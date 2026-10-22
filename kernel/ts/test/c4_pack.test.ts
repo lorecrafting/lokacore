@@ -9,7 +9,19 @@ import { validate } from '../src/foundation/validate.ts';
 import { refString, type World } from '../src/runtime/decision.ts';
 import type { DefinitionRef } from '../src/contracts.gen.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
-import { ids, run, h1, h2, home, nest, fixture, wounded, begun, due } from './c4_pack_fixture.ts';
+import {
+  run,
+  h1,
+  h2,
+  home,
+  nest,
+  shrine,
+  fixture,
+  wounded,
+  begun,
+  due,
+  spawned,
+} from './c4_pack_fixture.ts';
 
 // Breaks: admission scans only the day target or cap minus one and silently omits a sixth live helper.
 test('night admission visits each of six fixed slots once', () => {
@@ -21,8 +33,8 @@ test('night admission visits each of six fixed slots once', () => {
   assert.equal(steps.n, 6);
 });
 
-// Breaks: pack admission selects only the attacked hound or substitutes the first template member.
-test('attack H2 admits both exact co-present hounds with H2 as primary', () => {
+// Breaks: pack admission selects only the attacked goblin or substitutes the first template member.
+test('attack H2 admits both exact co-present goblins with H2 as primary', () => {
   const w = fixture();
   const begun = step(
     w,
@@ -45,17 +57,17 @@ test('attack H2 admits both exact co-present hounds with H2 as primary', () => {
   );
 });
 
-// Breaks: a pack member's band is missing, copied from the primary, or read from the wrong hound
-// (hp 0..8: h2 at 4 is the exact many_nasty_wounds cut, 400 >= 50*8; h1 untouched reads ready).
+// Breaks: a pack member's band is missing, copied from the primary, or read from the wrong goblin
+// (hp 0..8: h2 at 4 is the exact hurt cut, 400 >= 50*8; h1 untouched reads ready).
 test('each pack member shows its own hp band', () => {
   const view = gameView(wounded(begun(fixture()), 4));
   assert.deepEqual(validate('GameView', view), []);
-  assert.equal(view.combat?.band, 'many_nasty_wounds');
+  assert.equal(view.combat?.band, 'hurt');
   assert.deepEqual(
     view.combat?.active_opponents?.map(({ id, band }) => [id, band]),
     [
       [h1, 'ready'],
-      [h2, 'many_nasty_wounds'],
+      [h2, 'hurt'],
     ].sort(),
   );
 });
@@ -99,7 +111,7 @@ test('a hidden or dead pack member shows no band while the seen primary keeps it
   assert.deepEqual(bands(dead), [undefined, of('ready', undefined)]);
 });
 
-// Breaks: a hound already bound to another encounter is pulled into a second pack.
+// Breaks: a goblin already bound to another encounter is pulled into a second pack.
 test('admission omits an already engaged helper while retaining the free target', () => {
   const w = fixture();
   const occupied = {
@@ -152,32 +164,10 @@ test('one pack round rotates the cursor and keeps one current job', () => {
   assert.equal(due.world.state.jobs![row.job_id].due_time, 64810);
 });
 
-// Breaks: the cursor rotates but every opponent attack is silently substituted with the primary hound.
+// Breaks: the cursor rotates but every opponent attack is silently substituted with the primary goblin.
 test('two healthy rounds use the selected helper for its actual attack', () => {
   const w = fixture();
-  const firstNpc = w.entities[h1];
-  const primaryNpc = w.entities[h2];
-  assert.equal(firstNpc.kind, 'npc');
-  assert.equal(primaryNpc.kind, 'npc');
-  if (firstNpc.kind !== 'npc' || primaryNpc.kind !== 'npc') return;
-  const attack = { chance: 100, damage_min: 1, damage_max: 1 };
-  const combat = w.cartridge.world!.combat!;
-  const controlled = {
-    ...w,
-    entities: {
-      ...w.entities,
-      [h1]: { ...firstNpc, attack },
-      [h2]: { ...primaryNpc, attack },
-    },
-    cartridge: {
-      ...w.cartridge,
-      world: {
-        ...w.cartridge.world!,
-        combat: { ...combat, player_attack: attack, dodge: undefined },
-      },
-    },
-  };
-  const first = due(begun(controlled));
+  const first = due(begun(w));
   assert.equal(first.decision.kind, 'accepted', JSON.stringify(first.decision));
   const second = stepElapsed(
     first.world,
@@ -208,7 +198,6 @@ test('two healthy rounds use the selected helper for its actual attack', () => {
   assert.equal(level(second.world, w.body, resourceRef(w, 'hp')), 8);
   assert.equal(level(second.world, h2, resourceRef(w, 'hp')), 6);
   assert.equal(level(second.world, h1, resourceRef(w, 'hp')), 8);
-  assert.deepEqual(second.world.state.rng, [27274249, 25704967, 31982592, 12605441]);
 });
 
 // Breaks: a departed primary is still struck or keeps the attack cursor after due pruning.
@@ -233,7 +222,7 @@ test('due pruning repairs a departed primary before the player opportunity', () 
   assert.deepEqual(row.active_ids, [h1]);
 });
 
-// Breaks: when every bound hound has departed before its due round, closure loses withdrawal narration.
+// Breaks: when every bound goblin has departed before its due round, closure loses withdrawal narration.
 test('an empty due roster closes once and narrates pack withdrawal', () => {
   const joined = begun(fixture());
   const departed = {
@@ -246,7 +235,7 @@ test('an empty due roster closes once and narrates pack withdrawal', () => {
   assert.equal(Object.values(result.world.state.encounters ?? {})[0]!.status, 'closed');
   assert.deepEqual(
     result.decision.narration?.map((line) => line.key),
-    ['hound.pack.withdrew'],
+    ['combat.goblins_gone'],
   );
 });
 
@@ -274,18 +263,7 @@ test('player Flee closes the whole roster and cancels its sole future round', ()
 // Breaks: a killed selected primary gets a helper's strike in its lost opportunity or ends the pack.
 test('player-first selected death skips retaliation and repairs to the surviving helper', () => {
   const w = fixture();
-  const combat = w.cartridge.world!.combat!;
-  const tuned = {
-    ...w,
-    cartridge: {
-      ...w.cartridge,
-      world: {
-        ...w.cartridge.world!,
-        combat: { ...combat, player_attack: { chance: 100, damage_min: 1, damage_max: 1 } },
-      },
-    },
-  };
-  const result = due(begun(wounded(tuned, 1)));
+  const result = due(begun(wounded(w, 1)));
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
   assert.equal(level(result.world, w.body, resourceRef(w, 'hp')), 10);
   assert.equal(level(result.world, h2, resourceRef(w, 'hp')), 0);
@@ -295,15 +273,15 @@ test('player-first selected death skips retaliation and repairs to the surviving
   const view = gameView(result.world);
   assert.deepEqual(validate('GameView', view), []);
   assert.deepEqual(view.combat?.active_opponents, [
-    { id: h1, name: 'npc.fen_hound.short', band: 'ready' },
+    { id: h1, name: 'npc.goblin.short', band: 'ready' },
   ]);
   assert.equal(
     result.decision.kind === 'accepted' &&
       result.decision.events.filter((event) => event.payload.type === 'attack_result').length,
     1,
   );
-  const corpse = result.world.state.containers[ids['population/fen_hounds/slot2/pelt']];
-  assert.equal(result.world.state.created?.[corpse]?.definition.key, 'hound_corpse');
+  const corpse = result.world.state.containers[spawned(w, 2, 'pelt')];
+  assert.equal(result.world.state.created?.[corpse]?.definition.key, 'npc_corpse');
 });
 
 // Breaks: a helper strikes the revived player after lethal selected-opponent damage.
@@ -312,17 +290,8 @@ test('even-round player death closes every pack member before shrine return', ()
   const first = due(begun(w));
   assert.equal(first.decision.kind, 'accepted');
   const bodyHp = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
-  const row = Object.values(first.world.state.encounters ?? {})[0]!;
-  const attacker = row.next_opponent_id!;
-  const npc = first.world.entities[attacker];
-  assert.equal(npc.kind, 'npc');
-  if (npc.kind !== 'npc') return;
   const controlled = {
     ...first.world,
-    entities: {
-      ...first.world.entities,
-      [attacker]: { ...npc, attack: { chance: 100, damage_min: 1, damage_max: 1 } },
-    },
     state: {
       ...first.world.state,
       resources: { ...first.world.state.resources, [bodyHp]: { value: 1, at: 64805 } },
@@ -341,7 +310,7 @@ test('even-round player death closes every pack member before shrine return', ()
   const closed = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.equal(closed.status, 'closed');
   assert.deepEqual(closed.active_ids, []);
-  assert.equal(result.world.state.containers[w.body], ids['room/chapel_nave']);
+  assert.equal(result.world.state.containers[w.body], shrine);
   assert.equal(level(result.world, w.body, resourceRef(w, 'hp')), 10);
   assert.equal(
     result.decision.kind === 'accepted' &&

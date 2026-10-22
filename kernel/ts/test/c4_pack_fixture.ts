@@ -1,43 +1,66 @@
-import { newWorld, step, stepElapsed, type Cartridge } from '../src/index.ts';
+// A controlled pack over the frozen toolbox_showcase KAT goblins: every asserted number is set here
+// or in the test. Six slots (day 4, night 6), hourly wander, 8 hp, sure 1-damage blows on both sides.
+import { step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { read } from './read.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { fact } from '../src/mechanics/position/shared.ts';
+import { fragment } from './fragment.ts';
 
-const pin = read('protocol/fixtures/missing_child_v029_hash.json');
-export const ids = read('protocol/fixtures/missing_child_v029_ids.json');
-const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
+const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
+export const { prefix, ref } = f;
 export const run = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
-export const h1 = ids['population/fen_hounds/slot1/member'] as never;
-export const h2 = ids['population/fen_hounds/slot2/member'] as never;
-export const home = ids['room/hound_run'] as never;
-export const nest = ids['room/adder_nest'] as never;
+
+function base(c: any, start = 64800, wander_interval = 3600) {
+  c.calendar.start = start;
+  const plan = c.populations[`${prefix}:population/goblins`];
+  c.populations = {
+    [`${prefix}:population/goblins`]: {
+      ...plan,
+      cap: 6,
+      day_target: 4,
+      night_target: 6,
+      wander_interval,
+      replacement_delay: 86400,
+    },
+  };
+  c.npcs[`${prefix}:npc/goblin`].hp = { minimum: 0, maximum: 8, start: 8, gain: 0 };
+  const combat = c.world.combat;
+  combat.interval = 5;
+  combat.player_attack = { chance: 100, damage_min: 1, damage_max: 1 };
+  delete combat.allies;
+}
+
+/** The controlled world, optionally changed further (an inline area, bundle roles). */
+export const genesis = (change: (c: any) => void = () => {}, start?: number, wander?: number) =>
+  f.genesis((c) => {
+    base(c, start, wander);
+    change(c);
+  });
+
+/** The controlled cartridge, changed further, through the installed loader. */
+export const load = (change: (c: any) => void) =>
+  f.load((c) => {
+    base(c);
+    change(c);
+  });
+
+/** The generation-1 entity of `slot` with spawn `role` (the member role or the loot role). */
+export const spawned = (w: World, slot: number, role = 'hound') =>
+  Object.keys(w.state.created ?? {}).find((e) => {
+    const o = w.state.created![e]!.origin;
+    return o.kind === 'spawned' && o.slot === slot && o.role === role && o.generation === 1;
+  }) as never;
+
+const plain = genesis();
+export const h1 = spawned(plain, 1);
+export const h2 = spawned(plain, 2);
+export const home = plain.roomIds[`${prefix}:room/goblin_pit`] as never;
+export const nest = plain.roomIds[`${prefix}:room/drill_yard`] as never;
+export const shrine = plain.roomIds[`${prefix}:room/crossroads_inn`] as never;
 
 export function fixture(start?: number, wander_interval?: number) {
-  const c = structuredClone(pin.value) as Cartridge;
-  if (start !== undefined) (c.calendar as { start: number }).start = start;
-  const populations = Object.fromEntries(
-    Object.entries(c.populations!).map(([k, plan]) => [
-      k,
-      {
-        ...plan,
-        ...(wander_interval && { wander_interval }),
-        pack: {
-          flight_below_percent: 25,
-          flight_fare: 0 as const,
-          narration: {
-            helper_joined: 'hound.pack.helper',
-            enemy_fled: { east: 'hound.pack.fled_east', west: 'hound.pack.fled_west' },
-            primary_changed: 'hound.pack.primary',
-            pack_withdrew: 'hound.pack.withdrew',
-          },
-        },
-      },
-    ]),
-  ) as unknown as Cartridge['populations'];
-  const world = { ...c.world!, combat: { ...c.world!.combat!, interval: 5 } };
-  const w = newWorld({ ...c, populations, world }, context, [1, 2, 3, 4]);
+  const w = genesis(undefined, start, wander_interval);
   return {
     ...w,
     state: {
@@ -47,10 +70,7 @@ export function fixture(start?: number, wander_interval?: number) {
         [w.body]: home,
         [h1]: home,
         [h2]: home,
-        ...(start === undefined && {
-          [ids['population/fen_hounds/slot3/member']]: nest,
-          [ids['population/fen_hounds/slot4/member']]: nest,
-        }),
+        ...(start === undefined && { [spawned(w, 3)]: nest, [spawned(w, 4)]: nest }),
       },
     },
   };

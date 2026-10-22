@@ -4,9 +4,35 @@ import { validate } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 
 const id = '00000004-0000-4000-8000-000000000000';
-const pack = read('protocol/fixtures/missing_child_v032_hash.json').value.populations[
-  'ashmere_missing_child@0.0.32:population/fen_hounds'
-];
+const r = (kind: string, key: string) => ({
+  cartridge_id: 'c',
+  cartridge_version: '0.0.1',
+  kind,
+  key,
+});
+const pack = {
+  key: 'pack',
+  bundle: r('population_bundle', 'pack'),
+  home: r('room', 'den'),
+  area: [r('room', 'den'), r('room', 'yard')],
+  cap: 2,
+  day_target: 1,
+  night_target: 2,
+  night_start: 20,
+  night_end: 6,
+  replacement_delay: 86400,
+  wander_interval: 3600,
+  pack: {
+    flight_below_percent: 25,
+    flight_fare: 0,
+    narration: {
+      helper_joined: 'pack.joined',
+      enemy_fled: { north: 'pack.fled_north' },
+      primary_changed: 'pack.primary',
+      pack_withdrew: 'pack.withdrew',
+    },
+  },
+};
 const cases = read('protocol/fixtures/c4_pack_composition.json').cases;
 const op = (name: string) => cases.flatMap((c: any) => c.ops).find((o: any) => o.op === name);
 
