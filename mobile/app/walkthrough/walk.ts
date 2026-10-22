@@ -79,6 +79,8 @@ const live = (): Live => {
 const OWN =
   'say whisper shout cast look flee choose close_choice continue stand sit rest sleep raise_attribute scan';
 const KEY = /\b[a-z][a-z0-9_]+\.[a-z][a-z0-9_]+/;
+const has = (names: string[], start: string) =>
+  names.some((n) => n.toLowerCase().startsWith(start));
 
 // The room page against its GameView (pass-1 check 8; book-ui.md World and status entry): each
 // available place offer is a control with its label, each refused one a `label: reason` note
@@ -92,8 +94,6 @@ function roomDrawn({ view, text, buttons, lines }: Live) {
   // An untexted label shows its key's last word (words.ts sayers).
   const label = (a: Offer) =>
     (text[a.label] || a.label.split('.').at(-1)!.replaceAll('_', ' ')).toLowerCase();
-  const has = (names: string[], start: string) =>
-    names.some((n) => n.toLowerCase().startsWith(start));
   const place = view.actions.filter(
     (a) =>
       !a.input.length &&
