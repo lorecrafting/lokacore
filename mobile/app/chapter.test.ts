@@ -26,9 +26,10 @@ const adapt = (sql: DatabaseSync): Db => ({
   isInTransactionSync: () => sql.isTransaction,
 });
 
-// Breaks: the app bundles Ashmere or Lantern again, or opens/deletes an older save for the
-// showcase, including the Start over that deletes an unreadable showcase file. Saved pins, the
-// opening room and untouched old save bytes are the assertions.
+// Breaks: the app bundles Ashmere or Lantern again, keys its save name by content (web keeps a
+// slot per file forever), opens a save pinned to another showcase build without the refusal and
+// Start over, or opens/deletes an older save, including the Start over that deletes an unreadable
+// showcase file. Saved pins, the opening room and untouched old save bytes are the assertions.
 test('the app opens and replaces only its showcase save, preserving Lantern, sampler and Ashmere saves', () => {
   const showcase = JSON.parse(
     readFileSync(
@@ -77,7 +78,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
       createHash('sha256').update(readFileSync(path)).digest('hex'),
     );
   const before = checksum();
-  const showcasePath = join(dir, `loka-showcase-${showcase.sha256.slice(0, 16)}.db`);
+  const showcasePath = join(dir, 'loka-showcase.db');
   writeFileSync(showcasePath, 'not a sqlite save'); // Start over must delete this file, only this
   const connections: DatabaseSync[] = [];
   let id = 0;
@@ -105,11 +106,11 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     './book/labels.ts': { LABEL },
     './SaveError': {},
   };
-  const globals: { loka_session?: ReturnType<typeof localSession> } = {};
   const compiled = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React },
   }).outputText;
-  try {
+  const run = () => {
+    const globals: { loka_session?: ReturnType<typeof localSession> } = {};
     runInNewContext(compiled, {
       exports: {},
       require: (name: string) => {
@@ -124,13 +125,14 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
       __DEV__: false,
       performance,
     });
-    assert.equal(globals.loka_session!.game(), undefined);
-    assert.equal(globals.loka_session!.failed()?.startOver, true);
-    assert.equal(globals.loka_session!.startOver(), undefined);
-    assert.equal(
-      globals.loka_session!.game()!.view().view.place.title.key,
-      'room.crossroads_inn.title',
-    );
+    return globals.loka_session!;
+  };
+  try {
+    let session = run();
+    assert.equal(session.game(), undefined);
+    assert.equal(session.failed()?.startOver, true);
+    assert.equal(session.startOver(), undefined);
+    assert.equal(session.game()!.view().view.place.title.key, 'room.crossroads_inn.title');
     const pin = () => {
       const database = new DatabaseSync(showcasePath, { readOnly: true });
       try {
@@ -141,11 +143,25 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     };
     assert.equal(pin().cartridge_id, 'toolbox_showcase');
     assert.equal(pin().content_hash, showcase.sha256);
-    assert.equal(globals.loka_session!.startOver(), undefined);
+    assert.equal(session.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'toolbox_showcase');
+
+    // A later showcase build: the same file, pinned to a release this app does not bundle.
+    for (const c of connections) if (c.isOpen) c.close();
+    const edit = new DatabaseSync(showcasePath);
+    edit
+      .prepare('UPDATE save SET pin = ?')
+      .run(JSON.stringify({ ...pin(), content_hash: '0'.repeat(64) }));
+    edit.close();
+    session = run();
+    assert.equal(session.game(), undefined);
+    assert.equal(session.failed()?.startOver, true);
+    assert.equal(pin().content_hash, '0'.repeat(64));
+    assert.equal(session.startOver(), undefined);
+    assert.equal(pin().content_hash, showcase.sha256);
     assert.deepEqual(checksum(), before);
   } finally {
-    connections.at(-1)?.close();
+    for (const c of connections) if (c.isOpen) c.close();
     rmSync(dir, { recursive: true, force: true });
   }
 });

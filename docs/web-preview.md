@@ -12,8 +12,9 @@ mise exec -- npm run web:preview
 Open **http://localhost:19006**. Keep that process running while editing the same
 worktree. Metro watches the app, mobile authority, kernel and bundled fixture sources;
 Book UI edits appear through Fast Refresh. An already-open game retains its loaded
-session and cartridge. Reload the page to use changed rules; when the chapter pin has
-changed, use the Book's confirmed **Start over** to begin on the new release. The local
+session and cartridge. Reload the page to use changed rules; when the showcase content has
+changed, the saved game is refused as pinned to another release; use the Book's confirmed
+**Start over** to begin on the new release. The local
 header proxy listens only on loopback and supplies the
 isolation headers required by SQLite. Metro's private port is 19007; use 19006 in the
 browser. The browser save lives in origin-scoped OPFS, separate from the native save.

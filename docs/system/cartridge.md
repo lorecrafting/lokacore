@@ -28,9 +28,10 @@ The shared app bundles the [toolbox showcase](../SHOWCASE.md), `toolbox_showcase
 chapter: the [artifact](../../protocol/fixtures/toolbox_showcase_hash.json) compiled from
 `cartridges/toolbox_showcase`, under the
 [retire-Ashmere decision](../decisions/owner-decision-retire-ashmere-2026-10-21.md). The
-first release will bundle the real game's chapter. The app's save is
-`loka-showcase-<first 16 hex digits of the artifact's sha256>.db`, so in pre-production the
-showcase build starts a fresh save on each content change, with no save compatibility.
+first release will bundle the real game's chapter. The app's save has one fixed name,
+`loka-showcase.db` (the web build keeps a storage slot per save file); after a content change the
+app shows the pinned-release refusal with [explicit Start over](save.md#opening-a-story), with no
+save compatibility in pre-production.
 Earlier saves, `loka-ashmere-missing-child.db` included, stay on the device untouched and
 are never deleted.
 The app opens only the chapter file and offers no story picker. Missing pins follow

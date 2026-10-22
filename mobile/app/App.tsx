@@ -35,18 +35,16 @@ export const fonts = {
 // deletes the file (expo refuses to delete an open database).
 // deleteDatabaseSync removes the main file only; SQLite discards a -journal left beside the new,
 // empty file rather than replaying it, so nothing else needs deleting.
-// The bundled chapter is the toolbox showcase (owner-decision-retire-ashmere-2026-10-21). Its save
-// is keyed by its hash, so each content change starts fresh (pre-production: no save
-// compatibility); earlier saves, Ashmere's loka-ashmere-missing-child.db included, stay untouched.
+// The bundled chapter is the toolbox showcase (owner-decision-retire-ashmere-2026-10-21). One fixed
+// save name: web keeps a storage slot per file, so after a content change the pinned-release
+// refusal offers Start over; earlier saves (loka-ashmere-missing-child.db) stay untouched.
 // ponytail: no story picker until the approved release needs one.
 // The author preview (metro.config.js) keeps one save per edited cartridge's hash: an edit starts
 // fresh without re-pinning the release save or meeting pinned_release_missing, and nothing is
 // deleted. ponytail: those dev saves pile up in the browser; clear the site's data to drop them.
 const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
 if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
-const NAME = devCartridge
-  ? `loka-dev-${chapter.sha256.slice(0, 16)}.db`
-  : `loka-showcase-${chapter.sha256.slice(0, 16)}.db`;
+const NAME = devCartridge ? `loka-dev-${chapter.sha256.slice(0, 16)}.db` : 'loka-showcase.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
 const commit = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? `${'0'.repeat(40)}-dirty`;

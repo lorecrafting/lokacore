@@ -10,8 +10,8 @@ Written 2026-10-21 in Claude Code by anthropic/claude-opus-5-5 (developer).
   having the showcase, and then rebuilding the real game from 0 after ui polish".
 - Phase 1 (`loka-4hik.1`): the app bundles the [toolbox showcase](../SHOWCASE.md) as its chapter
   through the same import ([current bundled chapter](../system/cartridge.md#current-bundled-chapter)).
-  Its save is keyed by the artifact's hash, so the showcase build starts fresh on each content
-  change (pre-production); earlier saves, `loka-ashmere-missing-child.db` included, stay untouched
+  Its save has one fixed name, `loka-showcase.db`; after a content change the app shows the
+  pinned-release refusal with Start over (pre-production: no save compatibility); earlier saves, `loka-ashmere-missing-child.db` included, stay untouched
   and are never deleted. Browser tests bound to Ashmere rooms are deleted; the move over reload, Start
   over and bounded-memory checks move onto the showcase. Browser coverage lost until showcase e2e
   replaces it (`loka-4hik.3`): a resumed dream choice, a timed reopen under a faked clock,
