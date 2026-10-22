@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
-import { CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
+import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
 import { JournalPage } from '../book/journal.tsx';
 import { pageStory } from './screen.tsx';
 import JournalView from './views/journal.json';
@@ -159,4 +159,27 @@ export const JournalChronicleDays: StoryObj = {
     await canvas.findByLabelText('You find the lost child., story point');
     if (canvas.queryByText(`${TICK} (11 times)`)) throw new Error('earlier day open');
   },
+};
+
+// The showcase authors no ancestry, so the page takes a synthetic view and one choose button.
+// Breaks: a choice shows no button, or the button is not matched to its ancestry.
+export const Ancestry: StoryObj = {
+  name: 'Ancestry',
+  render: () => (
+    <AncestryPage
+      view={
+        { ancestry_choices: [{ key: 'hill', description: 'Hill folk, steady on stone.' }] } as never
+      }
+      text={(k) => k}
+      buttons={[
+        {
+          action_key: 'choose_ancestry',
+          label: 'Choose hill',
+          input: { ancestry: 'hill' },
+        } as never,
+      ]}
+      pending={false}
+      press={() => {}}
+    />
+  ),
 };

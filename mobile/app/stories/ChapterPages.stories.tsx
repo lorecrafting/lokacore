@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { ChapterPage, ScenePage } from '../book/sections.tsx';
+import { DreamPage } from '../book/DreamPage.tsx';
 import { chapterLabel } from '../book/words.ts';
 import { pageStory } from './screen.tsx';
 import SceneView from './views/scene.json';
@@ -32,3 +33,36 @@ export const ChapterTitleLong: StoryObj = {
   ),
 };
 export const Scene: StoryObj = { ...pageStory(SceneView), name: 'Scene' };
+
+// The showcase authors no dream, so the page takes a synthetic screen (words are their own keys).
+export const Dream: StoryObj = {
+  name: 'Dream',
+  render: () => (
+    <DreamPage
+      id="n"
+      close={fn()}
+      press={fn()}
+      screen={
+        {
+          view: {
+            notices: [
+              {
+                id: 'n',
+                dream: {
+                  available: true,
+                  index: 1,
+                  title: 'A dream',
+                  description: 'You sleep.',
+                  line: 'Rain on slate.',
+                },
+              },
+            ],
+          },
+          text: (k: string) => k,
+          buttons: [],
+          detail: () => [],
+        } as never
+      }
+    />
+  ),
+};

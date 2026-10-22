@@ -117,7 +117,7 @@ export const CompanionRemark: StoryObj = {
     view: {
       ...RoomNpcsItemsView.view,
       entities: RoomNpcsItemsView.view.entities
-        .map((e) => (e.kind === 'npc' ? { ...e, asides: [{ key: 'remark.hal.first' }] } : e))
+        .map((e, i) => (i === 0 ? { ...e, asides: [{ key: 'remark.hal.first' }] } : e))
         .slice(0, 3),
     },
   }),
