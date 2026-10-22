@@ -124,7 +124,7 @@ test('a projected Read resolves its exact target and the invariant detects a sub
   );
 });
 
-// Breaks: projection bypasses room subtraction or Read bypasses them.
+// Breaks: projection bypasses room subtraction, or a raw Read bypasses the combat or scene restriction.
 test('composed action restrictions remove Read and raw commands cannot bypass them', () => {
   const w = fresh(),
     here = w.state.containers[w.body];

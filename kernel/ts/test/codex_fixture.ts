@@ -9,6 +9,7 @@ export const DESK_NOTE = 'Return every ledger to its shelf by nightfall.';
 
 export function notices(c: any) {
   c.rooms[`${prefix}:room/hall`].details = {
+    ...c.rooms[`${prefix}:room/hall`].details,
     plaque: {
       aliases: ['plaque', 'hall_plaque'],
       description: 'detail.plaque',
@@ -28,6 +29,14 @@ export function notices(c: any) {
   });
 }
 
+// Real elapsed time at 50 game seconds per wall second from 64800 (codex has no calendar).
+export function realElapsed(c: any) {
+  c.calendar = { start: 64800 };
+  c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+  c.manifest.requires.capabilities.calendar = 1;
+  c.lock.capabilities.calendar = 1;
+}
+
 /** A portable chest in the study whose lid starts `initial` and needs no key. */
 export const chest =
   (initial: 'open' | 'closed' = 'open') =>
@@ -45,6 +54,7 @@ export const chest =
       container: true,
     };
     c.barriers = {
+      ...c.barriers,
       [`${prefix}:barrier/chest_lid`]: {
         key: 'chest_lid',
         keywords: ['lid', 'chest_lid'],

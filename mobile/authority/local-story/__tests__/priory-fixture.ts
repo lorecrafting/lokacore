@@ -4,7 +4,13 @@ import { createHash } from 'node:crypto';
 import { chest, codex } from '../../../../kernel/ts/test/codex_fixture.ts';
 import { fragment } from '../../../../kernel/ts/test/fragment.ts';
 // Book tests reach the kernel only through local-story (spec document 10 §2).
-export { chest, DESK_NOTE, notices, PLAQUE } from '../../../../kernel/ts/test/codex_fixture.ts';
+export {
+  chest,
+  DESK_NOTE,
+  notices,
+  PLAQUE,
+  realElapsed,
+} from '../../../../kernel/ts/test/codex_fixture.ts';
 
 type Change = (c: any) => void;
 export const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';

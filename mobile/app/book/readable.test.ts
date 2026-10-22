@@ -13,21 +13,16 @@ import {
   ids,
   notices,
   PLAQUE,
+  realElapsed,
 } from '../../authority/local-story/__tests__/priory-fixture.ts';
 
 const bundle = codexBundle(notices);
 const id = ids(bundle.value);
-const notice = id['detail/hall/plaque'];
-const board = id['detail/study/desk'];
-const noticeBody = PLAQUE;
-const boardBody = DESK_NOTE;
-// Real elapsed time at 50 game seconds per wall second from 64800 (inline, no calendar in codex).
+const plaque = id['detail/hall/plaque'];
+const desk = id['detail/study/desk'];
 const timed = codexBundle((c) => {
   notices(c);
-  c.calendar = { start: 64800 };
-  c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
-  c.manifest.requires.capabilities.calendar = 1;
-  c.lock.capabilities.calendar = 1;
+  realElapsed(c);
 });
 
 function preview(path = ':memory:', bundled = bundle) {
@@ -45,13 +40,13 @@ function preview(path = ':memory:', bundled = bundle) {
 }
 
 // Breaks: Read loses its exact target, mutates gameplay state, substitutes observational prose,
-// or appends confirmed writing to World rather than the notice detail.
+// or appends confirmed writing to World rather than the plaque detail.
 test('production Read targets retain confirmed detail messages without changing state', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
   for (const [label, target, body] of [
-    ['Read the plaque', notice, noticeBody],
-    ['Read the desk note', board, boardBody],
+    ['Read the plaque', plaque, PLAQUE],
+    ['Read the desk note', desk, DESK_NOTE],
   ]) {
     const before = a.state();
     for (let repetition = 0; repetition < 2; repetition++) {
@@ -83,7 +78,7 @@ test('production Read targets retain confirmed detail messages without changing 
       assert.equal(a.book.screen().log.includes(body), false);
       assert.deepEqual(a.state(), before);
     }
-    if (target === notice) a.tap('Go west');
+    if (target === plaque) a.tap('Go west');
   }
 });
 
@@ -106,38 +101,38 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   assert.equal(a.game.pending(), true);
   const id = a.game.pendingInvocation();
   assert.ok(id);
-  assert.equal(a.book.screen().log.includes(noticeBody), false);
+  assert.equal(a.book.screen().log.includes(PLAQUE), false);
   const receipt = a.sql.prepare('SELECT * FROM receipt WHERE invocation_id = ?').get(id);
   assert.ok(receipt);
   assert.equal(receipts(a.sql), 1);
   a.book.press(control);
   assert.equal(a.game.pendingInvocation(), id);
-  assert.equal(a.book.screen().log.includes(noticeBody), false);
+  assert.equal(a.book.screen().log.includes(PLAQUE), false);
   a.fault.reads = false;
   a.book.press(control);
   assert.equal(a.game.pending(), false);
   assert.deepEqual(a.sql.prepare('SELECT * FROM receipt WHERE invocation_id = ?').get(id), receipt);
   assert.equal(receipts(a.sql), 1);
-  assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
+  assert.deepEqual(a.book.screen().detail(plaque), [PLAQUE]);
   assert.deepEqual(a.book.screen().log, []);
-  assert.deepEqual(control.target_ids, [notice]);
+  assert.deepEqual(control.target_ids, [plaque]);
   assert.equal(control.token, token);
   assert.deepEqual(a.state(), before);
   a.sql.close();
   a = preview(path);
   assert.equal(a.sql.prepare('SELECT pin FROM save').get()!.pin, pin);
   assert.deepEqual(a.state(), before);
-  assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
+  assert.deepEqual(a.book.screen().detail(plaque), [PLAQUE]);
   assert.deepEqual(a.book.screen().log, []);
-  assert.deepEqual(a.button('Read the plaque').target_ids, [notice]);
+  assert.deepEqual(a.button('Read the plaque').target_ids, [plaque]);
   a.tap('Read the plaque');
-  assert.deepEqual(a.book.screen().detail(notice), [noticeBody, noticeBody]);
+  assert.deepEqual(a.book.screen().detail(plaque), [PLAQUE, PLAQUE]);
   assert.deepEqual(a.book.screen().log, []);
   assert.equal(receipts(a.sql), 2);
   assert.deepEqual(a.state(), before);
 });
 
-// Breaks: a stale notice control is retargeted to another room's readable, or a
+// Breaks: a stale plaque control is retargeted to another room's readable, or a
 // rejected detail target invents the readable body in the World log.
 test('stale and refused Read retain their target and never narrate an unread body', (t) => {
   const a = preview();
@@ -153,7 +148,7 @@ test('stale and refused Read retain their target and never narrate an unread bod
   assert.equal(a.book.screen().log.at(-1), 'The page had changed; here it is again.');
   a.book.press({
     ...a.button('Read the desk note'),
-    target_ids: [notice],
+    target_ids: [plaque],
   });
   assert.equal(receipts(a.sql), count + 1);
   const refused = JSON.parse(
@@ -161,8 +156,8 @@ test('stale and refused Read retain their target and never narrate an unread bod
       .response as string,
   );
   assert.equal(refused.kind, 'rejected');
-  assert.equal(a.book.screen().log.includes(noticeBody), false);
-  assert.equal(a.book.screen().log.includes(boardBody), false);
+  assert.equal(a.book.screen().log.includes(PLAQUE), false);
+  assert.equal(a.book.screen().log.includes(DESK_NOTE), false);
   assert.deepEqual(a.state(), before);
 });
 
@@ -187,10 +182,10 @@ test('held Read survives the authored 68350 to 68400 pulse with authority freshn
   const before = a.state();
   a.book.press(control);
   assert.equal(receipts(a.sql), count + 2);
-  assert.equal(a.book.screen().detail(notice).at(-1), noticeBody);
+  assert.equal(a.book.screen().detail(plaque).at(-1), PLAQUE);
   assert.equal(a.book.screen().view.time, 68400);
   assert.deepEqual(a.state(), before);
-  assert.deepEqual(control.target_ids, [notice]);
+  assert.deepEqual(control.target_ids, [plaque]);
   assert.equal(control.token, token);
 });
 

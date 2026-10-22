@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { codex, notices, PLAQUE } from '../../../kernel/ts/test/codex_fixture.ts';
+import { codex } from '../../../kernel/ts/test/codex_fixture.ts';
 import { group, intentOf } from '../../app/book/model.ts';
 import { presenter } from '../../app/book/presenter.ts';
-import { bundle, ids } from './__tests__/priory-fixture.ts';
+import { bundle, ids, notices, PLAQUE, realElapsed } from './__tests__/priory-fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const P = codex.prefix;
@@ -12,6 +12,7 @@ const P = codex.prefix;
 test('Book preserves an aliased Read place offer and exact target through a live redraw', (t) => {
   const source = bundle((c) => {
     notices(c);
+    realElapsed(c);
     c.actions[`${P}:action/peruse`] = {
       key: 'peruse',
       command: 'read',
@@ -47,6 +48,7 @@ test('Book preserves an aliased Read place offer and exact target through a live
   a.clock.wall += 1000;
   a.clock.mono += 1000;
   assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(book.screen().view.time, 64850);
   book.press(control);
   assert.deepEqual(book.screen().log, []);
   assert.deepEqual(book.screen().detail(plaque), [PLAQUE]);
