@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: Retire Ashmere 2, M1 delete bell/finale save code (loka-4hik.9)](2026-10-21-retire-ashmere-2-m1-review.md): **APPROVE WITH NOTES**
 - [Review: Retire Ashmere 1, bundle the showcase (PR #423, loka-4hik.1)](2026-10-21-retire-ashmere-1-review.md): **APPROVE WITH NOTES**
 - [Pass-1 UI rulings (loka-x6t.72)](2026-10-21-pass1-ui-rulings.md)
 - [Review: pass-1 GE3 named refusals (loka-y6yg.46)](2026-10-21-pass1-refuse-review.md): **APPROVE WITH NOTES**
