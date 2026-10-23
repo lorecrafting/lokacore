@@ -211,6 +211,11 @@ test('invariant: a cast accepted at a target whose aimed offer is unavailable di
     check('gameview_agrees_with_admission', { view: off, command, decision, words }),
     false,
   );
+  const other = structuredClone(view) as any; // a non-cast entry under the same key is not the offer
+  other.entities
+    .find((e: { id: string }) => e.id === command.payload.target_id)
+    .actions.unshift({ action_key: 'ward', available: false, reason: { code: 'invalid_state' } });
+  assert.ok(check('gameview_agrees_with_admission', { view: other, command, decision, words }));
 });
 
 // Breaks: an unlearned word aimed at an unseen target tells not_present (or a bad target tells

@@ -155,7 +155,7 @@ function advertised(
         a.target_ids?.[0] === p.item_id &&
         a.target_ids?.[1] === p.container_id
       : p.type === 'cast' // an aimed cast's offer is on its target under the spell's key (loka-x6t.109)
-        ? a.action_key === (action_key ?? words[folded(p.word) ?? ''])
+        ? a.command === 'cast' && a.action_key === (action_key ?? words[folded(p.word) ?? ''])
         : p.type === 'take'
           ? (action_key === undefined || a.action_key === action_key) &&
             (a.command ?? commandOf(a) ?? a.action_key) === p.type
