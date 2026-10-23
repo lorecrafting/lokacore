@@ -11,7 +11,7 @@ import { buttonsOf } from './buttons.ts';
 function yard() {
   const b = book(compiled('cartridges/use_sampler') as never);
   for (const k of ['bucket', 'oilcan', 'torch']) {
-    b.tap(new RegExp(`${k} is here`));
+    b.tap(new RegExp(`${k}, open$`, 'i'));
     b.tap(/^Take/);
   }
   b.tap(/Contents/);
@@ -43,7 +43,7 @@ test('the bucket offers Quench a cart, the oilcan Oil a winch; each press is adm
       .map((p) => [p.action_key, p.target_ids, p.input]),
     listed.map((a) => [a.action_key, a.target_ids, {}]),
   );
-  b.tap(/cart is here/);
+  b.tap(/^a cart, open$/i);
   assert.ok(!b.labels().some((l) => l.startsWith('Quench')), b.labels().join(' | '));
   b.tap('Leave');
   page(b, 'bucket');

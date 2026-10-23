@@ -48,6 +48,9 @@ registerHooks({
     };
   },
 });
+// stateless hooks: these tests draw one frame (the status line's say field stays shut)
+(globalThis as any)[Symbol.for('combat-state')] ??= (v: unknown) => [v, () => {}];
+(globalThis as any)[Symbol.for('combat-effect')] ??= () => {};
 export const { color } = await import('../tokens.ts');
 export const { default: Book, BookView } = await import('../Book.tsx');
 

@@ -19,7 +19,7 @@ function smith() {
   const b = book(bundle as never);
   b.map();
   b.tap('Go north');
-  b.tap('The smith');
+  b.tap('the smith'); // third in the room's sentence, so lower case
   return b;
 }
 const asks = (b: ReturnType<typeof book>) => b.labels().filter((l) => l.startsWith(LABEL.askAbout));
@@ -31,7 +31,8 @@ test('the smith offers one Ask about card per known topic; no topic, no card', (
   const b = smith();
   assert.deepEqual(asks(b), [`${LABEL.askAbout} The mill`, `${LABEL.askAbout} The moon`]);
   const labels = b.labels();
-  assert.ok(!labels.some((l) => l.startsWith('Whisper'))); // no word to send until word bar S3
+  // the Whisper Control (opens the one-word field) follows the cards (book-ui.md, Word bar)
+  assert.ok(labels.indexOf(LABEL.whisper) > labels.indexOf(`${LABEL.askAbout} The moon`));
   const talk = labels.findIndex((l) => l.startsWith('Talk'));
   assert.ok(talk >= 0 && talk < labels.indexOf(`${LABEL.askAbout} The mill`));
   const v = b.game.view().view;

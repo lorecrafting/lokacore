@@ -128,11 +128,11 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
   h.tap('Back to World');
   assert.ok(body() > 0); // body 28 x 1.5
   // loka-x6t.86: the title and the status line scale too (pageTitle 26/30, small 13/19 x 1.5); the
-  // room's title is left-aligned like every page's
+  // room's title is centred (owner mvl8eti4yeoe; detail page titles stay left)
   const sized = (n: any) =>
     n.type === 'Text' && [n.props.style?.fontSize, n.props.style?.lineHeight];
   const title = drawn().find((n) => String(sized(n)) === '39,45');
-  assert.equal(title.props.style.textAlign, undefined);
+  assert.equal(title.props.style.textAlign, 'center');
   assert.ok(drawn().some((n) => String(sized(n)) === '20,29'));
   assert.ok(drawn().some((n) => n.type === 'Pressable' && n.props.style?.paddingVertical === 1));
 });
