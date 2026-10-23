@@ -37,17 +37,15 @@ export const LABEL = {
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
   awayRecap: 'While you were away',
-  // The World page's Word block (word bar S3): its title and row titles; the status line's say
-  // icon and field.
-  word: 'Word',
+  // The say field's sends, the status line's say icon and field; the Character page's Spells.
   say: 'Say',
-  whisperTo: 'Whisper to',
   whisper: 'Whisper',
   shout: 'Shout',
   cast: 'Cast',
   sayToRoom: 'Say to the room',
   aWord: 'A word',
   oneWord: 'One word, letters only.',
+  spells: 'Spells',
   // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).
   inventory: 'Inventory',
   // The Reading size setting (docs/system/book-ui.md#world-and-status-entry, loka-x6t.42).

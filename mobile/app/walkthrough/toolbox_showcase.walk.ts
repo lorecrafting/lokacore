@@ -50,7 +50,13 @@ const steps = ({ screen, room }: Walk) => {
     )
       await tap(/change position$/);
   };
-  return { tap, take, lesson, held, putAway, position, moves };
+  // A known word through the say field: open it, press the word's chip, press the send.
+  const speak = async (word: string, how: string) => {
+    await tap(LABEL.sayToRoom);
+    await tap(new RegExp(`^${word}$`));
+    await tap(new RegExp(`^${how}$`));
+  };
+  return { tap, take, lesson, held, putAway, position, moves, speak };
 };
 type Steps = ReturnType<typeof steps>;
 
@@ -154,7 +160,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
+const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -170,7 +176,7 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
   await wizard('Fetch the second word');
   await tap('Gather ash');
   await take(/^The lantern, open$/i, /^Take the lantern/);
-  await tap('lux, cast');
+  await speak('lux', LABEL.cast);
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
   await take(/^The grimoire, open$/i, /^Take the grimoire/);
@@ -182,12 +188,12 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
   await tap(/^Character/);
   await tap('Raise CHA');
   await tap(LABEL.backToWorld);
-  await tap('ward, cast');
+  await speak('ward', LABEL.cast);
 };
 
 const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
-  const { tap, take, held, putAway, moves } = steps;
+  const { tap, take, held, putAway, moves, speak } = steps;
   await loft(r, steps);
   await take(/^The oilcan, open$/i, /^Take the oilcan/);
   await take(/^The loft bucket, open$/i, /^Take the loft bucket/);
@@ -204,11 +210,11 @@ const magic = async (r: Walk, steps: Steps) => {
   await moves('up');
   await take(/^The lantern, open$/i, /^Take the lantern/);
   await moves('down');
-  await tap('flamma, cast');
+  await speak('flamma', LABEL.cast);
   await tap(/^Flee/);
   await tap(LABEL.backToWorld);
   await moves('down');
-  await tap('flamma, cast'); // the second bolt kills the wight (magic 7)
+  await speak('flamma', LABEL.cast); // the second bolt kills the wight (magic 7)
   // No Quench: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
   // cannot win reliably; kernel test magic 8 pins the quench. The bucket stays held.
   await moves('up', 'west', 'west');
@@ -254,10 +260,10 @@ walk('4-traps', "Traps: the shout in the chief's den; the goblins flee", async (
   await settle();
   await scene(screen);
   await r.room();
-  const { tap, moves } = steps(r);
+  const { tap, moves, speak } = steps(r);
   await moves('west', 'down', 'north', 'north'); // the passage plate bites on the way
   // Afraid lasts 600 game s (~12 s of wall time at rate 50): nothing slow between shout and Attack.
-  await tap('begone, shout');
+  await speak('begone', LABEL.shout);
   await tap(/^A goblin, open$/i);
   await tap(/Attack/);
   // A round is 150 game s, 3 s of wall time at rate 50.

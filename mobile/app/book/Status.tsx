@@ -33,7 +33,7 @@ type StatusProps = {
   openPosition?: () => void;
   // The say field (World page only): one button per offered way to speak, Say first; a new room
   // closes the field; busy holds every send.
-  say?: { room: string; busy: boolean; sends: Send[] };
+  say?: { room: string; busy: boolean; sends: Send[]; words?: readonly string[] };
 };
 
 const statusRow = {
@@ -84,7 +84,7 @@ const skyText = (p: StatusProps) =>
  *   label-in-name rule.
  *   Say icon (World page, while Say is offered): a size.touch box after the pools, in their wrap
  *   unit, named "Say to the room" and expanded while open; a tap toggles the SayField under the
- *   line with Say, Shout and Cast, each only while offered. Escape or the icon closes it; a new
+ *   line with Say, Shout and Cast, each only while offered, and the known words. Escape or the icon closes it; a new
  *   room closes it.
  * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`);
@@ -131,7 +131,12 @@ export function StatusLine(p: StatusProps) {
         </View>
       </View>
       {p.say && open && (
-        <SayField pending={p.say.busy} sends={p.say.sends} close={() => setOpen(false)} />
+        <SayField
+          pending={p.say.busy}
+          sends={p.say.sends}
+          words={p.say.words}
+          close={() => setOpen(false)}
+        />
       )}
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}

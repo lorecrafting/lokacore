@@ -62,7 +62,7 @@ test('refused place verbs follow the available verb as label: reason notes', asy
 });
 
 // Breaks: a refused action that belongs to another control (Sleep, the hold scan), takes typed input
-// (Inscribe), is the Word block's (Shout), aims at an entity it does not name (Take), is the storylet
+// (Inscribe), is the say field's (Shout), aims at an entity it does not name (Take), is the storylet
 // (its own block) or a notice's (its notice page) drawn as a World verb note.
 test('refused actions owned by another control draw no verb note', async () => {
   const drawn = lines(

@@ -29,3 +29,13 @@ export const Pending: Story = {
     await expect(args.sends[0]!.send).not.toHaveBeenCalled();
   },
 };
+
+// Breaks: a known-word chip that sends instead of filling the field.
+export const KnownWords: Story = {
+  args: { words: ['ward', 'help', 'lux'] },
+  play: async ({ canvas, args, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'lux' }));
+    await expect(args.sends[0]!.send).not.toHaveBeenCalled();
+    await expect(canvas.getByLabelText('A word')).toHaveValue('lux');
+  },
+};

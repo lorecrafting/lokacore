@@ -85,7 +85,7 @@ const live = (): Live => {
   };
 };
 
-// Drawn by its own control, not a World verb (book-ui.md): the Word block, position, the title's
+// Drawn by its own control, not a World verb (book-ui.md): the say field, position, the title's
 // Look, a scene's Continue, a choice, Flee, the Character page's Raise, Scan.
 const OWN =
   'say whisper shout cast look flee choose close_choice continue stand sit rest sleep raise_attribute scan';

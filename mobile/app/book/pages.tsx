@@ -126,7 +126,7 @@ export function Control(p: {
 
 /**
  * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet
- * card, verb lines, door cards, the log, then the Word block (book-ui.md, World and status entry).
+ * card, verb lines, door cards, then the log (book-ui.md, World and status entry).
  * - Use: the World page.
  * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
  *   of the authored text.
@@ -143,7 +143,6 @@ export function RoomPage(p: {
   open: (id: string) => void;
   openChoice: () => void;
   details: ReactNode;
-  word?: ReactNode; // the Word block, last: after the room's actions and the log (pass-1 UA)
 }) {
   const c = usePalette();
   const t = useType();
@@ -167,7 +166,6 @@ export function RoomPage(p: {
       {storylet(p.view, p.g, p.press, p.text, p.label)}
       {actions.length > 0 && <View>{actions}</View>}
       {p.log.length > 0 && <LogLines lines={p.log} />}
-      {p.word}
     </Page>
   );
 }

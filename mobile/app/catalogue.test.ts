@@ -16,7 +16,7 @@ const EXEMPT: Record<string, string> = {
   'book/lines.tsx:Here': 'the room page lines, shown through the RoomPage stories',
   'book/StatusIcon.tsx:Tooltip':
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
-  'book/Chip.tsx:Row': 'a titled chip row, shown through the WordBar stories and Chip ReadingSize',
+  'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
 };
 

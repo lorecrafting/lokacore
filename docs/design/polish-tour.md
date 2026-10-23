@@ -53,10 +53,10 @@ x6t.26 death outside combat (waits on engine loka-3w3q), x6t.29 "1 doses" (waits
 - Look at: section headings, empty states, chip states in Settings.
 - Known: x6t.56 (lore shown twice on Character), x6t.57.
 
-## 9. Word bar and away recap
-- book-wordbar--rows, --cast-with-refused-word, --field-open, --bad-word-note
+## 9. Say field and away recap
+- book-sayfield--whisper, --pending, --known-words
 - book-awayrecap--collapsed, --open, --milestone
-- Look at: row density, the bad-word note.
+- Look at: chip density under the field, the bad-word note.
 - Known: none filed.
 
 ## 10. Map and notices

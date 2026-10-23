@@ -142,7 +142,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Book` | `book/Book.tsx` | Live |
 | `BookView` | `book/Book.tsx` | RecoveryPages |
 | `Chip` | `book/Chip.tsx` | Chip |
-| `Row` | `book/Chip.tsx` | WordBar |
+| `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
@@ -164,7 +164,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
-| `WordBar` | `book/WordBar.tsx` | WordBar |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
 | `Cards` | `book/actions.tsx` | ActionCard |
 | `VerbLine` | `book/actions.tsx` | VerbLine |

@@ -1,6 +1,7 @@
 // The one-word field: the status line's say field and the NPC page's Whisper.
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
+import { Chip } from './Chip.tsx';
 import { Control } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import { Note } from './lines.tsx';
@@ -13,16 +14,24 @@ export type Send = { label: (typeof LABEL)[keyof typeof LABEL]; send: (word: str
 
 /**
  * The one-word field (book-ui.md, Word bar): one text field named "A word" (focused on open, up
- * to 32 characters, no autocorrect or autocapitalize), then one Control per send.
- * - Use: the status line's say field (Say, Shout, Cast, each only while offered) and the NPC
- *   page's Whisper (one Whisper button aimed at that person).
+ * to 32 characters, no autocorrect or autocapitalize), then one Control per send, then a Chip
+ * per known word.
+ * - Use: the status line's say field (Say, Shout, Cast, each only while offered; the known
+ *   phrases and castable spell words) and the NPC page's Whisper (one Whisper button aimed at
+ *   that person; the known phrases).
  * - Rules: a press sends the typed word with that button's action and closes; Enter sends the
- *   first. A word that is not 1 to 32 letters is not sent, keeps the field open and shows the
- *   Note "One word, letters only."; nothing sends while pending; Escape closes it unsent.
- * - States: open; pending; bad word.
+ *   first. A word chip only fills the field (named by its word), never sends. A word that is not
+ *   1 to 32 letters is not sent, keeps the field open and shows the Note "One word, letters
+ *   only."; nothing sends while pending; Escape closes it unsent.
+ * - States: open; known words; pending; bad word.
  * - Story: SayField.stories.tsx
  */
-export function SayField(p: { pending: boolean; sends: Send[]; close: () => void }) {
+export function SayField(p: {
+  pending: boolean;
+  sends: Send[];
+  words?: readonly string[];
+  close: () => void;
+}) {
   const [c, t] = [usePalette(), useType()];
   const [draft, setDraft] = useState('');
   const [wrong, setWrong] = useState(false);
@@ -61,6 +70,13 @@ export function SayField(p: { pending: boolean; sends: Send[]; close: () => void
         ))}
       </View>
       {wrong && <Note>{LABEL.oneWord}</Note>}
+      {!!p.words?.length && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+          {p.words.map((w) => (
+            <Chip key={w} word={w} label={w} onPress={() => (setDraft(w), setWrong(false))} />
+          ))}
+        </View>
+      )}
     </View>
   );
 }

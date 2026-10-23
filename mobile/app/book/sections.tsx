@@ -28,6 +28,7 @@ import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 import { LABEL } from './labels.ts';
+import { castWords } from './buttons.ts';
 
 const home = (world: () => void) => <Control label={LABEL.backToWorld} onPress={world} />;
 
@@ -38,8 +39,9 @@ type Grouped = ReturnType<typeof group>;
 const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
 
 /**
- * The Character section: attributes, skills, professions, then the Raise cards (book-ui.md,
- * Skill tree details).
+ * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
+ * spell word refused here in ActionCard's unavailable form `<word>, cast: <reason>`, none when
+ * none is (book-ui.md, Skill tree details; Word bar).
  * - Use: Contents, and the status pools when only pennies show.
  * - Story: SectionPages.stories.tsx
  */
@@ -79,7 +81,22 @@ export function CharacterPage(
       {levelling && <Text style={prose(c, t)}>{xpLine(levelling)}</Text>}
       <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
+      {spells(p.view, p.text)}
     </Page>
+  );
+}
+
+// The spell words refused here, each with its reason (owner, mvl9qy5ut2x2).
+function spells(view: GameView | undefined, text: Say) {
+  const refused = view?.spell_words?.length ? castWords(view).filter((s) => !s.available) : [];
+  if (!refused.length) return null;
+  return (
+    <View>
+      <SectionTitle>{LABEL.spells}</SectionTitle>
+      {refused.map((s) => (
+        <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, text)} />
+      ))}
+    </View>
   );
 }
 

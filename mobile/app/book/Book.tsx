@@ -7,6 +7,7 @@ import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
+import { knownWords } from './buttons.ts';
 import {
   group,
   POSITION_ACTIONS,
@@ -284,7 +285,12 @@ function Bottom(p: BottomProps) {
           openCharacter={() => p.open({ kind: 'character' })}
           say={
             sends.length
-              ? { room: view.place.id, busy: pending || !!fault || p.screen.catchingUp, sends }
+              ? {
+                  room: view.place.id,
+                  busy: pending || !!fault || p.screen.catchingUp,
+                  sends,
+                  words: knownWords(view),
+                }
               : undefined
           }
         />

@@ -151,6 +151,7 @@ function Whisper(p: NpcProps) {
         <SayField
           pending={!!p.pending}
           sends={[{ label: LABEL.whisper, send }]}
+          words={p.view.phrases}
           close={() => setOpen(false)}
         />
       )}

@@ -21,9 +21,9 @@ and their text is at [the last commit that held them](https://github.com/lorecra
 ## World and status entry
 
 World is one current-room page. Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
-description, projected interactibles, offered place actions, event log and, last, the
-[Word block](#word-bar), so a pressed verb's result line sits within a screen of the verb and the
-word rows never push it below the fold (pass-1 UA). A place action the GameView advertises
+description, projected interactibles, offered place actions and, last, the event log, so a
+pressed verb's result line sits within a screen of the verb (pass-1 UA; words go through the
+[say field](#word-bar)). A place action the GameView advertises
 unavailable draws in the verb list, after the available verb lines, in the Action card's
 unavailable form `label: reason` (`Fish in: not yet`; `cooldown` reads **not yet**), never
 dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
@@ -659,23 +659,21 @@ An NPC that the GameView lists an available `ask` on shows, after its other acti
 
 ## Word bar
 
-While the GameView offers `whisper`, `shout` or
-`cast` and no combat, scene or conversation is open, the World page shows a Word block last in
-its scrolling body, after the log (pass-1 UA; [room order](#world-and-status-entry)): the **Word** section title, then rows of
-[Chips](../BOOK-UI-COMPONENTS.md), each row under a Note-look title. Whisper to <name>: one chip per
-cartridge phrase (GameView `phrases`), one row per present
-NPC that lists an available `whisper`. Two present people with one shown name share that title; the Book does not number them. Shout: the same phrases. Cast: one chip per learned spell
-word (GameView `spell_words`, never an unlearned one); a word the GameView refuses is an
-unavailable chip with a `word, cast: reason` line under the row. Each chip's name is the word, then
-how it is spoken (`ward, whisper to the elder`, `ward, shout`, `ward, cast`); a press
-sends that action with `{word}`. A word that opens a conversation turns to it, as Talk does.
-No whisper, shout or cast row, no block.
-
-Saying is never a Word row (owner, wordbar1 2026-10-23), and a typed word never needs the Word block (owner, mvl9qy5ut2x2). While `say`, `shout` or `cast` is offered on the World page, the
+The World page has no Word block (owner, mvl9qy5ut2x2): every word is sent through the one-word
+field. Saying is never a chip row (owner, wordbar1 2026-10-23). While `say`, `shout` or `cast` is
+offered and no combat, scene or conversation is open, the
 [status line](#world-and-status-entry) ends with a say icon named **Say to the room** (expanded while open; [look](../../mobile/app/book/Status.tsx));
 a tap opens the one-word field ([SayField](../../mobile/app/book/SayField.tsx)) under the line with **Say**, **Shout** and **Cast** Controls, each only while that action is offered. A press sends that action with the typed word and closes the field; Enter sends the first; Escape or the icon
 closes it unsent; a new room closes it. On an NPC page, while `whisper` to that person is offered, a **Whisper** Control after the action cards opens the same field with one **Whisper** Control aimed at them; it counts as something to do there. Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
-shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it. The Word block above stays only for known words: phrase and learned-spell chips and refused-cast lines, which have no other surface yet.
+shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it.
+
+Known words are [Chips](../BOOK-UI-COMPONENTS.md) under the open field, each named by its word: on
+the status line, the cartridge phrases (GameView `phrases`), then each learned spell word the
+GameView offers to cast here (`spell_words`, only while Cast is offered; never an unlearned or a
+refused one); on the NPC page's Whisper, the phrases. A chip press only fills the field (and
+clears the bad-word Note); it never sends. A refused spell word is no chip: the Character page
+lists it under a **Spells** section title in the Action card's unavailable form `word, cast: reason`
+(`lux, cast: need 1 ash`); no refused word, no Spells section.
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:
@@ -689,7 +687,7 @@ GameView `storylet` names the one place action the [storylet deck](mechanics.md#
 
 ## Skill tree details
 
-Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
+Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
 
 An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "Blade: locked. <requirement>"; a learned one "Blade: learned." with no requirement (nothing is left to meet, pass-2), or while unqualified "Blade: learned, unqualified. <requirement>" as on Character (loka-x6t.24).
 
