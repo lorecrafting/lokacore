@@ -8,7 +8,7 @@ import { createRequire, registerHooks } from 'node:module';
 import { DatabaseSync } from 'node:sqlite';
 import { openGame } from '../../../authority/local-story/session.ts';
 import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { control } from './control.test.ts';
+import { control, pressable } from './control.test.ts';
 import { fadeStub } from './fade-stub.ts';
 
 const require = createRequire(import.meta.url);
@@ -179,7 +179,7 @@ export function book(
     for (const effect of queued.splice(0)) effect();
     return rendered;
   };
-  const buttons = () => draw().filter((n) => n.type === 'Pressable' && !n.props.disabled);
+  const buttons = () => draw().filter(pressable);
   const labels = () => buttons().map((n) => n.props.accessibilityLabel);
   const tap = (shown: string | RegExp) => control(draw(), shown).props.onPress();
   const map = () => {

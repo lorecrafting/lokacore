@@ -68,7 +68,7 @@ export const ReeveErrand: StoryObj = {
   loaders: at('green'),
   play: async ({ canvasElement }) => {
     const { page, tap } = opened(canvasElement);
-    await tap('The Reeve is here., open');
+    await tap('the Reeve, open');
     await tap('Talk to the Reeve');
     await tap('Take the letter to Wat');
     await page.findByText('Journal updated'); // the real kernel answered: the quest began
@@ -83,7 +83,7 @@ export const NellShop: StoryObj = {
   loaders: at('nell-shop'),
   play: async ({ canvasElement }) => {
     const { page, tap } = opened(canvasElement);
-    await tap('Nell, the baker is here., open'); // a checkpoint restores the save, not the open page
+    await tap('Nell, the baker, open'); // a checkpoint restores the save, not the open page
     await tap('Buy a cob of bread — 4p');
     await page.findByText('You buy it.');
     await tap('Leave');
@@ -101,14 +101,14 @@ export const SackContents: StoryObj = {
   loaders: at('sack-contents'),
   play: async ({ canvasElement }) => {
     const { page, tap } = opened(canvasElement);
-    await tap('A seed sack is here., open');
+    await tap('a seed sack, open');
     // the page a turn brings takes focus at its title (pages.tsx titleFocus), for screen readers
     await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('heading'));
     await tap('A turnip seed, open'); // its Inside row
     await tap('Take a turnip seed');
     // book-ui.md (Take from a container): the pickup line shows, then the sack reopens with Put and Leave
     await page.findByText('You pick up a turnip seed.');
-    await tap('A seed sack is here., open');
+    await tap('a seed sack, open');
     await page.findByLabelText('Put a turnip seed in a seed sack');
     await page.findByLabelText('Leave');
   },

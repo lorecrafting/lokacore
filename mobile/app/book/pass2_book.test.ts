@@ -19,7 +19,7 @@ test('a learned teach line drops its requirement', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'north', 'west', 'west');
-  b.tap('The carpenter is here.');
+  b.tap('The carpenter, open');
   b.tap('Talk to the carpenter');
   b.tap('Learn whittling');
   const shown = b.text();
@@ -56,7 +56,7 @@ test('a fresh NPC visit after a reopen starts empty', () => {
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, cart);
   const b = book(cart, a);
   go(b, 'north', 'west', 'west');
-  b.tap('The carpenter is here.');
+  b.tap('The carpenter, open');
   b.tap('Talk to the carpenter');
   b.tap('Learn whittling');
   const taught = b.text().find((x) => x.startsWith('The carpenter shows you'));
@@ -64,7 +64,7 @@ test('a fresh NPC visit after a reopen starts empty', () => {
   b.tap(LABEL.leaveConversation);
   b.unmount();
   const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
-  r.tap('The carpenter is here.');
+  r.tap('The carpenter, open');
   assert.equal(r.text().includes(taught), false, JSON.stringify(r.text()));
   r.unmount();
   a.sql.close();
@@ -76,7 +76,7 @@ test('price rows keep the empty Note off an NPC page', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'down', 'west');
-  b.tap('The fence is here.');
+  b.tap('The fence, open');
   const shown = b.text();
   assert.ok(
     shown.includes('a beeswax candle: Buy 4p (sold out); Sell 2p (you are not holding it).'),
@@ -113,7 +113,7 @@ test('a resting rod keeps its use as a note', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'north', 'west', 'south', 'east');
-  b.tap('A fishing rod is here.');
+  b.tap('a fishing rod, open');
   b.tap('Take a fishing rod');
   const rod = () => (b.tap(/opens Contents$/), b.tap(LABEL.inventory), b.tap('a fishing rod'));
   rod();

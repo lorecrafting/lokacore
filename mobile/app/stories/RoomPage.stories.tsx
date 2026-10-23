@@ -134,7 +134,8 @@ export const CompanionRemark: StoryObj = {
   },
 };
 
-// A crowded room for the one-paragraph question (owner pick mvl8h6dqhrjk): five people, five items.
+// Breaks (owner pick mvl9864n2qi8): a crowded room lists one name per line, joins with "and",
+// capitalises every name, or merges a group's names into one link.
 const [npc, , thing] = RoomNpcsItemsView.view.entities;
 const crowd = (e: typeof npc, kind: string, names: string[]) =>
   names.map((n, i) => ({ ...e, id: `${e.id}-${i}`, name: `${kind}.${n}.short`, contents: [] }));
@@ -150,4 +151,12 @@ export const Crowded: StoryObj = {
     },
   }),
   name: 'Five people, five items',
+  play: async ({ canvas }) => {
+    const people = ['Aldous', 'Bess, the alewife', 'the carpenter', 'the chandler', 'the cook'];
+    const things = ['An apple', 'an axe', 'a wooden bench', 'a cob of bread', 'an iron anvil'];
+    for (const group of [people, things]) {
+      const links = group.map((n) => canvas.getByRole('button', { name: `${n}, open` }));
+      await expect(links[0]!.parentElement!.textContent).toBe(`${group.join(', ')} are here.`);
+    }
+  },
 };

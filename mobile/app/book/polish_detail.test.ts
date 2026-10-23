@@ -87,7 +87,7 @@ test('a held item offers Give only to a present recipient and logs the confirmed
   h.tap(LABEL.backToWorld); // item Leave returned to Carrying
   h.map();
   h.tap('Go south');
-  h.tap('Old Bram is here., open');
+  h.tap('Old Bram, open');
   assert.deepEqual(gives(), []); // the recipient's page offers no Give card
   h.tap('Leave');
   h.tap(CONTENTS);
@@ -133,7 +133,7 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.map();
   h.tap('Go south'); // retries Drop without walking
   assert.deepEqual(h.game.view().view.inventory, []);
-  assert.ok(h.labels().includes('A brass lantern is here., open'));
+  assert.ok(h.labels().includes('A brass lantern, open'));
   assert.ok(h.labels().includes('standing, change position'));
   assert.equal(h.labels().includes('Leave'), false);
   assert.equal(h.p.screen().log.at(-1), 'You drop a brass lantern.');
@@ -159,12 +159,12 @@ test('other item actions retain their detail and show their consequences there',
   assert.ok(h.text().includes('Opened.'));
   assert.equal(h.p.screen().log.includes('Opened.'), false);
   h.tap('Leave');
-  assert.ok(h.labels().includes('A sewing box is here., open'));
-  h.tap('A sewing box is here., open');
+  assert.ok(h.labels().includes('A sewing box, open'));
+  h.tap('A sewing box, open');
   assert.equal(h.text().includes('Opened.'), false); // a reopened item starts a new visit (loka-x6t.19)
   h.unmount();
   const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
-  r.tap('A sewing box is here., open');
+  r.tap('A sewing box, open');
   assert.equal(r.text().includes('Opened.'), false, JSON.stringify(r.text()));
   r.unmount();
   h.sql.close();
@@ -213,7 +213,7 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     h.clock.mono = 2592000;
     assert.equal(h.game.pulse().kind, 'ready');
     assert.equal(h.game.view().view.time, 194400);
-    assert.ok(h.labels().includes('Old Bram is here., open'));
+    assert.ok(h.labels().includes('Old Bram, open'));
     assert.equal(turn(), worldTurn);
   } finally {
     h.unmount();
@@ -327,7 +327,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
     h.tap(`Go ${direction}`);
   };
   const take = (name: string) => {
-    h.tap(`${name[0].toUpperCase()}${name.slice(1)} is here.`);
+    h.tap(h.labels().find((l: string) => l.toLowerCase() === `${name}, open`)!); // first name capitalised
     h.tap(`Take ${name}`);
   };
   go('north');

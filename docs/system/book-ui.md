@@ -45,10 +45,14 @@ and admission contract. The selected room-description variant itself must omit
 concealed fixture or exit text until the game reveals it; the Book cannot hide
 an authored phrase after receiving it.
 
-Below the description, present players and NPCs have their own paragraph/list, and
-loose room items have a separate paragraph/list, NPCs first. Every entity that is not an
-NPC or player goes in the item list, so none is dropped or listed twice. Each projected subject can open its
-own detail. An item's Take option appears only when currently offered; an NPC or
+Below the description, present players and NPCs form one sentence and loose room items
+a second, NPCs first (owner, mvl9864n2qi8): names joined by commas with no "and", the
+first name capitalised, ending "are here." ("is here." for one), for example "Aldous,
+Bess, the alewife, the cook are here." Each name keeps its authored article until the
+cartridge supplies bare-name words (loka-6qi). Every entity that is not an
+NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
+its own inline link named "<name>, open" that opens its detail; the commas and "are here."
+are not pressable. A person's carried-item line follows the people sentence as a Note. An item's Take option appears only when currently offered; an NPC or
 player uses its own offered interactions. Omit an empty group. Player presence is a
 future projection; the current Book has NPCs and items only. This distinction is
 presentation and custody, not a new entity kind: fixture, actor and item actions still
