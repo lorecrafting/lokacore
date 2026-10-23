@@ -2252,7 +2252,7 @@
         "description"
       ],
       "additionalProperties": false,
-      "description": "Current-room readable detail identity, authored page title and selected description; no body. Optional actions list exact-subject readable-detail recipes, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
+      "description": "Current-room readable detail identity, authored detail key, authored page title and selected description; no body. Optional actions list exact-subject readable-detail recipes, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
       "examples": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
@@ -2311,7 +2311,7 @@
         "notices"
       ],
       "additionalProperties": false,
-      "description": "Current-room board identity, title, selected description and ordered notice membership; no bodies.",
+      "description": "Current-room board identity, authored detail key, title, selected description and ordered notice membership; no bodies.",
       "examples": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",

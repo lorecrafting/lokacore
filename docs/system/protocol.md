@@ -423,10 +423,10 @@ or non-readable targets and remote readable targets follow [readable@1](mechanic
 
 GameView optionally supplies `notice_boards` only when the current room has boards, and
 `notices` for its standalone readable details outside board membership. Each board
-has `id`, `title: TextKey`, selected `description: TextKey` and ordered `notices`, each
-with `id`, `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
+has `id`, `key`, `title: TextKey`, selected `description: TextKey` and ordered `notices`, each
+with `id`, `key` (its own detail Key), `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
 nonempty and bounded to 64. IDs are existing detail target IDs; bodies are never projected.
-Standalone notices have the same `id`, `title` and selected `description` shape. Each Notice
+Standalone notices have the same `id`, `key`, `title` and selected `description` shape. Each Notice
 optionally has `actions`, existing AdvertisedAction rows: exact-subject recipes for
 that readable detail, available or with their actual refusal reason. These recipes are omitted
 from World actions; Read remains in its existing exact-target entry channel. The view is
