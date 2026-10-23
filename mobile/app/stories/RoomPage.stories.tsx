@@ -133,3 +133,21 @@ export const CompanionRemark: StoryObj = {
     ).toBeTruthy();
   },
 };
+
+// A crowded room for the one-paragraph question (owner pick mvl8h6dqhrjk): five people, five items.
+const [npc, , thing] = RoomNpcsItemsView.view.entities;
+const crowd = (e: typeof npc, kind: string, names: string[]) =>
+  names.map((n, i) => ({ ...e, id: `${e.id}-${i}`, name: `${kind}.${n}.short`, contents: [] }));
+export const Crowded: StoryObj = {
+  ...pageStory({
+    ...RoomNpcsItemsView,
+    view: {
+      ...RoomNpcsItemsView.view,
+      entities: [
+        ...crowd(npc, 'npc', ['aldous', 'bess', 'carpenter', 'chandler', 'cook']),
+        ...crowd(thing, 'item', ['apple', 'axe', 'bench', 'bread', 'anvil']),
+      ],
+    },
+  }),
+  name: 'Five people, five items',
+};
