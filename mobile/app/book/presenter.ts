@@ -204,11 +204,40 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   return true;
 }
 
-function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) {
+// What the live region reads (loka-x6t.43): the World and combat lines new since the last screen,
+// never history; `key` changes per batch, so a repeated line is read again.
+type Said = {
+  log: number;
+  combat: number;
+  place: string;
+  fight?: string;
+  key: number;
+  text: string;
+};
+function heard(s: Logs, view: GameView, was: Said | undefined): Said {
+  const now = {
+    log: s.log.length,
+    combat: s.combatLog.length,
+    place: view.place.id,
+    fight: view.combat?.encounter_id,
+  };
+  was ??= { ...now, key: 0, text: '' };
+  // A room or encounter change empties its log first (resetLogs), so all of it is new.
+  const fresh = [
+    ...s.log.slice(now.place === was.place ? was.log : 0),
+    ...s.combatLog.slice(!now.fight || now.fight === was.fight ? was.combat : 0),
+  ].map((l) => (typeof l === 'string' ? l : 'reason' in l ? `${l.reason}, ${l.text}` : l.text));
+  return fresh.length ? { ...now, key: was.key + 1, text: fresh.join(' ') } : { ...was, ...now };
+}
+
+function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
+  const { view, token } = game.view();
+  const said = heard(s, view, was); // before the trim, which drops lines from the front
   s.log.splice(0, s.log.length - 200);
   s.combatLog.splice(0, s.combatLog.length - 200);
   for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
-  const { view, token } = game.view();
+  said.log = s.log.length;
+  said.combat = s.combatLog.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,
     token,
@@ -221,6 +250,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     buttons,
     log: s.log,
     combatLog: s.combatLog,
+    said,
     recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
@@ -239,8 +269,13 @@ export function presenter(game: Game) {
   const { text, label } = sayers(game);
   const s = restoredLogs(game, text);
   let generation = 0; // Player receipts invalidate old controls even if the context cycles back.
+  let said: Said | undefined;
   return {
-    screen: () => screen(game, s, label, text, generation),
+    screen: () => {
+      const shown = screen(game, s, label, text, generation, said);
+      said = shown.said;
+      return shown;
+    },
     update: (update: GameSubscription) => {
       const terminal = updated(game, update, s, text);
       if (terminal && s.recovered) generation++;

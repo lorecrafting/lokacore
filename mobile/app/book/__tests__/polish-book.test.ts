@@ -69,6 +69,8 @@ export function nodes(element: any): any[] {
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
+    // The live region repeats page lines for a screen reader: page text leaves it out (live_region.test.ts reads it).
+    if (element.type.name === 'Heard') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     owner = element.type;
     return nodes(element.type(element.props));

@@ -1,5 +1,6 @@
 import type { Preview } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
+import { configure } from 'storybook/test';
 import { PaletteContext, TypeContext, useFocusRing } from '../book/palette.ts';
 import { readingType } from '../book/reading.ts';
 import { color, reading } from '../book/tokens.ts';
@@ -23,6 +24,10 @@ const readings = {
   Larger: reading.larger,
   Max: reading.cap,
 };
+
+// The Book's live region (lines.tsx Heard) repeats page lines for a screen reader: a play's text
+// query reads the page, not the region (Heard.stories.tsx reads the region).
+configure({ defaultIgnore: 'script, style, [aria-live] *' });
 
 const preview: Preview = {
   tags: ['autodocs'], // each component's doc comment on its Docs page (BOOK-UI-COMPONENTS.md, Component catalogue)

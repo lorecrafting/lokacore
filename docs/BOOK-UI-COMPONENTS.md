@@ -174,6 +174,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Asides` | `book/lines.tsx` | RoomPage |
 | `LogLines` | `book/lines.tsx` | LogLines |
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
+| `Heard` | `book/lines.tsx` | Heard |
 | `Here` | `book/lines.tsx` | RoomPage |
 | `NoticeEntries` | `book/notices.tsx` | RoomPage |
 | `NoticePage` | `book/notices.tsx` | NoticePage |

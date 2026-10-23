@@ -464,6 +464,14 @@ remains a report, not proof that pickup caused it. Opaque scrolling surfaces and
 settled page's persistent 3D transform are supported UI candidates. Actual cause and resolution
 need later native before/after proof; no unsupported prop, native plugin or dependency patch.
 
+## Announcements
+
+Proposed for designer approval (loka-x6t.43). One polite live region, outside the page turn, reads
+each new batch of World, combat and refused lines once, as shown and in log order. A refused line
+reads "<reason>, <sentence>". History, redraws, page turns and a reopen are never read again. A
+repeated line is read again. Condition changes arrive as log narration, so they are read the same
+way. The region is text only, so motion settings do not apply to it.
+
 ## Future boundaries
 
 Other-player presence requires a real projection and UI scope; no fabricated player rows.

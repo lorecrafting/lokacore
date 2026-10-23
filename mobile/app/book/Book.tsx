@@ -36,6 +36,7 @@ import {
   type ReadingStore,
 } from './reading.ts';
 import { color, size, space } from './tokens.ts';
+import { Heard } from './lines.tsx';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
@@ -215,6 +216,7 @@ export function BookView(p: ViewProps) {
             )}
           </PageTurn>
           <Bottom {...ctx} page={page} />
+          <Heard said={p.screen.said} />
           {c.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
       </TypeContext>

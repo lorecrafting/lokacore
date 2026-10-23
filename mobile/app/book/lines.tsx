@@ -22,15 +22,17 @@ import { radius, size, space, type } from './tokens.ts';
 export function EntityLine(p: { name: string; rest?: string; note?: string; onPress: () => void }) {
   const c = usePalette();
   const t = useType();
+  // A trailing space ends the first line, so the shown text reads like the name (it hangs unseen).
+  const gap = p.note ? ' ' : '';
   return (
     <Tap label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`} onPress={p.onPress}>
       {p.rest ? (
         <Text style={prose(c, t)}>
           <Text style={type.named}>{p.name}</Text>
-          {p.rest}
+          {p.rest + gap}
         </Text>
       ) : (
-        <Text style={{ ...prose(c, t), ...type.named }}>{p.name}</Text>
+        <Text style={{ ...prose(c, t), ...type.named }}>{p.name + gap}</Text>
       )}
       {
         p.note ? (
@@ -206,3 +208,28 @@ export function Here(p: {
     ),
   ];
 }
+
+/**
+ * The Book's live region: each new batch of World, combat and refused lines, read once by a screen
+ * reader and not seen (book-ui.md, Announcements).
+ * - Use: once, in the Book, outside PageTurn, so a page turn never reads it again.
+ * - Rules: polite; a new key per batch remounts the text, so a repeated line is read again.
+ * - Story: Heard.stories.tsx
+ */
+export function Heard({ said }: { said: { key: number; text: string } }) {
+  return (
+    <View aria-live="polite" style={unseen}>
+      <Text key={said.key} numberOfLines={1}>
+        {said.text}
+      </Text>
+    </View>
+  );
+}
+
+// Read by a screen reader, not seen: one pixel, clipped.
+const unseen = {
+  position: 'absolute',
+  width: size.unseen,
+  height: size.unseen,
+  overflow: 'hidden',
+} as const;

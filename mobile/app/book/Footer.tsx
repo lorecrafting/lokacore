@@ -43,7 +43,8 @@ const keys: Record<string, string> = {
   PageDown: 'down',
 };
 
-// ponytail: react-native-web's announceForAccessibility is a no-op; a web build needs a live region.
+// ponytail: announceForAccessibility is a no-op on web, where the live region (lines.tsx Heard)
+// reads the refused line; where native maps aria-live too, the reason may be read twice (check on device).
 /**
  * The map joystick between two hairline rules (book-ui.md, Minimap, map and presentation
  * controls).
