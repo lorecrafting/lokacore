@@ -12,6 +12,7 @@ import { adopt, admit } from '../src/runtime/proposal.ts';
 import { accepted, allocator } from '../src/runtime/decision.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { resolve } from '../src/commands/target.ts';
 
 // Showcase, entered at the Drill Yard (no up exit) at 18:00; the death shrine is the Crossroads Inn.
 const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
@@ -138,8 +139,9 @@ test('real fatal sequence records shrine return in the same adopted proposal', (
   assert.deepEqual(names(next.world), ['room.crossroads_inn.title', 'room.drill_yard.title']);
 });
 
-// Break: Where lists a dead NPC (pass-1 UF3), or the living filter also drops a 1 HP one.
-test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after reopen', () => {
+// Break: Where lists a dead NPC (pass-1 UF3), or the living filter also drops a 1 HP one; typed
+// `where boar` still finds the dead boar and answers last seen with no name (loka-y6yg.53).
+test('known_npcs and typed Where keep a remembered NPC at 1 HP and drops it at 0 HP, also after reopen', () => {
   const initial = fresh();
   const boar = npc(initial, 'boar');
   const hp = resourceRef(initial, 'hp');
@@ -169,6 +171,10 @@ test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after
         view.known_npcs!.some((n) => n.id === boar),
         listed,
         `hp ${left}`,
+      );
+      assert.deepEqual(
+        resolve(w, w.character, 'boar', 'where'),
+        listed ? { kind: 'unique', target_id: boar } : { kind: 'none' },
       );
     }
   }
