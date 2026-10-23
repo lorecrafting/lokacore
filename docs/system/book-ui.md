@@ -376,12 +376,12 @@ Put appears as a concrete pair button using projected source/destination names a
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
-A held tool's page shows one card per use pair (G4) the GameView lists available on it, in listed order, labelled with the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name; the target's page shows none. Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView does not list, or lists unavailable, shows no card: held pages list only available actions, the `too_heavy` note above and any item action refused with `cooldown` ("Fish in: not yet" on the rod resting between casts; pass-2, designer to check wording) being the exceptions; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4))
+A held tool's page shows one card per use pair (G4) the GameView lists available on it, in listed order, labelled with the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name; the target's page shows none. Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView does not list, or lists unavailable, shows no card: held pages list only available actions, the `too_heavy` note above and any item action refused with `cooldown` ("Fish in: not yet" on the rod resting between casts), one note per use whatever the order of its targets, beside any card the use still shows being the exceptions; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4))
 
 A held item's page shows one card per Give pair the GameView lists available, at Give's place among its actions, in GameView order, labelled "Give", the item's and the recipient's projected names ("Give an apple to the farmer"). Pressing it sends give with target_ids [item, recipient]. A refused pair, or no one present, shows no card and no note. A confirmed given returns to World and adds **You give an apple to the farmer.** once with the original names; authored narration takes precedence. Pending, refused or stale presses claim nothing. ([Give pairs](mechanics.md#give-pairs))
 
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
-figures and skill requirement, read from the projection, never renderer literals or inferred
+figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
 How Character shows learned skills is the [skill tree rule](#skill-tree-details).
 A worn item a curse holds on keeps Remove in its list, unavailable, with the engine's reason
@@ -410,9 +410,9 @@ detail, Pour and Drink to their source vessel. The Book owns no liquid math.
 
 **Held readables.** Opening a held book sends no Read; Read is an explicit option. Its confirmed
 text joins that item's history and the page stays. A child of an open held container pushes its
-own detail; Leave pops locally without a command to the page the item was opened from (the
-container, or the person holding it), and Back to World clears the stack. Proposed for designer
-approval (loka-x6t.94, loka-x6t.68): there is no separate Back to container, which went to the same page. Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
+own detail; its foot is Leave alone, which pops locally without a command to the page the item
+was opened from (the container, the person holding it, or inventory), and Back to World clears
+the stack. There is no Back to container: it went to the same page (loka-x6t.94). Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
 Read to its original history, opening a route only when custody still reaches it.
 
 **Consumed items.** An action that consumes the item (Eat, a bandage) removes it from Carrying,
