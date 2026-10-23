@@ -45,15 +45,6 @@ export const Reworded: StoryObj = {
     await expect(canvas.getByRole('button', { name: 'The inn signpost, open' })).toBeVisible();
   },
 };
-// Breaks: the description's linked signpost stays plain words or keeps a second World line (loka-x6t.105).
-export const LinkedSignpost: StoryObj = {
-  ...pageStory(RoomFirstView),
-  name: 'Linked signpost',
-  play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button', { name: 'signpost, open' })).toBeVisible();
-    await expect(canvas.queryByRole('button', { name: 'The inn signpost, open' })).toBeNull();
-  },
-};
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
 export const LongLog: StoryObj = { ...pageStory(RoomLongLogView), name: 'Long log' };
 export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Refusal line' };

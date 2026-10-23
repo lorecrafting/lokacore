@@ -245,7 +245,8 @@ function Present(p: {
 
 // An inline link inside running prose (Here's names, RoomPage's linked fixtures): `type.named`, no
 // touch box (the inline-link exception, BOOK-UI-COMPONENTS.md), named "<words>, open", Enter or Space
-// presses it on the web. A plain function, not a component, so it stays one Text in its sentence.
+// presses it on the web. A function, not a component: the Book's test text helpers read Text
+// children only, and a component would need its own story and catalogue line.
 export const nameLink = (name: string, onPress: () => void, key?: string | number) => (
   <Text
     key={key}

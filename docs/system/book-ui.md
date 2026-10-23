@@ -41,13 +41,13 @@ current-room identity and detail route (a notice whose `key` is the
 link's target, with its captured Read offer). The Book does not infer visibility, identity,
 detail or an action from bracketed prose alone. If that projection is absent,
 the words remain ordinary prose until a mechanic adds the required projection
-and admission contract. The selected room-description variant itself must omit
+and admission contract. A readable detail the selected description links, whose
+`key` the GameView projects with an offered Read, is a fixture link in the prose
+and draws no separate World line; a notice the description does not link, a
+board, a bed, a transport or a counted harvest keeps its World entry
+(loka-x6t.105). The selected room-description variant itself must omit
 concealed fixture or exit text until the game reveals it; the Book cannot hide
-an authored phrase after receiving it. A readable notice the selected
-description links, whose `key` the GameView projects with an offered Read, is a
-fixture link in the prose and draws no separate World line; a notice the
-description does not link, a board, a bed, a transport or a counted harvest keeps
-its World entry (loka-x6t.105).
+an authored phrase after receiving it.
 
 Below the description, present players and NPCs form one sentence and loose room items
 a second, NPCs first (owner, mvl9864n2qi8, mvl9q99wzm29): names joined with a serial
