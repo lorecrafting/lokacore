@@ -246,17 +246,19 @@ function Bottom(p: BottomProps) {
   const shut = !!view.combat || !!ended;
   // The keyboard's Say (buttons.ts): on the open World page only, as the Word block was.
   const say = !p.page && !shut && p.g.word.find((b) => b.action_key === 'say');
+  const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   return (
     <View
       style={{
         paddingTop: space.sm,
         paddingHorizontal: space.xl,
         paddingBottom: space.lg,
-        borderTopWidth: size.rule,
+        // The footer's own flanking rules divide it from the page (owner, mvl8dz3dy36l).
+        borderTopWidth: nav ? 0 : size.rule,
         borderTopColor: c.line,
       }}
     >
-      {!p.page && !view.ancestry_choices && !view.scene && !shut && navigation(p)}
+      {nav && navigation(p)}
       {!view.ancestry_choices && (
         <StatusLine
           time={view.time}
