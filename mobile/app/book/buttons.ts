@@ -203,6 +203,10 @@ function heldButtons(
   return projected.flatMap((e) =>
     e.actions
       .filter((a) => a.available && !['ask', 'whisper'].includes(a.action_key)) // whisper is wordButtons, ask is askButtons
+      // An unauthored Wear on a wield-slot item reads Wield (book-ui.md, Equipment and skills).
+      .map((o) =>
+        o.label === 'action.wear' && e.slot === 'wield' ? { ...o, label: 'action.wield' } : o,
+      )
       .map((a) => {
         // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target
         // and keep the card on this page (detail_id), not the target's.

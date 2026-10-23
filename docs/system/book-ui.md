@@ -385,6 +385,11 @@ names; a carried weapon is visibly distinct from a wielded one, and a descriptio
 How Character shows learned skills is the [skill tree rule](#skill-tree-details).
 A worn item a curse holds on keeps Remove in its list, unavailable, with the engine's reason
 ("Remove: it will not come off."); the Book never hides it.
+An item's authored `equip` words name its Wear and Remove buttons and their lines ("Wield the
+training sword", "You take up the training sword."). With none, a wield-slot item reads **Wield**
+and answers "You take it up." and "You put it away."; any other slot reads Wear and answers "You
+put it on." and "You take it off.". A cure's authored `edible.label` names its verb the same way
+(**Apply** a poultice); an authored narration line always wins over these defaults.
 
 **Fuel and light.** An item with fuel shows `Fuel <remaining> of <capacity>, lit/unlit` from the
 confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside Remove when worn.

@@ -95,3 +95,28 @@ test('retained item results appear chronologically between description and optio
   assert.equal(book.screen().returnWorld, false);
   assert.deepEqual(book.screen().log, ['You pick up a wool cloak.']);
 });
+
+// Breaks: a wield-slot item with no equip words reads Wear, or answers "You put it on." /
+// "You take it off." (book-ui.md, Equipment and skills); the cloak above keeps those.
+test('a wield-slot item with no equip words reads Wield, You take it up. and You put it away.', (t) => {
+  const bundle = JSON.parse(
+    readFileSync(
+      new URL('../../../protocol/fixtures/harvest_sampler_hash.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
+  t.after(() => a.sql.close());
+  const book = presenter(a.game);
+  a.game.subscribe(book.update);
+  const tap = (label: string) =>
+    book.press(book.screen().buttons.find((b) => b.label === label) ?? assert.fail(label));
+  tap('Take a pickaxe');
+  tap('Wield a pickaxe'); // fails here if the label stays Wear
+  tap('Remove a pickaxe');
+  assert.deepEqual(book.screen().log, [
+    'You pick up a pickaxe.',
+    'You take it up.',
+    'You put it away.',
+  ]);
+});

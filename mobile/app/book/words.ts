@@ -63,6 +63,12 @@ export const OUTCOME: Record<string, string> = {
   waited: 'Time passes.',
 };
 
+// A wield-slot item with no authored equip words (book-ui.md, Equipment and skills).
+export const WIELD: Record<string, string> = {
+  worn: 'You take it up.',
+  removed: 'You put it away.',
+};
+
 // The refusal codes an offer can carry (book/reasons.test.ts).
 const REASON: Record<string, string> = {
   exit_locked: 'locked',
