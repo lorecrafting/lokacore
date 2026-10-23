@@ -3,7 +3,8 @@
 // port, opens one preview per combination and switches stories in place, which is far faster
 // than a page load per story. Live stories (dev-server sqlite) stay out.
 import { spawn } from 'node:child_process';
-import { readFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, mkdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { createServer } from 'node:net';
 import { chromium, type Page } from 'playwright';
 import { fileURLToPath } from 'node:url';
@@ -20,12 +21,20 @@ const port = await new Promise<number>((found) => {
     probe.close(() => found(port));
   });
 });
+const root = realpathSync(fileURLToPath(new URL('../../..', import.meta.url)));
+const live = process.env.LOKA_SESSION_DIR ?? `${homedir()}/dev/lokacore-session`;
+// Its Vite cache rebuild would reload the owner's Storybook on 6006.
+if (existsSync(live) && realpathSync(live) === root)
+  throw new Error('stories:sheet: not in the live session worktree; run it from your own');
 const url = `http://localhost:${port}`;
 const server = spawn(
   'npx',
   ['storybook', 'dev', '-p', `${port}`, '--host', '127.0.0.1', '--ci', '--no-open'],
   { cwd: new URL('..', import.meta.url), stdio: ['ignore', 'ignore', 'inherit'], detached: true },
 );
+const stop = () => server.exitCode === null && process.kill(-server.pid!, 'SIGTERM');
+for (const sig of ['SIGINT', 'SIGTERM'] as const)
+  process.on(sig, () => (stop(), process.exit(130)));
 const escape = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
@@ -147,5 +156,5 @@ ${rows.join('\n')}</table>
     `story sheet: mobile/app/.walkthrough/stories/index.html (${stories.length} stories × ${combos.length}, ${verdicts.size} not success, ${Math.round((Date.now() - started) / 1000)} s)`,
   );
 } finally {
-  if (server.exitCode === null) process.kill(-server.pid!, 'SIGTERM');
+  stop();
 }

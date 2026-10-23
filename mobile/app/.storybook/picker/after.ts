@@ -5,6 +5,11 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const [port, dir, id] = process.argv.slice(2);
+// The done line waits on this process: end it whatever hangs (launch, render, fonts).
+const deadline = setTimeout(
+  () => (console.error('after shot: 30 s deadline'), process.exit(1)),
+  30_000,
+);
 const pick = readFileSync(`${dir}/picks.jsonl`, 'utf8')
   .trim()
   .split('\n')
@@ -54,4 +59,5 @@ try {
   }
 } finally {
   await browser.close();
+  clearTimeout(deadline);
 }

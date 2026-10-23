@@ -112,3 +112,5 @@ from the served story at the pick's palette, Reading size and viewport (`.storyb
 and the panel shows it beside the before crop when the owner opens a thumbnail.
 `mise exec -- npm run stories:sheet` (in `mobile/app`) screenshots every story but Live at 390 px in Reading size
 Standard and Max, light and dark, on its own Storybook, into `mobile/app/.walkthrough/stories/index.html` (gitignored).
+It refuses to run in the live session worktree (`LOKA_SESSION_DIR`), where its build cache would reload the
+owner's Storybook on 6006.

@@ -83,6 +83,7 @@ try {
     const button = preview.locator('[role="button"]').first();
     await button.waitFor();
     await preview.evaluate(() => document.fonts.ready); // the Book's fonts resize text boxes
+    await button.evaluate((el) => ((el as HTMLElement).style.width = '200px')); // narrower than the page
     const before = await boxes(preview);
     await page.click('[title="Pick an element (P)"]');
     await settle(page, 'Press P or Pick');
@@ -142,6 +143,9 @@ try {
     const crop = size(`shots/${pick.id}-0.png`);
     const shot = size(`shots/${pick.id}-0-after.png`);
     if (shot !== crop) fail(`after shot ${shot}, want the before crop's ${crop}`);
+    const { w } = pick.elements[0].box; // the narrowed row: no clamp to the page
+    if (crop.split('x')[0] !== `${2 * (w + 48)}`)
+      fail(`crop ${crop}, want ${2 * (w + 48)} px wide`);
     await page
       .waitForFunction(
         () =>
