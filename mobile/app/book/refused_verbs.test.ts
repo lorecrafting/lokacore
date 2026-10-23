@@ -87,15 +87,19 @@ test('refused actions owned by another control draw no verb note', async () => {
   assert.equal(drawn.filter((l) => l.startsWith('A stranger beckons')).length, 1);
 });
 
-// Breaks: the real Book drops the Glade's refused Chop wood (no axe), as before pass-1 R2.
-test('glade without an axe: the real Book shows "Chop wood: not now"', (t) => {
+// Breaks: the real Book drops the Glade's refused Chop wood (no axe), as before pass-1 R2, or
+// says only "not now" without the recipe's authored reason (loka-y6yg.56).
+test('glade without an axe: the real Book says why Chop wood is refused', (t) => {
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   t.after(() => b.sql.close());
   for (const d of ['north', 'west', 'south', 'west']) {
     b.map();
     b.tap(`Go ${d}`);
   }
-  assert.ok(b.text().includes('Chop wood: not now'), JSON.stringify(b.text().slice(-8)));
+  assert.ok(
+    b.text().includes('Chop wood: Needs an axe and woodcutting 1'),
+    JSON.stringify(b.text().slice(-8)),
+  );
 });
 
 // Breaks: the ring's Item page drops its held-on Remove (a cause outside NOTED), loka-x6t.38.

@@ -3,6 +3,7 @@
   "aliases": [
     "chop"
   ],
+  "reason": "reason.chop",
   "target": {
     "kind": "detail",
     "room": "glade",
