@@ -70,7 +70,11 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
     title: string;
     name: string;
   };
-  const globals = api.getGlobals() as { palette?: string; viewport?: { value?: string } };
+  const globals = api.getGlobals() as {
+    palette?: string;
+    reading?: string;
+    viewport?: { value?: string };
+  };
   const options = api.getCurrentParameter<{
     options?: Record<string, { name: string; styles: { width: string; height: string } }>;
   }>('viewport')?.options;
@@ -79,6 +83,7 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
     note,
     story: { id, title: `${title}/${name}` },
     palette: globals.palette ?? null,
+    reading: globals.reading ?? null,
     viewport: v ? { name: v.name, ...v.styles } : null,
     elements: pending,
   }).catch((e: Error) => e);
