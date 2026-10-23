@@ -169,7 +169,10 @@ accepted `removed`, one transfer holder → body. These checks are one read-only
 rule and the GameView share. Composition re-checks custody, cycles and the holder's capacity.
 `has_item` climbs containers, so a worn item still counts. A worn item's affects move its
 wearer's attributes ([toolbox row 3](#item-slots-and-affects-toolbox-row-3)); when the hp maximum
-is derived, wearing or removing an item with affects first settles hp, as every attribute writer does ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). Slot compatibility
+is derived, wearing or removing an item with affects first settles hp, as every attribute writer does ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). An item with
+[equip words](cartridge.md#item-affect-declarations) (`kernel_api` 1.116) is offered under its own `equip.wear` and
+`equip.remove` labels, else `action.wear` and `action.remove`, and an accepted `worn` or `removed`
+tells its `equip.worn` or `equip.removed` line; without them the decision has no narration. Slot compatibility
 and dual wield are LATER ([ROADMAP](../ROADMAP.md)).
 
 <a id="position1-kerneltssrcrulespositionts"></a>
