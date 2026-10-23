@@ -14,8 +14,8 @@
   "npc.stranger.room": "A [stranger] watches from the well.",
   "npc.stranger.description": "A traveller in a grey cloak.",
   "dialogue.talk.prompt": "They wait for you to speak.",
-  "dialogue.talk.greet": "Say hello.",
-  "dialogue.talk.help": "Offer a hand.",
+  "dialogue.talk.greet": "Say hello",
+  "dialogue.talk.help": "Offer a hand",
   "narration.talk.greet": "You exchange greetings.",
   "narration.talk.help": "You help for a while."
 }

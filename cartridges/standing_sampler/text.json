@@ -32,9 +32,9 @@
   "shop.sold": "You sell it.",
   "dialogue.maud.prompt": "Maud looks you over.",
   "dialogue.maud.warm": "Maud smiles. \"There you are, dear.\"",
-  "dialogue.maud.help": "Help carry water.",
-  "dialogue.maud.wrong": "Kick over her bucket.",
-  "dialogue.maud.chat": "Chat a while.",
+  "dialogue.maud.help": "Help carry water",
+  "dialogue.maud.wrong": "Kick over her bucket",
+  "dialogue.maud.chat": "Chat a while",
   "narration.maud.help": "You carry water for the village.",
   "narration.maud.wrong": "Water spills; the village will hear of it.",
   "narration.maud.chat": "You talk of small things.",
@@ -51,6 +51,6 @@
   "band.tired": "tired",
   "band.exhausted": "exhausted",
   "dialogue.peg.prompt": "Peg dusts off her hands.",
-  "dialogue.peg.chat": "Ask about the bread.",
+  "dialogue.peg.chat": "Ask about the bread",
   "narration.peg.chat": "Peg talks of rye and barley."
 }

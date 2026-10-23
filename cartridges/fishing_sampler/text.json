@@ -5,7 +5,7 @@
   "room.larder.description": "Deep water no one can reach.",
   "room.midden.title": "Midden",
   "room.midden.description": "A sealed heap where spoiled things go.",
-  "condition.spoiling": "Spoiling",
+  "condition.spoiling": "spoiling",
   "narration.spoiling.applied": "It will not keep long.",
   "narration.spoiling.tick": "It smells a little worse.",
   "narration.spoiling.expired": "It has spoiled.",

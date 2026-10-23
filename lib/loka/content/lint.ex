@@ -1,6 +1,7 @@
 defmodule Loka.Content.Lint do
   @moduledoc """
-  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources;
+  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources, plus the label rules: no final period on a
+  choice or action label, lowercase status labels;
   docs/CHECKS.md). Each finding is one line naming the file and key. The loader never runs
   these: a sampler may break them on purpose.
   """
@@ -12,14 +13,20 @@ defmodule Loka.Content.Lint do
 
   @doc "The findings for the source directory `dir`."
   @spec run(Path.t()) :: [String.t()]
-  def run(dir) do
+  def run(dir), do: dir |> decoded() |> findings()
+
+  @doc "Only the label findings for the source directory `dir` (samplers are checked for these too)."
+  @spec labels(Path.t()) :: [String.t()]
+  def labels(dir), do: dir |> decoded() |> then(&labels(&1, Map.get(&1, "text.json", %{})))
+
+  defp decoded(dir) do
     {files, _} = Source.load(dir)
 
     # A missing folder or the parent cartridges folder loads no manifest and would lint clean.
     if !Enum.any?(files, &match?({"cartridge.json", _, %{}}, &1)),
       do: raise(ArgumentError, "#{dir}: no cartridge.json loaded; give a cartridge source folder")
 
-    findings(Map.new(for {rel, _, value} <- files, is_map(value), do: {rel, value}))
+    Map.new(for {rel, _, value} <- files, is_map(value), do: {rel, value})
   end
 
   @doc "The findings for decoded source files, keyed by their path relative to the cartridge."
@@ -31,6 +38,7 @@ defmodule Loka.Content.Lint do
     |> Enum.sort()
     |> Enum.flat_map(fn {rel, v} -> file(Path.split(rel), rel, v) end)
     |> Kernel.++(talk(files, text))
+    |> Kernel.++(labels(files, text))
     |> Kernel.++(items(files))
     |> Kernel.++(fills(files))
   end
@@ -202,4 +210,36 @@ defmodule Loka.Content.Lint do
       do: ["text.json: action.talk has no text, yet a dialogue has no label of its own"],
       else: []
   end
+
+  # A choice or action label is a bare imperative: no single final "." unless it opens with a quote
+  # mark (a spoken line). A status label is authored lowercase; condition.bleeding keeps its capital
+  # (the kernel keys on it). book-ui.md: NPC dialogue and action details, Conditions details.
+  defp labels(files, text) do
+    for {rel, d} <- Enum.sort(files),
+        {kind, key} <- label_keys(Path.split(rel), d),
+        s = text[key],
+        is_binary(s),
+        msg = label_problem(kind, key, s),
+        do: "#{rel}: label #{key} #{msg}"
+  end
+
+  defp label_keys(["dialogues", _], d),
+    do:
+      Enum.map(
+        [d["label"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
+        &{:choice, &1}
+      )
+
+  defp label_keys(["actions", _], d), do: [{:choice, d["label"]}]
+  defp label_keys(["statuses", _], d), do: [{:status, d["label"]}]
+  defp label_keys(_, _), do: []
+
+  defp label_problem(:choice, _, s),
+    do:
+      if(s =~ ~r/[^.]\.$/ and not String.starts_with?(s, ["\"", "“", "‘"]),
+        do: "ends in a period"
+      )
+
+  defp label_problem(:status, key, s),
+    do: if(key != "condition.bleeding" and s != String.downcase(s), do: "is not lowercase")
 end
