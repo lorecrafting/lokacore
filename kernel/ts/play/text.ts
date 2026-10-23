@@ -120,8 +120,10 @@ const capital = (w: string) => `${w[0].toUpperCase()}${w.slice(1)}`;
 /** A catalog string as plain words: each touch link's words, without brackets or target. */
 export const plain = (s: string): string => s.replace(/\[([^[\]]+)\](?:\([^()]*\))?/g, '$1');
 
-/** The cartridge's text for a key, as plain words (the key itself if it has none). */
-export const say = (cartridge: Cartridge, key: string): string => plain(cartridge.text[key] ?? key);
+/** The cartridge's text for a key, as plain words (the key itself if it has none; the engine key
+ * place.dark its default words, as the Book's words.ts, loka-x6t.36). */
+export const say = (cartridge: Cartridge, key: string): string =>
+  plain(cartridge.text[key] ?? (key === 'place.dark' ? "It's too dark to see..." : key));
 
 // A narration line's committed key and participants as the receipt holds them (06 §43), or
 // nothing for a line without participants; names are not rendered (presentation, later).

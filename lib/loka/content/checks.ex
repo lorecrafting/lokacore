@@ -292,7 +292,7 @@ defmodule Loka.Content.Checks do
     all = for {_, ds} <- defs, is_map(ds), {_, {_, _, _} = d} <- ds, do: d
 
     Enum.flat_map(all, &depth/1) ++
-      Loka.Content.Requires.features(manifest, all) ++
+      Loka.Content.Requires.features(manifest, all, Map.values(defs["room"] || %{})) ++
       Loka.Content.Exchanges.check(manifest, defs) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
   end

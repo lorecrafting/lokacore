@@ -7,6 +7,7 @@ import { resolve } from '../src/commands/target.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { fresh, entity, room, npc, f, light, lightActionFixture } from './light_fixture.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { room as roomText } from '../play/text.ts';
 const torch = entity('torch'),
   oil = entity('lamp_oil'),
   bag = entity('satchel');
@@ -341,6 +342,7 @@ test('a dark-flagged room reads place.dark and hides its entities until lit', ()
   assert.deepEqual(validate('GameView', view), []);
   assert.equal(view.place.description.key, 'place.dark');
   assert.equal(view.place.asides, undefined);
+  assert.match(roomText(w.cartridge as never, w), /\nIt's too dark to see\.\.\.\n/);
   assert.ok(!ids(view).includes(peg) && !ids(view).includes(oil));
   assert.ok(ids(view).includes('"item.torch.short"'));
   assert.equal(resolve(w, w.character, 'peg').kind, 'none');
@@ -357,4 +359,18 @@ test('a dark-flagged room reads place.dark and hides its entities until lit', ()
   assert.equal(view.place.asides?.length, 1);
   assert.ok(ids(view).includes(peg) && ids(view).includes(oil));
   assert.equal(gameView(blinded(w)).place.description.key, 'place.dark');
+});
+
+// Breaks (loka-x6t.36): the engine line replaces an authored dark_description in a dark-flagged room.
+test('a dark-flagged room with a dark_description shows the authored text unlit', () => {
+  const w = small(
+    f.genesis((c) => {
+      light(c);
+      c.manifest.requires.kernel_api.at_least = '1.114';
+      c.rooms[`${f.prefix}:room/well_shaft`].dark = true;
+    }),
+  );
+  const view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.equal(view.place.description.key, 'room.well_shaft.dark');
 });
