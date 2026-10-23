@@ -36,19 +36,7 @@ export function links(c: Obj): Diagnostic[] {
     for (const [k, d] of Object.entries((r.details ?? {}) as Obj))
       own(d, `${at}.details${step(k)}`, k);
   }
-  for (const map of ['npcs', 'items'])
-    for (const [ref, e] of Object.entries((c[map] ?? {}) as Obj)) {
-      const at = `.cartridge.${map}${step(ref)}`;
-      for (const f of ['short', 'room_line', 'description'])
-        uses.push([`${at}.${f}`, e[f], e.key, entities]);
-      for (const f of ['bare', 'plural'])
-        // name words (loka-6qi), as lib/loka/content/entities.ex
-        if (e.words?.[f]) uses.push([`${at}.words.${f}`, e.words[f], e.key, entities]);
-      for (const f of ENTITY_VARIANTS)
-        (e[f] ?? []).forEach((v: Obj, i: number) =>
-          uses.push([`${at}.${f}[${i}].description`, v.description, e.key, entities]),
-        );
-    }
+  uses.push(...entityUses(c, entities));
   return uses.flatMap(([at, key, self, targets]) =>
     [...(Object.hasOwn(c.text, key) ? (c.text[key] as string) : '').matchAll(LINK)].flatMap(
       ([, words, t]) => {
@@ -58,6 +46,24 @@ export function links(c: Obj): Diagnostic[] {
       },
     ),
   );
+}
+
+// An item's or NPC's own texts, its name words included (loka-6qi, as lib/loka/content/entities.ex).
+function entityUses(c: Obj, entities: string[]): Use[] {
+  const uses: Use[] = [];
+  for (const map of ['npcs', 'items'])
+    for (const [ref, e] of Object.entries((c[map] ?? {}) as Obj)) {
+      const at = `.cartridge.${map}${step(ref)}`;
+      for (const f of ['short', 'room_line', 'description'])
+        uses.push([`${at}.${f}`, e[f], e.key, entities]);
+      for (const f of ['bare', 'plural'])
+        if (e.words?.[f]) uses.push([`${at}.words.${f}`, e.words[f], e.key, entities]);
+      for (const f of ENTITY_VARIANTS)
+        (e[f] ?? []).forEach((v: Obj, i: number) =>
+          uses.push([`${at}.${f}[${i}].description`, v.description, e.key, entities]),
+        );
+    }
+  return uses;
 }
 
 export function unreachable(details: Obj, at: string): Diagnostic[] {

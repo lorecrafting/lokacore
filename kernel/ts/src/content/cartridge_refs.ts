@@ -247,14 +247,10 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...knowledge(c, check));
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
-    const { in: k } = i.location;
-    if (k !== 'template') named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
+    const [{ in: k }, at] = [i.location, `.cartridge.items${step(ref)}`];
+    if (k !== 'template') named(i.location[k], k, `${at}.location.${k}`);
     if (c.world?.carry !== undefined && !Object.hasOwn(i, 'mass_grams'))
-      out.push(
-        diag('SCHEMA_VIOLATION', `.cartridge.items${step(ref)}.mass_grams`, {
-          error: 'missing_property',
-        }),
-      );
+      out.push(diag('SCHEMA_VIOLATION', `${at}.mass_grams`, { error: 'missing_property' }));
   }
   if (c.world?.carry !== undefined) {
     if (c.lock.capabilities.containment !== 1)
