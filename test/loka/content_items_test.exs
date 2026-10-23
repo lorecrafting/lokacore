@@ -339,5 +339,9 @@ defmodule Loka.ContentItemsTest do
                 d("UNRESOLVED_REFERENCE", "items/lantern.words.plural", %{"target" => "no.such"}),
                 d("UNRESOLVED_REFERENCE", "npcs/bram.words.bare", %{"target" => "no.such"})
               ]}
+
+    # A non-map words stops at the schema, before the text-key scan reads it.
+    assert {:error, [%{"code" => "SCHEMA_VIOLATION", "path" => "items/lantern.words"} | _]} =
+             compile(dir, files.("x", %{"bare" => "npc.bram.short"}))
   end
 end
