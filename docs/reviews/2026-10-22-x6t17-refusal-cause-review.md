@@ -20,7 +20,8 @@
 - **4.** Held for `move` (land and water edge). The exit reason comes from the same `movementPlan` (`view.ts:292`).
 - **5.** Held. The full mobile `npm test` exits 0.
 - **6.** Additive (S1). Old receipt text replays as stored (`invocation.ts:61`, never decided again); `cause` is optional.
-- Kernel focused tests (position, water, sleep and others) and the typecheck exit 0.
+- The kernel focused tests (position, water, sleep and others) and the typecheck exit 0. My local subsets did not include `loader_floors_test.exs` or `transcripts.test.ts`; hosted CI found B1 and B2.
+- Hosted CI at 8a62a1c89: `ci` failed (elixir, kernel); `book-e2e` and `graph-diff` passed.
 - **Mutants** (throwaway worktree, all reverted):
   - `sequence.ts:166` returns a bare `'invalid_state'`: red.
   - `view.ts:292` keeps the code only: red.
@@ -34,8 +35,8 @@
 ## Findings
 
 - **B1 blocker.** `test/loka/loader_floors_test.exs:148` fails on hosted run 39894030818, with left `["1.111"]`. `protocol/error.schema.json:94` says "kernel_api at least 1.111", and no loader-floor fixture case has that floor. Fix: add the case, or drop the version phrase from the description.
-- **B2 blocker.** `kernel/ts/test/transcripts.test.ts:52` fails: `cartridges/position_sampler/transcripts/position.jsonl` replays the sitting move with `"error":{"cause":"not_standing","code":"invalid_state"}`, and the later `stand` line also differs. Regenerate that expected file with the repo tool. Check that the diff only adds `cause`, and name the file in the PR body.
-- **S1 should-fix (PR wording).** "Save impact: none" is not exact. A rejected move is committed with its full response (`delivery.ts:86`, `invocation.ts`), so new receipts can hold `cause`. GameError has `additionalProperties: false` (`error.schema.json:82`), so a 1.110 build that reopens such a receipt gets `conflict`. Say instead: additive; old saves are byte-identical; a downgrade is not supported.
+- **B2 blocker.** `kernel/ts/test/transcripts.test.ts:52` fails: `cartridges/position_sampler/transcripts/position.jsonl` replays the sitting move with `"error":{"cause":"not_standing","code":"invalid_state"}`, and the later `stand` line also differs. A per-field replay diff shows exactly one change: line 5 `/data/decision/error/cause` goes from absent to `"not_standing"`. The `stand` difference in the CI output is a display artefact. Fix: regenerate the file (an expected behavior change) and name it in the PR body.
+- **S1 should-fix (PR wording).** "Save impact: none" is not exact. A rejected move is committed with its full response (`invocation.ts:157`), so new receipts can hold `cause`. Reopen checks accepted rows only (`receipt-history.ts:28`), so a reopen is not affected. But GameError has `additionalProperties: false`, so a 1.110 build that replays the same command id gets `conflict` (`invocation.ts:61`). Say instead: additive; old saves are byte-identical; a downgrade is not supported.
 - **N1 nit.** An engaged sitter gets a bare `invalid_state` at a land exit (`sequence.ts:165`, the engaged check comes before standing), but `not_standing` at a water edge (`water/shared.ts:33-34`). The same fight gives two different Book words.
 
 ## Ruled
