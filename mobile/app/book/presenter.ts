@@ -1,3 +1,4 @@
+// size: allow 305, the press, receipt and update paths share one Logs state (loka-x6t.102)
 // The book's words and state over a Game (packages/game-view/session.ts): the offered actions as
 // buttons, the log of what each press said, and who came or went. The engine returns structured
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
@@ -36,9 +37,11 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
+  closedLog,
   closing,
   detailLines,
   visit,
+  leaveLog,
   narrationLines,
   pickupLine,
   resetLogs,
@@ -111,10 +114,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
         : reply.kind === 'saved' && reply.decision.kind === 'fault'
           ? `Time stopped: ${reply.decision.code}`
           : undefined;
-  const left = s.retry?.button.action_key === 'close_choice' && s.left;
-  if (left && reply.kind === 'saved' && reply.decision.kind === 'accepted')
-    s.details.get(left)?.splice(0); // the confirmed Leave is the conversation's fresh history
-  if (left) s.left = undefined;
+  closedLog(s, reply.kind === 'saved' && reply.decision.kind === 'accepted');
   const line = s.fault ? '' : received(game, reply, was, s, text);
   if (s.fault) {
     s.returnWorld = false;
@@ -259,11 +259,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
-    // Leave the conversation: a fresh history; an open choice's waits for its confirmed close.
-    leave: (id: string) =>
-      void (game.view().view.choice?.speaker_id === id
-        ? (s.left = id)
-        : s.details.get(id)?.splice(0)),
+    leave: (id: string) => leaveLog(s, id, game.view().view.choice?.speaker_id === id),
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,

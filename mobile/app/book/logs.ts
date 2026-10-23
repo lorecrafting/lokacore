@@ -147,3 +147,16 @@ export function visit(s: Logs, open: (string | undefined)[]) {
   for (const id of s.details.keys())
     if (!keep.includes(id) && !id.startsWith('dream:')) s.details.delete(id);
 }
+
+// Leave the conversation: a fresh history; an open choice's waits for its close to commit.
+export function leaveLog(s: Logs, id: string, open: boolean) {
+  if (open) s.left = id;
+  else s.details.get(id)?.splice(0);
+}
+
+// The committed close of that Leave empties the history; a refused one keeps the question.
+export function closedLog(s: Logs, accepted: boolean) {
+  if (s.retry?.button.action_key !== 'close_choice' || !s.left) return;
+  if (accepted) s.details.get(s.left)?.splice(0);
+  s.left = undefined;
+}

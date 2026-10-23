@@ -257,26 +257,44 @@ test('a restored committed narration is not duplicated by its pending receipt re
   ]);
 });
 
-// Breaks: a refused Leave the conversation still empties the history, so the choice stays open
-// without its question (loka-x6t.102).
-test("a refused Leave the conversation keeps the open choice's question", () => {
-  const choice = {
-    speaker_id: 'bram',
-    prompt: { key: 'prompt' },
-    continuation_id: 'continuation',
-    choices: [],
-    closable: true,
-  };
-  const p = presenter({
-    ...game(() => ({
-      kind: 'saved',
-      decision: { kind: 'rejected', error: { code: 'not_present' } },
-    })),
-    view: () => ({ view: { ...(VIEW as object), choice } as never, token: 'view:r:0' }),
+const bram = (closable: boolean, reply: (n: number) => Reply) =>
+  presenter({
+    ...game(reply),
+    view: () => ({
+      view: {
+        ...(VIEW as object),
+        choice: {
+          speaker_id: 'bram',
+          prompt: { key: 'p' },
+          continuation_id: 'c',
+          choices: [],
+          closable,
+        },
+      } as never,
+      token: 'view:r:0',
+    }),
     text: () => 'Would you fetch it?',
   });
+const close = { label: 'Leave', action_key: 'close_choice', target_ids: [], input: {} };
+const refused = { kind: 'saved', decision: { kind: 'rejected', error: { code: 'x' } } } as Reply;
+
+// Breaks: a refused Leave the conversation still empties the history, so the choice stays open
+// without its question; or the refused Leave stays armed and a later close empties it (loka-x6t.102).
+test("a refused Leave the conversation keeps the open choice's question", () => {
+  const p = bram(true, (n) => (n === 0 ? refused : accepted('choice_closed')));
   p.screen().leave('bram');
-  p.press({ label: 'Leave', action_key: 'close_choice', target_ids: [], input: {} }, 'bram');
+  p.press(close, 'bram');
+  assert.ok(p.screen().detail('bram').includes('Would you fetch it?'));
+  p.press(close, 'bram'); // a typed close: no Leave
+  assert.ok(p.screen().detail('bram').includes('Would you fetch it?'));
+});
+
+// Breaks: a Leave with no close to press (the choice is not closable) empties the history at the
+// next committed reply, here the answer.
+test('a Leave without a close press keeps the history through the next answer', () => {
+  const p = bram(false, () => accepted('choice_answered'));
+  p.screen().leave('bram');
+  p.press({ label: 'Yes', action_key: 'choose', target_ids: [], input: {} }, 'bram');
   assert.ok(p.screen().detail('bram').includes('Would you fetch it?'));
 });
 
