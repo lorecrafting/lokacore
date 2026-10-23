@@ -19,5 +19,10 @@
       "kind": "bitters",
       "quantity": 2
     }
+  },
+  "words": {
+    "bare": "item.cellar_skin.bare",
+    "article": "a",
+    "plural": "item.cellar_skin.plural"
   }
 }

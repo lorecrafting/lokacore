@@ -20,5 +20,9 @@
   },
   "resistances": {
     "fire": 50
+  },
+  "words": {
+    "bare": "npc.wight.bare",
+    "article": "a"
   }
 }

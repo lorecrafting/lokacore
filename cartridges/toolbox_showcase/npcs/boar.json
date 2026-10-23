@@ -33,5 +33,9 @@
       "text": "cue.boar",
       "range": 1
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.boar.bare",
+    "article": "the"
+  }
 }

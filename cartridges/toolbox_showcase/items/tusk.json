@@ -9,5 +9,10 @@
     "in": "npc",
     "npc": "boar"
   },
-  "mass_grams": 200
+  "mass_grams": 200,
+  "words": {
+    "bare": "item.tusk.bare",
+    "article": "a",
+    "plural": "item.tusk.plural"
+  }
 }

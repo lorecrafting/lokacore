@@ -13,5 +13,10 @@
   "slot": "body",
   "tags": [
     "waterproof"
-  ]
+  ],
+  "words": {
+    "bare": "item.fold_oilskin.bare",
+    "article": "an",
+    "plural": "item.fold_oilskin.plural"
+  }
 }

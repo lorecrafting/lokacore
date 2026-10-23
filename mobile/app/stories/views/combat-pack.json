@@ -245,16 +245,28 @@
    "encounter_id": "d8de6604-8212-8c0d-a187-64bf21f91e3c",
    "opponent_id": "ee075a63-404c-8db6-8aee-a7f40ea30f16",
    "name": "npc.goblin.short",
+   "words": {
+    "article": "a",
+    "bare": "npc.goblin.bare"
+   },
    "band": "ready",
    "active_opponents": [
     {
      "id": "ee075a63-404c-8db6-8aee-a7f40ea30f16",
      "name": "npc.goblin.short",
+     "words": {
+      "article": "a",
+      "bare": "npc.goblin.bare"
+     },
      "band": "ready"
     },
     {
      "id": "fb3908f6-f602-82da-b5c6-e6ea6e1ed23b",
      "name": "npc.goblin.short",
+     "words": {
+      "article": "a",
+      "bare": "npc.goblin.bare"
+     },
      "band": "ready"
     }
    ]
@@ -337,6 +349,10 @@
    {
     "id": "ee075a63-404c-8db6-8aee-a7f40ea30f16",
     "name": "npc.goblin.short",
+    "words": {
+     "article": "a",
+     "bare": "npc.goblin.bare"
+    },
     "description": "npc.goblin.description",
     "kind": "npc",
     "actions": [
@@ -360,6 +376,10 @@
      {
       "id": "d5a6adf6-dc23-847c-9436-62f3a288bd99",
       "name": "item.ear.short",
+      "words": {
+       "article": "a",
+       "bare": "item.ear.bare"
+      },
       "description": "item.ear.description",
       "kind": "item",
       "actions": [],
@@ -370,6 +390,10 @@
    {
     "id": "fb3908f6-f602-82da-b5c6-e6ea6e1ed23b",
     "name": "npc.goblin.short",
+    "words": {
+     "article": "a",
+     "bare": "npc.goblin.bare"
+    },
     "description": "npc.goblin.description",
     "kind": "npc",
     "actions": [
@@ -390,6 +414,10 @@
      {
       "id": "4916d02f-f380-82aa-aee6-f0aa54a79b29",
       "name": "item.ear.short",
+      "words": {
+       "article": "a",
+       "bare": "item.ear.bare"
+      },
       "description": "item.ear.description",
       "kind": "item",
       "actions": [],

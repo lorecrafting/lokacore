@@ -9,5 +9,9 @@
     "in": "npc",
     "npc": "merchant"
   },
-  "mass_grams": 50
+  "mass_grams": 50,
+  "words": {
+    "bare": "item.merchant_purse.bare",
+    "article": "the"
+  }
 }

@@ -14,5 +14,9 @@
   "immune": [
     "growing",
     "growing_croft"
-  ]
+  ],
+  "words": {
+    "bare": "item.trough.bare",
+    "article": "a"
+  }
 }

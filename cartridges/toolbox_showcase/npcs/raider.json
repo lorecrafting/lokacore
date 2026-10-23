@@ -16,5 +16,9 @@
     "chance": 100,
     "damage_min": 1,
     "damage_max": 1
+  },
+  "words": {
+    "bare": "npc.raider.bare",
+    "article": "the"
   }
 }

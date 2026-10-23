@@ -158,9 +158,10 @@ export function reload(edit: (c: any) => void) {
 }
 
 // The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) and the
-// Undercroft's gated parts, the wanted icon and the golem's observed lines (1.110) dropped for the older-floor
+// Undercroft's gated parts, the wanted icon and the golem's observed lines (1.110) and name words (1.118) dropped for the older-floor
 // loader rows; twin of homestead/0 in test/loka/content_showcase_test.exs.
 export function homestead(c: any) {
+  for (const e of [...Object.values<any>(c.npcs), ...Object.values<any>(c.items)]) delete e.words; // 1.118 (loka-6qi)
   delete c.world.construction;
   delete c.rooms[ref('room', 'holding_lane')].site;
   delete c.npcs[ref('npc', 'carpenter')].services;

@@ -29,5 +29,8 @@
       },
       "description": "npc.gil.description_warned"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.gil.bare"
+  }
 }

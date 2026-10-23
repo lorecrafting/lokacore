@@ -10,5 +10,9 @@
     "in": "item",
     "item": "sack"
   },
-  "give_allowed": false
+  "give_allowed": false,
+  "words": {
+    "bare": "item.seed_01.bare",
+    "article": "a"
+  }
 }

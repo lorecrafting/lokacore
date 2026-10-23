@@ -19,5 +19,10 @@
     "applies": [
       "hearty"
     ]
+  },
+  "words": {
+    "bare": "item.stew_hearty_01.bare",
+    "article": "a",
+    "plural": "item.stew_hearty_01.plural"
   }
 }

@@ -13,5 +13,10 @@
   "tags": [
     "rod",
     "wooden"
-  ]
+  ],
+  "words": {
+    "bare": "item.rod.bare",
+    "article": "a",
+    "plural": "item.rod.plural"
+  }
 }

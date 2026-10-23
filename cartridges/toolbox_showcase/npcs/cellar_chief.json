@@ -19,5 +19,9 @@
   },
   "immune": [
     "afraid"
-  ]
+  ],
+  "words": {
+    "bare": "npc.cellar_chief.bare",
+    "article": "the"
+  }
 }

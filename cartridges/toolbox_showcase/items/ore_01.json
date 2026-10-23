@@ -9,5 +9,10 @@
   "location": {
     "in": "room",
     "room": "forge_stall"
+  },
+  "words": {
+    "bare": "item.ore_01.bare",
+    "article": "a",
+    "plural": "item.ore_01.plural"
   }
 }

@@ -26,5 +26,9 @@
         }
       }
     }
+  },
+  "words": {
+    "bare": "item.yard_crate.bare",
+    "article": "a"
   }
 }

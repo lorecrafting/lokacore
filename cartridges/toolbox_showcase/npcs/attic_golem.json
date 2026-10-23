@@ -11,5 +11,9 @@
     "maximum": 20,
     "start": 20,
     "gain": 0
+  },
+  "words": {
+    "bare": "npc.attic_golem.bare",
+    "article": "a"
   }
 }

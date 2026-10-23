@@ -449,6 +449,9 @@
    {
     "id": "e26d5050-0ec1-8ec4-a164-209a07f75784",
     "name": "npc.bess.short",
+    "words": {
+     "bare": "npc.bess.bare"
+    },
     "description": "npc.bess.description",
     "kind": "npc",
     "actions": [
@@ -498,6 +501,11 @@
      {
       "id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
       "name": "item.hall_bread.short",
+      "words": {
+       "article": "a",
+       "bare": "item.hall_bread.bare",
+       "plural": "item.hall_bread.plural"
+      },
       "description": "item.hall_bread.description",
       "kind": "item",
       "actions": [
@@ -521,6 +529,10 @@
    {
     "id": "542dc207-7ae5-8fc4-8643-4854106d9e84",
     "name": "item.hall_roll.short",
+    "words": {
+     "article": "a",
+     "bare": "item.hall_roll.bare"
+    },
     "description": "item.hall_roll.description",
     "kind": "item",
     "actions": [
@@ -541,6 +553,10 @@
    {
     "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
     "name": "item.hall_strongbox.short",
+    "words": {
+     "article": "the",
+     "bare": "item.hall_strongbox.bare"
+    },
     "description": "item.hall_strongbox.description",
     "kind": "item",
     "state": "closed",

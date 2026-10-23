@@ -475,6 +475,9 @@
    {
     "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
     "name": "npc.hob.short",
+    "words": {
+     "bare": "npc.hob.bare"
+    },
     "description": "npc.hob.description",
     "kind": "npc",
     "actions": [
@@ -497,6 +500,11 @@
    {
     "id": "bc3d071f-472b-8655-9e2d-d5d0fe2edc5c",
     "name": "item.waterskin.short",
+    "words": {
+     "article": "a",
+     "bare": "item.waterskin.bare",
+     "plural": "item.waterskin.plural"
+    },
     "description": "item.waterskin.description",
     "kind": "item",
     "actions": [
@@ -531,6 +539,11 @@
    {
     "id": "f8598a43-4a6f-8277-b092-c4449c71d2e2",
     "name": "item.loaf.short",
+    "words": {
+     "article": "a",
+     "bare": "item.loaf.bare",
+     "plural": "item.loaf.plural"
+    },
     "description": "item.loaf.description",
     "kind": "item",
     "actions": [

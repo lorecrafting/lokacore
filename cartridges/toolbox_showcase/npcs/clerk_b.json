@@ -12,5 +12,9 @@
   "services": [
     "deposit_b",
     "withdraw_b"
-  ]
+  ],
+  "words": {
+    "bare": "npc.clerk_b.bare",
+    "article": "the"
+  }
 }

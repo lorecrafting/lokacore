@@ -13,5 +13,10 @@
   "slot": "head",
   "tags": [
     "cool"
-  ]
+  ],
+  "words": {
+    "bare": "item.fold_hat.bare",
+    "article": "a",
+    "plural": "item.fold_hat.plural"
+  }
 }

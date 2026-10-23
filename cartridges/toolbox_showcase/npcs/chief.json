@@ -19,5 +19,9 @@
   },
   "immune": [
     "afraid"
-  ]
+  ],
+  "words": {
+    "bare": "npc.chief.bare",
+    "article": "the"
+  }
 }

@@ -31,5 +31,9 @@
         "equals": true
       }
     }
+  },
+  "words": {
+    "bare": "item.croft_plot.bare",
+    "article": "a"
   }
 }

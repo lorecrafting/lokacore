@@ -10,5 +10,10 @@
     "in": "room",
     "room": "holding_croft"
   },
-  "give_allowed": false
+  "give_allowed": false,
+  "words": {
+    "bare": "item.grain_01.bare",
+    "article": "a",
+    "plural": "item.grain_01.plural"
+  }
 }

@@ -88,5 +88,9 @@
         "equals": true
       }
     }
+  },
+  "words": {
+    "bare": "item.plot.bare",
+    "article": "a"
   }
 }

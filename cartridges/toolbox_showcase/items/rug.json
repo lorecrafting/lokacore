@@ -12,5 +12,9 @@
   },
   "tags": [
     "rug"
-  ]
+  ],
+  "words": {
+    "bare": "item.rug.bare",
+    "article": "a"
+  }
 }

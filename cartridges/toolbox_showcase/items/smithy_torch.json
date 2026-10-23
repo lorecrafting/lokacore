@@ -9,5 +9,9 @@
   "location": {
     "in": "room",
     "room": "smithy"
+  },
+  "words": {
+    "bare": "item.smithy_torch.bare",
+    "article": "a"
   }
 }

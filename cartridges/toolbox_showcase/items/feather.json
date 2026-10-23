@@ -8,5 +8,9 @@
   "mass_grams": 1,
   "location": {
     "in": "template"
+  },
+  "words": {
+    "bare": "item.feather.bare",
+    "article": "a"
   }
 }

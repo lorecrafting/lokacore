@@ -32,5 +32,9 @@
         "equals": true
       }
     }
+  },
+  "words": {
+    "bare": "item.hoard_chest.bare",
+    "article": "a"
   }
 }

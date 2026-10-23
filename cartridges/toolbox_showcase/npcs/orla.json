@@ -25,5 +25,8 @@
       },
       "description": "npc.orla.description_inspired"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.orla.bare"
+  }
 }

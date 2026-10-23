@@ -8,5 +8,9 @@
   "room": "cell",
   "resource_starts": {
     "pennies": 0
+  },
+  "words": {
+    "bare": "npc.jailer.bare",
+    "article": "the"
   }
 }

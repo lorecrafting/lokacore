@@ -10,5 +10,9 @@
   "location": {
     "in": "npc",
     "npc": "chandler"
+  },
+  "words": {
+    "bare": "item.beeswax_candle.bare",
+    "article": "a"
   }
 }

@@ -9,5 +9,10 @@
   "location": {
     "in": "room",
     "room": "larder"
+  },
+  "words": {
+    "bare": "item.turnip_03.bare",
+    "article": "a",
+    "plural": "item.turnip_03.plural"
   }
 }
