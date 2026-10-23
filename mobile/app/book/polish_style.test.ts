@@ -159,3 +159,71 @@ test("an NPC's asides show as quiet lines after the people, before the items", a
     '~Hal shivers.',
   ]);
 });
+
+// Breaks (loka-x6t.105, book-ui.md fixture rule): a description's link to a readable notice stays
+// plain words, keeps its World line too, or reads without opening the page; or the prose links an
+// unmatched key, a counted harvest or an unavailable Read, or drops the World line of an unlinked notice.
+test('a readable notice the description links is a prose link and no World line', async () => {
+  const { RoomPage } = await import('./pages.tsx');
+  const { NoticeEntries, proseLinks } = await import('./notices.tsx');
+  const draw = (description: string, notice: object, available = true) => {
+    const done: unknown[] = [];
+    const read = {
+      action_key: 'read',
+      available,
+      reason: { code: 'x', message: { key: 'Too dark to read.' } },
+      target: { kind: 'entity', scopes: ['inspectable_details'] },
+      input: [],
+      target_ids: ['n1'],
+    };
+    const view = {
+      place: { title: { key: 'Green' }, description: { key: description } },
+      exits: [],
+      entities: [],
+      actions: [read],
+      notices: [{ id: 'n1', key: 'sign_social', title: 'The sign', ...notice }],
+    };
+    const p = {
+      screen: {
+        view,
+        text: (key: string) => key,
+        buttons: [{ action_key: 'read', detail_id: 'n1', target_ids: ['n1'] }],
+      },
+      open: (page: unknown) => done.push(page),
+      press: (_b: unknown, id?: string) => done.push(id),
+    } as any;
+    const shown = nodes(
+      RoomPage({
+        ...room(description),
+        view,
+        details: NoticeEntries(p),
+        links: proseLinks(p),
+      } as any),
+    );
+    const link = shown.find((n) => n.props?.accessibilityLabel === 'signpost, open');
+    return { shown, link, done, text: shown.filter((n) => n.type === 'Text').map(words) };
+  };
+  const linked = 'A green with a [signpost](sign_social).';
+  const yes = draw(linked, {});
+  assert.ok(yes.text.includes('A green with a signpost.'));
+  assert.equal(
+    yes.text.some((t) => t.includes('The sign')),
+    false,
+  );
+  yes.link.props.onKeyDown({ key: 'Enter', preventDefault: () => {} });
+  assert.deepEqual(yes.done, [{ kind: 'notice', id: 'n1' }, 'n1']);
+  for (const [description, notice, available, line] of [
+    [linked, { key: 'sign_hub' }, true, 'The sign'], // no notice with the link's key
+    ['A green.', {}, true, 'The sign'], // the description does not link it
+    [linked, { remaining: 2 }, true, 'The sign (2)'], // a counted harvest
+    [linked, {}, false, 'Too dark to read.'], // Read unavailable: the card and its reason
+  ] as const) {
+    const no = draw(description, notice, available);
+    assert.equal(no.link, undefined, `${description} ${JSON.stringify(notice)} linked`);
+    assert.ok(no.text.includes(description.replace('[signpost](sign_social)', 'signpost')));
+    assert.ok(
+      no.text.some((t) => t.includes(line)),
+      `${line} missing: ${no.text}`,
+    );
+  }
+});

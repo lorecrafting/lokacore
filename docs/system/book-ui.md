@@ -37,13 +37,17 @@ move it into a separate entity list or force a paragraph break. A fixture is
 immovable room content: it cannot be taken, dropped, stored or otherwise removed
 from the room. A removable object is a loose item in the item group instead.
 The link opens a detail only when the current GameView supplies a visible,
-current-room identity and detail route (a notice or board whose `key` is the
+current-room identity and detail route (a notice whose `key` is the
 link's target, with its captured Read offer). The Book does not infer visibility, identity,
 detail or an action from bracketed prose alone. If that projection is absent,
 the words remain ordinary prose until a mechanic adds the required projection
 and admission contract. The selected room-description variant itself must omit
 concealed fixture or exit text until the game reveals it; the Book cannot hide
-an authored phrase after receiving it.
+an authored phrase after receiving it. A readable notice the selected
+description links, whose `key` the GameView projects with an offered Read, is a
+fixture link in the prose and draws no separate World line; a notice the
+description does not link, a board, a bed, a transport or a counted harvest keeps
+its World entry (loka-x6t.105).
 
 Below the description, present players and NPCs form one sentence and loose room items
 a second, NPCs first (owner, mvl9864n2qi8, mvl9q99wzm29): names joined with a serial
@@ -230,7 +234,7 @@ foot. A control that opens a child (Resume dream, Continue conversation) stays i
 
 ## Notice-board details
 
-Every readable notice opens its own detail page. A standalone notice opens directly from World and invokes its captured Read offer. Its Leave
+Every readable notice opens its own detail page. A standalone notice opens from its prose link, or from its World line when the selected description does not link it, and invokes its captured Read offer. Its Leave
 option returns to World. Its page title is an authored noun distinct from the action label.
 Read text never enters the room event log.
 

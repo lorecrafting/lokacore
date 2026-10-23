@@ -83,7 +83,7 @@ export const routes: Record<string, Step[]> = {
   'npc-shop': [...nell],
   'npc-services': [go('down', 'north', 'north'), 'The smith, open'],
   'npc-closed': [go('north', 'north', 'east'), 'Wat, the shepherd, open'],
-  'notice-read': ['The inn signpost, open'],
+  'notice-read': ['signpost, open'],
   'item-plain': ['a waterskin, open'],
   'item-fuel': [go('up'), 'The lantern, open'],
   'item-container': [

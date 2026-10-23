@@ -133,7 +133,9 @@ export function group(all: Button[]) {
         .sort((a, b) => rank(a) - rank(b)), // stable: GameView order within a group
   };
 }
-export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+// A touch link in authored prose: `[words](target)`.
+export const LINK = /\[([^\]]*)\]\(([^)]*)\)/g;
+export const plain = (s: string) => s.replace(LINK, '$1');
 
 type Offered =
   | GameView['exits'][number]

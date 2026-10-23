@@ -234,15 +234,7 @@ function Present(p: {
         return (
           <Fragment key={e.id}>
             {i > 0 && (i < p.group.length - 1 ? ', ' : p.group.length > 2 ? ', and ' : ' and ')}
-            <Text
-              style={type.named}
-              accessibilityRole="button"
-              accessibilityLabel={`${name}, open`}
-              onPress={() => p.open(e.id)}
-              {...onKey((k) => (k === 'Enter' || k === ' ') && (p.open(e.id), true))} // web Text has no key press
-            >
-              {name}
-            </Text>
+            {nameLink(name, () => p.open(e.id))}
           </Fragment>
         );
       })}
@@ -250,6 +242,22 @@ function Present(p: {
     </Text>
   );
 }
+
+// An inline link inside running prose (Here's names, RoomPage's linked fixtures): `type.named`, no
+// touch box (the inline-link exception, BOOK-UI-COMPONENTS.md), named "<words>, open", Enter or Space
+// presses it on the web. A plain function, not a component, so it stays one Text in its sentence.
+export const nameLink = (name: string, onPress: () => void, key?: string | number) => (
+  <Text
+    key={key}
+    style={type.named}
+    accessibilityRole="button"
+    accessibilityLabel={`${name}, open`}
+    onPress={onPress}
+    {...onKey((k) => (k === 'Enter' || k === ' ') && (onPress(), true))} // web Text has no key press
+  >
+    {name}
+  </Text>
+);
 
 /**
  * The Book's live region: each new batch of World, combat and refused lines, read once by a screen

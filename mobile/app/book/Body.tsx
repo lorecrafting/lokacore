@@ -7,7 +7,7 @@ import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
-import { NoticeEntries, NoticePage } from './notices.tsx';
+import { NoticeEntries, NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
 import { note, usePalette, useType } from './palette.ts';
@@ -151,6 +151,7 @@ function WorldPage(p: BodyProps) {
       open={openThing}
       openChoice={() => p.open(conversation(view))}
       details={<NoticeEntries {...p} />}
+      links={proseLinks(p)}
     />
   );
 }
