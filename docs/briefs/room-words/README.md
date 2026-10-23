@@ -146,7 +146,7 @@ Lane: Book, after slices 2 and 4.
 
 Goal (book-ui.md "Below the description"). In `Present`:
 - People: GameView order kept; an entity with `words` shows `bare`; one "the" before the first name whose `article`
-  is "the" and none after in that sentence (PM ruling: shared across the whole run): "Aldous, Bess, the carpenter,
+  is "the"; the article is shared only within a run of adjacent definite names and is written again after any name without it (owner 2026-10-23: "The carpenter, Aldous, and the cook are here."): "Aldous, Bess, the carpenter,
   chandler, and cook are here." Without `words`: `text(name)` as today.
 - Items: unchanged, each keeps its own article.
 - Plurals: entities with equal `name` and a `plural` collapse into one link "two crows" (count words two to nine in
@@ -161,7 +161,7 @@ Files in: `lines.tsx`, `labels.ts`, `Combat.tsx`, `polish.test.ts`, `polish_styl
 Acceptance (literal):
 1. [Aldous, Bess, carpenter{the}, chandler{the}, cook{the}]: "Aldous, Bess, the carpenter, chandler, and cook are
    here.", five links "<bare>, open".
-2. [carpenter{the}, Aldous, cook{the}]: "The carpenter, Aldous, and cook are here."
+2. [carpenter{the}, Aldous, cook{the}]: "The carpenter, Aldous, and the cook are here." (break: "the" not restarted after a proper name)
 3. An NPC without `words` keeps its `name` among the others.
 4. Items: "An apple, an axe, a wooden bench, and an iron anvil are here." unchanged.
 5. "Two crows are here." (one link, first id); "Three crows and a hen are here."; "A crow is here."
@@ -170,8 +170,8 @@ Acceptance (literal):
 8. Screenshot: a room with people, 390 px.
 
 Spec text (book-ui.md, replacing "Each name keeps its authored article until the cartridge supplies bare-name words
-(loka-6qi)."): "With cartridge name words a person shows its bare name, one shared 'the' before the first definite
-name in the sentence and none after ('Aldous, Bess, the carpenter, chandler, and cook are here.'; owner 2026-10-23);
+(loka-6qi)."): "With cartridge name words a person shows its bare name, one shared 'the' per run of adjacent definite
+names, written again after a proper name ('The carpenter, Aldous, and the cook are here.') ('Aldous, Bess, the carpenter, chandler, and cook are here.'; owner 2026-10-23);
 a loose item keeps its own article; same-kind entities with a plural collapse into one link, 'two crows', count words to
 nine, digits after, opening the first; a name without words draws as its `name`. Combat foe lines take the definite
 form, one line per foe."
@@ -181,6 +181,6 @@ Stop and ask before merging foe lines, before numbers above nine as words, and i
 ## Risks
 
 - A holding `short_variants` NPC gets no `words`, so one sentence can mix bare and phrased names. Accepted.
-- "the" shared across the whole run reads oddly with a proper name in between; pinned by slice 5 case 2; the designer
-  may flip it to per-run sharing.
+- A shared "the" over singular nouns can read as one person with several roles ("the carpenter, chandler, and
+  cook"); "are here" and the separate links keep it readable. Per-run sharing pinned by slice 5 case 2.
 - Collapsed plural links open an arbitrary member; content keeps distinct-state items on distinct `short`s.
