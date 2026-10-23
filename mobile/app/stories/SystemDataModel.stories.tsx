@@ -117,7 +117,7 @@ export const SearchAndKeys: Story = {
 export const TwoHops: Story = {
   globals: { node: 'StatusRow' },
   play: async ({ canvas, canvasElement, globals }) => {
-    const c = color[globals.palette as keyof typeof color] ?? color.light; // as preview.tsx paints it
+    const c = color[globals.palette as keyof typeof color]; // as preview.tsx paints it
     const bleed = canvas.getByRole('button', { name: 'BleedRow' });
     await expect(bleed).toHaveStyle({ color: c.dim });
     const one = canvasElement.querySelectorAll('svg line').length;
