@@ -406,6 +406,22 @@ test('a notice page shows its description once and every other read line as read
   assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'You read it twice.', 'Leave']);
 });
 
+// Break: a body read again on entry (Map Read, then opening the signpost) shows twice now that
+// the notice page keeps equal lines (loka-x6t.81, loka-x6t.101).
+test('the signpost read from the Map, then opened, shows its body once', () => {
+  const h = book(bundle('toolbox_showcase_hash'));
+  try {
+    h.map();
+    h.tap('Read the signpost');
+    h.tap(LABEL.backToWorld);
+    h.tap('The inn signpost, open');
+    assert.equal(h.text().filter((line) => line.startsWith('Four roads')).length, 1);
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
+});
+
 // Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
 // before any quest is active, or repeats on the Journal page (Page's doc comment).
 test('the running head shows the active quest objective on room and NPC pages', () => {
