@@ -96,7 +96,7 @@ export function propose(
     join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root) ?? farewell(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration.push(...levelUp(world, command.payload.actor_id, ops));
+  p.narration.push(...levelUp(world, command.payload.actor_id, ops), ...woke(world, p.events));
   return {
     decision: {
       ...root,
@@ -343,4 +343,12 @@ function crowDelivery(p: P, next: Queued): Admitted | undefined {
       if (failed) return failed;
     }
   }
+}
+
+// loka-3w3q: once after any player's death (an NPC victim carries its definition), combat
+// included, after the penalty line.
+function woke(world: World, events: DomainEvent[]) {
+  const key = world.cartridge.world?.death?.narration?.woke;
+  const died = events.some((e) => e.payload.type === 'entity_died' && !e.payload.victim_definition);
+  return key && died ? [{ key }] : [];
 }

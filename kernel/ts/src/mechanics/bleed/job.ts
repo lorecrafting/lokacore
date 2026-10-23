@@ -11,7 +11,7 @@ import {
 } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter } from '../combat/shared.ts';
-import { deathSequence } from '../death/sequence.ts';
+import { deathSequence, fallLine } from '../death/sequence.ts';
 import { adjust, level, resourceRef } from '../resource.ts';
 import { currentBleed } from './shared.ts';
 
@@ -29,12 +29,13 @@ function fatalBleed(
   mint: Mint,
 ) {
   const loss = ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>; // the bleeding body's
+  const owner_id = actorOf(world, loss.entity_id) ?? null;
   const died = deathSequence(
     prefix(visit, ops, now),
     command,
     {
       loss,
-      owner_id: actorOf(world, loss.entity_id) ?? null,
+      owner_id,
       killer_id: row.source_id!,
       credited_character_id: null,
       cause: 'bleeding',
@@ -42,7 +43,8 @@ function fatalBleed(
     mint,
   );
   ops.push(...died.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: now } : op)));
-  return accepted(world, 'job_ran', ops, died.events, [{ key: spec.narration.tick }]);
+  const fall = owner_id ? fallLine(world) : [];
+  return accepted(world, 'job_ran', ops, died.events, [{ key: spec.narration.tick }, ...fall]);
 }
 
 function finishBleed(

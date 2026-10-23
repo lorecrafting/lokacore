@@ -1,5 +1,12 @@
 // M5-B foundation, consumed by the first M6 fatal encounter. No public death command.
-import type { CharacterId, Command, DeltaOp, DomainEvent, EntityId } from '../../contracts.gen.ts';
+import type {
+  CharacterId,
+  Command,
+  DeltaOp,
+  DomainEvent,
+  EntityId,
+  Text,
+} from '../../contracts.gen.ts';
 import { bodyOf, refString, type Mint, type World } from '../../runtime/decision.ts';
 import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
@@ -30,6 +37,13 @@ export type Fatal = {
   killer_id: EntityId | null;
   credited_character_id: CharacterId | null;
 };
+
+/** A player's fall line outside a combat round (loka-3w3q): the death's own, else combat's. */
+export function fallLine(world: World): Text[] {
+  const w = world.cartridge.world;
+  const key = w?.death?.narration?.player_died ?? w?.combat?.narration.player_died;
+  return key ? [{ key }] : [];
+}
 
 /**
  * `world` includes the fatal HP loss and producer's encounter closure at the fatal clock. `rng`

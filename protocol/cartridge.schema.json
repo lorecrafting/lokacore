@@ -1861,6 +1861,19 @@
             }
           },
           "additionalProperties": false
+        },
+        "narration": {
+          "type": "object",
+          "description": "A player's death lines outside a combat round (loka-3w3q; kernel_api at least 1.117). player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
+          "properties": {
+            "player_died": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "woke": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

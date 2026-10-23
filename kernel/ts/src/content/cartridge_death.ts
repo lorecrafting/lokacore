@@ -31,6 +31,7 @@ export function death(c: Obj, { named, text }: Checks): Diagnostic[] {
   out.push(...drops(c, named));
   if (!d) return out;
   out.push(...requirements(c), ...penalty(c, text));
+  text(d.narration ?? {}, ['player_died', 'woke'], '.cartridge.world.death.narration'); // loka-3w3q
   named(d.shrine, 'room', '.cartridge.world.death.shrine');
   for (const field of ['player_corpse', 'npc_corpse']) {
     named(d[field], 'item', `.cartridge.world.death.${field}`);
@@ -58,7 +59,8 @@ function penalty(c: Obj, text: Checks['text']): Diagnostic[] {
 
 function requirements(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const floor = c.world.death.penalty ? '1.109' : '1.5'; // row 47
+  const d = c.world.death;
+  const floor = d.narration ? '1.117' : d.penalty ? '1.109' : '1.5'; // loka-3w3q; row 47
   if (apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const capability of ['death', 'containment', 'position'])

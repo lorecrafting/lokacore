@@ -80,6 +80,8 @@ defmodule Loka.ContentShowcaseTest do
     do:
       c
       |> update_in(["world"], &Map.drop(&1, ~w(construction theft)))
+      # the death waking line (1.117, loka-3w3q)
+      |> update_in(["world", "death"], &Map.delete(&1, "narration"))
       |> update_in(["requires", "capabilities"], &Map.delete(&1, "light"))
 
   defp homestead_edits,

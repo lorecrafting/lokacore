@@ -265,6 +265,11 @@ test('a fatal tick ends a lone fight but not a pack fight', () => {
     };
     const fight = {
       ...w,
+      // loka-3w3q: the NPC's death line only when its tick ends the fight
+      cartridge: {
+        ...w.cartridge,
+        world: { ...w.cartridge.world, combat: { narration: { npc_died: 'npc.died' } } },
+      },
       state: {
         ...w.state,
         encounters: { [E]: encounter },
@@ -276,10 +281,12 @@ test('a fatal tick ends a lone fight but not a pack fight', () => {
     } as never;
     const r = runStatus(fight, { id: 'x' as never }, job_id, w.state.jobs![job_id]!, () => 'y');
     assert.equal(r.kind, 'accepted');
-    return r.kind === 'accepted' && r.delta.ops.some((o) => o.op === 'encounter.close');
+    if (r.kind !== 'accepted') return [];
+    const closed = r.delta.ops.some((o) => o.op === 'encounter.close');
+    return [closed, (r.narration ?? []).some((t) => t.key === 'npc.died')];
   };
-  assert.equal(closes([g]), true);
-  assert.equal(closes([g, id(w, 'npc', 'golem')].sort()), false);
+  assert.deepEqual(closes([g]), [true, true]);
+  assert.deepEqual(closes([g, id(w, 'npc', 'golem')].sort()), [false, false]);
 });
 
 // Breaks (row 2c): npcValue ignores modifies, counts any active status (poison) or its per_tick, or
