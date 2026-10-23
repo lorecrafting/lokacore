@@ -145,7 +145,8 @@ equals the article its `short` opens with. Stop and ask before changing any `sho
 Lane: Book, after slices 2 and 4.
 
 Goal (book-ui.md "Below the description"). In `Present`:
-- People: GameView order kept; an entity with `words` shows `bare`; one "the" before the first name whose `article`
+- People: GameView order kept; an entity with `words` shows `bare` (a name with an appositive shows the name alone,
+  "Bess" not "Bess, the alewife": owner 2026-10-23; the cartridge bare already says "Bess"); one "the" before the first name whose `article`
   is "the"; the article is shared only within a run of adjacent definite names and is written again after any name without it (owner 2026-10-23: "The carpenter, Aldous, and the cook are here."): "Aldous, Bess, the carpenter,
   chandler, and cook are here." Without `words`: `text(name)` as today.
 - Items: the same rule with indefinite articles (owner 2026-10-23): an article is shared while the next name takes
