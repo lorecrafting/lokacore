@@ -202,6 +202,19 @@ reads `Lux: need 1 ash`. Spec text (book-ui.md Word bar, with the designer's app
 `aimed`, loka-x6t.109) is never a chip or a Spells-section line: the GameView offers it on each admitted target's entry
 (`command: cast`, `target_ids: [target]`) and the Book lists it in that page's Cast a spell… pick list."
 
+## Owner additions (2026-10-23, after the draft)
+
+Owner (quoted): "1. Yes please" (a reverse "Cast on…" list from the Character page's Spells block) "Okay in combat yes
+give each foe line a cast a spell option, and also a perform a skill otpion." So slice 5 also covers:
+- Character page, Spells block: each aimed spell the GameView offers anywhere in reach gets "Cast on…", a Pick list of
+  its admitted targets (the target entries carrying that spell's `command: 'cast'` offer); pick -> World, result in the
+  log.
+- Combat page: each foe line gets "Cast a spell…" (that foe's cast offers). The designer writes the combat placement and
+  the Character reverse list into book-ui.md / BOOK-UI-COMPONENTS.md before slice 5 (after #459 merges; single writer).
+- "Perform a skill…" on foe lines needs skills aimed at an NPC: a separate engine row (Beads child of loka-x6t.109,
+  "Aimed skills"), briefed after slice 2 shows the aimed-spell shape. Not in this batch.
+Later (Beads P3, not this batch): a bottom-bar icon opening the spell and skill lists; a configurable hotbar.
+
 ## Risks
 
 - Slice 2 is at the M ceiling; if the generic advertise path cannot carry the offer, the PM splits view + invariant
