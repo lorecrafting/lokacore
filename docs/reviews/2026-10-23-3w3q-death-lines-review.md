@@ -47,3 +47,37 @@ Self-review items judged:
 - PR claims rerun: "a player's entity_died has no victim_definition" holds (`death/sequence.ts:270,294`). "resetLogs already clears the old room's log and held lines" holds (`mobile/app/book/logs.ts:103-106`).
 - Hosted on 8a68a017d: ci 39938666995, book-e2e 39938667116 and graph-diff 39938711305 all pass.
 - The PR body reports `/code-review medium` (8 findings).
+
+## Second opinion (save path), head `85cc70b383c4f608aa3e4afe38c53060aa73ec8f`
+
+- Reviewer: anthropic/claude-opus-5-5, independent. Scope: replay of stored receipts, the 64-line cap, size allowances, line order. The first review's findings are not reopened.
+- Verdict: **CHANGES REQUIRED** (one must-fix: size allowances).
+
+### Must be true
+
+1. A cartridge whose bytes do not change has no stored receipt that the new kernel decides differently, or the difference is within [save.md](../system/save.md) "Pre-production, a rule change ... opens `save_corrupt`".
+2. The cap changes only receipts that were invalid before (more than 64 lines), and it is deterministic.
+3. No `size: allow` in a source file is raised ([CHECKS.md](../CHECKS.md) Size).
+
+### Findings
+
+1. **Must-fix**, `kernel/ts/src/runtime/proposal.ts:3` (346 -> 349) and `:69` (`propose` 41 -> 43). On main the file is 346 lines with `allow 346`, so it is at its limit. CHECKS.md:51-53 says such a file splits and an existing allowance is never raised. This matches the #447 row 3 fix round, where `shared.ts` went back to its allowance after its code moved out. Fix: move the end-of-receipt composition (`levelUp`, `woke`, the cut) into one exported helper beside `woke` in `mechanics/death/lines.ts`. Then `propose` makes one call and stays at 41. To bring the file back to 346 or less, move one self-contained function out to a `runtime/proposal_*.ts` sibling: `farewell` (`:117`) or `crowDelivery` (`:327`). Then restore both markers to their main values.
+2. **Nit**, `proposal.ts:102`. The cut keeps the head, so a receipt over 64 lines can lose its own fall line and keep `woke`. Failure: a long elapsed drain gives more than 62 earlier lines, then a fatal bleed. The Book then shows "You wake at the inn." with no fall line. Such a receipt was schema-invalid before this PR, so no stored receipt changes. No shipped content comes near this. Accept as is or file it.
+
+### Replay of unchanged cartridges (the brief's question)
+
+- The release build bundles only the showcase (`mobile/app/App.tsx:23,47`). Its hash changes, so an old release save gets `pinned_release_missing`.
+- I listed the cartridges that have hp-draining statuses or bleeds and a `world.death`. Only `bleed_sampler` (hash unchanged) reaches a new line: a fatal bleed now adds `combat.player_died` (`c5_bleed.test.ts` asserts `['narration.bleed.tick', fell]`). `npc_died` from a tick needs `combat.narration.npc_died` and a draining status; only the showcase has both. `woke` needs the new field, so only changed cartridges have it.
+- Risk: a dev author-preview save (`loka-dev-<hash>.db`, same name because the hash is unchanged) with a stored fatal bleed opens `save_corrupt`. This is dev only and is allowed by save.md:18-20. **Not a must-fix.** The 7 live `.sql` stories are showcase saves and differ only in hash (first review).
+- Elixir builds no receipt narration; `lib/loka/content/death.ex` only checks content. No parity gap.
+
+### Determinism
+
+- The order is fixed by the code: `bleed/job.ts` [tick, fall]; `status/fatal.ts` [tick, fall or `npc_died`]; then `proposal.ts` [..., penalty, woke]. All are pure functions of the world and events. The first review's mutants A and B pin the tick and fall order.
+
+### Checks run
+
+- `penalty.test.ts` green on head. Mutants, each red on "a death at 50 lowers experience to 45 once ... survives a reopen", tree restored:
+  - m1: `64 - last.length` changed to `63 - ...`.
+  - m2: `woke` placed before `levelUp`.
+- Hosted on 85cc70b38: graph-diff 39942147798 success. ci 39942139590 and book-e2e 39942139525 were still running when this was written.
