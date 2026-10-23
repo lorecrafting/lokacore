@@ -60,10 +60,6 @@
         "rating": 3,
         "failure": "narration.lean_bess_failed"
       }
-    },
-    "leave": {
-      "label": "dialogue.bess_talk.leave",
-      "narration": "narration.bess_talk.leave"
     }
   }
 }

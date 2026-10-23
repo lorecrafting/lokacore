@@ -172,10 +172,10 @@ test('the loader refuses each unsound dialogue choice check', () => {
     [
       (c) =>
         (c.dialogues[guard].riddle = {
-          choice_id: 'leave',
+          choice_id: 'persuade',
           answer: 'x',
           bank: ['X'],
-          wrong: 'dialogue.guard.leave',
+          wrong: 'narration.guard.persuade_failed',
         }),
       'OUTCOME_MISMATCH',
       `${at}.intimidate.check`,
