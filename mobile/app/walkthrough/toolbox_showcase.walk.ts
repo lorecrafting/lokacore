@@ -219,7 +219,7 @@ const magic = async (r: Walk, steps: Steps) => {
   await tap(LABEL.backToWorld);
   await moves('down');
   await speak('flamma', LABEL.cast); // the second bolt kills the wight (magic 7)
-  // No Quench: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
+  // No Douse: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
   // cannot win reliably; kernel test magic 8 pins the quench. The bucket stays held.
   await moves('up', 'west', 'west');
   await r.note('The golem yard');

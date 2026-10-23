@@ -342,8 +342,8 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
 });
 
 // Breaks (loka-y6yg.48): the bier going out is not told in the lit crypt, told twice, or told to a
-// player who left or doused the lantern; Quench still works once the burn has ended.
-test('magic 7b: the bier going out is told only while seen; then Quench is refused', () => {
+// player who left or doused the lantern; Douse still works once the burn has ended.
+test('magic 7b: the bier going out is told only while seen; then Douse is refused', () => {
   const out = (v: World) => {
     const r = wait(v, v.state.clock + 180);
     return { world: r.world, lines: r.lines.filter((k) => k.startsWith('narration.burning')) };
