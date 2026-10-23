@@ -132,8 +132,8 @@ Stop and ask if `validate.ts` cannot express the shape, or if a sampler needs `w
 Lane: content, after slice 3. Read `docs/SHOWCASE.md`.
 
 Goal. `cartridges/toolbox_showcase`: `words` on every NPC (`bare` + `article`; a proper name `bare` only) and on every
-item whose `short` another item shares (eggs, logs, candles, yard candles, turnips, ore, feast, grain, eel, cots:
-`bare`, `article`, `plural`); `text.json` keys; `cartridge.json` `at_least` 1.118; regenerate
+item (`bare` + `article`, for the shared-article item sentence); items whose `short` another item shares (eggs, logs,
+candles, yard candles, turnips, ore, feast, grain, eel, cots) also get `plural`; `text.json` keys; `cartridge.json` `at_least` 1.118; regenerate
 `protocol/fixtures/toolbox_showcase_hash.json` (see HANDOFF lesson: `mix loka.compile` then split canonical and sha256).
 Hand back a table of entities given `words` (bare, article, plural).
 
@@ -148,7 +148,9 @@ Goal (book-ui.md "Below the description"). In `Present`:
 - People: GameView order kept; an entity with `words` shows `bare`; one "the" before the first name whose `article`
   is "the"; the article is shared only within a run of adjacent definite names and is written again after any name without it (owner 2026-10-23: "The carpenter, Aldous, and the cook are here."): "Aldous, Bess, the carpenter,
   chandler, and cook are here." Without `words`: `text(name)` as today.
-- Items: unchanged, each keeps its own article.
+- Items: the same rule with indefinite articles (owner 2026-10-23): an article is shared while the next name takes
+  the same word and written again when it changes ("a" to "an") or a name without words intervenes: "A wooden bench,
+  knife, and an orange are here."; "An apple, axe, a wooden bench, and an iron anvil are here."
 - Plurals: entities with equal `name` and a `plural` collapse into one link "two crows" (count words two to nine in
   `labels.ts`, digits from 10), opening the first member; `is`/`are` by the number of links, a collapsed group plural.
 - Combat (`Combat.tsx` `Fight`): a foe with `words` reads definite ("the goblin (your target) — hurt"); one line per
@@ -163,7 +165,9 @@ Acceptance (literal):
    here.", five links "<bare>, open".
 2. [carpenter{the}, Aldous, cook{the}]: "The carpenter, Aldous, and the cook are here." (break: "the" not restarted after a proper name)
 3. An NPC without `words` keeps its `name` among the others.
-4. Items: "An apple, an axe, a wooden bench, and an iron anvil are here." unchanged.
+4. Items [bench{a}, knife{a}, orange{an}]: "A wooden bench, knife, and an orange are here."; [apple{an}, axe{an},
+   bench{a}, anvil{an}]: "An apple, axe, a wooden bench, and an iron anvil are here." (break: an article shared across
+   a change of word, e.g. "an wooden bench"; or "is" for a list)
 5. "Two crows are here." (one link, first id); "Three crows and a hen are here."; "A crow is here."
 6. Combat: "the goblin (your target) — hurt"; a foe without `words` keeps today's line.
 7. Mutants on the shared-article flag, the 9/10 count edge and `is/are`.
@@ -172,7 +176,8 @@ Acceptance (literal):
 Spec text (book-ui.md, replacing "Each name keeps its authored article until the cartridge supplies bare-name words
 (loka-6qi)."): "With cartridge name words a person shows its bare name, one shared 'the' per run of adjacent definite
 names, written again after a proper name ('The carpenter, Aldous, and the cook are here.') ('Aldous, Bess, the carpenter, chandler, and cook are here.'; owner 2026-10-23);
-a loose item keeps its own article; same-kind entities with a plural collapse into one link, 'two crows', count words to
+loose items share 'a' or 'an' the same way, written again when the word changes ('A wooden bench, knife, and an
+orange are here.'; owner 2026-10-23); same-kind entities with a plural collapse into one link, 'two crows', count words to
 nine, digits after, opening the first; a name without words draws as its `name`. Combat foe lines take the definite
 form, one line per foe."
 
