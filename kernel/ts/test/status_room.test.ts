@@ -14,7 +14,7 @@ import { refString, type Cartridge, type World } from '../src/runtime/decision.t
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
-import { dark, illuminated, visible } from '../src/mechanics/light/shared.ts';
+import { dark, illuminated, unlit, visible } from '../src/mechanics/light/shared.ts';
 import { darkSight } from '../src/mechanics/attributes/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 
@@ -74,6 +74,10 @@ function play(w: World, payload: object) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
+const gloomLines = (r: { decision: { kind: string; narration?: readonly { key: string }[] } }) =>
+  (r.decision.kind === 'accepted' ? (r.decision.narration ?? []) : [])
+    .map((l) => l.key)
+    .filter((k) => k.startsWith('narration.gloom'));
 function wait(w: World, by: number) {
   const run_id = `aaaaaaaa-9494-4949-8949-${String(++n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + by];
@@ -82,7 +86,7 @@ function wait(w: World, by: number) {
   const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   const types: string[] = JSON.stringify(r.decision).match(/"type":"[a-z_]+"/g) ?? [];
-  return { world: r.world, types, decision: JSON.stringify(r.decision) };
+  return { world: r.world, types, decision: JSON.stringify(r.decision), lines: gloomLines(r) };
 }
 const hall = () => {
   n = 0;
@@ -205,4 +209,61 @@ test('loader: a room step needs API 1.65, stands alone and names a room of the c
     'UNRESOLVED_REFERENCE',
     `${at}.room`,
   ]);
+});
+
+// loka-x6t.37: gloom with its own lines, applied by the shrine's entry to the shrine (where the
+// player stands) or to the den (elsewhere).
+const told = (target: 'shrine' | 'den', observed = true) => {
+  const c = edited((c) => {
+    c.manifest.requires.kernel_api.at_least = '1.110';
+    const lines = ['applied', 'tick', 'expired', ...(observed ? ['observed'] : [])];
+    const keys = lines.map((l) => [l, `narration.gloom.${l}`]);
+    c.statuses[S('gloom')].narration = Object.fromEntries(keys);
+    for (const [, key] of keys) c.text[key] = 'The gloom.';
+    shrine(c).apply[0].room = { ...denRef, key: target };
+  });
+  assert.ok(c.ok, JSON.stringify(c));
+  n = 0;
+  return newWorld(
+    c.cartridge as Cartridge,
+    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94' as never,
+    [1, 2, 3, 4],
+  );
+};
+const enter = (w: World) => {
+  const command = {
+    id: id(),
+    world_context_id: w.context,
+    payload: { actor_id: w.character, type: 'move', direction: 'north' },
+  };
+  const r = step(w, command as never, n);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r;
+};
+
+// Breaks: a room holder's observed line not told to the player standing in it (statusStep admits
+// only an NPC or item), told to a player in another room, told without an observed line, told on
+// a tick; its expiry not told to the player inside (job.ts watched admits only items), told to a
+// player outside, or told without an observed line. The darkened shrine still tells both.
+test('a room status tells its observed and expired lines only to whoever stands in it', () => {
+  const inside = enter(told('shrine'));
+  assert.deepEqual(gloomLines(inside), ['narration.gloom.observed']);
+  const tick = wait(inside.world, 60);
+  assert.deepEqual(tick.lines, []);
+  assert.deepEqual(wait(tick.world, 60).lines, ['narration.gloom.expired']);
+  const away = enter(told('den'));
+  assert.deepEqual(gloomLines(away), []);
+  assert.deepEqual(wait(away.world, 120).lines, [], 'the den expires out of earshot');
+  const unlitWorld = told('shrine');
+  const [at, room] = Object.entries(unlitWorld.rooms).find(([, r]) =>
+    JSON.stringify(r).includes('room.shrine'),
+  )!;
+  const unlitShrine = { ...room, dark_description: room.description };
+  const darkened = { ...unlitWorld, rooms: { ...unlitWorld.rooms, [at]: unlitShrine } };
+  assert.ok(unlit(darkened, at), 'the shrine is dark before the gloom lands');
+  const inDark = enter(darkened);
+  assert.deepEqual(gloomLines(inDark), ['narration.gloom.observed'], 'felt in the dark');
+  const mute = enter(told('shrine', false));
+  assert.deepEqual(gloomLines(mute), []);
+  assert.deepEqual(wait(mute.world, 120).lines, []);
 });
