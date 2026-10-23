@@ -176,6 +176,24 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
     'death.penalty',
     'death.woke',
   ]);
+  // Breaks (loka-3w3q): the death lines push the receipt past its 64 lines, or are the ones cut.
+  const full = die(
+    hall(50, (c) => {
+      c.manifest.requires.kernel_api.at_least = '1.117';
+      c.text['death.woke'] = 'You wake.';
+      c.text['death.mourn'] = 'Someone mourns.';
+      c.world.death.narration = { woke: 'death.woke' };
+      const mourn = { op: 'narrate', text: 'death.mourn' };
+      c.reactions[`${P}:reaction/mourn`] = {
+        key: 'mourn',
+        on: { event: 'entity_died' },
+        apply: Array(64).fill(mourn),
+      };
+    }),
+  );
+  assert.deepEqual(narration(full).slice(-3), ['death.mourn', 'death.penalty', 'death.woke']);
+  assert.equal(narration(full).length, 64);
+  assert.deepEqual(validate('DecisionResult', full.decision), []);
   const reopened = hydrate(hall(0), JSON.parse(JSON.stringify(r.world.state)), true);
   assert.ok(reopened);
   assert.deepEqual(levelling(reopened), { level: 2, experience: 45, next: 100, unspent: 0 });

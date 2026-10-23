@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 347, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 349, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -66,7 +66,7 @@ export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * Each sequence gets one writer group; event positions are global, allocators causal.
  * now() lazily applies the prefix and retains hydration/RNG for real later consumers.
  */
-// size: allow 41, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups
+// size: allow 43, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups, loka-3w3q the 64-line cap
 export function propose(
   world: World,
   root: Admitted,
@@ -97,7 +97,9 @@ export function propose(
     join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root) ?? farewell(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration.push(...levelUp(world, command.payload.actor_id, ops), ...woke(world, p.events));
+  // The penalty and waking lines end the receipt within DecisionResult's 64 lines (loka-3w3q).
+  const last = [...levelUp(world, command.payload.actor_id, ops), ...woke(world, p.events)];
+  p.narration = [...p.narration.slice(0, 64 - last.length), ...last];
   return {
     decision: {
       ...root,
