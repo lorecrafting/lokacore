@@ -24,7 +24,7 @@ export function fatalTick(
 ) {
   const player = actorOf(visit, body) !== undefined;
   const fight = engaged(visit, body);
-  const last = !player && fight !== undefined && lastOpponent(fight.row);
+  const last = fight !== undefined && lastOpponent(fight.row);
   if (fight && (player || last)) ops.push(...closeEncounter(visit, body));
   ops.push(endStatus(body, status, row, 0));
   const died = dies(visit, command, ops, mint);
