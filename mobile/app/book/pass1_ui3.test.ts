@@ -10,9 +10,9 @@ import { group } from './model.ts';
 import { presenter } from './presenter.ts';
 
 // Breaks: the Map draws the log again (UF1); the door line repeats the exit card's "closed" or
-// "locked", or drops while the door is open (UF2); World loses the shut door's Open, draws an open
-// door's Close, puts the card after the log, or its press sends another command than the Map's (R4).
-test('doors sampler lane: Map and World door lines after closing the hut door', (t) => {
+// "locked", or drops while the door is open (UF2); World draws a door card again (owner 2026-10-23
+// reverses R4: doors work from the Map and the joystick), or a repeat Map press sends another command.
+test('doors sampler lane: Map door lines, none on World, after closing the hut door', (t) => {
   const b = book(compiled('cartridges/doors_sampler') as never);
   t.after(() => b.sql.close());
   const sent: unknown[] = [];
@@ -32,9 +32,9 @@ test('doors sampler lane: Map and World door lines after closing the hut door', 
   b.tap('Back to World');
   const world = b.text();
   assert.ok(world.includes('Closed.'));
-  assert.ok(world.indexOf('Open the hut door (north)') < world.indexOf('Closed.'));
-  b.tap('Open the hut door (north)');
+  assert.ok(!world.includes('Open the hut door (north)'), JSON.stringify(world));
   b.map();
+  b.tap('Open the hut door (north)');
   b.tap('Close the hut door (north)');
   b.tap('Open the hut door (north)');
   assert.deepEqual(sent[1], sent[3]);

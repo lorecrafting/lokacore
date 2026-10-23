@@ -1,6 +1,6 @@
 // The room page's own action list (pages.tsx draws it after the storylet).
 import type { GameView } from '../../packages/game-view/session.ts';
-import { commandOf, refusedPlace } from './buttons.ts';
+import { refusedPlace } from './buttons.ts';
 import { notVerb, why, type group } from './model.ts';
 import type { Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
@@ -33,10 +33,5 @@ export const placeActions = (
       .map((a) => (
         <ActionCard key={a.label + a.target_ids} label={label(a.label)} reason={why(a, text)} />
       )),
-    // A shut door's way through, also here (pass-1 R4): the Map's own cards, its labels.
-    ...view.exits
-      .flatMap((e) => g.door(e.direction))
-      .filter((b) => ['open', 'unlock'].includes(commandOf(b)))
-      .map((b) => <ActionCard key={cardKey(b)} b={b} press={press} />),
   ];
 };

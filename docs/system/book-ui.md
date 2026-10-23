@@ -33,8 +33,10 @@ page, or item detail page, and not in the main room page"). An action aimed at a
 use pair, an aimed skill or spell) draws on that thing's page instead. An aimed verb whose target
 has no page of its own (no room entity or notice) stays a World verb line, and a refused aimed
 verb keeps its World `label: reason` note.
-A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
-place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
+World draws no door card: Open and Unlock work from the Map and the
+[joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap, not
+in the description or the log (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
+would show in the minimap joystick thing, not in the main description or event log page").
 The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
@@ -86,9 +88,7 @@ save status/error UI remains accurate; NPC histories stay independently bounded.
 retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
 on World only (pass-1 UF1). An exit's door state line ("The hut door: open", the cartridge's door name capitalised) draws only when no
 exit card already carries that state as its reason; the door's action cards stay (pass-1 UF2).
-A closed or locked door's Open/Unlock cards draw on World as well, in the
-[World order](#world-and-status-entry) (pass-1 R4). The
-World minimap/joystick sits outside
+The World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
 A projected Read place action keeps its exact detail target and authored label and follows
@@ -170,7 +170,12 @@ barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging
 existing direction and releasing attempts that exit. Returning to center cancels; a short tap
 opens Map; a terminated gesture walks nowhere. Release keeps the action/context captured at
 drag start and follows [live action freshness](#live-action-freshness), never a new target after redraw. An unavailable exit announces its projected reason
-and logs the refusal without movement. Direction/reason appears opposite the finger. The existing
+and logs the refusal without movement. The barred-exit tick tells a closed door from a locked
+one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Release (or an arrow key)
+toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
+logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
+and walks nowhere. The reader actions name the reason too ("Go west, locked").
+Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; Go-direction actions use the
 same offered exits. Gesture/drawing details remain in

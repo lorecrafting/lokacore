@@ -143,7 +143,8 @@ type Offered =
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
 
-// A closed exit's log line: its reason word as the tag, then the cartridge's sentence or the frame.
+// A closed exit's log line: reason tag, then the cartridge's sentence, a shut door's, or the frame.
+const AT: Record<string, string> = { up: 'above', down: 'below' };
 export const refused = (
   e: Extract<GameView['exits'][number], { available: false }>,
   text: (key: string) => string,
@@ -152,7 +153,10 @@ export const refused = (
   reason: reasonOf(e.reason),
   text: e.reason.message
     ? text(e.reason.message.key)
-    : (refusedSentence(e.reason) ?? `The way ${e.direction} is ${why(e, text)}.`),
+    : (refusedSentence(e.reason) ??
+      (e.door && e.door.state !== 'open'
+        ? `The door ${AT[e.direction] ?? `to the ${e.direction}`} is ${e.door.state}.`
+        : `The way ${e.direction} is ${why(e, text)}.`)),
 });
 
 export const absent = (v: GameView) =>

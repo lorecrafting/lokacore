@@ -126,7 +126,7 @@ export function Control(p: {
 
 /**
  * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet
- * card, the room's own verb lines (aimed ones draw on their target's page), door cards, then the log
+ * card, the room's own verb lines (aimed ones draw on their target's page), then the log
  * (book-ui.md, World and status entry).
  * - Use: the World page.
  * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
