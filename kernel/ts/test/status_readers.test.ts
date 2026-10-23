@@ -484,3 +484,17 @@ test('loader: perception and concealment need API 1.61 and stand in for per_tick
     `.cartridge.statuses["${S('soaked')}"].perception`,
   ]);
 });
+
+// Breaks (loka-x6t.30): a skipped key missing from the text catalog loads.
+test('loader: a status skipped line must be in the text catalog', () => {
+  const skipped = (key: string) =>
+    reload((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.115';
+      c.statuses[S('stunned')].narration.skipped = key;
+    });
+  assert.equal(skipped('narration.stunned.applied'), 'loaded');
+  assert.deepEqual(skipped('narration.stunned.nowhere'), [
+    'SCHEMA_VIOLATION',
+    `.cartridge.statuses["${S('stunned')}"].narration`,
+  ]);
+});
