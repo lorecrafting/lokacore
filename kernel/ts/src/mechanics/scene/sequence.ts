@@ -137,7 +137,7 @@ export function chosen(
   const run = assigned(
     world,
     p.actor_id,
-    { ops: [], position: 0, facts: {} },
+    { ops: [...leave(world, p.actor_id)], position: 0, facts: {} }, // the choice leaves first, as Continue
     { fact: fact(world, found.scene), value: p.dream!.line + 1 },
     'scene',
   );

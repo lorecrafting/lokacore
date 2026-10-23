@@ -1694,7 +1694,8 @@ nor overwrites one. Close returns to the real bed/World without a gameplay write
 A saved checkpoint is resumable only by a living actor at its exact room anchor,
 with no encounter or modal. An open ordinary conversation does not block Continue: Continue
 ends it first, as Leave would, in the same decision (owner ruling 2026-10-09, loka-x6t.5;
-`mechanics/scene/sequence.ts:42`); the dream's own choice is still refused while one is open.
+`mechanics/scene/sequence.ts:42`); the dream's own choice ends it first the same way (owner
+approval of loka-x6t.10, 2026-10-22).
 Travel, damage/return or
 another modal makes presentation unavailable, preserves the beat/branch, and
 leaves normal Stand/Flee/movement/recovery available. Return legally and Resume;
