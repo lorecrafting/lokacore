@@ -63,14 +63,13 @@ export const poll = async () => {
   const feed = r?.ok ? ((await r.json()) as Feed) : null;
   void update(() => ({ feed, denied: r?.status === 403 }));
 };
-// Null when the queue took it; else why not (the composer keeps the text and pins).
-export const send = async (note: string, pending: Picked[]): Promise<string | null> => {
+// The story, globals and viewport at the key press: a story change in the crop wait lends none.
+const scene = () => {
   const { id, title, name } = api.getCurrentStoryData() as {
     id: string;
     title: string;
     name: string;
   };
-  // Read before the crop wait: a story change during it must not lend its globals.
   const globals = api.getGlobals() as {
     palette?: string;
     reading?: string;
@@ -80,6 +79,16 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
     options?: Record<string, { name: string; styles: { width: string; height: string } }>;
   }>('viewport')?.options;
   const v = globals.viewport?.value ? options?.[globals.viewport.value] : undefined;
+  return {
+    story: { id, title: `${title}/${name}` },
+    palette: globals.palette ?? null,
+    reading: globals.reading ?? null,
+    viewport: v ? { name: v.name, ...v.styles } : null,
+  };
+};
+// Null when the queue took it; else why not (the composer keeps the text and pins).
+export const send = async (note: string, pending: Picked[]): Promise<string | null> => {
+  const at = scene();
   // A crop still rendering (no png or shot yet; html-to-image takes about a second) joins this send;
   // one that hangs (a hidden window pauses its frames) is left out after 5 s.
   const cropping = () =>
@@ -90,17 +99,10 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
     await new Promise((r) => setTimeout(r, 100));
   // The pressed pins only, with a crop that finished in the wait. A story change keeps none: it
   // clears the pins, and a reloaded preview restarts their keys.
-  const story = api.getCurrentStoryData()?.id === id;
+  const story = api.getCurrentStoryData()?.id === at.story.id;
   const now = api.getAddonState<State>(ADDON_ID)?.pending ?? [];
   const elements = pending.map((p) => (story && now.find((f) => f.key === p.key)) || p);
-  const r = await post({
-    note,
-    story: { id, title: `${title}/${name}` },
-    palette: globals.palette ?? null,
-    reading: globals.reading ?? null,
-    viewport: v ? { name: v.name, ...v.styles } : null,
-    elements,
-  }).catch((e: Error) => e);
+  const r = await post({ note, ...at, elements }).catch((e: Error) => e);
   if (r instanceof Error) return r.message;
   if (!r.ok) return `${r.status} ${await r.text().catch(() => '')}`.trim();
   const sent = new Set(pending.map((p) => p.key)); // a pin added or swapped in the wait stays
