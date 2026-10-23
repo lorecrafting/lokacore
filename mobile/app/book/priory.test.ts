@@ -121,7 +121,7 @@ test('actual nested book Item opens locally and Read stays between description a
   assert.equal(p.screen().returnWorld, false);
   const latest = a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
   draw(ward)
-    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Back to container')!
+    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave')!
     .props.onPress();
   assert.deepEqual(stack.at(-1), { kind: 'thing', id: chest });
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, latest);

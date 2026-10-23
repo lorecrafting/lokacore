@@ -134,9 +134,11 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
       )}
       {item?.weapon && (
         <Text style={note(c, t)}>
-          Attack: {item.weapon.attack.chance}% chance, {item.weapon.attack.damage_min}–
-          {item.weapon.attack.damage_max} damage; requires{' '}
-          {item.skill_label ? p.text(item.skill_label) : item.weapon.skill.key}
+          Attack: {item.weapon.attack.chance}% chance, {item.weapon.attack.damage_min}
+          {item.weapon.attack.damage_max !== item.weapon.attack.damage_min
+            ? `–${item.weapon.attack.damage_max}`
+            : ''}{' '}
+          damage; requires {item.skill_label ? p.text(item.skill_label) : item.weapon.skill.key}
           {item.skill_requirement ? ` (${p.text(item.skill_requirement)})` : ''}.
         </Text>
       )}

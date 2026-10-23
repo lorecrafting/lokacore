@@ -8,8 +8,8 @@ const meta = {
   args: { back: fn(), leave: fn() },
   render: (args: { back?: () => void; leave: () => void }) => (
     <PageFoot>
-      {args.back && <Control label="Back to container" onPress={args.back} />}
-      <Control label="Leave" onPress={args.leave} />
+      {args.back && <Control label="Back to map" onPress={args.back} />}
+      <Control label={args.back ? 'Back to World' : 'Leave'} onPress={args.leave} />
     </PageFoot>
   ),
 } satisfies Meta<{ back?: () => void; leave: () => void }>;
@@ -26,12 +26,12 @@ export const OneReturn: Story = {
   },
 };
 
-// Breaks: a nested item loses one of its two returns.
+// Breaks: PageFoot drops or misroutes the second of two returns (a Map room detail's pair).
 export const TwoReturns: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await expect(canvas.getAllByRole('button')).toHaveLength(2);
-    await userEvent.click(canvas.getByRole('button', { name: 'Back to container' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Leave' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Back to map' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Back to World' }));
     await expect(args.back).toHaveBeenCalledTimes(1);
     await expect(args.leave).toHaveBeenCalledTimes(1);
   },
