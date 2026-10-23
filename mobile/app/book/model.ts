@@ -9,7 +9,7 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { message, reason, refusedSentence } from './words.ts';
+import { message, reasonOf, refusedSentence } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
@@ -144,11 +144,7 @@ type Offered =
   | NonNullable<GameView['choice']>['choices'][number]
   | NonNullable<GameView['spell_words']>[number];
 export const why = (e: Offered, text: (key: string) => string) =>
-  e.available
-    ? ''
-    : e.reason.message
-      ? message(e.reason.message, text)
-      : reason(e.reason.code, e.reason.cause);
+  e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
 
 // A closed exit's log line: its reason word as the tag, then the cartridge's sentence or the frame.
 export const refused = (
@@ -156,11 +152,10 @@ export const refused = (
   text: (key: string) => string,
 ): DetailLine => ({
   kind: 'refused',
-  reason: reason(e.reason.code, e.reason.cause),
+  reason: reasonOf(e.reason),
   text: e.reason.message
     ? text(e.reason.message.key)
-    : (refusedSentence(e.reason.code, e.reason.cause) ??
-      `The way ${e.direction} is ${why(e, text)}.`),
+    : (refusedSentence(e.reason) ?? `The way ${e.direction} is ${why(e, text)}.`),
 });
 
 export const absent = (v: GameView) =>

@@ -124,15 +124,9 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
   }
   // Breaks: the water edge refuses a sitter without the not_standing cause (loka-x6t.17).
   const not_standing = { code: 'invalid_state', cause: 'not_standing' };
-  assert.deepEqual(
-    gameView(sitting).exits.find((e) => e.direction === 'down')!.reason,
-    not_standing,
-  );
-  assert.deepEqual(
-    (run(sitting, { type: 'move', direction: 'down' }).decision as never as { error: object })
-      .error,
-    not_standing,
-  );
+  const exit: any = gameView(sitting).exits.find((e) => e.direction === 'down');
+  const moved: any = run(sitting, { type: 'move', direction: 'down' }).decision;
+  assert.deepEqual([exit.reason, moved.error], [not_standing, not_standing]);
   const w = load(learned(base), 6000),
     r = run(w, { type: 'move', direction: 'down' }),
     below = green(r);

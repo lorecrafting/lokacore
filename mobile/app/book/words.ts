@@ -92,7 +92,8 @@ const SENTENCE: Record<string, string> = {
   insufficient_resource: 'You are too exhausted.',
   not_standing: 'You are not standing.',
 };
-export const refusedSentence = (code: string, cause?: string) =>
+type Refusal = { code: string; cause?: string };
+export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
 // The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
 // one reason a shared code stands for, so it goes before the code's word.
@@ -103,6 +104,7 @@ const CAUSE: Record<string, string> = {
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string, cause?: string) =>
   (cause && CAUSE[cause]) ?? REASON[code] ?? code.replaceAll('_', ' ');
+export const reasonOf = (r: Refusal) => reason(r.code, r.cause);
 // An item page's refusal notes (book-ui.md, too heavy; pass-1 E8): a locked Take reads as ownership.
 export const NOTED: Record<string, string> = {
   too_heavy: REASON.too_heavy!,
@@ -150,11 +152,11 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
-    const { code, cause } = d.error; // a refused line, as a refused drag (model.ts `refused`)
+    // a refused line, as a refused drag (model.ts `refused`)
     return {
       kind: 'refused',
-      reason: reason(code, cause),
-      text: refusedSentence(code, cause) ?? `You can't do that: ${reason(code, cause)}.`,
+      reason: reasonOf(d.error),
+      text: refusedSentence(d.error) ?? `You can't do that: ${reasonOf(d.error)}.`,
     };
   }
   if (d.kind === 'fault') return '';

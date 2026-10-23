@@ -134,8 +134,7 @@ test('a fresh world: no position record, the same state as without position@1, s
   assert.ok(!place(gameView(without)).includes('sit'));
 });
 // Breaks: move not checking position, or before passage; the same position accepted; expected
-// hard-coded to standing; the exit not shown invalid_state; the not_standing cause dropped from the
-// move's error or the exit's reason (Q13 option A); the current verb listed.
+// standing hard-coded; exit or move error without invalid_state/not_standing; current verb listed.
 test('the position walk by invocation: only move needs standing, after the door', () => {
   const w0 = world();
   assert.deepEqual(effects(w0, 'sit'), [
@@ -149,14 +148,12 @@ test('the position walk by invocation: only move needs standing, after the door'
     ['open', 'opened', north],
     ['move', 'invalid_state', north],
   ]);
-  const not_standing = { code: 'invalid_state', cause: 'not_standing' };
-  assert.deepEqual((invoke(w, 'move', north).decision as any).error, not_standing);
+  const ns = { code: 'invalid_state', cause: 'not_standing' }; // Q13 option A
   const v = gameView(w);
-  assert.deepEqual(validate('GameView', v), []);
-  assert.equal(v.position, 'sitting');
+  const exit: any = v.exits.find((e) => e.direction === 'north');
+  assert.deepEqual([v.position, exit.available, validate('GameView', v)], ['sitting', false, []]);
   assert.deepEqual(place(v).sort(), ['move', 'rest', 'scan', 'sleep', 'stand', 'wait']);
-  const exit = v.exits.find((e) => e.direction === 'north')!;
-  assert.deepEqual([exit.available, (exit as any).reason], [false, not_standing]);
+  assert.deepEqual([exit.reason, (invoke(w, 'move', north).decision as any).error], [ns, ns]);
   assert.deepEqual(effects(w, 'rest')[0], [assign('sitting', 'resting')]);
   w = run(w, [
     ['rest', 'rested'],
@@ -265,7 +262,6 @@ const ferry = (f: (c: any) => void) =>
     f(c);
   });
 const write = { op: 'fact.assign', fact: fact('position'), value: 'sitting' };
-
 // Breaks: each write-site check dropped, the FactSpec comparison skipped or a missing spec
 // accepted, or a read refused.
 test('the loader refuses content writing the position fact, and a wrong or missing spec', () => {
