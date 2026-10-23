@@ -88,22 +88,27 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
       ?.pending.some((p) => p.png === undefined && p.shot === undefined);
   for (const t = Date.now(); cropping() && Date.now() - t < 5_000;)
     await new Promise((r) => setTimeout(r, 100));
-  const fresh = api.getAddonState<State>(ADDON_ID)?.pending ?? [];
-  const keys = (ps: Picked[]) => ps.map((p) => p.key).join();
-  // Pins changed in the wait (a story change clears them): send the pressed ones, keep the new.
-  const same = api.getCurrentStoryData()?.id === id && keys(fresh) === keys(pending);
-  if (same) pending = fresh;
+  // The pressed pins only, with a crop that finished in the wait. A story change keeps none: it
+  // clears the pins, and a reloaded preview restarts their keys.
+  const story = api.getCurrentStoryData()?.id === id;
+  const now = api.getAddonState<State>(ADDON_ID)?.pending ?? [];
+  const elements = pending.map((p) => (story && now.find((f) => f.key === p.key)) || p);
   const r = await post({
     note,
     story: { id, title: `${title}/${name}` },
     palette: globals.palette ?? null,
     reading: globals.reading ?? null,
     viewport: v ? { name: v.name, ...v.styles } : null,
-    elements: pending,
+    elements,
   }).catch((e: Error) => e);
   if (r instanceof Error) return r.message;
   if (!r.ok) return `${r.status} ${await r.text().catch(() => '')}`.trim();
-  if (same) clear();
+  const sent = new Set(pending.map((p) => p.key)); // a pin added or swapped in the wait stays
+  void update(({ pending: rest }) => {
+    const next = rest.filter((p) => !sent.has(p.key));
+    pins(next);
+    return { pending: next };
+  });
   await poll();
   return null;
 };

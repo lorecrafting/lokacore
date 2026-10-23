@@ -182,6 +182,7 @@ try {
     await page.fill('textarea[placeholder="What should change?"]', 'swap');
     await page.keyboard.press('Enter');
     await page.mouse.click(b.x + b.width - 4, b.y + b.height / 2); // B, past A's text: replaces A
+    await page.fill('textarea[placeholder="What should change?"]', 'next'); // typed in the wait
     for (const t = Date.now(); lines('picks.jsonl').length < 3; await page.waitForTimeout(200))
       if (Date.now() - t > 10_000) fail('the send during a pin swap never arrived');
     const swap = lines('picks.jsonl').at(-1);
@@ -191,6 +192,8 @@ try {
     await page.waitForTimeout(500); // the send's clear runs just after its write
     if (!(await page.locator('button[title="Remove"]').count()))
       fail('the send cleared the new pin');
+    const typed = await page.inputValue('textarea[placeholder="What should change?"]');
+    if (typed !== 'next') fail(`the send left ${JSON.stringify(typed)} in the composer, want next`);
     console.log(`ok   picker: ${pick.id} ${pick.elements[0].chain.join(' › ')} in ${story}`);
   } finally {
     await browser.close();
