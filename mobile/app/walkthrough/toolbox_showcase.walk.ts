@@ -12,6 +12,16 @@ import { LABEL } from '../book/labels.ts';
 import { go } from '../tests/steps.ts';
 import { scene, settle, walk, type Screen, type Walk } from './walk.ts';
 
+// Change position until `to` shows, at most four turns.
+const turnTo = (screen: Screen, tap: (label: RegExp) => Promise<void>) => async (to: string) => {
+  for (
+    let i = 0;
+    i < 4 && !(await screen.getByRole('button', new RegExp(`^${to}, change`)).isVisible());
+    i++
+  )
+    await tap(/change position$/);
+};
+
 const steps = ({ screen, room }: Walk) => {
   // Every arrival checks the room page against its GameView (walk.ts room).
   const moves = async (...directions: string[]) => {
@@ -42,14 +52,7 @@ const steps = ({ screen, room }: Walk) => {
   };
   // An item page opened from Inventory leaves back to Inventory (x6t.23), then on to World.
   const putAway = () => tap(LABEL.leave).then(() => tap(LABEL.backToWorld));
-  const position = async (to: string) => {
-    for (
-      let i = 0;
-      i < 4 && !(await screen.getByRole('button', new RegExp(`^${to}, change`)).isVisible());
-      i++
-    )
-      await tap(/change position$/);
-  };
+  const position = turnTo(screen, tap);
   // A known word through the say field: open it, press the word's chip, press the send.
   const speak = async (word: string, how: string) => {
     await tap(LABEL.sayToRoom);

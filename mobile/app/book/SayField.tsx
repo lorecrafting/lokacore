@@ -22,6 +22,19 @@ export const shield = (close: () => void) => (
   />
 );
 
+// Named "A word", focused on open, the word as typed: no font scaling, autocorrect, capitals or
+// spell check.
+const bare = {
+  accessibilityLabel: LABEL.aWord,
+  autoFocus: true,
+  allowFontScaling: false,
+  maxLength: 32,
+  autoCorrect: false,
+  autoCapitalize: 'none',
+  spellCheck: false,
+} as const;
+const box = { minHeight: size.touch, paddingHorizontal: space.lg, borderWidth: size.rule };
+
 /**
  * The one-word field (book-ui.md, Word bar): one text field named "A word" (focused on open, up
  * to 32 characters, no autocorrect or autocapitalize), then one Control per send, then a Chip
@@ -50,29 +63,15 @@ export function SayField(p: {
     if (!WORD.test(draft)) return setWrong(true);
     (s.send(draft), p.close());
   };
-  const send = sender(p.sends[0]!);
   return (
     <View style={{ gap: space.sm }}>
       <TextInput
-        accessibilityLabel={LABEL.aWord}
-        autoFocus
-        allowFontScaling={false}
+        {...bare}
         value={draft}
         onChangeText={(s) => (setDraft(s), setWrong(false))}
-        onSubmitEditing={send}
+        onSubmitEditing={sender(p.sends[0]!)}
         onKeyPress={(e) => e.nativeEvent.key === 'Escape' && p.close()} // web and hardware keyboards
-        maxLength={32}
-        autoCorrect={false}
-        autoCapitalize="none"
-        spellCheck={false}
-        style={{
-          ...prose(c, t),
-          backgroundColor: c.bg,
-          minHeight: size.touch,
-          paddingHorizontal: space.lg,
-          borderColor: c.line,
-          borderWidth: size.rule,
-        }}
+        style={{ ...prose(c, t), ...box, backgroundColor: c.bg, borderColor: c.line }}
       />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
         {p.sends.map((s) => (

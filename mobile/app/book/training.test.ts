@@ -39,9 +39,9 @@ registerHooks({
     };
   },
 });
-const { SkillDetails, ItemDetails } = await import('./skills.tsx');
+const { SkillDetails, ItemDetails, npcSkills } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { NpcDetail, NpcPage, npcSkills } = await import('./Npc.tsx');
+const { NpcDetail, NpcPage } = await import('./Npc.tsx');
 const { usePalette, useType } = await import('./palette.ts');
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);

@@ -6,9 +6,8 @@ import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
-import { StatusLine } from './Status.tsx';
-import { shield, type Send } from './SayField.tsx';
-import { knownWords } from './buttons.ts';
+import { StatusLine, useSay } from './Status.tsx';
+import { shield } from './SayField.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -190,23 +189,12 @@ export function BookView(p: ViewProps) {
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const open = (page: Page) => p.go([...p.stack, page], 1);
-  const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
-  // The say field's wordless twins (buttons.ts), Say, Shout, Cast: on the open World page only.
-  const shut = !!p.screen.view.combat || !!p.screen.ended;
-  const sends = (!page && !shut ? SENDS : []).flatMap(([key, label]) => {
-    const b = g.word.find((w) => w.action_key === key && !('word' in w.input));
-    return b ? [{ label, send: (word: string) => p.press({ ...b, label, input: { word } }) }] : [];
-  });
-  const [saying, setSaying] = useState<string>(); // the room whose say field is open
-  const room = p.screen.view.place.id;
-  const say = { sends, open: !!sends.length && saying === room };
-  const setSay = (on: boolean) => setSaying(on ? room : undefined);
+  const say = useSay(p.screen, g, p.press, page);
   const ctx = {
     ...p,
     g,
-    open,
-    walk,
+    open: (page: Page) => p.go([...p.stack, page], 1),
+    walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
     world: () => p.go([], -1),
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
@@ -221,14 +209,13 @@ export function BookView(p: ViewProps) {
               <Body
                 {...ctx}
                 page={page}
-                talkingOn={p.talkingOn}
                 talkOn={p.talkOn ?? (() => {})}
                 chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
               />
             )}
           </PageTurn>
-          {say.open && shield(() => setSay(false))}
-          <Bottom {...ctx} page={page} say={{ ...say, setOpen: setSay }} />
+          {say.open && shield(() => say.setOpen(false))}
+          <Bottom {...ctx} page={page} say={say} />
           <Heard said={p.screen.said} />
           {c.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
@@ -248,21 +235,12 @@ type BottomProps = {
   page?: Page;
   startOver: () => void;
   shell: Shell;
-  say: { sends: Send[]; open: boolean; setOpen: (on: boolean) => void };
+  say: ReturnType<typeof useSay>;
 };
 
-const SENDS = [
-  ['say', LABEL.say],
-  ['shout', LABEL.shout],
-  ['cast', LABEL.cast],
-] as const;
-
 function Bottom(p: BottomProps) {
-  const c = usePalette();
-  const t = useType();
+  const [c, t] = [usePalette(), useType()];
   const { view, text, pending, fault, ended } = p.screen;
-  // A tap on the position line acts only on the open World page.
-  const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
   const shut = !!view.combat || !!ended;
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   return (
@@ -278,34 +256,34 @@ function Bottom(p: BottomProps) {
     >
       {nav && navigation(p)}
       {p.say.open && shield(() => p.say.setOpen(false))}
-      {!view.ancestry_choices && (
-        <StatusLine
-          time={view.time}
-          calendar={view.calendar_status}
-          resources={view.resources}
-          bleeding={view.bleeding}
-          conditions={view.conditions}
-          position={view.position}
-          text={text}
-          locked={!!view.scene || shut || p.page?.kind === 'chapter'}
-          openPosition={position ? () => p.press(position) : undefined}
-          pending={pending}
-          open={() => p.open({ kind: 'contents' })}
-          openCharacter={() => p.open({ kind: 'character' })}
-          say={
-            p.say.sends.length
-              ? {
-                  ...p.say,
-                  busy: pending || !!fault || p.screen.catchingUp,
-                  words: knownWords(view),
-                }
-              : undefined
-          }
-        />
-      )}
+      {!view.ancestry_choices && statusLine(p)}
       {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
+  );
+}
+
+// The status line under the footer, its say field live on the open World page.
+function statusLine(p: BottomProps) {
+  const { view, text, pending, ended } = p.screen;
+  // A tap on the position line acts only on the open World page.
+  const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
+  return (
+    <StatusLine
+      time={view.time}
+      calendar={view.calendar_status}
+      resources={view.resources}
+      bleeding={view.bleeding}
+      conditions={view.conditions}
+      position={view.position}
+      text={text}
+      locked={!!view.scene || !!view.combat || !!ended || p.page?.kind === 'chapter'}
+      openPosition={position ? () => p.press(position) : undefined}
+      pending={pending}
+      open={() => p.open({ kind: 'contents' })}
+      openCharacter={() => p.open({ kind: 'character' })}
+      say={p.say.sends.length ? p.say : undefined}
+    />
   );
 }
 

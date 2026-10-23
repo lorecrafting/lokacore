@@ -1,5 +1,5 @@
 // The status line under the footer.
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -10,6 +10,10 @@ import { StatusIcons } from './StatusIcon.tsx';
 import { usePalette, useType, type Palette, type Type } from './palette.ts';
 import { size, space } from './tokens.ts';
 import { SayField, shield, type Send } from './SayField.tsx';
+import { knownWords } from './buttons.ts';
+import type { Button } from './presenter.ts';
+import type { group as grouped, Page } from './model.ts';
+import type { Presenter } from './updates.ts';
 
 // The status icon row (StatusIcon.tsx) when any condition is on, then the line: the sky glyph (sun by day, moon by night), the position, bleeding, then
 // the resource button, which shows the condition pools coloured by band when GameView carries them
@@ -121,28 +125,11 @@ export function StatusLine(p: StatusProps) {
         </View>
         <View style={group}>
           <Contents {...p} resources={pools(p.resources)} />
-          {p.say && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={LABEL.sayToRoom}
-              accessibilityState={{ expanded: open }}
-              onPress={() => setOpen(!open)}
-              style={{ minHeight: size.touch, minWidth: size.touch, ...centred }}
-            >
-              <SayIcon />
-            </Pressable>
-          )}
+          {p.say && <SayIcon open={open} toggle={() => setOpen(!open)} />}
         </View>
       </View>
       {open && shield(() => setOpen(false))}
-      {p.say && open && (
-        <SayField
-          pending={p.say.busy}
-          sends={p.say.sends}
-          words={p.say.words}
-          close={() => setOpen(false)}
-        />
-      )}
+      {p.say && open && <SayField {...p.say} pending={p.say.busy} close={() => setOpen(false)} />}
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
       </View>
@@ -153,28 +140,36 @@ export function StatusLine(p: StatusProps) {
 // The say icon (owner, mvl9w8xu411y): a speech bubble at the sky glyph's size, ink and stroke, its
 // tail a turned square whose paper fill hides the bubble's edge. Drawn, since no text glyph for a
 // bubble is both covered by the fonts and free of emoji colour.
-function SayIcon() {
+function SayIcon(p: { open: boolean; toggle: () => void }) {
   const [c, t] = [usePalette(), useType()];
   const em = t.small.fontSize;
   const ink = { borderColor: c.dim, borderWidth: 0 };
   return (
-    <View aria-hidden style={{ width: em, height: em * 0.75 }}>
-      <View style={{ ...ink, flex: 1, borderWidth: size.rule, borderRadius: em }} />
-      <View
-        style={{
-          ...ink,
-          position: 'absolute',
-          left: em / 4,
-          bottom: -em / 8,
-          width: em / 4,
-          height: em / 4,
-          backgroundColor: c.bg,
-          borderRightWidth: size.rule,
-          borderBottomWidth: size.rule,
-          transform: [{ rotate: '45deg' }],
-        }}
-      />
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={LABEL.sayToRoom}
+      accessibilityState={{ expanded: p.open }}
+      onPress={p.toggle}
+      style={{ minHeight: size.touch, minWidth: size.touch, ...centred }}
+    >
+      <View aria-hidden style={{ width: em, height: em * 0.75 }}>
+        <View style={{ ...ink, flex: 1, borderWidth: size.rule, borderRadius: em }} />
+        <View
+          style={{
+            ...ink,
+            position: 'absolute',
+            left: em / 4,
+            bottom: -em / 8,
+            width: em / 4,
+            height: em / 4,
+            backgroundColor: c.bg,
+            borderRightWidth: size.rule,
+            borderBottomWidth: size.rule,
+            transform: [{ rotate: '45deg' }],
+          }}
+        />
+      </View>
+    </Pressable>
   );
 }
 
@@ -255,4 +250,36 @@ function Position(p: { value: NonNullable<GameView['position']>; open?: () => vo
   ) : (
     words
   );
+}
+
+const SENDS = [
+  ['say', LABEL.say],
+  ['shout', LABEL.shout],
+  ['cast', LABEL.cast],
+] as const;
+
+// StatusLine's say prop from the screen: the say field's wordless twins (buttons.ts), Say, Shout,
+// Cast, on the open World page only; the field stays open only in the room it was opened in.
+export function useSay(
+  screen: ReturnType<Presenter['screen']>,
+  g: ReturnType<typeof grouped>,
+  press: (b: Button) => void,
+  page?: Page,
+) {
+  const { view, ended, pending, fault, catchingUp } = screen;
+  const sends = (!page && !view.combat && !ended ? SENDS : []).flatMap(([key, label]) => {
+    const b = g.word.find((w) => w.action_key === key && !('word' in w.input));
+    return b ? [{ label, send: (word: string) => press({ ...b, label, input: { word } }) }] : [];
+  });
+  const [saying, setSaying] = useState<string>();
+  const room = view.place.id;
+  const setOpen = (on: boolean) => setSaying(on ? room : undefined);
+  const busy = pending || !!fault || !!catchingUp;
+  return {
+    sends,
+    open: !!sends.length && saying === room,
+    setOpen,
+    busy,
+    words: sends.length ? knownWords(view) : [],
+  };
 }

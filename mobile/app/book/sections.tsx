@@ -22,13 +22,12 @@ import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { ReadingSize } from './Chip.tsx';
 import type { Reading } from './reading.ts';
-import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
+import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from './skills.tsx';
 import { size, space } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 import { LABEL } from './labels.ts';
-import { castWords } from './buttons.ts';
 
 const home = (world: () => void) => <Control label={LABEL.backToWorld} onPress={world} />;
 
@@ -83,20 +82,6 @@ export function CharacterPage(
       <RaiseCards {...p} />
       {spells(p.view, p.text)}
     </Page>
-  );
-}
-
-// The spell words refused here, each with its reason (owner, mvl9qy5ut2x2).
-function spells(view: GameView | undefined, text: Say) {
-  const refused = view?.spell_words?.length ? castWords(view).filter((s) => !s.available) : [];
-  if (!refused.length) return null;
-  return (
-    <View>
-      <SectionTitle>{LABEL.spells}</SectionTitle>
-      {refused.map((s) => (
-        <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, text)} />
-      ))}
-    </View>
   );
 }
 
