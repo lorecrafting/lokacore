@@ -97,7 +97,7 @@ The Loka picker (`mobile/app/.storybook/picker/`, [design input](briefs/polish/d
 panel on the right, `↩` sends (`⇧↩` a newline). `storybook dev` only, loopback only. Each send appends one line to
 `.polish/picks.jsonl` in the served worktree (gitignored): `{id, time, note, story: {id, title},
 palette, reading, viewport, elements: [{chain, box, computed, text, role, name, testId, shot}]}`, the crop at
-`.polish/shots/<id>-<i>.png`; Close batch and Keep going append `{id, time, type: 'close' | 'keep-going'}`.
+`.polish/shots/<id>-<i>.png` (box in page px); Close batch and Keep going append `{id, time, type: 'close' | 'keep-going'}`.
 Agents answer in `.polish/status.jsonl` through `bin/polish_status.sh`: `{id, time, state: working |
 done | stopped, model, summary, sha}`, `{id, time, state: 'moved', beads, summary}` or `{time, type:
 'suggest-close', reason}`; `bin/polish_status.sh log "<text>"` adds `{time, type: 'log', text}`, a

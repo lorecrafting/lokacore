@@ -28,7 +28,7 @@ case "${1-}:${2-}:${3-}" in
 esac
 mkdir -p "$LOKA_POLISH_DIR"
 if [ "${2-}" = done ] && [ -n "$shoot" ]; then
-  (cd "$(dirname "$0")/../mobile/app" && mise exec -- node .storybook/picker/after.ts "$SB_PORT" "$LOKA_POLISH_DIR" "$1") ||
+  (cd "${app:-$(dirname "$0")/../mobile/app}" && mise exec -- node .storybook/picker/after.ts "$SB_PORT" "$LOKA_POLISH_DIR" "$1") ||
     echo "$me: no after shot for $1" >&2
 fi
 python3 -c '

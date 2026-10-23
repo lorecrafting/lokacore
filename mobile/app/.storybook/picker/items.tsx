@@ -83,7 +83,7 @@ export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
           {latest(feed, p.id)?.state === 'done' && (
             <img
               alt="after"
-              src={`${ROUTE}/shots/${p.id}-${open}-after.png`}
+              src={`${ROUTE}/shots/${p.id}-${open}-after.png?t=${latest(feed, p.id)?.time}`}
               style={{ minWidth: 0, flex: 1 }}
               onError={(ev) => (ev.currentTarget.style.display = 'none')}
             />
