@@ -9,7 +9,7 @@ import type {
   GameSubscription,
   NarrationRecord,
 } from '../../packages/game-view/session.ts';
-import { comings, replyLine, sayers } from './words.ts';
+import { comings, lineText, replyLine, sayers } from './words.ts';
 import { actionContext, buttonsOf, intentOf, things } from './model.ts';
 
 /**
@@ -27,6 +27,10 @@ export type Button = {
   token?: string; // none: no freshness check (a test's hand-made button)
   context?: string; // only projected buttons can refresh across an unchanged live update
 };
+
+/** A card's identity, its React key: two offers that share a label (two Talk dialogues) stay two. */
+export const cardKey = (b: Button) =>
+  [b.action_key, b.target_ids.join(','), JSON.stringify(b.input)].join(':');
 
 type Say = (key: string) => string;
 
@@ -174,7 +178,7 @@ function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, tex
   if (game.pending() && reply.kind !== 'pending' && reply.kind !== 'catching_up') {
     const lines = replyLine(reply, text, game.view().view);
     (was.combat ? s.combatLog : detail ? detailLines(s, detail) : s.log).push(...lines);
-    return lines.join(' ');
+    return lines.map(lineText).join(' ');
   }
   if (reply.kind === 'pending' || reply.kind === 'catching_up') {
     s.retry.invocation =

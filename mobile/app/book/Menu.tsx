@@ -2,6 +2,7 @@
 import { View } from 'react-native';
 import { cap, things, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
+import { cardKey } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
@@ -120,7 +121,7 @@ export function ThingPage(p: {
       {!refusals && !p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
       <Cards>
         {p.actions.map((b) => (
-          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+          <ActionCard key={cardKey(b)} b={b} press={p.press} />
         ))}
       </Cards>
       {inside(p)}

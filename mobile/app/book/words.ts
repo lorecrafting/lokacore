@@ -9,6 +9,7 @@ import type {
   GameView,
   Reply,
 } from '../../packages/game-view/session.ts';
+import type { DetailLine } from './logs.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -127,16 +128,21 @@ const UNDONE: Partial<Record<Reply['kind'], string>> = {
 
 // What one press answers: the narration, one line per record, or the outcome's words (words.ts;
 // none: no line) of an accepted command, else the refusal in words. Never a raw outcome code.
-export const replyLine = (r: Reply, text: Say, view: GameView, fallback?: string): string[] =>
+export const replyLine = (r: Reply, text: Say, view: GameView, fallback?: string): DetailLine[] =>
   [answer(r, text, view, fallback)].flat().filter(Boolean);
+export const lineText = (l: DetailLine) => (typeof l === 'string' ? l : l.text);
 
-function answer(r: Reply, text: Say, view: GameView, fallback?: string): string | string[] {
+function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailLine | string[] {
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
-    const { code } = d.error; // the same sentence as a refused drag (model.ts `refused`)
-    return SENTENCE[code] ?? `You can't do that: ${reason(code)}.`;
+    const { code } = d.error; // a refused line, as a refused drag (model.ts `refused`)
+    return {
+      kind: 'refused',
+      reason: reason(code),
+      text: SENTENCE[code] ?? `You can't do that: ${reason(code)}.`,
+    };
   }
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {

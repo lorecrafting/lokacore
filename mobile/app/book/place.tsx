@@ -3,6 +3,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { commandOf, refusedPlace } from './buttons.ts';
 import { notVerb, why, type group } from './model.ts';
 import type { Button } from './presenter.ts';
+import { cardKey } from './presenter.ts';
 import { ActionCard, VerbLine } from './actions.tsx';
 
 type Say = (key: string) => string;
@@ -23,9 +24,7 @@ export const placeActions = (
   const verb = (a: { action_key: string; target_ids?: readonly string[] }) =>
     a.action_key !== view.storylet && !notices.some((n) => a.target_ids?.includes(n.id));
   return [
-    ...g.place
-      .filter(verb)
-      .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />),
+    ...g.place.filter(verb).map((b) => <VerbLine key={cardKey(b)} b={b} press={press} />),
     ...refusedPlace(view)
       .filter((a) => !notVerb(a.action_key) && verb(a))
       .map((a) => (
@@ -35,6 +34,6 @@ export const placeActions = (
     ...view.exits
       .flatMap((e) => g.door(e.direction))
       .filter((b) => ['open', 'unlock'].includes(commandOf(b)))
-      .map((b) => <ActionCard key={`${b.action_key}:${b.label}`} b={b} press={press} />),
+      .map((b) => <ActionCard key={cardKey(b)} b={b} press={press} />),
   ];
 };

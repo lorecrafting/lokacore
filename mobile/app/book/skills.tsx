@@ -8,6 +8,7 @@ import type { Thing } from './model.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import type { Button } from './presenter.ts';
+import { cardKey } from './presenter.ts';
 
 // pass-1 H3 (book-ui.md Skill tree details): a qualified learned box has nothing left to meet.
 const learned = (s: NonNullable<GameView['skills']>[number], text: (key: string) => string) =>
@@ -97,7 +98,7 @@ export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void 
       {p.buttons
         ?.filter((b) => b.action_key === 'raise_attribute')
         .map((b) => (
-          <ActionCard key={b.label} b={b} press={p.press!} />
+          <ActionCard key={cardKey(b)} b={b} press={p.press!} />
         ))}
     </Cards>
   );
