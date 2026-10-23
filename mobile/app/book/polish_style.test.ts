@@ -230,7 +230,7 @@ test('a readable notice the description links is a prose link and no World line'
 
 // Room sentences from cartridge name words (book-ui.md "Below the description", loka-6qi). Breaks:
 // the article is written on every name, is not written again after a proper name or a change of
-// word ("an wooden bench"), a name without words is dropped or loses its text, a plural group
+// word ("an wooden bench") or between two equal names without a plural, a name without words is dropped or loses its text, a plural group
 // is not one link, opens a later member, says "is", or counts 10 as a word.
 test('the room sentence shows bare names, shares an article per run and collapses plurals', async () => {
   const { Here } = await import('./lines.tsx');
@@ -297,6 +297,9 @@ test('the room sentence shows bare names, shares an article per run and collapse
       'An apple, axe, a wooden bench, and an iron anvil are here. | apple, open | axe, open | wooden bench, open | iron anvil, open',
     ],
   );
+  assert.deepEqual(said([item('stick1', 'a'), item('stick2', 'a')]), [
+    'A stick and a stick are here. | stick, open | stick, open',
+  ]);
   assert.deepEqual(said(crows(2)), ['Two crows are here. | Two crows, open']);
   assert.deepEqual(said([...crows(3), item('hen', 'a')]), [
     'Three crows and a hen are here. | Three crows, open | hen, open',

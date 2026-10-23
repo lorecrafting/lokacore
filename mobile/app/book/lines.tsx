@@ -185,8 +185,8 @@ export function AwayRecap({
  * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
  *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word
  *   capitalised, each name its own link named "<name>, open"; articles, commas and "and" are plain
- *   text. A name with words shows its bare name; an article is shared by a run of names that take it.
- *   A person's carried-item line follows the people sentence as a Note.
+ *   text. A name with words shows its bare name; an article is shared by a run of different names
+ *   that take it. A person's carried-item line follows the people sentence as a Note.
  * - Story: RoomPage.stories.tsx
  */
 export function Here(p: {
@@ -221,7 +221,8 @@ export function Here(p: {
 
 // One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
 // words (loka-6qi): the bare name, its article written only when it differs from the previous
-// link's (a name without one breaks the run), and same-name entities with a plural as one link.
+// link's or the name repeats it (a name without one breaks the run), and same-name entities with a
+// plural as one link.
 function Present(p: {
   group: GameView['entities'];
   text: (key: string) => string;
@@ -242,7 +243,8 @@ function Present(p: {
   return (
     <Text style={prose(c, t)}>
       {links.map((l, i) => {
-        const article = l.article !== links[i - 1]?.article && l.article;
+        const prev = links[i - 1];
+        const article = (l.article !== prev?.article || l.name === prev?.name) && l.article;
         const first = (s: string) => (i === 0 ? cap(s) : s);
         return (
           <Fragment key={l.id}>
