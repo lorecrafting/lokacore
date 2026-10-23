@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 export const Chapter: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
-    await expect(args.onPress.mock.calls).toEqual([[]]); // no press event (Storybook cannot send one)
+    await expect(args.onPress.mock.calls).toEqual([[]]); // the component sends no press event
   },
 };
 

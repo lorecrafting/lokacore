@@ -41,7 +41,7 @@ export const Buff: Story = {
     await userEvent.click(icon);
     icon.focus();
     await userEvent.keyboard('{Enter}');
-    await expect(args.open!.mock.calls).toEqual([[], []]); // no press event (Storybook cannot send one)
+    await expect(args.open!.mock.calls).toEqual([[], []]); // the component sends no press event
   },
 };
 
