@@ -6,7 +6,3 @@ const byKind = { buff: '+', debuff: '−', neutral: '○' }; // signs, not arrow
 
 export const glyph = (label: string, kind?: 'buff' | 'debuff') =>
   byLabel[label] ?? byKind[kind ?? 'neutral'];
-
-// The status line's say icon (StatusLine's doc comment): an opening quote, speech; placeholder
-// until the icon set (loka-x6t.63).
-export const sayGlyph = '“';

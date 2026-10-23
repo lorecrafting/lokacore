@@ -355,7 +355,7 @@ export const SayBadWord: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
     await expect(canvas.getByText('One word, letters only.')).toBeVisible();
     await expect(args.say!.sends[0]!.send).not.toHaveBeenCalled();
-    await userEvent.keyboard('{Escape}');
+    await userEvent.type(canvas.getByLabelText('A word'), '{Escape}'); // the press moved focus to Say
     await expect(canvas.queryByLabelText('A word')).toBeNull();
     await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' })); // left open
   },

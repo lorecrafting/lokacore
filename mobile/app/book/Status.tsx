@@ -5,7 +5,6 @@ import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
-import { sayGlyph } from './glyphs.ts';
 import { LABEL } from './labels.ts';
 import { StatusIcons } from './StatusIcon.tsx';
 import { usePalette, useType, type Palette, type Type } from './palette.ts';
@@ -88,7 +87,8 @@ const skyText = (p: StatusProps) =>
  *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
  *   label-in-name rule.
- *   Say icon (World page, while Say is offered): a size.touch box after the pools, in their wrap
+ *   Say icon (World page, while Say is offered): a drawn speech bubble in the sky glyph's size and dim
+ *   ink, in a size.touch box after the pools, in their wrap
  *   unit, named "Say to the room" and expanded while open; a tap toggles the SayField under the
  *   line with Say, Shout and Cast, each only while offered, and the known words. Escape or the
  *   icon closes it; a new room closes it; a tap elsewhere on the line closes it and presses
@@ -129,9 +129,7 @@ export function StatusLine(p: StatusProps) {
               onPress={() => setOpen(!open)}
               style={{ minHeight: size.touch, minWidth: size.touch, ...centred }}
             >
-              <Text aria-hidden style={{ ...t.body, color: c.action }}>
-                {sayGlyph}
-              </Text>
+              <SayIcon />
             </Pressable>
           )}
         </View>
@@ -148,6 +146,34 @@ export function StatusLine(p: StatusProps) {
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
       </View>
+    </View>
+  );
+}
+
+// The say icon (owner, mvl9w8xu411y): a speech bubble at the sky glyph's size, ink and stroke, its
+// tail a turned square whose paper fill hides the bubble's edge. Drawn, since no text glyph for a
+// bubble is both covered by the fonts and free of emoji colour.
+function SayIcon() {
+  const [c, t] = [usePalette(), useType()];
+  const em = t.small.fontSize;
+  const ink = { borderColor: c.dim, borderWidth: 0 };
+  return (
+    <View aria-hidden style={{ width: em, height: em * 0.75 }}>
+      <View style={{ ...ink, flex: 1, borderWidth: size.rule, borderRadius: em }} />
+      <View
+        style={{
+          ...ink,
+          position: 'absolute',
+          left: em / 4,
+          bottom: -em / 8,
+          width: em / 4,
+          height: em / 4,
+          backgroundColor: c.bg,
+          borderRightWidth: size.rule,
+          borderBottomWidth: size.rule,
+          transform: [{ rotate: '45deg' }],
+        }}
+      />
     </View>
   );
 }
