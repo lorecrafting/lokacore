@@ -22,15 +22,17 @@ import { radius, size, space, type } from './tokens.ts';
 export function EntityLine(p: { name: string; rest?: string; note?: string; onPress: () => void }) {
   const c = usePalette();
   const t = useType();
+  // A trailing space ends the first line, so the shown text reads like the name (it hangs unseen).
+  const gap = p.note ? ' ' : '';
   return (
     <Tap label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`} onPress={p.onPress}>
       {p.rest ? (
         <Text style={prose(c, t)}>
           <Text style={type.named}>{p.name}</Text>
-          {p.rest}
+          {p.rest + gap}
         </Text>
       ) : (
-        <Text style={{ ...prose(c, t), ...type.named }}>{p.name}</Text>
+        <Text style={{ ...prose(c, t), ...type.named }}>{p.name + gap}</Text>
       )}
       {
         p.note ? (

@@ -32,6 +32,16 @@ export const Item: Story = {
   args: { name: 'A brass lantern', note: undefined },
 };
 
+// Breaks: a note under a bare name (no `rest`) reads differently from the shown text.
+export const ItemWithNote: Story = {
+  args: { name: 'A brass lantern', rest: undefined, note: 'It is unlit.' },
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('button', { name: 'A brass lantern It is unlit., open' }),
+    ).toBeVisible();
+  },
+};
+
 export const Held: Story = {
   args: {
     name: 'a brass lantern',
