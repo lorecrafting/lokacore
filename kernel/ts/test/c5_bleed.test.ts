@@ -218,7 +218,7 @@ test('Flee and re-engagement pair the exact same-due round and bleed tick', () =
   assert.deepEqual([...orders].sort(), ['bleed_first', 'round_first']);
 });
 
-// Breaks: a fatal bleed tick leaves an active job that kills the shrine-returned body again.
+// Breaks: a fatal bleed tick leaves an active job that kills the shrine-returned body again, or tells no fall line or combat's over the death's own (loka-3w3q).
 test('fatal tick closes bleed before same-body shrine return', () => {
   const { world, target } = fixture(100, 2);
   const first = elapsed(

@@ -30,13 +30,12 @@ function fatalBleed(
   mint: Mint,
 ) {
   const loss = ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>; // the bleeding body's
-  const owner_id = actorOf(world, loss.entity_id) ?? null;
   const died = deathSequence(
     prefix(visit, ops, now),
     command,
     {
       loss,
-      owner_id,
+      owner_id: actorOf(world, loss.entity_id) ?? null,
       killer_id: row.source_id!,
       credited_character_id: null,
       cause: 'bleeding',
