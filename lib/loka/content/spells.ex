@@ -1,15 +1,14 @@
 defmodule Loka.Content.Spells do
   @moduledoc """
   Toolbox row 29a: a spell recipe target needs kernel_api 1.98, an aimed one 1.119 (loka-x6t.109;
-  one diagnostic), and no two spells
-  share a word (DUPLICATE_DEFINITION at each one's word); its learned names a bool fact of this
-  cartridge (FACT_TYPE_MISMATCH otherwise) of player scope alone, not per_subject
-  (FACT_SCOPE_UNSUPPORTED). Row 29b: an effect step (status.apply, damage, light.ignite) sits on a
+  one diagnostic), and no two spells share a word (DUPLICATE_DEFINITION at each one's word); its
+  learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise) of player scope
+  alone, not per_subject (FACT_SCOPE_UNSUPPORTED). Row 29b: an effect step (status.apply, damage, light.ignite) sits on a
   spell (SCHEMA_VIOLATION at its op) and needs its owner (UNDECLARED_CAPABILITY at its op: damage
   death@1 by entity_died, light.ignite light@1 by the ignite command; status.apply's status
   already needs status@1); an unaimed spell's damage names its npc and its light.ignite its item
-  (SCHEMA_VIOLATION at the missing field). Word bar S2: speech.phrases needs kernel_api 1.98 too, and speech@1
-  (UNDECLARED_CAPABILITY at the phrases). Twin of
+  (SCHEMA_VIOLATION at the missing field). Word bar S2: speech.phrases needs kernel_api 1.98
+  too, and speech@1 (UNDECLARED_CAPABILITY at the phrases). Twin of
   spells/1 in kernel/ts/src/content/cartridge_recipes.ts and the recipe steps of lockStage in
   cartridge.ts.
   """
@@ -31,13 +30,7 @@ defmodule Loka.Content.Spells do
 
     effects = effects(defs)
 
-    aimed = Enum.any?(targets, fn {_, t} -> is_map_key(t, "aimed") end)
-
-    floor(
-      targets != [] or Map.has_key?(settings, "speech"),
-      if(aimed, do: [1, 119], else: [1, 98]),
-      m
-    ) ++
+    floor(targets, settings, m) ++
       shared(targets) ++
       Enum.flat_map(targets, &learned(&1, m, defs)) ++
       placed(effects) ++ bare(effects) ++ unowned(effects, m, registry) ++ phrases(settings, m)
@@ -114,8 +107,11 @@ defmodule Loka.Content.Spells do
         do: d
   end
 
-  defp floor(floored, at_least, m) do
-    if floored and api(m) < at_least,
+  defp floor(targets, settings, m) do
+    aimed = Enum.any?(targets, fn {_, t} -> is_map_key(t, "aimed") end)
+    floored = targets != [] or Map.has_key?(settings, "speech")
+
+    if floored and api(m) < if(aimed, do: [1, 119], else: [1, 98]),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end

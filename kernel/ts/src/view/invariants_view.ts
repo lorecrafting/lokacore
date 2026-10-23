@@ -152,7 +152,7 @@ function advertised(
         a.target_ids?.[1] === p.container_id
       : p.type === 'take' || p.type === 'cast' // an aimed cast's offer is on its target (loka-x6t.109)
         ? (action_key === undefined || a.action_key === action_key) &&
-          (commandOf(a) ?? a.action_key) === p.type
+          (a.command ?? commandOf(a) ?? a.action_key) === p.type
         : a.action_key === p.type,
   );
 }
