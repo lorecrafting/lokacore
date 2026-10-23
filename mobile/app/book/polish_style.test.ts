@@ -239,7 +239,7 @@ test('the room sentence shows bare names, shares an article per run and collapse
     crows: 'crows',
     'npc.tam.short': 'Tam, the miller',
   };
-  const e = (id: string, article?: string, kind = 'npc', name = id) => ({
+  const e = (id: string, article?: string, kind = 'npc', name = `${kind}.${id}.short`) => ({
     id,
     kind,
     name,
