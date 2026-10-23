@@ -16,11 +16,12 @@ import { size, space } from './tokens.ts';
 // truncates (polish pick mv1j35ltxddx; loka-x6t.86).
 type StatusProps = {
   time: number;
-  calendar?: GameView['calendar_status'];
+  // NonNullable: react-docgen reads a bare GameView['x'] as a member-less type that Storybook's arg-type conversion throws on.
+  calendar?: NonNullable<GameView['calendar_status']>;
   resources?: readonly Pool[];
-  bleeding?: GameView['bleeding'];
-  conditions?: GameView['conditions'];
-  position?: GameView['position'];
+  bleeding?: NonNullable<GameView['bleeding']>;
+  conditions?: NonNullable<GameView['conditions']>;
+  position?: NonNullable<GameView['position']>;
   text: (key: string) => string;
   locked: boolean;
   pending: boolean;
@@ -145,7 +146,7 @@ function Contents(p: StatusProps) {
       accessibilityRole="button"
       // Label in name (book-ui.md): the shown text first (its no-break spaces as spaces), then where it goes.
       accessibilityLabel={`${p.resources ? said(p.resources, p.text) : 'character'}; opens Contents`}
-      onPress={p.open}
+      onPress={() => p.open()} // no press event: open takes none
       style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
       <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>

@@ -116,12 +116,13 @@ export const SearchAndKeys: Story = {
 // and lit at two, and the lines reach past the first ring.
 export const TwoHops: Story = {
   globals: { node: 'StatusRow' },
-  play: async ({ canvas, canvasElement }) => {
+  play: async ({ canvas, canvasElement, globals }) => {
+    const c = color[globals.palette as keyof typeof color] ?? color.light; // as preview.tsx paints it
     const bleed = canvas.getByRole('button', { name: 'BleedRow' });
-    await expect(bleed).toHaveStyle({ color: color.light.dim });
+    await expect(bleed).toHaveStyle({ color: c.dim });
     const one = canvasElement.querySelectorAll('svg line').length;
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Hops' }), '2');
-    await expect(bleed).toHaveStyle({ color: color.light.fg });
+    await expect(bleed).toHaveStyle({ color: c.fg });
     const lines = [...canvasElement.querySelectorAll('svg line')];
     await expect(lines.length).toBeGreaterThan(one);
     // Real edges only: no line joins the selection to a chip two hops out (not an edge).
