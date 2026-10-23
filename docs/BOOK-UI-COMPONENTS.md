@@ -130,7 +130,7 @@ never wraps, the screen-reader name, its consumers), `- States:` (one story per 
 `- Story:` (its story file). `Use:` and `Story:` are required; `Rules:` and `States:` appear when
 they say something; the comment wraps at 100 columns and restates no style the code sets.
 Behaviour stays in [Book UI](system/book-ui.md), which a comment links and never copies. Storybook
-renders the comment on the Docs page of the story whose meta names the component. This index has
+shows every comment on the Docs/Component specs page (`mobile/app/stories/Specs.mdx`). This index has
 one line per export, the file under `mobile/app/`; [`catalogue.test.ts`](../mobile/app/catalogue.test.ts)
 fails when a comment or a line is missing or the two disagree. A new mechanic reuses one of these;
 a new component needs a real consumer, its comment and its line here in the same slice.
