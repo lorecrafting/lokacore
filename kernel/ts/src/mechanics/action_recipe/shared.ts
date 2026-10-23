@@ -108,17 +108,21 @@ export function castAdmission(
   if (!spell || busy) return { code: 'invalid_state' };
   const id = payload.target_id;
   const aimed = spell.target.kind === 'spell' ? spell.target.aimed : undefined;
-  if (!aimed !== !id || (aimed && !aimedAt(world, body!, id!, aimed.scopes)))
-    return { code: 'invalid_target' };
+  if (aimed ? !aimedAt(world, body!, id, aimed.scopes) : id) return { code: 'invalid_target' };
   return holds(world, payload.actor_id, spell.policy.root, { target: id, steps })
     ? undefined
     : policyRefusal(spell);
 }
 
 /** An aimed spell's target (loka-x6t.109): held by the caster, or an npc or item in its room. */
-const aimedAt = (world: World, body: EntityId, id: EntityId, scopes: readonly string[]) => {
-  const at = world.state.containers[id];
-  const kind = world.entities[id]?.kind;
+const aimedAt = (
+  world: World,
+  body: EntityId,
+  id: EntityId | undefined,
+  scopes: readonly string[],
+) => {
+  const at = id && world.state.containers[id];
+  const kind = id && world.entities[id]?.kind;
   return scopes.some((s) =>
     s === 'inventory'
       ? at === body

@@ -145,6 +145,7 @@ test('refusals: no target, unaimed with a target, out of scope, unknown word, pe
   const w = crypt();
   assert.equal(code(at(w, 'flamma')), 'invalid_target');
   assert.equal(code(at(hall(), 'flamma', 'item/glowdust')), 'invalid_target'); // a floor item
+  assert.equal(code(at(hall(), 'lux', 'item/orb')), 'invalid_target'); // inventory: not held
   assert.equal(code(at(w, 'lux', 'item/glowdust')), 'invalid_state'); // 7: untagged held
   assert.equal(code(at(w, 'zzz', 'npc/wight')), 'invalid_state');
   const target_id = w.entityIds[`${P}:npc/wight`];
@@ -153,8 +154,8 @@ test('refusals: no target, unaimed with a target, out of scope, unknown word, pe
   assert.equal(code(at(old, 'lux', 'item/orb')), 'invalid_target'); // lux unaimed
 });
 
-// Breaks: an aimed offer's invocation does not resolve to cast with its word and target, or a
-// second aimed cast in a fight is refused.
+// Breaks: an aimed offer's invocation does not resolve to cast with its word and target, its keyed
+// step does not bind the aimed offer, or a second aimed cast in a fight is refused.
 test('the offer resolves to cast {word, target_id}; a second bolt in a fight kills', () => {
   let w = crypt();
   const wight = w.entityIds[`${P}:npc/wight`]!;
@@ -173,7 +174,12 @@ test('the offer resolves to cast {word, target_id}; a second bolt in a fight kil
     target_id: wight,
   });
   w = ok(play(w, { type: 'attack', target_id: wight }));
-  w = ok(at(w, 'flamma', 'npc/wight'));
+  const keyed = {
+    id: 'eeeeeeee-1090-4109-8109-0000000000aa',
+    world_context_id: w.context,
+    payload: (command as { payload: object }).payload,
+  };
+  w = ok(step(w, keyed as never, ++n, 'flamma' as never)); // the Book's keyed invocation
   w = ok(at(w, 'flamma', 'npc/wight'));
   assert.equal(wightHp(w), 0);
 });
