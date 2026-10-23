@@ -83,12 +83,12 @@ test('Character draws projected attributes and acquired qualification with autho
   assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
     'Character',
     'STR 9',
-    'Sword craft — learned, unqualified; STR at least 10',
+    'Sword craft — learned, unqualified. STR at least 10',
     'Back to World',
   ]);
   assert.deepEqual(words(SkillDetails({ view, text })), [
     'STR 9',
-    'Sword craft — learned, unqualified; STR at least 10',
+    'Sword craft — learned, unqualified. STR at least 10',
   ]);
 });
 
@@ -122,35 +122,30 @@ test('Character groups profession boxes under their title, acquired then not lea
     'swords — learned',
     'Woodcraft',
     'whittling, level 2 — learned',
-    'joinery — learned, unqualified; joinery req',
-    'turning — not learned; turning req',
+    'joinery — learned, unqualified. joinery req',
+    'turning — not learned. turning req',
     'Handcraft',
-    'carving — locked; carving req',
+    'carving — locked. carving req',
     'Loomcraft',
-    'weaving — not learned; weaving req',
+    'weaving — not learned. weaving req',
     'Back to World',
   ]);
   const locked = { skills: [box('carving', 'Handcraft', { locked: true })] };
   assert.deepEqual(words(CharacterPage({ view: locked, text, world: () => {} } as any)), [
     'Character',
     'Handcraft',
-    'carving — locked; carving req',
+    'carving — locked. carving req',
     'Back to World',
   ]);
   const npc = { name: 'aldous', lessons: view.skills.map((s: any) => s.skill) };
-  assert.deepEqual(
-    words(npcSkills(usePalette(), useType(), { view, npc, text } as any)).map(
-      (w) => w.split(';')[0],
-    ),
-    [
-      'swords: learned.',
-      'whittling: learned.',
-      'carving: locked',
-      'joinery: learned, unqualified',
-      'Aldous teaches turning',
-      'Aldous teaches weaving',
-    ],
-  );
+  assert.deepEqual(words(npcSkills(usePalette(), useType(), { view, npc, text } as any)), [
+    'swords: learned.',
+    'whittling: learned.',
+    'carving: locked. carving req',
+    'joinery: learned, unqualified. joinery req',
+    'Aldous teaches turning. turning req',
+    'Aldous teaches weaving. weaving req',
+  ]);
 });
 
 // Breaks: the displayed name missing, capitalised, labelled or not first, or the empty placeholder
@@ -269,7 +264,7 @@ test('item equipment detail copies current typed slot/profile/requirement and bl
   assert.deepEqual(words(ItemDetails({ thing, text })), [
     'A weathered blade.',
     'Slot: wield',
-    'Attack: 82% chance, 7–9 damage; requires Sword craft (STR at least 10).',
+    'Attack: 82% chance, 7–9 damage; requires Sword craft. STR at least 10',
   ]);
   assert.deepEqual(
     words(ItemDetails({ thing: { slot: 'off_hand', block_chance: 37 } as any, text })),
@@ -281,7 +276,7 @@ test('item equipment detail copies current typed slot/profile/requirement and bl
   };
   assert.equal(
     words(ItemDetails({ thing: fixed, text }))[2],
-    'Attack: 82% chance, 2 damage; requires Sword craft (STR at least 10).',
+    'Attack: 82% chance, 2 damage; requires Sword craft. STR at least 10',
   );
 });
 

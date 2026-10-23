@@ -12,7 +12,7 @@ import { cardKey } from './presenter.ts';
 
 // pass-1 H3 (book-ui.md Skill tree details): a qualified learned box has nothing left to meet.
 const learned = (s: NonNullable<GameView['skills']>[number], text: (key: string) => string) =>
-  s.qualified ? 'learned' : `learned, unqualified; ${text(s.requirement)}`;
+  s.qualified ? 'learned' : `learned, unqualified. ${text(s.requirement)}`;
 
 /**
  * The Character page's topics, attributes and skills.
@@ -69,7 +69,7 @@ export function Professions(p: { view?: GameView; text: (key: string) => string 
             </Text>
           ) : (
             <Note key={s.skill.key}>
-              {`${p.text(s.label)} — ${s.locked ? 'locked' : 'not learned'}; ${p.text(s.requirement)}`}
+              {`${p.text(s.label)} — ${s.locked ? 'locked' : 'not learned'}. ${p.text(s.requirement)}`}
             </Note>
           ),
         )}
@@ -138,8 +138,8 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
           {item.weapon.attack.damage_max !== item.weapon.attack.damage_min
             ? `–${item.weapon.attack.damage_max}`
             : ''}{' '}
-          damage; requires {item.skill_label ? p.text(item.skill_label) : item.weapon.skill.key}
-          {item.skill_requirement ? ` (${p.text(item.skill_requirement)})` : ''}.
+          damage; requires {item.skill_label ? p.text(item.skill_label) : item.weapon.skill.key}.
+          {item.skill_requirement ? ` ${p.text(item.skill_requirement)}` : ''}
         </Text>
       )}
       {item?.block_chance !== undefined && (
