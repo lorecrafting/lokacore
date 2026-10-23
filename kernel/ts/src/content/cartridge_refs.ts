@@ -91,6 +91,7 @@ export function parts(c: Obj): [string, Obj, string][] {
     add('room', r, `.cartridge.rooms${step(ref)}`);
     if (r.dark_description)
       out.push(['darkness', {}, `.cartridge.rooms${step(ref)}.dark_description`]);
+    if (r.dark) out.push(['darkness', {}, `.cartridge.rooms${step(ref)}.dark`]);
     for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
       add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
   }

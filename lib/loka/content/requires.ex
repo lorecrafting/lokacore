@@ -39,12 +39,20 @@ defmodule Loka.Content.Requires do
   defp book_minimum(all),
     do: if(Enum.any?(all, fn {_, _, d} -> d["readable"] != nil end), do: [1, 24], else: [])
 
+  # A room's dark flag (loka-x6t.36) needs 1.114; fuel or a dark_description 1.19.
   defp light_minimum(all) do
-    if Enum.any?(all, fn {_, _, d} ->
-         is_map_key(d, "fuel") or is_map_key(d, "dark_description")
-       end),
-       do: [1, 19],
-       else: []
+    cond do
+      Enum.any?(all, fn {_, _, d} -> is_map_key(d, "dark") end) ->
+        [1, 114]
+
+      Enum.any?(all, fn {_, _, d} ->
+        is_map_key(d, "fuel") or is_map_key(d, "dark_description")
+      end) ->
+        [1, 19]
+
+      true ->
+        []
+    end
   end
 
   defp b6_minimum(all), do: if(Enum.any?(all, &b6_feature?/1), do: [1, 21], else: [])

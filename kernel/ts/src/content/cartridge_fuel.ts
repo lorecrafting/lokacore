@@ -3,13 +3,16 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 export function fuel(c: Obj, check: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
-  if (
-    [...Object.values((c.items ?? {}) as Obj), ...Object.values((c.rooms ?? {}) as Obj)].some(
-      (d) => d.fuel || d.dark_description,
-    )
-  ) {
+  const rooms = Object.values((c.rooms ?? {}) as Obj);
+  // A dark flag (loka-x6t.36) needs 1.114; fuel or a dark_description 1.19.
+  const floor = rooms.some((r) => r.dark)
+    ? 114
+    : [...Object.values((c.items ?? {}) as Obj), ...rooms].some((d) => d.fuel || d.dark_description)
+      ? 19
+      : 0;
+  if (floor) {
     const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-    if (major < 1 || (major === 1 && minor < 19))
+    if (major < 1 || (major === 1 && minor < floor))
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );

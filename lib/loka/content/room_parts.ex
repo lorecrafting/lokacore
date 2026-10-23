@@ -87,11 +87,16 @@ defmodule Loka.Content.RoomParts do
         do: {["details", k, "harvest", "tool"], "tags"}
       )
 
-  # A room's darkness (light@1) and tags (tags@1), each owned by its capability, and its tool gates.
+  # A room's darkness (light@1: dark, dark_description) and tags (tags@1), each owned by its
+  # capability, and its tool gates.
   defp optional(r),
     do:
       tools(r) ++
-        for({f, k} <- [{"dark_description", "darkness"}, {"tags", "tags"}], r[f], do: {[f], k})
+        for(
+          {f, k} <- [{"dark", "darkness"}, {"dark_description", "darkness"}, {"tags", "tags"}],
+          r[f],
+          do: {[f], k}
+        )
 
   @doc "Each variant's condition in the schema-valid rooms, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]

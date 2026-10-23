@@ -5,7 +5,8 @@ import { fuelAt } from '../src/foundation/fuel.ts';
 import { fuelView } from '../src/mechanics/light/shared.ts';
 import { resolve } from '../src/commands/target.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
-import { fresh, entity, room, lightActionFixture } from './light_fixture.ts';
+import { fresh, entity, room, npc, f, light, lightActionFixture } from './light_fixture.ts';
+import { validate } from '../src/foundation/validate.ts';
 const torch = entity('torch'),
   oil = entity('lamp_oil'),
   bag = entity('satchel');
@@ -21,30 +22,30 @@ export function run(w: World, type: string, fields: object = {}) {
     ordinal,
   );
 }
-function small(): World {
+function small(base: World = fresh): World {
   return {
-    ...fresh,
+    ...base,
     fuelSpecs: {
-      ...fresh.fuelSpecs,
-      [torch]: { ...fresh.fuelSpecs[torch], capacity: 10, initial: 10 },
-      [oil]: { ...fresh.fuelSpecs[oil], capacity: 6, initial: 6 },
+      ...base.fuelSpecs,
+      [torch]: { ...base.fuelSpecs[torch], capacity: 10, initial: 10 },
+      [oil]: { ...base.fuelSpecs[oil], capacity: 6, initial: 6 },
     },
     state: {
-      ...fresh.state,
+      ...base.state,
       clock: 100,
       resources: Object.fromEntries(
-        Object.entries(fresh.state.resources ?? {}).map(([k, r]) => [k, { ...r, at: 100 }]),
+        Object.entries(base.state.resources ?? {}).map(([k, r]) => [k, { ...r, at: 100 }]),
       ),
       fuel: {
         [torch]: { remaining: 10, at: 100, lit: false },
         [oil]: { remaining: 6, at: 100, lit: false },
       },
       containers: {
-        ...fresh.state.containers,
-        [fresh.body]: room('well_shaft'),
-        [torch]: fresh.body,
-        [oil]: fresh.body,
-        [bag]: fresh.body,
+        ...base.state.containers,
+        [base.body]: room('well_shaft'),
+        [torch]: base.body,
+        [oil]: base.body,
+        [bag]: base.body,
       },
     },
   };
@@ -292,9 +293,7 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 // Breaks (status reader 6): a held lit torch outweighs blindness (blind read inside the unlit test).
-test('a blind player holding a lit torch sees the well shaft dark', () => {
-  const w = accept(run(small(), 'ignite', { item_id: torch }));
-  assert.equal(gameView(w).place.description.key, 'room.well_shaft.description');
+function blinded(w: World): World {
   const { id: cartridge_id, version: cartridge_version } = w.cartridge.manifest;
   const blind = { cartridge_id, cartridge_version, kind: 'status', key: 'blind' } as never;
   const spec = {
@@ -302,7 +301,7 @@ test('a blind player holding a lit torch sees the well shaft dark', () => {
     resource: { cartridge_id, cartridge_version, kind: 'resource', key: 'hp' },
     perception: { sight: 'blind' },
   };
-  const blinded = {
+  return {
     ...w,
     cartridge: { ...w.cartridge, statuses: { [refString(blind)]: spec } },
     state: {
@@ -310,5 +309,52 @@ test('a blind player holding a lit torch sees the well shaft dark', () => {
       statuses: { [statusKey(w.body, blind)]: { generation: 1, active: true } },
     },
   } as World;
-  assert.equal(gameView(blinded).place.description.key, 'room.well_shaft.dark');
+}
+test('a blind player holding a lit torch sees the well shaft dark', () => {
+  const w = accept(run(small(), 'ignite', { item_id: torch }));
+  assert.equal(gameView(w).place.description.key, 'room.well_shaft.description');
+  assert.equal(gameView(blinded(w)).place.description.key, 'room.well_shaft.dark');
+});
+
+// Breaks (loka-x6t.36): a dark-flagged room with no dark_description shows its description, an
+// aside, Peg or the floor oil to a player without light; the peek from above shows its contents;
+// the engine line replaces a held item's short; the exit is lost; light does not restore sight.
+test('a dark-flagged room reads place.dark and hides its entities until lit', () => {
+  const flagged = f.genesis((c) => {
+    light(c);
+    c.manifest.requires.kernel_api.at_least = '1.114';
+    const shaft = c.rooms[`${f.prefix}:room/well_shaft`];
+    delete shaft.dark_description;
+    shaft.dark = true;
+    const always = { policy_version: 1, root: { op: 'all', items: [] } };
+    shaft.asides = [{ when: always, text: 'room.well_shaft.description' }];
+    c.npcs[`${f.prefix}:npc/peg`].room = f.ref('room', 'well_shaft');
+  });
+  const base = small(flagged);
+  let w: World = {
+    ...base,
+    state: { ...base.state, containers: { ...base.state.containers, [oil]: room('well_shaft') } },
+  };
+  const ids = (v: object) => JSON.stringify(v);
+  const peg = npc('peg');
+  let view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.equal(view.place.description.key, 'place.dark');
+  assert.equal(view.place.asides, undefined);
+  assert.ok(!ids(view).includes(peg) && !ids(view).includes(oil));
+  assert.ok(ids(view).includes('"item.torch.short"'));
+  assert.equal(resolve(w, w.character, 'peg').kind, 'none');
+  const above = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [w.body]: room('well_lane') } },
+  };
+  assert.ok(!sight(above, w.body).find((s) => s.direction === 'down')!.entities);
+  assert.equal(run(w, 'move', { direction: 'up' }).decision.kind, 'accepted');
+  w = accept(run(w, 'ignite', { item_id: torch }));
+  view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.equal(view.place.description.key, 'room.well_shaft.description');
+  assert.equal(view.place.asides?.length, 1);
+  assert.ok(ids(view).includes(peg) && ids(view).includes(oil));
+  assert.equal(gameView(blinded(w)).place.description.key, 'place.dark');
 });

@@ -673,8 +673,10 @@ Item definitions opt into `fuel`: a supply declares `kind: supply`, positive
 `supply` reference and the `ignited`, `doused`, `refueled` narration keys. Runtime
 immutable `fuel_specs` bind these specifications to their actual item instances;
 mutable `fuel` rows are keyed by item ID. A room's optional `dark_description`
-is its authored darkness opt-in. Actual fuel or darkness fields require a
-`requires.kernel_api.at_least` floor of 1.19 in both compiler and loader;
+is its authored darkness opt-in; the optional `dark: true` flag (kernel_api 1.114)
+darkens a room with no text of its own, read as the engine key `place.dark`. Actual
+fuel or darkness fields require a `requires.kernel_api.at_least` floor of 1.19 (1.114
+for `dark`) in both compiler and loader;
 an unused reserved light capability does not impose that floor. `FuelView` carries confirmed `remaining`,
 `capacity`, and effective `lit` without a presenter clock.
 
