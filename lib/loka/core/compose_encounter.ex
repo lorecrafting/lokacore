@@ -1,3 +1,4 @@
+# size: allow 310, job bindings mirror TS bindingValid, including its sight rule (loka-kgd.153)
 defmodule Loka.Core.ComposeEncounter do
   @moduledoc "Portable encounter and bound-job lifecycle over composition's current rows."
   alias Loka.Core.Int
