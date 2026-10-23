@@ -77,9 +77,9 @@ test('a press that changed nothing logs a plain sentence', () => {
 
 // Breaks: the bleeding line shows raw seconds (360s) instead of the conditions' durations (loka-ozu).
 test('the bleeding line reads its time left and cadence like a condition', () => {
-  const bleeding = { label: 'bleeding', ends_at: 1260, hp_loss: 1, tick_every: 60 } as never;
+  const bleeding = { label: 'bleeding', ends_at: 1260, hp_loss: 1, tick_every: 180 } as never;
   assert.equal(
     bleedingLine(bleeding, 900, (s) => s),
-    'bleeding · 6m remaining · 1 HP each 60s',
+    'bleeding · 6m remaining · 1 HP each 3m',
   );
 });

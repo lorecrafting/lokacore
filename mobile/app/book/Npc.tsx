@@ -68,7 +68,7 @@ type NpcProps = {
   press: (b: Button) => void;
   log: DetailLine[];
   leave: () => void;
-  since?: number; // outside a conversation, history before this line is hidden (owner 2026-10-09)
+  since?: number; // history before this line (the last Leave the conversation) is hidden (loka-x6t.19)
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
   open: (id: string) => void;
@@ -79,7 +79,7 @@ type NpcProps = {
  * action details).
  * - Use: an NPC route.
  * - Rules: choices and services as Action cards, the conversation log, Controls in the PageFoot.
- *   Outside a conversation, earlier history is hidden.
+ *   History belongs to the page visit and restarts after Leave the conversation.
  * - States: choice; shop; services; closed conversation.
  * - Story: NpcPage.stories.tsx
  */
@@ -190,15 +190,18 @@ export const npcSkills = (c: Palette, t: Type, p: NpcProps) =>
             r.key === s.skill.key,
         ),
     )
-    .map((s) => (
-      <Text key={s.skill.key} style={note(c, t)}>
-        {s.acquired || s.locked
-          ? `${p.text(s.label)}: ${s.locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
-          : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
-        {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
-        {s.qualified && !s.locked ? '.' : `; ${p.text(s.requirement)}`}
-      </Text>
-    ));
+    .map((s) => {
+      const locked = s.locked && !s.acquired; // learned reads first, as on the Character page
+      return (
+        <Text key={s.skill.key} style={note(c, t)}>
+          {s.acquired || locked
+            ? `${p.text(s.label)}: ${locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
+            : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
+          {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
+          {s.qualified && !locked ? '.' : `; ${p.text(s.requirement)}`}
+        </Text>
+      );
+    });
 
 function ShopOptions(p: NpcProps) {
   const c = usePalette();

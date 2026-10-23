@@ -161,7 +161,7 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
     if (location.status === 'here') return `${who}: here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);
-    const ago = Math.max(0, view.time - location.at);
+    const ago = view.time - location.at; // a clock behind the sighting still reads just now
     return `${who}: last seen at ${room ? text(room.title) : 'a previously observed place'}, ${ago < 120 ? 'just now' : `${dur(ago)} ago`}.`;
   }
   const lines = d.narration ?? [];

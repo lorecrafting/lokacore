@@ -109,7 +109,7 @@ test('Character groups profession boxes under their title, acquired then not lea
   });
   const view: any = {
     skills: [
-      box('swords', undefined, { acquired: true, qualified: true }),
+      box('swords', undefined, { acquired: true, qualified: true, locked: true }), // learned outranks locked
       box('whittling', 'Woodcraft', { acquired: true, qualified: true, level: 2 }),
       box('carving', 'Handcraft', { locked: true }),
       box('joinery', 'Woodcraft', { acquired: true }),
