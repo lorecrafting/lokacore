@@ -220,16 +220,14 @@ export function Here(p: {
 }
 
 // One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
-// words (loka-6qi): the bare name, its article written only when it differs from the previous
-// link's or the name repeats it (a name without one breaks the run), and same-name entities with a
-// plural as one link.
+// words (loka-6qi): the bare name, its article written when it differs from the previous link's or
+// the name repeats (a name without one breaks the run), and same-name entities with a plural as one.
 function Present(p: {
   group: GameView['entities'];
   text: (key: string) => string;
   open: (id: string) => void;
 }) {
-  const c = usePalette();
-  const t = useType();
+  const [c, t] = [usePalette(), useType()];
   type Link = { id: string; name: string; article?: string; many?: true };
   const links = p.group.flatMap((e): Link[] => {
     const { bare, article, plural } = e.words ?? {};
