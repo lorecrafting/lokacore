@@ -74,7 +74,7 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => "Hire him."})) == bad
 
-    for ok <- ["Hire him", "Wait...", "\"Hire him.\"", "“Hire him.”"],
+    for ok <- ["Hire him", "Wait...", "\"Aye,\" he says.", "“Aye,” he says."],
         do: assert(Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => ok})) == [])
 
     act = %{"actions/walk.json" => %{"label" => "l"}, "text.json" => %{"l" => "Walk."}}

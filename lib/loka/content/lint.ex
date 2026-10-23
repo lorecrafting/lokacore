@@ -235,7 +235,7 @@ defmodule Loka.Content.Lint do
 
   defp label_problem(:choice, _, s),
     do:
-      if(s =~ ~r/[^.]\.$/,
+      if(s =~ ~r/[^.]\.$/ and not String.starts_with?(s, ["\"", "“", "‘"]),
         do: "ends in a period"
       )
 
