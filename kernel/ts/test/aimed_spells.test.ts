@@ -85,8 +85,8 @@ const hall = (c = aimed) => {
   return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never, [1, 2, 3, 4]);
 };
 /** Orb (and glowdust) taken, east into the crypt, lit by aimed lux at the orb. */
-function crypt(): World {
-  let w = hall();
+function crypt(c = aimed): World {
+  let w = hall(c);
   for (const i of ['orb', 'glowdust'])
     w = ok(play(w, { type: 'take', item_id: w.entityIds[`${P}:item/${i}`] }));
   w = ok(play(w, { type: 'move', direction: 'east' }));
@@ -119,7 +119,8 @@ test('flamma is offered on the wight, not in spell_words; lux lists only on the 
   assert.deepEqual(view.spell_words ?? [], []);
   const keys = (key: string) =>
     entry(w, w.entityIds[`${P}:${key}`]!)!.actions.map((a) => a.action_key);
-  assert.ok(keys('item/orb').includes('lux'));
+  const orb = entry(w, w.entityIds[`${P}:item/orb`]!)!.actions.find((a) => a.action_key === 'lux');
+  assert.equal(orb?.available, true); // its policy read with the orb as target
   assert.ok(!keys('item/glowdust').includes('lux')); // 7: untagged: not listed
 });
 
@@ -219,7 +220,12 @@ test('an unlearned or unknown word is invalid_state before any target check', ()
     aimedChange(c);
     c.facts[`${P}:fact/flamma_known`].value_type.default = false;
   }) as { cartridge: Cartridge };
-  assert.equal(code(at(hall(unlearned.cartridge), 'flamma', 'item/glowdust')), 'invalid_state');
+  const h = hall(unlearned.cartridge);
+  assert.equal(code(at(h, 'flamma', 'item/glowdust')), 'invalid_state');
+  const offers = gameView(crypt(unlearned.cartridge)).entities.flatMap((e) =>
+    e.actions.map((a) => a.action_key),
+  );
+  assert.ok(!offers.includes('flamma')); // not even on the wight
   let w = hall();
   for (const i of ['orb', 'glowdust'])
     w = ok(play(w, { type: 'take', item_id: w.entityIds[`${P}:item/${i}`] }));

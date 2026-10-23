@@ -146,7 +146,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
   });
-  const said = [...talks(world, actor), ...aimedOffers(world, actor)]; // loka-x6t.109
+  const said = [...talks(world, actor), ...aimedOffers(world)]; // loka-x6t.109
   return Object.fromEntries([...actions, ...recipes, ...quests, ...said]);
 }
 
