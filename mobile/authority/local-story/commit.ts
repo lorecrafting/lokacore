@@ -32,8 +32,9 @@ export function commit(
   reports: Captured[],
   elapsed?: Checkpoint,
 ): boolean {
-  if (validate('DecisionResult', r.response).length)
-    throw new Error('invalid DecisionResult; nothing was saved');
+  const invalid = validate('DecisionResult', r.response);
+  if (invalid.length)
+    throw new Error('invalid DecisionResult; nothing was saved', { cause: invalid });
   return transaction(db, () => {
     if (elapsed) persistElapsed(db, elapsed);
     for (const c of reports)

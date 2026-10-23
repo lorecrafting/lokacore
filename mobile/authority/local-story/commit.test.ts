@@ -4,11 +4,11 @@
 // path wrote for the same receipt, never commit's own output.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 import type { RngState, WorldContextId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
 import { INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
@@ -35,6 +35,7 @@ const pick = {
   input: {},
 };
 const dir = mkdtempSync(join(tmpdir(), 'loka-commit-'));
+after(() => rmSync(dir, { recursive: true, force: true }));
 
 function opened(path: string) {
   const sql = new DatabaseSync(path);
@@ -71,10 +72,13 @@ test('commit refuses an invalid DecisionResult before writing; the valid one wri
   const before = bytes(path);
   const bad = { ...r, response: { ...(r.response as object), narration: [] } };
   assert.throws(
-    () => commit(db, next, bad.response as never, bad, []),
+    // No BEGIN: refused before the transaction, so no lock, rollback or fence.
+    () => commit({ ...db, execSync: (q) => assert.fail(q) }, next, bad.response as never, bad, []),
     /invalid DecisionResult; nothing was saved/,
   );
   assert.equal(bytes(path), before);
   assert.equal(commit(db, next, r.response as never, r, []), true);
   assert.deepEqual(sql.prepare(RECEIPT).all(), [row]);
+  played.sql.close();
+  sql.close();
 });
