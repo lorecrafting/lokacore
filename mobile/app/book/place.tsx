@@ -24,9 +24,7 @@ export const placeActions = (
   const verb = (a: { action_key: string; target_ids?: readonly string[] }) =>
     a.action_key !== view.storylet && !notices.some((n) => a.target_ids?.includes(n.id));
   return [
-    ...g.place
-      .filter(verb)
-      .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />),
+    ...g.place.filter(verb).map((b) => <VerbLine key={cardKey(b)} b={b} press={press} />),
     ...refusedPlace(view)
       .filter((a) => !notVerb(a.action_key) && verb(a))
       .map((a) => (

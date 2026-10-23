@@ -17,6 +17,7 @@ import {
   type Thing,
 } from './model.ts';
 import type { Button } from './presenter.ts';
+import { cardKey } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { ReadingSize } from './Chip.tsx';
@@ -240,7 +241,7 @@ export function MapPage(p: {
       />
       <Cards>
         {p.g.place.map((b) => (
-          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+          <ActionCard key={cardKey(b)} b={b} press={p.press} />
         ))}
       </Cards>
       {where(p)}

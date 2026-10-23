@@ -8,6 +8,7 @@ import { LABEL } from './labels.ts';
 import { Control, Page, RunningHead } from './pages.tsx';
 import { prose, usePalette, useType } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
+import { cardKey } from './presenter.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Encounter = NonNullable<Screen['ended']>;
@@ -68,7 +69,7 @@ export function Combat(p: {
             {stand && <ActionCard b={stand} press={p.press} />}
             {p.g.look && <ActionCard b={p.g.look} press={p.press} />}
             {p.g.flee.map((b) => (
-              <ActionCard key={b.label} b={b} press={p.press} />
+              <ActionCard key={cardKey(b)} b={b} press={p.press} />
             ))}
             {p.g.bandage.map((b) => (
               <ActionCard key={b.target_ids[0]} b={b} press={p.press} />

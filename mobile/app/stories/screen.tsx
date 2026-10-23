@@ -19,7 +19,7 @@ export type Saved = {
   view: GameView;
   stack: Page[];
   log: DetailLine[];
-  combatLog: string[];
+  combatLog: DetailLine[];
   details: Record<string, DetailLine[]>;
   chronicle?: ChronicleDay[];
 };
