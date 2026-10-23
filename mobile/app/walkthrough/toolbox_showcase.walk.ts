@@ -39,7 +39,7 @@ const steps = ({ screen, room }: Walk) => {
     await tap(label);
   };
   const lesson = async (...choices: string[]) => {
-    await tap(/^(?:the )?carpenter, open$/i);
+    await tap('carpenter, open');
     await tap('Talk to the carpenter');
     for (const c of choices) await tap(c);
     await tap(LABEL.leaveConversation);
@@ -67,14 +67,14 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await moves('north', 'west', 'west');
   await lesson('Learn whittling', 'Learn woodcutting');
   await take(/^(?:an )?axe, open$/i, /^Take an axe/);
-  for (let i = 0; i < 2; i++) await take(/^(?:an? |two )?sticks?, open$/i, /^Take a stick/);
+  for (let i = 0; i < 2; i++) await take(/^(?:two sticks|stick), open$/i, /^Take a stick/);
   for (let i = 0; i < 2; i++) await tap('Carve a spoon');
   await lesson('Learn carving (2 pennies)');
   await take(/^(?:a )?cot, open$/i, /^Take a cot/);
   await moves('east', 'south', 'west');
   for (let i = 0; i < 4; i++) await tap('Chop wood');
   for (let i = 0; i < 2; i++)
-    await take(/^(?:an? |two )?rabbit pelts?, open$/i, /^Take a rabbit pelt/);
+    await take(/^(?:three|two) rabbit pelts, open$/i, /^Take a rabbit pelt/);
   await moves('east', 'north', 'west');
   await lesson('Learn carpentry (2 pennies)');
   for (let i = 0; i < 2; i++) await tap('Saw timber');
