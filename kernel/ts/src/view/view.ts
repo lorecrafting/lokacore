@@ -121,16 +121,18 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
     return { id: '' as EntityId, title: text('' as TextKey), description: text('' as TextKey) };
   const room = world.rooms[here];
   // In the dark, the authored dark_description, else the engine line (loka-x6t.36); not in
-  // `describe`, which also names held items and the player.
+  // `describe`, which also names held items and the player. Lit, `describe` and `asides` get no
+  // dark_description so they do not test darkness again (query budget).
   const unseen = dark(world, actor, steps);
-  const lines = unseen ? [] : asides(world, actor, room, steps);
+  const lit = { ...room, dark_description: undefined };
+  const lines = unseen ? [] : asides(world, actor, lit, steps);
   return {
     id: here,
     title: text(room.title),
     description: text(
       unseen
         ? (room.dark_description ?? ('place.dark' as TextKey))
-        : describe(world, actor, room, steps),
+        : describe(world, actor, lit, steps),
     ),
     ...(lines.length > 0 && { asides: lines.map(text) }),
   };
