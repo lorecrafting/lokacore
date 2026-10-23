@@ -5,10 +5,24 @@ every agent). Quoted text is one token, so a message or pattern that mentions a 
 ponytail: a command hidden in `sh -c '...'` or eval is not seen.
   python3 -I bin/bash_guard.py < hook-input.json"""
 import json
+import re
 import shlex
 import sys
 
 MARKER = "LOKA_OWNER_OK_NO_VERIFY=1"
+
+
+def strip_heredocs(command):
+    """Drop heredoc bodies: they are text (a message, a file), not commands."""
+    out, end = [], None
+    for line in command.split("\n"):
+        if end is None:
+            out.append(line)
+            m = re.search(r"(?<!<)<<(?!<)-?\s*['\"]?(\w+)", line)
+            end = m and m.group(1)
+        elif line.lstrip("\t") == end:
+            end = None
+    return "\n".join(out)
 
 
 def segments(command):
@@ -59,7 +73,9 @@ def refusal(seg):
         hooks_off = "--no-verify" in args or (sub == "commit" and skips_hooks(args))
         if hooks_off and MARKER not in seg[:i]:
             return f"git hooks skipped without the owner's OK. Fix the cause; with the owner's OK, prefix {MARKER}."
-    br = invoked(seg, "br")
+    while seg and re.match(r"\w+=", seg[0]):  # br only as the command word, so `echo br create` passes
+        seg = seg[1:]
+    br = seg and seg[0].rsplit("/", 1)[-1] == "br" and invoked(seg, "br")
     if br and br[1] == "create":
         return "bare br create refused: use bin/br_create.sh (plain br create leaves a local source_repo_path)."
     return None
@@ -67,7 +83,7 @@ def refusal(seg):
 
 try:
     command = json.load(sys.stdin)["tool_input"]["command"]
-    reasons = [r for r in map(refusal, segments(command)) if r]
+    reasons = [r for r in map(refusal, segments(strip_heredocs(command))) if r]
 except Exception:
     sys.exit(0)
 if reasons:

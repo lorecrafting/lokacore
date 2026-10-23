@@ -43,7 +43,7 @@ merge "$rec" "Merge review record for $subj" || { git reset -q --hard "$pre"; ex
 # A protocol schema or kernel_api change needs a review record added or updated by the slice or the record branch (loka-1qa2).
 if git diff --name-only "$pre" HEAD -- 'protocol/*.schema.json' | grep -q . ||
   git diff -U0 "$pre" HEAD -- kernel/ts/src/runtime/world.ts | grep -qE '^[+-] *kernel_api:'; then
-  git diff --name-only --diff-filter=AM "$pre" HEAD -- 'docs/reviews/*.md' | grep -q . ||
+  git diff --name-only --diff-filter=AM "$pre" HEAD -- 'docs/reviews/*.md' ':!docs/reviews/README.md' | grep -q . ||
     { echo "NO REVIEW RECORD: a schema or kernel_api change adds or updates no docs/reviews record; reset to pre-merge $pre"; git reset -q --hard "$pre"; exit 1; }
 fi
 

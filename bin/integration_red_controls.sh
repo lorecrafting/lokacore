@@ -283,9 +283,10 @@ CI='[{"conclusion":"cancelled"}]' E2E=$ok pm ci-timeout 2 'ci.yml on .* is cance
 CI=$ok E2E='[{"conclusion":"failure"}]' pm e2e-red 2 'book-e2e.yml on .* is failure'
 CI=$ok E2E='[]' pm e2e-missing 2 'book-e2e.yml on .* is missing'
 CI='[{"conclusion":""}]' E2E=$ok pm ci-running 2 'ci.yml on .* is still running'
-# Break (loka-1qa2): a protocol schema change merges with no review record added, or a record on the record branch is not counted.
+# Break (loka-1qa2): a protocol schema change merges with no review record added (the generated README does not count), or a record on the record branch is not counted.
 CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json pm schema-no-record 1 'NO REVIEW RECORD'
 CI=$ok E2E=$ok SLICE_FILE=kernel/ts/src/runtime/world.ts SLICE_TEXT="  kernel_api: '1.2'," pm kernel-api-no-record 1 'NO REVIEW RECORD'
+CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/README.md pm schema-readme-only 1 'NO REVIEW RECORD'
 CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.md pm schema-record 0 '^PUSHED batch'
 CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.md REC_IN_BASE=1 pm schema-record-updated 0 '^PUSHED batch'
 # --- prepush.sh ----------------------------------------------------------------------------
@@ -311,8 +312,10 @@ grep -q 'test/transcripts.test.ts' "$R.pp" && grep -q '^IMPACT_STORY_' "$R.d" ||
 ! grep -qE '^(STORIES|STATE_SECTIONS)_' "$R.c" || bad 'prepush: story or state-sections check ran for an unrelated change'
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/app kernel/ts/src; echo x > mobile/app/x; git add . && git commit -qm app; pp e
 grep -q '^STORIES_' "$R.e" && ! grep -q '^STATE_SECTIONS_' "$R.e" || bad 'prepush: a mobile/app change did not run only the story check'
-echo x > kernel/ts/src/x; git add . && git commit -qm src; pp f
+git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/x; git add . && git commit -qm src; pp f
 grep -q '^STORIES_' "$R.f" && grep -q '^STATE_SECTIONS_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story and state-sections checks'
+git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/authority; echo x > mobile/authority/x; git add . && git commit -qm auth; pp i
+grep -q '^STORIES_' "$R.i" && ! grep -q '^STATE_SECTIONS_' "$R.i" || bad 'prepush: a mobile/authority change did not run only the story check'
 git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; echo x > docs/state-sections.gen.json; git add . && git commit -qm gen; pp h
 grep -q '^STATE_SECTIONS_' "$R.h" && ! grep -q '^STORIES_' "$R.h" || bad 'prepush: an edit of docs/state-sections.gen.json did not run only the state-sections check'
 git update-ref -d refs/remotes/origin/main; pp g
@@ -336,7 +339,7 @@ lg comma-decimal 'load averages: 9,50 9,00 9,00' 0
 lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- bash_guard.py, send_guard.py (Claude Code PreToolUse hooks) ------------------------------------
 # Break: a git hook skip (--no-verify, commit -n) or a bare br create passes, the owner marker does not let it through, or a
-# command that only mentions the flag in quoted text, another tool's flag or bin/br_create.sh is refused.
+# command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
 bg() { # <want-rc> <command>
   rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.stdin.read()}}))' |
     python3 -I "$bin/bash_guard.py" 2> /dev/null || rc=$?
@@ -359,6 +362,23 @@ bg 0 'git commit -m "refuse --no-verify; br create"'
 bg 0 'grep -n -- --no-verify f && git push -n'
 bg 0 'bin/br_create.sh -t x && br list --status open'
 bg 0 'echo "unclosed'
+bg 0 "gh pr comment 1 --body-file - <<'EOF'
+git commit -n slips
+EOF"
+bg 0 "cat > notes.md <<'EOF'
+never br create
+EOF"
+bg 0 "git commit -F - <<'EOF'
+skip --no-verify
+EOF"
+bg 0 'echo br create'
+bg 2 'BR_X=1 br create x'
+bg 2 "cat > n <<EOF
+x
+EOF
+git push --no-verify"
+bg 2 'cat <<< EOF
+git push --no-verify'
 # Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
 P=$(mktemp -d); mkdir -p "$P/s1/subagents"
 cb() { printf '{"type":"system","subtype":"compact_boundary","compactMetadata":{"durationMs":%s}}\n' "$1"; }
