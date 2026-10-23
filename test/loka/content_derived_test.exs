@@ -139,4 +139,28 @@ defmodule Loka.ContentDerivedTest do
     assert c["world"]["gear_budget"] == budget
     assert c["items"]["affects_sampler@0.0.1:item/belt"]["intended_level"] == 1
   end
+
+  # Breaks: equip words without a slot or outside the text catalog compile, or sound ones are
+  # dropped from the artifact (row 6a; the API floor is a loader_floors.json case).
+  test "equip words keep their slot and catalog keys" do
+    dir = Loka.ContentSource.copy("cartridges/wear_sampler")
+    api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.116")}
+    words = Map.new(~w(wear remove worn removed), &{&1, "item.leather_cap.short"})
+    equip = &{"items/leather_cap.json", fn i -> Map.put(&1.(i), "equip", &2) end}
+
+    assert {:ok, bytes, _} = Loka.ContentSource.compile(dir, [api, equip.(& &1, words)])
+    c = JSON.decode!(bytes)["cartridge"]
+    assert c["items"]["wear_sampler@0.0.1:item/leather_cap"]["equip"] == words
+
+    cases = [
+      {equip.(&Map.delete(&1, "slot"), words), {"SCHEMA_VIOLATION", "items/leather_cap.equip"}},
+      {equip.(& &1, %{words | "worn" => "no.such"}),
+       {"UNRESOLVED_REFERENCE", "items/leather_cap.equip.worn"}}
+    ]
+
+    for {change, {code, path}} <- cases do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [api, change])
+      assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
+    end
+  end
 end
