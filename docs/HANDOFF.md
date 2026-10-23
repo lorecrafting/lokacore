@@ -14,6 +14,8 @@ live Storybook polish batch.
 
 ## Live polish session (OPEN since 2026-10-22, owner at Storybook)
 
+**Start here tomorrow: [docs/design/polish-tour.md](design/polish-tour.md)** (refreshed 2026-10-23; what is fixed, what is filed, screen by screen).
+
 The owner reactivated Storybook polish (2026-10-22, quoted): "i am going to do the ui polish on the storybook thing ...
 PLease set things up so that its easy for me to do my ui polish there".
 - Session: `polish/session-2026-10-21` in ~/dev/lokacore-session; it holds no commits yet and was fast-forwarded to
@@ -325,6 +327,11 @@ polish stage which needs me at the computer for a bit."
   levels of being stunned or whatever affect that is delaying his round of inaction"; 6 "Make it lik LegendMUD where the
   description says somethihg like \"It's too dark to see...\" Items and PC/NPC also cant be seen."; "All others not mentioned,
   go with your recs". Details in each issue's notes. #372 closed; loka-oej closed by design; loka-6qi to the toolbox.
+- 2026-10-22 (quoted): dark rooms (loka-x6t.36, #449) "Room name should not be hidden"; the title stays as shipped.
+- 2026-10-22 (quoted): "yes please go ahead with those 12" (small polish fixes; batches A and B); "yes" to the audit:
+  close loka-51b and loka-kgd.107.10-.16, defer loka-x6t.34/.35, loka-4l3, loka-x6t.45.
+- 2026-10-22 (quoted): "Yes lets go with your recommendation" on the Fable Beads cleanup (all but the epic split;
+  loka-3w3q to P1). Applied, except y6yg.54 kept (its "file removed" claim was wrong). Open 187 -> 108.
 
 - 2026-10-21 (session c5ed3619, quoted): NPC statuses "Line now, page later (Recommended)"; worldbuilding "Lets take over
   thr worldbuilding maybe spin off a subagent to clean it up and comit" (done, #420); retro "ok approve".
