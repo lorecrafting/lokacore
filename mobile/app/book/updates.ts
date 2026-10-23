@@ -32,14 +32,14 @@ export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']
   return pagesAfter(corpse, screen.view, screen.view);
 }
 const detailId = (page: Page) =>
-  page.kind === 'thing' || page.kind === 'notice' || page.kind === 'board'
+  page.kind === 'thing' || page.kind === 'notice'
     ? page.id
     : page.kind === 'dialogue'
       ? (page.speaker ?? 'conversation')
       : undefined;
 // A closed NPC, item or notice page drops its visit's history, by any route (book-ui.md
 // Detail-page order); every redraw sweeps, so a reply that lands after its page closed is gone too.
-export const visit = (pr: Presenter, stack: Page[]) => pr.visit(stack.map(detailId));
+const visit = (pr: Presenter, stack: Page[]) => pr.visit(stack.map(detailId));
 
 export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   const stack = s.current.current.stack;
