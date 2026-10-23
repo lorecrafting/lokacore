@@ -373,6 +373,22 @@ skip --no-verify
 EOF"
 bg 0 'echo br create'
 bg 2 'BR_X=1 br create x'
+bg 0 'git commit -m T -m "- add new guard"'
+bg 0 'git push --no-verbose'
+bg 2 'git push origin b \
+  --no-verify'
+bg 2 'git commit -m x 2>&1 --no-verify'
+bg 2 'echo $((1<<2))
+git push --no-verify'
+bg 2 'git commit --no-verif -m x'
+bg 2 'git -c core.hooksPath=/dev/null commit -m x'
+bg 2 'git commit -mx -n'
+bg 2 'git commit -S -n'
+bg 0 'git diff -- f'
+bg 2 'cat <<END-X
+b
+END-X
+git push --no-verify'
 bg 2 "cat > n <<EOF
 x
 EOF

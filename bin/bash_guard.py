@@ -18,7 +18,7 @@ def strip_heredocs(command):
     for line in command.split("\n"):
         if end is None:
             out.append(line)
-            m = re.search(r"(?<!<)<<(?!<)-?\s*['\"]?(\w+)", line)
+            m = re.search(r"(?<!<)<<(?!<)-?\s*['\"]?([A-Za-z_][\w-]*)", line)  # not 1<<2
             end = m and m.group(1)
         elif line.lstrip("\t") == end:
             end = None
@@ -26,6 +26,7 @@ def strip_heredocs(command):
 
 
 def segments(command):
+    command = re.sub(r">&|<&|&>", ">", command.replace("\\\n", " "))  # 2>&1 and a line continuation join
     lex = shlex.shlex(command, posix=True, punctuation_chars=";&|\n()")
     lex.whitespace = " \t\r"
     lex.whitespace_split = True
@@ -55,12 +56,15 @@ def invoked(seg, name):
 
 def skips_hooks(args):
     """An `n` in a short-flag cluster of `git commit`, before a flag that takes the rest as its value."""
-    for t in args:
+    rest = iter(args)
+    for t in rest:
         if t[:1] == "-" and t[1:2] != "-":
             for c in t[1:]:
                 if c == "n":
                     return True
                 if c in "mFCcSut":  # the rest of the token is this flag's value
+                    if t.endswith(c) and c in "mFCct":
+                        next(rest, None)  # or the next word: `-m "- add"`
                     break
     return False
 
@@ -70,7 +74,8 @@ def refusal(seg):
     if git:
         i, sub = git
         args = seg[i + 1 :]
-        hooks_off = "--no-verify" in args or (sub == "commit" and skips_hooks(args))
+        skip = [a for a in args if len(a) > 8 and "--no-verify".startswith(a) or a.lower().startswith("core.hookspath=")]
+        hooks_off = skip or (sub == "commit" and skips_hooks(args))
         if hooks_off and MARKER not in seg[:i]:
             return f"git hooks skipped without the owner's OK. Fix the cause; with the owner's OK, prefix {MARKER}."
     while seg and re.match(r"\w+=", seg[0]):  # br only as the command word, so `echo br create` passes

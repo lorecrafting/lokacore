@@ -28,7 +28,7 @@ run DOCS elixir bin/check_docs.exs
 changed=$(git diff --name-only origin/main...HEAD 2>/dev/null) || changed=ALL
 touched() { [ "$changed" = ALL ] || printf '%s\n' "$changed" | grep -qE "$1"; }
 # Story views, saves and CSF meta indexing (#431); hosted mobile runs it too (loka-8qzi, loka-yz58).
-if touched '^(mobile/app/|mobile/authority/|kernel/ts/src/|protocol/)'; then
+if touched '^(mobile/|kernel/ts/src/|protocol/)'; then
   run STORIES sh -c 'cd mobile/app && node --test --test-reporter=dot stories.test.ts'
 fi
 # docs/state-sections.gen.json, the one generated doc contracts.exs --check does not cover (loka-u58).
