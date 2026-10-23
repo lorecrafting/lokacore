@@ -46,10 +46,27 @@ const StatusRow = ({ item, session }: { item: Item; session: boolean }) => {
   );
 };
 
+// The before crop and, once done, the after shot (bin/polish_status.sh); ?t= refetches a redone one.
+const Shots = ({ shot, at, done }: { shot: string; at: string; done: Item }) => (
+  <div style={{ display: 'flex', gap: 4 }}>
+    <img alt="before" src={shotUrl(shot)} style={{ minWidth: 0, flex: 1 }} />
+    {done?.state === 'done' && (
+      <img
+        key={done.time} // a new shot remounts an image its 404 hid
+        alt="after"
+        src={`${ROUTE}/shots/${at}-after.png?t=${done.time}`}
+        style={{ minWidth: 0, flex: 1 }}
+        onError={(ev) => (ev.currentTarget.style.display = 'none')}
+      />
+    )}
+  </div>
+);
+
 // A chip pins its element again for a follow-up (no outline in the preview: the node may be gone;
 // the old crop path rides along). The thumbnail toggles the full crop.
 export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<number | null>(null);
+  const shot = open === null ? null : p.elements?.[open]?.shot;
   return (
     <Owner data-pick={p.id}>
       <div>
@@ -66,7 +83,7 @@ export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
                 width={24}
                 height={24}
                 style={{ objectFit: 'cover' }}
-                onClick={(ev) => (ev.stopPropagation(), setOpen(open === e.shot ? null : e.shot!))}
+                onClick={(ev) => (ev.stopPropagation(), setOpen(open === i ? null : i))}
               />
             )}
             {chipText(e)}
@@ -76,7 +93,7 @@ export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
           {[p.story?.title, p.palette, p.viewport?.name].filter(Boolean).join(' · ')}
         </Muted>
       </div>
-      {open && <img alt="crop" src={shotUrl(open)} style={{ width: '100%' }} />}
+      {shot && <Shots shot={shot} at={`${p.id}-${open}`} done={latest(feed, p.id)} />}
       <div style={{ fontSize: 14, margin: '4px 0' }}>{p.note}</div>
       <StatusRow item={latest(feed, p.id)} session={!!feed.session} />
     </Owner>

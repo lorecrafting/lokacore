@@ -36,6 +36,7 @@ export type Pick = {
   note?: string;
   story?: { id: string; title: string };
   palette?: string;
+  reading?: string;
   viewport?: { name: string; width: string; height: string } | null;
   elements?: Picked[];
 };
