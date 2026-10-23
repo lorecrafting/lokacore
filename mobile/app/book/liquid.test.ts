@@ -9,6 +9,7 @@ import {
   water,
 } from '../../authority/local-story/__tests__/liquid-bundle.test.ts';
 import { presenter } from './presenter.ts';
+import { book } from './__tests__/polish-book.test.ts';
 import { buttonsOf, actionContext, group, pagesAfter, intentOf, things } from './model.ts';
 const pin = liquidBundle();
 function invoke(game: Game, action_key: string, target_ids: string[] = [], input: object = {}) {
@@ -95,6 +96,9 @@ test('Book restores liquid narration on the exact saved source detail after SQLi
     assert.equal(game.lastNarration()!.detail_id, well);
     game = openGame(p.db, pin, p.host);
     assert.match(presenter(game).screen().detail(well).join(' '), /Water · 4 quarter-litres/);
+    const ui = book(pin, { ...p, game }); // the Book opens the well on a new visit (loka-x6t.19)
+    assert.deepEqual(ui.p.screen().detail(well), []);
+    ui.unmount();
     invoke(game, 'drink', [original]);
     game = openGame(p.db, pin, p.host);
     assert.match(presenter(game).screen().detail(original).join(' '), /Water · 1 quarter-litres/);

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { openGame } from '../../authority/local-story/session.ts';
 import { glowBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
@@ -149,7 +150,8 @@ test('other item actions retain their detail and show their consequences there',
       'utf8',
     ),
   );
-  const h = book(items);
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, items);
+  const h = book(items, a);
   h.tap('A sewing box');
   h.tap('Open a sewing box');
   assert.ok(h.labels().includes('Leave'));
@@ -160,6 +162,11 @@ test('other item actions retain their detail and show their consequences there',
   assert.ok(h.labels().includes('A sewing box is here., open'));
   h.tap('A sewing box is here., open');
   assert.equal(h.text().includes('Opened.'), false); // a reopened item starts a new visit (loka-x6t.19)
+  h.unmount();
+  const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
+  r.tap('A sewing box is here., open');
+  assert.equal(r.text().includes('Opened.'), false, JSON.stringify(r.text()));
+  r.unmount();
   h.sql.close();
 });
 

@@ -290,6 +290,13 @@ export function presenter(game: Game) {
     },
     leaveCombat: () => (s.ended = undefined),
     forget: (id: string) => s.details.delete(id),
+    // At mount: a reopened save's restored history belongs to no visit unless its page is open;
+    // a restored pickup and a dream (resumed, not revisited) keep theirs.
+    forgetClosed(open: (string | undefined)[]) {
+      for (const id of [...s.details.keys()])
+        if (!open.includes(id) && id !== s.pickedFrom && !id.startsWith('dream:'))
+          s.details.delete(id);
+    },
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },
