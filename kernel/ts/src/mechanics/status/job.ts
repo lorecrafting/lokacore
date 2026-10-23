@@ -69,8 +69,8 @@ export function runStatus(
     return fatalTick(visit, command, ops, events, held, status, mint, say(spec.narration.tick));
   if (expired) {
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
-    // ponytail: an item reuses the player's own expired line (third person for burning, the only
-    // observed item status today); add an item-specific key when a second-person one reaches items.
+    // ponytail: an item or room reuses the player's own expired line (third person for burning, the
+    // only observed item status today); add a holder-specific key when a second-person one reaches them.
     const lines = player || watched(visit, body, spec) ? [{ key: spec.narration.expired }] : [];
     return accepted(world, 'job_ran', ops, ended, lines);
   }
@@ -83,13 +83,18 @@ export function runStatus(
   return crossed ? { ...ran, next, tick: next_tick_at } : ran;
 }
 
-/** loka-y6yg.48: an item whose status declares an observed line, seen in an admitted player's room, tells its expiry. */
-const watched = (w: World, item: EntityId, spec: StatusDefinition) =>
+/**
+ * loka-y6yg.48: an item whose status declares an observed line, seen in an admitted player's room,
+ * tells its expiry; loka-x6t.37: so does a room an admitted player stands in, unlit or not.
+ */
+const watched = (w: World, holder: EntityId, spec: StatusDefinition) =>
   !!spec.narration.observed &&
-  w.entities[item]?.kind === 'item' &&
-  admitted(w).some(
-    ([actor, body]) =>
-      w.state.containers[item] === w.state.containers[body] && visible(w, actor, item),
+  admitted(w).some(([actor, body]) =>
+    w.rooms[holder]
+      ? w.state.containers[body] === holder
+      : w.entities[holder]?.kind === 'item' &&
+        w.state.containers[holder] === w.state.containers[body] &&
+        visible(w, actor, holder),
   );
 
 /** loka-y6yg.48: items going out in one advance tell each expired line once per receipt (a woodpile is one line). */

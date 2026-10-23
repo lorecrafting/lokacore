@@ -296,7 +296,8 @@ export function statusStep(
     const kind = world.entities[holder]?.kind; // an NPC or (loka-y6yg.48) an item in the room
     const seen = (kind === 'npc' || kind === 'item') && world.state.containers[holder] === here;
     const told = kind === 'item' && out.narration.some((l) => l.key === label); // one line for a woodpile
-    if (first && label && !told && (holder === body || (seen && sees(holder))))
+    // loka-x6t.37: the room the player stands in is felt, not seen: no light test.
+    if (first && label && !told && (holder === body || holder === here || (seen && sees(holder))))
       out.narration.push({ key: label });
   }
   return out;
