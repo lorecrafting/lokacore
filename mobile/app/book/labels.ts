@@ -37,13 +37,14 @@ export const LABEL = {
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
   awayRecap: 'While you were away',
-  // The World page's Word block (word bar S3): its title, row titles and keyboard.
+  // The World page's Word block (word bar S3): its title and row titles; the status line's say
+  // icon and field.
   word: 'Word',
   say: 'Say',
   whisperTo: 'Whisper to',
   shout: 'Shout',
   cast: 'Cast',
-  typeAWord: 'Type a word',
+  sayToRoom: 'Say to the room',
   aWord: 'A word',
   oneWord: 'One word, letters only.',
   // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).

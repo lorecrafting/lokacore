@@ -244,6 +244,8 @@ function Bottom(p: BottomProps) {
   // A tap on the position line acts only on the open World page.
   const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
   const shut = !!view.combat || !!ended;
+  // The keyboard's Say (buttons.ts): on the open World page only, as the Word block was.
+  const say = !p.page && !shut && p.g.word.find((b) => b.action_key === 'say');
   return (
     <View
       style={{
@@ -269,6 +271,15 @@ function Bottom(p: BottomProps) {
           pending={pending}
           open={() => p.open({ kind: 'contents' })}
           openCharacter={() => p.open({ kind: 'character' })}
+          say={
+            say
+              ? {
+                  room: view.place.id,
+                  busy: pending || !!fault || p.screen.catchingUp,
+                  send: (word) => p.press({ ...say, label: LABEL.say, input: { word } }),
+                }
+              : undefined
+          }
         />
       )}
       {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}

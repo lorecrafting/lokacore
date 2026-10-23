@@ -34,31 +34,34 @@ const type = (b: Book, word: string) => {
     .find((n) => n.type === 'TextInput')
     .props.onSubmitEditing();
 };
+// Says a word through the status line's say icon and field.
+const say = (b: Book, word: string) => (b.tap(LABEL.sayToRoom), type(b, word));
 
 // Breaks: a chip row missing or out of order, whisper chips not one row per NPC, the a11y names
-// not "<word>, <how>", or the keyboard control missing while Say is offered.
-test('the square offers Say, a Whisper row per NPC, Shout and the keyboard', () => {
+// not "<word>, <how>", a Say chip drawn, or the say icon missing while Say is offered.
+test('the square offers a Whisper row per NPC, Shout and the say icon', () => {
   const b = book(speech as never);
   const words = (how: string) => ['ward', 'help', 'hello'].map((w) => `${w}, ${how}`);
   const l = b.labels();
-  assert.deepEqual(l.slice(l.indexOf('ward, say'), l.indexOf(LABEL.typeAWord) + 1), [
-    ...words('say'),
+  const first = l.indexOf('ward, whisper to the elder');
+  assert.deepEqual(l.slice(first, first + 9), [
     ...words('whisper to the elder'),
     ...words('whisper to the smith'),
     ...words('shout'),
-    LABEL.typeAWord,
   ]);
+  assert.ok(!l.some((x) => x.endsWith(', say')));
+  assert.ok(l.indexOf(LABEL.sayToRoom) > first + 8, 'the say icon sits on the status line');
 });
 
 // Breaks: a word press not admitted (wrong input shape), the conversation it opens not turned to,
 // or the Word block left showing while a conversation is open.
 test('saying ward opens the elder conversation and hides the Word block', () => {
   const b = book(speech as never);
-  b.tap('ward, say');
+  say(b, 'ward');
   const shown = b.text();
   assert.ok(shown.includes('The elder leans close. "The ward fails at the new moon."'));
   assert.ok(b.labels().includes('Thank her'));
-  assert.ok(!shown.includes(LABEL.word) && !b.labels().some((l) => l.endsWith(', say')));
+  assert.ok(!shown.includes(LABEL.word) && !b.labels().includes(LABEL.sayToRoom));
 });
 
 // Breaks: a whisper sent as a say (everyone in the room hears), or to the wrong target.
@@ -66,7 +69,7 @@ test('a word whispered to the smith is not heard by the elder', () => {
   const b = book(speech as never);
   b.tap('ward, whisper to the smith');
   assert.deepEqual(facts(b), {});
-  b.tap('hello, say');
+  say(b, 'hello');
   assert.deepEqual(facts(b), { elder_heard: true });
 });
 
@@ -82,7 +85,8 @@ test('shouting help in the square alerts the watchman next door', () => {
 test('a say, whisper or shout with no narration echoes once in ink', () => {
   const b = book(speech as never);
   const echoes = () => b.text().filter((t) => t.startsWith('You '));
-  for (const chip of ['hello, say', 'help, shout', 'ward, whisper to the smith']) b.tap(chip);
+  say(b, 'hello');
+  for (const chip of ['help, shout', 'ward, whisper to the smith']) b.tap(chip);
   assert.deepEqual(echoes(), [
     'You say "hello".',
     'You shout "help".',
@@ -95,7 +99,7 @@ test('a say, whisper or shout with no narration echoes once in ink', () => {
 // the chip rows.
 test('the latest result shows before the Word block', () => {
   const b = book(speech as never);
-  b.tap('hello, say');
+  say(b, 'hello');
   const shown = b.text();
   assert.ok(shown.indexOf('You say "hello".') >= 0, JSON.stringify(shown));
   assert.ok(shown.indexOf('You say "hello".') < shown.indexOf(LABEL.word), JSON.stringify(shown));
@@ -107,7 +111,7 @@ test('the latest result shows before the Word block', () => {
 test('a typed word is said like its chip, even after the view moves on, and echoed once', () => {
   const b = book(speech as never);
   const input = () => b.draw().find((n) => n.type === 'TextInput');
-  b.tap(LABEL.typeAWord);
+  b.tap(LABEL.sayToRoom);
   const before = revision(b);
   type(b, 'two words');
   assert.equal(revision(b), before);
@@ -115,7 +119,7 @@ test('a typed word is said like its chip, even after the view moves on, and echo
   input().props.onChangeText('Xyzzy'); // said, and echoed, as the kernel folds it
   const stale = input(); // drawn before a background update, so its Say token is old
   const { view, token } = b.game.view();
-  const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, say')!;
+  const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, shout')!;
   b.game.invoke(intentOf({ ...hello, token })); // not through the Book: no new generation
   const after = revision(b);
   stale.props.onSubmitEditing();
@@ -170,7 +174,7 @@ test('no word press without a word, nor in combat, a scene or a conversation', (
   const words = (w: GameView) => buttonsOf(w, say, say).filter((p) => WORDS.includes(p.action_key));
   const [keyboard, ...chips] = words(v); // the keyboard's Say is never drawn as a chip
   assert.deepEqual([keyboard.action_key, keyboard.input], ['say', {}]);
-  assert.equal(chips.length, 12);
+  assert.equal(chips.length, 9);
   assert.ok(chips.every((p) => /^[a-zA-Z]{1,32}$/.test((p.input as { word?: string }).word ?? '')));
   assert.deepEqual(words({ ...v, phrases: [] }), [keyboard]);
   const open = (f: string) =>
@@ -184,10 +188,8 @@ test('no word press without a word, nor in combat, a scene or a conversation', (
 // "drench" was unsayable), or the keyboard's wordless Say drawn as a chip.
 test('Say without phrases still offers the keyboard, and a typed word is heard', () => {
   const b = book(ward as never);
-  assert.ok(b.text().includes(LABEL.word));
-  assert.ok(!b.labels().some((l) => l.endsWith(', say')));
-  b.tap(LABEL.typeAWord);
-  type(b, 'drench');
+  say(b, 'drench');
+  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'a sent word closes the field');
   const said = b.sql.prepare('SELECT command FROM receipt').all();
   assert.deepEqual(
     said.map((r: any) => JSON.parse(r.command).payload.word),
@@ -199,13 +201,13 @@ test('Say without phrases still offers the keyboard, and a typed word is heard',
 test('Enter while a press is pending sends nothing', () => {
   const a = elapsedHost(':memory:', undefined, speech as never);
   const b = book(speech as never, a);
-  b.tap(LABEL.typeAWord);
+  b.tap(LABEL.sayToRoom);
   b.draw()
     .find((n) => n.type === 'TextInput')
     .props.onChangeText('xyzzy');
   a.fault.kind = 'lost';
   a.fault.armed = true;
-  b.tap('hello, say');
+  b.tap('hello, shout');
   assert.ok(b.game.pending());
   assert.ok(b.draw().find((n) => n.props.accessibilityLabel === LABEL.say).props.disabled);
   let sent = 0;
@@ -224,7 +226,7 @@ test('a word that settles later still turns to its conversation', () => {
   const b = book(speech as never, a);
   a.fault.kind = 'lost';
   a.fault.armed = true;
-  b.tap('ward, say');
+  say(b, 'ward');
   assert.ok(b.game.pending());
   assert.ok(!b.labels().includes('Thank her'));
   a.fault.reads = false;

@@ -297,3 +297,32 @@ export const Position: Story = {
     await expect(button.getBoundingClientRect().height).toBe(size.touch);
   },
 };
+
+// The say icon after the pools, its field open (owner pick wordbar1, 2026-10-23).
+// Breaks: the field not focused, a word not sent, or the field left open after a send.
+export const SayOpen: Story = {
+  args: { say: { room: 'inn', busy: false, send: fn() } },
+  play: async ({ canvas, args, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' }));
+    await expect(canvas.getByLabelText('A word')).toHaveFocus();
+    await userEvent.type(canvas.getByLabelText('A word'), 'ward{Enter}');
+    await expect(args.say!.send).toHaveBeenCalledWith('ward');
+    await expect(canvas.queryByLabelText('A word')).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' })); // left open
+  },
+};
+
+// Breaks: two words sent as one, refused without the note, or Escape not closing the field.
+export const SayBadWord: Story = {
+  args: { say: { room: 'inn', busy: false, send: fn() } },
+  play: async ({ canvas, args, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' }));
+    await userEvent.type(canvas.getByLabelText('A word'), 'two words');
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await expect(canvas.getByText('One word, letters only.')).toBeVisible();
+    await expect(args.say!.send).not.toHaveBeenCalled();
+    await userEvent.keyboard('{Escape}');
+    await expect(canvas.queryByLabelText('A word')).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' })); // left open
+  },
+};

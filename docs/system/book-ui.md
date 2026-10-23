@@ -655,20 +655,26 @@ An NPC that the GameView lists an available `ask` on shows, after its other acti
 
 ## Word bar
 
-While the GameView offers `say`, `shout` or
+While the GameView offers `whisper`, `shout` or
 `cast` and no combat, scene or conversation is open, the World page shows a Word block last in
 its scrolling body, after the log (pass-1 UA; [room order](#world-and-status-entry)): the **Word** section title, then rows of
-[Chips](../BOOK-UI-COMPONENTS.md), each row under a Note-look title. Say: one chip per
-cartridge phrase (GameView `phrases`). Whisper to <name>: the same phrases, one row per present
+[Chips](../BOOK-UI-COMPONENTS.md), each row under a Note-look title. Whisper to <name>: one chip per
+cartridge phrase (GameView `phrases`), one row per present
 NPC that lists an available `whisper`. Two present people with one shown name share that title; the Book does not number them. Shout: the same phrases. Cast: one chip per learned spell
 word (GameView `spell_words`, never an unlearned one); a word the GameView refuses is an
 unavailable chip with a `word, cast: reason` line under the row. Each chip's name is the word, then
-how it is spoken (`ward, say`, `ward, whisper to the elder`, `ward, shout`, `ward, cast`); a press
+how it is spoken (`ward, whisper to the elder`, `ward, shout`, `ward, cast`); a press
 sends that action with `{word}`. A word that opens a conversation turns to it, as Talk does.
-While `say` is offered, with or without phrases, a **Type a word** Control opens one text field (named
-**A word**, up to 32 characters, no autocorrect or autocapitalize) and a **Say** Control;
-Enter or Say sends `say` with the typed word. A word that is not 1 to 32 letters is not sent and
-shows the Note **One word, letters only.** An accepted `say`, `whisper` or `shout` whose receipt
+No whisper, shout or cast row, no block.
+
+Saying is never a Word row (owner, wordbar1 2026-10-23). While `say` is offered on the World page, the
+[status line](#world-and-status-entry) ends with a say icon named **Say to the room** (expanded while open; [look](../../mobile/app/book/Status.tsx));
+a tap opens one text field under the line (named **A word**, focused, up to 32 characters, no autocorrect or
+autocapitalize) and a **Say** Control. Enter or Say sends `say` with the typed word and closes the field; Escape or the icon
+closes it unsent; a new room closes it. A word that is not 1 to 32 letters is not sent, keeps the field open and
+shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it.
+
+An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:
 **You say "ware".**, **You whisper "ware" to the jailer.**, **You shout "ware".** (pass-1 R5);
 a receipt with narration draws that instead. Beyond this echo the Book never writes the typed

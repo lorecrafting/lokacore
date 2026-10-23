@@ -6,6 +6,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { game, view } from './__tests__/combat-book.test.ts';
 import { book, words } from './__tests__/polish-book.test.ts';
+import { LABEL } from './labels.ts';
 import { presenter } from './presenter.ts';
 
 const showcase = compiled('cartridges/toolbox_showcase');
@@ -15,14 +16,23 @@ const live = (b: ReturnType<typeof book>) => {
   const region = heard.type(heard.props);
   return [region.props['aria-live'], words(region)];
 };
+const say = (b: ReturnType<typeof book>, word: string) => {
+  b.tap(LABEL.sayToRoom);
+  b.draw()
+    .find((n) => n.type === 'TextInput')
+    .props.onChangeText(word);
+  b.draw()
+    .find((n) => n.type === 'TextInput')
+    .props.onSubmitEditing();
+};
 
 // Breaks: no region, an assertive one, a press not read, or an earlier press read again.
 test("the Book reads each press's new line politely", () => {
   const b = book(showcase as never);
   assert.deepEqual(live(b), ['polite', '']);
-  b.tap('ware, say');
+  say(b, 'ware');
   assert.deepEqual(live(b), ['polite', 'You say "ware".']);
-  b.tap('begone, say');
+  say(b, 'begone');
   assert.deepEqual(live(b), ['polite', 'You say "begone".']);
 });
 

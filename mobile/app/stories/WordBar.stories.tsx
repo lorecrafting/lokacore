@@ -22,9 +22,7 @@ const meta = {
   args: {
     view: view(),
     chips: [
-      keyboard,
-      said('say', 'ward'),
-      said('say', 'help'),
+      keyboard, // the keyboard's Say: the status line's say field, never a row here
       said('whisper', 'ward', smith.id),
       said('shout', 'help'),
     ],
@@ -39,7 +37,7 @@ type Story = StoryObj<typeof meta>;
 export const Rows: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'ward, whisper to Smith' }));
-    await expect(args.press).toHaveBeenCalledWith(args.chips[3]);
+    await expect(args.press).toHaveBeenCalledWith(args.chips[1]);
   },
 };
 
@@ -66,23 +64,5 @@ export const CastWithRefusedWord: Story = {
       'true',
     );
     await expect(canvas.getByText('ignis, cast: too exhausted')).toBeVisible();
-  },
-};
-
-export const FieldOpen: Story = {
-  play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'Type a word' }));
-    await expect(canvas.getByLabelText('A word')).toHaveFocus();
-  },
-};
-
-// Breaks: two words sent as one, or refused without the note.
-export const BadWordNote: Story = {
-  play: async ({ canvas, args, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'Type a word' }));
-    await userEvent.type(canvas.getByLabelText('A word'), 'two words');
-    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
-    await expect(canvas.getByText('One word, letters only.')).toBeVisible();
-    await expect(args.press).not.toHaveBeenCalled();
   },
 };

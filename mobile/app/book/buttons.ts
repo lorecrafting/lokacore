@@ -138,8 +138,8 @@ const askButtons = (v: GameView, text: Say): Press[] =>
       ),
   );
 
-// The Word block's chips (word bar S3): each phrase said, whispered to each NPC offering whisper
-// and shouted, and each castable spell word; only while no combat, scene or conversation is open.
+// The Word block's chips (word bar S3): each phrase whispered to each NPC offering whisper and
+// shouted, and each castable spell word; only while no combat, scene or conversation is open.
 export const WORDS = ['say', 'whisper', 'shout', 'cast'];
 export const wordless = (v: GameView) => Boolean(v.combat || v.scene || v.choice);
 // The spell words the Word block shows: none unless Cast is offered here.
@@ -156,10 +156,9 @@ function wordButtons(v: GameView, text: Say): Press[] {
   });
   const phrases = v.phrases ?? [];
   return [
-    // First, the keyboard's Say without a word: the live twin of every typed word (actionContext).
-    ...(offered('say')
-      ? [{ ...chip('say', ''), input: {} }, ...phrases.map((w) => chip('say', w))]
-      : []),
+    // The keyboard's Say without a word: the live twin of every typed word (actionContext); the
+    // status line's say field sends it, so phrases get no Say chip.
+    ...(offered('say') ? [{ ...chip('say', ''), input: {} }] : []),
     ...v.entities.flatMap((e) =>
       e.actions.some((a) => a.action_key === 'whisper' && a.available)
         ? phrases.map((w) => chip('whisper', w, e))
