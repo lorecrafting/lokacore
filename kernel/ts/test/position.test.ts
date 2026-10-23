@@ -13,6 +13,7 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { check } from '../src/runtime/invariants.ts';
+import { validate } from '../src/foundation/validate.ts';
 import {
   admit,
   adopt,
@@ -133,7 +134,8 @@ test('a fresh world: no position record, the same state as without position@1, s
   assert.ok(!place(gameView(without)).includes('sit'));
 });
 // Breaks: move not checking position, or before passage; the same position accepted; expected
-// hard-coded to standing; the exit not shown invalid_state; the current verb listed.
+// hard-coded to standing; the exit not shown invalid_state; the not_standing cause dropped from the
+// move's error or the exit's reason (Q13 option A); the current verb listed.
 test('the position walk by invocation: only move needs standing, after the door', () => {
   const w0 = world();
   assert.deepEqual(effects(w0, 'sit'), [
@@ -147,11 +149,14 @@ test('the position walk by invocation: only move needs standing, after the door'
     ['open', 'opened', north],
     ['move', 'invalid_state', north],
   ]);
+  const not_standing = { code: 'invalid_state', cause: 'not_standing' };
+  assert.deepEqual((invoke(w, 'move', north).decision as any).error, not_standing);
   const v = gameView(w);
+  assert.deepEqual(validate('GameView', v), []);
   assert.equal(v.position, 'sitting');
   assert.deepEqual(place(v).sort(), ['move', 'rest', 'scan', 'sleep', 'stand', 'wait']);
   const exit = v.exits.find((e) => e.direction === 'north')!;
-  assert.deepEqual([exit.available, (exit as any).reason], [false, { code: 'invalid_state' }]);
+  assert.deepEqual([exit.available, (exit as any).reason], [false, not_standing]);
   assert.deepEqual(effects(w, 'rest')[0], [assign('sitting', 'resting')]);
   w = run(w, [
     ['rest', 'rested'],

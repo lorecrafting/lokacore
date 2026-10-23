@@ -32,6 +32,7 @@ import {
   type PopulationPlan,
   type CrowTransport,
   type ErrorCode,
+  type GameError,
   type EventPayload,
   type FactValue,
   type InspectableDetail,
@@ -259,7 +260,8 @@ export const COMPASS: readonly Key[] = Object.keys(
 export const refString = (r: DefinitionRef) =>
   `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
 
-export const rejected = (code: ErrorCode) => ({ kind: 'rejected', error: { code } }) as const;
+export const rejected = (error: ErrorCode | GameError) =>
+  ({ kind: 'rejected', error: typeof error === 'string' ? { code: error } : error }) as const;
 
 /**
  * The IdSource allocator of one command's decision: ordinals 0, 1, 2, ... each used once, shared

@@ -1347,6 +1347,19 @@
   {
     "contract": "GameError",
     "value": {
+      "code": "invalid_state",
+      "cause": "sleeping"
+    },
+    "errors": [
+      {
+        "path": "/cause",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "GameError",
+    "value": {
       "code": "not_a_code"
     },
     "errors": [
@@ -6300,6 +6313,19 @@
       {
         "path": "/sight/title",
         "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "UnavailableReason",
+    "value": {
+      "code": "invalid_state",
+      "cause": "sleeping"
+    },
+    "errors": [
+      {
+        "path": "/cause",
+        "code": "not_in_enum"
       }
     ]
   },

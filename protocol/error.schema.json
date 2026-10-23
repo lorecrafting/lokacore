@@ -71,6 +71,9 @@
       "properties": {
         "code": {
           "$ref": "#/$defs/ErrorCode"
+        },
+        "cause": {
+          "$ref": "#/$defs/RefusalCause"
         }
       },
       "required": [
@@ -80,7 +83,21 @@
       "examples": [
         {
           "code": "exit_locked"
+        },
+        {
+          "code": "invalid_state",
+          "cause": "not_standing"
         }
+      ]
+    },
+    "RefusalCause": {
+      "description": "Why a refusal with a shared code was refused, so a client can tell the player (kernel_api at least 1.111; owner Q13 option A): not_standing, a move while the actor is not standing (position@1); cursed, reserved for a cursed worn item that will not come off. Optional on GameError and on GameView UnavailableReason; a reader that does not know it reads the code alone. The code stays the contract; a cause never changes it.",
+      "enum": [
+        "not_standing",
+        "cursed"
+      ],
+      "examples": [
+        "not_standing"
       ]
     },
     "ErrorRegistryEntry": {

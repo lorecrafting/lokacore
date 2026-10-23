@@ -520,7 +520,11 @@ code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pe
 save retries keep the existing original-attempt behavior for any subsequent press. A press
 refused after a catch-up gets no "what changed" sentence: the catch-up's own lines (rounds, a
 death, an expiry) already precede the refused line in order, and the refused line carries its
-reason word.
+reason word. Proposed for designer approval (loka-x6t.17, owner Q13 option A): a refusal that
+carries a `cause` (GameError or an exit's reason, `RefusalCause`) takes the cause's word as its
+tag and the cause's sentence before the code's ([words](../../mobile/app/book/words.ts)
+`reason`, `refusedSentence`): a move while sitting reads **not standing**, "You are not
+standing.", never "The way north is not standing." or "not now".
 
 A timed hazard (submersion) shows its remaining time from the confirmed projection on every page
 it covers; the authority owns the deadline and the presenter keeps no clock and never renews

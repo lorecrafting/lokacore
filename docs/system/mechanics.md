@@ -49,7 +49,8 @@ and trusted elapsed updates; world time starts at selection.
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
 (`:33`); no exit here, or one [hidden](#hidden-passages-and-search-toolbox-row-11) from the actor, `not_found`; an exit through a closed or locked barrier, `exit_closed`
 or `exit_locked` (`passage`, `:62`); under [position@1](#position1-kerneltssrcmechanicspositionrulets), an
-actor not standing, `invalid_state` (`kernel/ts/src/mechanics/position/shared.ts` `standing`); the move costs the body
+actor not standing, `invalid_state` with `cause` `not_standing` (`kernel/ts/src/mechanics/position/shared.ts` `standing`;
+the step's GameError and the exit's `UnavailableReason` carry the same cause, owner Q13 option A); the move costs the body
 the cartridge's `world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
 declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:73`).
 The destination room's terrain scales the fare ([row 43a](#terrain-movement-costs-toolbox-row-43a)); a ridden [mount](#mounts-toolbox-row-43b) bars rooms off its terrain and scales the fare last; per-exit costs have no consumer. Accepted
@@ -189,7 +190,7 @@ the old rate first, then one `fact.assign` at the actor's player scope has `expe
 current position. All operations share one writer group; the host adds `fact_changed` at
 the assignment's causal position. Legacy pools receive no position adjustment.
 Every change between two positions is legal (twelve). `move` needs standing
-([movement@1](#movement1-kerneltssrcmechanicsmovementrulets)); a sleeping actor may only use the
+([movement@1](#movement1-kerneltssrcmechanicsmovementrulets); refused `invalid_state`, cause `not_standing`); a sleeping actor may only use the
 position verbs, move, look, wait and answer a modal ([Sleep](#sleep-toolbox-row-w9)); every other
 verb works in any position. Content may read the fact
 (`fact_compare`, a reaction's `on.fact`) but never write it (`RESERVED_FACT`). The GameView

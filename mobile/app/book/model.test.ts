@@ -163,6 +163,20 @@ test('a move refused at 0 MV says the body is too exhausted', () => {
   );
 });
 
+// Breaks (Q13 option A): a move refused while sitting logs "The way north is not now." (the shared
+// code's word, cause dropped) or "The way north is not standing." (the cause framed as the way's).
+test('a move refused while sitting says the player is not standing', () => {
+  const north = {
+    available: false,
+    direction: 'north',
+    reason: { code: 'invalid_state', cause: 'not_standing' },
+  };
+  assert.deepEqual(
+    refused(north as never, (k) => k),
+    { kind: 'refused', reason: 'not standing', text: 'You are not standing.' },
+  );
+});
+
 // Breaks (review POL-2): a hint store that throws (an unreadable key-value file) takes the book or
 // the Look tap down with it, instead of the hint falling back to this session's memory.
 test('a hint survives a store that throws, for this session', () => {

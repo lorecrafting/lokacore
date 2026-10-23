@@ -268,6 +268,20 @@ test('a move rejected for want of MV says the body is too exhausted', () => {
   ]);
 });
 
+// Breaks (Q13 option A): an authority rejection while sitting reads "You can't do that: not now."
+// because the answer drops the GameError's cause.
+test('a move rejected while sitting says the player is not standing', () => {
+  const rejected = {
+    kind: 'rejected',
+    error: { code: 'invalid_state', cause: 'not_standing' },
+  } as DecisionResult;
+  const p = presenter(game(() => ({ kind: 'saved', decision: rejected })));
+  p.press(north);
+  assert.deepEqual(p.screen().log, [
+    { kind: 'refused', reason: 'not standing', text: 'You are not standing.' },
+  ]);
+});
+
 // Breaks (R6P-A04): a log that keeps every press while the process lives (memory, redraws).
 test('the log stops growing in one room, its last line the latest answer', () => {
   const p = presenter(game((n) => accepted(n % 2 ? 'dropped' : 'taken')));

@@ -1,7 +1,7 @@
 // size: allow 318, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2; the Book hostile refusal (loka-x6t.33); NPC asides (row FD10)
 import { wordViews } from './spells.ts';
 import { knowledgeView } from './knowledge.ts';
-import { movementPlan } from '../mechanics/movement/sequence.ts';
+import { movementPlan, planned } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
 import { waterViews } from './water.ts';
 import { chapter, journal } from './quest_journal.ts';
@@ -53,7 +53,8 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * the player sees (description_variant's describe), exits in compass order (unavailable while
  * admission refuses them: unsupported_capability without a matching composed action or
  * invalid_state when its policy fails; then exit_closed or exit_locked through a closed or locked barrier,
- * movement.passage, else invalid_state while the player is not standing, position.standing, else
+ * movement.passage, else invalid_state with cause not_standing while the player is not standing,
+ * position.standing, else
  * insufficient_resource while the body cannot pay a move, movement.fare),
  * each with its barrier's door (short name, state and the door verbs step accepts there now,
  * view/action_lists.ts door), also when passable, and, unless its barrier bars the way, what is seen
@@ -286,9 +287,9 @@ function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: 
     };
     const command = { type: 'move', actor_id, direction } as const;
     const refused = refusal(world, command, steps, 'move' as Key, set);
-    const plan = refused ? undefined : movementPlan(world, actor_id, direction, steps);
-    const code = refused ?? (typeof plan === 'string' ? plan : undefined);
-    return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
+    const plan = refused ?? movementPlan(world, actor_id, direction, steps);
+    if (planned(plan)) return { available: true, ...shown };
+    return { available: false, ...shown, reason: typeof plan === 'string' ? { code: plan } : plan };
   });
 }
 
