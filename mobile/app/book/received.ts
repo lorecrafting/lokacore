@@ -1,7 +1,7 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { comings, given, replyLine, spoken } from './words.ts';
+import { comings, given, lineText, replyLine, spoken } from './words.ts';
 import {
   closing,
   combatResult,
@@ -76,7 +76,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   if (!repeated && routed) s.combatLog.push(...routed[1]);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
-  return repeated ? '' : said.join(' ');
+  return repeated ? '' : said.map(lineText).join(' ');
 }
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;

@@ -92,7 +92,7 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
           ? action === 'close_choice'
             ? ['choice.prompt']
             : []
-          : ["You can't do that: not here."],
+          : [{ kind: 'refused', reason: 'not here', text: "You can't do that: not here." }],
       );
     }
   }
@@ -179,12 +179,14 @@ test('confirmed room change clears old history before adding new authored conseq
   };
   const p = presenter(g);
   p.press(north);
-  assert.deepEqual(p.screen().log, ["You can't do that: not in this book."]);
+  const unsupported = {
+    kind: 'refused',
+    reason: 'not in this book',
+    text: "You can't do that: not in this book.",
+  };
+  assert.deepEqual(p.screen().log, [unsupported]);
   p.press(north);
-  assert.deepEqual(p.screen().log, [
-    "You can't do that: not in this book.",
-    'The page had changed; here it is again.',
-  ]);
+  assert.deepEqual(p.screen().log, [unsupported, 'The page had changed; here it is again.']);
   p.press(north);
   assert.deepEqual(p.screen().log, ['The gate closes behind you.']);
 });
@@ -261,7 +263,9 @@ test('a move rejected for want of MV says the body is too exhausted', () => {
   const rejected = { kind: 'rejected', error: { code: 'insufficient_resource' } } as DecisionResult;
   const p = presenter(game(() => ({ kind: 'saved', decision: rejected })));
   p.press(north);
-  assert.deepEqual(p.screen().log, ['You are too exhausted.']);
+  assert.deepEqual(p.screen().log, [
+    { kind: 'refused', reason: 'too exhausted', text: 'You are too exhausted.' },
+  ]);
 });
 
 // Breaks (R6P-A04): a log that keeps every press while the process lives (memory, redraws).

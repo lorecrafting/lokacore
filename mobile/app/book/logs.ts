@@ -42,7 +42,7 @@ export type DetailLine =
   string | { text: string; event: true } | { kind: 'refused'; reason: string; text: string };
 export type Logs = {
   log: DetailLine[];
-  combatLog: string[];
+  combatLog: DetailLine[];
   details: Map<string, DetailLine[]>;
   retry?: { button: Button; detail?: string; item?: string; to?: string; invocation?: string };
   projection: Projection;
