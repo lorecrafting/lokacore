@@ -25,7 +25,7 @@ import { permits } from '../mechanics/status/permits.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
-import { accepts, primaryTarget } from './action_input.ts';
+import { accepts, aimedOffers, primaryTarget } from './action_input.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
@@ -114,11 +114,10 @@ function engine(world: World, actor: CharacterId): ActionSet {
   );
 }
 
-// The cartridge's actions, recipes, the offers of the quests `actor` has no instance of (a quest
-// may have none) and the talks of the dialogues whose speaker is in the actor's room (several per
-// speaker), by key: disjoint, since the
-// compiler and the loader reject a recipe, quest or dialogue whose key is an action's, a recipe's,
-// a quest's or a registered command's (DUPLICATE_DEFINITION), so no key has two definitions here.
+// The cartridge's actions, recipes, aimed spells, offers of quests `actor` has no instance of (a
+// quest may have none) and talks of dialogues whose speaker is in the actor's room (several per
+// speaker), by key: disjoint, since the compiler and the loader reject a recipe, quest or dialogue
+// whose key is an action's, a recipe's, a quest's or a registered command's (DUPLICATE_DEFINITION).
 function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = keyed(world).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
@@ -142,7 +141,8 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
   });
-  return Object.fromEntries([...actions, ...recipes, ...quests, ...talks(world, actor)]);
+  const said = [...talks(world, actor), ...aimedOffers(world, actor)]; // loka-x6t.109
+  return Object.fromEntries([...actions, ...recipes, ...quests, ...said]);
 }
 
 /**
@@ -249,7 +249,7 @@ export function refusalReason(
   const unknown =
     (perform && !recipeKeys(world).includes(payload.action)) ||
     (payload.type === 'accept_quest' && !world.cartridge.quests?.[refString(payload.quest)]);
-  if (!matching.length)
+  if (unknown || !matching.length)
     return {
       code: unknown
         ? 'not_found'
@@ -267,7 +267,7 @@ export function refusalReason(
   return craftRefused(world, matching[0]!.recipe, actor, steps); // after policy, as the offer (hs-10)
 }
 
-// A spell (row 29a) is cast by its word, never offered or performed by its key.
+// A spell (row 29a) is cast by its word, never performed by its key (an aimed one is offered).
 const allRecipes = (world: World) => Object.values(world.cartridge.recipes ?? {});
 const keyed = (world: World) => allRecipes(world).filter((r) => r.target.kind !== 'spell');
 const recipeKeys = (world: World) => keyed(world).map((r) => r.key);

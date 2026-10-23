@@ -1,12 +1,14 @@
 // Exact command, primary target, scope and captured input binding.
-import type { CharacterId, CommandPayload, EntityId } from '../contracts.gen.ts';
+import type { CharacterId, CommandPayload, EntityId, Key } from '../contracts.gen.ts';
 import { same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import type { Offered } from './actions.ts';
+import { value as factValue } from '../mechanics/fact.ts';
 import { definition as expeditionDefinition } from '../mechanics/expedition/shared.ts';
+import { spellOf } from '../mechanics/action_recipe/shared.ts';
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
 const INPUTS: readonly string[] = [
@@ -55,7 +57,7 @@ export function accepts(
     return false;
   const bound = boundAction(world, payload, a.key);
   if (bound !== a.key) return false;
-  if (a.engine) return true;
+  if (a.engine || a.recipe?.target.kind === 'spell') return true;
   const id = primaryTarget(payload);
   if (a.speaker !== undefined && id !== a.speaker) return false;
   const inputs = Object.keys(payload).filter(
@@ -84,7 +86,26 @@ function boundAction(world: World, payload: CommandPayload, fallback: string) {
       ? world.cartridge.transports?.[refString(payload.route)]?.action
       : payload.type === 'harvest' && payload.method
         ? world.details[payload.target_id]?.harvest?.careful?.action
-        : fallback;
+        : payload.type === 'cast'
+          ? aimed(world, payload)
+          : fallback;
+}
+
+/** The learned aimed spells (loka-x6t.109), each offered on its targets and cast by its word. */
+export const aimedOffers = (world: World, actor: CharacterId): [string, Offered][] =>
+  Object.values(world.cartridge.recipes ?? {}).flatMap((recipe) => {
+    const { key, label, priority, policy, target: t } = recipe;
+    if (t.kind !== 'spell' || !t.aimed || factValue(world, actor, t.learned) !== true) return [];
+    const target = { kind: 'entity', scopes: t.aimed.scopes } as const;
+    return [
+      [key, { key, label, target, input: [], priority, policy, command: 'cast' as Key, recipe }],
+    ];
+  });
+
+/** A cast at a target binds to the learned aimed spell of that word, any other to the engine verb (loka-x6t.109). */
+function aimed(world: World, payload: Extract<CommandPayload, { type: 'cast' }>) {
+  const spell = payload.target_id && spellOf(world, payload.actor_id, payload.word);
+  return spell && spell.target.kind === 'spell' && spell.target.aimed ? spell.key : 'cast';
 }
 
 function inventory(

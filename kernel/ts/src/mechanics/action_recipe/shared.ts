@@ -10,6 +10,7 @@ import type {
   RecipeTarget,
   UnavailableReason,
   UseTool,
+  Word,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
@@ -105,10 +106,45 @@ export function castAdmission(
   const body = bodyOf(world, payload.actor_id);
   const busy = !!spell?.duration && !!body && !!engaged(world, body);
   if (!spell || busy) return { code: 'invalid_state' };
-  return holds(world, payload.actor_id, spell.policy.root, { steps })
+  const id = payload.target_id;
+  const aimed = spell.target.kind === 'spell' ? spell.target.aimed : undefined;
+  if (!aimed !== !id || (aimed && !aimedAt(world, body!, id!, aimed.scopes)))
+    return { code: 'invalid_target' };
+  return holds(world, payload.actor_id, spell.policy.root, { target: id, steps })
     ? undefined
     : policyRefusal(spell);
 }
+
+/** An aimed spell's target (loka-x6t.109): held by the caster, or an npc or item in its room. */
+const aimedAt = (world: World, body: EntityId, id: EntityId, scopes: readonly string[]) => {
+  const at = world.state.containers[id];
+  const kind = world.entities[id]?.kind;
+  return scopes.some((s) =>
+    s === 'inventory'
+      ? at === body
+      : at === world.state.containers[body] && kind === (s === 'room_occupants' ? 'npc' : 'item'),
+  );
+};
+
+/** Whether a view hides aimed spell `recipe` on `id` (loka-x6t.109): its cast there is refused. */
+export const aimedRefused = (
+  world: World,
+  actor: CharacterId,
+  recipe: ActionRecipe | undefined,
+  id: string,
+  steps: Steps,
+) =>
+  recipe?.target.kind === 'spell' &&
+  !!castAdmission(
+    world,
+    {
+      type: 'cast',
+      actor_id: actor,
+      word: recipe.target.word as string as Word,
+      target_id: id as EntityId,
+    },
+    steps,
+  );
 
 /** A failed policy's refusal, carrying the recipe's authored `reason` text when it has one (loka-j64e). */
 export const policyRefusal = (recipe?: ActionRecipe): UnavailableReason =>

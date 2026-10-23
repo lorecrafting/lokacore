@@ -65,7 +65,8 @@ storage half):
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
    look/talk one `target_id`; perform `target_id`, then a use recipe's held tool as `item_id` ([row G4](mechanics.md#use-x-on-y-toolbox-row-g4)); take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; an
-   input fills its field (`cast`'s `word` names a spell, [row 29a](mechanics.md#spell-cast-admission-toolbox-row-29a)); the
+   input fills its field (`cast`'s `word` names a spell, [row 29a](mechanics.md#spell-cast-admission-toolbox-row-29a)); an
+   aimed spell is offered on its target's entry, never in `spell_words`, and its offer fills `word` from its recipe and `target_id` from `target_ids` (loka-x6t.109); the
    result must validate as a Command.
 5. **Step** (`kernel/ts/src/runtime/world.ts:117`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
    refuses ordinary player commands as `invalid_state` before ActionSet matching;
