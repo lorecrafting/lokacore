@@ -41,10 +41,14 @@ const detailId = (page: Page) =>
 export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   // A closed NPC or item page drops its visit's history, by any route (book-ui.md Detail-page order).
   const stack = s.current.current.stack;
-  const shown = useRef(stack);
+  const shown = useRef<Page[] | undefined>(undefined);
   useEffect(() => {
     const open = stack.map(detailId);
-    for (const id of shown.current.map(detailId)) if (id && !open.includes(id)) pr.forget(id);
+    // At mount, a reopened save's NPC history belongs to no visit yet (loka-x6t.19).
+    const was =
+      shown.current?.map(detailId) ??
+      pr.screen().view.entities.flatMap((e) => (e.kind === 'npc' ? [e.id] : []));
+    for (const id of was) if (id && !open.includes(id)) pr.forget(id);
     shown.current = stack;
   }, [pr, stack]);
   useEffect(() => {

@@ -71,9 +71,7 @@ export function restoredLogs(game: Game, text: Say): Logs {
   const restored = pickup ? [pickup] : narrated;
   const log = !view.choice && !last?.detail_id ? restored : [];
   const details = new Map<string, DetailLine[]>();
-  // An NPC page never restores open: its next visit starts empty (loka-x6t.19).
-  const npc = view.entities.some((e) => e.id === last?.detail_id && e.kind === 'npc');
-  if (restored.length && last?.detail_id && !npc) details.set(last.detail_id, restored);
+  if (restored.length && last?.detail_id) details.set(last.detail_id, restored);
   else if (restored.length && view.choice)
     details.set(view.choice.speaker_id ?? 'conversation', restored);
   if (view.choice) {
