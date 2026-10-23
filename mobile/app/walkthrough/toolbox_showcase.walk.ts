@@ -85,7 +85,7 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await take(/^(?:a )?red apple, open$/i, /^Take a red apple/);
   await held(/^a red apple/);
   await tap(/^Give a red apple to the farmer/);
-  await tap(/^The farmer/);
+  await tap(/^(?:the )?farmer, open$/i);
   await tap('Trade two pelts for a knife');
   await tap(LABEL.leave);
 };
@@ -116,11 +116,11 @@ const pondAndStew = async (
   await position('resting');
   await position('standing');
   await moves('south', 'south');
-  await tap(/^The cook/);
+  await tap(/^(?:the )?cook, open$/i);
   await tap(/^Order a stew from two fish/);
   await tap(LABEL.leave);
   await new Promise((done) => setTimeout(done, 7_000)); // 300 s at rate 50
-  await tap(/^The cook/);
+  await tap(/^(?:the )?cook, open$/i);
   await tap(/^Claim your stew/);
   await tap(LABEL.leave);
   await held(/^a bowl of stew/);
@@ -149,7 +149,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
   await tap(/^(?:the )?merchant, open$/i);
   await take(/^The merchant's purse, open/, /^Lift$/);
   await moves('south', 'west');
-  await npc(/^The fence/, /^Sell the merchant's purse/);
+  await npc(/^(?:the )?fence, open$/i, /^Sell the merchant's purse/);
   await moves('east', 'east');
   await npc(/^(?:the )?clerk, open$/i, /^Buy the strongroom/);
   await take(/^(?:the )?strongroom key, open$/i, /^Take the strongroom key/);
@@ -168,7 +168,7 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
-    await tap(/^The hedge-wizard/);
+    await tap(/^(?:the )?hedge-wizard, open$/i);
     await tap(/^Talk/);
     await tap(choice);
     await tap(LABEL.leaveConversation);

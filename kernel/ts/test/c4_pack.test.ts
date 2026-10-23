@@ -291,8 +291,14 @@ test('player-first selected death skips retaliation and repairs to the surviving
   assert.equal(row.npc_id, h1);
   const view = gameView(result.world);
   assert.deepEqual(validate('GameView', view), []);
-  assert.deepEqual(view.combat?.active_opponents, [
-    { id: h1, name: 'npc.goblin.short', band: 'ready' },
+  // structuredClone: the loaded words are a null-prototype record
+  assert.deepEqual(structuredClone(view.combat?.active_opponents), [
+    {
+      id: h1,
+      name: 'npc.goblin.short',
+      words: { article: 'a', bare: 'npc.goblin.bare', plural: 'npc.goblin.plural' },
+      band: 'ready',
+    },
   ]);
   assert.equal(
     result.decision.kind === 'accepted' &&
