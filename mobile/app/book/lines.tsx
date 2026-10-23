@@ -219,7 +219,9 @@ export function Here(p: {
 export function Heard({ said }: { said: { key: number; text: string } }) {
   return (
     <View aria-live="polite" style={unseen}>
-      <Text key={said.key}>{said.text}</Text>
+      <Text key={said.key} numberOfLines={1}>
+        {said.text}
+      </Text>
     </View>
   );
 }
