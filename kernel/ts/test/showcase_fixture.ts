@@ -185,6 +185,8 @@ export function homestead(c: any) {
   // the Loft's errand handover line (1.103).
   delete c.rooms[ref('room', 'lever_hall')].asides;
   for (const r of [
+    'lever_a_step',
+    'lever_a_reset',
     'lever_b_step',
     'lever_b_reset',
     'lever_c_step',

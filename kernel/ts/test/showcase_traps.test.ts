@@ -1,3 +1,4 @@
+// size: allow 510, the district walk shares one World threaded through its steps (loka-y6yg.50)
 // The showcase traps district (Sappers' Stair) walked step by step (docs/showcase/traps-district.md,
 // guided loop, steps 1 to 9; slices T1 to T3). Steps 1 to 6 and 8 continue one world; steps 7 and 9
 // branch from step 1's world and the sandbox starts fresh. Every attack is chance 100. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
@@ -154,11 +155,20 @@ const notice = (x: World, key: string) =>
 
 // Breaks: a lever's reset or step is missing or fires in the wrong key order (lever_c_reset must
 // precede lever_c_step), the door opens off stage 3, the slate reads other text, a reset
-// recloses the door, or a player who shuts the door from inside is locked in.
+// recloses the door, or a player who shuts the door from inside is locked in; lever A sets its stage
+// with no bolt line, or restarts later progress with no reset line (loka-y6yg.50).
 test('traps 5: the levers open the north door only in order A, B, C; the slate reads', () => {
   w = go(go(w, 'south').world, 'east').world;
   assert.equal(at(w), room(w, 'lever_hall'));
   assert.deepEqual(exits(w), ['east', 'north', 'west']);
+  assert.deepEqual(perform(w, 'pull_a').lines, ['narration.lever', 'narration.lever_bolt']);
+  const again = perform(pulls(w, 'ab'), 'pull_a');
+  assert.deepEqual(again.lines, [
+    'narration.lever',
+    'narration.lever_reset',
+    'narration.lever_bolt',
+  ]);
+  assert.equal(fact(again.world, 'lever_stage'), 1);
   assert.equal(fact(pulls(w, 'ab'), 'lever_stage'), 2);
   assert.equal(fact(pulls(w, 'abb'), 'lever_stage'), 0);
   const ac = pulls(w, 'ac');

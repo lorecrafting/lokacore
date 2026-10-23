@@ -104,7 +104,7 @@ defmodule Loka.ContentShowcaseTest do
   # The traps district's lever, wheel and needle lines need API 1.103 (a narrate op or
   # a whole wheel readout reaction); the lever hall's asides need 1.91. The Loft's errand
   # handover line is a narrate op too.
-  @trap_lines ~w(lever_b_step lever_b_reset lever_c_step lever_c_reset plate_springs plate_bites
+  @trap_lines ~w(lever_a_step lever_a_reset lever_b_step lever_b_reset lever_c_step lever_c_reset plate_springs plate_bites
                  cellar_springs cellar_bites errand_reward)
 
   defp unnarrated,

@@ -52,6 +52,27 @@ test("an open choice's question stays for its speaker's next visit", () => {
   h.sql.close();
 });
 
+// Breaks: Leave the conversation empties the history while its close is still pending, so a close
+// that is never confirmed leaves the open choice without its question; or the confirmed close
+// keeps the old conversation on the page (loka-x6t.102).
+test("Leave the conversation keeps the choice's question until the close is confirmed", () => {
+  const h = book(bundle('containers_sampler_v010_hash'));
+  h.tap('Old Bram');
+  h.tap('Talk to Old Bram');
+  h.clock.wall += 15552000; // half a year idle: the close waits on catch-up
+  h.clock.mono = 15552000;
+  h.tap(LABEL.leaveConversation);
+  assert.equal(h.game.pending(), true);
+  assert.ok(h.text().some((t) => t.includes('Would you fetch it?')));
+  h.game.pulse();
+  assert.equal(
+    h.text().some((t) => t.includes('Would you fetch it?')),
+    false,
+  );
+  h.unmount();
+  h.sql.close();
+});
+
 // Breaks: after Leave the conversation the page hides a count of lines, which goes stale once the
 // 200-line trim drops older ones, so new lines vanish.
 test('lines after Leave the conversation survive the history trim', () => {

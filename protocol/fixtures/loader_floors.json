@@ -651,6 +651,8 @@
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
         ["statuses/burning.json", ["narration", "observed"], null],
+        ["reactions/lever_a_step.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 1}]],
+        ["reactions/lever_a_reset.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 0}]],
         ["reactions/lever_b_step.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 2}]],
         ["reactions/lever_b_reset.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 0}]],
         ["reactions/lever_c_step.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 3}]],

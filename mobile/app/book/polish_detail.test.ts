@@ -384,9 +384,8 @@ test('self-luminous Notice invokes its projected targetless recipe and retains t
 });
 
 // Breaks: a readable whose read text is its own description (Chapter 1's well) shows that
-// sentence twice on its page, or a different read line is dropped with it, or a body read again
-// (each entry reads, so Map Read then opening the signpost) shows twice (loka-x6t.81).
-test('a notice page shows its description once and every other read line once', async () => {
+// sentence twice on its page (loka-x6t.81), or two equal read lines collapse to one (loka-x6t.101).
+test('a notice page shows its description once and every other read line as read', async () => {
   const { NoticePage } = await import('./notices.tsx');
   const well = 'A rope and bucket hang over clear, cold well water.';
   const shown = nodes(
@@ -404,7 +403,23 @@ test('a notice page shows its description once and every other read line once', 
   )
     .filter((n) => n.type === 'Text')
     .map(words);
-  assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'Leave']);
+  assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'You read it twice.', 'Leave']);
+});
+
+// Break: a body read again on entry (Map Read, then opening the signpost) shows twice now that
+// the notice page keeps equal lines (loka-x6t.81, loka-x6t.101).
+test('the signpost read from the Map, then opened, shows its body once', () => {
+  const h = book(bundle('toolbox_showcase_hash'));
+  try {
+    h.map();
+    h.tap('Read the signpost');
+    h.tap(LABEL.backToWorld);
+    h.tap('The inn signpost, open');
+    assert.equal(h.text().filter((line) => line.startsWith('Four roads')).length, 1);
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
 });
 
 // Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows

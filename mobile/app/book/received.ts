@@ -13,6 +13,7 @@ import {
   savedNarration,
   type Logs,
 } from './logs.ts';
+import type { Button } from './presenter.ts';
 
 type Say = (key: string) => string;
 
@@ -90,6 +91,16 @@ function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepte
     (command_id || accepted.outcome !== 'riddle_wrong')
     ? savedNarration(game, s, command_id)
     : undefined;
+}
+
+// A press's item and listener names, for its fallback line (fallbackLine below).
+export function named(b: Button, was: GameView) {
+  const name = (id?: string) => things(was).find((t) => t.id === id)?.name;
+  return ['take', 'drop', 'give'].includes(b.action_key)
+    ? b.target_ids.map(name)
+    : b.action_key === 'whisper'
+      ? [undefined, name(b.target_ids[0])] // the speech echo's listener
+      : [];
 }
 
 const fallbackLine = (

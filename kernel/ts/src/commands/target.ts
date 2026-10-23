@@ -49,6 +49,7 @@ export function resolve(
     (present(world, actor, id) ||
       (mode === 'where' &&
         world.entities[id]?.kind === 'npc' &&
+        living(world, id) &&
         !!world.state.observed_npcs?.[
           key({ kind: 'observation', actor_id: actor, npc_id: id as EntityId })
         ]));

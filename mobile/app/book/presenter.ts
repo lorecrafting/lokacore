@@ -10,7 +10,7 @@ import type {
   NarrationRecord,
 } from '../../packages/game-view/session.ts';
 import { comings, lineText, replyLine, sayers } from './words.ts';
-import { actionContext, buttonsOf, intentOf, things } from './model.ts';
+import { actionContext, buttonsOf, intentOf } from './model.ts';
 
 /**
  * A tappable action: its text and the intent it sends (the session adds id and actor), with the
@@ -36,16 +36,18 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
+  closedLog,
   closing,
   detailLines,
   visit,
+  leaveLog,
   narrationLines,
   pickupLine,
   resetLogs,
   restoredLogs,
   type Logs,
 } from './logs.ts';
-import { received } from './received.ts';
+import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { grouped, holding, pressedAway, settle } from './recap.ts';
 
@@ -111,6 +113,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
         : reply.kind === 'saved' && reply.decision.kind === 'fault'
           ? `Time stopped: ${reply.decision.code}`
           : undefined;
+  closedLog(s, reply.kind === 'saved' && reply.decision.kind === 'accepted');
   const line = s.fault ? '' : received(game, reply, was, s, text);
   if (s.fault) {
     s.returnWorld = false;
@@ -142,16 +145,6 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
     )
     ? { ...b, token }
     : b;
-}
-
-// A press's item and listener names, for its fallback line (received.ts fallbackLine).
-function named(b: Button, was: GameView) {
-  const name = (id?: string) => things(was).find((t) => t.id === id)?.name;
-  return ['take', 'drop', 'give'].includes(b.action_key)
-    ? b.target_ids.map(name)
-    : b.action_key === 'whisper'
-      ? [undefined, name(b.target_ids[0])] // the speech echo's listener
-      : [];
 }
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
@@ -255,7 +248,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
-    leave: (id: string) => void s.details.get(id)?.splice(0), // Leave the conversation: a fresh history
+    leave: (id: string) => leaveLog(s, id, game.view().view.choice?.speaker_id === id),
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,

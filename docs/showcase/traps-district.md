@@ -89,19 +89,20 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
   disarm}` against the detail's rating 1, success `fact.assign plate_disarmed true`, empty failure;
   `traps_sampler/recipes`). The sandbox twins on `cellar_flags` and `cellar_*` facts; the cellar
   trigger's `room` is `sapper_cellar`.
-- Levers: `pull_a` (alias `pull`, success `fact.assign lever_stage 1`), `pull_b`, `pull_c`
-  (success emits nothing; their steps are reactions); reactions in this key order, since a reset
+- Levers: `pull_a` (alias `pull`), `pull_b`, `pull_c` (success emits `lever`; their steps are
+  reactions); reactions in this key order, since a reset
   keyed after its step is [row 26](../system/mechanics.md#sequence-and-combination-puzzles-toolbox-row-26)'s
-  red control: `lever_b_reset` (`on action_completed {action: pull_b}`, `when not(lever_stage
+  red control: `lever_a_reset` (`on action_completed {action: pull_a}`, `when not(lever_stage
+  equals 0)`, assign 0), `lever_a_step` (`when lever_stage equals 0`, assign 1), `lever_b_reset` (`on action_completed {action: pull_b}`, `when not(lever_stage
   equals 1)`, assign 0), `lever_b_step` (same trigger, `when lever_stage equals 1`, assign 2),
   `lever_c_reset` (`when not(lever_stage equals 2)`, assign 0), `lever_c_step` (`when lever_stage
-  equals 2`, assign 3). The solve order is `lever_a`, `lever_b`, `lever_c`: `pull_a`'s recipe sets
-  stage 1 and so always restarts the order.
+  equals 2`, assign 3). The solve order is `lever_a`, `lever_b`, `lever_c`: `pull_a` always ends at
+  stage 1, so it restarts the order (with the reset line when the stage was not 0).
 - Wheels: `turn_wheel_n` (alias `turn`, success `event.emit wheel`); reactions `wheel_n_turn`
   (`on action_completed {action: turn_wheel_n}`, `fact.adjust wheel_n +1`) then `wheel_n_wrap`
   (`when wheel_n equals 10`, assign 0), the wrap keyed after the turn (`puzzles_sampler/reactions`).
-- Feedback lines (API 1.103; asides 1.91): `lever_b_step` and `lever_c_step` narrate first
-  `narration.lever_bolt` ("Behind the north door, a bolt slides back.", `pull_a` keeps its own clank) and each reset
+- Feedback lines (API 1.103; asides 1.91): each step narrates first
+  `narration.lever_bolt` ("Behind the north door, a bolt slides back.") and each reset
   `narration.lever_reset` ("... the bolts clatter home."); `plate_springs`, `plate_bites` and their
   cellar twins narrate `narration.needle` ("A needle in the plate bites.") before the status. Thirty
   readout reactions `wheel_n_x_shows_k` (`on action_completed {action: turn_wheel_n}`, `when wheel_n
@@ -135,7 +136,7 @@ except where a step says so, so T is also the clock through step 6.
 | 2 | `search_floor`; `disarm_plate` once. | `plate_found` true, the flagstones' found variant. The disarm fails (disarm 0 against 1): `check_failed`, then `plate_bites`: `poisoned` applied (generation 1, `ends_at` T + 7200), its line, the Conditions line shows Poisoned and `cues` lists the smell from the player's own room; `plate_sprung` still false; hp 10. | traps x statuses; senses x traps |
 | 3 | `disarm_plate` again. | Success (disarm 1 after one use, growth `[1]`): `plate_disarmed` true, the disarmed variant; a third `disarm` is `invalid_state`. | traps x skill growth |
 | 4 | North into `plate_passage`; read `sapper_note` (a fixed room detail). | No status change (`plate_disarmed` true); `plate_sprung` false; the note's text. | |
-| 5 | Back south, east; `pull_a`, `pull_c` (wrong order); Open north; then `pull_a`, `pull_b`, `pull_c`; Open north; read `vault_slate`. | `pull_a` sets 1; `pull_c` fires `lever_c_reset` (1 is not 2: assign 0), then `lever_c_step` reads 0 and does nothing: `lever_stage` 0 and Open north `invalid_state`. After A, B, C: 3, Open north `opened`, the slate's text. Pulling `lever_c` again now resets to 0 and the open door stays open (a barrier once open stays open; row 26's known limit, named on the slate). | puzzles x barriers |
+| 5 | Back south, east; `pull_a`, `pull_c` (wrong order); Open north; then `pull_a`, `pull_b`, `pull_c`; Open north; read `vault_slate`. | `pull_a` sets 1 (`lever_a_step`); `pull_c` fires `lever_c_reset` (1 is not 2: assign 0), then `lever_c_step` reads 0 and does nothing: `lever_stage` 0 and Open north `invalid_state`. After A, B, C: 3, Open north `opened`, the slate's text. Pulling `lever_c` again now resets to 0 and the open door stays open (a barrier once open stays open; row 26's known limit, named on the slate). | puzzles x barriers |
 | 6 | Three turns of `wheel_1`, one of `wheel_2`, one of `wheel_3`; Open east; one more turn of `wheel_3`; Open east; take `bitters_skin`; Drink. | First Open `invalid_state`; wheels `[3, 1, 2]`, Open `opened`; the skin held; Drink ends `poisoned` with no tick (hp 10), one dose left; the Conditions line is empty. Ten turns of one wheel read 0 again (the wrap). | puzzles x barriers; cure x statuses |
 | 7 | Branch from step 1's state (undisarmed): north; south and north again at once; wait to the next `clock_hour`; south then north. | First entry: `poisoned` (generation 1, `ends_at` entry + 7200), `plate_sprung` true; second entry changes nothing. At the hour `plate_sprung` false; the re-entry refreshes `ends_at` to re-entry + 7200, generation still 1 (row 1: a refresh moves only the end). Left alone from the first entry: ticks at +1800, +3600, +5400 (hp 9, 8, 7), the expired line at +7200. | traps x statuses x reset |
 | 8 | From step 6: north twice to `chief_den` (disarmed plate); `shout begone`; Attack the lower-id goblin; two rounds. | The shout: `afraid` on both goblins (`ends_at` +600), nothing on the chief (immune) or the player; the goblins' room lines read an afraid variant (W6, the developer's words). Round 1: the player hits goblin A (6 to 4); A flees south before its blow. Round 2: B flees before the player strikes. Both stand in `plate_passage` (the disarmed plate is quiet: no `poisoned` row on either), the encounter is `closed`, hp 10. | fear x pack x shout |

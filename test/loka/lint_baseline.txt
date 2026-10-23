@@ -86,7 +86,6 @@ toolbox_showcase reactions/wither_plot.json: writes state with no narrate step a
 toolbox_showcase reactions/word_out.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/yard_hide.json: writes state with no narrate step and no "silent": true
 toolbox_showcase recipes/carve_spoon.json: policy refuses with no reason
-toolbox_showcase recipes/chop.json: policy refuses with no reason
 toolbox_showcase recipes/cook_feast.json: policy refuses with no reason
 toolbox_showcase recipes/cook_stew.json: policy refuses with no reason
 toolbox_showcase recipes/cook_stew_croft.json: policy refuses with no reason
