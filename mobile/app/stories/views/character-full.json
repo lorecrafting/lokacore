@@ -603,7 +603,7 @@
      {
       "available": true,
       "action_key": "wear",
-      "label": "action.wear",
+      "label": "action.wield",
       "target": {
        "kind": "entity",
        "scopes": [
