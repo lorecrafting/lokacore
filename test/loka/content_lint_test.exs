@@ -92,12 +92,15 @@ defmodule Loka.ContentLintTest do
     assert st.("condition.bleeding", "Bleeding") == []
   end
 
-  test "a do-nothing Leave or Close choice is refused outside the six single-choice talks" do
-    talk = fn id, file, choice ->
+  test "a do-nothing Leave or Close choice is refused in a talk with more than one choice" do
+    talk = fn choice ->
       %{
-        "cartridge.json" => %{"id" => id},
-        "dialogues/#{file}.json" => %{"keyword" => "k", "choices" => %{"leave" => choice}},
+        "dialogues/t.json" => %{
+          "keyword" => "k",
+          "choices" => %{"leave" => choice, "ask" => %{"label" => "a"}}
+        },
         "text.json" => %{
+          "a" => "Ask about the mill",
           "l" => "Leave her be",
           "c" => "Close the ledger",
           "s" => "Leave it with Bram"
@@ -105,25 +108,21 @@ defmodule Loka.ContentLintTest do
       }
     end
 
-    bad = fn file ->
-      [
-        "dialogues/#{file}.json: choice leave only leaves; the page's own Leave control ends the talk"
-      ]
-    end
+    bad = [
+      "dialogues/t.json: choice leave only leaves; the page's own Leave control ends the talk"
+    ]
 
-    assert Lint.findings(
-             talk.("toolbox_showcase", "bess_talk", %{"label" => "l", "narration" => "n"})
-           ) ==
-             bad.("bess_talk")
+    assert Lint.findings(talk.(%{"label" => "l", "narration" => "n"})) == bad
+    assert Lint.findings(talk.(%{"label" => "c"})) == bad
+    # a single-choice talk keeps its own Leave
+    one =
+      put_in(talk.(%{"label" => "l"}), ["dialogues/t.json", "choices"], %{
+        "leave" => %{"label" => "l"}
+      })
 
-    assert Lint.findings(talk.("toolbox_showcase", "bess_talk", %{"label" => "c"})) ==
-             bad.("bess_talk")
-
-    # the allowlist is keyed by cartridge too: a sampler's nell_talk is not exempt
-    assert Lint.findings(talk.("other", "nell_talk", %{"label" => "l"})) == bad.("nell_talk")
-    assert Lint.findings(talk.("toolbox_showcase", "nell_talk", %{"label" => "l"})) == []
+    assert Lint.findings(one) == []
     # a Leave label that does something (a hand-over sequence) is a real choice
-    assert Lint.findings(talk.("other", "bram", %{"label" => "s", "sequence" => []})) == []
+    assert Lint.findings(talk.(%{"label" => "s", "sequence" => []})) == []
   end
 
   # Samplers break lint rules on purpose, but not label wording (loka-p2ey, loka-z2j2).
