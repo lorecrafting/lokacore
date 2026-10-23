@@ -70,16 +70,7 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
     title: string;
     name: string;
   };
-  // A crop still rendering (no png or shot yet; html-to-image takes about a second) joins this send;
-  // one that hangs (a hidden window pauses its frames) is left out after 5 s.
-  const cropping = () =>
-    api
-      .getAddonState<State>(ADDON_ID)
-      ?.pending.some((p) => p.png === undefined && p.shot === undefined);
-  for (const t = Date.now(); cropping() && Date.now() - t < 5_000;)
-    await new Promise((r) => setTimeout(r, 100));
-  const fresh = api.getAddonState<State>(ADDON_ID)?.pending;
-  if (fresh?.length === pending.length) pending = fresh; // else a story change cleared the pins
+  // Read before the crop wait: a story change during it must not lend its globals.
   const globals = api.getGlobals() as {
     palette?: string;
     reading?: string;
@@ -89,6 +80,19 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
     options?: Record<string, { name: string; styles: { width: string; height: string } }>;
   }>('viewport')?.options;
   const v = globals.viewport?.value ? options?.[globals.viewport.value] : undefined;
+  // A crop still rendering (no png or shot yet; html-to-image takes about a second) joins this send;
+  // one that hangs (a hidden window pauses its frames) is left out after 5 s.
+  const cropping = () =>
+    api
+      .getAddonState<State>(ADDON_ID)
+      ?.pending.some((p) => p.png === undefined && p.shot === undefined);
+  for (const t = Date.now(); cropping() && Date.now() - t < 5_000;)
+    await new Promise((r) => setTimeout(r, 100));
+  const fresh = api.getAddonState<State>(ADDON_ID)?.pending ?? [];
+  const keys = (ps: Picked[]) => ps.map((p) => p.key).join();
+  // Pins changed in the wait (a story change clears them): send the pressed ones, keep the new.
+  const same = api.getCurrentStoryData()?.id === id && keys(fresh) === keys(pending);
+  if (same) pending = fresh;
   const r = await post({
     note,
     story: { id, title: `${title}/${name}` },
@@ -99,7 +103,7 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
   }).catch((e: Error) => e);
   if (r instanceof Error) return r.message;
   if (!r.ok) return `${r.status} ${await r.text().catch(() => '')}`.trim();
-  clear();
+  if (same) clear();
   await poll();
   return null;
 };

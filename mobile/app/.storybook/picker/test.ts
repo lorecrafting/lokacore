@@ -165,6 +165,32 @@ try {
       .catch(() => fail('the suggestion stayed after a sent prompt'));
     const note = lines('picks.jsonl').at(-1).note;
     if (note !== 'Close batch') fail(`sent ${JSON.stringify(note)}, want the suggestion`);
+    // A pin swapped during the crop wait (same count, other key): the send keeps A, B stays pinned.
+    await preview.evaluate(() => {
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = function () {
+        return new Promise((r) => setTimeout(r, 3_000)).then(() => decode.call(this));
+      };
+    });
+    const on = await preview
+      .locator('div[style*="crosshair"]')
+      .evaluate((el) => (el as HTMLElement).style.display !== 'none');
+    if (!on) await page.click('[title="Pick an element (P)"]');
+    await layer('block', 'Pick not on for the swap case');
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForSelector('button[title="Remove"]');
+    await page.fill('textarea[placeholder="What should change?"]', 'swap');
+    await page.keyboard.press('Enter');
+    await page.mouse.click(b.x + b.width - 4, b.y + b.height / 2); // B, past A's text: replaces A
+    for (const t = Date.now(); lines('picks.jsonl').length < 3; await page.waitForTimeout(200))
+      if (Date.now() - t > 10_000) fail('the send during a pin swap never arrived');
+    const swap = lines('picks.jsonl').at(-1);
+    const box = (e: { box: object }) => JSON.stringify(e.box);
+    if (swap.elements.length !== 1 || box(swap.elements[0]) !== box(pick.elements[0]))
+      fail(`swap sent ${swap.elements.map(box).join(' + ')}, want A ${box(pick.elements[0])}`);
+    await page.waitForTimeout(500); // the send's clear runs just after its write
+    if (!(await page.locator('button[title="Remove"]').count()))
+      fail('the send cleared the new pin');
     console.log(`ok   picker: ${pick.id} ${pick.elements[0].chain.join(' › ')} in ${story}`);
   } finally {
     await browser.close();
