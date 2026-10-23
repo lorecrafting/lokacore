@@ -200,7 +200,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `ItemDetails` | `book/skills.tsx` | ItemPage |
 | `SaveError` | `SaveError.tsx` | RecoveryPages |
 
-**Pick list** (owner 2026-10-23; no export yet: the Book developer adds it to `book/actions.tsx`
+**Pick list** (owner 2026-10-23; no export yet, and until loka-x6t.109.4 lands the Book still draws one card per pair on both the tool's and the target's page: the Book developer adds it to `book/actions.tsx`
 with its doc comment, index line and story after the engine and content slices). Composed of
 existing pieces, no new token: the option is an available `ActionCard` that takes a local press
 instead of a `Button` and carries `accessibilityState.expanded`; while open, its rows render

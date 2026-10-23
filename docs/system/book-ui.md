@@ -35,8 +35,8 @@ use pair, an aimed skill or spell) draws on that thing's page instead, a pair th
 has no page of its own (no room entity or notice) stays a World verb line, and a refused aimed
 verb keeps its World `label: reason` note.
 World draws no door card: Open and Unlock work from the Map and the
-[joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap, not
-in the description or the log (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
+[joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap: World
+draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
 would show in the minimap joystick thing, not in the main description or event log page").
 The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
@@ -409,6 +409,8 @@ and confirmed receipt routing. There is no separate storage session or recipient
 - **Cast a spell…** on a target's page: one row per aimed spell the GameView offers on it, labelled with the spell's word (`lux`), as the say field's chips name it. The cast-with-target command is engine row loka-x6t.109; until it lands no target lists one.
 - **Give an item…** on a person's page: one row per carried item the GameView lists in a Give pair with this person, target_ids [item, recipient], labelled with the item's projected name.
 - **Give to…** on a held item's page, its reverse (PM 2026-10-23, for symmetry with Use on…): one row per person the GameView lists in a Give pair with this item, labelled with the person's projected name.
+
+Until loka-x6t.109.4 lands, the Book still draws one card per pair on both the tool's and the target's page; the list above is the target.
 
 Rows keep the GameView's order. When one list holds pairs of more than one recipe, each row reads the recipe's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one row in the Action card's unavailable form (`rod: not yet`; under Use on…, one row per recipe, `Fish in: not yet`, whatever its targets); a refused aimed spell reads `lux: need 1 ash`; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still counts as something to do (no "Nothing to do here." Note).
 

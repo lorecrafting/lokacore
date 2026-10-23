@@ -116,21 +116,22 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
   const refusals: DetailLine[] = [];
-  const knocked: string[] = []; // exits whose door was tried; only up offers Open or Unlock
+  const knocked: string[] = []; // exits whose door was tried; only west offers Open or Unlock
   const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
     direction,
     available: true,
   }));
-  Footer({
+  const props = {
     keyboardEnabled: true,
     exits,
     text: (key: string) => key,
     go: (direction: string) => walked.push(direction),
-    door: (direction: string) => (knocked.push(direction), direction === 'up'),
+    door: (direction: string) => (knocked.push(direction), direction === 'west'),
     refused: (line: DetailLine) => refusals.push(line),
     openMap: () => {},
     learned: { seen: () => true, see: () => {} },
-  });
+  };
+  Footer(props);
   for (const name of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'])
     assert.equal(key(name), true);
   assert.deepEqual(walked, ['north', 'south', 'west', 'east', 'up', 'down']);
@@ -141,24 +142,26 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   assert.equal(key('ArrowUp', { defaultPrevented: true }), false);
   assert.equal(key('Home'), false);
   assert.equal(walked.length, 6);
-  exits.pop(); // no down exit is offered here
-  assert.equal(key('PageDown'), false);
+  assert.equal((exits.pop(), key('PageDown')), false); // no down exit is offered here
   exits[0] = { direction: 'north', available: false, reason: { code: 'exit_closed' } } as any;
   assert.equal(key('ArrowUp'), true);
+  // Breaks: a shut door's key walks, logs nothing or names the way; a reader's Go drops why (owner 2026-10-23).
+  exits.splice(0, 5, shut('north', 'locked'), exits[1]!, shut('west', 'locked'));
+  exits.push(shut('up', 'closed'), shut('down', 'locked'));
+  for (const name of ['ArrowUp', 'PageUp', 'PageDown', 'ArrowLeft']) assert.equal(key(name), true);
+  assert.deepEqual(knocked, ['north', 'north', 'up', 'down', 'west']);
   assert.equal(walked.length, 6);
   assert.deepEqual(refusals, [
     { kind: 'refused', reason: 'closed', text: 'The way north is closed.' },
-  ]);
-  // Breaks: a shut door's key walks, logs nothing or names the way (owner 2026-10-23).
-  exits[0] = shut('north', 'locked');
-  exits[4] = shut('up', 'closed');
-  assert.equal(key('ArrowUp'), true);
-  assert.equal(key('PageUp'), true);
-  assert.deepEqual(knocked, ['north', 'north', 'up']);
-  assert.equal(walked.length, 6);
-  assert.deepEqual(refusals.slice(1), [
     { kind: 'refused', reason: 'locked', text: 'The door to the north is locked.' },
+    { kind: 'refused', reason: 'locked', text: 'The door above is closed.' },
+    { kind: 'refused', reason: 'locked', text: 'The door below is locked.' },
   ]);
+  const reader = (n: any): any =>
+    n?.props &&
+    (n.props.accessibilityActions ?? [n.props.children].flat().map(reader).find(Boolean));
+  const labels = reader(Footer(props)).map((a: any) => a.label);
+  assert.deepEqual(labels.slice(1, 3), ['Go north, locked', 'Go south']);
 });
 
 // Breaks: Book installs a World keyboard handler while a detail or save state owns input.
