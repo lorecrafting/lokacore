@@ -313,4 +313,35 @@ defmodule Loka.ContentItemsTest do
              "containment@1"
            ]) in diagnostics
   end
+
+  # Breaks: name words outside the text catalog compile, the NPC's words go unchecked, or sound
+  # ones are dropped from the artifact (loka-6qi; the 1.118 floor is a loader_floors.json case).
+  test "name words keep their catalog keys", %{dir: dir} do
+    api = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.118")
+    lantern = %{"bare" => "item.lantern.short", "article" => "a", "plural" => "item.lantern.room"}
+
+    files = fn lantern, bram ->
+      %{
+        "cartridge.json" => api,
+        "items/lantern.json" => Map.put(src("items/lantern.json"), "words", lantern),
+        "npcs/bram.json" => Map.put(src("npcs/bram.json"), "words", bram)
+      }
+    end
+
+    assert {:ok, bytes, _} = compile(dir, files.(lantern, %{"bare" => "npc.bram.short"}))
+    c = JSON.decode!(bytes)["cartridge"]
+    assert c["items"]["items_sampler@0.0.1:item/lantern"]["words"] == lantern
+    assert c["npcs"]["items_sampler@0.0.1:npc/bram"]["words"] == %{"bare" => "npc.bram.short"}
+
+    assert compile(dir, files.(%{lantern | "plural" => "no.such"}, %{"bare" => "no.such"})) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "items/lantern.words.plural", %{"target" => "no.such"}),
+                d("UNRESOLVED_REFERENCE", "npcs/bram.words.bare", %{"target" => "no.such"})
+              ]}
+
+    # A non-map words stops at the schema, before the text-key scan reads it.
+    assert {:error, [%{"code" => "SCHEMA_VIOLATION", "path" => "items/lantern.words"} | _]} =
+             compile(dir, files.("x", %{"bare" => "npc.bram.short"}))
+  end
 end

@@ -5,8 +5,8 @@ defmodule Loka.Content.Variants do
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
   `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
   (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
-  1.102; an NPC's `asides` (row FD10) 1.107. Twin of
-  kernel/ts/src/content/cartridge_variants.ts.
+  1.102; an NPC's `asides` (row FD10) 1.107; an NPC's or item's name `words` (loka-6qi) 1.118.
+  Twin of kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
   alias Loka.Content.{Entities, RoomParts}
@@ -20,30 +20,36 @@ defmodule Loka.Content.Variants do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    relative = relative?(defs) or relative?(settings)
+    {used, floor} = need(defs, settings)
 
-    remarks = remarks?(defs)
+    if used and api < floor,
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
+      else: []
+  end
+
+  # The floor ladder, newest first: the first feature present sets the floor.
+  defp need(defs, settings) do
+    relative = relative?(defs) or relative?(settings)
     voices = voice?(defs) or aside?(defs)
     identity = is_map_key(settings["world"] || %{}, "identity")
-    furnish = furnish?([defs, settings])
+    words = Enum.any?(Entities.all(defs), fn {_, _, e} -> is_map_key(e, "words") end)
 
-    if (identity or voices or relative or used?(defs, settings)) and
-         api < floor(remarks, furnish, identity, voices, relative, {defs, settings}),
-       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-       else: []
+    ladder = [
+      {words, [1, 118]},
+      {remarks?(defs), [1, 107]},
+      {furnish?([defs, settings]), [1, 102]},
+      {identity, [1, 97]},
+      {voices, [1, 91]},
+      {relative, [1, 87]},
+      {reader?(defs) or reader?(settings), [1, 53]}
+    ]
+
+    {Enum.any?([words, identity, voices, relative]) or used?(defs, settings),
+     Enum.find_value(ladder, [1, 46], fn {on, floor} -> on && floor end)}
   end
 
   defp used?(defs, settings),
     do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)
-
-  defp floor(true, _, _, _, _, _), do: [1, 107]
-  defp floor(_, true, _, _, _, _), do: [1, 102]
-  defp floor(_, _, true, _, _, _), do: [1, 97]
-  defp floor(_, _, _, true, _, _), do: [1, 91]
-  defp floor(_, _, _, _, true, _), do: [1, 87]
-
-  defp floor(_, _, _, _, _, {defs, settings}),
-    do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
     do:

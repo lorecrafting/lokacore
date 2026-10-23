@@ -9,5 +9,9 @@
   "location": {
     "in": "room",
     "room": "farm_yard"
+  },
+  "words": {
+    "bare": "item.holding_apple.bare",
+    "article": "a"
   }
 }

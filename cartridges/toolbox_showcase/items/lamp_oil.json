@@ -16,5 +16,9 @@
     "capacity": 3600,
     "initial": 0,
     "unit": "flame"
+  },
+  "words": {
+    "bare": "item.lamp_oil.bare",
+    "article": "the"
   }
 }

@@ -13,5 +13,9 @@
   "tags": [
     "metal",
     "sharp"
-  ]
+  ],
+  "words": {
+    "bare": "item.axe.bare",
+    "article": "an"
+  }
 }

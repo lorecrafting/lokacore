@@ -9,5 +9,10 @@
   "location": {
     "in": "npc",
     "npc": "yard_chandler"
+  },
+  "words": {
+    "bare": "item.yard_candle_01.bare",
+    "article": "a",
+    "plural": "item.yard_candle_01.plural"
   }
 }

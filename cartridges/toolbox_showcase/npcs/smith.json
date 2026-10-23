@@ -13,5 +13,9 @@
     "forge_commission",
     "forge_claim",
     "forge_cancel"
-  ]
+  ],
+  "words": {
+    "bare": "npc.smith.bare",
+    "article": "the"
+  }
 }

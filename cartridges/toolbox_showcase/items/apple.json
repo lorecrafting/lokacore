@@ -9,5 +9,9 @@
     "in": "room",
     "room": "village_green"
   },
-  "mass_grams": 100
+  "mass_grams": 100,
+  "words": {
+    "bare": "item.apple.bare",
+    "article": "an"
+  }
 }

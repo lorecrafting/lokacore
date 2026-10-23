@@ -39,5 +39,9 @@
       },
       "description": "npc.farmer.description_cold"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.farmer.bare",
+    "article": "the"
+  }
 }

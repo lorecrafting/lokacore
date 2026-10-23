@@ -3,7 +3,7 @@ import { DreamResume } from './DreamPage.tsx';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { plain, why, type Page as Route } from './model.ts';
+import { LINK, plain, why, type Page as Route } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { Asides, EntityLine, LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
@@ -68,12 +68,33 @@ function control(screen: Screen, id: string) {
     : undefined;
 }
 
+// A bed, a ferry or a counted harvest opens its page without reading (book-ui.md, Notice-board details).
+const kept = (n: Notice) => n.bed || n.transport || n.remaining !== undefined;
+const read = (p: Props, id: string, b: Button) => () => {
+  p.open({ kind: 'notice', id });
+  p.press(b, id);
+};
+
+// The readable notices the room description links, by key, each to its read press (book-ui.md
+// fixture rule); they draw in the prose and not as World lines.
+export function proseLinks(p: Props): Map<string, () => void> {
+  const targets = [...p.screen.text(p.screen.view.place.description.key).matchAll(LINK)].map(
+    (m) => m[2],
+  );
+  return new Map(
+    (p.screen.view.notices ?? []).flatMap((n) => {
+      const b = control(p.screen, n.id);
+      return b && !kept(n) && targets.includes(n.key) ? [[n.key, read(p, n.id, b)] as const] : [];
+    }),
+  );
+}
+
 function NoticeLink(p: Props & { notice: Notice }) {
   const { notice, screen } = p;
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
   const offer = noticeOffer(screen.view, notice.id);
-  if (notice.bed || notice.transport || notice.remaining !== undefined)
+  if (kept(notice))
     return (
       <EntityLine
         name={title}
@@ -82,13 +103,7 @@ function NoticeLink(p: Props & { notice: Notice }) {
       />
     );
   return b ? (
-    <EntityLine
-      name={title}
-      onPress={() => {
-        p.open({ kind: 'notice', id: notice.id });
-        p.press(b, notice.id);
-      }}
-    />
+    <EntityLine name={title} onPress={read(p, notice.id, b)} />
   ) : (
     <ActionCard
       label={title}
@@ -99,12 +114,14 @@ function NoticeLink(p: Props & { notice: Notice }) {
 
 /**
  * A room's notices and boards: an Entity line when Read is offered, else the Action card's
- * unavailable form.
+ * unavailable form; a notice the description links (proseLinks) draws in the prose instead.
  * - Use: the room page.
  * - Story: RoomPage.stories.tsx
  */
 export function NoticeEntries(p: Props) {
-  const { notice_boards: boards = [], notices = [] } = p.screen.view;
+  const linked = proseLinks(p);
+  const { notice_boards: boards = [] } = p.screen.view;
+  const notices = (p.screen.view.notices ?? []).filter((n) => !linked.has(n.key));
   if (!boards.length && !notices.length) return null;
   return (
     <View>

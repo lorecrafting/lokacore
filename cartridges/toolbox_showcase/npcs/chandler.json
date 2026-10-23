@@ -47,5 +47,9 @@
       "attribute": "alertness",
       "value": 1
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.chandler.bare",
+    "article": "the"
+  }
 }

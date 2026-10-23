@@ -6,5 +6,9 @@
   "short": "npc.hedge_wizard.short",
   "room_line": "npc.hedge_wizard.room",
   "description": "npc.hedge_wizard.description",
-  "room": "loft"
+  "room": "loft",
+  "words": {
+    "bare": "npc.hedge_wizard.bare",
+    "article": "the"
+  }
 }

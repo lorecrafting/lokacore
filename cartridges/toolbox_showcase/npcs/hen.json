@@ -17,5 +17,9 @@
     "chance": 1,
     "damage_min": 1,
     "damage_max": 1
+  },
+  "words": {
+    "bare": "npc.hen.bare",
+    "article": "a"
   }
 }

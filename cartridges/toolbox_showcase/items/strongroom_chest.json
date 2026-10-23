@@ -32,5 +32,9 @@
         "equals": true
       }
     }
+  },
+  "words": {
+    "bare": "item.strongroom_chest.bare",
+    "article": "a"
   }
 }

@@ -90,13 +90,15 @@ test('loader rejects invalid board membership, title references and readable own
   assert.equal(result.diagnostic.code, 'UNDECLARED_CAPABILITY');
 });
 
-// Breaks: projection exposes notice bodies, wrong sibling IDs, remote boards or base descriptions
+// Breaks: projection exposes notice bodies, wrong sibling IDs or keys (a board's key on its
+// children), remote boards or base descriptions
 // after policies select variants; Read aliases/unavailable offers must stay canonical.
 test('board projection keeps bounded identities and selected descriptions separate from Read eligibility', () => {
   const initial = genesis();
   assert.deepEqual(gameView(initial).notices, [
     {
       id: detail(initial, 'tracks'),
+      key: 'tracks',
       title: 'detail.tracks.title',
       description: 'detail.tracks.description',
     },
@@ -108,16 +110,19 @@ test('board projection keeps bounded identities and selected descriptions separa
   assert.deepEqual(gameView(w).notice_boards, [
     {
       id: board,
+      key: 'rumor_board',
       title: 'detail.rumor_board.title',
       description: 'detail.rumor_board.description',
       notices: [
         {
           id: whistle,
+          key: 'lost_whistle',
           title: 'detail.lost_whistle.title',
           description: 'detail.lost_whistle.description',
         },
         {
           id: detail(w, 'cellar_help'),
+          key: 'cellar_help',
           title: 'detail.cellar_help.title',
           description: 'detail.cellar_help.description',
         },
@@ -125,6 +130,8 @@ test('board projection keeps bounded identities and selected descriptions separa
     },
   ]);
   assert.equal(gameView(w).notices, undefined);
+  assert.deepEqual(validate('GameView', gameView(initial)), []);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   const changed = {
     ...w,
     details: {

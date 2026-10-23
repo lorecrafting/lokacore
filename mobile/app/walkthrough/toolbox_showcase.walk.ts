@@ -39,7 +39,7 @@ const steps = ({ screen, room }: Walk) => {
     await tap(label);
   };
   const lesson = async (...choices: string[]) => {
-    await tap(/^The carpenter, open$/i);
+    await tap('carpenter, open');
     await tap('Talk to the carpenter');
     for (const c of choices) await tap(c);
     await tap(LABEL.leaveConversation);
@@ -66,14 +66,15 @@ type Steps = ReturnType<typeof steps>;
 const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps) => {
   await moves('north', 'west', 'west');
   await lesson('Learn whittling', 'Learn woodcutting');
-  await take(/^An axe, open$/i, /^Take an axe/);
-  for (let i = 0; i < 2; i++) await take(/^A stick, open$/i, /^Take a stick/);
+  await take(/^(?:an )?axe, open$/i, /^Take an axe/);
+  for (let i = 0; i < 2; i++) await take(/^(?:two sticks|stick), open$/i, /^Take a stick/);
   for (let i = 0; i < 2; i++) await tap('Carve a spoon');
   await lesson('Learn carving (2 pennies)');
-  await take(/^A cot, open$/i, /^Take a cot/);
+  await take(/^(?:a )?cot, open$/i, /^Take a cot/);
   await moves('east', 'south', 'west');
   for (let i = 0; i < 4; i++) await tap('Chop wood');
-  for (let i = 0; i < 2; i++) await take(/^A rabbit pelt, open$/i, /^Take a rabbit pelt/);
+  for (let i = 0; i < 2; i++)
+    await take(/^(?:three|two) rabbit pelts, open$/i, /^Take a rabbit pelt/);
   await moves('east', 'north', 'west');
   await lesson('Learn carpentry (2 pennies)');
   for (let i = 0; i < 2; i++) await tap('Saw timber');
@@ -81,10 +82,10 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await tap('Raise a timbered hut');
   await moves('north', 'south');
   await moves('south');
-  await take(/^A red apple, open$/i, /^Take a red apple/);
+  await take(/^(?:a )?red apple, open$/i, /^Take a red apple/);
   await held(/^a red apple/);
   await tap(/^Give a red apple to the farmer/);
-  await tap(/^The farmer/);
+  await tap(/^(?:the )?farmer, open$/i);
   await tap('Trade two pelts for a knife');
   await tap(LABEL.leave);
 };
@@ -94,8 +95,8 @@ const pondAndStew = async (
   { tap, take, held, putAway, position, moves }: Steps,
 ) => {
   await moves('east');
-  await take(/^A fishing rod, open$/i, /^Take a fishing rod/);
-  const fish = /^An? (trout|salmon|eel), open$/i;
+  await take(/^(?:a )?fishing rod, open$/i, /^Take a fishing rod/);
+  const fish = /^(?:an? )?(trout|salmon|eel), open$/i;
   let landed = 0;
   for (let i = 0; landed < 2 && i < 12; i++) {
     await held(/^a fishing rod/);
@@ -115,11 +116,11 @@ const pondAndStew = async (
   await position('resting');
   await position('standing');
   await moves('south', 'south');
-  await tap(/^The cook/);
+  await tap(/^(?:the )?cook, open$/i);
   await tap(/^Order a stew from two fish/);
   await tap(LABEL.leave);
   await new Promise((done) => setTimeout(done, 7_000)); // 300 s at rate 50
-  await tap(/^The cook/);
+  await tap(/^(?:the )?cook, open$/i);
   await tap(/^Claim your stew/);
   await tap(LABEL.leave);
   await held(/^a bowl of stew/);
@@ -138,26 +139,26 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
     await tap(LABEL.leave);
   };
   await moves('down', 'east');
-  await npc(/^The clerk, open$/i, /^Deposit five pennies/);
+  await npc(/^(?:the )?clerk, open$/i, /^Deposit five pennies/);
   await moves('west', 'north');
-  await npc(/^The market clerk, open$/i, /^Withdraw five pennies/);
-  await npc(/^The chandler, open$/i, /^Buy a tallow candle/);
+  await npc(/^(?:the )?market clerk, open$/i, /^Withdraw five pennies/);
+  await npc(/^(?:the )?chandler, open$/i, /^Buy a tallow candle/);
   await moves('south', 'west');
   await tap('Hide');
   await moves('east', 'north');
-  await tap(/^The merchant, open$/i);
+  await tap(/^(?:the )?merchant, open$/i);
   await take(/^The merchant's purse, open/, /^Lift$/);
   await moves('south', 'west');
-  await npc(/^The fence/, /^Sell the merchant's purse/);
+  await npc(/^(?:the )?fence, open$/i, /^Sell the merchant's purse/);
   await moves('east', 'east');
-  await npc(/^The clerk, open$/i, /^Buy the strongroom/);
-  await take(/^The strongroom key, open$/i, /^Take the strongroom key/);
+  await npc(/^(?:the )?clerk, open$/i, /^Buy the strongroom/);
+  await take(/^(?:the )?strongroom key, open$/i, /^Take the strongroom key/);
   await moves('west');
   await tap('Map');
   await tap(/^Unlock the strongroom door/);
   await tap(/^Open the strongroom door/);
   await tap('Go south');
-  await take(/^A strongroom chest, open$/i, /^Put a tallow candle/);
+  await take(/^(?:a )?strongroom chest, open$/i, /^Put a tallow candle/);
   await take(/^A tallow candle, open/, /^Take a tallow candle/);
   await settle();
 };
@@ -167,7 +168,7 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
-    await tap(/^The hedge-wizard/);
+    await tap(/^(?:the )?hedge-wizard, open$/i);
     await tap(/^Talk/);
     await tap(choice);
     await tap(LABEL.leaveConversation);
@@ -178,11 +179,11 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await wizard('Learn the word lux');
   await wizard('Fetch the second word');
   await tap('Gather ash');
-  await take(/^The lantern, open$/i, /^Take the lantern/);
+  await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await speak('lux', LABEL.cast);
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
-  await take(/^The grimoire, open$/i, /^Take the grimoire/);
+  await take(/^(?:the )?grimoire, open$/i, /^Take the grimoire/);
   await held(/^the grimoire/);
   await tap(/^Read/);
   await putAway();
@@ -198,8 +199,8 @@ const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
   const { tap, take, held, putAway, moves, speak } = steps;
   await loft(r, steps);
-  await take(/^The oilcan, open$/i, /^Take the oilcan/);
-  await take(/^The loft bucket, open$/i, /^Take the loft bucket/);
+  await take(/^(?:the )?oilcan, open$/i, /^Take the oilcan/);
+  await take(/^(?:the )?loft bucket, open$/i, /^Take the loft bucket/);
   await moves('east');
   await held(/^the oilcan/); // a use recipe is offered on the held tool
   await tap(/^Oil/);
@@ -211,7 +212,7 @@ const magic = async (r: Walk, steps: Steps) => {
   await moves('down');
   await r.note('The dark crypt');
   await moves('up');
-  await take(/^The lantern, open$/i, /^Take the lantern/);
+  await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await moves('down');
   await speak('flamma', LABEL.cast);
   await tap(/^Flee/);
@@ -267,7 +268,7 @@ walk('4-traps', "Traps: the shout in the chief's den; the goblins flee", async (
   await moves('west', 'down', 'north', 'north'); // the passage plate bites on the way
   // Afraid lasts 600 game s (~12 s of wall time at rate 50): nothing slow between shout and Attack.
   await speak('begone', LABEL.shout);
-  await tap(/^A goblin, open$/i);
+  await tap(/^(?:an? |two )?goblins?, open$/i);
   await tap(/Attack/);
   // A round is 150 game s, 3 s of wall time at rate 50.
   await expect(screen.getByText(/A goblin flees south/).first()).toBeVisible({ timeout: 10_000 });

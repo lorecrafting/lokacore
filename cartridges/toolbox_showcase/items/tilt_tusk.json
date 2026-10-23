@@ -9,5 +9,10 @@
     "in": "npc",
     "npc": "tilt_boar"
   },
-  "mass_grams": 200
+  "mass_grams": 200,
+  "words": {
+    "bare": "item.tilt_tusk.bare",
+    "article": "a",
+    "plural": "item.tilt_tusk.plural"
+  }
 }

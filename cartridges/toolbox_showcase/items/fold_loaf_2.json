@@ -19,5 +19,10 @@
     "cures": [
       "hungry"
     ]
+  },
+  "words": {
+    "bare": "item.fold_loaf_2.bare",
+    "article": "a",
+    "plural": "item.fold_loaf_2.plural"
   }
 }

@@ -291,8 +291,14 @@ test('player-first selected death skips retaliation and repairs to the surviving
   assert.equal(row.npc_id, h1);
   const view = gameView(result.world);
   assert.deepEqual(validate('GameView', view), []);
-  assert.deepEqual(view.combat?.active_opponents, [
-    { id: h1, name: 'npc.goblin.short', band: 'ready' },
+  // structuredClone: the loaded words are a null-prototype record
+  assert.deepEqual(structuredClone(view.combat?.active_opponents), [
+    {
+      id: h1,
+      name: 'npc.goblin.short',
+      words: { article: 'a', bare: 'npc.goblin.bare', plural: 'npc.goblin.plural' },
+      band: 'ready',
+    },
   ]);
   assert.equal(
     result.decision.kind === 'accepted' &&
@@ -335,5 +341,24 @@ test('even-round player death closes every pack member before shrine return', ()
     result.decision.kind === 'accepted' &&
       result.decision.events.filter((event) => event.payload.type === 'attack_result').length,
     1,
+  );
+});
+
+// Breaks: the combat opponent or a pack member drops its name words (loka-6qi), or carries
+// another entity's.
+test('the combat opponent and each pack member carry their own name words', () => {
+  const w = begun(fixture());
+  const words = (id: string) => ({
+    bare: w.entities[id]!.short,
+    plural: id === h1 ? 'pack.one' : 'pack.two',
+  });
+  const entities = { ...w.entities };
+  for (const id of [h1, h2]) entities[id] = { ...entities[id]!, words: words(id) } as never;
+  const view = gameView({ ...w, entities } as World);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(view.combat?.words, words(view.combat!.opponent_id));
+  assert.deepEqual(
+    view.combat?.active_opponents?.map((m) => [m.id, m.words]),
+    [h1, h2].sort().map((id) => [id, words(id)]),
   );
 });

@@ -16,5 +16,9 @@
   "immune": [
     "growing",
     "growing_croft"
-  ]
+  ],
+  "words": {
+    "bare": "item.strongbox.bare",
+    "article": "a"
+  }
 }

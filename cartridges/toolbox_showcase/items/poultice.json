@@ -18,5 +18,10 @@
     "cures": [
       "bleeding"
     ]
+  },
+  "words": {
+    "bare": "item.poultice.bare",
+    "article": "a",
+    "plural": "item.poultice.plural"
   }
 }

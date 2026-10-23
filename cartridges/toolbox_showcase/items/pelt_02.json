@@ -9,5 +9,10 @@
   "location": {
     "in": "room",
     "room": "glade"
+  },
+  "words": {
+    "bare": "item.pelt_02.bare",
+    "article": "a",
+    "plural": "item.pelt_02.plural"
   }
 }

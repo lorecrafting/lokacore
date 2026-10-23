@@ -17,5 +17,9 @@
       "kind": "draught",
       "quantity": 3
     }
+  },
+  "words": {
+    "bare": "item.tilt_cask.bare",
+    "article": "a"
   }
 }

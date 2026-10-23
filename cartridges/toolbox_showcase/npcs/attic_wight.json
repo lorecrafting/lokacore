@@ -17,5 +17,9 @@
     "chance": 100,
     "damage_min": 2,
     "damage_max": 2
+  },
+  "words": {
+    "bare": "npc.attic_wight.bare",
+    "article": "a"
   }
 }

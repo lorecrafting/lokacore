@@ -9,5 +9,9 @@
     "in": "room",
     "room": "village_green"
   },
-  "mass_grams": 20
+  "mass_grams": 20,
+  "words": {
+    "bare": "item.letter.bare",
+    "article": "a"
+  }
 }

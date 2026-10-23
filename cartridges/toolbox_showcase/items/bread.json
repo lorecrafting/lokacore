@@ -9,5 +9,10 @@
     "in": "npc",
     "npc": "nell"
   },
-  "mass_grams": 200
+  "mass_grams": 200,
+  "words": {
+    "bare": "item.bread.bare",
+    "article": "a",
+    "plural": "item.bread.plural"
+  }
 }

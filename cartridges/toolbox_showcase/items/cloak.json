@@ -13,5 +13,10 @@
   "slot": "cloak",
   "tags": [
     "warm"
-  ]
+  ],
+  "words": {
+    "bare": "item.cloak.bare",
+    "article": "a",
+    "plural": "item.cloak.plural"
+  }
 }

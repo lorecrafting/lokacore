@@ -13,5 +13,9 @@
   },
   "tags": [
     "water"
-  ]
+  ],
+  "words": {
+    "bare": "item.pond_water.bare",
+    "article": "the"
+  }
 }

@@ -102,17 +102,17 @@ test('a restored pickup shows on the corpse visit after reopen, then only once',
   for (let i = 0; i < 20 && !corpse(); i++)
     ((a.clock.wall += 3000), (a.clock.mono += 3000), a.game.pulse());
   const b = book(cart, a);
-  b.tap('A corpse');
+  b.tap('corpse, open');
   b.tap('A goblin ear, open');
   b.tap('Take a goblin ear');
   b.unmount();
   const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
   const PICKUP = 'You pick up a goblin ear.';
   assert.equal(r.text().includes(PICKUP), false); // the world, not the corpse, opens
-  r.tap('A corpse');
+  r.tap('corpse, open');
   assert.ok(r.text().includes(PICKUP));
   r.tap(LABEL.leave);
-  r.tap('A corpse');
+  r.tap('corpse, open');
   assert.equal(r.text().includes(PICKUP), false);
   r.unmount();
   a.sql.close();

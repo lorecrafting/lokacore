@@ -37,19 +37,29 @@ move it into a separate entity list or force a paragraph break. A fixture is
 immovable room content: it cannot be taken, dropped, stored or otherwise removed
 from the room. A removable object is a loose item in the item group instead.
 The link opens a detail only when the current GameView supplies a visible,
-current-room identity and detail route (for example, an offered place action
-with an exact inspectable target). The Book does not infer visibility, identity,
+current-room identity and detail route (a notice whose `key` is the
+link's target, with its captured Read offer). The Book does not infer visibility, identity,
 detail or an action from bracketed prose alone. If that projection is absent,
 the words remain ordinary prose until a mechanic adds the required projection
-and admission contract. The selected room-description variant itself must omit
+and admission contract. A readable detail the selected description links, whose
+`key` the GameView projects with an offered Read, is a fixture link in the prose
+and draws no separate World line; a notice the description does not link, a
+board, a bed, a transport or a counted harvest keeps its World entry
+(loka-x6t.105). The selected room-description variant itself must omit
 concealed fixture or exit text until the game reveals it; the Book cannot hide
 an authored phrase after receiving it.
 
 Below the description, present players and NPCs form one sentence and loose room items
 a second, NPCs first (owner, mvl9864n2qi8, mvl9q99wzm29): names joined with a serial
 comma and "and" before the last, the first name capitalised, ending "are here." ("A and B
-are here."; "A is here." for one), for example "Aldous, Bess, and the cook are here." Each name keeps its authored article until the
-cartridge supplies bare-name words (loka-6qi). Every entity that is not an
+are here."; "A is here." for one), for example "Aldous, Bess, and the cook are here." With cartridge name words a person shows its bare name, one shared 'the' per run of adjacent definite
+names, written again after a proper name ('The carpenter, Aldous, and the cook are here.') ('Aldous, Bess, the carpenter, chandler, and cook are here.'; owner 2026-10-23);
+loose items share 'a' or 'an' the same way, written again when the word changes ('A wooden bench, knife, and an
+orange are here.'; owner 2026-10-23), and written again on a name equal to the one before it ('A stick and a stick are here.');
+same-kind entities with a plural collapse into one link, 'two crows', count words to
+nine, digits after; the link opens the first member, and after Take the sentence recounts ('Five eggs are here.'), so
+every member stays reachable (PM ruling 2026-10-23); a name without words draws as its `name`. Combat foe lines take the definite
+form, one line per foe. Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
 its own inline link named "<name>, open" that opens its detail (a tap, or Enter or Space on a keyboard); the commas, "and" and "are here."
 are not pressable. A person's carried-item line follows the people sentence as a Note. An item's Take option appears only when currently offered; an NPC or
@@ -230,7 +240,7 @@ foot. A control that opens a child (Resume dream, Continue conversation) stays i
 
 ## Notice-board details
 
-Every readable notice opens its own detail page. A standalone notice opens directly from World and invokes its captured Read offer. Its Leave
+Every readable notice opens its own detail page. A standalone notice opens from its prose link, or from its World line when the selected description does not link it, and invokes its captured Read offer. Its Leave
 option returns to World. Its page title is an authored noun distinct from the action label.
 Read text never enters the room event log.
 

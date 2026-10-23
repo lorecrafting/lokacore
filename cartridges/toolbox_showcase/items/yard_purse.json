@@ -9,5 +9,9 @@
     "in": "npc",
     "npc": "mark"
   },
-  "mass_grams": 50
+  "mass_grams": 50,
+  "words": {
+    "bare": "item.yard_purse.bare",
+    "article": "a"
+  }
 }

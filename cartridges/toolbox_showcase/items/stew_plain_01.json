@@ -18,5 +18,9 @@
     "applies": [
       "fed"
     ]
+  },
+  "words": {
+    "bare": "item.stew_plain_01.bare",
+    "article": "a"
   }
 }

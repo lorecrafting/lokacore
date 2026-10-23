@@ -333,3 +333,42 @@ test('item schema enforces its required fields, bounds and literal container aut
   for (const row of read('protocol/fixtures/container_contracts.json'))
     assert.equal(validate('ItemDefinition', row.value).length === 0, row.valid, row.name);
 });
+
+// Breaks: name words outside the text catalog load, or the NPC's words go unchecked (loka-6qi; the
+// 1.118 floor is a loader_floors.json case, the shape container_contracts.json rows).
+test('name words load at 1.118 and their bare and plural keys resolve in the catalog', () => {
+  const bram = `.cartridge.npcs["${ID}:npc/bram"]`;
+  const worded = (c: any) => {
+    c.manifest.requires.kernel_api.at_least = '1.118';
+    at(c, 'lantern').words = {
+      bare: 'item.lantern.short',
+      article: 'a',
+      plural: 'item.lantern.room',
+    };
+    c.npcs[`${ID}:npc/bram`].words = { bare: 'npc.bram.short' };
+  };
+  assert.equal(load(worded).ok, true);
+  fails(
+    (c) => (worded(c), (at(c, 'lantern').words.plural = 'no.such')),
+    'UNRESOLVED_REFERENCE',
+    `${item('lantern')}.words.plural`,
+    { target: 'no.such' },
+  );
+  fails(
+    (c) => (worded(c), (c.npcs[`${ID}:npc/bram`].words.bare = 'no.such')),
+    'UNRESOLVED_REFERENCE',
+    `${bram}.words.bare`,
+    { target: 'no.such' },
+  );
+  // A touch link in name-word text is checked as in short (twin of the compiler's text_keys scan).
+  fails(
+    (c) => (
+      worded(c),
+      (c.text['npc.bram.bare'] = '[Bram](ghost)'),
+      (c.npcs[`${ID}:npc/bram`].words.bare = 'npc.bram.bare')
+    ),
+    'UNRESOLVED_REFERENCE',
+    `${bram}.words.bare`,
+    { target: 'ghost' },
+  );
+});

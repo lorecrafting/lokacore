@@ -13,5 +13,9 @@
     "deposit_a",
     "withdraw_a",
     "buy_strongroom"
-  ]
+  ],
+  "words": {
+    "bare": "npc.clerk_a.bare",
+    "article": "the"
+  }
 }

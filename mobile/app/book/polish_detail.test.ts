@@ -414,7 +414,8 @@ test('the signpost read from the Map, then opened, shows its body once', () => {
     h.map();
     h.tap('Read the signpost');
     h.tap(LABEL.backToWorld);
-    h.tap('The inn signpost, open');
+    assert.equal(h.labels().includes('The inn signpost, open'), false); // linked in the prose (loka-x6t.105)
+    h.tap('signpost, open');
     assert.equal(h.text().filter((line) => line.startsWith('Four roads')).length, 1);
   } finally {
     h.unmount();

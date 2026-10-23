@@ -39,5 +39,9 @@
       },
       "description": "npc.mark.description_robbed"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.mark.bare",
+    "article": "a"
+  }
 }

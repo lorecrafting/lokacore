@@ -20,5 +20,9 @@
       "kind": "water",
       "quantity": 4
     }
+  },
+  "words": {
+    "bare": "item.watering_can.bare",
+    "article": "a"
   }
 }

@@ -420,6 +420,10 @@
    {
     "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1",
     "name": "npc.smith.short",
+    "words": {
+     "article": "the",
+     "bare": "npc.smith.bare"
+    },
     "description": "npc.smith.description",
     "kind": "npc",
     "actions": [
@@ -618,6 +622,11 @@
    {
     "id": "ed46889f-3b43-8c50-854e-eb0f678931e7",
     "name": "item.ore_01.short",
+    "words": {
+     "article": "a",
+     "bare": "item.ore_01.bare",
+     "plural": "item.ore_01.plural"
+    },
     "description": "item.ore_01.description",
     "kind": "item",
     "actions": [
@@ -638,6 +647,11 @@
    {
     "id": "124169af-8fcb-888a-9cc6-ebb5cf09ae9e",
     "name": "item.ore_02.short",
+    "words": {
+     "article": "a",
+     "bare": "item.ore_02.bare",
+     "plural": "item.ore_02.plural"
+    },
     "description": "item.ore_02.description",
     "kind": "item",
     "actions": [
@@ -658,6 +672,11 @@
    {
     "id": "07ad588e-b649-82d6-95ed-118cbf97e8f2",
     "name": "item.ore_03.short",
+    "words": {
+     "article": "a",
+     "bare": "item.ore_03.bare",
+     "plural": "item.ore_03.plural"
+    },
     "description": "item.ore_03.description",
     "kind": "item",
     "actions": [
@@ -678,6 +697,11 @@
    {
     "id": "286a9781-0c21-8be9-88f3-edf8d1a50c34",
     "name": "item.ore_04.short",
+    "words": {
+     "article": "a",
+     "bare": "item.ore_04.bare",
+     "plural": "item.ore_04.plural"
+    },
     "description": "item.ore_04.description",
     "kind": "item",
     "actions": [

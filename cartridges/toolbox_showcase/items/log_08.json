@@ -14,5 +14,10 @@
   "tags": [
     "wooden",
     "burnable"
-  ]
+  ],
+  "words": {
+    "bare": "item.log_08.bare",
+    "article": "a",
+    "plural": "item.log_08.plural"
+  }
 }

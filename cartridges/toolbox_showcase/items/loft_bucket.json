@@ -20,5 +20,9 @@
       "kind": "water",
       "quantity": 1
     }
+  },
+  "words": {
+    "bare": "item.loft_bucket.bare",
+    "article": "the"
   }
 }

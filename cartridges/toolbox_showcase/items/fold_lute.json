@@ -9,5 +9,10 @@
     "in": "room",
     "room": "the_fold"
   },
-  "mass_grams": 1000
+  "mass_grams": 1000,
+  "words": {
+    "bare": "item.fold_lute.bare",
+    "article": "a",
+    "plural": "item.fold_lute.plural"
+  }
 }

@@ -9,5 +9,9 @@
   "location": {
     "in": "room",
     "room": "stall"
+  },
+  "words": {
+    "bare": "item.knife_01.bare",
+    "article": "a"
   }
 }

@@ -15,5 +15,9 @@
     "label": "actions.read_book",
     "text": "readable.grimoire",
     "topic": "flamma"
+  },
+  "words": {
+    "bare": "item.grimoire.bare",
+    "article": "the"
   }
 }

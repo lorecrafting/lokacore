@@ -24,12 +24,19 @@ export function combatOffered(
   );
 }
 
+// An entity's view name, with its name words while the base short holds (loka-6qi).
+export const named = (world: World, actor: CharacterId, id: EntityId, steps: Steps) => {
+  const name = describeEntity(world, actor, id, 'short', steps);
+  const { short, words } = world.entities[id];
+  return { name, ...(words && name === short && { words }) };
+};
+
 type Fight = NonNullable<ReturnType<typeof engaged>>;
 export function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
   // A foe is always named (even unseen); its hp band word shows only when seen and alive: a pack
   // member a spell or status kills stays on the roster until the round-end prune (loka-y6yg.49).
   const foe = (id: EntityId) => ({
-    name: describeEntity(world, actor, id, 'short', steps),
+    ...named(world, actor, id, steps),
     ...(visible(world, actor, id, steps) &&
       living(world, id) && { band: bandOf(world, id, 'hp').band }),
   });

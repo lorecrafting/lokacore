@@ -15,5 +15,9 @@
     "label": "actions.read_book",
     "text": "readable.parish_roll",
     "topic": "parish"
+  },
+  "words": {
+    "bare": "item.hall_roll.bare",
+    "article": "a"
   }
 }

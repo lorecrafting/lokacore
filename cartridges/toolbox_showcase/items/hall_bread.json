@@ -9,5 +9,10 @@
     "in": "npc",
     "npc": "bess"
   },
-  "mass_grams": 200
+  "mass_grams": 200,
+  "words": {
+    "bare": "item.hall_bread.bare",
+    "article": "a",
+    "plural": "item.hall_bread.plural"
+  }
 }

@@ -17,6 +17,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { detail, room } from '../play/text.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { variants } from '../src/content/cartridge_variants.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-variants-'));
 let artifact: Uint8Array;
@@ -209,4 +210,20 @@ test('loader: a status kind is buff or debuff', () => {
     'SCHEMA_VIOLATION',
     `.cartridge.statuses[${JSON.stringify(`${C}:status/bruised`)}].kind`,
   ]);
+});
+
+// Breaks: name words (loka-6qi) not copied to the EntityView, or kept while a short variant
+// holds (they would then name the base short, not the variant the player reads).
+test('the guard carries its name words only while its base short holds', () => {
+  const words = { bare: 'npc.guard.short', article: 'the', plural: 'npc.guard.short' } as const;
+  const npcs = { ...content.npcs } as Record<string, object>;
+  npcs[`${C}:npc/guard`] = { ...npcs[`${C}:npc/guard`], words };
+  const worded = { ...content, npcs } as Cartridge;
+  let w = newWorld(worded, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const of = (k: string) => gameView(w).entities.find((x) => x.id === id(w, 'npc', k))!;
+  assert.equal(of('guard').words, undefined); // 05:00: short_asleep holds
+  w = wait(w, 3600); // 06:00: awake, the base short
+  assert.deepEqual(of('guard').words, words);
+  assert.equal('words' in of('maud'), false);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
 });

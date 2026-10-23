@@ -247,14 +247,10 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...knowledge(c, check));
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
-    const { in: k } = i.location;
-    if (k !== 'template') named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
+    const [{ in: k }, at] = [i.location, `.cartridge.items${step(ref)}`];
+    if (k !== 'template') named(i.location[k], k, `${at}.location.${k}`);
     if (c.world?.carry !== undefined && !Object.hasOwn(i, 'mass_grams'))
-      out.push(
-        diag('SCHEMA_VIOLATION', `.cartridge.items${step(ref)}.mass_grams`, {
-          error: 'missing_property',
-        }),
-      );
+      out.push(diag('SCHEMA_VIOLATION', `${at}.mass_grams`, { error: 'missing_property' }));
   }
   if (c.world?.carry !== undefined) {
     if (c.lock.capabilities.containment !== 1)
@@ -271,7 +267,10 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
-  for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
+  for (const [kind, d, at] of parts(c)) {
+    text(d, TEXT[kind] ?? ['description'], at);
+    if (d.words) text(d.words, ['bare', 'plural'], `${at}.words`); // loka-6qi
+  }
   for (const [a, at] of asideParts(c)) text(a, ['text'], at);
   text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));

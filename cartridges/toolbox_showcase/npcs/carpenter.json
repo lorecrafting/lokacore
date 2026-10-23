@@ -14,5 +14,9 @@
     "raze_hut",
     "raise_croft_hut",
     "raze_croft_hut"
-  ]
+  ],
+  "words": {
+    "bare": "npc.carpenter.bare",
+    "article": "the"
+  }
 }

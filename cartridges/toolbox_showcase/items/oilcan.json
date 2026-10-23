@@ -21,5 +21,9 @@
       "kind": "oil",
       "quantity": 2
     }
+  },
+  "words": {
+    "bare": "item.oilcan.bare",
+    "article": "the"
   }
 }

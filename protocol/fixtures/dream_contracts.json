@@ -787,6 +787,7 @@
       "contract": "NoticeView",
       "value": {
         "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "key": "notice",
         "title": "detail.notice.title",
         "description": "detail.notice.description"
       }

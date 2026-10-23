@@ -49,5 +49,9 @@
       },
       "description": "npc.watchman.room_wanted"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.watchman.bare",
+    "article": "the"
+  }
 }

@@ -93,5 +93,8 @@
       },
       "description": "npc.wat.description_chilled"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.wat.bare"
+  }
 }
