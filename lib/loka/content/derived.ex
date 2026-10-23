@@ -1,7 +1,8 @@
 defmodule Loka.Content.Derived do
   @moduledoc """
   Checks toolbox row 2 derived-stat tables (world.derived), row 3 item affects, row 27 identified
-  items, row G3 NPC attributes and balance 6b's gear budget; twin of cartridge_derived.ts.
+  items, row G3 NPC attributes, balance 6b's gear budget and row 6a's equip words; twin of
+  cartridge_derived.ts.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
   alias Loka.Content.Refs
@@ -51,18 +52,21 @@ defmodule Loka.Content.Derived do
       Enum.any?(defs["npc"] || %{}, &match?({_, {_, _, %{"attributes" => _}}}, &1)) or
         Enum.any?(defs["recipe"] || %{}, &match?({_, {_, _, %{"check" => %{"npc" => _}}}}, &1))
 
-  # A gear budget or an intended level is balance 6b (API 1.72); an identified item is row 27
-  # (1.68); NPC attributes are row G3 (1.46); finger slots and affects row 3 (1.41); hp_max 1.40;
-  # the other tables 1.39.
+  # Authored equip words are row 6a (API 1.116); a gear budget or an intended level is balance 6b
+  # (1.72); an identified item is row 27 (1.68); NPC attributes are row G3 (1.46); finger slots and
+  # affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
   defp api_floor(table, items, g3, budget) do
     cond do
-      budget || Enum.any?(items, fn {_, i} -> i["intended_level"] end) -> [1, 72]
-      Enum.any?(items, fn {_, i} -> i["identified"] end) -> [1, 68]
+      declares?(items, "equip") -> [1, 116]
+      budget || declares?(items, "intended_level") -> [1, 72]
+      declares?(items, "identified") -> [1, 68]
       g3 -> [1, 46]
       Enum.any?(items, fn {_, i} -> i["affects"] || i["slot"] == "finger" end) -> [1, 41]
       true -> table_floor(table)
     end
   end
+
+  defp declares?(items, field), do: Enum.any?(items, fn {_, i} -> i[field] end)
 
   defp floor(m, floor) do
     if floor && api(m) < floor,
@@ -88,7 +92,14 @@ defmodule Loka.Content.Derived do
   defp gear_budget(m, %{"gear_budget" => _}), do: owner(m, "cartridge.world.gear_budget")
   defp gear_budget(_, _), do: []
 
-  defp item(i, m, defs), do: intended(i) ++ affects(i, m, defs) ++ identified(i, m, defs)
+  defp item(i, m, defs),
+    do: intended(i) ++ equip(i) ++ affects(i, m, defs) ++ identified(i, m, defs)
+
+  # Row 6a: authored wear and remove words need a slot to wear in.
+  defp equip({rel, %{"equip" => _} = item}) when not is_map_key(item, "slot"),
+    do: [diag("SCHEMA_VIOLATION", at(rel, ["equip"]))]
+
+  defp equip(_), do: []
 
   # Balance 6b: an intended level sits beside affects.
   defp intended({rel, %{"intended_level" => _} = item}) when not is_map_key(item, "affects"),

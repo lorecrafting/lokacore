@@ -24,5 +24,11 @@
   "tags": [
     "metal",
     "sharp"
-  ]
+  ],
+  "equip": {
+    "wear": "action.wield",
+    "remove": "action.unwield",
+    "worn": "narration.wield_training_sword",
+    "removed": "narration.unwield_training_sword"
+  }
 }

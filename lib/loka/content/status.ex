@@ -56,10 +56,10 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # An observed line (loka-kgd.176) needs 1.110, an authored kind (loka-x6t.64) 1.102, a pierced_by
-  # (row 16) 1.93, a movement status (reader 7) 1.62, a perception or concealment (readers 6, 8)
-  # 1.61, a status reader (4, 5) 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
-  # the fields above 1.46.
+  # A skipped line (loka-x6t.30) needs 1.115, an observed line (loka-kgd.176) 1.110, an authored
+  # kind (loka-x6t.64) 1.102, a pierced_by (row 16) 1.93, a movement status (reader 7) 1.62, a
+  # perception or concealment (readers 6, 8) 1.61, a status reader (4, 5) 1.54, a fear status (row
+  # W21) 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
   defp floor(statuses, g3) do
     defs = for {_, {_, _, s}} <- statuses, is_map(s), do: s
 
@@ -74,7 +74,8 @@ defmodule Loka.Content.Status do
 
   defp floors,
     do: [
-      {&Map.has_key?(&1["narration"] || %{}, "observed"), [1, 110]},
+      {&narrates?(&1, "skipped"), [1, 115]},
+      {&narrates?(&1, "observed"), [1, 110]},
       {&Map.has_key?(&1, "kind"), [1, 102]},
       {&Map.has_key?(&1, "pierced_by"), [1, 93]},
       {&Map.has_key?(&1, "movement"), [1, 62]},
@@ -85,6 +86,8 @@ defmodule Loka.Content.Status do
     ]
 
   defp permanent?(s), do: s["duration"] == "permanent"
+
+  defp narrates?(s, line), do: Map.has_key?(s["narration"] || %{}, line)
 
   # Status readers 4-8: blocks, allows, resistances, perception, concealment or movement; such a
   # status may omit per_tick too.

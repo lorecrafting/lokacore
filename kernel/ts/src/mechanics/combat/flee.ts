@@ -10,7 +10,7 @@ import {
 import { refusal, composed } from '../../commands/actions.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { uniform } from '../../foundation/rng.ts';
-import { movementPlan, moveSequence } from '../movement/sequence.ts';
+import { movementPlan, moveSequence, planned } from '../movement/sequence.ts';
 import { engaged } from './shared.ts';
 
 /** Candidate selection is read-only and shares ordinary composed movement admission. */
@@ -27,7 +27,7 @@ export function escapeDirections(
     .filter(
       (direction) =>
         !refusal(world, { type: 'move', actor_id, direction }, steps, undefined, set) &&
-        typeof movementPlan(world, actor_id, direction, steps, true) !== 'string',
+        planned(movementPlan(world, actor_id, direction, steps, true)),
     );
 }
 

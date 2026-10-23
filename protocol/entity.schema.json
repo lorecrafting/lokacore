@@ -193,6 +193,18 @@
         "slot": {
           "$ref": "#/$defs/SlotKey"
         },
+        "equip": {
+          "description": "Authored wear and remove words (toolbox row 6a, loka-x6t.20; kernel_api at least 1.116): the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["wear", "remove", "worn", "removed"],
+          "properties": {
+            "wear": {"$ref": "text.schema.json#/$defs/TextKey"},
+            "remove": {"$ref": "text.schema.json#/$defs/TextKey"},
+            "worn": {"$ref": "text.schema.json#/$defs/TextKey"},
+            "removed": {"$ref": "text.schema.json#/$defs/TextKey"}
+          }
+        },
         "affects": {
           "type": "array",
           "minItems": 1,

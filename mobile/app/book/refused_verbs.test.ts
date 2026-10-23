@@ -97,3 +97,16 @@ test('glade without an axe: the real Book shows "Chop wood: not now"', (t) => {
   }
   assert.ok(b.text().includes('Chop wood: not now'), JSON.stringify(b.text().slice(-8)));
 });
+
+// Breaks: the ring's Item page drops its held-on Remove (a cause outside NOTED), loka-x6t.38.
+test('a worn cursed ring: its Item page shows "Remove: it will not come off."', (t) => {
+  const b = book(compiled('cartridges/curse_sampler') as never);
+  t.after(() => b.sql.close());
+  b.tap(/silver ring is here/);
+  b.tap(/^Take/);
+  b.tap(/opens Contents/);
+  b.tap(/^Inventory/);
+  b.tap(/silver ring/);
+  b.tap(/^Wear/);
+  assert.ok(b.text().includes('Remove: it will not come off.'), JSON.stringify(b.text()));
+});

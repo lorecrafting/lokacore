@@ -690,7 +690,8 @@
         ["reactions/wheel_3_x_shows_6.json", [], null],
         ["reactions/wheel_3_x_shows_7.json", [], null],
         ["reactions/wheel_3_x_shows_8.json", [], null],
-        ["reactions/wheel_3_x_shows_9.json", [], null]
+        ["reactions/wheel_3_x_shows_9.json", [], null],
+        ["items/training_sword.json", ["equip"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1580,7 +1581,8 @@
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
-        ["statuses/burning.json", ["narration", "observed"], null]
+        ["statuses/burning.json", ["narration", "observed"], null],
+        ["items/training_sword.json", ["equip"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1604,7 +1606,8 @@
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
-        ["statuses/burning.json", ["narration", "observed"], null]
+        ["statuses/burning.json", ["narration", "observed"], null],
+        ["items/training_sword.json", ["equip"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1724,6 +1727,30 @@
         ["statuses/poison.json", ["narration", "observed"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.115",
+      "below": "1.114",
+      "source": "cartridges/status_sampler",
+      "feature": "a status narration.skipped line (loka-x6t.30)",
+      "edits": [["statuses/poison.json", ["narration", "skipped"], "narration.poison.applied"]],
+      "without": [
+        ["statuses/poison.json", ["narration", "skipped"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.116",
+      "below": "1.115",
+      "source": "cartridges/wear_sampler",
+      "feature": "an item's authored equip words (row 6a, loka-x6t.20)",
+      "edits": [["items/leather_cap.json", ["equip"], {"wear": "item.leather_cap.short", "remove": "item.leather_cap.short", "worn": "item.leather_cap.room", "removed": "item.leather_cap.room"}]],
+      "without": [
+        ["items/leather_cap.json", ["equip"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]

@@ -32,6 +32,6 @@
   "item.salve.short": "a jar of healer's salve",
   "item.salve.room": "A [jar of healer's salve] sits here.",
   "item.salve.description": "A clay jar of green salve.",
-  "action.eat": "Eat",
+  "action.apply": "Apply",
   "narration.eat_salve": "You rub in the salve; the scar smooths away."
 }

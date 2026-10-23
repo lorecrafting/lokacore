@@ -102,8 +102,7 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
     before,
   );
 
-// The narration lines that belong to combat: an encounter root (any receipt that opens one, as a
-// move's engage does: book-ui.md, Opening), attack, pack or engaged bleed.
+// Combat lines: a receipt opening an encounter (book-ui.md, Opening), attack, pack, skip, bleed.
 function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narration']>) {
   const root = d.delta.ops.some(
     (o) =>
@@ -128,6 +127,7 @@ function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narrati
     root ||
     keys.includes(line?.key) ||
     packKeys.includes(line?.key) ||
+    line?.bindings?.status !== undefined || // only a status-skipped blow binds status (x6t.30)
     (bleedKeys.includes(line?.key) && !!engaged(s.world, s.world.body)) ||
     (d.outcome === 'bandaged' && d.encounter_id === engaged(s.world, s.world.body)?.id)
       ? [i]

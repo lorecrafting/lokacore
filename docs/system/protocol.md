@@ -1018,6 +1018,12 @@ projects the captured provider target, service reference/quote, declared benefit
 and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
 valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
 paid, full MV, sold out and unavailable exact payment without changing error codes.
+`GameError` and `UnavailableReason` may also carry `cause`, a closed `RefusalCause`
+(`error.schema.json`; kernel_api 1.111, owner Q13 option A): the one reason a shared code
+stands for, so a client can tell the player. `not_standing` is a move while the actor is not
+standing (`invalid_state`, position@1); `cursed` is a remove a curse holds on (`invalid_state`,
+equipment@1, loka-x6t.38). The code stays the contract; a
+reader that does not know `cause` reads the code alone, and a value without it stays valid.
 The actual bed is an inspectable detail with `bed {title, entitlement}`; its
 local projection emits ordinary targetless Rest and never changes raw Rest admission.
 

@@ -14,7 +14,7 @@
   "edible": {
     "resource": "mv",
     "amount": 1,
-    "label": "action.eat",
+    "label": "action.apply",
     "narration": "narration.eat_salve",
     "cures": [
       "scar"

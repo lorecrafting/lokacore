@@ -11,6 +11,7 @@ import type {
   EncounterId,
   EncounterRow,
   EntityId,
+  TextKey,
 } from '../../contracts.gen.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
@@ -27,7 +28,7 @@ import { equipped } from '../lookups.ts';
 import { broken, wear, type Worn } from './durability.ts';
 import type { CombatEvent, Round } from './round.ts';
 import { ally, lastOpponent, resisted } from './shared.ts';
-import { statusAllows } from '../status/shared.ts';
+import { barring } from '../status/bars.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
   const during =
@@ -62,7 +63,7 @@ export function attack(
 ) {
   const player = attacker_id === row.body_id;
   const foe = !player && !ally(world, row.character_id, attacker_id);
-  if ((!player && !foe && !allyFits(r)) || !statusAllows(world, attacker_id)('attack')) return;
+  if ((!player && !foe && !allyFits(r)) || skipped(world, attacker_id, player, r)) return;
   const target_id = foe ? row.body_id : row.npc_id;
   const profile = attackProfile(world, row, attacker_id, player, r);
   if (profile.ammo) shoot(world, row, profile.ammo, r);
@@ -93,6 +94,19 @@ export function attack(
 }
 
 // Toolbox row 17: a shot spends one of the body's ammo pool and makes the foe wait this round.
+// A status barring the blow tells its authored skipped line, else the engine line combat.skipped
+// naming the status; the player's own line has no actor (loka-x6t.30).
+function skipped(world: World, attacker: EntityId, player: boolean, r: Round) {
+  const spec = barring(world, attacker)('attack');
+  if (spec)
+    r.notes.push({
+      key: spec.narration.skipped ?? ('combat.skipped' as TextKey),
+      bindings: { status: spec.label },
+      ...(!player && { participants: { actor: attacker } }),
+    });
+  return !!spec;
+}
+
 function shoot(world: World, row: EncounterRow, ammo: DefinitionRef, r: Round) {
   r.ops.push({ ...adjust(world, row.body_id, ammo, -1, {}).op, at: r.due_time });
   r.shot = true;

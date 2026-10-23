@@ -15,7 +15,7 @@ Rules 5, 7, 9, 10 and 12 follow owner and PM rulings on the pass-1 questions (Q4
 8. Do not offer a dialogue whose choices are all refused. (REFUSAL, M10c)
 9. Every value a rule reads is on the page: a wanted status token, a puzzle readout (a room-detail aside until the projection lands), the opponent's band on the Combat page. (HIDDEN, E1, T3, C2b)
 10. Every offer and its result are on the page the player is looking at: a door's Open is on the World page too, not only on the Map. (PAGE, R4)
-11. Every verb has an `action.*` label key, and every readable has a title; read the composed label aloud. (VERB, UH: "Talk the jailer"; T5: "Read".)
+11. Every verb has an `action.*` label key, and every readable has a title; read the composed label aloud. (VERB, UH: "Talk the jailer"; T5: "Read".) Name an item's own verb where Eat or Wear reads wrong: a cure's `edible.label` (`action.apply` "Apply", or "Quaff" with its narration "You quaff a bubbly potion."), a weapon's `equip` words (`action.wield` "Wield", `action.unwield` "Put away" and its worn and removed lines; kernel_api 1.116).
 12. One code or verb means one thing: `over_load` for your load, Lift for a person's goods. (VERB, R3: `too_heavy` meant both; E14: Take on a person was a theft.)
 13. A tag query matches only the items it means: list what it matches. (WIRING, M8a: oil on any `metal` item opens the gate.)
 14. Every item has a source and a sink; a vessel that must be filled has a fill source in reach. (WIRING, M8c: the dry flask.)

@@ -70,6 +70,12 @@ export const OUTCOME: Record<string, string> = {
   slept: 'You lie down to sleep.',
 };
 
+// A wield-slot item with no authored equip words (book-ui.md, Equipment and skills).
+export const WIELD: Record<string, string> = {
+  worn: 'You take it up.',
+  removed: 'You put it away.',
+};
+
 // The refusal codes an offer can carry (book/reasons.test.ts).
 const REASON: Record<string, string> = {
   exit_locked: 'locked',
@@ -88,15 +94,31 @@ const REASON: Record<string, string> = {
   unsupported_capability: 'not in this book',
   budget_exceeded: 'more than the book can follow',
 };
-// A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
 // The kernel's engine key resource.short names the unpaid cost (pass-1 R1); keys show raw, as on the status line.
 export const message = (m: { key: string; bindings?: Record<string, unknown> }, text: Say) =>
   m.key === 'resource.short'
     ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
     : text(m.key);
-export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
+// A refusal's own sentence, not "The way north is …" or "You can't do that: …": keyed by the
+// GameError's cause (RefusalCause), then by its code.
+const SENTENCE: Record<string, string> = {
+  insufficient_resource: 'You are too exhausted.',
+  not_standing: 'You are not standing.',
+  cursed: 'It will not come off.',
+};
+export type Refusal = { code: string; cause?: string };
+export const refusedSentence = ({ code, cause }: Refusal) =>
+  (cause && SENTENCE[cause]) ?? SENTENCE[code];
+// The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
+// one reason a shared code stands for, so it goes before the code's word.
+const CAUSE: Record<string, string> = {
+  not_standing: 'not standing',
+  cursed: 'it will not come off',
+};
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
-export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
+export const reason = (code: string, cause?: string) =>
+  (cause && CAUSE[cause]) ?? REASON[code] ?? code.replaceAll('_', ' ');
+export const reasonOf = (r: Refusal) => reason(r.code, r.cause);
 // An item page's refusal notes (book-ui.md, too heavy; pass-1 E8): a locked Take reads as ownership.
 export const NOTED: Record<string, string> = {
   too_heavy: REASON.too_heavy!,
@@ -126,6 +148,27 @@ type Say = (key: string) => string;
 export const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
   lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
 
+// A known NPC's or visible entity's name, worded.
+const nameOf = (view: GameView, id: unknown, text: Say) => {
+  const name =
+    view.known_npcs?.find((n) => n.id === id)?.name ?? view.entities.find((n) => n.id === id)?.name;
+  return name && text(name);
+};
+
+// One narration line's words. A skipped combat turn (loka-x6t.30) names its status from the
+// engine line combat.skipped; it has no actor when the player skipped.
+export const lineWords = (
+  t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
+  text: Say,
+  view: GameView,
+) => {
+  if (t.key !== 'combat.skipped') return text(t.key);
+  const actor = t.participants?.actor;
+  const name = actor === undefined ? undefined : nameOf(view, actor, text);
+  const who = actor === undefined ? 'You are' : name ? `${name} is` : 'They are';
+  return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);
+};
+
 // A press that changed nothing, as one plain sentence (book-ui.md, Shared elapsed status).
 const UNDONE: Partial<Record<Reply['kind'], string>> = {
   conflict: 'The book is still catching up; try again.',
@@ -144,20 +187,17 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
-    const { code } = d.error; // a refused line, as a refused drag (model.ts `refused`)
+    // a refused line, as a refused drag (model.ts `refused`)
     return {
       kind: 'refused',
-      reason: reason(code),
-      text: SENTENCE[code] ?? `You can't do that: ${reason(code)}.`,
+      reason: reasonOf(d.error),
+      text: refusedSentence(d.error) ?? `You can't do that: ${reasonOf(d.error)}.`,
     };
   }
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {
     const location = d.location;
-    const name =
-      view.known_npcs?.find((n) => n.id === location.target_id)?.name ??
-      view.entities.find((n) => n.id === location.target_id)?.name;
-    const who = name ? text(name) : 'They';
+    const who = nameOf(view, location.target_id, text) || 'They';
     if (location.status === 'here') return `${who}: here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);
@@ -166,7 +206,7 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  const said = shown.map((t) => text(t.key)).filter(Boolean);
+  const said = shown.map((t) => lineWords(t, text, view)).filter(Boolean);
   return said.length ? said : (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 

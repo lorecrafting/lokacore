@@ -242,22 +242,6 @@ export function statusMovement(world: World, body: EntityId) {
 }
 
 /**
- * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
- * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
- */
-export function statusAllows(world: World, body: EntityId) {
-  const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
-  const specs = bars ? activeStatuses(world, body).map(({ spec }) => spec) : [];
-  return (command: string) =>
-    specs.every(
-      (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
-    );
-}
-
-/** Status reader 4: whether NPC `npc` may move (its statuses bar or leave out `move`); every NPC mover reads it. */
-export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('move');
-
-/**
  * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its
  * holders, once per holder and status, in the holder's one writer group this advance (job.ts
  * statusGroup). Only a first application (over no active row) is heard: it emits status_applied

@@ -54,7 +54,8 @@ defmodule Loka.ContentShowcaseTest do
                      strongroom_chest yard_crate)
 
   # those immune pairs; the Undercroft's bank and forge services, shop stock tables and locks;
-  # the guard's disposition (arrest needs 1.105, toolbox row 35; hostile alone is refused)
+  # the guard's disposition (arrest needs 1.105, toolbox row 35; hostile alone is refused);
+  # the training sword's equip words (1.116)
   @dropped_keys for(i <- @immune_holders, do: {"items/" <> i, "immune"}) ++
                   for(n <- ~w(clerk_a clerk_b smith), do: {"npcs/" <> n, "services"}) ++
                   for(n <- ~w(chandler yard_chandler), do: {"npcs/" <> n, "shop"}) ++
@@ -68,7 +69,8 @@ defmodule Loka.ContentShowcaseTest do
                     {"npcs/vault", "locks"},
                     {"npcs/fence", "shop"},
                     {"npcs/guard", "disposition"},
-                    {"rooms/crypt", "dark_description"}
+                    {"rooms/crypt", "dark_description"},
+                    {"items/training_sword", "equip"}
                   ]
 
   # Nell and Bess's disposition.refuse lines need 1.104 (Book hostile refusal).

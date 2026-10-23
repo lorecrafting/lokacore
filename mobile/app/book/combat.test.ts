@@ -187,3 +187,30 @@ test('combat shows the running head, even over a Journal page', () => {
     assert.equal(lines.filter((line) => line === head).length, 1);
   }
 });
+
+// Breaks (loka-x6t.30): a skipped blow shows its engine key, names the player as an NPC (or an NPC
+// as "You"), drops the status word, leaves the name lower case, or an authored line is reworded.
+test('a status-skipped blow reads "<Name> is too <status> to do anything."', () => {
+  const skip = (participants?: object) => ({
+    key: 'combat.skipped',
+    bindings: { status: 'condition.stunned' },
+    ...(participants && { participants }),
+  });
+  const lines = [skip({ actor: 'rat' }), skip(), skip({ actor: 'gone' }), { key: 'combat.result' }];
+  const p = presenter({
+    ...game(view()),
+    text: (k) => ({ 'npc.rat': 'a marsh rat', 'condition.stunned': 'stunned' })[k] ?? k,
+    lastNarration: () => ({ command_id: 'before', lines, combat_lines: [0, 1, 2, 3] }) as never,
+  });
+  const page = Combat({ screen: p.screen(), g: group([]), press: () => {}, world: () => {} });
+  const said = nodes(page)
+    .filter((n) => n.type === 'Text')
+    .map(words);
+  for (const line of [
+    'A marsh rat is too stunned to do anything.',
+    'You are too stunned to do anything.',
+    'They are too stunned to do anything.',
+    'combat.result',
+  ])
+    assert.ok(said.includes(line), `${line} in ${JSON.stringify(said)}`);
+});

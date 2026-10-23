@@ -1,4 +1,11 @@
-import type { CharacterId, CommandId, Key, NpcDefinition } from '../../contracts.gen.ts';
+import type {
+  CharacterId,
+  CommandId,
+  ErrorCode,
+  GameError,
+  Key,
+  NpcDefinition,
+} from '../../contracts.gen.ts';
 import {
   accepted,
   bodyOf,
@@ -15,7 +22,7 @@ import * as patrol from '../patrol/sequence.ts';
 import * as expedition from '../expedition/sequence.ts';
 import { exitOf, exitTo, hidden } from '../lookups.ts';
 import { lockRefused } from '../locks.ts';
-import { standing } from '../position/shared.ts';
+import { notStanding, standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 import { mounted, travel } from '../escort/shared.ts';
@@ -39,7 +46,7 @@ export function moveSequence(
 ) {
   const { actor_id, direction } = command.payload;
   const plan = movementPlan(world, actor_id, direction, steps, outcome === 'fled');
-  if (typeof plan === 'string') return rejected(plan);
+  if (!planned(plan)) return rejected(plan);
   const { body, here, there, paid } = plan;
   const transfer = {
     op: 'entity.transfer',
@@ -78,7 +85,7 @@ const PINNED = new Set(['water.transition', 'encounter.open']);
 function routeProgress(
   world: World,
   command: MoveCommand,
-  { body, here, there, paid }: Exclude<ReturnType<typeof movementPlan>, string>,
+  { body, here, there, paid }: Planned,
   ops: Parameters<typeof patrol.travel>[4],
   mint: Mint,
   steps: { n: number },
@@ -116,6 +123,11 @@ function routeProgress(
   };
 }
 
+type Planned = Extract<ReturnType<typeof movementPlan>, { body: unknown }>;
+/** True when movementPlan admitted the move; else the plan is its refusal (a code or a GameError). */
+export const planned = (plan: Planned | ErrorCode | GameError): plan is Planned =>
+  typeof plan !== 'string' && 'body' in plan;
+
 /** Read-only ordinary movement checks, reused before random escape selection. */
 export function movementPlan(
   world: World,
@@ -146,10 +158,12 @@ export function movementPlan(
   const wet = water.edge(world, here, there, direction);
   if (wet) {
     const paid = water.admission(world, actor_id, wet.entering, steps);
-    return typeof paid === 'string' ? paid : { body, here, there, paid, water: wet };
+    return typeof paid === 'string' || 'code' in paid
+      ? paid
+      : { body, here, there, paid, water: wet };
   }
   if (engaged(world, body) && !escape) return 'invalid_state' as const;
-  if (!standing(world, actor_id)) return 'invalid_state' as const;
+  if (!standing(world, actor_id)) return notStanding();
   const paid = fare(world, actor_id, body, there);
   if (!paid) return 'insufficient_resource' as const;
   return { body, here, there, paid };

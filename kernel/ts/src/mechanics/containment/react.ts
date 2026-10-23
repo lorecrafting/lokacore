@@ -18,7 +18,7 @@ import { living } from '../death/shared.ts';
 import { eventRooms } from '../lookups.ts';
 import { livingMembers } from '../population/refs.ts';
 import { running } from '../scene/shared.ts';
-import { moves } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 
 export function moveItem(
   world: World,

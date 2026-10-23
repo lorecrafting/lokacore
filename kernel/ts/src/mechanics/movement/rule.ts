@@ -6,7 +6,7 @@ import { concealed, perceives } from '../status/shared.ts';
 // A direction outside the compass is invalid_target; a compass direction without an exit here,
 // or with one hidden from the actor (hidden_until, toolbox row 11), is not_found, and one through
 // a closed or locked barrier (barrier@1) exit_closed or exit_locked (passage); then, under
-// position@1, an actor not standing is invalid_state (position.ts standing). A move costs the
+// position@1, an actor not standing is invalid_state, cause not_standing. A move costs the
 // body the cartridge's world.movement.cost, else 1 mv where it declares the mv pool (resource@1;
 // 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot pay is insufficient_resource
 // ("You are too exhausted."). Accepted: that resource.adjust (none without a cost), one

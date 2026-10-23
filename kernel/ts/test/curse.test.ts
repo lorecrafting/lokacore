@@ -10,6 +10,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { gameView } from '../src/view/view.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-curse-sampler-'));
 let artifact: Uint8Array;
@@ -48,19 +49,26 @@ const fresh = () =>
 const ring = (w: World) => w.entityIds['curse_sampler@0.0.1:item/ring']!;
 const worn = (w: World) => gameView(w).equipment!.find((s) => s.item?.id === ring(w))?.item;
 const carried = (w: World) => gameView(w).inventory.find((e) => e.id === ring(w));
-const removable = (w: World) => worn(w)!.actions.some((a) => a.action_key === 'remove');
+const remove = (w: World) => worn(w)!.actions.find((a) => a.action_key === 'remove');
+const removable = (w: World) => remove(w)?.available;
 
 // Breaks: equipment@1 never reads the item's own statuses (the cursed ring comes off and lists
-// Remove), or reads them so a lifted curse still holds (the blessed ring stays on); the curse
-// reaction ignores its blessed guard (the retaken ring is cursed again).
+// Remove), or reads them so a lifted curse still holds (the blessed ring stays on), or bars wear
+// too; the curse reaction ignores its blessed guard (the retaken ring is cursed again); the held
+// ring drops Remove or lists it without the cursed cause, or the refusal drops it (loka-x6t.38).
 test('a cursed ring will not come off until the chapel blesses it', () => {
   let w = play(fresh(), { type: 'take', item_id: ring(fresh()) });
   assert.equal(carried(w)!.name, 'item.ring.short', 'hidden while carried');
+  assert.ok(carried(w)!.actions.some((a) => a.action_key === 'wear' && a.available));
   w = play(w, { type: 'wear', item_id: ring(w) });
   assert.equal(worn(w)!.name, 'item.ring.short_cursed');
-  assert.equal(removable(w), false);
+  const cursed = { code: 'invalid_state', cause: 'cursed' };
+  const held = remove(w);
+  assert.ok(held && !held.available, 'Remove listed, unavailable');
+  assert.deepEqual(held.reason, cursed);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   const refused = send(w, { type: 'remove', item_id: ring(w) }).decision;
-  assert.equal(refused.kind === 'rejected' && refused.error.code, 'invalid_state');
+  assert.deepEqual(refused, { kind: 'rejected', error: cursed });
 
   w = play(w, { type: 'move', direction: 'north' });
   assert.equal(worn(w)!.name, 'item.ring.short', 'blessed');

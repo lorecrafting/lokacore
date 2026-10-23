@@ -16,6 +16,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { escapeDirections } from '../src/mechanics/combat/flee.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sleep-'));
@@ -87,7 +88,8 @@ const won = () => {
 
 // Breaks: the Sleep provocation (the PM's provisional answer, loka-kgd.119) is dropped, or Rest
 // and Sit provoke too (reverting that one `engage` call fails this test and the double-damage
-// one, which needs it); or a sleeper in the fight loses Look or may Flee.
+// one, which needs it); or a sleeper in the fight loses Look or may Flee, or finds an escape exit
+// (flee's movementPlan guard lets a not-standing plan through, loka-x6t.17).
 test('a Sleep beside the hostile hound opens the fight with its engage line; Rest and Sit do not', () => {
   const r = play(fresh(), { type: 'sleep' });
   const w = ok(r);
@@ -96,6 +98,7 @@ test('a Sleep beside the hostile hound opens the fight with its engage line; Res
   assert.equal(w.state.clock, 0, 'Sleep passes no time');
   assert.deepEqual(verbs(w), ['look', 'stand'], 'both filters: the fight and the sleeper');
   assert.equal(code(play(w, { type: 'flee' })), 'invalid_state');
+  assert.deepEqual(escapeDirections(w, w.character), [], 'a sleeper has no way out');
   for (const type of ['rest', 'sit']) {
     const quiet = act(fresh(), { type });
     assert.equal(engaged(quiet, quiet.body), undefined, type);

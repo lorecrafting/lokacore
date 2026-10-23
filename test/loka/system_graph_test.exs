@@ -89,7 +89,7 @@ defmodule Loka.SystemGraphTest do
   # Breaks: every field marked required, or a union read as an object.
   test "required marks and kinds follow the schema" do
     fields = Map.new(contract("UnavailableReason")["fields"], &{&1["name"], &1["required"]})
-    assert fields == %{"code" => true, "message" => false}
+    assert fields == %{"cause" => false, "code" => true, "message" => false}
     assert contract("TextValue")["kind"] == "union"
   end
 

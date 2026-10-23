@@ -142,6 +142,12 @@ defmodule Loka.Content.Entities do
 
   defp readable_texts(_), do: []
 
+  # Row 6a: authored Wear and Remove labels and the worn and removed lines.
+  defp equip_texts(%{"equip" => q}),
+    do: for(f <- ~w(wear remove worn removed), do: {["equip", f], q[f]})
+
+  defp equip_texts(_), do: []
+
   # A fence names its refusal of honest goods (pass-1 GE3).
   defp shop_texts(%{"shop" => s}),
     do:
@@ -205,7 +211,8 @@ defmodule Loka.Content.Entities do
         goal_texts(e) ++
         disposition_texts(e) ++
         ask_texts(e) ++
-        aside_texts(e)
+        aside_texts(e) ++
+        equip_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

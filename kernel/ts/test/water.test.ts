@@ -82,6 +82,15 @@ function load(w: World, grams: number): World {
 // Breaks: entry ignores acquired swim, nested load, exact MV minimum, posture or following child, or debits ordinary fare as well.
 test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () => {
   const base = fresh();
+  const sitting = {
+    ...learned(base),
+    state: {
+      ...learned(base).state,
+      facts: { ...learned(base).state.facts, [scoped(base, position(base))]: 'sitting' as never },
+    },
+  };
+  const following = { [base.character]: { status: 'following' } as never }; // a sitter, too
+  const held = { ...sitting, state: { ...sitting.state, escorts: following } };
   for (const w of [
     base,
     load(learned(base), 6001),
@@ -100,20 +109,8 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
         },
       },
     },
-    {
-      ...learned(base),
-      state: {
-        ...learned(base).state,
-        facts: { ...learned(base).state.facts, [scoped(base, position(base))]: 'sitting' as never },
-      },
-    },
-    {
-      ...learned(base),
-      state: {
-        ...learned(base).state,
-        escorts: { [base.character]: { status: 'following' } as never },
-      },
-    },
+    sitting,
+    held,
   ]) {
     const before = w.state,
       view = gameView(w).exits.find((e) => e.direction === 'down')!;
@@ -121,6 +118,15 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
     assert.equal(run(w, { type: 'move', direction: 'down' }).decision.kind, 'rejected');
     assert.deepEqual(w.state, before);
   }
+  // Breaks: the water edge refuses a sitter without the not_standing cause (loka-x6t.17).
+  const not_standing = { code: 'invalid_state', cause: 'not_standing' };
+  const exit: any = gameView(sitting).exits.find((e) => e.direction === 'down');
+  const moved: any = run(sitting, { type: 'move', direction: 'down' }).decision;
+  assert.deepEqual([exit.reason, moved.error], [not_standing, not_standing]);
+  // Breaks: posture checked before a following child, unlike the land exit's engaged-first order.
+  assert.deepEqual((run(held, { type: 'move', direction: 'down' }).decision as any).error, {
+    code: 'invalid_state',
+  });
   const w = load(learned(base), 6000),
     r = run(w, { type: 'move', direction: 'down' }),
     below = green(r);

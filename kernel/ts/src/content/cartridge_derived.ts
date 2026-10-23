@@ -1,6 +1,6 @@
 // Toolbox row 2 derived-stat tables (hp_max: loka-kgd.8), row 3 item affects, row 27 identified
-// items, row G3 NPC attributes and balance 6b's gear budget in the loaded artifact; twin of
-// Loka.Content.Derived.
+// items, row G3 NPC attributes, balance 6b's gear budget and row 6a's equip words in the loaded
+// artifact; twin of Loka.Content.Derived.
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
@@ -12,11 +12,11 @@ const NEEDS = { hit_chance: 'combat', damage: 'combat', carry_grams: 'carry', hp
 const API = '.cartridge.manifest.requires.kernel_api.at_least';
 const OWNER = ['UNDECLARED_CAPABILITY', { capability: 'attributes' }, ['attributes@1']] as const;
 
-export function derived(c: Obj, named: Checks['named']): Diagnostic[] {
+export function derived(c: Obj, { named, text }: Checks): Diagnostic[] {
   const table = c.world?.derived as Obj | undefined;
   const items = Object.entries((c.items ?? {}) as Obj) as [string, Obj][];
   const npcs = Object.entries((c.npcs ?? {}) as Obj) as [string, Obj][];
-  // A gear budget or an intended level is balance 6b (1.72); an identified item is row 27 (1.68);
+  // Authored equip words are row 6a (1.116); a gear budget or an intended level is balance 6b (1.72); an identified item is row 27 (1.68);
   // NPC attributes are row G3 (API 1.46, with an opposed check naming an NPC); finger slots and
   // affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
   const g3 =
@@ -25,8 +25,9 @@ export function derived(c: Obj, named: Checks['named']): Diagnostic[] {
   const row3 = items.some(([, i]) => i.affects || i.slot === 'finger');
   const row27 = items.some(([, i]) => i.identified);
   const budget = c.world?.gear_budget;
-  const floor =
-    budget || items.some(([, i]) => i.intended_level !== undefined)
+  const floor = items.some(([, i]) => i.equip)
+    ? '1.116'
+    : budget || items.some(([, i]) => i.intended_level !== undefined)
       ? '1.72'
       : row27
         ? '1.68'
@@ -43,6 +44,7 @@ export function derived(c: Obj, named: Checks['named']): Diagnostic[] {
   if (table) out.push(...tables(c, table, named));
   out.push(...gearBudget(c, items));
   for (const [ref, item] of items) if (item.affects) out.push(...affects(c, ref, item, named));
+  for (const [ref, item] of items) if (item.equip) out.push(...equip(ref, item, text));
   for (const [ref, item] of items)
     if (item.identified) out.push(...identified(c, ref, item, named));
   for (const [ref, npc] of npcs) if (npc.attributes) out.push(...npcAttributes(c, ref, npc, named));
@@ -97,6 +99,13 @@ function tables(c: Obj, table: Obj, named: Checks['named']): Diagnostic[] {
       named(term.attribute, 'attribute', `${at}.${stat}.terms[${i}].attribute`);
   }
   return out;
+}
+
+// Row 6a: authored wear and remove words need a slot to wear in, and each key is in the catalog.
+function equip(ref: string, item: Obj, text: Checks['text']): Diagnostic[] {
+  const at = `.cartridge.items${step(ref)}.equip`;
+  text(item.equip, ['wear', 'remove', 'worn', 'removed'], at);
+  return item.slot === undefined ? [diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' })] : [];
 }
 
 // Toolbox row 3: an item's affects need its slot, attributes@1 and real attributes.

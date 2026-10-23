@@ -384,6 +384,13 @@ A held item's page shows one card per Give pair the GameView lists available, at
 figures and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
 How Character shows learned skills is the [skill tree rule](#skill-tree-details).
+A worn item a curse holds on keeps Remove in its list, unavailable, with the engine's reason
+("Remove: it will not come off."); the Book never hides it.
+An item's authored `equip` words name its Wear and Remove buttons and their lines ("Wield the
+training sword", "You take up the training sword."). With none, a wield-slot item reads **Wield**
+and answers "You take it up." and "You put it away."; any other slot reads Wear and answers "You
+put it on." and "You take it off.". A cure's authored `edible.label` names its verb the same way
+(**Apply** a poultice); an authored narration line always wins over these defaults.
 
 **Fuel and light.** An item with fuel shows `Fuel <remaining> of <capacity>, lit/unlit` from the
 confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside Remove when worn.
@@ -488,6 +495,7 @@ rather than hiding errors or clearing same-room history. Whisper needs a word, s
 
 The installed first-fight interaction follows [Live combat response](#live-combat-response-m6-a).
 An NPC a [spell](mechanics.md#spell-effects-toolbox-row-29b) kills gets no "leaves" line in the Book log (Beads `loka-y6yg.44`).
+A status-skipped blow tells one Combat line: the status's authored `narration.skipped`, else, proposed for the designer, "<Name> is too <label> to do anything." ("You are ..." for the player; Beads `loka-x6t.30`).
 
 ## Shared elapsed status/completion boundary
 
@@ -523,7 +531,11 @@ code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pe
 save retries keep the existing original-attempt behavior for any subsequent press. A press
 refused after a catch-up gets no "what changed" sentence: the catch-up's own lines (rounds, a
 death, an expiry) already precede the refused line in order, and the refused line carries its
-reason word.
+reason word. Proposed for designer approval (loka-x6t.17, owner Q13 option A): a refusal that
+carries a `cause` (GameError or an exit's reason, `RefusalCause`) takes the cause's word as its
+tag and the cause's sentence before the code's ([words](../../mobile/app/book/words.ts)
+`reason`, `refusedSentence`): a move while sitting reads **not standing**, "You are not
+standing.", never "The way north is not standing." or "not now".
 
 A timed hazard (submersion) shows its remaining time from the confirmed projection on every page
 it covers; the authority owns the deadline and the presenter keeps no clock and never renews
