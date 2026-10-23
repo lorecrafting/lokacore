@@ -9,7 +9,7 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { dur, message, reasonOf, refusedSentence } from './words.ts';
+import { doorSentence, dur, message, reasonOf, refusedSentence } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
@@ -145,7 +145,7 @@ type Offered =
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
 
-// A closed exit's log line: its reason word as the tag, then the cartridge's sentence or the frame.
+// A closed exit's log line: reason tag, then the cartridge's sentence, a shut door's, or the frame.
 export const refused = (
   e: Extract<GameView['exits'][number], { available: false }>,
   text: (key: string) => string,
@@ -154,7 +154,9 @@ export const refused = (
   reason: reasonOf(e.reason),
   text: e.reason.message
     ? text(e.reason.message.key)
-    : (refusedSentence(e.reason) ?? `The way ${e.direction} is ${why(e, text)}.`),
+    : (refusedSentence(e.reason) ??
+      doorSentence(e) ??
+      `The way ${e.direction} is ${why(e, text)}.`),
 });
 
 export const absent = (v: GameView) =>

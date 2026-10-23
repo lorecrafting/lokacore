@@ -27,10 +27,10 @@ const page = (b: ReturnType<typeof yard>, item: string) => {
 };
 
 // Breaks: the pair reads its tool as a destination ("Quench a bucket in a bucket"), names the
-// tool instead of the target, shows on the target's page too, or presses ids other than the
-// listed [target, tool] pair. Every
+// tool instead of the target, is missing from the target's page or reads differently there
+// (owner 2026-10-23: both pages), or presses ids other than the listed [target, tool] pair. Every
 // listed pair is pressed, so this is the view-to-invocation check.
-test('the bucket offers Quench a cart, the oilcan Oil a winch; each press is admitted', () => {
+test('Quench a cart on the bucket and the cart, Oil a winch on the oilcan; each press is admitted', () => {
   const b = yard();
   const say = (k: string) => k;
   const v = b.game.view().view;
@@ -40,16 +40,18 @@ test('the bucket offers Quench a cart, the oilcan Oil a winch; each press is adm
   assert.deepEqual(
     buttonsOf(v, say, say)
       .filter((p) => p.action_key === 'quench' || p.action_key === 'oil')
-      .map((p) => [p.action_key, p.target_ids, p.input]),
-    listed.map((a) => [a.action_key, a.target_ids, {}]),
+      .map((p) => [p.action_key, p.target_ids, p.input, p.detail_id]),
+    listed.flatMap((a) =>
+      [a.target_ids![1], a.target_ids![0]].map((page) => [a.action_key, a.target_ids, {}, page]),
+    ),
   );
-  b.tap(/^a cart, open$/i);
-  assert.ok(!b.labels().some((l) => l.startsWith('Quench')), b.labels().join(' | '));
-  b.tap('Leave');
   page(b, 'bucket');
   assert.ok(b.labels().includes('Quench a cart'), b.labels().join(' | '));
+  b.tap('Leave');
+  b.tap('Back to World');
+  b.tap(/^a cart, open$/i);
   b.tap('Quench a cart');
-  assert.equal(b.text()[0], 'A bucket');
+  assert.equal(b.text()[0], 'A cart');
   assert.ok(b.text().includes('You pour water over it and the flames hiss out.'));
   assert.ok(!b.labels().some((l) => l.startsWith('Quench')), 'the cart no longer burns');
   b.tap('Leave');

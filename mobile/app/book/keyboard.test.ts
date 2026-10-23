@@ -102,24 +102,36 @@ function browser(t: { after: (cleanup: () => void) => void }) {
   return { listeners, key, Target };
 }
 
+// An exit barred by a door in the given state (none offers Open or Unlock unless the test adds it).
+const shut = (direction: string, state: string) =>
+  ({
+    direction,
+    available: false,
+    reason: { code: 'exit_locked' },
+    door: { name: 'door', state, actions: [] },
+  }) as any;
+
 // Breaks: a shortcut chooses the wrong exit or steals a focused input's arrow keys.
 test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
   const refusals: DetailLine[] = [];
+  const knocked: string[] = []; // exits whose door was tried; only west offers Open or Unlock
   const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
     direction,
     available: true,
   }));
-  Footer({
+  const props = {
     keyboardEnabled: true,
     exits,
     text: (key: string) => key,
     go: (direction: string) => walked.push(direction),
+    door: (direction: string) => (knocked.push(direction), direction === 'west'),
     refused: (line: DetailLine) => refusals.push(line),
     openMap: () => {},
     learned: { seen: () => true, see: () => {} },
-  });
+  };
+  Footer(props);
   for (const name of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'])
     assert.equal(key(name), true);
   assert.deepEqual(walked, ['north', 'south', 'west', 'east', 'up', 'down']);
@@ -130,14 +142,26 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   assert.equal(key('ArrowUp', { defaultPrevented: true }), false);
   assert.equal(key('Home'), false);
   assert.equal(walked.length, 6);
-  exits.pop(); // no down exit is offered here
-  assert.equal(key('PageDown'), false);
+  assert.equal((exits.pop(), key('PageDown')), false); // no down exit is offered here
   exits[0] = { direction: 'north', available: false, reason: { code: 'exit_closed' } } as any;
   assert.equal(key('ArrowUp'), true);
+  // Breaks: a shut door's key walks, logs nothing or names the way; a reader's Go drops why (owner 2026-10-23).
+  exits.splice(0, 5, shut('north', 'locked'), exits[1]!, shut('west', 'locked'));
+  exits.push(shut('up', 'closed'), shut('down', 'locked'));
+  for (const name of ['ArrowUp', 'PageUp', 'PageDown', 'ArrowLeft']) assert.equal(key(name), true);
+  assert.deepEqual(knocked, ['north', 'north', 'up', 'down', 'west']);
   assert.equal(walked.length, 6);
   assert.deepEqual(refusals, [
     { kind: 'refused', reason: 'closed', text: 'The way north is closed.' },
+    { kind: 'refused', reason: 'locked', text: 'The door to the north is locked.' },
+    { kind: 'refused', reason: 'locked', text: 'The door above is closed.' },
+    { kind: 'refused', reason: 'locked', text: 'The door below is locked.' },
   ]);
+  const reader = (n: any): any =>
+    n?.props &&
+    (n.props.accessibilityActions ?? [n.props.children].flat().map(reader).find(Boolean));
+  const labels = reader(Footer(props)).map((a: any) => a.label);
+  assert.deepEqual(labels.slice(1, 3), ['Go north, locked', 'Go south']);
 });
 
 // Breaks: Book installs a World keyboard handler while a detail or save state owns input.
@@ -173,7 +197,7 @@ test('Book captures movement keys only on an active World page', (t) => {
       stack: stack as any,
       flip: { turn: 0, dir: 1 },
       go: () => {},
-      press: (button: any) => pressed.push(button.input.direction),
+      press: (button: any) => pressed.push(`${button.action_key} ${button.input.direction}`),
       refused: () => {},
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
@@ -186,7 +210,7 @@ test('Book captures movement keys only on an active World page', (t) => {
     return key('ArrowUp');
   };
   assert.equal(attempt(), true);
-  assert.deepEqual(pressed, ['north']);
+  assert.deepEqual(pressed, ['move north']);
   for (const change of [
     { pending: true },
     { catchingUp: true },
@@ -197,7 +221,21 @@ test('Book captures movement keys only on an active World page', (t) => {
     assert.equal(attempt(change), false);
   for (const page of [{ kind: 'dialogue' }, { kind: 'thing', id: 'npc' }, { kind: 'chapter' }])
     assert.equal(attempt({}, [page]), false);
-  assert.deepEqual(pressed, ['north']);
+  assert.deepEqual(pressed, ['move north']);
+  // Breaks: a key toward a locked door presses Open over the offered Unlock, or another exit's door.
+  const doorButton = (action_key: string, direction: string) => ({
+    label: action_key,
+    action_key,
+    target_ids: [],
+    input: { direction },
+  });
+  const buttons = [
+    doorButton('unlock', 'south'),
+    doorButton('open', 'north'),
+    doorButton('unlock', 'north'),
+  ];
+  assert.equal(attempt({ buttons, view: { exits: [shut('north', 'locked')] } }), true);
+  assert.deepEqual(pressed, ['move north', 'unlock north']);
 });
 
 // Breaks: the chapter title page offers Back to World or an enabled Contents beside its Continue, or

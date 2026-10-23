@@ -8,7 +8,8 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
-import type { DetailLine } from './presenter.ts';
+import type { Button, DetailLine } from './presenter.ts';
+import { commandOf } from './buttons.ts';
 import { Control } from './pages.tsx';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space } from './tokens.ts';
@@ -19,6 +20,7 @@ type Props = {
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
+  door: (direction: string) => boolean; // presses a shut exit's offered Unlock, else Open; false if none
   refused: (line: DetailLine) => void; // a drag toward a closed exit: its line for the log
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
@@ -51,9 +53,10 @@ const keys: Record<string, string> = {
  * - Use: under every page; its flanking rules are the World page's only divider above it, no rule over
  *   the footer.
  * - Rules: press to zoom, drag toward a path to light it, release to walk, drag back to the middle
- *   to cancel; a tap opens the Map page. A walk keeps the action and context from the drag start;
- *   the presenter revalidates its token.
- * - States: at rest; held.
+ *   to cancel; a tap opens the Map page. Release toward a shut door presses its offered Unlock, else
+ *   Open; with neither it logs the refusal ("The door to the south is locked."). A walk keeps the
+ *   action and context from the drag start; the presenter revalidates its token.
+ * - States: at rest; held; an exit barred by a closed or a locked door.
  * - Story: Footer.stories.tsx
  */
 export function Footer(p: Props) {
@@ -84,7 +87,7 @@ export function Footer(p: Props) {
         <View style={rule(c)} />
         <View
           style={{ width: size.minimap, height: size.minimap, zIndex: 1 }} // above the rules: the zoomed map covers them
-          {...readerActions(p.exits, said, (d) => walk(d, p), openMap)}
+          {...readerActions(p, said, (d) => walk(d, p), openMap)}
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
@@ -96,11 +99,20 @@ export function Footer(p: Props) {
   );
 }
 
-// An open exit walks (and teaches the tip); a closed one shows, announces and logs its reason.
+// A shut door's way through on release: its offered Unlock, else Open (owner 2026-10-23).
+export const pressDoor = (door: Button[], press: (b: Button) => void) => {
+  const b = ['unlock', 'open'].flatMap((c) => door.filter((x) => commandOf(x) === c))[0];
+  if (b) press(b);
+  return !!b;
+};
+
+// An open exit walks (and teaches the tip); a shut door opens or unlocks when it can; else the
+// exit shows, announces and logs its reason.
 const walker =
   (learn: () => void, setNote: (note: string) => void) => (d: string | null, at: Props) => {
     const e = at.exits.find((x) => x.direction === d);
     if (e?.available) (at.go(e.direction), learn());
+    else if (e && at.door(e.direction)) setNote('');
     else if (e) {
       const reason = why(e, at.text); // a screen reader hears it too
       (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
@@ -197,9 +209,9 @@ function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
 }
 
 // A screen reader gets the map as one button: activate opens the Map page, and each exit is an
-// action ("Go north") that walks (a closed one announces its reason). No touch targets to collide.
+// action ("Go north"; "Go west, locked") that walks as a release does. No touch targets to collide.
 function readerActions(
-  exits: Props['exits'],
+  { exits, text }: Props,
   said: string, // shown inside the button while dragging: it leads the name (WCAG 2.5.3)
   walk: (direction: string) => void,
   openMap: () => void,
@@ -210,7 +222,10 @@ function readerActions(
     accessibilityLabel: said ? `${said}, Map` : 'Map',
     accessibilityActions: [
       { name: 'activate' },
-      ...exits.map((x) => ({ name: x.direction, label: `Go ${x.direction}` })),
+      ...exits.map((x) => ({
+        name: x.direction,
+        label: `Go ${x.direction}${x.available ? '' : `, ${why(x, text)}`}`,
+      })),
     ],
     onAccessibilityAction: (a: { nativeEvent: { actionName: string } }) =>
       a.nativeEvent.actionName === 'activate' ? openMap() : walk(a.nativeEvent.actionName),

@@ -207,14 +207,14 @@ function heldButtons(
       .map((o) =>
         o.label === 'action.wear' && e.slot === 'wield' ? { ...o, label: 'action.wield' } : o,
       )
-      .map((a) => {
-        // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target
-        // and keep the card on this page (detail_id), not the target's.
-        if (a.target_ids?.[1] === e.id)
-          return {
-            ...button(a, ` ${text(names.get(a.target_ids[0]!) ?? '')}`),
-            detail_id: e.id,
-          };
+      .flatMap((a) => {
+        // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target;
+        // the same card draws on the tool's page and on the target's when it has one (owner 2026-10-23).
+        if (a.target_ids?.[1] === e.id) {
+          const pair = button(a, ` ${text(names.get(a.target_ids[0]!) ?? '')}`);
+          const target = names.has(a.target_ids[0]!) ? [a.target_ids[0]!] : [];
+          return [e.id, ...target].map((id) => ({ ...pair, detail_id: id }));
+        }
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(

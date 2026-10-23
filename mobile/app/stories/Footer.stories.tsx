@@ -7,6 +7,14 @@ type Exit = Parameters<typeof Footer>[0]['exits'][number];
 const open = (direction: string) => ({ direction, available: true }) as Exit;
 const barred = (direction: string) =>
   ({ direction, available: false, reason: { code: 'exit_locked' } }) as Exit;
+// A door shut across the way: closed (path ink) or locked (danger ink), owner 2026-10-23.
+const shut = (direction: string, state: 'closed' | 'locked') =>
+  ({
+    direction,
+    available: false,
+    reason: { code: state === 'locked' ? 'exit_locked' : 'exit_closed' },
+    door: { name: `${direction} door`, state, actions: [] },
+  }) as unknown as Exit;
 
 const meta = {
   title: 'Book/Footer',
@@ -16,6 +24,7 @@ const meta = {
     exits: [open('north'), open('east'), open('south'), open('west')],
     text: (key: string) => key,
     go: fn(),
+    door: fn(() => false),
     refused: fn(),
     openMap: fn(),
     learned: { seen: () => true, see: fn() },
@@ -51,3 +60,18 @@ export const BarredExit: Story = {
 };
 
 export const UpAndDown: Story = { args: { exits: [open('north'), open('up'), open('down')] } };
+
+// A locked door west and a closed door east: the ticks tell them apart. Release toward the locked
+// door with no key offered logs its one line; nothing walks.
+export const DoorExits: Story = {
+  args: { exits: [open('north'), shut('east', 'closed'), shut('west', 'locked')] },
+  play: async ({ canvas, args }) => {
+    const map = canvas.getByRole('button', { name: 'Map' });
+    fireEvent.mouseDown(map, { button: 0, buttons: 1 });
+    fireEvent.mouseMove(map, { buttons: 1, clientX: -40 });
+    fireEvent.mouseUp(map, { clientX: -40 });
+    await waitFor(() => expect(args.door).toHaveBeenCalledWith('west'));
+    await expect(args.refused).toHaveBeenCalled();
+    await expect(args.go).not.toHaveBeenCalled();
+  },
+};
