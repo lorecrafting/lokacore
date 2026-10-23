@@ -14,17 +14,20 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Encounter = NonNullable<Screen['ended']>;
 
 // The opponent lines, "name — band", one block of touching lines (a run of one kind, like the
-// mock's entity lines; Page's doc comment). Your own bleeding and conditions stay on the
+// mock's entity lines; Page's doc comment). A foe with name words reads definite, "the goblin"
+// (a proper name stays bare), one line per foe (loka-6qi). Your own bleeding and conditions stay on the
 // status line and Character (book-ui.md, Live combat response).
 function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat: Encounter }) {
   const c = usePalette();
   const t = useType();
-  const { opponent_id: id, name, band } = combat;
+  const { opponent_id: id, name, band, words } = combat;
   return (
     <View>
-      {(combat.active_opponents ?? [{ id, name, band }]).map((opponent) => (
+      {(combat.active_opponents ?? [{ id, name, band, words }]).map((opponent) => (
         <Text key={opponent.id} style={prose(c, t)}>
-          {text(opponent.name)}
+          {opponent.words
+            ? `${opponent.words.article ? `${LABEL.the} ` : ''}${text(opponent.words.bare)}`
+            : text(opponent.name)}
           {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
             ? ' (your target)'
             : ''}

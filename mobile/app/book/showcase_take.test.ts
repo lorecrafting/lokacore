@@ -12,6 +12,6 @@ test('farm yard: a seed sack that is too heavy reads "Take: too heavy to carry."
     b.map();
     b.tap(`Go ${d}`);
   }
-  b.tap('a seed sack, open');
+  b.tap('seed sack, open');
   assert.ok(b.text().includes('Take: too heavy to carry.'));
 });

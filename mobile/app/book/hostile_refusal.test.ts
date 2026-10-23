@@ -14,11 +14,11 @@ function nell(cheat: boolean) {
   b.map();
   b.tap('Go south');
   if (cheat) {
-    for (const c of ['the Reeve, open', /^Talk/, 'Call him a cheat']) b.tap(c);
+    for (const c of ['Reeve, open', /^Talk/, 'Call him a cheat']) b.tap(c);
     b.tap(LABEL.leaveConversation);
     b.tap(LABEL.leave);
   }
-  b.tap('Nell, the baker, open');
+  b.tap('Nell, open');
   return [b.text(), b.labels()] as const;
 }
 
@@ -46,7 +46,7 @@ test("a shelf row's buy reason is a word, never the code", () => {
   const b = book(showcase as never);
   b.map();
   b.tap('Go south');
-  b.tap('Nell, the baker, open');
+  b.tap('Nell, open');
   b.tap('Buy a cob of bread — 4p');
   const row = 'a cob of bread: Buy 4p (sold out); Sell 1p.';
   assert.ok(b.text().includes(row), JSON.stringify(b.text()));

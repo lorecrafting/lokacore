@@ -52,8 +52,12 @@ an authored phrase after receiving it.
 Below the description, present players and NPCs form one sentence and loose room items
 a second, NPCs first (owner, mvl9864n2qi8, mvl9q99wzm29): names joined with a serial
 comma and "and" before the last, the first name capitalised, ending "are here." ("A and B
-are here."; "A is here." for one), for example "Aldous, Bess, and the cook are here." Each name keeps its authored article until the
-cartridge supplies bare-name words (loka-6qi). Every entity that is not an
+are here."; "A is here." for one), for example "Aldous, Bess, and the cook are here." With cartridge name words a person shows its bare name, one shared 'the' per run of adjacent definite
+names, written again after a proper name ('The carpenter, Aldous, and the cook are here.') ('Aldous, Bess, the carpenter, chandler, and cook are here.'; owner 2026-10-23);
+loose items share 'a' or 'an' the same way, written again when the word changes ('A wooden bench, knife, and an
+orange are here.'; owner 2026-10-23); same-kind entities with a plural collapse into one link, 'two crows', count words to
+nine, digits after, opening the first; a name without words draws as its `name`. Combat foe lines take the definite
+form, one line per foe. Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
 its own inline link named "<name>, open" that opens its detail (a tap, or Enter or Space on a keyboard); the commas, "and" and "are here."
 are not pressable. A person's carried-item line follows the people sentence as a Note. An item's Take option appears only when currently offered; an NPC or

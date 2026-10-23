@@ -136,31 +136,65 @@ export const CompanionRemark: StoryObj = {
   },
 };
 
-// Breaks (owner pick mvl9864n2qi8): a crowded room lists one name per line, joins with "and",
-// capitalises every name, or merges a group's names into one link.
+// Breaks (owner pick mvl9864n2qi8; loka-6qi): a crowded room lists one name per line, joins with
+// "and", capitalises every name, merges a group's names into one link, or repeats a shared article.
 const [npc, , thing] = RoomNpcsItemsView.view.entities;
-const crowd = (e: typeof npc, kind: string, names: string[]) =>
-  names.map((n, i) => ({ ...e, id: `${e.id}-${i}`, name: `${kind}.${n}.short`, contents: [] }));
+type Word = [string, ('a' | 'an' | 'the')?, true?];
+const crowd = (e: typeof npc, kind: string, names: Word[]) =>
+  names.map(([n, article, many], i) => ({
+    ...e,
+    id: `${e.id}-${i}`,
+    name: `${kind}.${n}.short`,
+    contents: [],
+    words: { bare: `${kind}.${n}.bare`, article, plural: many && `${kind}.${n}.plural` },
+  }));
+const room = (entities: ReturnType<typeof crowd>) =>
+  pageStory({ ...RoomNpcsItemsView, view: { ...RoomNpcsItemsView.view, entities } });
+const sentence = async (
+  canvas: Parameters<NonNullable<StoryObj['play']>>[0]['canvas'],
+  names: string[],
+  text: string,
+) => {
+  const links = names.map((n) => canvas.getByRole('button', { name: `${n}, open` }));
+  await expect(links[0]!.parentElement!.textContent).toBe(text);
+};
 export const Crowded: StoryObj = {
-  ...pageStory({
-    ...RoomNpcsItemsView,
-    view: {
-      ...RoomNpcsItemsView.view,
-      entities: [
-        ...crowd(npc, 'npc', ['aldous', 'bess', 'carpenter', 'chandler', 'cook']),
-        ...crowd(thing, 'item', ['apple', 'axe', 'bench', 'bread', 'anvil']),
-      ],
-    },
-  }),
-  name: 'Five people, five items',
+  ...room([
+    ...crowd(npc, 'npc', [
+      ['aldous'],
+      ['bess'],
+      ['carpenter', 'the'],
+      ['chandler', 'the'],
+      ['cook', 'the'],
+    ]),
+    ...crowd(thing, 'item', [
+      ['apple', 'an'],
+      ['axe', 'an'],
+      ['bench', 'a'],
+      ['anvil', 'an'],
+    ]),
+  ]),
+  name: 'Five people, four items',
   play: async ({ canvas }) => {
-    const people = ['Aldous', 'Bess, the alewife', 'the carpenter', 'the chandler', 'the cook'];
-    const things = ['An apple', 'an axe', 'a wooden bench', 'a cob of bread', 'an iron anvil'];
-    for (const group of [people, things]) {
-      const links = group.map((n) => canvas.getByRole('button', { name: `${n}, open` }));
-      await expect(links[0]!.parentElement!.textContent).toBe(
-        `${group.slice(0, -1).join(', ')}, and ${group.at(-1)} are here.`,
-      );
-    }
+    const people = ['Aldous', 'Bess', 'carpenter', 'chandler', 'cook'];
+    await sentence(canvas, people, 'Aldous, Bess, the carpenter, chandler, and cook are here.');
+    const things = ['apple', 'axe', 'wooden bench', 'iron anvil'];
+    await sentence(canvas, things, 'An apple, axe, a wooden bench, and an iron anvil are here.');
+  },
+};
+
+// Breaks (loka-6qi): same-kind entities with a plural show one link per member, or the count as a digit.
+export const Plural: StoryObj = {
+  ...room(
+    crowd(npc, 'npc', [
+      ['goblin', 'a', true],
+      ['goblin', 'a', true],
+      ['goblin', 'a', true],
+      ['hen', 'a'],
+    ]),
+  ),
+  name: 'Three goblins and a hen',
+  play: async ({ canvas }) => {
+    await sentence(canvas, ['Three goblins', 'hen'], 'Three goblins and a hen are here.');
   },
 };

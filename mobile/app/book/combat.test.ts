@@ -15,6 +15,8 @@ const SAY: Record<string, string> = {
   'band.ready': 'ready',
   hungry: 'hungry',
   bleeding: 'Bleeding',
+  goblin: 'goblin',
+  Grub: 'Grub',
 };
 const combatLines = (combat: object, extra = {}, ended = false) => {
   const current = view({ combat, ...extra });
@@ -61,6 +63,35 @@ test('a pack draws each member once with its own band and none for a hidden memb
   assert.deepEqual(
     lines.filter((l) => l.includes('hound')),
     ['a fen hound (your target) — hurt', 'a fen hound — ready', 'a fen hound'],
+  );
+});
+
+// Breaks (loka-6qi): a foe with name words keeps its indefinite short ("a goblin"), a proper name
+// gets "the", a one-foe fight drops its words, or two same-name foes merge into one line.
+test('a foe with name words reads definite, one line per foe', () => {
+  const goblin = { bare: 'goblin', article: 'a' };
+  const one = { encounter_id: 'fight', opponent_id: 'a', name: 'npc.goblin', band: 'hurt' };
+  assert.deepEqual(
+    combatLines({ ...one, words: goblin }).filter((l) => l.includes('goblin')),
+    ['the goblin — hurt'],
+  );
+  const lines = combatLines({
+    ...one,
+    active_opponents: [
+      { id: 'a', name: 'npc.goblin', band: 'hurt', words: goblin },
+      { id: 'b', name: 'npc.goblin', band: 'ready', words: goblin },
+      { id: 'c', name: 'npc.grub', band: 'ready', words: { bare: 'Grub' } },
+      { id: 'd', name: 'npc.hound', band: 'ready' },
+    ],
+  });
+  assert.deepEqual(
+    lines.filter((l) => / — /.test(l)),
+    [
+      'the goblin (your target) — hurt',
+      'the goblin — ready',
+      'Grub — ready',
+      'a fen hound — ready',
+    ],
   );
 });
 

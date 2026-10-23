@@ -227,3 +227,92 @@ test('a readable notice the description links is a prose link and no World line'
     );
   }
 });
+
+// Room sentences from cartridge name words (book-ui.md "Below the description", loka-6qi). Breaks:
+// the article is written on every name, is not written again after a proper name or a change of
+// word ("an wooden bench"), a name without words is dropped or loses its text, a plural group
+// is not one link, opens a later member, says "is", or counts 10 as a word.
+test('the room sentence shows bare names, shares an article per run and collapses plurals', async () => {
+  const { Here } = await import('./lines.tsx');
+  const SAY: Record<string, string> = {
+    crow: 'crow',
+    crows: 'crows',
+    'npc.tam.short': 'Tam, the miller',
+  };
+  const e = (id: string, article?: string, kind = 'npc', name = id) => ({
+    id,
+    kind,
+    name,
+    actions: [],
+    words: { bare: id.replace(/\d+$/, ''), ...(article && { article }) },
+  });
+  const crows = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      ...e(`crow${i}`, 'a', 'item', 'crow'),
+      words: { bare: 'crow', article: 'a', plural: 'crows' },
+    }));
+  const opened: string[] = [];
+  const said = (entities: object[]) => {
+    const drawn = nodes(
+      Here({ view: { entities } as any, text: (k) => SAY[k] ?? k, open: (id) => opened.push(id) }),
+    );
+    return drawn
+      .filter(
+        (n) =>
+          n.type === 'Text' &&
+          !n.props.onPress &&
+          nodes(n.props.children).some((c) => c.props?.onPress),
+      )
+      .map((n) => {
+        const links = nodes(n.props.children).filter((c) => c.props?.onPress);
+        return [words(n), ...links.map((l) => l.props.accessibilityLabel)].join(' | ');
+      });
+  };
+  assert.deepEqual(
+    said([e('Aldous'), e('Bess'), e('carpenter', 'the'), e('chandler', 'the'), e('cook', 'the')]),
+    [
+      'Aldous, Bess, the carpenter, chandler, and cook are here. | Aldous, open | Bess, open | carpenter, open | chandler, open | cook, open',
+    ],
+  );
+  assert.deepEqual(said([e('carpenter', 'the'), e('Aldous'), e('cook', 'the')]), [
+    'The carpenter, Aldous, and the cook are here. | carpenter, open | Aldous, open | cook, open',
+  ]);
+  const tam = { id: 'tam', kind: 'npc', name: 'npc.tam.short', actions: [] };
+  assert.deepEqual(said([e('carpenter', 'the'), tam, e('cook', 'the')]), [
+    'The carpenter, Tam, the miller, and the cook are here. | carpenter, open | Tam, the miller, open | cook, open',
+  ]);
+  const item = (id: string, article: string) => e(id, article, 'item');
+  assert.deepEqual(said([item('wooden bench', 'a'), item('knife', 'a'), item('orange', 'an')]), [
+    'A wooden bench, knife, and an orange are here. | wooden bench, open | knife, open | orange, open',
+  ]);
+  assert.deepEqual(
+    said([
+      item('apple', 'an'),
+      item('axe', 'an'),
+      item('wooden bench', 'a'),
+      item('iron anvil', 'an'),
+    ]),
+    [
+      'An apple, axe, a wooden bench, and an iron anvil are here. | apple, open | axe, open | wooden bench, open | iron anvil, open',
+    ],
+  );
+  assert.deepEqual(said(crows(2)), ['Two crows are here. | Two crows, open']);
+  assert.deepEqual(said([...crows(3), item('hen', 'a')]), [
+    'Three crows and a hen are here. | Three crows, open | hen, open',
+  ]);
+  assert.deepEqual(said(crows(1)), ['A crow is here. | crow, open']);
+  assert.deepEqual(said(crows(9)), ['Nine crows are here. | Nine crows, open']);
+  assert.deepEqual(said(crows(10)), ['10 crows are here. | 10 crows, open']);
+  opened.length = 0;
+  const [sentence] = nodes(
+    Here({
+      view: { entities: crows(2) } as any,
+      text: (k) => SAY[k] ?? k,
+      open: (id) => opened.push(id),
+    }),
+  );
+  nodes(sentence)
+    .find((c) => c.props?.onPress)
+    .props.onPress();
+  assert.deepEqual(opened, ['crow0']); // the collapsed link opens the first member
+});

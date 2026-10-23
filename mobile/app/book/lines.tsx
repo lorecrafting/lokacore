@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, cueLine, plain } from './model.ts';
-import { LABEL } from './labels.ts';
+import { COUNT, LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
 import { Tap } from './pages.tsx';
@@ -182,9 +182,10 @@ export function AwayRecap({
  * The room's people, then items, then sense cues; no headings, an empty group omitted
  * (book-ui.md, World and status entry).
  * - Use: RoomPage only.
- * - Rules: each group is one sentence, "Aldous, Bess, and the cook are here." ("A and B are here.",
- *   "A is here."): serial comma, the first name capitalised, each name its own link named
- *   "<name>, open"; commas and "and" are plain text.
+ * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
+ *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word
+ *   capitalised, each name its own link named "<name>, open"; articles, commas and "and" are plain
+ *   text. A name with words shows its bare name; an article is shared by a run of names that take it.
  *   A person's carried-item line follows the people sentence as a Note.
  * - Story: RoomPage.stories.tsx
  */
@@ -218,8 +219,9 @@ export function Here(p: {
   ];
 }
 
-// One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29).
-// ponytail: names keep their authored article ("an axe") until loka-6qi gives bare-name words.
+// One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
+// words (loka-6qi): the bare name, its article written only when it differs from the previous
+// link's (a name without one breaks the run), and same-name entities with a plural as one link.
 function Present(p: {
   group: GameView['entities'];
   text: (key: string) => string;
@@ -227,18 +229,29 @@ function Present(p: {
 }) {
   const c = usePalette();
   const t = useType();
+  type Link = { id: string; name: string; article?: string; many?: true };
+  const links = p.group.flatMap((e): Link[] => {
+    const { bare, article, plural } = e.words ?? {};
+    const same = plural ? p.group.filter((o) => o.words?.plural && o.name === e.name) : [e];
+    if (same[0] !== e) return []; // a later member of a collapsed group
+    const n = same.length;
+    if (n > 1) return [{ id: e.id, name: `${COUNT[n - 2] ?? n} ${p.text(plural!)}`, many: true }];
+    return [{ id: e.id, name: p.text(bare ?? e.name), article }];
+  });
   return (
     <Text style={prose(c, t)}>
-      {p.group.map((e, i) => {
-        const name = i === 0 ? cap(p.text(e.name)) : p.text(e.name);
+      {links.map((l, i) => {
+        const article = l.article !== links[i - 1]?.article && l.article;
+        const first = (s: string) => (i === 0 ? cap(s) : s);
         return (
-          <Fragment key={e.id}>
-            {i > 0 && (i < p.group.length - 1 ? ', ' : p.group.length > 2 ? ', and ' : ' and ')}
-            {nameLink(name, () => p.open(e.id))}
+          <Fragment key={l.id}>
+            {i > 0 && (i < links.length - 1 ? ', ' : links.length > 2 ? ', and ' : ' and ')}
+            {article && `${first(article)} `}
+            {nameLink(article ? l.name : first(l.name), () => p.open(l.id))}
           </Fragment>
         );
       })}
-      {p.group.length > 1 ? ' are here.' : ' is here.'}
+      {links.length > 1 || links[0]?.many ? ' are here.' : ' is here.'}
     </Text>
   );
 }
