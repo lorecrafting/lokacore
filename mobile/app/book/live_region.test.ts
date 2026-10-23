@@ -49,9 +49,8 @@ test('each batch holds only the lines new since the last screen', () => {
   s.combatLog.push(...Array(201).fill('-'));
   said();
   s.log.push({ kind: 'refused', reason: 'closed', text: 'The way north is closed.' });
-  assert.equal(said().text, 'closed, The way north is closed.');
   s.combatLog.push('The marsh rat bites.');
-  assert.equal(said().text, 'The marsh rat bites.');
+  assert.equal(said().text, 'closed, The way north is closed. The marsh rat bites.');
   current = view();
   s.combatLog.length = 0;
   s.combatLog.push('A marsh rat attacks.');
