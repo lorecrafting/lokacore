@@ -43,6 +43,7 @@ export const screenFrom = (
     combatLog: saved.combatLog,
     said: { log: 0, combat: 0, place: saved.view.place.id, key: 0, text: '' },
     detail: (id: string) => saved.details[id] ?? [],
+    leave: (id: string) => void saved.details[id]?.splice(0),
     chronicle: () => saved.chronicle ?? [],
     pending: false,
     catchingUp: false,
