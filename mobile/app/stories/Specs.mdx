@@ -1,0 +1,26 @@
+import { Meta, Markdown } from '@storybook/addon-docs/blocks';
+import { specs } from './specs.ts';
+
+export const sources = import.meta.glob(['../book/*.tsx', '../SaveError.tsx'], {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+export const all = Object.entries(sources).flatMap(
+  ([path, src]) => specs(path.slice(3), src).components,
+);
+
+<Meta title="Docs/Component specs" />
+
+Each exported Book component's doc comment, read from its source (the same scan `catalogue.test.ts` checks): {all.length} components. Relative links open nothing here; follow them in the repository.
+
+{/* A bare `<name>` in a comment is a placeholder, not HTML: escape it outside code spans. */}
+
+<Markdown>
+  {all
+    .map(
+      (c) =>
+        `### ${c.name}\n\n\`${c.file}\`\n\n${c.doc.replace(/(`[^`]*`)|</g, (m, code) => code ?? '&lt;')}`,
+    )
+    .join('\n\n')}
+</Markdown>
