@@ -54,10 +54,6 @@
         "rating": 1,
         "failure": "narration.lean_warden_failed"
       }
-    },
-    "leave": {
-      "label": "dialogue.warden_talk.leave",
-      "narration": "narration.warden_talk.leave"
     }
   }
 }

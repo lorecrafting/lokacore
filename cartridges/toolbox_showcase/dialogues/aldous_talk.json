@@ -30,10 +30,6 @@
       "label": "dialogue.aldous_talk.bounty",
       "narration": "narration.aldous_talk.bounty",
       "accept": "bounty"
-    },
-    "leave": {
-      "label": "dialogue.aldous_talk.leave",
-      "narration": "narration.aldous_talk.leave"
     }
   }
 }

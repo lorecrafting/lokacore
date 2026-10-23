@@ -138,7 +138,9 @@ export const outcome = (r: ReturnType<typeof play>) =>
 // Pick `choice` from `who`'s dialogue, talking first unless its hub is still open.
 export const say = (w: World, who: string, choice: string) =>
   choose(pending(w, w.character) ? w : talk(w, who).world, choice);
-export const leave = (w: World) => choose(w, 'leave').world;
+// Leave the conversation, as the Book's foot does (the showcase authors no Leave choice).
+export const leave = (w: World) =>
+  play(w, { type: 'close_choice', continuation_id: pending(w, w.character)![0] }).world;
 export const mood = (w: World, who: string) => disposition(w, w.character, npc(w, who));
 export const topics = (w: World) => (gameView(w).topics ?? []).map((t) => t.label as string);
 

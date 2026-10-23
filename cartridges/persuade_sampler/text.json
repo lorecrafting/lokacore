@@ -12,7 +12,5 @@
   "narration.guard.persuade_failed": "The guard shakes his head.",
   "dialogue.guard.intimidate": "Lean on the guard",
   "narration.guard.intimidate": "The guard flinches and lifts the bar.",
-  "narration.guard.intimidate_failed": "The guard looks you up and down and turns away.",
-  "dialogue.guard.leave": "Leave",
-  "narration.guard.leave": "You step back from the gate."
+  "narration.guard.intimidate_failed": "The guard looks you up and down and turns away."
 }

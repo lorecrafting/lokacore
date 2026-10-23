@@ -74,10 +74,6 @@
           "skill": "joinery"
         }
       ]
-    },
-    "leave": {
-      "label": "dialogue.carpenter_lessons.leave",
-      "narration": "narration.carpenter_lessons.leave"
     }
   }
 }

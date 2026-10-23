@@ -7,6 +7,7 @@ import { elapsedHost, receipts } from '../../authority/local-story/__tests__/ela
 import { localSession } from '../../authority/local-story/session.ts';
 import { group, intentOf } from './model.ts';
 import { presenter } from './presenter.ts';
+import { book } from './__tests__/polish-book.test.ts';
 import {
   bundle as codexBundle,
   DESK_NOTE,
@@ -123,6 +124,9 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   assert.equal(a.sql.prepare('SELECT pin FROM save').get()!.pin, pin);
   assert.deepEqual(a.state(), before);
   assert.deepEqual(a.book.screen().detail(plaque), [PLAQUE]);
+  const ui = book(bundle, a); // the Book reopens on the plaque notice and keeps its text
+  assert.deepEqual(ui.p.screen().detail(plaque), [PLAQUE]);
+  ui.unmount();
   assert.deepEqual(a.book.screen().log, []);
   assert.deepEqual(a.button('Read the plaque').target_ids, [plaque]);
   a.tap('Read the plaque');
