@@ -40,11 +40,13 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -57,6 +59,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description"
     },
@@ -179,11 +182,13 @@
     "name": "NoticeBoardView missing [].id",
     "contract": "NoticeBoardView",
     "value": {
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -196,10 +201,12 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "description": "notice.description",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -212,10 +219,12 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -228,6 +237,7 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description"
     },
@@ -238,11 +248,13 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -255,6 +267,7 @@
     "name": "NoticeView missing [].id",
     "contract": "NoticeView",
     "value": {
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description"
     },
@@ -265,6 +278,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "description": "notice.description"
     },
     "valid": false
@@ -274,6 +288,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title"
     },
     "valid": false
@@ -283,6 +298,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "extra": true
@@ -857,6 +873,7 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "notices": []
@@ -868,326 +885,391 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -1200,331 +1282,397 @@
     "contract": "NoticeBoardView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description",
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -1579,11 +1727,13 @@
       "notice_boards": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1591,11 +1741,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1603,11 +1755,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1615,11 +1769,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1627,11 +1783,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1639,11 +1797,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1651,11 +1811,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1663,11 +1825,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1675,11 +1839,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1687,11 +1853,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1699,11 +1867,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1711,11 +1881,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1723,11 +1895,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1735,11 +1909,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1747,11 +1923,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1759,11 +1937,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1771,11 +1951,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1783,11 +1965,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1795,11 +1979,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1807,11 +1993,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1819,11 +2007,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1831,11 +2021,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1843,11 +2035,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1855,11 +2049,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1867,11 +2063,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1879,11 +2077,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1891,11 +2091,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1903,11 +2105,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1915,11 +2119,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1927,11 +2133,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1939,11 +2147,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1951,11 +2161,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1963,11 +2175,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1975,11 +2189,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1987,11 +2203,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -1999,11 +2217,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2011,11 +2231,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2023,11 +2245,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2035,11 +2259,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2047,11 +2273,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2059,11 +2287,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2071,11 +2301,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2083,11 +2315,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2095,11 +2329,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2107,11 +2343,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2119,11 +2357,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2131,11 +2371,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2143,11 +2385,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2155,11 +2399,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2167,11 +2413,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2179,11 +2427,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2191,11 +2441,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2203,11 +2455,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2215,11 +2469,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2227,11 +2483,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2239,11 +2497,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2251,11 +2511,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2263,11 +2525,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2275,11 +2539,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2287,11 +2553,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2299,11 +2567,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2311,11 +2581,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2323,11 +2595,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2335,11 +2609,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2372,11 +2648,13 @@
       "notice_boards": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2384,11 +2662,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2396,11 +2676,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2408,11 +2690,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2420,11 +2704,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2432,11 +2718,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2444,11 +2732,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2456,11 +2746,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2468,11 +2760,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2480,11 +2774,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2492,11 +2788,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2504,11 +2802,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2516,11 +2816,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2528,11 +2830,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2540,11 +2844,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2552,11 +2858,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2564,11 +2872,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2576,11 +2886,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2588,11 +2900,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2600,11 +2914,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2612,11 +2928,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2624,11 +2942,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2636,11 +2956,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2648,11 +2970,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2660,11 +2984,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2672,11 +2998,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2684,11 +3012,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2696,11 +3026,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2708,11 +3040,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2720,11 +3054,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2732,11 +3068,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2744,11 +3082,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2756,11 +3096,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2768,11 +3110,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2780,11 +3124,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2792,11 +3138,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2804,11 +3152,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2816,11 +3166,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2828,11 +3180,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2840,11 +3194,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2852,11 +3208,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2864,11 +3222,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2876,11 +3236,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2888,11 +3250,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2900,11 +3264,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2912,11 +3278,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2924,11 +3292,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2936,11 +3306,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2948,11 +3320,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2960,11 +3334,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2972,11 +3348,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2984,11 +3362,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -2996,11 +3376,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3008,11 +3390,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3020,11 +3404,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3032,11 +3418,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3044,11 +3432,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3056,11 +3446,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3068,11 +3460,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3080,11 +3474,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3092,11 +3488,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3104,11 +3502,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3116,11 +3516,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3128,11 +3530,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3140,11 +3544,13 @@
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "notice.title",
               "description": "notice.description"
             }
@@ -3201,321 +3607,385 @@
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -3546,326 +4016,391 @@
       "notices": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "notice.title",
           "description": "notice.description"
         }
@@ -3938,6 +4473,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "",
+      "key": "notice",
       "title": "notice.title",
       "description": "notice.description"
     },
@@ -3948,6 +4484,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "",
       "description": "notice.description"
     },
@@ -3958,8 +4495,85 @@
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
       "title": "notice.title",
       "description": ""
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeView missing [].key",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView missing [].key",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView missing ['notices', 0].key",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "notice",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed notice key",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "Notice",
+      "title": "notice.title",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed board key",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "Board",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
     },
     "valid": false
   }

@@ -10,5 +10,9 @@
     "in": "room",
     "room": "still_room"
   },
-  "mass_grams": 7000
+  "mass_grams": 7000,
+  "words": {
+    "bare": "item.quern.bare",
+    "article": "a"
+  }
 }

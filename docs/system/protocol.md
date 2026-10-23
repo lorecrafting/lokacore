@@ -328,6 +328,15 @@ that explicit key; an older view without it has no invented description. This ch
 adjacent-sight projection, rule, content artifact or saved state
 ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
+EntityView, ContentView and the combat opponent (`combat` and each `active_opponents`
+member) carry `words` copied from the definition while the selected short is the base
+`short`; a holding `short_variants` entry omits them (loka-6qi, kernel_api 1.118).
+
+NoticeView and NoticeBoardView carry `key`, the authored detail Key, so a presenter can match
+a touch link ([cartridge.md](cartridge.md#compiler)) in the selected description to the
+projected current-room detail; the Book draws a fixture link only on that match
+([book-ui.md fixture rule](book-ui.md#world-and-status-entry)). Bodies stay off the wire.
+
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
 `exits` in compass order, first checking Move against the actor's composed ActionSet with
@@ -418,10 +427,10 @@ or non-readable targets and remote readable targets follow [readable@1](mechanic
 
 GameView optionally supplies `notice_boards` only when the current room has boards, and
 `notices` for its standalone readable details outside board membership. Each board
-has `id`, `title: TextKey`, selected `description: TextKey` and ordered `notices`, each
-with `id`, `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
+has `id`, `key`, `title: TextKey`, selected `description: TextKey` and ordered `notices`, each
+with `id`, `key` (its own detail Key), `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
 nonempty and bounded to 64. IDs are existing detail target IDs; bodies are never projected.
-Standalone notices have the same `id`, `title` and selected `description` shape. Each Notice
+Standalone notices have the same `id`, `key`, `title` and selected `description` shape. Each Notice
 optionally has `actions`, existing AdvertisedAction rows: exact-subject recipes for
 that readable detail, available or with their actual refusal reason. These recipes are omitted
 from World actions; Read remains in its existing exact-target entry channel. The view is

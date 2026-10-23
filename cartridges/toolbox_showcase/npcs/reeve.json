@@ -18,5 +18,9 @@
       },
       "description": "npc.reeve.description_cold"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.reeve.bare",
+    "article": "the"
+  }
 }

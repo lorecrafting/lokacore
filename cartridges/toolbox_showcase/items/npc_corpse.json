@@ -14,5 +14,9 @@
   "immune": [
     "growing",
     "growing_croft"
-  ]
+  ],
+  "words": {
+    "bare": "item.npc_corpse.bare",
+    "article": "a"
+  }
 }

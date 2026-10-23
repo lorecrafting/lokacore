@@ -9,5 +9,10 @@
     "in": "room",
     "room": "still_room"
   },
-  "mass_grams": 1000
+  "mass_grams": 1000,
+  "words": {
+    "bare": "item.lute.bare",
+    "article": "a",
+    "plural": "item.lute.plural"
+  }
 }

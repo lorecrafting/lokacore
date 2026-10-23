@@ -112,5 +112,9 @@
       },
       "description": "npc.warden.description_watchful"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.warden.bare",
+    "article": "the"
+  }
 }

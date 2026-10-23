@@ -23,5 +23,9 @@
     "ignited": "light.lantern_ignited",
     "doused": "light.lantern_doused",
     "refueled": "light.lantern_refueled"
+  },
+  "words": {
+    "bare": "item.attic_lantern.bare",
+    "article": "the"
   }
 }

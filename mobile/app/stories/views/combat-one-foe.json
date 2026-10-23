@@ -245,6 +245,10 @@
    "encounter_id": "d8de6604-8212-8c0d-a187-64bf21f91e3c",
    "opponent_id": "7aa6c88d-bb91-86bf-add6-146962885046",
    "name": "npc.boar.short",
+   "words": {
+    "article": "the",
+    "bare": "npc.boar.bare"
+   },
    "band": "ready"
   },
   "cues": [
@@ -331,6 +335,10 @@
    {
     "id": "7aa6c88d-bb91-86bf-add6-146962885046",
     "name": "npc.boar.short",
+    "words": {
+     "article": "the",
+     "bare": "npc.boar.bare"
+    },
     "description": "npc.boar.description",
     "kind": "npc",
     "actions": [],
@@ -338,6 +346,11 @@
      {
       "id": "cd96d994-df5b-8158-b798-019f0397c557",
       "name": "item.purse.short",
+      "words": {
+       "article": "a",
+       "bare": "item.purse.bare",
+       "plural": "item.purse.plural"
+      },
       "description": "item.purse.description",
       "kind": "item",
       "actions": [],
@@ -346,6 +359,11 @@
      {
       "id": "36fea1aa-9e0c-8d49-917c-8aaf3549837e",
       "name": "item.tusk.short",
+      "words": {
+       "article": "a",
+       "bare": "item.tusk.bare",
+       "plural": "item.tusk.plural"
+      },
       "description": "item.tusk.description",
       "kind": "item",
       "actions": [],

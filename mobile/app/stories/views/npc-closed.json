@@ -415,6 +415,9 @@
    {
     "id": "6b2b9c4f-6781-82f4-a079-908def5908f6",
     "name": "npc.wat.short",
+    "words": {
+     "bare": "npc.wat.bare"
+    },
     "description": "npc.wat.description",
     "kind": "npc",
     "actions": [
@@ -452,6 +455,11 @@
    {
     "id": "2d56c2ba-0c40-8b90-aaa4-deafc9c16c53",
     "name": "item.hut_loaf.short",
+    "words": {
+     "article": "a",
+     "bare": "item.hut_loaf.bare",
+     "plural": "item.hut_loaf.plural"
+    },
     "description": "item.hut_loaf.description",
     "kind": "item",
     "actions": [
@@ -472,6 +480,11 @@
    {
     "id": "9bef0b0f-b2ab-860c-a3eb-6e75bd81e857",
     "name": "item.trough_skin.short",
+    "words": {
+     "article": "a",
+     "bare": "item.trough_skin.bare",
+     "plural": "item.trough_skin.plural"
+    },
     "description": "item.trough_skin.description",
     "kind": "item",
     "actions": [

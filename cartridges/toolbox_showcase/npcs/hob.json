@@ -19,5 +19,8 @@
       },
       "description": "npc.hob.short_asleep"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.hob.bare"
+  }
 }

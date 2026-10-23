@@ -18,5 +18,10 @@
       "kind": "water",
       "quantity": 4
     }
+  },
+  "words": {
+    "bare": "item.fold_skin.bare",
+    "article": "a",
+    "plural": "item.fold_skin.plural"
   }
 }

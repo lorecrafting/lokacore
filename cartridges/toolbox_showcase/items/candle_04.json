@@ -9,5 +9,10 @@
   "location": {
     "in": "item",
     "item": "crate"
+  },
+  "words": {
+    "bare": "item.candle_04.bare",
+    "article": "a",
+    "plural": "item.candle_04.plural"
   }
 }

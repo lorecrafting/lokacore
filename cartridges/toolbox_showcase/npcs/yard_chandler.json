@@ -30,5 +30,9 @@
     ],
     "bought": "shop.bought",
     "sold": "shop.sold"
+  },
+  "words": {
+    "bare": "npc.yard_chandler.bare",
+    "article": "the"
   }
 }

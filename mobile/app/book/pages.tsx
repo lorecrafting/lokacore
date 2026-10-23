@@ -7,13 +7,13 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { plain, why, type group, type Pool } from './model.ts';
+import { LINK, plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { tapBleed } from './reading.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { opacity, size, space } from './tokens.ts';
 import { ActionCard } from './actions.tsx';
-import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
+import { Asides, AwayRecap, Here, LogLines, nameLink } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
@@ -130,7 +130,7 @@ export function Control(p: {
  * (book-ui.md, World and status entry).
  * - Use: the World page.
  * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
- *   of the authored text.
+ *   of the authored text; a touch link in `links` is a name link in the prose, any other its words.
  * - Story: RoomPage.stories.tsx
  */
 export function RoomPage(p: {
@@ -144,6 +144,7 @@ export function RoomPage(p: {
   open: (id: string) => void;
   openChoice: () => void;
   details: ReactNode;
+  links?: ReadonlyMap<string, () => void>; // a linked fixture's press, by link target (proseLinks)
 }) {
   const c = usePalette();
   const t = useType();
@@ -156,7 +157,7 @@ export function RoomPage(p: {
       onTitlePress={look && (() => p.press(look))}
     >
       {p.recap && <AwayRecap lines={p.recap} />}
-      {paragraphs(c, t, p.text(p.view.place.description.key))}
+      {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
       <Asides keys={p.view.place.asides} text={p.text} />
       {warnings(c, t, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
@@ -171,15 +172,24 @@ export function RoomPage(p: {
   );
 }
 
-// The room prose as one block; a blank line in the authored text is a paragraph break.
-const paragraphs = (c: Palette, t: Type, description: string) => (
+// The room prose as one block; a blank line in the authored text is a paragraph break. A touch
+// link draws as a name link when `links` has its target, else as its words.
+const paragraphs = (
+  c: Palette,
+  t: Type,
+  description: string,
+  links: ReadonlyMap<string, () => void> = new Map(),
+) => (
   <View style={{ gap: space.lg }}>
-    {plain(description)
+    {description
       .trim()
       .split(/\s*\n\s*\n\s*/)
       .map((paragraph, i) => (
         <Text key={i} style={prose(c, t)}>
-          {paragraph}
+          {paragraph.split(LINK).map((part, j, parts) => {
+            const press = j % 3 === 1 && links.get(parts[j + 1]);
+            return press ? nameLink(part, press, j) : j % 3 < 2 && part;
+          })}
         </Text>
       ))}
   </View>

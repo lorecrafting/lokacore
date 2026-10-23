@@ -6,5 +6,8 @@
   "short": "npc.aldous.short",
   "room_line": "npc.aldous.room",
   "description": "npc.aldous.description",
-  "room": "drill_yard"
+  "room": "drill_yard",
+  "words": {
+    "bare": "npc.aldous.bare"
+  }
 }

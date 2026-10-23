@@ -53,4 +53,18 @@ export const LABEL = {
   readingStandard: 'Standard',
   readingLarge: 'Large',
   readingLarger: 'Larger',
+  // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
+  the: 'the',
 } as const;
+
+// A collapsed group's count in the room sentence, "two crows", from two; digits from 10 (loka-6qi).
+export const COUNT: readonly string[] = [
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+];

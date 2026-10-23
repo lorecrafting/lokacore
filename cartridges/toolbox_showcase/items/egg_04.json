@@ -15,5 +15,10 @@
     "amount": 2,
     "label": "action.eat",
     "narration": "narration.eat_egg"
+  },
+  "words": {
+    "bare": "item.egg_04.bare",
+    "article": "an",
+    "plural": "item.egg_04.plural"
   }
 }

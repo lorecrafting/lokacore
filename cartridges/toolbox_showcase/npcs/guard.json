@@ -52,5 +52,9 @@
       },
       "description": "npc.guard.room_wanted"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.guard.bare",
+    "article": "the"
+  }
 }

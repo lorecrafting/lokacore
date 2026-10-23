@@ -12,11 +12,6 @@ const go =
   (b) => {
     for (const d of directions) (b.map(), b.tap(`Go ${d}`));
   };
-// The n-th of several controls that start alike (two goblins).
-const nth =
-  (shown: string, n = 0): Step =>
-  (b) =>
-    b.tap(b.labels().filter((l) => l.startsWith(shown))[n]!);
 
 // Real time passes: the elapsed clocks advance and the game catches up (a pulse).
 const wait =
@@ -30,7 +25,7 @@ const wait =
 const night = wait(1_008_000);
 const contents = (section?: string): Step[] => [/; opens Contents$/, ...(section ? [section] : [])];
 // The Reeve's talk (Low Wardle Green): the letter errand begins.
-const reeve = ['the Reeve, open', 'Talk to the Reeve'];
+const reeve = ['Reeve, open', 'Talk to the Reeve'];
 const errand = [
   go('south'),
   ...reeve,
@@ -41,17 +36,17 @@ const errand = [
 // The letter taken from the green and carried north and east to Wat's hut.
 const hut = [
   ...errand,
-  'a sealed letter, open',
+  'sealed letter, open',
   'Take a sealed letter',
   go('north', 'north', 'north', 'east'),
-  'Wat, the shepherd, open',
+  'Wat, open',
 ];
 // Nell the baker, on the green.
-const nell = [go('south'), 'Nell, the baker, open'];
+const nell = [go('south'), 'Nell, open'];
 // The Goblin Pit: two goblins, so the fight is a pack.
-const goblins = [go('west', 'south'), nth('A goblin, open')];
+const goblins = [go('west', 'south'), 'Two goblins, open'];
 // A seed sack too heavy to lift, with a turnip seed inside (Farm Yard).
-const sack = [go('north', 'west', 'south'), 'a seed sack, open'];
+const sack = [go('north', 'west', 'south'), 'seed sack, open'];
 // A drag toward a closed exit (Footer's own refusal line; the harness does not expand Footer).
 const drag: Step = (b) => {
   const footer = b.draw().find((n) => n.type.name === 'Footer').props;
@@ -69,36 +64,36 @@ export const routes: Record<string, Step[]> = {
   'room-first': [],
   'room-npcs-items': [go('south')],
   'room-long-log': [
-    'A loaf, open',
+    'loaf, open',
     'Take a loaf',
     ...contents(LABEL.inventory),
     'a loaf, open',
     'Drop a loaf',
-    'A loaf, open',
+    'loaf, open',
     'Take a loaf',
   ],
   'room-refusal': [...hall, drag],
   'room-at-night': [night, 'Crossroads Inn, look'],
   'npc-choice': [go('south'), ...reeve],
   'npc-shop': [...nell],
-  'npc-services': [go('down', 'north', 'north'), 'The smith, open'],
-  'npc-closed': [go('north', 'north', 'east'), 'Wat, the shepherd, open'],
-  'notice-read': ['The inn signpost, open'],
-  'item-plain': ['a waterskin, open'],
-  'item-fuel': [go('up'), 'The lantern, open'],
+  'npc-services': [go('down', 'north', 'north'), 'smith, open'],
+  'npc-closed': [go('north', 'north', 'east'), 'Wat, open'],
+  'notice-read': ['signpost, open'],
+  'item-plain': ['waterskin, open'],
+  'item-fuel': [go('up'), 'lantern, open'],
   'item-container': [
     ...sack,
     'A turnip seed, open',
     'Take a turnip seed',
-    'a seed sack, open',
+    'seed sack, open',
     'Put a turnip seed in a seed sack',
   ],
   'item-too-heavy': [...sack],
-  'combat-one-foe': [go('west', 'north'), 'The boar, open', 'Attack the boar'],
+  'combat-one-foe': [go('west', 'north'), 'boar, open', 'Attack the boar'],
   'combat-pack': [...goblins, 'Attack a goblin'],
   'combat-bleeding': [
     go('west', 'north'),
-    'The boar, open',
+    'boar, open',
     'Attack the boar',
     wait(3000),
     (b) => {
@@ -112,7 +107,7 @@ export const routes: Record<string, Step[]> = {
   'map-where': [...hall, (b) => b.map(), 'Ask where Bess, the alewife is'],
   journal: [...errand, ...contents('Journal')],
   'carrying-empty': [...contents(LABEL.inventory)],
-  'carrying-held': ['A loaf, open', 'Take a loaf', ...contents(LABEL.inventory)],
+  'carrying-held': ['loaf, open', 'Take a loaf', ...contents(LABEL.inventory)],
   'character-unknown': [...contents('Character')],
   'character-full': [
     go('west'),

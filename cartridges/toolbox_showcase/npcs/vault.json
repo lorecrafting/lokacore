@@ -20,5 +20,9 @@
         }
       }
     }
+  },
+  "words": {
+    "bare": "npc.vault.bare",
+    "article": "the"
   }
 }

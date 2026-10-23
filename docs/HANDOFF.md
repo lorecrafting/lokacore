@@ -46,6 +46,11 @@ PLease set things up so that its easy for me to do my ui polish there".
   loka-3w3q to P1. Proposal file was a scratchpad file; the br notes on each survivor carry what was merged.
 - Polish tour for the owner: [docs/design/polish-tour.md](design/polish-tour.md).
 
+## Room words engine batch (owner go 2026-10-23)
+
+Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),
+branch `toolbox/batch-room-words`, five slices in order.
+
 ## Overnight results (2026-10-23)
 
 - MERGED #455 loka-3w3q + x6t.26 death lines outside combat (kernel_api 1.117; "You fall.", "You wake at the inn.";

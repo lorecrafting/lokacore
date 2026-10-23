@@ -12,5 +12,9 @@
   },
   "tags": [
     "metal"
-  ]
+  ],
+  "words": {
+    "bare": "item.gate_winch.bare",
+    "article": "the"
+  }
 }

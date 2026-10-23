@@ -31,5 +31,8 @@
       },
       "description": "npc.idony.description_winter"
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.idony.bare"
+  }
 }

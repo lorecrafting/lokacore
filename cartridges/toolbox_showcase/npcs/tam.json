@@ -24,5 +24,8 @@
       "village_green"
     ],
     "15": "warden_gate"
+  },
+  "words": {
+    "bare": "npc.tam.bare"
   }
 }

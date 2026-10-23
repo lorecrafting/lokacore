@@ -12,5 +12,9 @@
   "services": [
     "stew",
     "claim"
-  ]
+  ],
+  "words": {
+    "bare": "npc.cook.bare",
+    "article": "the"
+  }
 }

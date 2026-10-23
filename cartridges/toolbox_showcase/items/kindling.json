@@ -13,5 +13,9 @@
   "tags": [
     "wooden",
     "burnable"
-  ]
+  ],
+  "words": {
+    "bare": "item.kindling.bare",
+    "article": "a"
+  }
 }

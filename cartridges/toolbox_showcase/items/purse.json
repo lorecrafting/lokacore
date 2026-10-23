@@ -9,5 +9,10 @@
     "in": "npc",
     "npc": "boar"
   },
-  "mass_grams": 0
+  "mass_grams": 0,
+  "words": {
+    "bare": "item.purse.bare",
+    "article": "a",
+    "plural": "item.purse.plural"
+  }
 }

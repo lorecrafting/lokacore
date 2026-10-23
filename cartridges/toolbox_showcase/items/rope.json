@@ -9,5 +9,9 @@
     "in": "room",
     "room": "cliff_top"
   },
-  "mass_grams": 0
+  "mass_grams": 0,
+  "words": {
+    "bare": "item.rope.bare",
+    "article": "a"
+  }
 }

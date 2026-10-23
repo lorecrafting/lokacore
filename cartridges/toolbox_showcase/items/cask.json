@@ -17,5 +17,10 @@
       "kind": "draught",
       "quantity": 3
     }
+  },
+  "words": {
+    "bare": "item.cask.bare",
+    "article": "a",
+    "plural": "item.cask.plural"
   }
 }

@@ -11,5 +11,9 @@
       "attribute": "alertness",
       "value": 0
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.merchant.bare",
+    "article": "the"
+  }
 }

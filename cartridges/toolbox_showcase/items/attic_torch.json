@@ -9,5 +9,9 @@
   "location": {
     "in": "room",
     "room": "loft_attic"
+  },
+  "words": {
+    "bare": "item.attic_torch.bare",
+    "article": "the"
   }
 }

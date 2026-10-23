@@ -11,5 +11,9 @@
       "attribute": "str",
       "value": 12
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.drover.bare",
+    "article": "the"
+  }
 }

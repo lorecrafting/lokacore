@@ -13,5 +13,10 @@
   },
   "tags": [
     "wooden"
-  ]
+  ],
+  "words": {
+    "bare": "item.timber_01.bare",
+    "article": "a",
+    "plural": "item.timber_01.plural"
+  }
 }

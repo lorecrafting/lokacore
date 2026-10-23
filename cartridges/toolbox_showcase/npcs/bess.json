@@ -56,5 +56,8 @@
       }
     },
     "refuse": "npc.bess.refuse"
+  },
+  "words": {
+    "bare": "npc.bess.bare"
   }
 }

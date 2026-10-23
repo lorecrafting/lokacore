@@ -20,5 +20,9 @@
         "equals": true
       }
     }
+  },
+  "words": {
+    "bare": "item.strongroom_key.bare",
+    "article": "the"
   }
 }

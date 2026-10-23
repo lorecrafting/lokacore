@@ -430,6 +430,7 @@
   "notices": [
    {
     "id": "fe8a933a-59bb-8e0c-b129-e40cd6678f85",
+    "key": "sign_social",
     "title": "detail.sign_social.title",
     "description": "detail.sign_social.description"
    }
@@ -438,6 +439,9 @@
    {
     "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9",
     "name": "npc.nell.short",
+    "words": {
+     "bare": "npc.nell.bare"
+    },
     "description": "npc.nell.description",
     "kind": "npc",
     "actions": [
@@ -503,6 +507,11 @@
      {
       "id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
       "name": "item.bread.short",
+      "words": {
+       "article": "a",
+       "bare": "item.bread.bare",
+       "plural": "item.bread.plural"
+      },
       "description": "item.bread.description",
       "kind": "item",
       "actions": [
@@ -526,6 +535,10 @@
    {
     "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
     "name": "npc.reeve.short",
+    "words": {
+     "article": "the",
+     "bare": "npc.reeve.bare"
+    },
     "description": "npc.reeve.description",
     "kind": "npc",
     "actions": [
@@ -549,6 +562,10 @@
    {
     "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
     "name": "item.apple.short",
+    "words": {
+     "article": "an",
+     "bare": "item.apple.bare"
+    },
     "description": "item.apple.description",
     "kind": "item",
     "actions": [
@@ -569,6 +586,10 @@
    {
     "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
     "name": "item.letter.short",
+    "words": {
+     "article": "a",
+     "bare": "item.letter.bare"
+    },
     "description": "item.letter.description",
     "kind": "item",
     "actions": [

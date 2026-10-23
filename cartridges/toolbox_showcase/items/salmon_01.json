@@ -10,5 +10,9 @@
   "location": {
     "in": "room",
     "room": "pond_deep"
+  },
+  "words": {
+    "bare": "item.salmon_01.bare",
+    "article": "a"
   }
 }

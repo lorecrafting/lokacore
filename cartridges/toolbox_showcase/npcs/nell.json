@@ -56,5 +56,8 @@
       }
     },
     "refuse": "npc.nell.refuse"
+  },
+  "words": {
+    "bare": "npc.nell.bare"
   }
 }

@@ -580,5 +580,109 @@
       "contents": []
     },
     "valid": false
+  },
+  {
+    "name": "name words",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "words": {
+        "bare": "item.box.bare",
+        "article": "a",
+        "plural": "item.box.plural"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "name words without bare",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "words": {
+        "article": "a"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "name words article outside a, an, the",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "words": {
+        "bare": "item.box.bare",
+        "article": "some"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "name words unknown field",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "words": {
+        "bare": "item.box.bare",
+        "singular": "item.box.bare"
+      }
+    },
+    "valid": false
   }
 ]

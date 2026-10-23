@@ -488,6 +488,7 @@
   "notices": [
    {
     "id": "c2dcc404-9fda-84ea-af86-4596e9beb2d6",
+    "key": "sign_magic",
     "title": "detail.sign_magic.title",
     "description": "detail.sign_magic.description"
    }
@@ -496,6 +497,10 @@
    {
     "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
     "name": "npc.hedge_wizard.short",
+    "words": {
+     "article": "the",
+     "bare": "npc.hedge_wizard.bare"
+    },
     "description": "npc.hedge_wizard.description",
     "kind": "npc",
     "actions": [
@@ -590,6 +595,10 @@
      {
       "id": "1a3794b6-d460-8a60-b4f2-70aadb837df7",
       "name": "item.lamp_oil.short",
+      "words": {
+       "article": "the",
+       "bare": "item.lamp_oil.bare"
+      },
       "description": "item.lamp_oil.description",
       "kind": "item",
       "actions": [
@@ -618,6 +627,10 @@
    {
     "id": "a6579cfe-0b81-8c71-af34-20947857b1f0",
     "name": "item.lantern.short",
+    "words": {
+     "article": "the",
+     "bare": "item.lantern.bare"
+    },
     "description": "item.lantern.description",
     "kind": "item",
     "actions": [
@@ -643,6 +656,10 @@
    {
     "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
     "name": "item.loft_bucket.short",
+    "words": {
+     "article": "the",
+     "bare": "item.loft_bucket.bare"
+    },
     "description": "item.loft_bucket.description",
     "kind": "item",
     "actions": [
@@ -675,6 +692,10 @@
    {
     "id": "26deb06d-744f-8b74-90eb-d41dbd1bc785",
     "name": "item.oilcan.short",
+    "words": {
+     "article": "the",
+     "bare": "item.oilcan.bare"
+    },
     "description": "item.oilcan.description",
     "kind": "item",
     "actions": [

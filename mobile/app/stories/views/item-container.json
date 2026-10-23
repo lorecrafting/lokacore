@@ -443,6 +443,10 @@
    {
     "id": "00a60498-0ca6-8137-8172-7101d3767e0c",
     "name": "npc.farmer.short",
+    "words": {
+     "article": "the",
+     "bare": "npc.farmer.bare"
+    },
     "description": "npc.farmer.description",
     "kind": "npc",
     "actions": [
@@ -622,6 +626,10 @@
    {
     "id": "b525e0c4-feac-80dd-9498-43e0c4164e5f",
     "name": "item.dead_rat.short",
+    "words": {
+     "article": "a",
+     "bare": "item.dead_rat.bare"
+    },
     "description": "item.dead_rat.description",
     "kind": "item",
     "actions": [
@@ -642,6 +650,10 @@
    {
     "id": "17ebdbed-759e-8d08-9ef8-f9742608718a",
     "name": "item.holding_apple.short",
+    "words": {
+     "article": "a",
+     "bare": "item.holding_apple.bare"
+    },
     "description": "item.holding_apple.description",
     "kind": "item",
     "actions": [
@@ -662,6 +674,10 @@
    {
     "id": "bbcf44ff-8b4a-8113-88d7-fdf1821b0432",
     "name": "item.plot.short",
+    "words": {
+     "article": "a",
+     "bare": "item.plot.bare"
+    },
     "description": "item.plot.description",
     "kind": "item",
     "actions": [
@@ -685,6 +701,10 @@
    {
     "id": "331fb134-17eb-866f-a2fa-57583b9ac017",
     "name": "item.sack.short",
+    "words": {
+     "article": "a",
+     "bare": "item.sack.bare"
+    },
     "description": "item.sack.description",
     "kind": "item",
     "actions": [
@@ -708,6 +728,10 @@
      {
       "id": "ec6a2b0d-b917-8425-8cac-63c888eed0aa",
       "name": "item.seed_01.short",
+      "words": {
+       "article": "a",
+       "bare": "item.seed_01.bare"
+      },
       "description": "item.seed_01.description",
       "kind": "item",
       "actions": [
@@ -731,6 +755,10 @@
    {
     "id": "c9efb5ea-df51-8e53-a6fb-53b0fabfb73a",
     "name": "item.watering_can.short",
+    "words": {
+     "article": "a",
+     "bare": "item.watering_can.bare"
+    },
     "description": "item.watering_can.description",
     "kind": "item",
     "actions": [

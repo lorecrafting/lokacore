@@ -15,5 +15,9 @@
     "label": "actions.read_book",
     "text": "readable.mill_ledger",
     "topic": "mill"
+  },
+  "words": {
+    "bare": "item.mill_ledger.bare",
+    "article": "the"
   }
 }

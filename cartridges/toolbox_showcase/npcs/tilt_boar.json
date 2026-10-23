@@ -26,5 +26,9 @@
       "item": "tilt_purse",
       "chance": 50
     }
-  ]
+  ],
+  "words": {
+    "bare": "npc.tilt_boar.bare",
+    "article": "the"
+  }
 }

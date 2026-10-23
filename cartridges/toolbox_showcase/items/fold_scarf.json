@@ -13,5 +13,10 @@
   "slot": "neck",
   "tags": [
     "windproof"
-  ]
+  ],
+  "words": {
+    "bare": "item.fold_scarf.bare",
+    "article": "a",
+    "plural": "item.fold_scarf.plural"
+  }
 }

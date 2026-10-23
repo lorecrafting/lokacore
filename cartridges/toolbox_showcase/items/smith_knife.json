@@ -9,5 +9,9 @@
   "location": {
     "in": "room",
     "room": "forge_back"
+  },
+  "words": {
+    "bare": "item.smith_knife.bare",
+    "article": "a"
   }
 }

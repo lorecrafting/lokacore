@@ -9,7 +9,7 @@ import { lore } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
 import { conditionViews, resources } from './resources.ts';
-import { combatView } from './combat.ts';
+import { combatView, named } from './combat.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { dark, visible, fuelView } from '../mechanics/light/shared.ts';
@@ -229,7 +229,7 @@ const viewOf = (
   steps: Steps,
 ) => ({
   id: id as EntityId,
-  name: describeEntity(world, actor, id as EntityId, 'short', steps),
+  ...named(world, actor, id as EntityId, steps),
   description: describeEntity(world, actor, id as EntityId, 'description', steps),
   kind: e.kind as Key,
   ...(e.kind === 'item' && e.slot && { slot: e.slot }),

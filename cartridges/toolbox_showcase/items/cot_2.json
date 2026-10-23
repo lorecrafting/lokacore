@@ -13,5 +13,10 @@
   "tags": [
     "bed",
     "wooden"
-  ]
+  ],
+  "words": {
+    "bare": "item.cot_2.bare",
+    "article": "a",
+    "plural": "item.cot_2.plural"
+  }
 }

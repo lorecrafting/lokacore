@@ -21,5 +21,9 @@
       },
       "description": "item.net.description_rain"
     }
-  ]
+  ],
+  "words": {
+    "bare": "item.net.bare",
+    "article": "a"
+  }
 }

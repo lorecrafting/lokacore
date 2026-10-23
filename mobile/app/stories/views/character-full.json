@@ -450,6 +450,7 @@
   "notices": [
    {
     "id": "478fa0c5-5e19-81ca-964f-9fa745503d4b",
+    "key": "sign_combat",
     "title": "detail.sign_combat.title",
     "description": "detail.sign_combat.description"
    }
@@ -458,6 +459,9 @@
    {
     "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8",
     "name": "npc.aldous.short",
+    "words": {
+     "bare": "npc.aldous.bare"
+    },
     "description": "npc.aldous.description",
     "kind": "npc",
     "actions": [
@@ -530,6 +534,11 @@
    {
     "id": "ca479bb2-783b-89b8-8948-2ebc1bd65d0e",
     "name": "item.poultice.short",
+    "words": {
+     "article": "a",
+     "bare": "item.poultice.bare",
+     "plural": "item.poultice.plural"
+    },
     "description": "item.poultice.description",
     "kind": "item",
     "actions": [
@@ -552,6 +561,10 @@
    {
     "id": "93423a83-c48b-8bff-bc43-787f29edc863",
     "name": "item.training_sword.short",
+    "words": {
+     "article": "a",
+     "bare": "item.training_sword.bare"
+    },
     "description": "item.training_sword.description",
     "kind": "item",
     "slot": "wield",

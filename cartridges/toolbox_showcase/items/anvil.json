@@ -12,5 +12,9 @@
   },
   "tags": [
     "metal"
-  ]
+  ],
+  "words": {
+    "bare": "item.anvil.bare",
+    "article": "an"
+  }
 }
