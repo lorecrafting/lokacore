@@ -21,7 +21,6 @@ import { same } from '../../foundation/compose.ts';
 import { value } from '../fact.ts';
 import { level, resourceRef } from '../resource.ts';
 import { engaged } from '../combat/shared.ts';
-import { pending } from '../dialogue/selection.ts';
 import { fact, running } from './shared.ts';
 import { questOf } from '../lookups.ts';
 
@@ -133,7 +132,6 @@ export function chooseQuery(
   const code = safe(world, p.actor_id, scene, steps);
   if (code) return code;
   if (
-    pending(world, p.actor_id) ||
     value(world, p.actor_id, fact(world, scene)) !== p.dream.line ||
     row.status !== 'pending' ||
     !bound(world, p.actor_id, scene, row) ||

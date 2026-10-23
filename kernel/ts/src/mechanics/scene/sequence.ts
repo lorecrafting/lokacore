@@ -151,7 +151,7 @@ export function chosen(
   return accepted(
     world,
     'choice_resolved',
-    [op, ...run.ops],
+    [...leave(world, p.actor_id), op, ...run.ops], // the choice leaves first, as Continue
     [
       event(world, command, mint, run.position + 1, {
         type: 'choice_resolved',

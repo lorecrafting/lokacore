@@ -11,11 +11,13 @@ import {
   hint,
   initialPages,
   nextPosition,
+  pagesAfter,
   plain,
   refused,
   said,
   sky,
   timeLeft,
+  type Page,
   type Pool,
   why,
 } from './model.ts';
@@ -125,6 +127,23 @@ test('a restored choice opens its actual speaker detail or retained conversation
     ({ entities: ids.map((id) => ({ id })), choice: { speaker_id: 'bram' } }) as never;
   assert.deepEqual(initialPages(view(['bram'])), [{ kind: 'thing', id: 'bram' }]);
   assert.deepEqual(initialPages(view([])), [{ kind: 'dialogue', speaker: 'bram' }]);
+});
+
+// Breaks (loka-x6t.96): a chapter title over an open choice (restored or live) replaces its speaker
+// page, so Continue lands on the world and the sweep drops the restored prompt (book-ui.md Chapters).
+test('an open choice under a chapter title waits on its speaker page beneath it', () => {
+  const view = {
+    entities: [{ id: 'bram' }],
+    chapter: { index: 1 },
+    choice: { speaker_id: 'bram' },
+  } as never;
+  assert.deepEqual(initialPages(view), [{ kind: 'thing', id: 'bram' }, { kind: 'chapter' }]);
+  const before = { ...(view as object), chapter: undefined } as never; // the title arrives live
+  const stack = [{ kind: 'thing', id: 'bram' }] as Page[];
+  assert.deepEqual(pagesAfter(stack, before, view), [
+    { kind: 'thing', id: 'bram' },
+    { kind: 'chapter' },
+  ]);
 });
 
 // Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), a cartridge's own reason

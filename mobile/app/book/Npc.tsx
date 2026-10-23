@@ -68,7 +68,6 @@ type NpcProps = {
   press: (b: Button) => void;
   log: DetailLine[];
   leave: () => void;
-  since?: number; // history before this line (the last Leave the conversation) is hidden (loka-x6t.19)
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
   open: (id: string) => void;
@@ -92,7 +91,7 @@ export function NpcPage(p: NpcProps) {
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
-  const log = p.log.slice(p.since ?? 0);
+  const log = p.log;
   const contents = held(p);
   return (
     <Page
@@ -241,9 +240,6 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
   });
 }
 
-// Per page visit: how many history lines came before its last Leave the conversation.
-const past = new WeakMap<object, number>();
-
 /**
  * The NPC route: gathers the person's offers and history, then draws NpcPage.
  * - Use: Body only.
@@ -271,13 +267,12 @@ export function NpcDetail(p: {
       text={text}
       g={p.g}
       log={log}
-      since={p.visit && past.get(p.visit)}
       press={(b) => p.press(b, id)}
       leave={p.world}
       open={(thing) => p.open({ kind: 'thing', id: thing })}
       talking={!!p.visit && p.talkingOn === p.visit}
       talk={(on) => {
-        if (!on && p.visit) past.set(p.visit, log.length);
+        if (!on) p.screen.leave(id);
         p.talkOn?.(on ? p.visit : undefined);
       }}
     />

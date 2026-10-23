@@ -278,7 +278,12 @@ export default function App() {
   };
   if (!game)
     return (
-      <SaveError failed={activeSession.failed()!} startOver={() => shell.confirm(startOver)} />
+      <SaveError
+        failed={activeSession.failed()!}
+        startOver={() => shell.confirm(startOver)}
+        // the lock is web-only: a reload reopens the save
+        tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
+      />
     );
   const book = <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
   return devClock ? (

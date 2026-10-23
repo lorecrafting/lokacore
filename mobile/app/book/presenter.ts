@@ -38,6 +38,7 @@ export type { DetailLine } from './logs.ts';
 import {
   closing,
   detailLines,
+  visit,
   narrationLines,
   pickupLine,
   resetLogs,
@@ -254,6 +255,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
+    leave: (id: string) => void s.details.get(id)?.splice(0), // Leave the conversation: a fresh history
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,
@@ -289,10 +291,7 @@ export function presenter(game: Game) {
       return line;
     },
     leaveCombat: () => (s.ended = undefined),
-    forget: (id: string) => s.details.delete(id),
-    // Histories a cold reopen may drop: a restored pickup and a dream (resumed, not revisited) stay.
-    restored: () =>
-      [...s.details.keys()].filter((id) => id !== s.pickedFrom && !id.startsWith('dream:')),
+    visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },

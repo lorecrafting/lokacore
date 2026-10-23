@@ -28,6 +28,9 @@ export const sayers = (g: Game): { text: Say; label: Say } => ({
 const COUNT = 'one two three four five six seven eight nine ten eleven twelve'.split(' ');
 export const chapterLabel = (index: number) => `Chapter ${COUNT[index] ?? index + 1}`;
 
+// The browser's save-file lock: another tab holds the save (Try again once it closes).
+export const locked = (f: Failed) => /Access Handles? cannot be created/.test(f.message);
+
 /**
  * The line under the save-error headline, never a raw code or exception text: a Start over that is
  * not confirmed gets its words, an empty message or one that is only the kind none (the headline
@@ -39,7 +42,7 @@ export const detail = (f: Failed) =>
     ? 'Start over was not confirmed.'
     : f.message === f.kind
       ? undefined
-      : /Access Handles? cannot be created/.test(f.message)
+      : locked(f)
         ? 'Loka is already open in another tab.'
         : f.message
           ? 'The save could not be opened.'

@@ -229,6 +229,40 @@ test('first credit and the dream Continue leave an open conversation first', () 
   assert.equal(gameView(a.world).choice, undefined);
 });
 
+// Breaks (loka-x6t.10): a conversation opened at the dream's choice keeps that choice unavailable
+// and refused, or the choice resolves but leaves the conversation open.
+test('the dream choice leaves an open conversation first, as Continue does', () => {
+  const a = route(
+    fresh((c) => {
+      c.npcs[`${prefix}:npc/bram`].room = ref('room', 'inn_rooms');
+      delete c.npcs[`${prefix}:npc/bram`].daily_schedule;
+    }),
+  );
+  a.invoke({ type: 'rest' });
+  for (const line of [1, 2, 3]) a.invoke({ type: 'continue', scene: sceneRef, line }, 'dream_next');
+  a.invoke({ type: 'talk', target_id: entity(a.world, 'npc', 'bram') });
+  const ordinary = gameView(a.world).choice!;
+  assert.ok(ordinary);
+  const o = dream(a.world).choice!.choices[0]!;
+  assert.equal(o.available, true);
+  const chose = a.invoke(
+    {
+      type: 'choose',
+      continuation_id: dream(a.world).choice!.continuation_id,
+      choice_id: o.choice_id,
+      dream: o.dream,
+    },
+    o.action_key,
+  );
+  assert.deepEqual((chose.decision as any).delta.ops[0], {
+    op: 'choice.close',
+    writer_group: 0,
+    continuation_id: ordinary.continuation_id,
+  });
+  assert.equal(gameView(a.world).choice, undefined);
+  assert.equal(dream(a.world).branch, o.choice_id);
+});
+
 // Breaks: stale/wrong scene-owned draw or binding resolves a retained branch, or keyed view admission ignores the authored alias policy/shared budget.
 test('captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth', () => {
   const a = route(fresh());

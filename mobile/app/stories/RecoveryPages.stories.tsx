@@ -9,11 +9,13 @@ import firstRoom from './views/room-first.json';
 const meta: Meta = { title: 'Pages/Recovery', component: SaveError, tags: ['!autodocs'] };
 export default meta;
 const failed = (
-  kind: 'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing',
+  kind: 'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing' | undefined,
   message: string,
   startOver = true, // never for a newer app's save or a lock (session.ts offered)
 ) => ({
-  render: () => <SaveError failed={{ kind, message, startOver }} startOver={fn()} />,
+  render: () => (
+    <SaveError failed={{ kind, message, startOver }} startOver={fn()} tryAgain={fn()} />
+  ),
 });
 
 export const SaveErrorRelease: StoryObj = {
@@ -30,7 +32,7 @@ export const SaveErrorCorrupt: StoryObj = {
 };
 export const SaveErrorLocked: StoryObj = {
   ...failed(
-    'save_corrupt',
+    undefined, // the lock is untyped (session.ts Failed)
     'Access Handles cannot be created if there is another open Access Handle',
     false,
   ),
