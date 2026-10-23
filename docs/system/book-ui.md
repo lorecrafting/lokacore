@@ -401,8 +401,8 @@ detail, Pour and Drink to their source vessel. The Book owns no liquid math.
 
 **Held readables.** Opening a held book sends no Read; Read is an explicit option. Its confirmed
 text joins that item's history and the page stays. A child of an open held container pushes its
-own detail; Back to container pops locally without a command; Leave or Back to World clears the
-stack. Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
+own detail; Back to container pops locally without a command; Leave returns to the page the item
+was opened from, and Back to World clears the stack. Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
 Read to its original history, opening a route only when custody still reaches it.
 
 **Consumed items.** An action that consumes the item (Eat, a bandage) removes it from Carrying,

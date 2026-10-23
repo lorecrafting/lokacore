@@ -4,6 +4,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { openGame } from '../../authority/local-story/session.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 
@@ -45,6 +47,27 @@ test('a learned teach line drops its requirement', (t) => {
   assert.ok(unqualified.includes(`The carpenter teaches Woodcutting; ${free}`));
   const locked = skills((s) => ({ locked: !s.acquired }));
   assert.ok(locked.includes(`Woodcutting: locked; ${free}`), JSON.stringify(locked));
+});
+
+// Breaks: reopening the save seeds the NPC page with the last visit's narration, so a fresh
+// visit opens on an old talk line (loka-x6t.19).
+test('a fresh NPC visit after a reopen starts empty', () => {
+  const cart = compiled('cartridges/toolbox_showcase') as never;
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, cart);
+  const b = book(cart, a);
+  go(b, 'north', 'west', 'west');
+  b.tap('The carpenter is here.');
+  b.tap('Talk to the carpenter');
+  b.tap('Learn whittling');
+  const taught = b.text().find((x) => x.startsWith('The carpenter shows you'));
+  assert.ok(taught, JSON.stringify(b.text()));
+  b.tap(LABEL.leaveConversation);
+  b.unmount();
+  const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
+  r.tap('The carpenter is here.');
+  assert.equal(r.text().includes(taught), false, JSON.stringify(r.text()));
+  r.unmount();
+  a.sql.close();
 });
 
 // Breaks: "Nothing to do here." draws above the fence's price rows (UH3), or no longer draws on an

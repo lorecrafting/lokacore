@@ -225,9 +225,9 @@ defmodule Loka.Content.Lint do
     ) ++ exits(files, text)
   end
 
-  # The page's own Leave control ends a talk, so a do-nothing authored Leave or Close choice is
-  # kept only on these single-choice talks (book-ui.md: NPC dialogue; loka-x6t.21).
-  # A talk with a single authored choice keeps its own Leave (book-ui.md NPC dialogue).
+  # The page's own Leave control ends a talk, so a do-nothing Leave or Close choice is refused
+  # on a talk with more than one choice; a single-choice talk keeps it (book-ui.md NPC
+  # dialogue; loka-x6t.21).
   defp exits(files, text) do
     for {"dialogues/" <> _ = rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
         map_size(cs) > 1,
