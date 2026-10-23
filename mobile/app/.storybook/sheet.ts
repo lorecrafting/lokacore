@@ -54,7 +54,7 @@ try {
       if (!channel) return;
       clearInterval(hook);
       for (const e of ['storyErrored', 'storyThrewException', 'playFunctionThrewException'])
-        channel.on(e, () => (w.done[w.current!] ??= 'error'));
+        channel.on(e, (x: { message?: string }) => (w.done[w.current!] ??= `${e}: ${x?.message}`));
       channel.on('storyRenderPhaseChanged', (e: { newPhase: string; storyId: string }) => {
         if (e.newPhase === 'preparing') w.current = e.storyId;
       });

@@ -10,7 +10,6 @@ const pick = readFileSync(`${dir}/picks.jsonl`, 'utf8')
   .split('\n')
   .map((l) => JSON.parse(l))
   .find((p) => p.id === id);
-if (!pick?.story || !pick.elements?.length) process.exit(0); // a close, keep-going or element-less pick
 const globals = [
   `palette:${pick.palette ?? 'light'}`,
   `reading:${pick.reading ?? 'Standard'}`,
