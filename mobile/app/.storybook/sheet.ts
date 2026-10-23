@@ -6,9 +6,10 @@ import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { chromium, type Page } from 'playwright';
+import { fileURLToPath } from 'node:url';
 
 const combos = ['Standard:light', 'Standard:dark', 'Max:light', 'Max:dark'];
-const out = new URL('../.walkthrough/stories/', import.meta.url).pathname;
+const out = fileURLToPath(new URL('../.walkthrough/stories/', import.meta.url));
 const port = await new Promise<number>((found) => {
   const probe = createServer().listen(0, () => {
     const { port } = probe.address() as { port: number };

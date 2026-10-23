@@ -65,6 +65,11 @@ export const poll = async () => {
 };
 // Null when the queue took it; else why not (the composer keeps the text and pins).
 export const send = async (note: string, pending: Picked[]): Promise<string | null> => {
+  const { id, title, name } = api.getCurrentStoryData() as {
+    id: string;
+    title: string;
+    name: string;
+  };
   // A crop still rendering (no png or shot yet; html-to-image takes about a second) joins this send;
   // one that hangs (a hidden window pauses its frames) is left out after 5 s.
   const cropping = () =>
@@ -73,12 +78,8 @@ export const send = async (note: string, pending: Picked[]): Promise<string | nu
       ?.pending.some((p) => p.png === undefined && p.shot === undefined);
   for (const t = Date.now(); cropping() && Date.now() - t < 5_000;)
     await new Promise((r) => setTimeout(r, 100));
-  pending = api.getAddonState<State>(ADDON_ID)?.pending ?? pending;
-  const { id, title, name } = api.getCurrentStoryData() as {
-    id: string;
-    title: string;
-    name: string;
-  };
+  const fresh = api.getAddonState<State>(ADDON_ID)?.pending;
+  if (fresh?.length === pending.length) pending = fresh; // else a story change cleared the pins
   const globals = api.getGlobals() as {
     palette?: string;
     reading?: string;

@@ -8,8 +8,14 @@ const [port, dir, id] = process.argv.slice(2);
 const pick = readFileSync(`${dir}/picks.jsonl`, 'utf8')
   .trim()
   .split('\n')
-  .map((l) => JSON.parse(l))
-  .find((p) => p.id === id);
+  .map((l) => {
+    try {
+      return JSON.parse(l);
+    } catch {
+      return null; // a line torn mid-append
+    }
+  })
+  .find((p) => p?.id === id);
 const globals = [
   `palette:${pick.palette ?? 'light'}`,
   `reading:${pick.reading ?? 'Standard'}`,
@@ -23,6 +29,7 @@ mkdirSync(`${dir}/shots`, { recursive: true });
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 2 });
+  page.setDefaultTimeout(10_000); // the done line waits on this shot
   await page.goto(
     `http://localhost:${port}/iframe.html?id=${pick.story.id}&globals=${globals}&viewMode=story`,
   );
@@ -42,7 +49,8 @@ try {
       width: Math.min(box.w + 48, full[0] - x),
       height: Math.min(box.h + 48, full[1] - y),
     };
-    await page.screenshot({ path: `${dir}/shots/${id}-${i}-after.png`, clip, fullPage: true });
+    if (clip.width > 0 && clip.height > 0)
+      await page.screenshot({ path: `${dir}/shots/${id}-${i}-after.png`, clip, fullPage: true });
   }
 } finally {
   await browser.close();
