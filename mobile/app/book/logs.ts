@@ -8,7 +8,7 @@ import type {
   DecisionResult,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { withoutHeading } from './words.ts';
+import { lineWords, withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
 // One log line per narration record, then the cue (book-ui.md, Live action freshness; pass-1 UO):
@@ -35,7 +35,7 @@ export const rendered = (
   withoutHeading(
     (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
     view,
-  ).map((line) => liquidLine(line, text));
+  ).map((line) => liquidLine(line, text, view));
 
 // A refused line (a barred exit) leads with its reason tag (LogLines's doc comment).
 export type DetailLine =
@@ -116,8 +116,8 @@ export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | 
   (['engaged', 'fled'].includes(d.outcome) ||
     d.events.some((e) => e.payload.type === 'attack_result'));
 
-function liquidLine(line: NarrationRecord['lines'][number], text: Say): string {
-  const sentence = text(line.key);
+function liquidLine(line: NarrationRecord['lines'][number], text: Say, view: GameView): string {
+  const sentence = lineWords(line, text, view);
   if (line.key === 'item.recovered' && typeof line.bindings?.item === 'string')
     return `${sentence} ${text(line.bindings.item)}.`;
   if (!['liquid.filled', 'liquid.poured', 'liquid.drank'].includes(line.key)) return sentence;

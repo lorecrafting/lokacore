@@ -135,6 +135,27 @@ type Say = (key: string) => string;
 export const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
   lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
 
+// A known NPC's or visible entity's name, worded.
+const nameOf = (view: GameView, id: unknown, text: Say) => {
+  const name =
+    view.known_npcs?.find((n) => n.id === id)?.name ?? view.entities.find((n) => n.id === id)?.name;
+  return name && text(name);
+};
+
+// One narration line's words. A skipped combat turn (loka-x6t.30) names its status from the
+// engine line combat.skipped; it has no actor when the player skipped.
+export const lineWords = (
+  t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
+  text: Say,
+  view: GameView,
+) => {
+  if (t.key !== 'combat.skipped') return text(t.key);
+  const actor = t.participants?.actor;
+  const name = actor === undefined ? undefined : nameOf(view, actor, text);
+  const who = actor === undefined ? 'You are' : name ? `${name} is` : 'They are';
+  return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);
+};
+
 // A press that changed nothing, as one plain sentence (book-ui.md, Shared elapsed status).
 const UNDONE: Partial<Record<Reply['kind'], string>> = {
   conflict: 'The book is still catching up; try again.',
@@ -163,10 +184,7 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {
     const location = d.location;
-    const name =
-      view.known_npcs?.find((n) => n.id === location.target_id)?.name ??
-      view.entities.find((n) => n.id === location.target_id)?.name;
-    const who = name ? text(name) : 'They';
+    const who = nameOf(view, location.target_id, text) || 'They';
     if (location.status === 'here') return `${who}: here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);
@@ -174,7 +192,7 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  const said = shown.map((t) => text(t.key)).filter(Boolean);
+  const said = shown.map((t) => lineWords(t, text, view)).filter(Boolean);
   return said.length ? said : (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 

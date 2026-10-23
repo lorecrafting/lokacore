@@ -489,6 +489,7 @@ rather than hiding errors or clearing same-room history. Whisper needs a word, s
 
 The installed first-fight interaction follows [Live combat response](#live-combat-response-m6-a).
 An NPC a [spell](mechanics.md#spell-effects-toolbox-row-29b) kills gets no "leaves" line in the Book log (Beads `loka-y6yg.44`).
+A status-skipped blow tells one Combat line: the status's authored `narration.skipped`, else, proposed for the designer, "<Name> is too <label> to do anything." ("You are ..." for the player; Beads `loka-x6t.30`).
 
 ## Shared elapsed status/completion boundary
 

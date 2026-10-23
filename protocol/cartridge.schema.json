@@ -2830,6 +2830,10 @@
             "observed": {
               "$ref": "text.schema.json#/$defs/TextKey",
               "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC in the player's room that the player perceives; with none, an NPC holder is silent (kernel_api at least 1.110)."
+            },
+            "skipped": {
+              "$ref": "text.schema.json#/$defs/TextKey",
+              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's label (kernel_api at least 1.115)."
             }
           },
           "required": [

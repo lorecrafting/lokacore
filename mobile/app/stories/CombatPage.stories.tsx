@@ -21,3 +21,11 @@ export const Bleeding: StoryObj = {
   ...pageStory(CombatBleedingView),
   name: 'Bleeding',
 };
+// A blow a status barred (loka-x6t.30): the Book's default line for the foe and for the player
+// (book/words.ts lineWords). No showcase status bars a blow yet, so the lines are set here.
+export const SkippedTurn: StoryObj = {
+  ...pageStory(CombatOneFoeView, {
+    combatLog: ['The boar is too stunned to do anything.', 'You are too stunned to do anything.'],
+  }),
+  name: 'Skipped turn',
+};

@@ -246,11 +246,17 @@ export function statusMovement(world: World, body: EntityId) {
  * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
  */
 export function statusAllows(world: World, body: EntityId) {
+  const bar = barring(world, body);
+  return (command: string) => !bar(command);
+}
+
+/** The first active status on `body` (definition order) that bars Command type `command`, if any. */
+export function barring(world: World, body: EntityId) {
   const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
   const specs = bars ? activeStatuses(world, body).map(({ spec }) => spec) : [];
   return (command: string) =>
-    specs.every(
-      (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
+    specs.find(
+      (s) => s.blocks?.includes(command as Key) || !(s.allows?.includes(command as Key) ?? true),
     );
 }
 

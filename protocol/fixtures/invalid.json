@@ -24847,6 +24847,33 @@
     ]
   },
   {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "wet",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.wet",
+      "narration": {
+        "applied": "narration.wet.applied",
+        "tick": "narration.wet.tick",
+        "expired": "narration.wet.expired",
+        "skipped": "The golem is too wet to do anything."
+      }
+    },
+    "errors": [
+      {
+        "path": "/narration/skipped",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
     "contract": "ReactionRule",
     "value": {
       "key": "k",

@@ -1725,6 +1725,18 @@
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.115",
+      "below": "1.114",
+      "source": "cartridges/status_sampler",
+      "feature": "a status narration.skipped line (loka-x6t.30)",
+      "edits": [["statuses/poison.json", ["narration", "skipped"], "narration.poison.applied"]],
+      "without": [
+        ["statuses/poison.json", ["narration", "skipped"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]
 }

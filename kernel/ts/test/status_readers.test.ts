@@ -23,6 +23,7 @@ import { ALWAYS } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -61,13 +62,16 @@ function play(w: World, payload: object) {
   return r.world;
 }
 function round(w: World, by = 150) {
+  return elapsed(w, by).world;
+}
+function elapsed(w: World, by = 150) {
   const run_id = `aaaaaaaa-5454-4545-8545-${String(++n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + by];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
   const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
+  return r;
 }
 const hp = (w: World, e: string) => level(w, e as never, resourceRef(w, 'hp'));
 const troll = (w: World) => w.entityIds[refString({ ...C, kind: 'npc', key: 'troll' } as never)]!;
@@ -129,8 +133,44 @@ test('a stunned troll skips its blows until the stun ends', () => {
   assert.deepEqual([hp(two, two.body), hp(two, troll(two))], [8, 6], 'round at 300 s: it clubs');
 });
 
+// Breaks (loka-x6t.30): a status-skipped blow tells no line, an authored skipped line loses to the
+// engine line, the line names no status or the wrong actor, or a landed blow still tells it.
+test('a stunned troll tells its skipped blow; an authored line wins; a landed blow tells none', () => {
+  const lines = (c = content) => {
+    const den = play(play(fresh(c), { type: 'move', direction: 'east' }), {
+      type: 'say',
+      word: 'thunder',
+    });
+    const one = elapsed(play(den, { type: 'attack', target_id: troll(den) }));
+    assert.deepEqual(validate('DecisionResult', one.decision), []);
+    const said = (r: typeof one) =>
+      ((r.decision as { narration?: { key: string }[] }).narration ?? []).filter(
+        (l) => l.key === 'combat.skipped' || l.key === 'narration.stunned.applied',
+      );
+    return [said(one), said(elapsed(one.world))];
+  };
+  const skipped = (key: string, w = fresh()) => [
+    [{ key, bindings: { status: 'condition.stunned' }, participants: { actor: troll(w) } }],
+    [],
+  ];
+  assert.deepEqual(lines(), skipped('combat.skipped'), 'stunned at 150 s, clubbing at 300 s');
+  const stunned = content.statuses![S('stunned')]!;
+  const authored = {
+    ...content,
+    statuses: {
+      ...content.statuses,
+      [S('stunned')]: {
+        ...stunned,
+        narration: { ...stunned.narration, skipped: 'narration.stunned.applied' },
+      },
+    },
+  } as Cartridge;
+  assert.deepEqual(lines(authored), skipped('narration.stunned.applied'));
+});
+
 // Breaks (loka-kgd.98): the player's round blow skips the attack bar (a player stunned mid-fight
-// still hits the troll for 1).
+// still hits the troll for 1). Breaks (loka-x6t.30): the player's skip line names an actor (the
+// Book reads an actor as an NPC, not "You").
 test("a player stunned mid-fight takes no blow; the troll's still lands", () => {
   const status = (key: string) => ({ ...C, kind: 'status', key });
   const dazing = {
@@ -144,6 +184,13 @@ test("a player stunned mid-fight takes no blow; the troll's still lands", () => 
   } as unknown as Cartridge;
   // Hushed (120 s) ends before the round at 150 s and stuns the player for 200 s.
   assert.deepEqual(fight(south(shrine(c))), [9, 8], 'warded halves the troll hit to 1');
+  const den = play(south(shrine(c)), { type: 'move', direction: 'east' });
+  const r = elapsed(play(den, { type: 'attack', target_id: troll(den) }));
+  const narration = (r.decision as { narration?: { key: string }[] }).narration ?? [];
+  assert.deepEqual(
+    narration.filter((l) => l.key === 'combat.skipped'),
+    [{ key: 'combat.skipped', bindings: { status: 'condition.stunned' } }],
+  );
 });
 
 // Breaks: the action set is not filtered (a hushed say is accepted), a block is refused with
