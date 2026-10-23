@@ -19898,6 +19898,23 @@
     ]
   },
   {
+    "name": "room_dark_false",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hall",
+      "title": "room.hall.title",
+      "description": "room.hall.description",
+      "exits": {},
+      "dark": false
+    },
+    "errors": [
+      {
+        "path": "/dark",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
     "name": "room_tag_unknown",
     "contract": "RoomDefinition",
     "value": {

@@ -485,6 +485,10 @@
         "sanctuary": {
           "type": "boolean"
         },
+        "dark": {
+          "description": "The room is dark (light@1, kernel_api at least 1.114): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line.",
+          "const": true
+        },
         "dark_description": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },

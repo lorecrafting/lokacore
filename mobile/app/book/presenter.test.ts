@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { DecisionResult, Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { cardKey, presenter } from './presenter.ts';
-import { chapterLabel, comings, detail } from './words.ts';
+import { chapterLabel, comings, detail, sayers } from './words.ts';
 
 const VIEW = {
   actions: [],
@@ -431,4 +431,12 @@ test('two offers with one label keep two card keys; one offer keeps one', () => 
   ].map(cardKey);
   assert.equal(new Set(keys).size, 4);
   assert.equal(cardKey({ ...talk, action_key: 'aldous_talk' }), keys[0]);
+});
+
+// Breaks (loka-x6t.36): the dark room's engine line shows its raw key, or overrides authored text.
+test('place.dark reads the engine line unless the cartridge words it', () => {
+  const say = (words: Record<string, string>) =>
+    sayers({ text: (key: string) => words[key] } as unknown as Game).text('place.dark' as never);
+  assert.equal(say({}), "It's too dark to see...");
+  assert.equal(say({ 'place.dark': 'Pitch black.' }), 'Pitch black.');
 });

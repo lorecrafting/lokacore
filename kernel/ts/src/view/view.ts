@@ -12,7 +12,7 @@ import { conditionViews, resources } from './resources.ts';
 import { combatView } from './combat.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
-import { visible, fuelView } from '../mechanics/light/shared.ts';
+import { dark, visible, fuelView } from '../mechanics/light/shared.ts';
 import { skillViews, freeLessons } from './skills.ts';
 import { noticeViews } from './notice_boards.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
@@ -120,11 +120,20 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
   if (!here)
     return { id: '' as EntityId, title: text('' as TextKey), description: text('' as TextKey) };
   const room = world.rooms[here];
-  const lines = asides(world, actor, room, steps);
+  // In the dark, the authored dark_description, else the engine line (loka-x6t.36); not in
+  // `describe`, which also names held items and the player. Lit, `describe` and `asides` get no
+  // dark_description so they do not test darkness again (query budget).
+  const unseen = dark(world, actor, steps);
+  const lit = { ...room, dark_description: undefined };
+  const lines = unseen ? [] : asides(world, actor, lit, steps);
   return {
     id: here,
     title: text(room.title),
-    description: text(describe(world, actor, room, steps)),
+    description: text(
+      unseen
+        ? (room.dark_description ?? ('place.dark' as TextKey))
+        : describe(world, actor, lit, steps),
+    ),
     ...(lines.length > 0 && { asides: lines.map(text) }),
   };
 }

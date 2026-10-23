@@ -86,15 +86,17 @@ export function illuminated(w: World, actor: CharacterId, steps: Steps = { n: 0 
 const blinded = (w: World, body: EntityId | undefined) =>
   perceives(w, body, 'blind') || (!!body && perceives(w, w.state.containers[body], 'blind'));
 
+/** A room with no light of its own: flagged dark (1.114) or with an authored dark_description. */
+export const unlit = (w: World, room: string | undefined) =>
+  !!room && (w.rooms[room]?.dark === true || !!w.rooms[room]?.dark_description);
+
 /** Unlit for `actor`: a dark room without dark sight or a held light, or anywhere while blinded (status readers 6, 9). */
 export function dark(w: World, actor: CharacterId, steps: Steps = { n: 0 }) {
   const body = bodyOf(w, actor);
   return (
     !!body &&
     (blinded(w, body) ||
-      (!!w.rooms[w.state.containers[body]]?.dark_description &&
-        !darkSight(w, actor) &&
-        !illuminated(w, actor, steps)))
+      (unlit(w, w.state.containers[body]) && !darkSight(w, actor) && !illuminated(w, actor, steps)))
   );
 }
 

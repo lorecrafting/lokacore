@@ -1,4 +1,4 @@
-import { dark, illuminated } from '../light/shared.ts';
+import { dark, illuminated, unlit } from '../light/shared.ts';
 import { darkSight } from '../attributes/shared.ts';
 import { living } from '../death/shared.ts';
 import { concealed, perceives } from '../status/shared.ts';
@@ -57,9 +57,7 @@ export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
     const there = world.roomIds[refString(exitTo(room, direction)!)];
     if (
       perceives(world, there, 'blind') || // status reader 9: a darkened room hides its contents
-      (world.rooms[there].dark_description &&
-        !darkSight(world, actor) &&
-        !illuminated(world, actor, steps))
+      (unlit(world, there) && !darkSight(world, actor) && !illuminated(world, actor, steps))
     )
       return { direction };
     const at = (id: string): id is EntityId =>

@@ -389,7 +389,9 @@ confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside
 A two-item action names both items on its button (`Refuel <source> from <supply>`); the item that
 owns the control keeps the history, and the bound participant's page does not repeat it. The
 presenter owns no fuel arithmetic or clock. A dark room keeps exits, inventory and recovery
-usable and shows no hidden detail link, readable entry or Scan identity.
+usable and shows no hidden detail link, readable entry or Scan identity. A dark room without an authored dark
+description arrives as the place key `place.dark`; the Book words it "It's too dark to see..."
+unless the cartridge texts that key (owner wording, loka-x6t.36; `mobile/app/book/words.ts`).
 
 **Liquids.** A vessel's page shows the confirmed liquid kind, quantity and capacity with its
 authored unit, and offers Fill, Drink or Pour only to exact eligible vessels; two vessels keep

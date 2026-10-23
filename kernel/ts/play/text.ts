@@ -120,8 +120,9 @@ const capital = (w: string) => `${w[0].toUpperCase()}${w.slice(1)}`;
 /** A catalog string as plain words: each touch link's words, without brackets or target. */
 export const plain = (s: string): string => s.replace(/\[([^[\]]+)\](?:\([^()]*\))?/g, '$1');
 
-/** The cartridge's text for a key, as plain words (the key itself if it has none). */
-export const say = (cartridge: Cartridge, key: string): string => plain(cartridge.text[key] ?? key);
+/** Cartridge text for a key as plain words; else place.dark's default (words.ts), else the key. */
+export const say = (cartridge: Cartridge, key: string): string =>
+  plain(cartridge.text[key] ?? (key === 'place.dark' ? "It's too dark to see..." : key));
 
 // A narration line's committed key and participants as the receipt holds them (06 §43), or
 // nothing for a line without participants; names are not rendered (presentation, later).
@@ -132,11 +133,9 @@ export const pinned = (t: { key: string; participants?: Readonly<Record<string, 
         .join(', ')}]\n`
     : '';
 
-/**
- * The current room's title, description (none when `brief`), the room line of each NPC and item
+/** The current room's title, description (none when `brief`), the room line of each NPC and item
  * in it (its room-line variants), and exits, each marked closed or locked while its barrier
- * bars the way, in the cartridge's text.
- */
+ * bars the way, in the cartridge's text. */
 export function room(cartridge: Cartridge, world: World, brief = false): string {
   const view = gameView(world);
   const text = (key: string) => say(cartridge, key);
