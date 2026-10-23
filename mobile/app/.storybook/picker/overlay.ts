@@ -101,7 +101,6 @@ const describe = (el: Element, key: string): Picked => {
     role,
     name: el.getAttribute('aria-label') ?? (role === 'button' ? text : null),
     testId: el.getAttribute('data-testid'),
-    png: null,
   };
 };
 

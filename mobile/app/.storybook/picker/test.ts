@@ -122,6 +122,7 @@ try {
     if (!pick.elements?.[0]?.chain.includes('EntityLine'))
       fail(`chain ${JSON.stringify(pick.elements?.[0]?.chain)} lacks EntityLine`);
     if (pick.note !== 'quick: tighten\nthe row') fail(`note ${JSON.stringify(pick.note)}`);
+    if (!pick.elements[0].shot) fail('the pick went without its crop');
     status(pick.id, 'working', 'fable');
     status('suggest-close', 'enough for one review');
     status('log', 'routed to Sonnet designer');
@@ -129,6 +130,9 @@ try {
     await settle(page, 'suggest closing: enough for one review');
     await page.waitForSelector('[data-pick] >> text=working');
     const closeBtn = page.locator('button:has-text("Close batch")').first();
+    await page.click('[data-pick] img[alt=""]'); // the before crop opens; no after while working
+    await page.waitForSelector('[data-pick] img[alt="before"]');
+    if (await page.locator('[data-pick] img[alt="after"]').count()) fail('after shot before done');
     if (!(await closeBtn.isDisabled())) fail('Close batch enabled while an item is working');
     status(pick.id, 'done', 'fable', 'row tightened', 'abc1234');
     await settle(page, 'row tightened');
@@ -136,6 +140,12 @@ try {
     const crop = size(`shots/${pick.id}-0.png`);
     const shot = size(`shots/${pick.id}-0-after.png`);
     if (shot !== crop) fail(`after shot ${shot}, want the before crop's ${crop}`);
+    await page
+      .waitForFunction(
+        () =>
+          document.querySelector<HTMLImageElement>('[data-pick] img[alt="after"]')?.naturalWidth,
+      )
+      .catch(() => fail('the panel shows no after shot once done'));
     if (await closeBtn.isDisabled()) fail('Close batch still disabled after done');
     status('suggest', 'Close batch');
     const area = page.locator('textarea[placeholder="Close batch"]'); // the ghost text
