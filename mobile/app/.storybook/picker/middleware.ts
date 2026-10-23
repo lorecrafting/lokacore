@@ -112,7 +112,7 @@ const handle =
   (session: string | null) =>
   async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     if (!loopback(req)) return json(res, 403, { error: 'loopback only' });
-    const url = req.url ?? '';
+    const url = (req.url ?? '').split('?')[0]; // a ?t= cache bust on the after shot
     if (req.method === 'GET' && url === '/status')
       return json(res, 200, {
         session,
