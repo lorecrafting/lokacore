@@ -161,6 +161,39 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
     'combat.player_died',
     'death.penalty',
   ]);
+  // Breaks (loka-3w3q): the waking line is told before the penalty, or not at all.
+  const woke = narration(
+    die(
+      hall(50, (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.117';
+        c.text['death.woke'] = 'You wake.';
+        c.world.death.narration = { woke: 'death.woke' };
+      }),
+    ),
+  );
+  assert.deepEqual(woke.slice(woke.indexOf('combat.player_died')), [
+    'combat.player_died',
+    'death.penalty',
+    'death.woke',
+  ]);
+  // Breaks (loka-3w3q): the death lines push the receipt past its 64 lines, or are the ones cut.
+  const full = die(
+    hall(50, (c) => {
+      c.manifest.requires.kernel_api.at_least = '1.117';
+      c.text['death.woke'] = 'You wake.';
+      c.text['death.mourn'] = 'Someone mourns.';
+      c.world.death.narration = { woke: 'death.woke' };
+      const mourn = { op: 'narrate', text: 'death.mourn' };
+      c.reactions[`${P}:reaction/mourn`] = {
+        key: 'mourn',
+        on: { event: 'entity_died' },
+        apply: Array(64).fill(mourn),
+      };
+    }),
+  );
+  assert.deepEqual(narration(full).slice(-3), ['death.mourn', 'death.penalty', 'death.woke']);
+  assert.equal(narration(full).length, 64);
+  assert.deepEqual(validate('DecisionResult', full.decision), []);
   const reopened = hydrate(hall(0), JSON.parse(JSON.stringify(r.world.state)), true);
   assert.ok(reopened);
   assert.deepEqual(levelling(reopened), { level: 2, experience: 45, next: 100, unspent: 0 });
@@ -284,6 +317,32 @@ test('the loader refuses each malformed penalty', () => {
       at('.experience.percent'),
       at('.experience.percent'),
       at('.items'),
+      'loaded',
+    ],
+  );
+});
+
+// Breaks (loka-3w3q): the loader admits death narration below kernel_api 1.117, or a fall or
+// waking line naming no text key.
+test('the loader refuses each malformed death narration', () => {
+  const lines =
+    (narration: object, api = '1.117') =>
+    (c: any) => {
+      c.manifest.requires.kernel_api.at_least = api;
+      c.world.death.narration = narration;
+    };
+  const path = (f: string) => `.cartridge.world.death.narration.${f}`;
+  assert.deepEqual(
+    [
+      refused(lines({ woke: 'combat.player_died' }, '1.116')),
+      refused(lines({ woke: 'death.nope' })),
+      refused(lines({ player_died: 'death.nope' })),
+      refused(lines({ player_died: 'combat.player_died', woke: 'death.penalty' })),
+    ],
+    [
+      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
+      ['UNRESOLVED_REFERENCE', path('woke')],
+      ['UNRESOLVED_REFERENCE', path('player_died')],
       'loaded',
     ],
   );

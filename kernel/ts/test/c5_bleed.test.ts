@@ -218,7 +218,7 @@ test('Flee and re-engagement pair the exact same-due round and bleed tick', () =
   assert.deepEqual([...orders].sort(), ['bleed_first', 'round_first']);
 });
 
-// Breaks: a fatal bleed tick leaves an active job that kills the shrine-returned body again.
+// Breaks: a fatal bleed tick leaves an active job that kills the shrine-returned body again, or tells no fall line or combat's over the death's own (loka-3w3q).
 test('fatal tick closes bleed before same-body shrine return', () => {
   const { world, target } = fixture(100, 2);
   const first = elapsed(
@@ -248,6 +248,15 @@ test('fatal tick closes bleed before same-body shrine return', () => {
     [died.cause, died.killer_id, died.credited_character_id],
     ['bleeding', source, null],
   );
+  // loka-3w3q: the fall line after the tick, the death's own over combat's
+  const keys = (d: ReturnType<typeof elapsed>['decision']) =>
+    d.kind === 'accepted' ? d.narration?.map((line) => line.key) : [];
+  const c = fled.world.cartridge;
+  const fell = c.world!.combat!.narration.player_died;
+  assert.deepEqual(keys(fatal.decision), ['narration.bleed.tick', fell]);
+  const death = { ...c.world!.death!, narration: { player_died: 'death.fell' } };
+  const own = { ...fled.world, cartridge: { ...c, world: { ...c.world!, death } } } as World;
+  assert.deepEqual(keys(elapsed(own, 65050, 4).decision), ['narration.bleed.tick', 'death.fell']);
   const later = elapsed(fatal.world, 65150, 5);
   assert.equal(later.decision.kind, 'accepted');
   assert.equal(hp(later.world), 10);

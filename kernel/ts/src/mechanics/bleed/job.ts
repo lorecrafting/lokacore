@@ -11,6 +11,7 @@ import {
 } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter } from '../combat/shared.ts';
+import { fallLine } from '../death/lines.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceRef } from '../resource.ts';
 import { currentBleed } from './shared.ts';
@@ -42,7 +43,11 @@ function fatalBleed(
     mint,
   );
   ops.push(...died.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: now } : op)));
-  return accepted(world, 'job_ran', ops, died.events, [{ key: spec.narration.tick }]);
+  // A bleed opens only on a player's body (combat/round_attack.ts recordBleed).
+  return accepted(world, 'job_ran', ops, died.events, [
+    { key: spec.narration.tick },
+    ...fallLine(world),
+  ]);
 }
 
 function finishBleed(

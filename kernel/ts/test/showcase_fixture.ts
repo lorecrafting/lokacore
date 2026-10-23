@@ -180,6 +180,7 @@ export function homestead(c: any) {
     delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176, loka-y6yg.48)
   delete c.statuses[ref('status', 'wanted')].kind; // 1.102 (the law's wanted icon, E1)
   delete c.items[ref('item', 'training_sword')].equip; // 1.116 (loka-x6t.20)
+  delete c.world.death.narration; // 1.117 (loka-3w3q)
   // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91);
   // the Loft's errand handover line (1.103).
   delete c.rooms[ref('room', 'lever_hall')].asides;

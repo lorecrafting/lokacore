@@ -672,6 +672,16 @@ refuse API1.5 content; older bundled release lists refuse its unknown content pi
 (UNRESOLVED_REFERENCE at its `narration`) and an older API floor (KERNEL_API_RANGE_INVALID);
 the schema refuses the bounds and any other field. `cartridges/penalty_sampler` is the sampler.
 
+### Death narration declarations
+
+[Death lines](mechanics.md#death-lines-outside-a-combat-round-loka-3w3q) read the optional
+`world.death.narration` (`DeathSettings.narration`; kernel API at least **1.117**, Beads
+`loka-3w3q`): `player_died` and `woke`, each an optional TextKey. The compiler
+(`lib/loka/content/death.ex`) and the loader (`kernel/ts/src/content/cartridge_death.ts`) refuse
+an unknown key (UNRESOLVED_REFERENCE at `world.death.narration.<field>`) and an older API floor
+(KERNEL_API_RANGE_INVALID); the schema refuses any other field. The toolbox showcase declares
+`woke`.
+
 ## First encounter authoring (M6-A)
 
 `world.combat` requires combat@1, schedule@1, death@1, valid `world.death`
