@@ -11,7 +11,8 @@ import {
 } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter } from '../combat/shared.ts';
-import { deathSequence, fallLine } from '../death/sequence.ts';
+import { fallLine } from '../death/lines.ts';
+import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceRef } from '../resource.ts';
 import { currentBleed } from './shared.ts';
 

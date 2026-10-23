@@ -3,7 +3,8 @@ import type { Command, DefinitionRef, DeltaOp, EntityId, Text } from '../../cont
 import { accepted, actorOf, type Event, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter, engaged, lastOpponent } from '../combat/shared.ts';
-import { deathSequence, fallLine } from '../death/sequence.ts';
+import { fallLine } from '../death/lines.ts';
+import { deathSequence } from '../death/sequence.ts';
 import { endStatus } from './shared.ts';
 
 type Adjust = Extract<DeltaOp, { op: 'resource.adjust' }>;

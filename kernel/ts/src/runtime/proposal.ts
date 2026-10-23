@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 346, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 347, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -19,6 +19,7 @@ import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
+import { woke } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -343,12 +344,4 @@ function crowDelivery(p: P, next: Queued): Admitted | undefined {
       if (failed) return failed;
     }
   }
-}
-
-// loka-3w3q: once after any player's death (an NPC victim carries its definition), combat
-// included, after the penalty line.
-function woke(world: World, events: DomainEvent[]) {
-  const key = world.cartridge.world?.death?.narration?.woke;
-  const died = events.some((e) => e.payload.type === 'entity_died' && !e.payload.victim_definition);
-  return key && died ? [{ key }] : [];
 }

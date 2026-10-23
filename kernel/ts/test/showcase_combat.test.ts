@@ -47,7 +47,7 @@ const hp = (w: World, entity: string) => level(w, entity as never, resourceRef(w
 const cues = (w: World) => gameView(w).cues;
 const withHp = (w: World, value: number): World => {
   const k = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
-  const row = { ...w.state.resources[k]!, value, at: w.state.clock };
+  const row = { ...w.state.resources![k]!, value, at: w.state.clock };
   return { ...w, state: { ...w.state, resources: { ...w.state.resources, [k]: row } } };
 };
 const conditions = (w: World) => gameView(w).conditions;

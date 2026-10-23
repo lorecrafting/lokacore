@@ -249,13 +249,13 @@ test('fatal tick closes bleed before same-body shrine return', () => {
     ['bleeding', source, null],
   );
   // loka-3w3q: the fall line after the tick, the death's own over combat's
-  const keys = (d: typeof fatal.decision) =>
+  const keys = (d: ReturnType<typeof elapsed>['decision']) =>
     d.kind === 'accepted' ? d.narration?.map((line) => line.key) : [];
   const c = fled.world.cartridge;
   const fell = c.world!.combat!.narration.player_died;
   assert.deepEqual(keys(fatal.decision), ['narration.bleed.tick', fell]);
   const death = { ...c.world!.death!, narration: { player_died: 'death.fell' } };
-  const own = { ...fled.world, cartridge: { ...c, world: { ...c.world!, death } } };
+  const own = { ...fled.world, cartridge: { ...c, world: { ...c.world!, death } } } as World;
   assert.deepEqual(keys(elapsed(own, 65050, 4).decision), ['narration.bleed.tick', 'death.fell']);
   const later = elapsed(fatal.world, 65150, 5);
   assert.equal(later.decision.kind, 'accepted');
