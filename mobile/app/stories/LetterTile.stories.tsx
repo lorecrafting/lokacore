@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 export const Free: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'N, tile 2' }));
-    await expect(args.onPress).toHaveBeenCalledTimes(1);
+    await expect(args.onPress.mock.calls).toEqual([[]]); // no press event (Storybook cannot send one)
   },
 };
 

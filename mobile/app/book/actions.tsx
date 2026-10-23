@@ -89,7 +89,7 @@ export function ContinueButton(p: { label: string; onPress: () => void }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
-      onPress={p.onPress}
+      onPress={() => p.onPress()} // no press event: the handler takes none
       style={{
         backgroundColor: c.fg,
         borderRadius: radius.card,

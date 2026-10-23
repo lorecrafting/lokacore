@@ -24,7 +24,7 @@ export const NpcWithCarriedNote: Story = {
   play: async ({ canvas, args, userEvent }) => {
     const name = 'Bram the ferryman is here. He carries a long pole., open';
     await userEvent.click(canvas.getByRole('button', { name }));
-    await expect(args.onPress).toHaveBeenCalledTimes(1);
+    await expect(args.onPress.mock.calls).toEqual([[]]); // no press event (Storybook cannot send one)
   },
 };
 

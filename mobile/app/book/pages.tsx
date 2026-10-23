@@ -47,7 +47,7 @@ export function Tap(p: {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
-      onPress={p.onPress}
+      onPress={() => p.onPress()} // no press event: the handler takes none
       style={{ minHeight: size.touch, justifyContent: 'center', ...bleed, ...shrink }}
     >
       {p.children}
@@ -107,7 +107,7 @@ export function Control(p: {
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
-      onPress={onPress}
+      onPress={() => onPress()} // no press event: the handler takes none
       style={{
         minHeight: size.touch,
         minWidth: size.touch,
