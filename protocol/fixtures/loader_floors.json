@@ -690,7 +690,8 @@
         ["reactions/wheel_3_x_shows_6.json", [], null],
         ["reactions/wheel_3_x_shows_7.json", [], null],
         ["reactions/wheel_3_x_shows_8.json", [], null],
-        ["reactions/wheel_3_x_shows_9.json", [], null]
+        ["reactions/wheel_3_x_shows_9.json", [], null],
+        ["items/training_sword.json", ["equip"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1580,7 +1581,8 @@
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
-        ["statuses/burning.json", ["narration", "observed"], null]
+        ["statuses/burning.json", ["narration", "observed"], null],
+        ["items/training_sword.json", ["equip"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1604,7 +1606,8 @@
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
-        ["statuses/burning.json", ["narration", "observed"], null]
+        ["statuses/burning.json", ["narration", "observed"], null],
+        ["items/training_sword.json", ["equip"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
