@@ -40,7 +40,7 @@ const page = async (view: GameView, id: string) => {
   const { Item } = await import('./Menu.tsx');
   const screen = screenOf(view);
   const g = group(screen.buttons);
-  return shown(Item({ id, screen, g, press() {}, open() {}, world() {} } as never));
+  return shown(Item({ id, screen, g, press() {}, open() {}, world() {}, back() {} } as never));
 };
 const action = (action_key: string, more = {}) => ({
   available: true,
@@ -66,7 +66,8 @@ const ID = {
   pebble: '00000000-0000-4000-8000-000000000006',
 };
 
-// Breaks: Take keeps its name on an NPC's item, drops the holder Note or puts it after the card;
+// Breaks: Take keeps its name on an NPC's item, drops the holder Note or puts it after the card,
+// or its foot reads Back to container for a person (loka-x6t.68);
 // a refused theft still reads Take or reads before the holder Note; or a box's (or the floor's) item shows Lift or the holder Note (E14).
 test('an item an NPC holds reads Lift after the holder Note; a box item reads Take', async () => {
   const v = nellView();

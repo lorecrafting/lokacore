@@ -7,7 +7,6 @@ export const LABEL = {
   leaveConversation: 'Leave the conversation',
   backToWorld: 'Back to World',
   backToBoard: 'Back to board',
-  backToContainer: 'Back to container',
   backToMap: 'Back to map',
   close: 'Close',
   resumeDream: 'Resume dream',

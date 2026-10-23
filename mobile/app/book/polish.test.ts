@@ -11,7 +11,8 @@ import { bundle as goblins, unpacked } from '../../authority/local-story/__tests
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: confirmed ear Take returns to World, leaves the stale ear child open, or restores
-// its pickup on the World log instead of the exact corpse after reopening.
+// its pickup on the World log instead of the exact corpse after reopening; or the nested ear
+// shows Back to container beside Leave, two returns to the same page (loka-x6t.94).
 test('corpse Contents Take returns to its detail with one local pickup and Back to World', () => {
   const chapter = goblins(unpacked);
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
@@ -39,10 +40,12 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.stack.map((p: any) => p.id),
     [corpse.id, ear.id],
   );
-  const foot = ['Back to container', 'Leave'];
-  const shown = h.labels().filter((x) => foot.includes(x));
-  assert.deepEqual(shown, foot); // nearest first
-  h.tap('Back to container');
+  // Leave already returns to the container, so it is the one return (loka-x6t.94).
+  assert.deepEqual(
+    h.labels().filter((x) => ['Back to container', 'Leave'].includes(x)),
+    ['Leave'],
+  );
+  h.tap('Leave');
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
     [corpse.id],

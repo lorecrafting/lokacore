@@ -219,7 +219,7 @@ move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into 
 Give), then asks and services; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
-A page's local returns (Leave, Back to World, Back to board, Back to container, Back to map,
+A page's local returns (Leave, Back to World, Back to board, Back to map,
 Close) sit in its page foot, below the scrolling content and above the status line, nearest first;
 offered actions never do. World, a scene, a chapter title, the ancestry choice and combat have no
 foot. A control that opens a child (Resume dream, Continue conversation) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); no line shows twice for one receipt. Combat closure and the notice-board readable restore are the exceptions in their sections.
@@ -410,8 +410,9 @@ detail, Pour and Drink to their source vessel. The Book owns no liquid math.
 
 **Held readables.** Opening a held book sends no Read; Read is an explicit option. Its confirmed
 text joins that item's history and the page stays. A child of an open held container pushes its
-own detail; Back to container pops locally without a command; Leave returns to the page the item
-was opened from, and Back to World clears the stack. Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
+own detail; Leave pops locally without a command to the page the item was opened from (the
+container, or the person holding it), and Back to World clears the stack. Proposed for designer
+approval (loka-x6t.94, loka-x6t.68): there is no separate Back to container, which went to the same page. Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
 Read to its original history, opening a route only when custody still reaches it.
 
 **Consumed items.** An action that consumes the item (Eat, a bandage) removes it from Carrying,

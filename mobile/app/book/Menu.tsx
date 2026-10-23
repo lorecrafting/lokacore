@@ -102,18 +102,12 @@ export function ThingPage(p: {
   contents: Thing[];
   open: (id: string) => void;
   leave: () => void;
-  back?: () => void;
 }) {
   const refusals = notes(p.thing, p.label, p.holder);
   return (
     <Page
       title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
-      foot={
-        <>
-          {p.back && <Control label={LABEL.backToContainer} onPress={p.back} />}
-          <Control label={LABEL.leave} onPress={p.leave} />
-        </>
-      }
+      foot={<Control label={LABEL.leave} onPress={p.leave} />}
     >
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
@@ -161,8 +155,7 @@ export function Item(p: {
       press={(b) => p.press(b, p.id)}
       contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
       open={(id) => p.open({ kind: 'thing', id })}
-      leave={p.back ?? p.world} // Leave returns to the page it was opened from (loka-x6t.23)
-      back={thing && 'container_id' in thing ? p.back : undefined}
+      leave={p.back ?? p.world} // the page it was opened from (loka-x6t.23), so no Back to container (loka-x6t.94)
     />
   );
 }
