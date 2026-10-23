@@ -317,6 +317,9 @@ polish stage which needs me at the computer for a bit."
   answers in the polish session; nothing changes in the Book until then).
 - 2026-10-22 (quoted): "okay go with all your recommendations" on the drafts: loka-p2ey yes, loka-z2j2 yes (Bleeding exempt),
   loka-x6t.85 option A. One batch after the gate batch: Sonnet for the two label sweeps, Opus for the specs page.
+- 2026-10-22 (quoted): "yes please go ahead" on the pre-polish plan: bug batch A (loka-x6t.17/.18/.19/.23), bug batch B
+  (loka-x6t.43, -7s0, -ozu, -oej, -on6), polish tooling (picker smoke test, loka-f7j after-shot, story contact sheet), and an
+  Opus designer drafting rulings for loka-x6t.20/.21/.22/.24/.30/.36/.37/.38, loka-g96, loka-6qi plus a polish tour.
 
 - 2026-10-21 (session c5ed3619, quoted): NPC statuses "Line now, page later (Recommended)"; worldbuilding "Lets take over
   thr worldbuilding maybe spin off a subagent to clean it up and comit" (done, #420); retro "ok approve".
