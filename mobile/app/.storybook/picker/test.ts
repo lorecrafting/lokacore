@@ -7,7 +7,7 @@
 // composer (or Tab moving focus); a suggestion still offered after the owner sent a prompt.
 import { spawn } from 'node:child_process';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -124,6 +124,8 @@ try {
     if (pick.note !== 'quick: tighten\nthe row') fail(`note ${JSON.stringify(pick.note)}`);
     if (!pick.elements[0].shot) fail('the pick went without its crop');
     status(pick.id, 'working', 'fable');
+    if (existsSync(join(dir, 'shots', `${pick.id}-0-after.png`)))
+      fail('working saved an after shot');
     status('suggest-close', 'enough for one review');
     status('log', 'routed to Sonnet designer');
     await settle(page, 'routed to Sonnet designer');
