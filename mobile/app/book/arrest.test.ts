@@ -20,7 +20,7 @@ for (const failed of [false, true])
     b.tap('Open the barred cell door (east)');
     b.tap('Back to World');
     assert.ok(b.text().includes('Opened.'), JSON.stringify(b.text())); // a square line to lose
-    for (const c of ['The crier is here., open', /^Talk/, 'Confess to the theft.']) b.tap(c);
+    for (const c of ['The crier is here., open', /^Talk/, 'Confess to the theft']) b.tap(c);
     b.tap(LABEL.leaveConversation);
     b.tap(LABEL.leave);
     b.map();
