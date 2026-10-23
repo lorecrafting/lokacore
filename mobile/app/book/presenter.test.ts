@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { DecisionResult, Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { presenter } from './presenter.ts';
+import { cardKey, presenter } from './presenter.ts';
 import { chapterLabel, comings, detail } from './words.ts';
 
 const VIEW = {
@@ -418,4 +418,17 @@ test('the chapter label names the declaration index counted from one', () => {
   assert.equal(chapterLabel(0), 'Chapter one');
   assert.equal(chapterLabel(11), 'Chapter twelve');
   assert.equal(chapterLabel(12), 'Chapter 13');
+});
+
+// Breaks (loka-x6t.18): cards keyed by label, so Aldous's two Talk dialogues share one React key.
+test('two offers with one label keep two card keys; one offer keeps one', () => {
+  const talk = { label: 'Talk to Aldous', target_ids: ['aldous'], input: {} };
+  const keys = [
+    { ...talk, action_key: 'aldous_talk' },
+    { ...talk, action_key: 'aldous_yard' },
+    { ...talk, action_key: 'aldous_talk', target_ids: ['wat'] },
+    { ...talk, action_key: 'aldous_talk', input: { word: 'steel' } },
+  ].map(cardKey);
+  assert.equal(new Set(keys).size, 4);
+  assert.equal(cardKey({ ...talk, action_key: 'aldous_talk' }), keys[0]);
 });

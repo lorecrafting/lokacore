@@ -28,6 +28,10 @@ export type Button = {
   context?: string; // only projected buttons can refresh across an unchanged live update
 };
 
+/** A card's identity, its React key: two offers that share a label (two Talk dialogues) stay two. */
+export const cardKey = (b: Button) =>
+  [b.action_key, b.target_ids.join(','), JSON.stringify(b.input)].join(':');
+
 type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';

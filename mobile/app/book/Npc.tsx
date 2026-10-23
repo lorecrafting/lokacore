@@ -4,6 +4,7 @@ import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
+import { cardKey } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { Asides, LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
@@ -113,7 +114,7 @@ export function NpcPage(p: NpcProps) {
       {!talk && (
         <Cards>
           {cards.map((b) => (
-            <ActionCard key={b.label + JSON.stringify(b.input)} b={b} press={p.press} />
+            <ActionCard key={cardKey(b)} b={b} press={p.press} />
           ))}
           <ServiceOptions {...p} actions={actions} />
         </Cards>
