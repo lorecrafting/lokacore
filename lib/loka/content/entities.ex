@@ -148,6 +148,12 @@ defmodule Loka.Content.Entities do
 
   defp equip_texts(_), do: []
 
+  # Name words (loka-6qi): bare and the optional plural.
+  defp words_texts(%{"words" => w}),
+    do: for(f <- ~w(bare plural), is_map_key(w, f), do: {["words", f], w[f]})
+
+  defp words_texts(_), do: []
+
   # A fence names its refusal of honest goods (pass-1 GE3).
   defp shop_texts(%{"shop" => s}),
     do:
@@ -212,7 +218,8 @@ defmodule Loka.Content.Entities do
         disposition_texts(e) ++
         ask_texts(e) ++
         aside_texts(e) ++
-        equip_texts(e)
+        equip_texts(e) ++
+        words_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

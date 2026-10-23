@@ -271,7 +271,10 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
-  for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
+  for (const [kind, d, at] of parts(c)) {
+    text(d, TEXT[kind] ?? ['description'], at);
+    if (d.words) text(d.words, ['bare', 'plural'], `${at}.words`); // loka-6qi
+  }
   for (const [a, at] of asideParts(c)) text(a, ['text'], at);
   text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));

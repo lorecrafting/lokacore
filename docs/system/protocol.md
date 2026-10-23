@@ -328,6 +328,10 @@ that explicit key; an older view without it has no invented description. This ch
 adjacent-sight projection, rule, content artifact or saved state
 ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
+EntityView, ContentView and the combat opponent (`combat` and each `active_opponents`
+member) carry `words` copied from the definition while the selected short is the base
+`short`; a holding `short_variants` entry omits them (loka-6qi, kernel_api 1.118).
+
 NoticeView and NoticeBoardView carry `key`, the authored detail Key, so a presenter can match
 a touch link ([cartridge.md](cartridge.md#compiler)) in the selected description to the
 projected current-room detail; the Book draws a fixture link only on that match

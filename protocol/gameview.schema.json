@@ -521,6 +521,10 @@
         "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "words": {
+          "$ref": "entity.schema.json#/$defs/NameWords",
+          "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+        },
         "shop": {
           "type": "array",
           "items": {
@@ -678,6 +682,10 @@
         },
         "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "words": {
+          "$ref": "entity.schema.json#/$defs/NameWords",
+          "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
         },
         "container_id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
@@ -2154,6 +2162,10 @@
         "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "words": {
+          "$ref": "entity.schema.json#/$defs/NameWords",
+          "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+        },
         "band": {
           "$ref": "action.schema.json#/$defs/Key",
           "description": "The opponent's hp condition band key (its pool's band table); absent while the opponent is unseen or dead."
@@ -2170,6 +2182,10 @@
               },
               "name": {
                 "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "words": {
+                "$ref": "entity.schema.json#/$defs/NameWords",
+                "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
               },
               "band": {
                 "$ref": "action.schema.json#/$defs/Key",

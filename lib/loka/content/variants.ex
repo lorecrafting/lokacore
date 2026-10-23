@@ -5,8 +5,8 @@ defmodule Loka.Content.Variants do
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
   `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
   (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
-  1.102; an NPC's `asides` (row FD10) 1.107. Twin of
-  kernel/ts/src/content/cartridge_variants.ts.
+  1.102; an NPC's `asides` (row FD10) 1.107; an NPC's or item's name `words` (loka-6qi) 1.118.
+  Twin of kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
   alias Loka.Content.{Entities, RoomParts}
@@ -27,10 +27,16 @@ defmodule Loka.Content.Variants do
     identity = is_map_key(settings["world"] || %{}, "identity")
     furnish = furnish?([defs, settings])
 
-    if (identity or voices or relative or used?(defs, settings)) and
-         api < floor(remarks, furnish, identity, voices, relative, {defs, settings}),
-       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-       else: []
+    words = Enum.any?(Entities.all(defs), fn {_, _, e} -> is_map_key(e, "words") end)
+
+    floor =
+      if words,
+        do: [1, 118],
+        else: floor(remarks, furnish, identity, voices, relative, {defs, settings})
+
+    if (words or identity or voices or relative or used?(defs, settings)) and api < floor,
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
+      else: []
   end
 
   defp used?(defs, settings),
