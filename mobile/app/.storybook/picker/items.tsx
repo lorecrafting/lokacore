@@ -46,6 +46,21 @@ const StatusRow = ({ item, session }: { item: Item; session: boolean }) => {
   );
 };
 
+// The before crop and, once done, the after shot (bin/polish_status.sh); ?t= refetches a redone one.
+const Shots = ({ shot, at, done }: { shot: string; at: string; done: Item }) => (
+  <div style={{ display: 'flex', gap: 4 }}>
+    <img alt="before" src={shotUrl(shot)} style={{ minWidth: 0, flex: 1 }} />
+    {done?.state === 'done' && (
+      <img
+        alt="after"
+        src={`${ROUTE}/shots/${at}-after.png?t=${done.time}`}
+        style={{ minWidth: 0, flex: 1 }}
+        onError={(ev) => (ev.currentTarget.style.display = 'none')}
+      />
+    )}
+  </div>
+);
+
 // A chip pins its element again for a follow-up (no outline in the preview: the node may be gone;
 // the old crop path rides along). The thumbnail toggles the full crop.
 export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
@@ -77,19 +92,7 @@ export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
           {[p.story?.title, p.palette, p.viewport?.name].filter(Boolean).join(' · ')}
         </Muted>
       </div>
-      {shot && (
-        <div style={{ display: 'flex', gap: 4 }}>
-          <img alt="before" src={shotUrl(shot)} style={{ minWidth: 0, flex: 1 }} />
-          {latest(feed, p.id)?.state === 'done' && (
-            <img
-              alt="after"
-              src={`${ROUTE}/shots/${p.id}-${open}-after.png?t=${latest(feed, p.id)?.time}`}
-              style={{ minWidth: 0, flex: 1 }}
-              onError={(ev) => (ev.currentTarget.style.display = 'none')}
-            />
-          )}
-        </div>
-      )}
+      {shot && <Shots shot={shot} at={`${p.id}-${open}`} done={latest(feed, p.id)} />}
       <div style={{ fontSize: 14, margin: '4px 0' }}>{p.note}</div>
       <StatusRow item={latest(feed, p.id)} session={!!feed.session} />
     </Owner>
