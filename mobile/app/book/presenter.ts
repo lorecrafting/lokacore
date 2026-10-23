@@ -1,4 +1,3 @@
-// size: allow 305, the press, receipt and update paths share one Logs state (loka-x6t.102)
 // The book's words and state over a Game (packages/game-view/session.ts): the offered actions as
 // buttons, the log of what each press said, and who came or went. The engine returns structured
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
@@ -11,7 +10,7 @@ import type {
   NarrationRecord,
 } from '../../packages/game-view/session.ts';
 import { comings, lineText, replyLine, sayers } from './words.ts';
-import { actionContext, buttonsOf, intentOf, things } from './model.ts';
+import { actionContext, buttonsOf, intentOf } from './model.ts';
 
 /**
  * A tappable action: its text and the intent it sends (the session adds id and actor), with the
@@ -48,7 +47,7 @@ import {
   restoredLogs,
   type Logs,
 } from './logs.ts';
-import { received } from './received.ts';
+import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { grouped, holding, pressedAway, settle } from './recap.ts';
 
@@ -146,16 +145,6 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
     )
     ? { ...b, token }
     : b;
-}
-
-// A press's item and listener names, for its fallback line (received.ts fallbackLine).
-function named(b: Button, was: GameView) {
-  const name = (id?: string) => things(was).find((t) => t.id === id)?.name;
-  return ['take', 'drop', 'give'].includes(b.action_key)
-    ? b.target_ids.map(name)
-    : b.action_key === 'whisper'
-      ? [undefined, name(b.target_ids[0])] // the speech echo's listener
-      : [];
 }
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
