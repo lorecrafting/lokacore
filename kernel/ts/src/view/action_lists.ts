@@ -266,7 +266,6 @@ const equip = (a: Offered) => equipment.VERBS.includes(a.command);
 // Row 6a: an item's authored Wear or Remove label, else the engine's action.<verb>.
 const worded = (world: World, a: Offered, id?: string) =>
   (a.engine &&
-    equip(a) &&
     id &&
     (world.entities[id] as ItemDefinition).equip?.[a.command as 'wear' | 'remove']) ||
   a.label;

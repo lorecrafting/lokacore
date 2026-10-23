@@ -405,8 +405,10 @@ const label = (w: World, command: string) => {
 };
 
 test('an item with equip words offers its own Wear and Remove labels and tells its own lines', () => {
-  let w = accepted(world('cartridge_wear_hash.json', equipped), 'take', CAP).world;
+  const don = (c: any) => (equipped(c), action(c, 'don', 'wear', inventory));
+  let w = accepted(world('cartridge_wear_hash.json', don), 'take', CAP).world;
   assert.equal(label(w, 'wear'), 'cap.on');
+  assert.equal(label(w, 'don'), 'action.don'); // a cartridge wear keeps its own label
   const worn = accepted(w, 'wear', CAP);
   assert.deepEqual(plain(worn.decision).narration, [{ key: 'cap.worn' }]);
   w = worn.world;
