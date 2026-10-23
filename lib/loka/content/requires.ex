@@ -42,7 +42,7 @@ defmodule Loka.Content.Requires do
   # A room's dark flag (loka-x6t.36) needs 1.114; fuel or a dark_description 1.19.
   defp light_minimum(all, rooms) do
     cond do
-      Enum.any?(rooms, fn {_, _, d} -> is_map_key(d, "dark") end) ->
+      Enum.any?(rooms, &match?({_, _, %{"dark" => _}}, &1)) ->
         [1, 114]
 
       Enum.any?(all, fn {_, _, d} ->
