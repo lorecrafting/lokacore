@@ -8,6 +8,10 @@ import { createServer } from 'node:net';
 import { chromium, type Page } from 'playwright';
 import { fileURLToPath } from 'node:url';
 
+type W = {
+  __STORYBOOK_ADDONS_CHANNEL__: { emit(e: string, a: object): void };
+  done?: Record<string, string>;
+};
 const combos = ['Standard:light', 'Standard:dark', 'Max:light', 'Max:dark'];
 const out = fileURLToPath(new URL('../.walkthrough/stories/', import.meta.url));
 const port = await new Promise<number>((found) => {
@@ -78,23 +82,15 @@ try {
         );
       else
         await page.evaluate(
-          (id) =>
-            (
-              window as never as { __STORYBOOK_ADDONS_CHANNEL__: any }
-            ).__STORYBOOK_ADDONS_CHANNEL__.emit('setCurrentStory', {
-              storyId: id,
+          (storyId) =>
+            (window as never as W).__STORYBOOK_ADDONS_CHANNEL__.emit('setCurrentStory', {
+              storyId,
               viewMode: 'story',
             }),
           id,
         );
       const verdict = await page
-        .waitForFunction(
-          (id) => (window as never as { done?: Record<string, string> }).done?.[id],
-          id,
-          {
-            timeout: 30_000,
-          },
-        )
+        .waitForFunction((id) => (window as never as W).done?.[id], id, { timeout: 30_000 })
         .then((h) => h.jsonValue() as Promise<string>)
         .catch(() => 'timed out');
       if (verdict !== 'success') verdicts.set(`${combo} ${id}`, verdict);
