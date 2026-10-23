@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: death lines outside a combat round, Book World page on death (loka-3w3q, loka-x6t.26, PR #455, kernel_api 1.117)](2026-10-23-3w3q-death-lines-review.md): **APPROVE WITH NOTES**
 - [Review: refusal cause not_standing (loka-x6t.17, PR #447, kernel_api 1.111)](2026-10-22-x6t17-refusal-cause-review.md): **APPROVE WITH NOTES**
 - [Review: dark rooms, LegendMUD style (loka-x6t.36, PR #449)](2026-10-22-x6t-36-dark-rooms-review.md): **CHANGES REQUIRED**
 - [Review: a status-skipped combat turn names its cause (loka-x6t.30, PR #447 row 3)](2026-10-22-x6t-30-skipped-turn-review.md): **CHANGES REQUIRED**
