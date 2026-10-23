@@ -6,11 +6,12 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-22 ~18:30 UTC by Claude Code (Opus 5.5), PM session 016V3u, AS OF PR #432, before the owner's macOS
-update and reboot (owner 2026-10-22, quoted: "please bring this to a good stopping point so i can upgrade, then we will
-resume this session after the reboot").
-Open objectives: finish loka-x6t.86 (type and ink before polish), then loka-e56t (CI browser install), then the owner's
-live Storybook polish batch.
+Written 2026-10-23 ~01:30 local by Claude Code (Opus 5.5), PM session 661e816a (continued after the reboot), AS OF
+main after #453 plus the overnight batches below. Owner (2026-10-22, quoted): "Please work on the engine stuff, and the
+followups from todays reviews ... the polish phase will be ready for me tomorrow right?"
+Open objective: the owner's Storybook polish pass. Owner hold (2026-10-22, paraphrased): only polish and the bugs it
+finds until the owner says otherwise; P3 engine bugs, the toolbox backlog, balance tools, homestead, built rooms,
+worldbuilding and ARCH-D10 wait.
 
 ## Live polish session (OPEN since 2026-10-22, owner at Storybook)
 
@@ -20,9 +21,9 @@ The owner reactivated Storybook polish (2026-10-22, quoted): "i am going to do t
 PLease set things up so that its easy for me to do my ui polish there".
 - Session: `polish/session-2026-10-21` in ~/dev/lokacore-session; it holds no commits yet and was fast-forwarded to
   main after #432. No pick has arrived yet.
-- After the reboot: `bin/polish_session.sh start` (reuses the open session and serves the owner's Storybook on 6006),
-  then confirm 6006 and the web preview on 19006 answer; restart the preview per docs/web-preview.md if not. Use
-  `bin/polish_session.sh update` (not a manual merge) to bring main in: it restarts Storybook when stories change.
+- Start: `bin/polish_session.sh start` (reuses the open session and serves the owner's Storybook on 6006). No web
+  preview (owner 2026-10-22, quoted: "no need to have the web preview we will do everything in storybook for now").
+  Use `bin/polish_session.sh update` (not a manual merge) to bring main in; it restarts Storybook when stories change.
 - Loop (WORKFLOW "Live polish session", web-preview.md "Polish queue"): picks land in
   ~/dev/lokacore-session/.polish/picks.jsonl; the PM watches it with a Monitor (`tail -F -n 0`, re-armed every 30 min),
   answers through `bin/polish_status.sh`, and routes each pick to one Opus designer in the session worktree, which commits
@@ -31,32 +32,37 @@ PLease set things up so that its easy for me to do my ui polish there".
 - "Close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR comments, green hosted CI, merge with
   `--match-head-commit`, `bin/after_merge.sh`, `bin/preview_update.sh` (it refuses while a session is served).
 
-## Done this session (pre-polish foundation, all merged)
+## Done this session (2026-10-22/23, all merged unless marked)
 
-- #428 (loka-x6t.81 part, loka-x6t.53): signpost text once, map scrolls to the current room at 390 px, refusal notes use
-  action labels (Menu.tsx, pages.tsx). loka-x6t.81 stays open: signpost wording, Word bar height, DiscoveredMap.tsx:56
-  re-scroll, notices.tsx `fresh` collapses identical lines.
-- #429 (loka-x6t.82): retired-chapter sections out of docs/system/book-ui.md, general rules kept; catalogue page rows.
-- #430 (loka-x6t.42): Reading size setting (x1, x1.15, x1.3, cap 1.5), Storybook `reading` toolbar, lint rule
-  lint/rules/mobile-book-text.yml.
-- #431 (loka-x6t.83): component specs live in JSDoc on each component (Use/Rules/States/Story), BOOK-UI-COMPONENTS.md is
-  guidance plus an index, enforced by mobile/app/catalogue.test.ts. Owner (paraphrased): consolidate design files; specs
-  live with components; make it enforceable. Fable designed it. Follow-up loka-x6t.85 (story metas lack `component:`).
-- #432 (loka-x6t.87): showcase calendar solar phases; the Book shows dawn/day/dusk/night; no CJK hour glyph.
-- Fable broad audit loka-x6t.84 (ranked findings in its notes). Owner calls 2026-10-22: titles and the status line scale
-  with Reading size (supersedes the morning's "titles fixed"); distinct danger ink; one `type.pageTitle` 26 px left.
+- Before the reboot: #428-#432 (signpost, retired-chapter spec cleanup, Reading size, component specs in JSDoc, solar
+  phases) and the Fable broad audit loka-x6t.84 (closed; ranked findings in its notes).
+- Pre-polish clean-up: #433-#446, #448-#450 (retro items, gates, scripts, bug batches A/B, polish tooling, Book batch C,
+  dark rooms x6t.36, room status lines x6t.37). #372 closed.
+- #447 engine batch (loka-x6t.17 refusal causes, x6t.38 cursed Remove, x6t.30 "Aldous is too stunned to do anything.",
+  x6t.20 Apply/Wield words; kernel_api 1.116; review records 2026-10-22-*).
+- #451 batch A (x6t.68/.94 item foot is Leave only, x6t.80, x6t.81, one-value damage), #452 batch B (x6t.10, .25, .96
+  detail history per visit, .97), #453 (x6t.95 "requires Blade. Aldous teaches it in the drill yard.").
+- Beads clean-up (Fable proposal, owner "yes"): 187 open -> ~110; closes, merges into survivors, re-parenting, defers;
+  loka-3w3q to P1. Proposal file was a scratchpad file; the br notes on each survivor carry what was merged.
+- Polish tour for the owner: [docs/design/polish-tour.md](design/polish-tour.md).
 
-## In flight at the reboot
+## Overnight results (2026-10-23)
 
-- loka-x6t.86 (type and ink): Opus developer stopped for the reboot. Head 551f4d82 on `feat/type-ink-before-polish`
-  is committed only in its local worktree (named type-ink), not pushed: the pre-push size check failed
-  (`mobile/app/book/Status.tsx:80: function StatusLine, 46 lines, limit 40`). Type check and focused tests pass.
-  Left: cut StatusLine to 40 lines, run the mutants, push, open the PR, then one Opus reviewer, CI, merge,
-  `bin/polish_session.sh update`. The Fable ruling and acceptance literals are in the issue notes.
-- loka-e56t (P1): book-e2e jobs time out in the Playwright browser install (three times on 2026-10-22). Owner chose: after
-  the audit. Plan: cache the browser directory, bound the apt step, raise the storybook job timeout. e2e-web (tester.army)
-  uses the same Playwright 1.63.0 Chromium, so swapping installers alone does not help; browser-use is not a CI test driver.
-- Open owner item: the time of day shows only in the status line's accessible label; a visible clock needs a spec change.
+- MERGED #455 loka-3w3q + x6t.26 death lines outside combat (kernel_api 1.117; "You fall.", "You wake at the inn.";
+  record 2026-10-23-3w3q-death-lines-review.md with second opinion). Follow-up loka-3tc7.
+- MERGED #456 follow-ups x6t.102, .100, .101, y6yg.53, .56, .50. y6yg.51 stopped (no events on the state path);
+  y6yg.59 filed.
+- ON HOLD (owner 2026-10-22, quoted: "lets hold off on the p3 stuff for now"; PM recommendation accepted, "okay sounds
+  good"): draft #454 (E2; only kgd.153 built; before merge: /code-review and split lib/loka/core/compose_encounter.ex
+  instead of its new size allowance); kgd.188, 2lvx, 5i4c, k3b5, x6t.98, y6yg.36 and the 8 P3 engine bugs not started.
+- Storybook on 6006 updated to main after #456.
+
+## Retro 2026-10-23 (filed, P3, housekeeping; wait for the owner's go per the hold)
+
+loka-czpp size-allowance raise check, loka-14oe presenter history property test, loka-70yc loader_floors on cartridge
+change, loka-7h3v storybook tsc in prepush, loka-4zvw after_merge several ids. Owner asked (2026-10-22, paraphrased)
+whether edge-case fixes are systemic; answer given: some are class guards, the history and size items are the two
+classes to guard next.
 
 ## Start of a session
 
@@ -382,8 +388,6 @@ polish stage which needs me at the computer for a bit."
 
 ## Parked (polish lane)
 
-- Open PR #372 (`loka-x6t`, combat playtest findings into the Book spec), branch
-  `design/playtest-combat`.
 - [Give action plan](plans/loka-x6t.31-give-action.md) for `loka-x6t.31` (Book never offers Give),
   drafted by Pi on 2026-10-13, not reviewed. Known gap: it offers Give to every NPC in the room
   without an engine check that the recipient accepts.

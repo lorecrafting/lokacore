@@ -3,16 +3,16 @@
 Story ids are computed from title and export (`sanitize(title)--kebab(export)`). Open each one as `?path=/story/<id>`.
 Before you file anything new, check the "Known" line for that screen.
 
-## Fixed today (merged #447, #451, #452, #453; check them, do not refile)
-x6t.17 refused lines tagged with a reason, x6t.18 one card per offer, x6t.19 + x6t.96 detail history per visit, x6t.20 Apply / Wield words, x6t.21 authored Leave dropped, x6t.22 position tap line, x6t.23 Leave returns to its page, x6t.24 teaching line, x6t.25 Try again on the other-tab lock, x6t.30 "Aldous is too stunned to do anything.", x6t.36 dark rooms, x6t.37 room status lines, x6t.38 cursed item refusal, x6t.43 live regions, x6t.68 + x6t.94 item foot is Leave only, x6t.80 refusal note dedupe, x6t.81 smoke findings, x6t.95 "requires Blade. Aldous teaches it in the drill yard.", x6t.10 dream closes the conversation first, loka-7s0, loka-ozu, loka-oej, loka-on6.
+## Fixed (merged #447, #451-#453, #455, #456; check them, do not refile)
+x6t.17 refused lines tagged with a reason, x6t.18 one card per offer, x6t.19 + x6t.96 detail history per visit, x6t.20 Apply / Wield words, x6t.21 authored Leave dropped, x6t.22 position tap line, x6t.23 Leave returns to its page, x6t.24 teaching line, x6t.25 Try again on the other-tab lock, x6t.30 "Aldous is too stunned to do anything.", x6t.36 dark rooms, x6t.37 room status lines, x6t.38 cursed item refusal, x6t.43 live regions, x6t.68 + x6t.94 item foot is Leave only, x6t.80 refusal note dedupe, x6t.81 smoke findings, x6t.95 "requires Blade. Aldous teaches it in the drill yard.", x6t.10 dream closes the conversation first, x6t.26 + loka-3w3q death outside combat ("You fall." then "You wake at the inn."), x6t.100 map re-scrolls, x6t.101 equal notices both show, x6t.102 Leave keeps a pending choice question, y6yg.50 lever A lines, y6yg.53 where finds only the living, y6yg.56 Chop wood without an axe says why, loka-7s0, loka-ozu, loka-oej, loka-on6.
 
 ## Known and filed (do not refile)
-x6t.26 death outside combat (waits on engine loka-3w3q), x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only, x6t.99 signpost wording / Word bar height, x6t.100 map does not re-scroll, x6t.101 identical notices collapse, x6t.102 Leave while close pending, x6t.103 swept lines (designer), x6t.104 dream closes a one-shot offer silently, loka-g96 paragraphs outside rooms, loka-6qi plurals and "the".
+x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on hold), x6t.99 signpost wording / Word bar height, x6t.103 swept lines (designer), x6t.104 dream closes a one-shot offer silently, loka-3tc7 a death in the inn itself still recaps, y6yg.51 "X leaves." for an NPC killed in the background, y6yg.59 lever reset line at stage 3, loka-g96 paragraphs outside rooms, loka-6qi plurals and "the".
 
 ## 1. World page (seen most)
 - pages-room--first-room, --reworded, --npcs-and-items, --long-log, --refusal-line, --at-night, --sense-cues, --sense-cues-here, --asides, --companion-remark
 - Look at: prose rhythm, entity lines, the log tail, night tint, aside spacing.
-- Known: loka-6qi (plurals and "the"), loka-g96 (paragraphs outside rooms; deferred), x6t.71 (room line variants not drawn, unlabelled), x6t.6 (stars only outdoors), x6t.7 (lamp glow), x6t.99, x6t.100.
+- Known: loka-6qi (plurals and "the"), loka-g96 (paragraphs outside rooms; deferred), x6t.71 (room line variants not drawn, unlabelled), x6t.6 (stars only outdoors), x6t.7 (lamp glow), x6t.99.
 
 ## 2. Status line and icons
 - book-statusline--plain, --dusk, --weather, --sky, --warning-hp, --danger-hp, --bleeding, --conditions, --pennies, --only-pennies, --locked, --pending, --narrow, --one-line-larger, --wraps-at-max, --position
@@ -62,7 +62,7 @@ x6t.26 death outside combat (waits on engine loka-3w3q), x6t.29 "1 doses" (waits
 ## 10. Map and notices
 - pages-map--discovered-two-levels, --barred-exits, --where
 - pages-notices--notice-with-read, --dream-available, --dream-acknowledged
-- Known: x6t.100 (map does not re-scroll), x6t.101 (identical notices collapse).
+- Known: x6t.99 (signpost wording, Word bar height).
 
 ## 11. Chapter, scene, recovery
 - pages-chapter-and-scene--chapter-title-long, --scene, --dream
