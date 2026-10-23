@@ -114,7 +114,7 @@ function Icon(p: {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${p.name}, opens Character`}
-      onPress={p.open}
+      onPress={() => p.open?.()} // no press event: open takes none
       onLongPress={show}
       onPressOut={hide}
       onHoverIn={show}

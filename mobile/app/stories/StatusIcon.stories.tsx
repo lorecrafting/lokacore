@@ -42,6 +42,7 @@ export const Buff: Story = {
     icon.focus();
     await userEvent.keyboard('{Enter}');
     await expect(args.open).toHaveBeenCalledTimes(2);
+    await expect(args.open).toHaveBeenLastCalledWith(); // no press event (Storybook cannot send one)
   },
 };
 

@@ -33,6 +33,9 @@ function Prose({ lines }: { lines: number }) {
     </Text>
   ));
 }
+const Line = ({ children }: { children: string }) => (
+  <Text style={prose(usePalette(), useType())}>{children}</Text>
+);
 
 // In the page's own viewport (toBeVisible ignores scrolling).
 const inView = (el: HTMLElement) => {
@@ -160,7 +163,7 @@ export const NoTitle: Story = {
     foot: undefined,
     children: (
       <>
-        <Text>The bell rings once, and the nave falls silent.</Text>
+        <Line>The bell rings once, and the nave falls silent.</Line>
         <ContinueButton label="Continue" onPress={() => {}} />
       </>
     ),
