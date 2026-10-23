@@ -1,6 +1,7 @@
 defmodule Loka.Content.Lint do
   @moduledoc """
-  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources;
+  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources, plus the label rules: no final period on a
+  choice or action label, lowercase status labels;
   docs/CHECKS.md). Each finding is one line naming the file and key. The loader never runs
   these: a sampler may break them on purpose.
   """

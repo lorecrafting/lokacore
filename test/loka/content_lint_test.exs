@@ -65,7 +65,7 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"dialogues/bram.json" => %{"keyword" => "ember"}, "text.json" => %{}}) == []
   end
 
-  test "check 8: a choice or action label has no final period; a status label is lowercase" do
+  test "label rules: a choice or action label has no final period; a status label is lowercase" do
     dlg = fn key ->
       %{"dialogues/hal.json" => %{"keyword" => "hal", "choices" => %{"a" => %{"label" => key}}}}
     end

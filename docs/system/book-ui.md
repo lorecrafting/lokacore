@@ -277,7 +277,7 @@ shows again inside a new conversation); lines since that visit began or that Lea
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
-action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period; a quoted spoken line keeps its punctuation. The conversation belongs to
+action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. The conversation belongs to
 that page visit (the Book's latch, not the NPC): leaving the page any other way (Contents, Map,
 Back to World) ends it, and reopening the person shows their actions again. This supersedes the
 viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
