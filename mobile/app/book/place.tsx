@@ -9,7 +9,8 @@ import { ActionCard, VerbLine } from './actions.tsx';
 type Say = (key: string) => string;
 
 // The place's own actions, then those it lists unavailable as `label: reason` notes, never dropped
-// (pass-1 R2); a notice's actions stay on its notice page; the storylet has its card.
+// (pass-1 R2); the storylet has its card. An action aimed at a thing or notice with its own page
+// draws there, not here (owner 2026-10-23); a refused one keeps its note here.
 export const placeActions = (
   view: GameView,
   g: ReturnType<typeof group>,
@@ -21,10 +22,12 @@ export const placeActions = (
     ...(view.notices ?? []),
     ...(view.notice_boards ?? []).flatMap((b) => b.notices),
   ];
+  const paged = new Set<string>([...notices, ...view.entities].map((t) => t.id)); // each has its own page
   const verb = (a: { action_key: string; target_ids?: readonly string[] }) =>
     a.action_key !== view.storylet && !notices.some((n) => a.target_ids?.includes(n.id));
+  const own = (b: Button) => verb(b) && !b.target_ids.some((id) => paged.has(id));
   return [
-    ...g.place.filter(verb).map((b) => <VerbLine key={cardKey(b)} b={b} press={press} />),
+    ...g.place.filter(own).map((b) => <VerbLine key={cardKey(b)} b={b} press={press} />),
     ...refusedPlace(view)
       .filter((a) => !notVerb(a.action_key) && verb(a))
       .map((a) => (

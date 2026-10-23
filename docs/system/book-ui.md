@@ -27,6 +27,12 @@ pressed verb's result line sits within a screen of the verb (pass-1 UA; words go
 unavailable draws in the verb list, after the available verb lines, in the Action card's
 unavailable form `label: reason` (`Fish in: not yet`; `cooldown` reads **not yet**), never
 dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
+World keeps only the room's own place verbs, the storylet card, the exits and the untargeted
+say field (owner 2026-10-23, quoted: "all actions on targets [...] should be in the target detail
+page, or item detail page, and not in the main room page"). An action aimed at a thing (Talk, a
+use pair, an aimed skill or spell) draws on that thing's page instead. An aimed verb whose target
+has no page of its own (no room entity or notice) stays a World verb line, and a refused aimed
+verb keeps its World `label: reason` note.
 A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
 place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
 The description
