@@ -103,7 +103,8 @@ defmodule Loka.ContentLintTest do
           "a" => "Ask about the mill",
           "l" => "Leave her be",
           "c" => "Close the ledger",
-          "s" => "Leave it with Bram"
+          "s" => "Leave it with Bram",
+          "w" => "Ask why we never Leave"
         }
       }
     end
@@ -114,6 +115,8 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(talk.(%{"label" => "l", "narration" => "n"})) == bad
     assert Lint.findings(talk.(%{"label" => "c"})) == bad
+    # only a label that starts with Leave or Close is an exit
+    assert Lint.findings(talk.(%{"label" => "w"})) == []
     # a single-choice talk keeps its own Leave
     one =
       put_in(talk.(%{"label" => "l"}), ["dialogues/t.json", "choices"], %{
