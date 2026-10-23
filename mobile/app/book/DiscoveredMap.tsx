@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -57,17 +57,14 @@ export function DiscoveredMap({
   );
 }
 
-// The current-room marker stays visible (book-ui.md, Map): a narrow page scrolls to it.
+// The current-room marker stays visible (book-ui.md, Map): a narrow page scrolls to it when it is
+// drawn and when its level is shown again, also when the drawing keeps its size.
 function Follow(p: { x?: number; children: ReactNode }) {
   const scroller = useRef<ScrollView>(null);
+  const follow = () => p.x !== undefined && scroller.current?.scrollTo({ x: p.x, animated: false });
+  useEffect(() => void follow(), [p.x]);
   return (
-    <ScrollView
-      horizontal
-      ref={scroller}
-      onContentSizeChange={() =>
-        p.x !== undefined && scroller.current?.scrollTo({ x: p.x, animated: false })
-      }
-    >
+    <ScrollView horizontal ref={scroller} onContentSizeChange={follow}>
       {p.children}
     </ScrollView>
   );
