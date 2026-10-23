@@ -81,4 +81,27 @@ defmodule Loka.ContentSpellEffectsTest do
       assert pairs(diags) == [want]
     end
   end
+
+  # Breaks (loka-x6t.109): the schema still requires npc on damage or item on light.ignite, so an
+  # aimed spell cannot leave its target to the cast.
+  test "an aimed spell's damage and light.ignite need no npc or item" do
+    dir = Loka.ContentSource.copy(@dir)
+    floor = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.119")}
+
+    aimed = fn field, scopes ->
+      fn r ->
+        r
+        |> put_in(["target", "aimed"], %{"scopes" => scopes})
+        |> update_in(["outcomes", "success", "sequence", Access.at(0)], &Map.delete(&1, field))
+      end
+    end
+
+    edits = [
+      floor,
+      {"recipes/flamma.json", aimed.("npc", ["room_occupants"])},
+      {"recipes/lux.json", aimed.("item", ["inventory"])}
+    ]
+
+    assert {:ok, _, []} = Loka.ContentSource.compile(dir, edits)
+  end
 end
