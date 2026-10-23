@@ -320,6 +320,11 @@ polish stage which needs me at the computer for a bit."
 - 2026-10-22 (quoted): "yes please go ahead" on the pre-polish plan: bug batch A (loka-x6t.17/.18/.19/.23), bug batch B
   (loka-x6t.43, -7s0, -ozu, -oej, -on6), polish tooling (picker smoke test, loka-f7j after-shot, story contact sheet), and an
   Opus designer drafting rulings for loka-x6t.20/.21/.22/.24/.30/.36/.37/.38, loka-g96, loka-6qi plus a polish tour.
+- 2026-10-22 owner answers on the 15 draft rulings (quoted): 1 "how about stuff lik epotions, 'You quaff a bubbly potion.'
+  support for diferent verbs depending on what it is?"; 5 "Make it something like \"Aldous is too stunned to do anything\" or
+  levels of being stunned or whatever affect that is delaying his round of inaction"; 6 "Make it lik LegendMUD where the
+  description says somethihg like \"It's too dark to see...\" Items and PC/NPC also cant be seen."; "All others not mentioned,
+  go with your recs". Details in each issue's notes. #372 closed; loka-oej closed by design; loka-6qi to the toolbox.
 
 - 2026-10-21 (session c5ed3619, quoted): NPC statuses "Line now, page later (Recommended)"; worldbuilding "Lets take over
   thr worldbuilding maybe spin off a subagent to clean it up and comit" (done, #420); retro "ok approve".
