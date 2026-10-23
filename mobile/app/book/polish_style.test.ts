@@ -230,8 +230,9 @@ test('a readable notice the description links is a prose link and no World line'
 
 // Room sentences from cartridge name words (book-ui.md "Below the description", loka-6qi). Breaks:
 // the article is written on every name, is not written again after a proper name or a change of
-// word ("an wooden bench") or between two equal names without a plural, a name without words is dropped or loses its text, a plural group
-// is not one link, opens a later member, says "is", or counts 10 as a word.
+// word ("an wooden bench") or between two equal names without a plural, a name without words is
+// dropped or loses its text, a plural group is not one link, opens a later member, says "is", or
+// counts 10 as a word.
 test('the room sentence shows bare names, shares an article per run and collapses plurals', async () => {
   const { Here } = await import('./lines.tsx');
   const SAY: Record<string, string> = {
