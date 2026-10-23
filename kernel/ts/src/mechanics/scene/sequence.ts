@@ -137,7 +137,7 @@ export function chosen(
   const run = assigned(
     world,
     p.actor_id,
-    { ops: [...leave(world, p.actor_id)], position: 0, facts: {} }, // the choice leaves first, as Continue
+    { ops: [], position: 0, facts: {} },
     { fact: fact(world, found.scene), value: p.dream!.line + 1 },
     'scene',
   );
@@ -151,7 +151,7 @@ export function chosen(
   return accepted(
     world,
     'choice_resolved',
-    [op, ...run.ops],
+    [...leave(world, p.actor_id), op, ...run.ops], // the choice leaves first, as Continue
     [
       event(world, command, mint, run.position + 1, {
         type: 'choice_resolved',

@@ -19,7 +19,7 @@ const PLAIN: Record<string, string> = {
  * The screen for a save that does not open (book-ui.md, Chapters, scenes and recovery).
  * - Use: App, when the save fails to open; no GameView behind it.
  * - Rules: the Page's centred variant; `startOver` asks first: it destroys the save (10 §31; the
- *   shell's confirm); `tryAgain` retries the open, offered only on the other-tab lock.
+ *   shell's confirm); `tryAgain` (a page reload on web) reopens the save, offered only on the other-tab lock.
  * - States: release; format; corrupt; locked.
  * - Story: RecoveryPages.stories.tsx
  */

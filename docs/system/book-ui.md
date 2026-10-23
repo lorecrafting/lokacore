@@ -464,7 +464,7 @@ save-error screen has no GameView, so no phase; it shows a headline and at most
 one plain sentence under it, never a raw kind or code and never the headline repeated; the
 browser's save-file lock reads "Loka is already open in another tab." A cause the player can
 clear without losing the save (that lock: close the other tab) offers a **Try again** Control
-that retries opening the save; a cause they cannot offers only the permitted Start over
+that reloads the page, which opens the save again; a cause they cannot offers only the permitted Start over
 (proposed from closed #372, loka-x6t.25; designer to approve in the batch pass).
 [words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),

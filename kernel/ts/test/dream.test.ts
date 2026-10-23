@@ -254,11 +254,11 @@ test('the dream choice leaves an open conversation first, as Continue does', () 
     },
     o.action_key,
   );
-  assert.ok(
-    (chose.decision as any).delta.ops.some(
-      (op: any) => op.op === 'choice.close' && op.continuation_id === ordinary.continuation_id,
-    ),
-  );
+  assert.deepEqual((chose.decision as any).delta.ops[0], {
+    op: 'choice.close',
+    writer_group: 0,
+    continuation_id: ordinary.continuation_id,
+  });
   assert.equal(gameView(a.world).choice, undefined);
   assert.equal(dream(a.world).branch, o.choice_id);
 });
