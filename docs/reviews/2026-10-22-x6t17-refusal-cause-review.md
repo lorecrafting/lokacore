@@ -3,7 +3,7 @@
 - Branch `toolbox/batch-polish-engine-1` (draft batch polish-engine-1, row 1), exact commit `8a62a1c89a2dc0cee6f7808be388aed5a5b27932`.
 - Governing: [protocol.md](../system/protocol.md) (GameError, UnavailableReason), [mechanics.md](../system/mechanics.md) movement@1 and position@1, [book-ui.md](../system/book-ui.md) refused line, [Review stance](../WORKFLOW.md#review-stance), [Writing tests](../../AGENTS.md#writing-tests-every-change-every-agent); owner Q13 option A (loka-x6t.17 notes).
 - Reviewer: anthropic/claude-opus-5-5, independent, authored none of the work.
-- Verdict: **CHANGES REQUIRED** (hosted CI is red on the head: B1, B2).
+- Verdict: **APPROVE WITH NOTES** at `9649ced9d` (fix round below); was **CHANGES REQUIRED** at `8a62a1c89` (hosted CI red: B1, B2).
 
 ## Must be true (written before reading the diff)
 
@@ -46,3 +46,16 @@
   - `invariants_view.ts:69` and `:196` compare the code only. The direct tests catch a dropped cause (mutant B is red).
   - `expedition/shared.ts:64`, `transport/shared.ts:57` and `crow/behavior.ts:29`: the brief scopes this slice to `move` only.
 - **`cursed`** with no producer: acceptable on a draft batch head, because row 2 (loka-x6t.38) adds the producer. It must have a producer before the batch is ready, or be removed.
+
+## Fix round: head `9649ced9d81e70c468535400e596d790f5d0ee02` (fixes 8034514bd, 9649ced9d)
+
+- **B1 fixed.** `error.schema.json` RefusalCause no longer names a version. The contracts are regenerated: `contracts.exs --check` exits 0 and `loader_floors_test.exs` passes.
+- **B2 fixed.** The `position.jsonl` diff is one line, the sitting move gaining `cause`. `transcripts.test.ts` passes, and the PR body names the file.
+- **S1 fixed.** The PR body now says: additive; old saves are byte-identical; a downgrade is not supported.
+- **N1 fixed.** `water/shared.ts:33-35` checks engaged or following before posture, the same order as `sequence.ts:165`. Mutants on the water test, both red and reverted:
+  - drop the following clause;
+  - posture first.
+- The water test's standing-and-following case became a sitter that is following. Deleting the following clause still fails the test (the exact `{code}` assertion), so no coverage was lost.
+- The `rule.ts` and `words.ts` changes in 9649ced9d are comments only.
+- PM ruling accepted: a sleeper is told "You are not standing." (the owner's wording).
+- Verdict: **APPROVE WITH NOTES** on 9649ced9d (notes: the follow-ups ruled above). Hosted CI is in the PR comment.
