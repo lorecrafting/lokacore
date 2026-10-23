@@ -81,13 +81,13 @@ const REASON: Record<string, string> = {
   unsupported_capability: 'not in this book',
   budget_exceeded: 'more than the book can follow',
 };
-// A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
 // The kernel's engine key resource.short names the unpaid cost (pass-1 R1); keys show raw, as on the status line.
 export const message = (m: { key: string; bindings?: Record<string, unknown> }, text: Say) =>
   m.key === 'resource.short'
     ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
     : text(m.key);
-// Keyed by the GameError's cause (RefusalCause), then by its code.
+// A refused move's own sentence, not "The way north is …": keyed by the GameError's cause
+// (RefusalCause), then by its code.
 const SENTENCE: Record<string, string> = {
   insufficient_resource: 'You are too exhausted.',
   not_standing: 'You are not standing.',
