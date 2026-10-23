@@ -137,11 +137,12 @@ export function detailLines(s: Logs, id: string) {
 }
 
 // Drops each history whose page is not open (book-ui.md Detail-page order), so a late write for a
-// closed page is gone by its next visit; a dream's (resumed, not revisited) and a restored pickup's
-// (until its corpse opens) stay.
+// closed page is gone by its next visit; a dream's (resumed, not revisited), a restored pickup's
+// (until its corpse opens) and an open choice's speaker's (its question, as on a cold reopen) stay.
 export function visit(s: Logs, open: (string | undefined)[]) {
   if (open.includes(s.pickedFrom)) s.pickedFrom = undefined;
-  const keep = [...open, s.pickedFrom];
+  const choice = s.projection.view.choice;
+  const keep = [...open, s.pickedFrom, choice && (choice.speaker_id ?? 'conversation')];
   for (const id of s.details.keys())
     if (!keep.includes(id) && !id.startsWith('dream:')) s.details.delete(id);
 }

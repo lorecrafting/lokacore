@@ -272,7 +272,7 @@ export function NpcDetail(p: {
       open={(thing) => p.open({ kind: 'thing', id: thing })}
       talking={!!p.visit && p.talkingOn === p.visit}
       talk={(on) => {
-        if (!on) log.splice(0); // Leave the conversation starts the history afresh (the live array)
+        if (!on) p.screen.leave(id);
         p.talkOn?.(on ? p.visit : undefined);
       }}
     />

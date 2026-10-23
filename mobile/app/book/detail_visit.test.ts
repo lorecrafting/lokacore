@@ -32,6 +32,26 @@ test('a reply that lands after its page closed is not on the next visit', () => 
   h.sql.close();
 });
 
+// Breaks: the sweep drops the question of a choice that opened while its speaker's page was
+// closed; the choice card does not draw it, so the reopened page shows only the answers.
+test("an open choice's question stays for its speaker's next visit", () => {
+  const h = book(bundle('containers_sampler_v010_hash'));
+  h.tap('Old Bram');
+  h.clock.wall += 15552000; // half a year idle: Talk waits on catch-up
+  h.clock.mono = 15552000;
+  h.tap('Talk to Old Bram');
+  assert.equal(h.game.pending(), true);
+  h.tap(CONTENTS);
+  h.tap(LABEL.backToWorld);
+  h.draw();
+  h.game.pulse();
+  h.draw(); // the world page draws with the choice open
+  h.tap('Old Bram');
+  assert.ok(h.text().some((t) => t.includes('Would you fetch it?')));
+  h.unmount();
+  h.sql.close();
+});
+
 // Breaks: after Leave the conversation the page hides a count of lines, which goes stale once the
 // 200-line trim drops older ones, so new lines vanish.
 test('lines after Leave the conversation survive the history trim', () => {

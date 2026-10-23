@@ -255,6 +255,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
+    leave: (id: string) => void s.details.get(id)?.splice(0), // Leave the conversation: a fresh history
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,
