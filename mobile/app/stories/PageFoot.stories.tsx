@@ -26,7 +26,7 @@ export const OneReturn: Story = {
   },
 };
 
-// Breaks: a Map room detail loses one of its two returns.
+// Breaks: PageFoot drops or misroutes the second of two returns (a Map room detail's pair).
 export const TwoReturns: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await expect(canvas.getAllByRole('button')).toHaveLength(2);

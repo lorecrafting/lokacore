@@ -45,7 +45,10 @@ const noted = (r: Refusal) =>
   r.cause ? reasonOf(r) : Object.hasOwn(NOTED, r.code) ? NOTED[r.code] : undefined;
 const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown = (thing?.actions ?? [])
-    .flatMap((a) => (!a.available && noted(a.reason) ? [{ ...a, word: noted(a.reason) }] : []))
+    .flatMap((a) => {
+      const word = !a.available && noted(a.reason);
+      return word ? [{ ...a, word }] : [];
+    })
     .filter((a, i, all) => all.findIndex((b) => b.action_key === a.action_key) === i); // one note per use, however many targets (loka-x6t.80)
   return (
     shown.length > 0 && (
