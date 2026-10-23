@@ -215,14 +215,21 @@ export function BookView(p: ViewProps) {
             )}
           </PageTurn>
           <Bottom {...ctx} page={page} />
-          {/* Polite and outside PageTurn, so a page turn never reads it again (loka-x6t.43). */}
-          <View aria-live="polite" style={unseen}>
-            <Text key={p.screen.said.key}>{p.screen.said.text}</Text>
-          </View>
+          <Heard said={p.screen.said} />
           {c.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
+  );
+}
+
+// Polite and outside PageTurn, so a page turn never reads it again (loka-x6t.43). A new key per
+// batch remounts the text, so a repeated line is read again.
+function Heard({ said }: { said: Screen['said'] }) {
+  return (
+    <View aria-live="polite" style={unseen}>
+      <Text key={said.key}>{said.text}</Text>
+    </View>
   );
 }
 

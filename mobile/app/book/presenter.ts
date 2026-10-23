@@ -265,7 +265,7 @@ export function presenter(game: Game) {
   const { text, label } = sayers(game);
   const s = restoredLogs(game, text);
   let generation = 0; // Player receipts invalidate old controls even if the context cycles back.
-  let said: ReturnType<typeof screen>['said'] | undefined;
+  let said: Said | undefined;
   return {
     screen: () => {
       const shown = screen(game, s, label, text, generation, said);

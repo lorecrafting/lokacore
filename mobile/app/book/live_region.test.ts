@@ -47,7 +47,10 @@ test('each batch holds only the lines new since the last screen', () => {
   assert.notEqual(said().key, first.key);
   s.log.push(...Array(200).fill('-'), 'A door creaks.');
   s.combatLog.push(...Array(201).fill('-'));
-  said();
+  assert.equal(
+    said().text,
+    [...Array(200).fill('-'), 'A door creaks.', ...Array(201).fill('-')].join(' '),
+  );
   s.log.push({ kind: 'refused', reason: 'closed', text: 'The way north is closed.' });
   s.combatLog.push('The marsh rat bites.');
   assert.equal(said().text, 'closed, The way north is closed. The marsh rat bites.');

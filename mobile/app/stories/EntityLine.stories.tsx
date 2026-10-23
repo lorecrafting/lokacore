@@ -32,7 +32,7 @@ export const Item: Story = {
   args: { name: 'A brass lantern', note: undefined },
 };
 
-// Breaks: a note under a bare name (no `rest`) reads differently from the shown text.
+// Breaks: a note under a bare name (no `rest`) shows text its name does not read; the axe run (label-content-name-mismatch) fails.
 export const ItemWithNote: Story = {
   args: { name: 'A brass lantern', rest: undefined, note: 'It is unlit.' },
   play: async ({ canvas }) => {
