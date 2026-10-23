@@ -34,8 +34,13 @@ const server = spawn(
 );
 const status = (...args: string[]) =>
   execFileSync(new URL('../../../../bin/polish_status.sh', import.meta.url).pathname, args, {
-    env: { ...process.env, LOKA_POLISH_DIR: dir },
+    env: { ...process.env, LOKA_POLISH_DIR: dir, LOKA_SB_PORT: `${port}` },
   });
+// A PNG's pixel size, from its IHDR chunk.
+const size = (file: string) => {
+  const b = readFileSync(join(dir, file));
+  return `${b.readUInt32BE(16)}x${b.readUInt32BE(20)}`;
+};
 const lines = (file: string) =>
   readFileSync(join(dir, file), 'utf8')
     .trim()
@@ -127,6 +132,10 @@ try {
     if (!(await closeBtn.isDisabled())) fail('Close batch enabled while an item is working');
     status(pick.id, 'done', 'fable', 'row tightened', 'abc1234');
     await settle(page, 'row tightened');
+    // The after shot: the same region as the before crop, from the served story.
+    const crop = size(`shots/${pick.id}-0.png`);
+    const shot = size(`shots/${pick.id}-0-after.png`);
+    if (shot !== crop) fail(`after shot ${shot}, want the before crop's ${crop}`);
     if (await closeBtn.isDisabled()) fail('Close batch still disabled after done');
     status('suggest', 'Close batch');
     const area = page.locator('textarea[placeholder="Close batch"]'); // the ghost text

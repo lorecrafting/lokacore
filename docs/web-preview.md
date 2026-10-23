@@ -96,7 +96,7 @@ The Loka picker (`mobile/app/.storybook/picker/`, [design input](briefs/polish/d
 **Pick** in the toolbar or `P`, click an element (shift-click up to four), write in the Polish
 panel on the right, `↩` sends (`⇧↩` a newline). `storybook dev` only, loopback only. Each send appends one line to
 `.polish/picks.jsonl` in the served worktree (gitignored): `{id, time, note, story: {id, title},
-palette, viewport, elements: [{chain, box, computed, text, role, name, testId, shot}]}`, the crop at
+palette, reading, viewport, elements: [{chain, box, computed, text, role, name, testId, shot}]}`, the crop at
 `.polish/shots/<id>-<i>.png`; Close batch and Keep going append `{id, time, type: 'close' | 'keep-going'}`.
 Agents answer in `.polish/status.jsonl` through `bin/polish_status.sh`: `{id, time, state: working |
 done | stopped, model, summary, sha}`, `{id, time, state: 'moved', beads, summary}` or `{time, type:
@@ -107,3 +107,8 @@ ghost text until the owner sends a prompt (or Close, Keep going), and Tab fills 
 shows an activity line above the composer. Outside a session, [`/polish-intake`](../.claude/commands/polish-intake.md) moves waiting
 picks to Beads. `mise exec -- npm run storybook:picker` runs the picker end to end on a dev server with
 its own queue directory (about a minute; nightly in `book-e2e.yml`).
+On `done`, `bin/polish_status.sh` first saves `.polish/shots/<id>-<i>-after.png`, the same region
+from the served story at the pick's palette, Reading size and viewport (`.storybook/picker/after.ts`, best effort),
+and the panel shows it beside the before crop when the owner opens a thumbnail.
+`mise exec -- npm run stories:sheet` (in `mobile/app`) screenshots every story but Live at 390 px in Reading size
+Standard and Max, light and dark, on its own Storybook, into `mobile/app/.walkthrough/stories/index.html` (gitignored).
