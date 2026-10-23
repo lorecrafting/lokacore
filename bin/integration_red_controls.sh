@@ -1,6 +1,8 @@
 #!/bin/sh
-# Run the PM scripts (sync_pr, after_merge, br_create, mutate, session_status, preview_update,
-# polish_session) in throwaway repos with stubs; each case names the break it catches.
+# Run the PM and agent scripts (sync_pr, br_create, after_merge, mutate, session_status, pm_merge, prepush,
+# check_impact_fixtures, the agent_load_gate/bash_guard/send_guard hooks, pre-commit, preview_update,
+# polish_session, regen_hash_fixture, test_files, wait_ci, new_batch, push_slice) in throwaway repos
+# with stubs; each case names the break it catches.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -225,7 +227,7 @@ if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout li
 # prints a blank. A stub gh applies the real --jq to controlled `run list` records; other calls fail.
 mkdir -p "$tmp/gh"; cat > "$tmp/gh/gh" <<'SH'
 #!/bin/sh
-case "$1 $2" in "run list") ;; "run view") json=$JOBS ;; "pr list") json=$PRS ;; *) exit 1 ;; esac
+case "$1 $2" in "run list") ;; "run view") eval "json=\${JOBS_$3:-\$JOBS}" ;; "pr list") json=$PRS ;; *) exit 1 ;; esac
 case $* in "run list"*ci.yml*) json=$CI ;; "run list"*) json=$E2E ;; esac
 while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; shift; done
 printf '%s\n' "$json" | jq -r "$q"
@@ -242,8 +244,15 @@ grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: ru
 J='{"jobs":[{"name":"lint","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:01:00Z"},{"name":"sim (fresh)","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:07:23Z"},{"name":"sim (showcase)","conclusion":"failure","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:10:00Z"},{"name":"sim (fresh)","conclusion":"","startedAt":"2026-10-15T10:00:00Z","completedAt":"0001-01-01T00:00:00Z"}]}'
 CI='[{"conclusion":"success","status":"completed","headSha":"abcdef0123","url":"u1","databaseId":7}]' E2E='[]' PRS='[{"headRefOid":"1234567890ab"}]' JOBS=$J \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
-[ "$(grep -c 'sim (' out)" = 4 ] && grep -qx 'PR head 12345678: sim (showcase) job failure 600s' out && grep -qx 'PR head 12345678: sim (fresh) job success 443s' out && grep -qx 'ci.yml nightly: sim (fresh) job success 443s' out \
+[ "$(grep 'sim (' out | grep -vc median)" = 4 ] && grep -qx 'PR head 12345678: sim (showcase) job failure 600s' out && grep -qx 'PR head 12345678: sim (fresh) job success 443s' out && grep -qx 'ci.yml nightly: sim (fresh) job success 443s' out \
   || { bad 'session_status sim time: wrong lines'; grep 'sim (' out; }
+# Break (loka-9nd4): the nightly median is the newest run, the mean, or counts a failed leg. Five runs: 280 290 300 540 550 s, newest first.
+leg() { printf '{"name":"sim (fresh)","conclusion":"%s","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:%02d:%02dZ"}' "$1" $(($2 / 60)) $(($2 % 60)); }
+CI='[{"databaseId":1},{"databaseId":2},{"databaseId":3},{"databaseId":4},{"databaseId":5}]' E2E='[]' PRS='[]' JOBS='{"jobs":[]}' \
+  JOBS_1="{\"jobs\":[$(leg success 550),$(leg failure 30)]}" JOBS_2="{\"jobs\":[$(leg success 280)]}" JOBS_3="{\"jobs\":[$(leg success 540)]}" \
+  JOBS_4="{\"jobs\":[$(leg success 290)]}" JOBS_5="{\"jobs\":[$(leg success 300)]}" \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
+grep -qx 'ci.yml nightly median: sim (fresh) 300s over 5 runs' out || { bad 'session_status sim median: wrong line'; grep median out; }
 # --- pm_merge.sh ---------------------------------------------------------------------------
 # A batch worktree, a slice and a record branch on a bare origin (stub prepush.sh passes). Stub gh applies the real
 # --jq to $CI and $E2E, the run lists of ci.yml and book-e2e.yml (newest first). Break: a merge goes ahead while the newest
@@ -258,10 +267,12 @@ SH
 chmod +x "$tmp/pmgh/gh"
 pm() { # <case> <want-rc> <want-output>
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
+  sf=${SLICE_FILE:-s} rf=${REC_FILE:-r}; mkdir -p "$(dirname "$sf")" "$(dirname "$rf")"
   git checkout -qb batch; mkdir bin node_modules; cp "$bin/pm_merge.sh" bin/; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; echo base > a
+  [ -z "${REC_IN_BASE-}" ] || echo old > "$rf" # the record branch updates an existing record
   git add . && git commit -qm base && git push -q origin batch
-  git checkout -qb slice; echo s > s; git add s && git commit -qm slice && git push -q origin slice
-  git checkout -q batch; git checkout -qb rec; echo r > r; git add r && git commit -qm rec && git push -q origin rec; git checkout -q batch
+  git checkout -qb slice; echo "${SLICE_TEXT:-s}" > "$sf"; git add . && git commit -qm slice && git push -q origin slice
+  git checkout -q batch; git checkout -qb rec; echo r > "$rf"; git add . && git commit -qm rec && git push -q origin rec; git checkout -q batch
   pre=$(git rev-parse HEAD); rc=0; EXPECT_SHA=$(git rev-parse origin/slice) PATH="$tmp/pmgh:$PATH" capped sh bin/pm_merge.sh "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] && grep -q "$3" "$R.out" || { bad "pm_merge $1: exit $rc, want $2 with '$3'"; sed 's/^/  /' "$R.out"; }
   if [ "$2" != 0 ]; then [ "$(git rev-parse HEAD)" = "$pre" ] && [ "$(git rev-parse origin/batch)" = "$pre" ] || bad "pm_merge $1: merged or pushed"; fi
@@ -272,6 +283,12 @@ CI='[{"conclusion":"cancelled"}]' E2E=$ok pm ci-timeout 2 'ci.yml on .* is cance
 CI=$ok E2E='[{"conclusion":"failure"}]' pm e2e-red 2 'book-e2e.yml on .* is failure'
 CI=$ok E2E='[]' pm e2e-missing 2 'book-e2e.yml on .* is missing'
 CI='[{"conclusion":""}]' E2E=$ok pm ci-running 2 'ci.yml on .* is still running'
+# Break (loka-1qa2): a protocol schema change merges with no review record added (the generated README does not count), or a record on the record branch is not counted.
+CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json pm schema-no-record 1 'NO REVIEW RECORD'
+CI=$ok E2E=$ok SLICE_FILE=kernel/ts/src/runtime/world.ts SLICE_TEXT="  kernel_api: '1.2'," pm kernel-api-no-record 1 'NO REVIEW RECORD'
+CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/README.md pm schema-readme-only 1 'NO REVIEW RECORD'
+CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.md pm schema-record 0 '^PUSHED batch'
+CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.md REC_IN_BASE=1 pm schema-record-updated 0 '^PUSHED batch'
 # --- prepush.sh ----------------------------------------------------------------------------
 # A repo whose stub mise logs each check and fails them when STUB_RC=1; origin/main is the base commit.
 # Break: two runs share log files, so one reports the other's output (the first log must still read "run-a" after
@@ -290,6 +307,19 @@ la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FA
 ! grep -q 'transcripts.test.ts' "$R.pp" && ! grep -q IMPACT_STORY "$R.c" || bad 'prepush: transcript or Impact checks ran without a sampler hash change'
 echo '{}' > protocol/fixtures/new_sampler_hash.json; git add . && git commit -qm hash; : > "$R.pp"; pp d
 grep -q 'test/transcripts.test.ts' "$R.pp" && grep -q '^IMPACT_STORY_' "$R.d" || bad 'prepush: a sampler hash change did not run the transcript and Impact checks'
+# Break (loka-8qzi, loka-yz58, loka-u58): the story or state-sections check is skipped for its inputs, runs for others, or is
+# skipped when the branch diff cannot be read (no origin/main).
+! grep -qE '^(STORIES|STATE_SECTIONS)_' "$R.c" || bad 'prepush: story or state-sections check ran for an unrelated change'
+git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/app kernel/ts/src; echo x > mobile/app/x; git add . && git commit -qm app; pp e
+grep -q '^STORIES_' "$R.e" && ! grep -q '^STATE_SECTIONS_' "$R.e" || bad 'prepush: a mobile/app change did not run only the story check'
+git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/x; git add . && git commit -qm src; pp f
+grep -q '^STORIES_' "$R.f" && grep -q '^STATE_SECTIONS_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story and state-sections checks'
+git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/authority; echo x > mobile/authority/x; git add . && git commit -qm auth; pp i
+grep -q '^STORIES_' "$R.i" && ! grep -q '^STATE_SECTIONS_' "$R.i" || bad 'prepush: a mobile/authority change did not run only the story check'
+git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; echo x > docs/state-sections.gen.json; git add . && git commit -qm gen; pp h
+grep -q '^STATE_SECTIONS_' "$R.h" && ! grep -q '^STORIES_' "$R.h" || bad 'prepush: an edit of docs/state-sections.gen.json did not run only the state-sections check'
+git update-ref -d refs/remotes/origin/main; pp g
+grep -q '^STORIES_' "$R.g" && grep -q '^STATE_SECTIONS_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
 # Break: the Impact story's pinned list is not compared with the README row (a new fixture only in the README passes).
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p protocol mobile/app/stories
@@ -307,6 +337,81 @@ lg mac-15 '12:00  up 3 days,  2 users,  load averages: 15.93 9.50 9.00' 2
 grep -q 'load is 15.93' "$tmp/lg.err" || bad 'agent_load_gate: message omits the load'
 lg comma-decimal 'load averages: 9,50 9,00 9,00' 0
 lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
+# --- bash_guard.py, send_guard.py (Claude Code PreToolUse hooks) ------------------------------------
+# Break: a git hook skip (--no-verify, commit -n) or a bare br create passes, the owner marker does not let it through, or a
+# command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
+bg() { # <want-rc> <command>
+  rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.stdin.read()}}))' |
+    python3 -I "$bin/bash_guard.py" 2> /dev/null || rc=$?
+  [ "$rc" = "$1" ] || bad "bash_guard: exit $rc, want $1: $2"
+}
+bg 2 'git push --no-verify'
+bg 2 'cd x && git push origin b --no-verify'
+bg 2 'git commit -qn -m x'
+bg 2 'echo a
+git commit --no-verify -m "two
+lines"'
+bg 2 'br -q create "x"'
+bg 2 'git -C ../wt commit -n -m x'
+bg 2 '/usr/bin/git push --no-verify'
+bg 2 'git push --no-verify LOKA_OWNER_OK_NO_VERIFY=1'
+bg 0 'LOKA_OWNER_OK_NO_VERIFY=1 git push --no-verify'
+bg 0 'git commit -m done kernel'
+bg 0 'git commit -uno -m x'
+bg 0 'git commit -m "refuse --no-verify; br create"'
+bg 0 'grep -n -- --no-verify f && git push -n'
+bg 0 'bin/br_create.sh -t x && br list --status open'
+bg 0 'echo "unclosed'
+bg 0 "gh pr comment 1 --body-file - <<'EOF'
+git commit -n slips
+EOF"
+bg 0 "cat > notes.md <<'EOF'
+never br create
+EOF"
+bg 0 "git commit -F - <<'EOF'
+skip --no-verify
+EOF"
+bg 0 'echo br create'
+bg 2 'BR_X=1 br create x'
+bg 0 'git commit -m T -m "- add new guard"'
+bg 0 'git push --no-verbose'
+bg 2 'git push origin b \
+  --no-verify'
+bg 2 'git commit -m x 2>&1 --no-verify'
+bg 2 'echo $((1<<2))
+git push --no-verify'
+bg 2 'git commit --no-verif -m x'
+bg 2 'git -c core.hooksPath=/dev/null commit -m x'
+bg 2 'git commit -mx -n'
+bg 2 'git commit -S -n'
+bg 0 'git diff -- f'
+bg 2 'cat <<END-X
+b
+END-X
+git push --no-verify'
+bg 2 "cat > n <<EOF
+x
+EOF
+git push --no-verify"
+bg 2 'cat <<< EOF
+git push --no-verify'
+# Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
+P=$(mktemp -d); mkdir -p "$P/s1/subagents"
+cb() { printf '{"type":"system","subtype":"compact_boundary","compactMetadata":{"durationMs":%s}}\n' "$1"; }
+{ cb 40000; cb 350; } > "$P/s1/subagents/agent-hook1.jsonl"; { cb 350; cb 48000; } > "$P/s1/subagents/agent-built1.jsonl"
+sg() { # <want-rc> <to>
+  rc=0; printf '{"tool_input":{"to":"%s"},"transcript_path":"%s/s2.jsonl"}' "$2" "$P" | python3 -I "$bin/send_guard.py" 2> /dev/null || rc=$?
+  [ "$rc" = "$1" ] || bad "send_guard: exit $rc, want $1 for $2"
+}
+sg 2 hook1
+sg 0 built1
+sg 0 none1
+# A guard script missing from the session's checkout lets the call through (python's own exit 2 would block it).
+python3 -I -c 'import json,sys
+for e in json.load(open(sys.argv[1]))["hooks"]["PreToolUse"]:
+    [print(h["command"]) for h in e["hooks"] if "_guard.py" in h["command"]]' "$bin/../.claude/settings.json" > "$tmp/guards" || bad 'settings.json does not parse'
+[ "$(wc -l < "$tmp/guards")" -eq 2 ] || bad 'settings.json: want the bash and send guards'
+while IFS= read -r c; do echo '{}' | CLAUDE_PROJECT_DIR="$tmp/none" sh -c "$c" 2> /dev/null || bad "guard hook blocks when its script is missing: $c"; done < "$tmp/guards"
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
 # CHECKS.md, system/mechanics.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.

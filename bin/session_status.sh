@@ -55,6 +55,19 @@ for wf in ci.yml book-e2e.yml; do
   cancelled "$wf nightly" --workflow "$wf" --branch main --event schedule --limit 3
 done
 simtime "ci.yml nightly" --branch main --event schedule
+# Runners are two-speed (loka-9nd4): judge a sim time against the median of the last 5 green nightly legs, not one run.
+# The views run in parallel: one after another they add ~7 s to the 30 s hook.
+for id in $(gh run list --workflow ci.yml --branch main --event schedule --status success --limit 5 --json databaseId --jq '.[].databaseId' 2>/dev/null); do
+  gh run view "$id" --json jobs --jq '.jobs[]|select((.name|startswith("sim (")) and .conclusion == "success")|"\(.name)\t\((.completedAt|fromdate)-(.startedAt|fromdate))"' 2>/dev/null &
+done | python3 -I -c '
+import statistics, sys
+legs = {}
+for line in sys.stdin:
+    name, secs = line.rstrip("\n").split("\t")
+    legs.setdefault(name, []).append(int(secs))
+for name, secs in sorted(legs.items()):
+    print("ci.yml nightly median: %s %ds over %d runs" % (name, statistics.median(secs), len(secs)))
+'
 echo "## Housekeeping queue"
 # One br query (open ids/titles and the newest created_at) and one git query; failure prints a note.
 hk=

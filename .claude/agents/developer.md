@@ -34,6 +34,7 @@ Before handing off:
    the PM watches CI and sends a red run back as a finding. Never wait on CI,
    and never dispatch a run by hand when a push run exists (the dispatch cancels it, loka-thz). Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
+   A test that builds a GameView with a new or changed field asserts `validate('GameView', view)` is `[]` (as `kernel/ts/test/c4_pack.test.ts` does; loka-x3i0).
 2. Commit first, then self-review the diff once with this exact command: `/code-review medium <branch-name>` (the slice branch, e.g. `/code-review medium feat/x`). `/code-review` is a skill, so a `cd` before it does not change its target; never run it with no target (a bare run read main five times, loka-aa75). The review never runs checkout, stash or reset in your worktree. The handback names the range and confirms the reviewed files are the slice's; a review that lists files outside the slice is void: rerun it
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then mutate every new conditional in the diff (not only the checks you listed) and

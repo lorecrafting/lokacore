@@ -29,6 +29,11 @@ rm -rf node_modules && ln -s "$t/main/node_modules" node_modules
 echo B > package-lock.json
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
 [ ! -e "$t/main/node_modules/WIPED" ] && [ ! -L node_modules ] || { echo 'worktree_setup control failed: npm ci ran through the link' >&2; exit 1; }
-echo A > package-lock.json && echo stale > node_modules/.loka-lock-cksum
+echo A > package-lock.json && rm -rf node_modules
+echo B > "$t/main/package-lock.json" && touch "$t/main/node_modules/DRIFT" # a stray npm install in main; marker kept
+PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
+[ ! -e node_modules/DRIFT ] || { echo "worktree_setup control failed: main's drifted install cloned" >&2; exit 1; }
+echo A > "$t/main/package-lock.json" && rm "$t/main/node_modules/DRIFT"
+echo stale > node_modules/.loka-lock-cksum
 touch "$t/main/node_modules/unreadable" && chmod 000 "$t/main/node_modules/unreadable"
 if PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2> /dev/null || [ -e node_modules.tmp ]; then echo 'worktree_setup control failed: a failed clone exited 0 or left node_modules.tmp' >&2; exit 1; fi

@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { loadCsf } from 'storybook/internal/csf-tools';
 import { scenarios } from './stories/scenarios.ts';
 
 test('stories/views and stories/live are fresh (run npm run stories:views)', () => {
@@ -25,4 +26,15 @@ test('no story locks the palette toolbar', () => {
   const dir = new URL('stories/', import.meta.url);
   for (const f of readdirSync(dir).filter((f) => f.endsWith('.tsx')))
     assert.doesNotMatch(readFileSync(new URL(f, dir), 'utf8'), /globals:\s*\{\s*palette/, f);
+});
+
+// Breaks: a meta Storybook cannot index statically (e.g. `tags: pageTags`, #431) passes tsc but fails
+// the book-e2e build; loadCsf is the indexer's own parser.
+test('every story file indexes (CSF literal meta)', () => {
+  const dir = new URL('stories/', import.meta.url);
+  for (const f of readdirSync(dir).filter((f) => f.endsWith('.stories.tsx')))
+    loadCsf(readFileSync(new URL(f, dir), 'utf8'), {
+      fileName: f,
+      makeTitle: (t) => t ?? f,
+    }).parse();
 });
