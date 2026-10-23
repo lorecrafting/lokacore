@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 349, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 346, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -18,8 +18,8 @@ import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
-import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
-import { woke } from '../mechanics/death/lines.ts';
+import { oneWrite } from '../mechanics/levelling/shared.ts';
+import { closing } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -27,7 +27,7 @@ import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
 import { merge, statusGroup, unsaid } from '../mechanics/status/job.ts';
 import { moverGroups } from '../mechanics/containment/job.ts';
-import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
+import { farewell } from './proposal_farewell.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
@@ -66,7 +66,7 @@ export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * Each sequence gets one writer group; event positions are global, allocators causal.
  * now() lazily applies the prefix and retains hydration/RNG for real later consumers.
  */
-// size: allow 43, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups, loka-3w3q the 64-line cap
+// size: allow 41, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups
 export function propose(
   world: World,
   root: Admitted,
@@ -93,13 +93,11 @@ export function propose(
     roots: moverGroups(root.delta.ops),
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
-  const failed =
-    join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root) ?? farewell(p);
+  let failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
+  failed ??= farewell(p, () => now(p));
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  // The penalty and waking lines end the receipt within DecisionResult's 64 lines (loka-3w3q).
-  const last = [...levelUp(world, command.payload.actor_id, ops), ...woke(world, p.events)];
-  p.narration = [...p.narration.slice(0, 64 - last.length), ...last];
+  p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration);
   return {
     decision: {
       ...root,
@@ -109,25 +107,6 @@ export function propose(
       ...(p.narration.length && { narration: vary(world.cartridge, command.id, p.narration) }),
     },
   };
-}
-
-// dialogue@1: each conversation whose actor and speaker no longer share a room once the proposal
-// is composed ends as Leave would (choice.close, no event), in the writer group that opened it here,
-// else a new one. Composed only while a conversation may be open (no per-action apply otherwise).
-function farewell(p: P): Admitted | undefined {
-  const opened = new Map<string, number>();
-  for (const o of p.ops) if (o.op === 'choice.open') opened.set(o.continuation_id, o.writer_group);
-  if (!opened.size && !pending(p.world)) return;
-  const at = now(p);
-  if (!('cartridge' in at)) return at;
-  const ids = parted(at);
-  const group = ids.some((id) => !opened.has(id)) ? ++p.group : p.group;
-  for (const continuation_id of ids)
-    p.ops.push({
-      op: 'choice.close',
-      writer_group: opened.get(continuation_id) ?? group,
-      continuation_id,
-    });
 }
 
 // The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
