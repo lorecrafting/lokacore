@@ -74,8 +74,8 @@ defmodule Loka.Content.Status do
 
   defp floors,
     do: [
-      {&Map.has_key?(&1["narration"] || %{}, "skipped"), [1, 115]},
-      {&Map.has_key?(&1["narration"] || %{}, "observed"), [1, 110]},
+      {&narrates?(&1, "skipped"), [1, 115]},
+      {&narrates?(&1, "observed"), [1, 110]},
       {&Map.has_key?(&1, "kind"), [1, 102]},
       {&Map.has_key?(&1, "pierced_by"), [1, 93]},
       {&Map.has_key?(&1, "movement"), [1, 62]},
@@ -86,6 +86,8 @@ defmodule Loka.Content.Status do
     ]
 
   defp permanent?(s), do: s["duration"] == "permanent"
+
+  defp narrates?(s, line), do: Map.has_key?(s["narration"] || %{}, line)
 
   # Status readers 4-8: blocks, allows, resistances, perception, concealment or movement; such a
   # status may omit per_tick too.
