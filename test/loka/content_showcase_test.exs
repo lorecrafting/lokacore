@@ -126,7 +126,6 @@ defmodule Loka.ContentShowcaseTest do
       for(
         d <- ~w(npcs items),
         f <- File.ls!("cartridges/toolbox_showcase/#{d}"),
-        "#{d}/#{Path.rootname(f)}" not in @homestead_files,
         do: {"#{d}/#{f}", &Map.delete(&1, "words")}
       )
 
