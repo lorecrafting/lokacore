@@ -12,9 +12,10 @@ type Use = [path: string, key: string, self: string | undefined, targets: string
 /**
  * UNRESOLVED_REFERENCE for each touch link, in the catalog string of a room's title,
  * description or variant, a detail's description or variant, or an item's or NPC's short,
- * room line, room-line variant or description, whose target is not the thing whose text it is
- * (a link without a target key), a detail of the room (room and detail texts), or an item or
- * NPC of the cartridge; data {target} the key, or the link as written in a room's own text.
+ * room line, room-line variant, description or name words, whose target is not the thing
+ * whose text it is (a link without a target key), a detail of the room (room and detail
+ * texts), or an item or NPC of the cartridge; data {target} the key, or the link as written
+ * in a room's own text.
  */
 export function links(c: Obj): Diagnostic[] {
   const entities = ['npcs', 'items'].flatMap((m) =>
@@ -40,6 +41,9 @@ export function links(c: Obj): Diagnostic[] {
       const at = `.cartridge.${map}${step(ref)}`;
       for (const f of ['short', 'room_line', 'description'])
         uses.push([`${at}.${f}`, e[f], e.key, entities]);
+      for (const f of ['bare', 'plural'])
+        // name words (loka-6qi), as lib/loka/content/entities.ex
+        if (e.words?.[f]) uses.push([`${at}.words.${f}`, e.words[f], e.key, entities]);
       for (const f of ENTITY_VARIANTS)
         (e[f] ?? []).forEach((v: Obj, i: number) =>
           uses.push([`${at}.${f}[${i}].description`, v.description, e.key, entities]),

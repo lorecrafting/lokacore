@@ -360,4 +360,15 @@ test('name words load at 1.118 and their bare and plural keys resolve in the cat
     `${bram}.words.bare`,
     { target: 'no.such' },
   );
+  // A touch link in name-word text is checked as in short (twin of the compiler's text_keys scan).
+  fails(
+    (c) => (
+      worded(c),
+      (c.text['npc.bram.bare'] = '[Bram](ghost)'),
+      (c.npcs[`${ID}:npc/bram`].words.bare = 'npc.bram.bare')
+    ),
+    'UNRESOLVED_REFERENCE',
+    `${bram}.words.bare`,
+    { target: 'ghost' },
+  );
 });
