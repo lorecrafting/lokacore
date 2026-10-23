@@ -88,9 +88,11 @@ storage unchanged.
 
 ## Commit, fence, reconcile
 
-`commit` (`commit.ts:25`) writes in one transaction: pending story point reports, and for an
+`commit` (`commit.ts:27`) writes in one transaction: pending story point reports, and for an
 accepted decision the head (revision, clock, RNG) and the state rows its delta targets wrote,
-then always the receipt. `transaction` (`transaction.ts:21`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
+then always the receipt. Before `BEGIN` it validates the receipt's response as a DecisionResult,
+the same schema check reopen applies, and throws with nothing written when it is not one
+(loka-kgd.191). `transaction` (`transaction.ts:21`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
 transaction open, returns false: the outcome is unknown. Then the story is **fenced**
 (`save.ts:65`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and

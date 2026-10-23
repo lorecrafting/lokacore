@@ -1,6 +1,7 @@
 // One decision's commit: its changed rows, head, story point reports and receipt in one transaction.
 import { encode, type Json } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { target } from '../../../kernel/ts/src/foundation/compose.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { row } from '../../../kernel/ts/src/runtime/world.ts';
@@ -18,7 +19,8 @@ export type Captured = { report: StoryPointReport; lineage_id: string; binding: 
 /**
  * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
  * wrote, the revision, clock and RNG of `next`, and its pending story point reports; always the
- * receipt. Throws, with nothing written, on a definite failure; false when the outcome is
+ * receipt. Throws, with nothing written, on a definite failure (a response that is not a valid
+ * DecisionResult, refused before BEGIN as reopen would refuse it); false when the outcome is
  * unknown (`transaction`; then `reconcile`). The caller adopts `next` only after this returns
  * true.
  */
@@ -30,6 +32,8 @@ export function commit(
   reports: Captured[],
   elapsed?: Checkpoint,
 ): boolean {
+  if (validate('DecisionResult', r.response).length)
+    throw new Error('invalid DecisionResult; nothing was saved');
   return transaction(db, () => {
     if (elapsed) persistElapsed(db, elapsed);
     for (const c of reports)
