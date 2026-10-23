@@ -259,11 +259,11 @@ export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('
 
 /**
  * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its
- * holders, once per holder and status in the rule or spell, in the one writer group the holder's
- * status writes share in this advance (job.ts statusGroup). Only a first application (over no row
- * or an inactive one) is heard: it emits status_applied (status reader 2) and its applied line on
- * the actor's body, or (row G3) its opt-in observed line on an NPC or item in the room that `sees`; a
- * refresh while active is silent (row W25), and a permanent status (row W8) opens with no job.
+ * holders, once per holder and status, in the holder's one writer group this advance (job.ts
+ * statusGroup). Only a first application (over no active row) is heard: it emits status_applied
+ * (status reader 2) and its applied line on the actor's body, or (row G3) its opt-in observed line
+ * on an NPC or item in the room that `sees`, or (loka-x6t.37) on the room itself, unlit or not; a
+ * refresh while active is silent (row W25); a permanent one (row W8) has no job.
  */
 export function statusStep(
   world: World,
@@ -296,7 +296,6 @@ export function statusStep(
     const kind = world.entities[holder]?.kind; // an NPC or (loka-y6yg.48) an item in the room
     const seen = (kind === 'npc' || kind === 'item') && world.state.containers[holder] === here;
     const told = kind === 'item' && out.narration.some((l) => l.key === label); // one line for a woodpile
-    // loka-x6t.37: the room the player stands in is felt, not seen: no light test.
     if (first && label && !told && (holder === body || holder === here || (seen && sees(holder))))
       out.narration.push({ key: label });
   }

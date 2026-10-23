@@ -31,7 +31,7 @@ type Active = Required<Extract<StatusRow, { active: true }>>;
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);
- * an obsolete job completes harmlessly. Narration is the player's, or a seen item's expiry (`watched`). A successor the same
+ * an obsolete job completes harmlessly. Narration is the player's, or a seen item's or the player's room's expiry (`watched`). A successor the same
  * advance also crosses runs as a sub-step at `now` (`next`, runtime/proposal_hours.ts, loka-6ztc):
  * its job is already complete and its row's tick stale (a refresh writes the end there,
  * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
