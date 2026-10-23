@@ -69,6 +69,26 @@ test('the open say field lists the known phrases as chips that fill it', () => {
   assert.equal(b.draw().find((n) => n.type === 'TextInput').props.value, 'ward');
 });
 
+// Breaks: a tap outside the open say field reaching what lies beneath (an exit, a card, the
+// pools) or leaving the field open; a shield drawn under what it should cover.
+test('a tap outside the open say field closes it unsent and presses nothing beneath', () => {
+  const b = book(speech as never);
+  b.tap(LABEL.sayToRoom);
+  const drawn = b.draw();
+  const shield = (n: any) => n.type === 'Pressable' && n.props.accessible === false;
+  const shields = drawn.filter(shield);
+  assert.equal(shields.length, 3, 'over the page, the footer and the status row');
+  // A later sibling draws on top: each shield after what it covers, all before the field.
+  const at = (f: (n: any) => boolean) => drawn.findIndex(f);
+  const field = at((n) => n.type === 'TextInput');
+  assert.ok(shields.every((s) => drawn.indexOf(s) < field));
+  assert.ok(drawn.indexOf(shields[2]) > at((n) => n.props?.accessibilityLabel === LABEL.sayToRoom));
+  const before = revision(b);
+  shields[0].props.onPress();
+  assert.equal(revision(b), before, 'nothing sent');
+  assert.ok(!b.draw().some((n) => n.type === 'TextInput' || shield(n)), 'field and shields gone');
+});
+
 // Breaks: a word press not admitted (wrong input shape), the conversation it opens not turned to,
 // or the say icon left showing while a conversation is open.
 test('saying ward opens the elder conversation and hides the say icon', () => {

@@ -7,6 +7,7 @@ import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
+import { shield, type Send } from './SayField.tsx';
 import { knownWords } from './buttons.ts';
 import {
   group,
@@ -191,6 +192,16 @@ export function BookView(p: ViewProps) {
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
   const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
+  // The say field's wordless twins (buttons.ts), Say, Shout, Cast: on the open World page only.
+  const shut = !!p.screen.view.combat || !!p.screen.ended;
+  const sends = (!page && !shut ? SENDS : []).flatMap(([key, label]) => {
+    const b = g.word.find((w) => w.action_key === key && !('word' in w.input));
+    return b ? [{ label, send: (word: string) => p.press({ ...b, label, input: { word } }) }] : [];
+  });
+  const [saying, setSaying] = useState<string>(); // the room whose say field is open
+  const room = p.screen.view.place.id;
+  const say = { sends, open: !!sends.length && saying === room };
+  const setSay = (on: boolean) => setSaying(on ? room : undefined);
   const ctx = {
     ...p,
     g,
@@ -216,7 +227,8 @@ export function BookView(p: ViewProps) {
               />
             )}
           </PageTurn>
-          <Bottom {...ctx} page={page} />
+          {say.open && shield(() => setSay(false))}
+          <Bottom {...ctx} page={page} say={{ ...say, setOpen: setSay }} />
           <Heard said={p.screen.said} />
           {c.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
@@ -236,6 +248,7 @@ type BottomProps = {
   page?: Page;
   startOver: () => void;
   shell: Shell;
+  say: { sends: Send[]; open: boolean; setOpen: (on: boolean) => void };
 };
 
 const SENDS = [
@@ -251,11 +264,6 @@ function Bottom(p: BottomProps) {
   // A tap on the position line acts only on the open World page.
   const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
   const shut = !!view.combat || !!ended;
-  // The say field's wordless twins (buttons.ts), Say, Shout, Cast: on the open World page only.
-  const sends = (!p.page && !shut ? SENDS : []).flatMap(([key, label]) => {
-    const b = p.g.word.find((w) => w.action_key === key && !('word' in w.input));
-    return b ? [{ label, send: (word: string) => p.press({ ...b, label, input: { word } }) }] : [];
-  });
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   return (
     <View
@@ -269,6 +277,7 @@ function Bottom(p: BottomProps) {
       }}
     >
       {nav && navigation(p)}
+      {p.say.open && shield(() => p.say.setOpen(false))}
       {!view.ancestry_choices && (
         <StatusLine
           time={view.time}
@@ -284,11 +293,10 @@ function Bottom(p: BottomProps) {
           open={() => p.open({ kind: 'contents' })}
           openCharacter={() => p.open({ kind: 'character' })}
           say={
-            sends.length
+            p.say.sends.length
               ? {
-                  room: view.place.id,
+                  ...p.say,
                   busy: pending || !!fault || p.screen.catchingUp,
-                  sends,
                   words: knownWords(view),
                 }
               : undefined

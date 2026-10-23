@@ -664,7 +664,12 @@ field. Saying is never a chip row (owner, wordbar1 2026-10-23). While `say`, `sh
 offered and no combat, scene or conversation is open, the
 [status line](#world-and-status-entry) ends with a say icon named **Say to the room** (expanded while open; [look](../../mobile/app/book/Status.tsx));
 a tap opens the one-word field ([SayField](../../mobile/app/book/SayField.tsx)) under the line with **Say**, **Shout** and **Cast** Controls, each only while that action is offered. A press sends that action with the typed word and closes the field; Enter sends the first; Escape or the icon
-closes it unsent; a new room closes it. On an NPC page, while `whisper` to that person is offered, a **Whisper** Control after the action cards opens the same field with one **Whisper** Control aimed at them; it counts as something to do there. Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
+closes it unsent; a new room closes it. A tap anywhere outside the open field, its Controls and
+its chips (the page, the footer, the status line, the icon's own spot) also closes it unsent and
+presses nothing beneath: a second tap is needed to act there (owner, mvl9rtp93gex). The cover
+that takes that tap is not focusable, so a screen reader still closes with the expanded icon or
+Escape. On an NPC page, while `whisper` to that person is offered, a **Whisper** Control after the action cards opens the same field with one **Whisper** Control aimed at them; it counts as something to do there. That field sits in the page's flow under its own Control, so
+the tap-outside rule does not cover it: the Control or Escape closes it. Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
 shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it.
 
 Known words are [Chips](../BOOK-UI-COMPONENTS.md) under the open field, each named by its word: on

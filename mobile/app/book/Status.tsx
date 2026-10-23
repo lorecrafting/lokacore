@@ -1,5 +1,5 @@
 // The status line under the footer.
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -10,7 +10,7 @@ import { LABEL } from './labels.ts';
 import { StatusIcons } from './StatusIcon.tsx';
 import { usePalette, useType, type Palette, type Type } from './palette.ts';
 import { size, space } from './tokens.ts';
-import { SayField, type Send } from './SayField.tsx';
+import { SayField, shield, type Send } from './SayField.tsx';
 
 // The status icon row (StatusIcon.tsx) when any condition is on, then the line: the sky glyph (sun by day, moon by night), the position, bleeding, then
 // the resource button, which shows the condition pools coloured by band when GameView carries them
@@ -33,7 +33,13 @@ type StatusProps = {
   openPosition?: () => void;
   // The say field (World page only): one button per offered way to speak, Say first; a new room
   // closes the field; busy holds every send.
-  say?: { room: string; busy: boolean; sends: Send[]; words?: readonly string[] };
+  say?: {
+    busy: boolean;
+    sends: Send[];
+    words?: readonly string[];
+    open: boolean;
+    setOpen: (on: boolean) => void;
+  };
 };
 
 const statusRow = {
@@ -84,8 +90,9 @@ const skyText = (p: StatusProps) =>
  *   label-in-name rule.
  *   Say icon (World page, while Say is offered): a size.touch box after the pools, in their wrap
  *   unit, named "Say to the room" and expanded while open; a tap toggles the SayField under the
- *   line with Say, Shout and Cast, each only while offered, and the known words. Escape or the icon closes it; a new
- *   room closes it.
+ *   line with Say, Shout and Cast, each only while offered, and the known words. Escape or the
+ *   icon closes it; a new room closes it; a tap elsewhere on the line closes it and presses
+ *   nothing (BookView covers the page and footer the same way). The open state is the caller's.
  * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`);
  *   say field open; bad word.
@@ -95,9 +102,8 @@ export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const t = useType();
   const items = leading(c, t, p);
-  const [opened, setOpened] = useState<string>(); // the room whose say field is open
-  const open = !!p.say && opened === p.say.room;
-  const setOpen = (on: boolean) => setOpened(on ? p.say?.room : undefined);
+  const open = !!p.say?.open;
+  const setOpen = (on: boolean) => p.say?.setOpen(on);
   return (
     <View>
       {!!p.conditions?.length && (
@@ -130,6 +136,7 @@ export function StatusLine(p: StatusProps) {
           )}
         </View>
       </View>
+      {open && shield(() => setOpen(false))}
       {p.say && open && (
         <SayField
           pending={p.say.busy}

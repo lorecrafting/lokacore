@@ -1,6 +1,6 @@
 // The one-word field: the status line's say field and the NPC page's Whisper.
 import { useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import { Chip } from './Chip.tsx';
 import { Control } from './pages.tsx';
 import { LABEL } from './labels.ts';
@@ -11,6 +11,16 @@ import { size, space } from './tokens.ts';
 const WORD = /^[a-zA-Z]{1,32}$/; // the kernel's own check (kernel/ts/src/mechanics/speech/shared.ts)
 
 export type Send = { label: (typeof LABEL)[keyof typeof LABEL]; send: (word: string) => void };
+
+// Laid over what sits behind the open say field: a tap there only closes it, unsent, and reaches
+// nothing beneath (book-ui.md, Word bar). Not focusable; the say icon and Escape stay the close.
+export const shield = (close: () => void) => (
+  <Pressable
+    accessible={false}
+    onPress={close}
+    style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+  />
+);
 
 /**
  * The one-word field (book-ui.md, Word bar): one text field named "A word" (focused on open, up
