@@ -95,13 +95,14 @@ const describe = (el: Element, key: string): Picked => {
   return {
     key,
     chain: chain(el),
-    box: round(el.getBoundingClientRect()),
+    box: (({ x, y, w, h }) => ({ x: x + window.scrollX, y: y + window.scrollY, w, h }))(
+      round(el.getBoundingClientRect()),
+    ), // page px, as the crop
     computed,
     text: text && text.slice(0, 200),
     role,
     name: el.getAttribute('aria-label') ?? (role === 'button' ? text : null),
     testId: el.getAttribute('data-testid'),
-    png: null,
   };
 };
 

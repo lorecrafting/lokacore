@@ -67,7 +67,7 @@ defmodule Loka.ContentLightTest do
           {"unused", %{}}
         ] do
       # Controlled source declarations keep this check independent of the showcase consumers.
-      result = Loka.Content.Requires.features(manifest, [{name, [], fields}])
+      result = Loka.Content.Requires.features(manifest, [{name, [], fields}], [])
 
       if name == "unused" do
         assert result == []
@@ -80,5 +80,40 @@ defmodule Loka.ContentLightTest do
                ] = result
       end
     end
+  end
+
+  # Break: a room's dark flag (loka-x6t.36) compiles without light@1.
+  test "a room dark flag needs light@1" do
+    dir = Loka.ContentSource.copy("cartridges/sky_sampler")
+
+    edits = [
+      {"cartridge.json",
+       fn m ->
+         m
+         |> put_in(["requires", "kernel_api", "at_least"], "1.114")
+         |> update_in(["requires", "capabilities"], &Map.delete(&1, "light"))
+       end},
+      {"rooms/yard.json", &Map.put(&1, "dark", true)}
+    ]
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+
+    assert {"UNDECLARED_CAPABILITY", "rooms/yard.dark"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           ),
+           inspect(diags)
+  end
+
+  # Break: the dark flag's 1.114 floor read on any definition kind, not rooms only (as the TS
+  # loader, cartridge_fuel.ts).
+  test "only a room's dark flag raises the floor to 1.114" do
+    m = %{"requires" => %{"kernel_api" => %{"at_least" => "1.19"}, "capabilities" => %{}}}
+    flagged = {"rooms/yard.json", [], %{"dark" => true}}
+    item = {"items/crate.json", [], %{"dark" => true}}
+    assert Loka.Content.Requires.features(m, [item], []) == []
+
+    assert [%{"code" => "KERNEL_API_RANGE_INVALID"}] =
+             Loka.Content.Requires.features(m, [flagged], [flagged])
   end
 end

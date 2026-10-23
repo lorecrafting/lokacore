@@ -18,15 +18,15 @@ defmodule Loka.Content.Requires do
       Enum.flat_map(req["capabilities"], &capability(rel, &1, offline?, registry))
   end
 
-  @doc "Minimum API for optional authored features."
-  @spec features(map() | nil, list()) :: [map()]
-  def features(nil, _), do: []
+  @doc "Minimum API for optional authored features (`rooms`, the room definitions)."
+  @spec features(map() | nil, list(), list()) :: [map()]
+  def features(nil, _, _), do: []
 
-  def features(m, all) do
+  def features(m, all, rooms) do
     minimum =
       Enum.max([
         minimum_feature_api(m, all),
-        light_minimum(all),
+        light_minimum(all, rooms),
         b6_minimum(all),
         book_minimum(all)
       ])
@@ -39,12 +39,20 @@ defmodule Loka.Content.Requires do
   defp book_minimum(all),
     do: if(Enum.any?(all, fn {_, _, d} -> d["readable"] != nil end), do: [1, 24], else: [])
 
-  defp light_minimum(all) do
-    if Enum.any?(all, fn {_, _, d} ->
-         is_map_key(d, "fuel") or is_map_key(d, "dark_description")
-       end),
-       do: [1, 19],
-       else: []
+  # A room's dark flag (loka-x6t.36) needs 1.114; fuel or a dark_description 1.19.
+  defp light_minimum(all, rooms) do
+    cond do
+      Enum.any?(rooms, &match?({_, _, %{"dark" => _}}, &1)) ->
+        [1, 114]
+
+      Enum.any?(all, fn {_, _, d} ->
+        is_map_key(d, "fuel") or is_map_key(d, "dark_description")
+      end) ->
+        [1, 19]
+
+      true ->
+        []
+    end
   end
 
   defp b6_minimum(all), do: if(Enum.any?(all, &b6_feature?/1), do: [1, 21], else: [])

@@ -7,7 +7,7 @@
 // composer (or Tab moving focus); a suggestion still offered after the owner sent a prompt.
 import { spawn } from 'node:child_process';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -34,8 +34,13 @@ const server = spawn(
 );
 const status = (...args: string[]) =>
   execFileSync(new URL('../../../../bin/polish_status.sh', import.meta.url).pathname, args, {
-    env: { ...process.env, LOKA_POLISH_DIR: dir },
+    env: { ...process.env, LOKA_POLISH_DIR: dir, LOKA_SB_PORT: `${port}` },
   });
+// A PNG's pixel size, from its IHDR chunk.
+const size = (file: string) => {
+  const b = readFileSync(join(dir, file));
+  return `${b.readUInt32BE(16)}x${b.readUInt32BE(20)}`;
+};
 const lines = (file: string) =>
   readFileSync(join(dir, file), 'utf8')
     .trim()
@@ -78,6 +83,7 @@ try {
     const button = preview.locator('[role="button"]').first();
     await button.waitFor();
     await preview.evaluate(() => document.fonts.ready); // the Book's fonts resize text boxes
+    await button.evaluate((el) => ((el as HTMLElement).style.width = '200px')); // narrower than the page
     const before = await boxes(preview);
     await page.click('[title="Pick an element (P)"]');
     await settle(page, 'Press P or Pick');
@@ -117,16 +123,35 @@ try {
     if (!pick.elements?.[0]?.chain.includes('EntityLine'))
       fail(`chain ${JSON.stringify(pick.elements?.[0]?.chain)} lacks EntityLine`);
     if (pick.note !== 'quick: tighten\nthe row') fail(`note ${JSON.stringify(pick.note)}`);
+    if (!pick.elements[0].shot) fail('the pick went without its crop');
     status(pick.id, 'working', 'fable');
+    if (existsSync(join(dir, 'shots', `${pick.id}-0-after.png`)))
+      fail('working saved an after shot');
     status('suggest-close', 'enough for one review');
     status('log', 'routed to Sonnet designer');
     await settle(page, 'routed to Sonnet designer');
     await settle(page, 'suggest closing: enough for one review');
     await page.waitForSelector('[data-pick] >> text=working');
     const closeBtn = page.locator('button:has-text("Close batch")').first();
+    await page.click('[data-pick] img[alt=""]'); // the before crop opens; no after while working
+    await page.waitForSelector('[data-pick] img[alt="before"]');
+    if (await page.locator('[data-pick] img[alt="after"]').count()) fail('after shot before done');
     if (!(await closeBtn.isDisabled())) fail('Close batch enabled while an item is working');
     status(pick.id, 'done', 'fable', 'row tightened', 'abc1234');
     await settle(page, 'row tightened');
+    // The after shot: the same region as the before crop, from the served story.
+    const crop = size(`shots/${pick.id}-0.png`);
+    const shot = size(`shots/${pick.id}-0-after.png`);
+    if (shot !== crop) fail(`after shot ${shot}, want the before crop's ${crop}`);
+    const { w } = pick.elements[0].box; // the narrowed row: no clamp to the page
+    if (crop.split('x')[0] !== `${2 * (w + 48)}`)
+      fail(`crop ${crop}, want ${2 * (w + 48)} px wide`);
+    await page
+      .waitForFunction(
+        () =>
+          document.querySelector<HTMLImageElement>('[data-pick] img[alt="after"]')?.naturalWidth,
+      )
+      .catch(() => fail('the panel shows no after shot once done'));
     if (await closeBtn.isDisabled()) fail('Close batch still disabled after done');
     status('suggest', 'Close batch');
     const area = page.locator('textarea[placeholder="Close batch"]'); // the ghost text
@@ -140,6 +165,35 @@ try {
       .catch(() => fail('the suggestion stayed after a sent prompt'));
     const note = lines('picks.jsonl').at(-1).note;
     if (note !== 'Close batch') fail(`sent ${JSON.stringify(note)}, want the suggestion`);
+    // A pin swapped during the crop wait (same count, other key): the send keeps A, B stays pinned.
+    await preview.evaluate(() => {
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = function () {
+        return new Promise((r) => setTimeout(r, 3_000)).then(() => decode.call(this));
+      };
+    });
+    const on = await preview
+      .locator('div[style*="crosshair"]')
+      .evaluate((el) => (el as HTMLElement).style.display !== 'none');
+    if (!on) await page.click('[title="Pick an element (P)"]');
+    await layer('block', 'Pick not on for the swap case');
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForSelector('button[title="Remove"]');
+    await page.fill('textarea[placeholder="What should change?"]', 'swap');
+    await page.keyboard.press('Enter');
+    await page.mouse.click(b.x + b.width - 4, b.y + b.height / 2); // B, past A's text: replaces A
+    await page.fill('textarea[placeholder="What should change?"]', 'next'); // typed in the wait
+    for (const t = Date.now(); lines('picks.jsonl').length < 3; await page.waitForTimeout(200))
+      if (Date.now() - t > 10_000) fail('the send during a pin swap never arrived');
+    const swap = lines('picks.jsonl').at(-1);
+    const box = (e: { box: object }) => JSON.stringify(e.box);
+    if (swap.elements.length !== 1 || box(swap.elements[0]) !== box(pick.elements[0]))
+      fail(`swap sent ${swap.elements.map(box).join(' + ')}, want A ${box(pick.elements[0])}`);
+    await page.waitForTimeout(500); // the send's clear runs just after its write
+    if (!(await page.locator('button[title="Remove"]').count()))
+      fail('the send cleared the new pin');
+    const typed = await page.inputValue('textarea[placeholder="What should change?"]');
+    if (typed !== 'next') fail(`the send left ${JSON.stringify(typed)} in the composer, want next`);
     console.log(`ok   picker: ${pick.id} ${pick.elements[0].chain.join(' › ')} in ${story}`);
   } finally {
     await browser.close();

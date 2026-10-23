@@ -107,7 +107,7 @@ const useSend = (pending: State['pending'], suggestion?: string) => {
     busy.current = true;
     const why = await send(text, pending).finally(() => (busy.current = false));
     setFailed(why);
-    if (!why) setText('');
+    if (!why) setText((t) => (t === text ? '' : t)); // keep a note typed during the crop wait
   };
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // IME: Enter picks the candidate (Safari ends composition first, keyCode 229).

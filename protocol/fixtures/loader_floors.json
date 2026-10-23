@@ -30,6 +30,16 @@
       ]
     },
     {
+      "floor": "1.114",
+      "below": "1.113",
+      "source": "cartridges/sky_sampler",
+      "feature": "a room dark flag (loka-x6t.36)",
+      "edits": [["rooms/yard.json", ["dark"], true]],
+      "without": [["rooms/yard.json", ["dark"], null]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
       "floor": "1.21",
       "below": "1.20",
       "source": "cartridges/journal_sampler",

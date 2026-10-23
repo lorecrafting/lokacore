@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: refusal cause not_standing (loka-x6t.17, PR #447, kernel_api 1.111)](2026-10-22-x6t17-refusal-cause-review.md): **APPROVE WITH NOTES**
+- [Review: dark rooms, LegendMUD style (loka-x6t.36, PR #449)](2026-10-22-x6t-36-dark-rooms-review.md): **CHANGES REQUIRED**
 - [Review: validate a DecisionResult on commit (loka-kgd.191, PR #439)](2026-10-22-validate-on-commit-review.md): **APPROVE WITH NOTES**
 - [Review: pack of one Attack narration (loka-kgd.187, PR #427)](2026-10-22-pack-sole-narration-review.md): **APPROVE WITH NOTES**
 - [Review: Retire Ashmere 2 Z, final deletion (loka-4hik.29)](2026-10-21-retire-ashmere-2-z-review.md): **APPROVE WITH NOTES**
