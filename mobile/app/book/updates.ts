@@ -32,7 +32,7 @@ export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']
   return pagesAfter(corpse, screen.view, screen.view);
 }
 const detailId = (page: Page) =>
-  page.kind === 'thing'
+  page.kind === 'thing' || page.kind === 'notice'
     ? page.id
     : page.kind === 'dialogue'
       ? (page.speaker ?? 'conversation')
