@@ -192,10 +192,11 @@ export const npcSkills = (c: Palette, t: Type, p: NpcProps) =>
     )
     .map((s) => (
       <Text key={s.skill.key} style={note(c, t)}>
-        {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
-        {s.qualified ? 'qualified' : 'unqualified'}.
-        {/* a learned, qualified skill asks nothing more (pass-1 H3) */}
-        {s.acquired && s.qualified ? '' : ` ${p.text(s.requirement)}`}
+        {s.acquired || s.locked
+          ? `${p.text(s.label)}: ${s.locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
+          : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
+        {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
+        {s.qualified && !s.locked ? '.' : `; ${p.text(s.requirement)}`}
       </Text>
     ));
 
