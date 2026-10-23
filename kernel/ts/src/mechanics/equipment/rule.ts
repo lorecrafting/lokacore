@@ -33,7 +33,11 @@ export const decide: Rule<'equipment'> = (world, command) => {
     ...settle(world, item_id),
     { op: 'entity.transfer', writer_group: 0, entity_id: item_id, source_id, destination_id },
   ] as const;
-  return accepted(world, type === 'wear' ? 'worn' : 'removed', ops, []);
+  const outcome = type === 'wear' ? 'worn' : 'removed';
+  const e = world.entities[item_id];
+  // Row 6a: an item's authored worn or removed line; without one the Book words the outcome.
+  const said = e.kind === 'item' && e.equip ? [{ key: e.equip[outcome] }] : [];
+  return accepted(world, outcome, ops, [], said);
 };
 
 /** An item with affects moves its wearer's attributes, so a derived maximum settles first (resource@1). */

@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DefinitionRef, EntityId, GameView } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
@@ -381,4 +382,74 @@ test('worn gear counts once and Remove then Drop provides a carrying escape', ()
   w = accepted(w, 'drop', CLOAK).world;
   w = accepted(w, 'take', KEY).world; // 2100, below 5000
   assert.equal(w.state.containers[KEY], BODY);
+});
+
+// Row 6a: the leather cap's authored equip words, or `f` changing them, at kernel_api 1.116.
+const CAP_REF = `${W}:item/leather_cap`;
+const equipped = (c: any) => {
+  c.manifest.requires.kernel_api.at_least = '1.116';
+  c.items[CAP_REF].equip = {
+    wear: 'cap.on',
+    remove: 'cap.off',
+    worn: 'cap.worn',
+    removed: 'cap.removed',
+  };
+  for (const k of ['on', 'off', 'worn', 'removed']) c.text[`cap.${k}`] = `cap ${k}`;
+};
+const label = (w: World, command: string) => {
+  const v = gameView(w);
+  const cap = [...v.inventory, ...(v.equipment ?? []).map((s) => s.item)].find(
+    (e) => e?.id === CAP,
+  )!;
+  return cap.actions.find((a) => a.action_key === command)?.label;
+};
+
+test('an item with equip words offers its own Wear and Remove labels and tells its own lines', () => {
+  let w = accepted(world('cartridge_wear_hash.json', equipped), 'take', CAP).world;
+  assert.equal(label(w, 'wear'), 'cap.on');
+  const worn = accepted(w, 'wear', CAP);
+  assert.deepEqual(plain(worn.decision).narration, [{ key: 'cap.worn' }]);
+  w = worn.world;
+  assert.equal(label(w, 'remove'), 'cap.off');
+  assert.deepEqual(validate('GameView', gameView(w)), []);
+  assert.deepEqual(plain(accepted(w, 'remove', CAP).decision).narration, [{ key: 'cap.removed' }]);
+});
+
+test('an item without equip words keeps the engine labels and tells no line', () => {
+  const w = accepted(wear(), 'take', CAP).world;
+  assert.equal(label(w, 'wear'), 'action.wear');
+  assert.equal(plain(accepted(w, 'wear', CAP).decision).narration, undefined);
+});
+
+test('the loader refuses equip words below 1.116, outside the catalog, or without a slot', () => {
+  const load = (f: (c: any) => void) => {
+    const kat = read('protocol/fixtures/cartridge_wear_hash.json');
+    const c = structuredClone(kat.value);
+    equipped(c);
+    f(c);
+    const text = encode(c);
+    const h = createHash('sha256').update(text).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${text},"content_hash":"${h}"}`),
+      INSTALLED,
+    );
+    return r.ok ? [] : [[r.diagnostic.code, r.diagnostic.path]];
+  };
+  const at = `.cartridge.items["${CAP_REF}"].equip`;
+  assert.deepEqual(
+    load(() => {}),
+    [],
+  );
+  assert.deepEqual(
+    load((c) => (c.manifest.requires.kernel_api.at_least = '1.115')),
+    [['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least']],
+  );
+  assert.deepEqual(
+    load((c) => delete c.text['cap.on']),
+    [['UNRESOLVED_REFERENCE', `${at}.wear`]],
+  );
+  assert.deepEqual(
+    load((c) => delete c.items[CAP_REF].slot),
+    [['SCHEMA_VIOLATION', at]],
+  );
 });

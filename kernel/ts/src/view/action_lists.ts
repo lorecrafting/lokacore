@@ -18,6 +18,7 @@ import type {
   CommandPayload,
   EntityId,
   ErrorCode,
+  ItemDefinition,
   Key,
   NpcDefinition,
   TargetSpec,
@@ -192,7 +193,7 @@ function advertise(
     ...((light.VERBS.includes(a.command) || ['harvest', 'expedition'].includes(a.command)) && {
       command: a.command,
     }),
-    label: patch && !a.input.includes('method') ? patch.label : a.label,
+    label: patch && !a.input.includes('method') ? patch.label : worded(world, a, id),
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
     ...(target_ids && { target_ids }),
@@ -262,6 +263,13 @@ const lidded = (world: World, id: string) => {
 };
 // Never with the place: a targetless wear or remove is never accepted (its Command needs item_id).
 const equip = (a: Offered) => equipment.VERBS.includes(a.command);
+// Row 6a: an item's authored Wear or Remove label, else the engine's action.<verb>.
+const worded = (world: World, a: Offered, id?: string) =>
+  (a.engine &&
+    equip(a) &&
+    id &&
+    (world.entities[id] as ItemDefinition).equip?.[a.command as 'wear' | 'remove']) ||
+  a.label;
 // Why step would refuse equipment verb `a` by `actor` on `item` now, else undefined: admission
 // (refusal), then equipment@1's checks (equipment.transfer).
 function equipRefused(world: World, actor: CharacterId, a: Offered, item: string) {
