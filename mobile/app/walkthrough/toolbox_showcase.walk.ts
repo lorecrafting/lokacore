@@ -40,6 +40,8 @@ const steps = ({ screen, room }: Walk) => {
     await tap(new RegExp(`^${LABEL.inventory}`));
     await tap(item);
   };
+  // An item page opened from Inventory leaves back to Inventory (x6t.23), then on to World.
+  const putAway = () => tap(LABEL.leave).then(() => tap(LABEL.backToWorld));
   const position = async (to: string) => {
     for (
       let i = 0;
@@ -48,7 +50,7 @@ const steps = ({ screen, room }: Walk) => {
     )
       await tap(/change position$/);
   };
-  return { tap, take, lesson, held, position, moves };
+  return { tap, take, lesson, held, putAway, position, moves };
 };
 type Steps = ReturnType<typeof steps>;
 
@@ -78,7 +80,10 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await tap(LABEL.leave);
 };
 
-const pondAndStew = async (screen: Screen, { tap, take, held, position, moves }: Steps) => {
+const pondAndStew = async (
+  screen: Screen,
+  { tap, take, held, putAway, position, moves }: Steps,
+) => {
   await moves('east');
   await take(/^A fishing rod is here/, /^Take a fishing rod/);
   const fish = /^An? (trout|salmon|eel) is here/;
@@ -86,7 +91,7 @@ const pondAndStew = async (screen: Screen, { tap, take, held, position, moves }:
   for (let i = 0; landed < 2 && i < 12; i++) {
     await held(/^a fishing rod/);
     await tap(/^Fish in/);
-    await tap(LABEL.leave);
+    await putAway();
     if (await screen.getByRole('button', fish).first().isVisible()) {
       await take(fish, /^Take an? (trout|salmon|eel)/);
       landed++;
@@ -149,7 +154,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const loft = async (r: Walk, { tap, take, held, moves }: Steps) => {
+const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -171,7 +176,7 @@ const loft = async (r: Walk, { tap, take, held, moves }: Steps) => {
   await take(/^The grimoire is here/, /^Take the grimoire/);
   await held(/^the grimoire/);
   await tap(/^Read/);
-  await tap(LABEL.leave);
+  await putAway();
   await moves('south');
   await tap(/opens Contents$/);
   await tap(/^Character/);
@@ -182,14 +187,14 @@ const loft = async (r: Walk, { tap, take, held, moves }: Steps) => {
 
 const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
-  const { tap, take, held, moves } = steps;
+  const { tap, take, held, putAway, moves } = steps;
   await loft(r, steps);
   await take(/^The oilcan is here/, /^Take the oilcan/);
   await take(/^The loft bucket is here/, /^Take the loft bucket/);
   await moves('east');
   await held(/^the oilcan/); // a use recipe is offered on the held tool
   await tap(/^Oil/);
-  await tap(LABEL.leave);
+  await putAway();
   await tap('Map');
   await tap(/^Open/);
   await held(/^the lantern/);

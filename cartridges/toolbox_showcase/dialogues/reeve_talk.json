@@ -41,10 +41,6 @@
           "amount": -2
         }
       ]
-    },
-    "leave": {
-      "label": "dialogue.reeve_talk.leave",
-      "narration": "narration.reeve_talk.leave"
     }
   }
 }

@@ -289,6 +289,10 @@ export function presenter(game: Game) {
       return line;
     },
     leaveCombat: () => (s.ended = undefined),
+    forget: (id: string) => s.details.delete(id),
+    // Histories a cold reopen may drop: a restored pickup and a dream (resumed, not revisited) stay.
+    restored: () =>
+      [...s.details.keys()].filter((id) => id !== s.pickedFrom && !id.startsWith('dream:')),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },

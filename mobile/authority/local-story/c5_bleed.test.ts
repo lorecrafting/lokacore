@@ -333,7 +333,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
       64950,
       (k) => a.story.world().cartridge.text[k],
     ),
-    'Bleeding · 300s remaining · 1 HP each 100s',
+    'Bleeding · 5m remaining · 1 HP each 100s',
   );
   assert.deepEqual(
     group(

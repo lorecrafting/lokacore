@@ -50,10 +50,6 @@
         "rating": 1,
         "failure": "narration.guard.intimidate_failed"
       }
-    },
-    "leave": {
-      "label": "dialogue.guard.leave",
-      "narration": "narration.guard.leave"
     }
   }
 }

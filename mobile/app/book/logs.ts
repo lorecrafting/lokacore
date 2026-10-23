@@ -52,6 +52,7 @@ export type Logs = {
   confirmedRead?: string;
   returnWorld?: boolean;
   returnDetail?: string;
+  pickedFrom?: string; // a restored pickup's corpse, whose next visit still shows it
   fault?: string;
   // An open elapsed settlement's held World entries, one per line.
   away?: { from: number; log: string[] };
@@ -83,6 +84,7 @@ export function restoredLogs(game: Game, text: Say): Logs {
     combatLog: combat,
     details,
     narrationId: last?.command_id,
+    pickedFrom: pickup ? last?.detail_id : undefined,
     projection: game.view(),
     status: { kind: 'ready' },
   };
