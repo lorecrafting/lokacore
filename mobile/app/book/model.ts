@@ -70,7 +70,7 @@ export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
   if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
   if (before.combat || stack.some((page) => page.kind === 'combat')) return [];
-  if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
+  if (after.chapter && before.chapter?.index !== after.chapter.index) return titled(after);
   if (before.place.id !== after.place.id) return [];
   const dreaming = dreamPages(stack, before, after);
   if (dreaming) return dreaming;
@@ -213,14 +213,13 @@ export const branch = (t: number) => {
 };
 
 export const initialPages = (v: GameView): Page[] =>
-  v.combat
-    ? [{ kind: 'combat' }]
-    : v.chapter
-      ? // Continue dismisses the title only: a restored choice waits on its speaker's page beneath.
-        [...(v.choice ? [conversation(v)] : []), { kind: 'chapter' }]
-      : v.choice
-        ? [conversation(v)]
-        : [];
+  v.combat ? [{ kind: 'combat' }] : v.chapter ? titled(v) : v.choice ? [conversation(v)] : [];
+
+// Continue dismisses the title only: an open choice waits on its speaker's page beneath.
+const titled = (v: GameView): Page[] => [
+  ...(v.choice ? [conversation(v)] : []),
+  { kind: 'chapter' },
+];
 
 // Recover only the actual saved choice: a projected speaker has an ordinary entity page.
 export const conversation = (v: GameView): Page =>
