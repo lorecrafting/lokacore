@@ -235,7 +235,7 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
 }
 
 export const talk = async (screen: Screen, npc: string, ...choices: string[]) => {
-  await screen.getByRole('button', new RegExp(`^${npc} is here\\.`)).tap();
+  await screen.getByRole('button', new RegExp(`^${npc}, open$`, 'i')).tap();
   for (const choice of choices) {
     await screen.getByRole('button', `Talk to ${npc}`).last().tap();
     await screen.getByRole('button', choice).tap();

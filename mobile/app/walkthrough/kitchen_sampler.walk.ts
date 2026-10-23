@@ -11,13 +11,13 @@ walk('1-kitchen', 'Kitchen: learn cooking, cook a hearty stew at the hearth, eat
   await moves(screen, 'north');
   for (let i = 0; i < 2; i++) {
     await screen
-      .getByRole('button', /^A fish is here/)
+      .getByRole('button', /^A fish, open$/i)
       .first()
       .tap();
     await screen.getByRole('button', 'Take a fish').tap();
   }
   await moves(screen, 'south');
-  await screen.getByRole('button', /^The cook is here/).tap();
+  await screen.getByRole('button', /^The cook, open$/i).tap();
   await screen.getByRole('button', 'Talk the cook').tap();
   await screen.getByRole('button', 'Learn cooking').tap();
   const leave = () => screen.getByRole('button', /^Leave/).first();

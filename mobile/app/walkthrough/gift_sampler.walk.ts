@@ -9,12 +9,12 @@ walk('1-barter', 'Barter: two pelts for the knife, no coin', async (r) => {
   await settle();
   for (let i = 0; i < 2; i++) {
     await screen
-      .getByRole('button', /^A pelt is here/)
+      .getByRole('button', /^A pelt, open$/i)
       .first()
       .tap();
     await screen.getByRole('button', 'Take a pelt').tap();
   }
-  await screen.getByRole('button', /^The trader is here/).tap();
+  await screen.getByRole('button', /^The trader, open$/i).tap();
   await screen.getByRole('button', /Trade two pelts for the knife/).tap();
   await settle();
 });
@@ -24,7 +24,7 @@ walk('2-give', 'Give: the apple to the farmer from its page', async (r) => {
   await r.app.clearState();
   await settle();
   await screen
-    .getByRole('button', /^An apple is here/)
+    .getByRole('button', /^An apple, open$/i)
     .first()
     .tap();
   await screen.getByRole('button', 'Take an apple').tap();
