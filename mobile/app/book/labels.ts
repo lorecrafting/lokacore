@@ -14,6 +14,7 @@ export const LABEL = {
   continueConversation: 'Continue conversation',
   gotIt: 'Got it',
   startOver: 'Start over',
+  tryAgain: 'Try again',
   backspace: 'Backspace',
   clear: 'Clear',
   submit: 'Submit',

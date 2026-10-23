@@ -458,10 +458,14 @@ Pending save status says save not confirmed; no unconfirmed result is presented 
 invocation retries the original attempt before acting on its new button, preserving original
 NPC/item context. Fault details remain visible with Start over recovery. Settings Start over
 requires destructive confirmation; failure retains the existing game/retry, while successful
-replacement remounts the book. Save-open errors expose only existing permitted recovery. The
+replacement remounts the book. Save-open errors expose only existing permitted recovery, plus a
+retry where a retry can clear the cause. The
 save-error screen has no GameView, so no phase; it shows a headline and at most
 one plain sentence under it, never a raw kind or code and never the headline repeated; the
-browser's save-file lock reads "Loka is already open in another tab."
+browser's save-file lock reads "Loka is already open in another tab." A cause the player can
+clear without losing the save (that lock: close the other tab) offers a **Try again** Control
+that retries opening the save; a cause they cannot offers only the permitted Start over
+(proposed from closed #372, loka-x6t.25; designer to approve in the batch pass).
 [words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).

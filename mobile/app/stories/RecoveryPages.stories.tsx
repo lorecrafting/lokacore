@@ -13,7 +13,9 @@ const failed = (
   message: string,
   startOver = true, // never for a newer app's save or a lock (session.ts offered)
 ) => ({
-  render: () => <SaveError failed={{ kind, message, startOver }} startOver={fn()} />,
+  render: () => (
+    <SaveError failed={{ kind, message, startOver }} startOver={fn()} tryAgain={fn()} />
+  ),
 });
 
 export const SaveErrorRelease: StoryObj = {
