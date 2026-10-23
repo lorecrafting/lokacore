@@ -32,7 +32,8 @@ const server = spawn(
   ['storybook', 'dev', '-p', `${port}`, '--host', '127.0.0.1', '--ci', '--no-open'],
   { cwd: new URL('..', import.meta.url), stdio: ['ignore', 'ignore', 'inherit'], detached: true },
 );
-const stop = () => server.exitCode === null && process.kill(-server.pid!, 'SIGTERM');
+const stop = () =>
+  server.exitCode === null && server.signalCode === null && process.kill(-server.pid!, 'SIGTERM');
 for (const sig of ['SIGINT', 'SIGTERM'] as const)
   process.on(sig, () => (stop(), process.exit(130)));
 const escape = (s: string) =>

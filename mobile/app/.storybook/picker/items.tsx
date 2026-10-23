@@ -52,6 +52,7 @@ const Shots = ({ shot, at, done }: { shot: string; at: string; done: Item }) => 
     <img alt="before" src={shotUrl(shot)} style={{ minWidth: 0, flex: 1 }} />
     {done?.state === 'done' && (
       <img
+        key={done.time} // a new shot remounts an image its 404 hid
         alt="after"
         src={`${ROUTE}/shots/${at}-after.png?t=${done.time}`}
         style={{ minWidth: 0, flex: 1 }}
