@@ -99,7 +99,7 @@ const skyText = (p: StatusProps) =>
  *   nothing (BookView covers the page and footer the same way). The open state is the caller's.
  * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`);
- *   say field open; bad word.
+ *   say field open; bad word (both in StatusSay.stories.tsx).
  * - Story: StatusLine.stories.tsx
  */
 export function StatusLine(p: StatusProps) {
