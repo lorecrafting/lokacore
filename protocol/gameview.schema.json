@@ -2207,6 +2207,9 @@
         "id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
         "title": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
@@ -2244,6 +2247,7 @@
       },
       "required": [
         "id",
+        "key",
         "title",
         "description"
       ],
@@ -2252,11 +2256,13 @@
       "examples": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "detail.notice.title",
           "description": "detail.notice.description"
         },
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "tracks",
           "title": "detail.tracks.title",
           "description": "detail.tracks.description",
           "actions": [
@@ -2279,6 +2285,9 @@
         "id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
         "title": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
@@ -2296,6 +2305,7 @@
       },
       "required": [
         "id",
+        "key",
         "title",
         "description",
         "notices"
@@ -2305,11 +2315,13 @@
       "examples": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
           "title": "detail.notice.title",
           "description": "detail.notice.description",
           "notices": [
             {
               "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "key": "notice",
               "title": "detail.notice.title",
               "description": "detail.notice.description"
             }

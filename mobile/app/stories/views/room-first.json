@@ -466,6 +466,7 @@
   "notices": [
    {
     "id": "192ab4e9-ab36-8b5c-bb12-50a93f8cacd2",
+    "key": "sign_hub",
     "title": "detail.sign_hub.title",
     "description": "detail.sign_hub.description"
    }

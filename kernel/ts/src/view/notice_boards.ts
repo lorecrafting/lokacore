@@ -5,7 +5,13 @@ import { resolved, refusal } from '../commands/actions.ts';
 import { positionOf } from '../mechanics/position/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { selected } from '../mechanics/containment/stock.ts';
-import type { AdvertisedAction, CharacterId, EntityId, NoticeBoardView } from '../contracts.gen.ts';
+import type {
+  AdvertisedAction,
+  CharacterId,
+  EntityId,
+  Key,
+  NoticeBoardView,
+} from '../contracts.gen.ts';
 import type { Steps, World } from '../runtime/decision.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 
@@ -31,6 +37,7 @@ export function noticeViews(
       ? [
           {
             id: id as EntityId,
+            key: detail.key as Key,
             title: detailTitle(detail),
             ...harvestRemaining(world, detail, here),
             description: description_variant.describe(world, actor, detail, steps),
@@ -82,6 +89,7 @@ function noticeBoards(
     return [
       {
         id: id as EntityId,
+        key: detail.key as Key,
         title: board.title,
         description: description_variant.describe(world, actor, detail, steps),
         notices: board.notices.map((notice) => {
@@ -89,6 +97,7 @@ function noticeBoards(
           const shown = world.details[id];
           return {
             id,
+            key: notice.detail,
             ...offered(actions(id)),
             title: notice.title,
             description: description_variant.describe(world, actor, shown, steps),

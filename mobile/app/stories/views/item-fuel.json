@@ -488,6 +488,7 @@
   "notices": [
    {
     "id": "c2dcc404-9fda-84ea-af86-4596e9beb2d6",
+    "key": "sign_magic",
     "title": "detail.sign_magic.title",
     "description": "detail.sign_magic.description"
    }

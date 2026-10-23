@@ -452,6 +452,7 @@
   "notices": [
    {
     "id": "fe8a933a-59bb-8e0c-b129-e40cd6678f85",
+    "key": "sign_social",
     "title": "detail.sign_social.title",
     "description": "detail.sign_social.description"
    }

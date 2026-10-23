@@ -328,6 +328,11 @@ that explicit key; an older view without it has no invented description. This ch
 adjacent-sight projection, rule, content artifact or saved state
 ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
+NoticeView and NoticeBoardView carry `key`, the authored detail Key, so a presenter can match
+a touch link ([cartridge.md](cartridge.md#compiler)) in the selected description to the
+projected current-room detail; the Book draws a fixture link only on that match
+([book-ui.md fixture rule](book-ui.md#world-and-status-entry)). Bodies stay off the wire.
+
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
 `exits` in compass order, first checking Move against the actor's composed ActionSet with

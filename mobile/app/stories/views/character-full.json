@@ -450,6 +450,7 @@
   "notices": [
    {
     "id": "478fa0c5-5e19-81ca-964f-9fa745503d4b",
+    "key": "sign_combat",
     "title": "detail.sign_combat.title",
     "description": "detail.sign_combat.description"
    }

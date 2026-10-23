@@ -37,8 +37,8 @@ move it into a separate entity list or force a paragraph break. A fixture is
 immovable room content: it cannot be taken, dropped, stored or otherwise removed
 from the room. A removable object is a loose item in the item group instead.
 The link opens a detail only when the current GameView supplies a visible,
-current-room identity and detail route (for example, an offered place action
-with an exact inspectable target). The Book does not infer visibility, identity,
+current-room identity and detail route (a notice or board whose `key` is the
+link's target, with its captured Read offer). The Book does not infer visibility, identity,
 detail or an action from bracketed prose alone. If that projection is absent,
 the words remain ordinary prose until a mechanic adds the required projection
 and admission contract. The selected room-description variant itself must omit

@@ -258,6 +258,7 @@
       "contract": "NoticeView",
       "value": {
         "id": "bbbbbbbb-0000-4000-8000-000000000001",
+        "key": "notice",
         "title": "bed.title",
         "description": "bed.paid",
         "bed": true

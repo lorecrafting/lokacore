@@ -30262,6 +30262,7 @@
     "contract": "NoticeView",
     "value": {
       "id": "11111111-2222-4333-8444-555555555555",
+      "key": "notice",
       "title": "t",
       "description": "d",
       "asides": []
