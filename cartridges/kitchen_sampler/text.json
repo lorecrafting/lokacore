@@ -23,7 +23,7 @@
   "narration.fed.applied": "You feel strong and full.",
   "narration.fed.tick": "The meal still warms you.",
   "narration.fed.expired": "The meal's strength fades.",
-  "condition.spoiling": "Spoiling",
+  "condition.spoiling": "spoiling",
   "narration.spoiling.applied": "The stew will not keep long.",
   "narration.spoiling.tick": "The stew smells worse.",
   "narration.spoiling.expired": "The stew has spoiled.",

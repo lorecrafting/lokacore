@@ -37,7 +37,7 @@
   "npc.guard.description": "A guard in a dented helm.",
   "guard.collars": "The guard collars you.",
   "dialogue.stranger.prompt": "The stranger waits.",
-  "dialogue.stranger.ask_name": "Ask their name.",
+  "dialogue.stranger.ask_name": "Ask their name",
   "narration.stranger.ask_name": "\"Tamsin,\" they say.",
   "actions.tear_notice": "Tear down the notice",
   "actions.don_hood": "Put on a hooded cloak",

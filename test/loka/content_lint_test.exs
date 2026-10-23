@@ -65,6 +65,40 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"dialogues/bram.json" => %{"keyword" => "ember"}, "text.json" => %{}}) == []
   end
 
+  test "label rules: a choice or action label has no final period; a status label is lowercase" do
+    dlg = fn key ->
+      %{"dialogues/hal.json" => %{"keyword" => "hal", "choices" => %{"a" => %{"label" => key}}}}
+    end
+
+    bad = ["dialogues/hal.json: label l ends in a period"]
+
+    assert Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => "Hire him."})) == bad
+
+    for ok <- ["Hire him", "Wait...", "\"Aye,\" he says.", "“Aye,” he says."],
+        do: assert(Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => ok})) == [])
+
+    act = %{"actions/walk.json" => %{"label" => "l"}, "text.json" => %{"l" => "Walk."}}
+    assert Lint.findings(act) == ["actions/walk.json: label l ends in a period"]
+
+    st = fn key, text ->
+      Lint.findings(%{"statuses/s.json" => %{"label" => key}, "text.json" => %{key => text}})
+    end
+
+    assert st.("condition.wet", "Wet") == [
+             "statuses/s.json: label condition.wet is not lowercase"
+           ]
+
+    assert st.("condition.wet", "wet") == []
+    assert st.("condition.bleeding", "Bleeding") == []
+  end
+
+  # Samplers break lint rules on purpose, but not label wording (loka-p2ey, loka-z2j2).
+  test "every cartridge's choice, action and status labels follow the label rules" do
+    for dir <- Path.wildcard("cartridges/*"), File.exists?(Path.join(dir, "cartridge.json")) do
+      assert {dir, Lint.labels(dir)} == {dir, []}
+    end
+  end
+
   test "check 6: the normal band starts below 100% (UK, mv)" do
     old = [%{"at_percent" => 100, "tone" => "normal"}, %{"at_percent" => 25, "tone" => "warning"}]
 

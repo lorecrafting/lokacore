@@ -17,7 +17,7 @@
   "item.chest.short": "a chest",
   "item.chest.room": "A [chest] sits by the wall.",
   "item.chest.description": "A plain pine chest.",
-  "condition.well_rested": "Well rested",
+  "condition.well_rested": "well rested",
   "narration.well_rested.applied": "You wake well rested.",
   "narration.well_rested.tick": "Your rest carries you.",
   "narration.well_rested.expired": "The rest wears off.",

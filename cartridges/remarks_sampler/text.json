@@ -15,8 +15,8 @@
   "remark.hal.again": "Hal says he liked this place no better the first time.",
   "remark.bram.hum": "Bram, the sexton, hums over the graves.",
   "dialogue.talk.prompt": "Hal waits for you to speak.",
-  "dialogue.talk.join": "Ask Hal to come along.",
-  "dialogue.talk.leave": "Ask Hal to stay.",
+  "dialogue.talk.join": "Ask Hal to come along",
+  "dialogue.talk.leave": "Ask Hal to stay",
   "narration.talk.join": "Hal falls in beside you.",
   "narration.talk.leave": "Hal steps aside."
 }

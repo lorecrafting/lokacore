@@ -33,7 +33,7 @@
   "item.ear.description": "A pointed, grimy ear.",
   "room.burrow.title": "Burrow",
   "room.burrow.description": "A cramped burrow.",
-  "condition.afraid": "Afraid",
+  "condition.afraid": "afraid",
   "narration.afraid.applied": "Fear grips you.",
   "narration.afraid.tick": "You tremble.",
   "narration.afraid.expired": "Your fear passes.",

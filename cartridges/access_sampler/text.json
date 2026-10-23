@@ -21,9 +21,9 @@
   "npc.ada.room": "[Ada] leans on her gate.",
   "npc.ada.description": "The owner of the hut and the shed.",
   "dialogue.ada.prompt": "Ada looks you over.",
-  "dialogue.ada.invite": "Ask to visit.",
-  "dialogue.ada.revoke": "Say goodbye.",
-  "dialogue.ada.settle": "Ask to move in.",
+  "dialogue.ada.invite": "Ask to visit",
+  "dialogue.ada.revoke": "Say goodbye",
+  "dialogue.ada.settle": "Ask to move in",
   "narration.ada.invite": "Ada says you may come in.",
   "narration.ada.revoke": "Ada says you are no longer welcome.",
   "narration.ada.settle": "Ada hands you the run of the place."
