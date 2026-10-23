@@ -28,7 +28,7 @@ import { equipped } from '../lookups.ts';
 import { broken, wear, type Worn } from './durability.ts';
 import type { CombatEvent, Round } from './round.ts';
 import { ally, lastOpponent, resisted } from './shared.ts';
-import { barring } from '../status/shared.ts';
+import { barring } from '../status/bars.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
   const during =

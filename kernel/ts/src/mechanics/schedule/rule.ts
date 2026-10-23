@@ -46,7 +46,7 @@ import { runWage } from '../escort/job.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
 import { runStatus } from '../status/job.ts';
-import { moves } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 
 import { runSight } from '../population/behavior.ts';
 import { runDelayed, type Joins } from '../delayed.ts';

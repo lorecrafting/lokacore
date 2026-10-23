@@ -15,7 +15,7 @@ import {
 } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
 import { settleMaxima } from '../resource.ts';
-import { statusAllows } from '../status/shared.ts';
+import { statusAllows } from '../status/bars.ts';
 
 /** equipment@1's commands, shared by the GameView and its invariant. */
 export const VERBS: readonly string[] = ['wear', 'remove'];

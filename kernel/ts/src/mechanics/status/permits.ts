@@ -6,7 +6,7 @@ import type { CharacterId } from '../../contracts.gen.ts';
 import { bodyOf, keys, type World } from '../../runtime/decision.ts';
 import { MODAL } from '../dialogue/shared.ts';
 import { positionOf, VERBS } from '../position/shared.ts';
-import { statusAllows } from './shared.ts';
+import { statusAllows } from './bars.ts';
 
 /**
  * Status reader 4: the Command types `actor`'s body's active statuses let it issue (`statusAllows`);

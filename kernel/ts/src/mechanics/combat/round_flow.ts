@@ -17,7 +17,7 @@ import { standing } from '../position/shared.ts';
 import { ally, allyOf, npcRef, participantsPresent } from './shared.ts';
 import { afraid, eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
-import { statusAllows } from '../status/shared.ts';
+import { statusAllows } from '../status/bars.ts';
 import type { CombatEvent, Round } from './round.ts';
 
 type PackContext = {

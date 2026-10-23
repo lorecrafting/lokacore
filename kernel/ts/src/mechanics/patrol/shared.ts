@@ -11,7 +11,7 @@ import { living } from '../death/shared.ts';
 import { standing } from '../position/shared.ts';
 import { questOf } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
-import { moves } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 
 export const definition = (world: World, row: PatrolRelation) =>
   world.cartridge.quests![refString(world.state.quests![row.quest_instance_id].quest)].patrol!;

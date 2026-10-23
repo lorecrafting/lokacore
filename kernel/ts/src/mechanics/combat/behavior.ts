@@ -7,7 +7,8 @@ import { exitTo } from '../lookups.ts';
 import { npcPassage } from '../movement/shared.ts';
 import { engaged } from './shared.ts';
 import { suppressed } from '../population/shared.ts';
-import { activeStatuses, moves } from '../status/shared.ts';
+import { activeStatuses } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 import { left } from '../trail.ts';
 
 /** Exact C3 slot membership at admission; the roster never refills. */

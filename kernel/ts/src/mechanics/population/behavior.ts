@@ -24,7 +24,7 @@ import { closeEncounter } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { exitTo } from '../lookups.ts';
 import { npcPassage } from '../movement/shared.ts';
-import { moves } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 import { planRef } from './refs.ts';
 
 /** Bind only a current deer generation observed on an actual player entry (`seer` entering). */

@@ -1,7 +1,7 @@
 // status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
 // generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
 // stale one completes harmlessly.
-// size: allow 329, row 16 pierces sits by its one caller (skills.ts cycle); y6yg.48 items; x6t.30 barring
+// size: allow 323, row 16 pierces sits beside its one caller so skills.ts stays out of this cycle; item lines (y6yg.48)
 import type {
   DefinitionRef,
   DeltaOp,
@@ -240,28 +240,6 @@ export function statusMovement(world: World, body: EntityId) {
   const declared = Object.values(world.cartridge.statuses ?? {}).some((s) => s.movement);
   return declared ? activeStatuses(world, body).flatMap(({ spec }) => spec.movement ?? []) : [];
 }
-
-/**
- * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
- * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
- */
-export function statusAllows(world: World, body: EntityId) {
-  const bar = barring(world, body);
-  return (command: string) => !bar(command);
-}
-
-/** The first active status on `body` (definition order) that bars Command type `command`, if any. */
-export function barring(world: World, body: EntityId) {
-  const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
-  const specs = bars ? activeStatuses(world, body).map(({ spec }) => spec) : [];
-  return (command: string) =>
-    specs.find(
-      (s) => s.blocks?.includes(command as Key) || !(s.allows?.includes(command as Key) ?? true),
-    );
-}
-
-/** Status reader 4: whether NPC `npc` may move (its statuses bar or leave out `move`); every NPC mover reads it. */
-export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('move');
 
 /**
  * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its

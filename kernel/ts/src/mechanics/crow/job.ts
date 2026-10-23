@@ -9,7 +9,7 @@ import type {
 import { KernelError } from '../../foundation/error.ts';
 import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { entered } from '../schedule/behavior.ts';
-import { moves } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 import {
   changed,
   corridor,

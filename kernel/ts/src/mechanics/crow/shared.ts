@@ -11,7 +11,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { passage } from '../movement/shared.ts';
-import { moves } from '../status/shared.ts';
+import { moves } from '../status/bars.ts';
 import { barrierState } from '../lookups.ts';
 export type Plan = World['populationSpecs'][string];
 export type Binding = { plan: DefinitionRef; slot: number; row: CrowTransport; spec: Plan };
