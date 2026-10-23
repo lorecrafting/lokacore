@@ -1112,9 +1112,9 @@ A dark room is one with an authored `dark_description` or, from kernel_api 1.114
 room flag `dark: true` (`unlit`, `kernel/ts/src/mechanics/light/shared.ts`; loka-x6t.36,
 owner decision 2026-10-22, LegendMUD style). Where no `dark_description` is authored,
 the GameView place reads the engine key `place.dark` and no room aside (`placeView`,
-`kernel/ts/src/view/view.ts`); the Book words it "It's too dark to see..." unless the
-cartridge texts that key. Only the place line changes: an item's short and the player's
-name keep their own text. Exits stay usable, as above.
+`kernel/ts/src/view/view.ts`); the Book and the text player word it "It's too dark to
+see..." unless the cartridge texts that key. Only the place line changes: an item's short
+and the player's name keep their own text. Exits stay usable, as above.
 Hide other room details, items and NPC identities and adjacent sight descriptions
 unless opted into the later [B6 narrow glow exception](#s4-all-hours-wisp-b6-selected-contract);
 raw IDs or guessed keywords cannot bypass this gate. Existing combat restrictions
