@@ -356,14 +356,15 @@ test('only World position taps directly cycle the offered states with captured f
   const h = book();
   const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
   const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'standing, change position');
-  for (const [from, to] of [
-    ['standing', 'sitting'],
-    ['sitting', 'resting'],
-    ['resting', 'sleeping'],
-    ['sleeping', 'standing'],
+  for (const [from, to, line] of [
+    ['standing', 'sitting', 'You sit down.'],
+    ['sitting', 'resting', 'You settle down to rest.'],
+    ['resting', 'sleeping', 'You lie down to sleep.'],
+    ['sleeping', 'standing', 'You stand up.'],
   ]) {
     h.tap(`${from}, change position`);
     assert.equal(h.game.view().view.position, to);
+    assert.equal(h.text().filter((s: string) => s === line).length, 1, line); // one World line (loka-x6t.22)
     assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
     assert.ok(h.labels().includes('Old Bram is here., open'));
   }
@@ -378,21 +379,6 @@ test('only World position taps directly cycle the offered states with captured f
     [],
   );
   assert.equal(h.labels().includes('standing, change position'), false);
-  h.sql.close();
-});
-
-// Breaks: a position tap leaves no confirmed World line, or writes it twice (loka-x6t.22).
-test('each position tap writes its one line to the World log', () => {
-  const h = book();
-  for (const [from, line] of [
-    ['standing', 'You sit down.'],
-    ['sitting', 'You settle down to rest.'],
-    ['resting', 'You lie down to sleep.'],
-    ['sleeping', 'You stand up.'],
-  ]) {
-    h.tap(`${from}, change position`);
-    assert.equal(h.text().filter((s: string) => s === line).length, 1, line);
-  }
   h.sql.close();
 });
 

@@ -1,6 +1,6 @@
 // size: allow 320, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
@@ -100,13 +100,6 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   }
 }
 
-const detailId = (page: Page) =>
-  page.kind === 'thing'
-    ? page.id
-    : page.kind === 'dialogue'
-      ? (page.speaker ?? 'conversation')
-      : undefined;
-
 const firstPages = (s: ReturnType<Presenter['screen']>): Page[] => [
   ...restoredNoticePages(s),
   ...restoredItemPages(s.view, s.detail),
@@ -130,13 +123,6 @@ export default function Book(p: BookProps) {
   current.current = { stack, view: screen.view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
-  // A closed NPC or item page drops its visit's history, by any route (book-ui.md Detail-page order).
-  const shown = useRef(stack);
-  useEffect(() => {
-    const open = stack.map(detailId);
-    for (const id of shown.current.map(detailId)) if (id && !open.includes(id)) pr.forget(id);
-    shown.current = stack;
-  }, [pr, stack]);
   const go = (next: Page[], dir: 1 | -1) => {
     pr.leaveCombat(); // every turn leaves an ended Combat page (its foot is the only one shown)
     const view = pr.screen().view;

@@ -1,6 +1,6 @@
 // The Book's live updates: each GameView update redraws its pages, restores a remounted pending
 // Read or corpse Take, and turns the page on a terminal result.
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
@@ -31,7 +31,22 @@ export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']
   const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
   return pagesAfter(corpse, screen.view, screen.view);
 }
+const detailId = (page: Page) =>
+  page.kind === 'thing'
+    ? page.id
+    : page.kind === 'dialogue'
+      ? (page.speaker ?? 'conversation')
+      : undefined;
+
 export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
+  // A closed NPC or item page drops its visit's history, by any route (book-ui.md Detail-page order).
+  const stack = s.current.current.stack;
+  const shown = useRef(stack);
+  useEffect(() => {
+    const open = stack.map(detailId);
+    for (const id of shown.current.map(detailId)) if (id && !open.includes(id)) pr.forget(id);
+    shown.current = stack;
+  }, [pr, stack]);
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
