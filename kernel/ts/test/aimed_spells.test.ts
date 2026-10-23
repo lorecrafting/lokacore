@@ -184,8 +184,8 @@ test('the offer resolves to cast {word, target_id}; a second bolt in a fight kil
   assert.equal(wightHp(w), 0);
 });
 
-// Breaks: the invariant finds no entry for a targeted cast (an aimed offer listed unavailable
-// while its cast is accepted passes unseen).
+// Breaks: the invariant finds no entry for a targeted cast, or takes another spell's offer on the
+// same target (ward accepted while its offer is unavailable, flamma's listed first and available).
 test('invariant: a cast accepted at a target whose aimed offer is unavailable disagrees', () => {
   const w = crypt();
   const view = gameView(w);
@@ -194,18 +194,38 @@ test('invariant: a cast accepted at a target whose aimed offer is unavailable di
     payload: {
       type: 'cast',
       actor_id: w.character,
-      word: 'flamma',
+      word: 'ward',
       target_id: w.entityIds[`${P}:npc/wight`],
     },
   };
-  const { decision } = at(w, 'flamma', 'npc/wight');
-  assert.ok(check('gameview_agrees_with_admission', { view, command, decision }));
+  const words = { flamma: 'flamma', ward: 'ward' };
+  const { decision } = at(w, 'ward', 'npc/wight');
+  assert.ok(check('gameview_agrees_with_admission', { view, command, decision, words }));
   const off = structuredClone(view) as any;
-  const offer = off.entities
-    .find((e: { id: string }) => e.id === command.payload.target_id)
-    .actions.find((a: { action_key: string }) => a.action_key === 'flamma');
-  Object.assign(offer, { available: false, reason: { code: 'insufficient_resource' } });
-  assert.equal(check('gameview_agrees_with_admission', { view: off, command, decision }), false);
+  const keys = (e: any) => e.actions.map((a: { action_key: string }) => a.action_key);
+  const wight = off.entities.find((e: { id: string }) => e.id === command.payload.target_id);
+  assert.deepEqual(keys(wight), ['attack', 'flamma', 'ward']); // flamma's offer is found first
+  Object.assign(wight.actions[2], { available: false, reason: { code: 'insufficient_resource' } });
+  assert.equal(
+    check('gameview_agrees_with_admission', { view: off, command, decision, words }),
+    false,
+  );
+});
+
+// Breaks: an unlearned word aimed at an unseen target tells not_present (or a bad target tells
+// invalid_target), so a refusal shows which words are spells (PM ruling: the word first).
+test('an unlearned or unknown word is invalid_state before any target check', () => {
+  const unlearned = variant((c) => {
+    aimedChange(c);
+    c.facts[`${P}:fact/flamma_known`].value_type.default = false;
+  }) as { cartridge: Cartridge };
+  assert.equal(code(at(hall(unlearned.cartridge), 'flamma', 'item/glowdust')), 'invalid_state');
+  let w = hall();
+  for (const i of ['orb', 'glowdust'])
+    w = ok(play(w, { type: 'take', item_id: w.entityIds[`${P}:item/${i}`] }));
+  w = ok(play(w, { type: 'move', direction: 'east' })); // dark: the wight is unseen
+  assert.equal(code(at(w, 'flamma', 'npc/wight')), 'not_present');
+  assert.equal(code(at(w, 'zzz', 'npc/wight')), 'invalid_state');
 });
 
 // Breaks: the TS loader admits a step without its npc on an unaimed spell, a scope outside

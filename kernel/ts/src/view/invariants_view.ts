@@ -11,6 +11,7 @@ import type {
   GameView,
 } from '../contracts.gen.ts';
 import { MOVES } from '../mechanics/barrier/rule.ts';
+import { folded } from '../mechanics/speech/shared.ts';
 import { VERBS as EQUIP_VERBS } from '../mechanics/equipment/rule.ts';
 import { VERBS as POSITION_VERBS } from '../mechanics/position/shared.ts';
 
@@ -28,12 +29,14 @@ type Any = any;
 // among the place's actions; a listed take is never refused not_present. A position verb
 // (position@1, c1-position) uses the selected action_key when supplied, else any matching place
 // action: available, it is never refused invalid_state; unavailable or absent, never accepted.
+// A cast at a target is its spell's offer there: `words` maps each spell word to its recipe key.
 export const gameview_agrees_with_admission = ({
   view,
   command,
   world_context_id: context = command.world_context_id,
   decision,
   resolves = {},
+  words = {},
   action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
@@ -62,7 +65,7 @@ export const gameview_agrees_with_admission = ({
   }
   if (type === 'read' || Object.hasOwn(POSITION_VERBS, type))
     return placeAgrees(view, command.payload, decision, action_key, commandOf);
-  const entry = advertised(view, command.payload, action_key, commandOf);
+  const entry = advertised(view, command.payload, action_key, commandOf, words);
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
   if (!entry) return type !== 'perform' || decision.kind !== 'accepted';
   if (entry.available) return !shown.includes(code);
@@ -121,6 +124,7 @@ function advertised(
   p: Any,
   action_key: string | undefined,
   commandOf: (a: AdvertisedAction) => string | undefined,
+  words: Record<string, string>,
 ): ExitView | AdvertisedAction | undefined {
   if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);
   // Toolbox row G4: a use recipe's perform is its [target, tool] pair on the held tool.
@@ -150,10 +154,12 @@ function advertised(
         (commandOf(a) ?? a.action_key) === 'put' &&
         a.target_ids?.[0] === p.item_id &&
         a.target_ids?.[1] === p.container_id
-      : p.type === 'take' || p.type === 'cast' // an aimed cast's offer is on its target (loka-x6t.109)
-        ? (action_key === undefined || a.action_key === action_key) &&
-          (a.command ?? commandOf(a) ?? a.action_key) === p.type
-        : a.action_key === p.type,
+      : p.type === 'cast' // an aimed cast's offer is on its target under the spell's key (loka-x6t.109)
+        ? a.command === 'cast' && a.action_key === (action_key ?? words[folded(p.word) ?? ''])
+        : p.type === 'take'
+          ? (action_key === undefined || a.action_key === action_key) &&
+            (a.command ?? commandOf(a) ?? a.action_key) === p.type
+          : a.action_key === p.type,
   );
 }
 

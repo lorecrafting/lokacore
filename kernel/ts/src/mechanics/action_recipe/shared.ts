@@ -103,6 +103,7 @@ export function castAdmission(
 ): UnavailableReason | undefined {
   if (payload.type !== 'cast') return undefined;
   const spell = spellOf(world, payload.actor_id, payload.word);
+  // no `!body` guard: step refuses a foreign (bodiless) actor not_found before admission
   const body = bodyOf(world, payload.actor_id);
   const busy = !!spell?.duration && !!body && !!engaged(world, body);
   if (!spell || busy) return { code: 'invalid_state' };

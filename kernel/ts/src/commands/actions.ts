@@ -33,7 +33,12 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
-import { castAdmission, craftRefused, useAdmission } from '../mechanics/action_recipe/shared.ts';
+import {
+  castAdmission,
+  craftRefused,
+  spellOf,
+  useAdmission,
+} from '../mechanics/action_recipe/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -238,6 +243,8 @@ export function refusalReason(
     !fighting(world, payload.actor_id)
   )
     return { code: 'permission_denied' };
+  if (payload.type === 'cast' && !spellOf(world, payload.actor_id, payload.word))
+    return { code: 'invalid_state' }; // row 29a: the word before any target check (loka-x6t.109)
   if (hiddenTarget(world, payload, steps)) return { code: 'not_present' };
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;

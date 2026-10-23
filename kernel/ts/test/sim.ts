@@ -269,6 +269,11 @@ function violated(
     resolves: Object.fromEntries(
       Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
     ),
+    words: Object.fromEntries(
+      Object.values(resolved(before, before.character)).flatMap((a) =>
+        a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
+      ),
+    ),
   };
   const ids = CHECKED.step.filter((i) => i !== 'target_candidates_ordered');
   return (
