@@ -14,7 +14,7 @@ import { refString, type Cartridge, type World } from '../src/runtime/decision.t
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
-import { dark, illuminated, visible } from '../src/mechanics/light/shared.ts';
+import { dark, illuminated, unlit, visible } from '../src/mechanics/light/shared.ts';
 import { darkSight } from '../src/mechanics/attributes/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 
@@ -254,6 +254,15 @@ test('a room status tells its observed and expired lines only to whoever stands 
   const away = enter(told('den'));
   assert.deepEqual(gloomLines(away), []);
   assert.deepEqual(wait(away.world, 120).lines, [], 'the den expires out of earshot');
+  const unlitWorld = told('shrine');
+  const [at, room] = Object.entries(unlitWorld.rooms).find(([, r]) =>
+    JSON.stringify(r).includes('room.shrine'),
+  )!;
+  const unlitShrine = { ...room, dark_description: room.description };
+  const darkened = { ...unlitWorld, rooms: { ...unlitWorld.rooms, [at]: unlitShrine } };
+  assert.ok(unlit(darkened, at), 'the shrine is dark before the gloom lands');
+  const inDark = enter(darkened);
+  assert.deepEqual(gloomLines(inDark), ['narration.gloom.observed'], 'felt in the dark');
   const mute = enter(told('shrine', false));
   assert.deepEqual(gloomLines(mute), []);
   assert.deepEqual(wait(mute.world, 120).lines, []);
