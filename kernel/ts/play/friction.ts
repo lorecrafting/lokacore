@@ -103,6 +103,11 @@ function agrees(before: World, command: At['command'], decision: DecisionResult)
     obs = {
       view: gameView(before),
       resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
+      words: Object.fromEntries(
+        actions.flatMap((a) =>
+          a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
+        ),
+      ),
     };
     seen.set(before, obs);
   }

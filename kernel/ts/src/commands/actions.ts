@@ -1,4 +1,4 @@
-// size: allow 309, the command refusal and its GameView reason share one admission chain (loka-j64e)
+// size: allow 313, the command refusal and its GameView reason share one admission chain (loka-j64e)
 // ActionSet: engine, cartridge, room, choice; combat restricts admission/projection (06 §19).
 import {
   CAPABILITY_OWNERS,
@@ -33,12 +33,8 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
-import {
-  castAdmission,
-  craftRefused,
-  spellOf,
-  useAdmission,
-} from '../mechanics/action_recipe/shared.ts';
+import { castAdmission, craftRefused, useAdmission } from '../mechanics/action_recipe/shared.ts';
+import { spellOf } from '../mechanics/action_recipe/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -146,7 +142,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
   });
-  const said = [...talks(world, actor), ...aimedOffers(world)]; // loka-x6t.109
+  const said = [...talks(world, actor), ...aimedOffers(world, actor)]; // loka-x6t.109
   return Object.fromEntries([...actions, ...recipes, ...quests, ...said]);
 }
 
@@ -227,7 +223,7 @@ import { visible } from '../mechanics/light/shared.ts';
 export const refusal = (...args: Parameters<typeof refusalReason>) => refusalReason(...args)?.code;
 
 /** refusal with its reason: a failed spell policy carries the recipe's `reason` text (loka-j64e). */
-// size: allow 43, the reason rides the same admission chain as the code
+// size: allow 46, the reason rides the same admission chain as the code
 export function refusalReason(
   world: World,
   payload: CommandPayload,
@@ -243,12 +239,13 @@ export function refusalReason(
     !fighting(world, payload.actor_id)
   )
     return { code: 'permission_denied' };
-  if (payload.type === 'cast' && !spellOf(world, payload.actor_id, payload.word))
-    return { code: 'invalid_state' }; // row 29a: the word before any target check (loka-x6t.109)
+  const actor = (payload as { actor_id: CharacterId }).actor_id;
+  const offers = Object.values(set ?? resolved(world, actor));
+  const cast = payload.type === 'cast' && offers.some((a) => a.key === 'cast');
+  if (cast && !spellOf(world, actor, payload.word)) return { code: 'invalid_state' }; // row 29a: where cast is offered, the word before any target check (loka-x6t.109)
   if (hiddenTarget(world, payload, steps)) return { code: 'not_present' };
   const perform = payload.type === 'perform';
-  const actor = (payload as { actor_id: CharacterId }).actor_id;
-  const matching = Object.values(set ?? resolved(world, actor)).filter(
+  const matching = offers.filter(
     (a) =>
       (action === undefined || a.key === action) &&
       (perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload, steps)),

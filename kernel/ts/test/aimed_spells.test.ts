@@ -205,8 +205,10 @@ test('invariant: a cast accepted at a target whose aimed offer is unavailable di
   const off = structuredClone(view) as any;
   const keys = (e: any) => e.actions.map((a: { action_key: string }) => a.action_key);
   const wight = off.entities.find((e: { id: string }) => e.id === command.payload.target_id);
-  assert.deepEqual(keys(wight), ['attack', 'flamma', 'ward']); // flamma's offer is found first
-  Object.assign(wight.actions[2], { available: false, reason: { code: 'insufficient_resource' } });
+  const ward = wight.actions.find((a: { action_key: string }) => a.action_key === 'ward');
+  const first = keys(wight).indexOf('flamma');
+  assert.ok(first >= 0 && first < keys(wight).indexOf('ward')); // flamma's offer is found first
+  Object.assign(ward, { available: false, reason: { code: 'insufficient_resource' } });
   assert.equal(
     check('gameview_agrees_with_admission', { view: off, command, decision, words }),
     false,
@@ -231,6 +233,19 @@ test('an unlearned or unknown word is invalid_state before any target check', ()
     e.actions.map((a) => a.action_key),
   );
   assert.ok(!offers.includes('flamma')); // not even on the wight
+  const dark = crypt(unlearned.cartridge);
+  const invoke = (action_key: string) =>
+    resolve(
+      dark,
+      identify('aimed-test', dark.character, {
+        invocation_id: 'bbbbbbbb-0000-4000-8000-000000001091',
+        actor_id: dark.character,
+        action_key,
+        target_ids: [dark.entityIds[`${P}:npc/wight`]],
+        input: {},
+      } as never) as never,
+    );
+  assert.deepEqual(invoke('flamma'), invoke('zzz')); // an unlearned key is no key
   let w = hall();
   for (const i of ['orb', 'glowdust'])
     w = ok(play(w, { type: 'take', item_id: w.entityIds[`${P}:item/${i}`] }));

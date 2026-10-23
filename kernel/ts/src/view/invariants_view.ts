@@ -30,6 +30,7 @@ type Any = any;
 // (position@1, c1-position) uses the selected action_key when supplied, else any matching place
 // action: available, it is never refused invalid_state; unavailable or absent, never accepted.
 // A cast at a target is its spell's offer there: `words` maps each spell word to its recipe key.
+// size: allow 41, the cast offer's word map joins the observation (loka-x6t.109)
 export const gameview_agrees_with_admission = ({
   view,
   command,
@@ -119,6 +120,7 @@ const VERB_CODES = [
   'not_present',
 ];
 
+// size: allow 43, an aimed cast's offer is found on its target (loka-x6t.109)
 function advertised(
   view: GameView,
   p: Any,

@@ -1,4 +1,4 @@
-// size: allow 560, seed-picked corpus, --cartridge loader and offers (reused by play/flows.ts)
+// size: allow 564, seed-picked corpus, --cartridge loader and offers (reused by play/flows.ts)
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -256,6 +256,7 @@ function violated(
     : decision.kind === 'fault'
       ? { fault: decision }
       : { changes: [] };
+  const actions = Object.values(resolved(before, before.character));
   const obs = {
     state,
     delta,
@@ -266,11 +267,9 @@ function violated(
     decision,
     view,
     world_context_id: before.context,
-    resolves: Object.fromEntries(
-      Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
-    ),
+    resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
     words: Object.fromEntries(
-      Object.values(resolved(before, before.character)).flatMap((a) =>
+      actions.flatMap((a) =>
         a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
       ),
     ),

@@ -6,6 +6,7 @@ import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import type { Offered } from './actions.ts';
+import { value as factValue } from '../mechanics/fact.ts';
 import { definition as expeditionDefinition } from '../mechanics/expedition/shared.ts';
 import { spellOf } from '../mechanics/action_recipe/shared.ts';
 
@@ -90,11 +91,11 @@ function boundAction(world: World, payload: CommandPayload, fallback: string) {
           : fallback;
 }
 
-/** The aimed spells (loka-x6t.109), each offered on its targets and cast by its word. */
-export const aimedOffers = (world: World): [string, Offered][] =>
+/** The learned aimed spells (loka-x6t.109), each offered on its targets and cast by its word. */
+export const aimedOffers = (world: World, actor: CharacterId): [string, Offered][] =>
   Object.values(world.cartridge.recipes ?? {}).flatMap((recipe) => {
     const { key, label, priority, policy, target: t } = recipe;
-    if (t.kind !== 'spell' || !t.aimed) return []; // unlearned: castAdmission refuses, the view hides it
+    if (t.kind !== 'spell' || !t.aimed || factValue(world, actor, t.learned) !== true) return [];
     const target = { kind: 'entity', scopes: t.aimed.scopes } as const;
     return [
       [key, { key, label, target, input: [], priority, policy, command: 'cast' as Key, recipe }],
