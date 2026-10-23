@@ -53,7 +53,8 @@ defmodule Loka.LoaderFloorsTest do
     assert refused == []
   end
 
-  # Breaks: a new case without a counter-edit (without). Today's cases are frozen here; the
+  # Breaks: a new case without a counter-edit (without), or a stale entry left here once a case
+  # gains one. Today's cases are frozen here; the
   # shared samplers (craft, skills, status, build, terrain, gift) are never listed.
   @unguarded [
     "1.17 harvest_sampler",
@@ -130,7 +131,8 @@ defmodule Loka.LoaderFloorsTest do
           !c["without"],
           do: c["floor"] <> " " <> Path.basename(c["source"])
 
-    assert missing -- @unguarded == []
+    assert Enum.sort(missing) == Enum.sort(@unguarded)
+    refute Enum.any?(@unguarded, &(&1 =~ ~r/craft|skills|status|build|terrain|gift/))
   end
 
   # Breaks: a schema names a new kernel_api floor and no fixture case exercises it.

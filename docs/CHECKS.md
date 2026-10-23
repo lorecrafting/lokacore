@@ -72,7 +72,7 @@ their rules and red controls remain available for resumption.
   [`protocol/fixtures/loader_floors.json`](../protocol/fixtures/loader_floors.json), read by both
   kernels (`test/loka/loader_floors_test.exs`, which also checks the coverage, and
   `kernel/ts/test/loader_floors.test.ts`); a new floor adds its case there. A case's `without`
-  edits remove only its own feature, and both kernels load that source just below the floor, so
+  edits remove only its own feature; that source compiles (Elixir) and loads (TS) just below the floor, so
   a case another feature shadows fails; every new case carries one (the Elixir test freezes
   today's exceptions, never a shared sampler: craft, skills, status, build, terrain, gift).
 - `elixir bin/red_controls.exs`: refuses occupied plant paths and creates files exclusively;
