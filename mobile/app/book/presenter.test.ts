@@ -257,6 +257,29 @@ test('a restored committed narration is not duplicated by its pending receipt re
   ]);
 });
 
+// Breaks: a refused Leave the conversation still empties the history, so the choice stays open
+// without its question (loka-x6t.102).
+test("a refused Leave the conversation keeps the open choice's question", () => {
+  const choice = {
+    speaker_id: 'bram',
+    prompt: { key: 'prompt' },
+    continuation_id: 'continuation',
+    choices: [],
+    closable: true,
+  };
+  const p = presenter({
+    ...game(() => ({
+      kind: 'saved',
+      decision: { kind: 'rejected', error: { code: 'not_present' } },
+    })),
+    view: () => ({ view: { ...(VIEW as object), choice } as never, token: 'view:r:0' }),
+    text: () => 'Would you fetch it?',
+  });
+  p.screen().leave('bram');
+  p.press({ label: 'Leave', action_key: 'close_choice', target_ids: [], input: {} }, 'bram');
+  assert.ok(p.screen().detail('bram').includes('Would you fetch it?'));
+});
+
 // Breaks (R6P rerun N-1): an authority rejection worded "You can't do that: too exhausted." because
 // it skips the sentence a refused drag uses for the same code.
 test('a move rejected for want of MV says the body is too exhausted', () => {

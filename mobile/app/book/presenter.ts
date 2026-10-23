@@ -111,6 +111,10 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
         : reply.kind === 'saved' && reply.decision.kind === 'fault'
           ? `Time stopped: ${reply.decision.code}`
           : undefined;
+  const left = s.retry?.button.action_key === 'close_choice' && s.left;
+  if (left && reply.kind === 'saved' && reply.decision.kind === 'accepted')
+    s.details.get(left)?.splice(0); // the confirmed Leave is the conversation's fresh history
+  if (left) s.left = undefined;
   const line = s.fault ? '' : received(game, reply, was, s, text);
   if (s.fault) {
     s.returnWorld = false;
@@ -255,7 +259,11 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
-    leave: (id: string) => void s.details.get(id)?.splice(0), // Leave the conversation: a fresh history
+    // Leave the conversation: a fresh history; an open choice's waits for its confirmed close.
+    leave: (id: string) =>
+      void (game.view().view.choice?.speaker_id === id
+        ? (s.left = id)
+        : s.details.get(id)?.splice(0)),
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,

@@ -45,6 +45,7 @@ export type Logs = {
   combatLog: DetailLine[];
   details: Map<string, DetailLine[]>;
   retry?: { button: Button; detail?: string; item?: string; to?: string; invocation?: string };
+  left?: string; // Leave pressed with this speaker's choice open: history cleared once the close commits
   projection: Projection;
   status: ElapsedStatus;
   recovered?: boolean;
