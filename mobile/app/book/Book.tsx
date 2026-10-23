@@ -215,12 +215,24 @@ export function BookView(p: ViewProps) {
             )}
           </PageTurn>
           <Bottom {...ctx} page={page} />
+          {/* Polite and outside PageTurn, so a page turn never reads it again (loka-x6t.43). */}
+          <View aria-live="polite" style={unseen}>
+            <Text key={p.screen.said.key}>{p.screen.said.text}</Text>
+          </View>
           {c.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
   );
 }
+
+// Read by a screen reader, not seen: one pixel, clipped.
+const unseen = {
+  position: 'absolute',
+  width: size.unseen,
+  height: size.unseen,
+  overflow: 'hidden',
+} as const;
 
 // The footer (on the world), the status line and a press's fault.
 type BottomProps = {
