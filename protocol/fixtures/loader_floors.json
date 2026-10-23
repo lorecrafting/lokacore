@@ -1,5 +1,5 @@
 {
-  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling; a null value deletes the key; an empty key path writes the whole file, which may be new, or with null deletes it) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
+  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling; a null value deletes the key; an empty key path writes the whole file, which may be new, or with null deletes it) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader. Optional without (Beads loka-59uu): more edits, applied after edits, that remove only the case's own feature; with them the source compiles and loads at below, so a case another feature shadows fails.",
   "cases": [
     {
       "floor": "1.17",
@@ -112,6 +112,14 @@
       "floor": "1.38",
       "below": "1.37",
       "source": "cartridges/status_sampler",
+      "without": [
+        ["statuses/poison.json", [], null],
+        ["statuses/blessing.json", [], null],
+        ["reactions/dart.json", [], null],
+        ["reactions/shrine.json", [], null],
+        ["cartridge.json", ["requires", "capabilities", "status"], null],
+        ["items/antidote.json", ["edible", "cures"], null]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api"
@@ -380,6 +388,9 @@
           ]
         ]
       ],
+      "without": [
+        ["statuses/poison.json", ["blocks"], null]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api"
@@ -409,6 +420,9 @@
             }
           ]
         ]
+      ],
+      "without": [
+        ["reactions/dart.json", ["apply"], [{"op": "status.apply", "status": "poison", "co_present": true}]]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -703,6 +717,9 @@
           "hidden"
         ]
       ],
+      "without": [
+        ["statuses/poison.json", ["concealment"], null]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api"
@@ -727,6 +744,9 @@
             "cost_percent": 50
           }
         ]
+      ],
+      "without": [
+        ["statuses/poison.json", ["movement"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -756,6 +776,9 @@
             }
           ]
         ]
+      ],
+      "without": [
+        ["reactions/dart.json", ["apply"], [{"op": "status.apply", "status": "poison"}]]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1240,6 +1263,21 @@
           }
         ]
       ],
+      "without": [
+        ["blueprints/hut.json", [], null],
+        ["rooms/lane.json", ["site"], null],
+        ["cartridge.json", ["world", "construction"], null],
+        ["cartridge.json", ["requires", "capabilities", "construction"], null],
+        ["npcs/carpenter.json", ["services"], null],
+        ["services/raise_hut.json", [], null],
+        ["actions/raise_hut.json", [], null],
+        ["services/cancel_hut.json", [], null],
+        ["actions/cancel_hut.json", [], null],
+        ["services/mend_hut.json", [], null],
+        ["actions/mend_hut.json", [], null],
+        ["services/raze_hut.json", [], null],
+        ["actions/raze_hut.json", [], null]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -1269,6 +1307,9 @@
             }
           }
         ]
+      ],
+      "without": [
+        ["reactions/dart.json", ["when"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1354,6 +1395,12 @@
           [{ "op": "fact.assign", "fact": "wood_chopped", "value": true }]
         ]
       ],
+      "without": [
+        ["recipes/carve_spoon.json", ["craft"], null],
+        ["recipes/chop.json", ["craft"], null],
+        ["recipes/raise_timbered_hut.json", ["craft"], null],
+        ["recipes/saw.json", ["craft"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1366,6 +1413,9 @@
         ["skills/whittling.json", ["profession"], null],
         ["skills/carving.json", ["profession"], null],
         ["skills/joinery.json", ["profession"], null]
+      ],
+      "without": [
+        ["recipes/raise_timbered_hut.json", ["outcomes", "success", "sequence"], [{"op": "fact.assign", "fact": "wood_chopped", "value": true}]]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1381,6 +1431,9 @@
           ["prerequisite"],
           { "policy_version": 1, "root": { "op": "all", "items": [] } }
         ]
+      ],
+      "without": [
+        ["skills/pick.json", ["prerequisite"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1407,6 +1460,9 @@
       "source": "cartridges/skills_sampler",
       "feature": "a skill profession",
       "edits": [["skills/pick.json", ["profession"], "skill.pick.label"]],
+      "without": [
+        ["skills/pick.json", ["profession"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1423,6 +1479,9 @@
         ],
         ["skills/pick.json", ["hidden"], true]
       ],
+      "without": [
+        ["skills/pick.json", ["hidden"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1435,6 +1494,9 @@
         ["services/knife_for_pelts.json", ["benefit", "escrow", "ready_after"], 3600],
         ["cartridge.json", ["requires", "capabilities", "schedule"], 1]
       ],
+      "without": [
+        ["services/knife_for_pelts.json", ["price"], 1]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1444,6 +1506,10 @@
       "source": "cartridges/gift_sampler",
       "feature": "service.benefit.escrow.output without ready_after (a barter, row kgd.70)",
       "edits": [["services/knife_for_pelts.json", ["price"], 1]],
+      "without": [
+        ["services/knife_for_pelts.json", ["benefit", "escrow", "ready_after"], 3600],
+        ["cartridge.json", ["requires", "capabilities", "schedule"], 1]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1460,6 +1526,11 @@
       "below": "1.101",
       "source": "cartridges/build_sampler",
       "feature": "a raze service (Built rooms S5)",
+      "without": [
+        ["services/raze_hut.json", [], null],
+        ["actions/raze_hut.json", [], null],
+        ["npcs/carpenter.json", ["services"], ["raise_hut", "cancel_hut", "mend_hut"]]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1538,6 +1609,9 @@
         ["rooms/ford.json", ["tags"], null],
         ["rooms/fen.json", ["tags"], null]
       ],
+      "without": [
+        ["cartridge.json", ["world", "movement", "terrain"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1551,6 +1625,9 @@
         ["rooms/ford.json", ["tags"], null],
         ["rooms/fen.json", ["tags"], null]
       ],
+      "without": [
+        ["rooms/road.json", ["tags"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1563,6 +1640,9 @@
         ["cartridge.json", ["world", "movement", "terrain"], null],
         ["rooms/road.json", ["tags"], null],
         ["rooms/ford.json", ["tags"], null]
+      ],
+      "without": [
+        ["rooms/fen.json", ["tags"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1590,6 +1670,9 @@
         ["rooms/road.json", ["tags"], null],
         ["rooms/ford.json", ["tags"], null],
         ["rooms/fen.json", ["tags"], null]
+      ],
+      "without": [
+        ["cartridge.json", ["world", "movement"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1627,6 +1710,9 @@
       "source": "cartridges/status_sampler",
       "feature": "a status narration.observed line (row G3, loka-kgd.176)",
       "edits": [["statuses/poison.json", ["narration", "observed"], "narration.poison.applied"]],
+      "without": [
+        ["statuses/poison.json", ["narration", "observed"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
