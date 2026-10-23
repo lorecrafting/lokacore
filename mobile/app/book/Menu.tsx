@@ -7,7 +7,7 @@ import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
-import { holding, NOTED } from './words.ts';
+import { holding, NOTED, reasonOf, type Refusal } from './words.ts';
 import { commandOf } from './buttons.ts';
 import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
@@ -40,13 +40,14 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 // The refusal notes are one block (Page's doc comment: a run of rows of one kind).
+// A refusal's cause names it (a curse: "it will not come off", loka-x6t.38), else the noted code.
+const noted = (r: Refusal) =>
+  r.cause ? reasonOf(r) : Object.hasOwn(NOTED, r.code) ? NOTED[r.code] : undefined;
 const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown =
     thing?.actions.flatMap((a, i, all) =>
-      !a.available &&
-      Object.hasOwn(NOTED, a.reason.code) &&
-      all.findIndex((b) => b.action_key === a.action_key) === i // one note per use, however many targets
-        ? [{ ...a, word: NOTED[a.reason.code] }]
+      !a.available && noted(a.reason) && all.findIndex((b) => b.action_key === a.action_key) === i // one note per use, however many targets
+        ? [{ ...a, word: noted(a.reason) }]
         : [],
     ) ?? [];
   return (

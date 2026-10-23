@@ -57,8 +57,11 @@ export const gameview_agrees_with_admission = ({
         : direction !== undefined
           ? view.exits.find((e: ExitView) => e.direction === direction)?.door?.actions
           : entityView(view, target_id)?.actions;
-    const listed = actions?.some((a: AdvertisedAction) => commandOf(a) === type);
-    return listed ? !VERB_CODES.includes(code) : decision.kind !== 'accepted';
+    const listed = actions?.find((a: AdvertisedAction) => commandOf(a) === type);
+    if (!listed) return decision.kind !== 'accepted';
+    if (listed.available) return !VERB_CODES.includes(code);
+    // A listed unavailable one (a held-on Remove, loka-x6t.38) is refused with its reason.
+    return code === listed.reason.code && decision.error.cause === listed.reason.cause;
   }
   if (type === 'read' || Object.hasOwn(POSITION_VERBS, type))
     return placeAgrees(view, command.payload, decision, action_key, commandOf);

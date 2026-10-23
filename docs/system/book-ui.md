@@ -383,6 +383,8 @@ A held item's page shows one card per Give pair the GameView lists available, at
 figures and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
 How Character shows learned skills is the [skill tree rule](#skill-tree-details).
+A worn item a curse holds on keeps Remove in its list, unavailable, with the engine's reason
+("Remove: it will not come off."); the Book never hides it.
 
 **Fuel and light.** An item with fuel shows `Fuel <remaining> of <capacity>, lit/unlit` from the
 confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside Remove when worn.

@@ -153,7 +153,7 @@ function entityOffered(
   steps: Steps,
 ) {
   if (scope === 'worn' && !light.VERBS.includes(a.command))
-    return a.command === 'remove' && fits(world, actor, a, id);
+    return a.command === 'remove' && (fits(world, actor, a, id) || !!heldOn(world, actor, a, id));
   if (light.VERBS.includes(a.command))
     return (
       ['inventory', 'worn'].includes(scope) &&
@@ -207,9 +207,11 @@ function advertise(
     (speaks(world, target)
       ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
       : 'not_found');
-  const refused = holds(world, actor, a.policy.root, { target, steps })
-    ? craftRefused(world, a.recipe, actor, steps) // a craft's refusal (hs-10)
-    : policyRefusal(a.recipe); // the command's refusal of a failed policy, with its reason
+  const refused =
+    heldOn(world, actor, a, target) ??
+    (holds(world, actor, a.policy.root, { target, steps })
+      ? craftRefused(world, a.recipe, actor, steps) // a craft's refusal (hs-10)
+      : policyRefusal(a.recipe)); // the command's refusal of a failed policy, with its reason
   const code =
     refused?.code ??
     (talk ||
@@ -262,14 +264,21 @@ const lidded = (world: World, id: string) => {
 };
 // Never with the place: a targetless wear or remove is never accepted (its Command needs item_id).
 const equip = (a: Offered) => equipment.VERBS.includes(a.command);
-// True when step would accept equipment verb `a` by `actor` on `item` now: admission (refusal),
-// then equipment@1's checks (equipment.transfer).
-function fits(world: World, actor: CharacterId, a: Offered, item: string) {
+// Why step would refuse equipment verb `a` by `actor` on `item` now, else undefined: admission
+// (refusal), then equipment@1's checks (equipment.transfer).
+function equipRefused(world: World, actor: CharacterId, a: Offered, item: string) {
   const payload = { type: a.command, item_id: item, actor_id: actor } as CommandPayload;
-  return (
-    !refusal(world, payload, { n: 0 }, a.key) &&
-    typeof equipment.transfer(world, actor, a.command, item as EntityId) !== 'string'
-  );
+  const t =
+    refusal(world, payload, { n: 0 }, a.key) ??
+    equipment.transfer(world, actor, a.command, item as EntityId);
+  return Array.isArray(t) ? undefined : t;
+}
+const fits = (world: World, actor: CharacterId, a: Offered, item: string) =>
+  !equipRefused(world, actor, a, item);
+// The curse holding a worn item on (mechanics.md Held on): its Remove stays listed with it (loka-x6t.38).
+function heldOn(world: World, actor: CharacterId, a: Offered, item?: string) {
+  const r = a.command === 'remove' && item !== undefined && equipRefused(world, actor, a, item);
+  return typeof r === 'object' && r.cause === 'cursed' ? r : undefined;
 }
 
 // True when step would accept door verb `a` by `actor` at `site` (an exit's direction or an

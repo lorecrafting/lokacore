@@ -3,7 +3,7 @@
 // (a fresh world makes one per declared slot, capacity 1, finger 2; runtime/fresh.ts), so both are one
 // entity.transfer, whose custody, cycle and capacity preconditions foundation/compose.ts re-checks, and no
 // event; an item with affects first settles hp (settle below). Checks and codes: mechanics.md equipment@1.
-import type { CharacterId, EntityId, ErrorCode } from '../../contracts.gen.ts';
+import type { CharacterId, EntityId, ErrorCode, GameError } from '../../contracts.gen.ts';
 import {
   accepted,
   bodyOf,
@@ -27,7 +27,7 @@ export const wornIn = (world: World, at: EntityId | undefined, body: EntityId | 
 export const decide: Rule<'equipment'> = (world, command) => {
   const { type, actor_id, item_id } = command.payload;
   const t = transfer(world, actor_id, type, item_id);
-  if (typeof t === 'string') return rejected(t);
+  if (!Array.isArray(t)) return rejected(t);
   const [source_id, destination_id] = t;
   const ops = [
     ...settle(world, item_id),
@@ -49,7 +49,7 @@ export function transfer(
   actor: CharacterId,
   type: string,
   item: EntityId,
-): ErrorCode | [EntityId, EntityId] {
+): ErrorCode | GameError | [EntityId, EntityId] {
   const body = bodyOf(world, actor);
   if (!body || !has(world.entities, item)) return 'not_found';
   if (!movable(world, item)) return 'invalid_target';
@@ -58,7 +58,9 @@ export function transfer(
   const at = world.state.containers[item];
   const worn = wornIn(world, at, body);
   if (type === 'remove' && worn)
-    return statusAllows(world, item)('remove') ? [at, body] : 'invalid_state'; // row 28: a curse holds it on
+    return statusAllows(world, item)('remove')
+      ? [at, body]
+      : { code: 'invalid_state', cause: 'cursed' }; // row 28: a curse holds it on
   if (type === 'remove') return at === body ? 'invalid_state' : 'not_owned';
   if (worn) return 'invalid_state';
   if (at !== body) return 'not_owned';

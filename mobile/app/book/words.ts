@@ -86,13 +86,14 @@ export const message = (m: { key: string; bindings?: Record<string, unknown> }, 
   m.key === 'resource.short'
     ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
     : text(m.key);
-// A refused move's own sentence, not "The way north is …": keyed by the GameError's cause
-// (RefusalCause), then by its code.
+// A refusal's own sentence, not "The way north is …" or "You can't do that: …": keyed by the
+// GameError's cause (RefusalCause), then by its code.
 const SENTENCE: Record<string, string> = {
   insufficient_resource: 'You are too exhausted.',
   not_standing: 'You are not standing.',
+  cursed: 'It will not come off.',
 };
-type Refusal = { code: string; cause?: string };
+export type Refusal = { code: string; cause?: string };
 export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
 // The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
