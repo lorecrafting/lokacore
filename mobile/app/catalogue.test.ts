@@ -41,6 +41,12 @@ test('every exported component has a doc comment with Use: and an existing Story
   assert.deepEqual([...bad, ...unknownExports], []);
 });
 
+// Breaks: the scan passes over a capitalised export form it cannot read, so that component has no spec.
+test('the scan reports an export form it cannot read', () => {
+  for (const src of ['export let Foo = 1;', 'export const A = 1, B = 2;'])
+    assert.equal(specs('x.tsx', src).unknown.length, 1, src);
+});
+
 // Breaks: the catalogue index drops, duplicates or misfiles a component, or its Story column
 // disagrees with the doc comment.
 test('the catalogue index lists each exported component once, with its file and story', () => {
