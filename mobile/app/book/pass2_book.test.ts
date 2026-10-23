@@ -41,12 +41,12 @@ test('a learned teach line drops its requirement', (t) => {
   const free = 'The carpenter teaches it free.';
   const unqualified = skills(() => ({ qualified: false }));
   assert.ok(
-    unqualified.includes(`Whittling: learned, unqualified; ${free}`),
+    unqualified.includes(`Whittling: learned, unqualified. ${free}`),
     JSON.stringify(unqualified),
   );
-  assert.ok(unqualified.includes(`The carpenter teaches Woodcutting; ${free}`));
+  assert.ok(unqualified.includes(`The carpenter teaches Woodcutting. ${free}`));
   const locked = skills((s) => ({ locked: !s.acquired }));
-  assert.ok(locked.includes(`Woodcutting: locked; ${free}`), JSON.stringify(locked));
+  assert.ok(locked.includes(`Woodcutting: locked. ${free}`), JSON.stringify(locked));
 });
 
 // Breaks: reopening the save seeds the NPC page with the last visit's narration, so a fresh

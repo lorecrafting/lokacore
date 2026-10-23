@@ -197,7 +197,7 @@ export const npcSkills = (c: Palette, t: Type, p: NpcProps) =>
             ? `${p.text(s.label)}: ${locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
             : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
           {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
-          {s.qualified && !locked ? '.' : `; ${p.text(s.requirement)}`}
+          {s.qualified && !locked ? '.' : `. ${p.text(s.requirement)}`}
         </Text>
       );
     });
