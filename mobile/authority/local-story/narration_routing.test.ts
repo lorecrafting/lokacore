@@ -25,10 +25,6 @@ test('committed combat line indices come from pinned keys and structured receipt
           world: {
             combat: { narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' } },
           },
-          statuses: {
-            'c@1:status/s': { narration: { skipped: 'authored.skip' } },
-            bare: { narration: {} },
-          },
         },
       },
     }) as unknown as Story;
@@ -108,8 +104,15 @@ test('committed combat line indices come from pinned keys and structured receipt
       combat_lines: [0, 1],
     });
     // Break (loka-x6t.30): a round where every blow was status-skipped has no attack event; its
-    // skip lines (the engine's or an authored one) still belong to combat.
-    const skips = [{ key: 'bell' }, { key: 'combat.skipped' }, { key: 'authored.skip' }];
+    // skip lines (engine or authored key, each binding status) still belong to combat, and the
+    // same authored key told elsewhere without the binding does not.
+    const stunned = { status: 'condition.stunned' };
+    const skips = [
+      { key: 'bell' },
+      { key: 'combat.skipped', bindings: stunned },
+      { key: 'authored.skip', bindings: stunned },
+      { key: 'authored.skip' },
+    ];
     sql
       .prepare('UPDATE receipt SET response = ?')
       .run(JSON.stringify({ ...decision, events: [], narration: skips }));
