@@ -67,7 +67,7 @@ defmodule Loka.ContentLightTest do
           {"unused", %{}}
         ] do
       # Controlled source declarations keep this check independent of the showcase consumers.
-      result = Loka.Content.Requires.features(manifest, [{name, [], fields}])
+      result = Loka.Content.Requires.features(manifest, [{name, [], fields}], [])
 
       if name == "unused" do
         assert result == []
@@ -108,7 +108,7 @@ defmodule Loka.ContentLightTest do
   # Break: the dark flag's 1.114 floor read on any definition kind, not rooms only (as the TS
   # loader, cartridge_fuel.ts).
   test "only a room's dark flag raises the floor to 1.114" do
-    m = %{"requires" => %{"kernel_api" => %{"at_least" => "1.19"}}}
+    m = %{"requires" => %{"kernel_api" => %{"at_least" => "1.19"}, "capabilities" => %{}}}
     flagged = {"rooms/yard.json", [], %{"dark" => true}}
     item = {"items/crate.json", [], %{"dark" => true}}
     assert Loka.Content.Requires.features(m, [item], []) == []
