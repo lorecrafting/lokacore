@@ -209,7 +209,7 @@ unavailable form (`label: reason`), inset `space.lg` from the option so they rea
 children. No chevron or other glyph: the label's ellipsis says it opens. At phone width rows take
 the full inset width, a long name wraps and never truncates, and the open list stays in the
 page's scroll; opening scrolls the first row into view. Web keyboard: Tab and Shift-Tab move
-through the rows in order, Enter or Space picks, Escape closes; screen readers hear the option's
+through the rows in order, Enter or Space picks, Escape or the device's Back closes; screen readers hear the option's
 name with its expanded state, then each row's name. Behaviour: [Book UI](system/book-ui.md#item-details-and-takedrop).
 States for its story: closed; open with available rows; open with an unavailable row; recipes
 mixed in one list; pending.
