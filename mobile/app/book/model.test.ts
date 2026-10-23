@@ -163,7 +163,7 @@ test('a move refused at 0 MV says the body is too exhausted', () => {
   );
 });
 
-// Breaks (Q13 option A): a move refused while sitting logs "The way north is not now." (the shared
+// Breaks (Q13 option A): a move refused while sitting logs "The way north is not now." or notes "not now" (the shared
 // code's word, cause dropped) or "The way north is not standing." (the cause framed as the way's).
 test('a move refused while sitting says the player is not standing', () => {
   const north = {
@@ -174,6 +174,10 @@ test('a move refused while sitting says the player is not standing', () => {
   assert.deepEqual(
     refused(north as never, (k) => k),
     { kind: 'refused', reason: 'not standing', text: 'You are not standing.' },
+  );
+  assert.equal(
+    why(north as never, (k) => k),
+    'not standing',
   );
 });
 
