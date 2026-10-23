@@ -245,7 +245,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
       .screen()
       .detail(speaker)
       .filter((s: string) => s === result).length,
-    1,
+    0, // the closed visit's history is dropped; a replayed choice would write it again
   );
   assert.equal(h.p.screen().fault, undefined);
   assert.deepEqual(h.p.screen().log, []);
@@ -308,9 +308,8 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   const beforeResult = turn();
   h.tap("Offer to fetch Bram's lantern");
   assert.equal(turn(), beforeResult);
+  // each visit starts empty: the earlier visits' prompts are not shown again (loka-x6t.19)
   assert.deepEqual(h.p.screen().detail(speaker), [
-    prompt,
-    prompt,
     prompt,
     "You say you'll fetch it. Bram nods toward the path north.",
     { text: 'Journal updated', event: true },
@@ -345,7 +344,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.tap('Old Bram');
   assert.equal(h.text().includes('Journal updated'), false); // a fresh visit hides past talk
   h.tap('Talk to Old Bram');
-  assert.ok(h.text().includes('Journal updated')); // and a new conversation shows it again
+  assert.equal(h.text().includes('Journal updated'), false); // nor does a new conversation (loka-x6t.19)
   h.tap('Keep the lantern');
   assert.equal(h.game.view().view.scene!.index, 1);
   assert.deepEqual(h.labels(), ['Continue']);

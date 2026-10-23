@@ -222,7 +222,7 @@ combat details follow this order; World retains its [room-page order](#world-and
 A page's local returns (Leave, Back to World, Back to board, Back to container, Back to map,
 Close) sit in its page foot, below the scrolling content and above the status line, nearest first;
 offered actions never do. World, a scene, a chapter title, the ancestry choice and combat have no
-foot. A control that opens a child (Resume dream, Continue conversation) stays in the content.
+foot. A control that opens a child (Resume dream, Continue conversation) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); no line shows twice for one receipt. Combat closure and the notice-board readable restore are the exceptions in their sections.
 
 ## Notice-board details
 
@@ -274,12 +274,11 @@ cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) 
 with any priced offer (a shelf, a bank, a priced service) draws one Note **You have <n>p.**
 after the description, before the shelf rows, from the projected pennies; it is the only place
 the balance is written, and "can't afford" stays a bare reason (pass-1 E15). It shows
-no past conversation log on a fresh visit to the page or after Leave the conversation (the log
-shows again inside a new conversation); lines since that visit began or that Leave are the only
+no past conversation log on a fresh visit to the page or after Leave the conversation; lines since that visit began or that Leave are the only
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
-action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. An authored choice that only leaves (a Leave or Close label with no effect beyond its narration) is not drawn in a talk with more than one choice; the page's own Leave control ends the talk. A talk with a single authored choice keeps its own Leave (loka-x6t.21). The conversation belongs to
+action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk. A talk with a single authored choice keeps its own Leave (loka-x6t.21). The conversation belongs to
 that page visit (the Book's latch, not the NPC): leaving the page any other way (Contents, Map,
 Back to World) ends it, and reopening the person shows their actions again. This supersedes the
 viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
@@ -343,7 +342,7 @@ A shelf reason from the cartridge is a lowercase fragment with no period.
 
 Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
-reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. An available loose item therefore offers Take
+reachable contents and current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up <name>.** Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
 returns to World with the original projected name: **You drop <name>.** Held items

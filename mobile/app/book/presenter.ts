@@ -289,6 +289,7 @@ export function presenter(game: Game) {
       return line;
     },
     leaveCombat: () => (s.ended = undefined),
+    forget: (id: string) => s.details.delete(id),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },

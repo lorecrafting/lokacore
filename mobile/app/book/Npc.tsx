@@ -92,7 +92,7 @@ export function NpcPage(p: NpcProps) {
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
-  const log = talk ? p.log : p.log.slice(p.since ?? 0);
+  const log = p.log.slice(p.since ?? 0);
   const contents = held(p);
   return (
     <Page
@@ -238,7 +238,7 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
   });
 }
 
-// Per page visit: how many history lines came before it or before its last Leave the conversation.
+// Per page visit: how many history lines came before its last Leave the conversation.
 const past = new WeakMap<object, number>();
 
 /**
@@ -261,7 +261,6 @@ export function NpcDetail(p: {
   const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
   const id = npc?.id ?? p.speaker ?? view.choice?.speaker_id ?? 'conversation';
   const log = p.screen.detail(id);
-  if (p.visit && !past.has(p.visit)) past.set(p.visit, log.length);
   return (
     <NpcPage
       view={view}
