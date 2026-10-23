@@ -61,6 +61,10 @@ export const OUTCOME: Record<string, string> = {
   activated_with_possession: 'You take on the task. It is in your journal.',
   choice_closed: 'You leave the question for now.',
   waited: 'Time passes.',
+  stood: 'You stand up.',
+  sat: 'You sit down.',
+  rested: 'You settle down to rest.',
+  slept: 'You lie down to sleep.',
 };
 
 // The refusal codes an offer can carry (book/reasons.test.ts).

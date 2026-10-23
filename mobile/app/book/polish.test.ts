@@ -382,6 +382,21 @@ test('only World position taps directly cycle the offered states with captured f
   h.sql.close();
 });
 
+// Breaks: a position tap leaves no confirmed World line, or writes it twice (loka-x6t.22).
+test('each position tap writes its one line to the World log', () => {
+  const h = book();
+  for (const [from, line] of [
+    ['standing', 'You sit down.'],
+    ['sitting', 'You settle down to rest.'],
+    ['resting', 'You lie down to sleep.'],
+    ['sleeping', 'You stand up.'],
+  ]) {
+    h.tap(`${from}, change position`);
+    assert.equal(h.text().filter((s: string) => s === line).length, 1, line);
+  }
+  h.sql.close();
+});
+
 // Breaks: retrying an NPC's unconfirmed choice from Map forgets its original detail context.
 test('an NPC choice retried from the world keeps its result in the original detail', () => {
   const h = book();

@@ -128,7 +128,7 @@ Only World's current-position label is a distinct position tap target. Each tap 
 the next currently offered legal action in standing → sitting → resting → sleeping → standing
 order, skipping unavailable/absent actions. If none is offered, position stays informational.
 The button follows [live action freshness](#live-action-freshness); pending/refused/stale results never advance the
-shown position optimistically. This opens no detail page or Contents and does not turn the
+shown position optimistically. A confirmed change writes one World log line: its authored narration, else "You stand up.", "You sit down.", "You settle down to rest." or "You lie down to sleep.". This opens no detail page or Contents and does not turn the
 ordinary World page. Position in all details is informational; modal scenes expose no position
 shortcut. Movement and position admission remain kernel-owned.
 
