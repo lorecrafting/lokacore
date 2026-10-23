@@ -1,6 +1,6 @@
 // The Book's live updates: each GameView update redraws its pages, restores a remounted pending
 // Read or corpse Take, and turns the page on a terminal result.
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
@@ -32,23 +32,18 @@ export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']
   return pagesAfter(corpse, screen.view, screen.view);
 }
 const detailId = (page: Page) =>
-  page.kind === 'thing' || page.kind === 'notice'
+  page.kind === 'thing' || page.kind === 'notice' || page.kind === 'board'
     ? page.id
     : page.kind === 'dialogue'
       ? (page.speaker ?? 'conversation')
       : undefined;
+// A closed NPC, item or notice page drops its visit's history, by any route (book-ui.md
+// Detail-page order); every redraw sweeps, so a reply that lands after its page closed is gone too.
+export const visit = (pr: Presenter, stack: Page[]) => pr.visit(stack.map(detailId));
 
 export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
-  // A closed NPC or item page drops its visit's history, by any route (book-ui.md Detail-page order).
   const stack = s.current.current.stack;
-  const shown = useRef<Page[] | undefined>(undefined);
-  useEffect(() => {
-    const open = stack.map(detailId);
-    // At mount (a cold reopen) every restored history counts as shown, so a closed page starts empty.
-    const ids = shown.current ? shown.current.map(detailId) : pr.restored();
-    for (const id of ids) if (id && !open.includes(id)) pr.forget(id);
-    shown.current = stack;
-  }, [pr, stack]);
+  useEffect(() => visit(pr, stack), [pr, stack]);
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
@@ -74,6 +69,7 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   if (terminal && update.kind === 'completion')
     next = wordTurn(next, update.intent.action_key, before.view, after.view);
   current.current = { stack: next, view: after.view };
+  visit(pr, next);
   setStack(next);
   if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
   redraw((n) => n + 1);

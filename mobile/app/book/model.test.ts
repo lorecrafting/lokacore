@@ -127,6 +127,13 @@ test('a restored choice opens its actual speaker detail or retained conversation
   assert.deepEqual(initialPages(view([])), [{ kind: 'dialogue', speaker: 'bram' }]);
 });
 
+// Breaks (loka-x6t.96): a chapter title over a restored choice replaces its speaker page, so
+// Continue lands on the world and the sweep drops the restored prompt (book-ui.md Chapters).
+test('a restored choice under a chapter title waits on its speaker page beneath it', () => {
+  const view = { entities: [{ id: 'bram' }], chapter: {}, choice: { speaker_id: 'bram' } } as never;
+  assert.deepEqual(initialPages(view), [{ kind: 'thing', id: 'bram' }, { kind: 'chapter' }]);
+});
+
 // Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), a cartridge's own reason
 // sentence wrapped in the frame ("The way east is The causeway is flooded.."), a refused line without
 // its reason tag (the code word, even beside a cartridge sentence), or a title cased wrong.

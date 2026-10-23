@@ -43,7 +43,14 @@ import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
 import { PageTurn } from './PageTurn.tsx';
-import { resultPages, useUpdates, wordTurn, type BookState, type Presenter } from './updates.ts';
+import {
+  resultPages,
+  useUpdates,
+  visit,
+  wordTurn,
+  type BookState,
+  type Presenter,
+} from './updates.ts';
 import { LABEL } from './labels.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
@@ -87,6 +94,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   next = resultPages(next, after);
   next = wordTurn(next, b.action_key, before.view, after.view);
   s.current.current = { stack: next, view: after.view };
+  visit(pr, next);
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);
   const inline =

@@ -289,10 +289,15 @@ export function presenter(game: Game) {
       return line;
     },
     leaveCombat: () => (s.ended = undefined),
-    forget: (id: string) => s.details.delete(id),
-    // Histories a cold reopen may drop: a restored pickup and a dream (resumed, not revisited) stay.
-    restored: () =>
-      [...s.details.keys()].filter((id) => id !== s.pickedFrom && !id.startsWith('dream:')),
+    // Drops every history whose page is not open (book-ui.md Detail-page order), so a late write
+    // for a closed page is gone by its next visit; a dream (resumed, not revisited) and a restored
+    // pickup's corpse until that corpse's page opens stay.
+    visit: (open: (string | undefined)[]) => {
+      if (open.includes(s.pickedFrom)) s.pickedFrom = undefined;
+      for (const id of s.details.keys())
+        if (!open.includes(id) && id !== s.pickedFrom && !id.startsWith('dream:'))
+          s.details.delete(id);
+    },
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },

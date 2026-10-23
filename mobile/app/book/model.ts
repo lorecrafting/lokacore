@@ -216,7 +216,8 @@ export const initialPages = (v: GameView): Page[] =>
   v.combat
     ? [{ kind: 'combat' }]
     : v.chapter
-      ? [{ kind: 'chapter' }]
+      ? // Continue dismisses the title only: a restored choice waits on its speaker's page beneath.
+        [...(v.choice ? [conversation(v)] : []), { kind: 'chapter' }]
       : v.choice
         ? [conversation(v)]
         : [];
