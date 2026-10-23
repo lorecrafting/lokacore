@@ -217,7 +217,7 @@ function heard(s: Logs, view: GameView, was: Said | undefined): Said {
     place: view.place.id,
     fight: view.combat?.encounter_id,
   };
-  if (!was) return { ...now, key: 0, text: '' };
+  was ??= { ...now, key: 0, text: '' };
   // A room or encounter change empties its log first (resetLogs), so all of it is new.
   const fresh = [
     ...s.log.slice(now.place === was.place ? was.log : 0),
