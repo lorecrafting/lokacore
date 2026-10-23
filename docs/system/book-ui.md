@@ -20,7 +20,7 @@ and their text is at [the last commit that held them](https://github.com/lorecra
 
 ## World and status entry
 
-World is one current-room page. Its left-aligned title remains fixed above the scrolling authored
+World is one current-room page. Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
 description, projected interactibles, offered place actions, event log and, last, the
 [Word block](#word-bar), so a pressed verb's result line sits within a screen of the verb and the
 word rows never push it below the fold (pass-1 UA). A place action the GameView advertises
