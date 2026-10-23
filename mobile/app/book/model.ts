@@ -265,9 +265,9 @@ export function actionContext(
     b.target_ids,
     b.detail_id,
     Object.entries(b.input)
-      // A typed answer or Say word keeps the offered button's context (and its live token).
+      // A typed answer or word keeps the offered button's context (and its live token).
       .filter(([key]) => !(b.action_key === 'choose' && key === 'answer'))
-      .filter(([key]) => !(b.action_key === 'say' && key === 'word'))
+      .filter(([key]) => !(WORDS.includes(b.action_key) && key === 'word'))
       .sort(([a], [z]) => a.localeCompare(z)),
     b.detail_id?.startsWith('dream:') ? dreamAt(view, b.detail_id.slice('dream:'.length)) : null,
     view.actor_id,

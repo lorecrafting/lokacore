@@ -1,4 +1,5 @@
 // The NPC page: conversation, choices, skills, shop and services, what the NPC holds, with the existing book controls.
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -12,6 +13,7 @@ import { inside } from './Menu.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
+import { SayField } from './SayField.tsx';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
 import { balance, buyReason, refused, sellReason } from './words.ts';
@@ -71,6 +73,7 @@ type NpcProps = {
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
   open: (id: string) => void;
+  pending?: boolean; // holds the Whisper field's send
 };
 
 /**
@@ -78,8 +81,10 @@ type NpcProps = {
  * action details).
  * - Use: an NPC route.
  * - Rules: choices and services as Action cards, the conversation log, Controls in the PageFoot.
- *   History belongs to the page visit and restarts after Leave the conversation.
- * - States: choice; shop; services; closed conversation.
+ *   History belongs to the page visit and restarts after Leave the conversation. While whisper
+ *   to this person is offered, a Whisper Control after the cards opens the one-word field
+ *   (StatusLine's say field) with one Whisper button aimed at them.
+ * - States: choice; shop; services; closed conversation; whisper open.
  * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
@@ -105,9 +110,13 @@ export function NpcPage(p: NpcProps) {
       {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
-      {!talk && !enemy && !actions.length && !listed(p) && !log.length && !contents.length && (
-        <Note>Nothing to do here.</Note>
-      )}
+      {!talk &&
+        !enemy &&
+        !actions.length &&
+        !p.g.word.some((w) => w.target_ids[0] === p.npc?.id) &&
+        !listed(p) &&
+        !log.length &&
+        !contents.length && <Note>Nothing to do here.</Note>}
       {!talk && !enemy && <ShopOptions {...p} />}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && (
@@ -118,8 +127,34 @@ export function NpcPage(p: NpcProps) {
           <ServiceOptions {...p} actions={actions} />
         </Cards>
       )}
+      {!talk && <Whisper {...p} />}
       {!talk && inside({ thing: p.npc, contents, text: p.text, open: p.open })}
     </Page>
+  );
+}
+
+// Whisper to this person (owner, mvl9qy5ut2x2): the say field with one Whisper button, sent by
+// the wordless whisper twin (buttons.ts) so it stays live.
+function Whisper(p: NpcProps) {
+  const [open, setOpen] = useState(false);
+  const b = p.g.word.find(
+    (w) => w.action_key === 'whisper' && w.target_ids[0] === p.npc?.id && !('word' in w.input),
+  );
+  if (!b) return null;
+  const send = (word: string) => p.press({ ...b, label: LABEL.whisper, input: { word } });
+  return (
+    <View>
+      <View style={{ alignItems: 'flex-start' }}>
+        <Control label={LABEL.whisper} expanded={open} onPress={() => setOpen(!open)} />
+      </View>
+      {open && (
+        <SayField
+          pending={!!p.pending}
+          sends={[{ label: LABEL.whisper, send }]}
+          close={() => setOpen(false)}
+        />
+      )}
+    </View>
   );
 }
 
@@ -267,6 +302,7 @@ export function NpcDetail(p: {
       text={text}
       g={p.g}
       log={log}
+      pending={p.screen.pending}
       press={(b) => p.press(b, id)}
       leave={p.world}
       open={(thing) => p.open({ kind: 'thing', id: thing })}

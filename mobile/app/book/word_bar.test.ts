@@ -172,11 +172,22 @@ test('no word press without a word, nor in combat, a scene or a conversation', (
   const v = book(speech as never).game.view().view;
   const say = (k: string) => k;
   const words = (w: GameView) => buttonsOf(w, say, say).filter((p) => WORDS.includes(p.action_key));
-  const [keyboard, ...chips] = words(v); // the keyboard's Say is never drawn as a chip
-  assert.deepEqual([keyboard.action_key, keyboard.input], ['say', {}]);
+  // wordless twins are the field's sends (say, shout, cast, whisper per person), never chips
+  const twins = (w: GameView) => words(w).filter((p) => !('word' in p.input));
+  const keyboard = twins(v);
+  const chips = words(v).filter((p) => 'word' in p.input);
+  assert.deepEqual(
+    keyboard.map((p) => [p.action_key, p.input]),
+    [
+      ['say', {}],
+      ['shout', {}],
+      ['whisper', {}],
+      ['whisper', {}],
+    ], // two people here
+  );
   assert.equal(chips.length, 9);
-  assert.ok(chips.every((p) => /^[a-zA-Z]{1,32}$/.test((p.input as { word?: string }).word ?? '')));
-  assert.deepEqual(words({ ...v, phrases: [] }), [keyboard]);
+  assert.ok(chips.every((p) => /^[a-zA-Z]{1,32}$/.test((p.input as { word: string }).word)));
+  assert.deepEqual(words({ ...v, phrases: [] }), keyboard);
   const open = (f: string) =>
     JSON.parse(readFileSync(new URL(`../stories/views/${f}.json`, import.meta.url), 'utf8')).view;
   assert.deepEqual(words({ ...v, combat: open('combat-one-foe').combat }), [], 'combat');

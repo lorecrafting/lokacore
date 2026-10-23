@@ -671,12 +671,11 @@ how it is spoken (`ward, whisper to the elder`, `ward, shout`, `ward, cast`); a 
 sends that action with `{word}`. A word that opens a conversation turns to it, as Talk does.
 No whisper, shout or cast row, no block.
 
-Saying is never a Word row (owner, wordbar1 2026-10-23). While `say` is offered on the World page, the
+Saying is never a Word row (owner, wordbar1 2026-10-23), and a typed word never needs the Word block (owner, mvl9qy5ut2x2). While `say`, `shout` or `cast` is offered on the World page, the
 [status line](#world-and-status-entry) ends with a say icon named **Say to the room** (expanded while open; [look](../../mobile/app/book/Status.tsx));
-a tap opens one text field under the line (named **A word**, focused, up to 32 characters, no autocorrect or
-autocapitalize) and a **Say** Control. Enter or Say sends `say` with the typed word and closes the field; Escape or the icon
-closes it unsent; a new room closes it. A word that is not 1 to 32 letters is not sent, keeps the field open and
-shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it.
+a tap opens the one-word field ([SayField](../../mobile/app/book/SayField.tsx)) under the line with **Say**, **Shout** and **Cast** Controls, each only while that action is offered. A press sends that action with the typed word and closes the field; Enter sends the first; Escape or the icon
+closes it unsent; a new room closes it. On an NPC page, while `whisper` to that person is offered, a **Whisper** Control after the action cards opens the same field with one **Whisper** Control aimed at them; it counts as something to do there. Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
+shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it. The Word block above stays only for known words: phrase and learned-spell chips and refused-cast lines, which have no other surface yet.
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:

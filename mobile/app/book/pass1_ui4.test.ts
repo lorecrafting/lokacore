@@ -160,6 +160,7 @@ test('the empty Note only when nothing, not even a refusal, shows', async () => 
 // sits after the shelf rows, repeats, or shows beside a free service or no offer at all (E15).
 test('one balance Note after the description on a page with a priced offer', async () => {
   const { NpcPage } = await import('./Npc.tsx');
+  (globalThis as any)[Symbol.for('loka-book-test-state')] ??= (v: unknown) => [v, () => {}]; // no Book harness here
   const v = nellView();
   const nell = v.entities.find((e) => e.shop)!;
   const service = (price: number) => ({

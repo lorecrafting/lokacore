@@ -298,29 +298,46 @@ export const Position: Story = {
   },
 };
 
-// The say icon after the pools, its field open (owner pick wordbar1, 2026-10-23).
-// Breaks: the field not focused, a word not sent, or the field left open after a send.
+// The say icon after the pools, its field open with Say, Shout and Cast (owner picks wordbar1,
+// mvl9qy5ut2x2). Breaks: the field not focused, Enter not saying, a button sending another
+// button's action, or the field left open after a send.
 export const SayOpen: Story = {
-  args: { say: { room: 'inn', busy: false, send: fn() } },
+  args: {
+    say: {
+      room: 'inn',
+      busy: false,
+      sends: [
+        { label: 'Say', send: fn() },
+        { label: 'Shout', send: fn() },
+        { label: 'Cast', send: fn() },
+      ],
+    },
+  },
   play: async ({ canvas, args, userEvent }) => {
+    const [say, shout] = args.say!.sends.map((s) => s.send);
     await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' }));
     await expect(canvas.getByLabelText('A word')).toHaveFocus();
     await userEvent.type(canvas.getByLabelText('A word'), 'ward{Enter}');
-    await expect(args.say!.send).toHaveBeenCalledWith('ward');
+    await expect(say).toHaveBeenCalledWith('ward');
     await expect(canvas.queryByLabelText('A word')).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' }));
+    await userEvent.type(canvas.getByLabelText('A word'), 'help');
+    await userEvent.click(canvas.getByRole('button', { name: 'Shout' }));
+    await expect(shout).toHaveBeenCalledWith('help');
+    await expect(say).toHaveBeenCalledTimes(1);
     await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' })); // left open
   },
 };
 
 // Breaks: two words sent as one, refused without the note, or Escape not closing the field.
 export const SayBadWord: Story = {
-  args: { say: { room: 'inn', busy: false, send: fn() } },
+  args: { say: { room: 'inn', busy: false, sends: [{ label: 'Say', send: fn() }] } },
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' }));
     await userEvent.type(canvas.getByLabelText('A word'), 'two words');
     await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
     await expect(canvas.getByText('One word, letters only.')).toBeVisible();
-    await expect(args.say!.send).not.toHaveBeenCalled();
+    await expect(args.say!.sends[0]!.send).not.toHaveBeenCalled();
     await userEvent.keyboard('{Escape}');
     await expect(canvas.queryByLabelText('A word')).toBeNull();
     await userEvent.click(canvas.getByRole('button', { name: 'Say to the room' })); // left open

@@ -160,6 +160,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
+| `SayField` | `book/SayField.tsx` | SayField |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |

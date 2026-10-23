@@ -237,6 +237,12 @@ type BottomProps = {
   shell: Shell;
 };
 
+const SENDS = [
+  ['say', LABEL.say],
+  ['shout', LABEL.shout],
+  ['cast', LABEL.cast],
+] as const;
+
 function Bottom(p: BottomProps) {
   const c = usePalette();
   const t = useType();
@@ -244,8 +250,11 @@ function Bottom(p: BottomProps) {
   // A tap on the position line acts only on the open World page.
   const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
   const shut = !!view.combat || !!ended;
-  // The keyboard's Say (buttons.ts): on the open World page only, as the Word block was.
-  const say = !p.page && !shut && p.g.word.find((b) => b.action_key === 'say');
+  // The say field's wordless twins (buttons.ts), Say, Shout, Cast: on the open World page only.
+  const sends = (!p.page && !shut ? SENDS : []).flatMap(([key, label]) => {
+    const b = p.g.word.find((w) => w.action_key === key && !('word' in w.input));
+    return b ? [{ label, send: (word: string) => p.press({ ...b, label, input: { word } }) }] : [];
+  });
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   return (
     <View
@@ -274,12 +283,8 @@ function Bottom(p: BottomProps) {
           open={() => p.open({ kind: 'contents' })}
           openCharacter={() => p.open({ kind: 'character' })}
           say={
-            say
-              ? {
-                  room: view.place.id,
-                  busy: pending || !!fault || p.screen.catchingUp,
-                  send: (word) => p.press({ ...say, label: LABEL.say, input: { word } }),
-                }
+            sends.length
+              ? { room: view.place.id, busy: pending || !!fault || p.screen.catchingUp, sends }
               : undefined
           }
         />

@@ -1,16 +1,16 @@
 // The status line under the footer.
 import { useState, type ReactElement } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
-import { band, Control, Tap } from './pages.tsx';
+import { band, Tap } from './pages.tsx';
 import { sayGlyph } from './glyphs.ts';
 import { LABEL } from './labels.ts';
 import { StatusIcons } from './StatusIcon.tsx';
-import { Note } from './lines.tsx';
-import { prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { usePalette, useType, type Palette, type Type } from './palette.ts';
 import { size, space } from './tokens.ts';
+import { SayField, type Send } from './SayField.tsx';
 
 // The status icon row (StatusIcon.tsx) when any condition is on, then the line: the sky glyph (sun by day, moon by night), the position, bleeding, then
 // the resource button, which shows the condition pools coloured by band when GameView carries them
@@ -31,8 +31,9 @@ type StatusProps = {
   open: () => void;
   openCharacter: () => void; // a status icon's tap
   openPosition?: () => void;
-  // Say to the room (World page only): a new room closes the field; busy holds the send.
-  say?: { room: string; busy: boolean; send: (word: string) => void };
+  // The say field (World page only): one button per offered way to speak, Say first; a new room
+  // closes the field; busy holds every send.
+  say?: { room: string; busy: boolean; sends: Send[] };
 };
 
 const statusRow = {
@@ -82,10 +83,9 @@ const skyText = (p: StatusProps) =>
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
  *   label-in-name rule.
  *   Say icon (World page, while Say is offered): a size.touch box after the pools, in their wrap
- *   unit, named "Say to the room" and expanded while open; a tap toggles the say field under the
- *   line: one text field named "A word", focused on open, and a Say Control. Enter or Say sends
- *   one word and closes; Escape or the icon closes; an invalid word keeps it open with the Note
- *   "One word, letters only."; nothing sends while pending; a new room closes it.
+ *   unit, named "Say to the room" and expanded while open; a tap toggles the SayField under the
+ *   line with Say, Shout and Cast, each only while offered. Escape or the icon closes it; a new
+ *   room closes it.
  * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`);
  *   say field open; bad word.
@@ -131,7 +131,7 @@ export function StatusLine(p: StatusProps) {
         </View>
       </View>
       {p.say && open && (
-        <SayField pending={p.say.busy} send={p.say.send} close={() => setOpen(false)} />
+        <SayField pending={p.say.busy} sends={p.say.sends} close={() => setOpen(false)} />
       )}
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
@@ -216,49 +216,5 @@ function Position(p: { value: NonNullable<GameView['position']>; open?: () => vo
     </Tap>
   ) : (
     words
-  );
-}
-
-const WORD = /^[a-zA-Z]{1,32}$/; // the kernel's own check (kernel/ts/src/mechanics/speech/shared.ts)
-
-// The say field (StatusLine's doc comment): a typed word goes as the keyboard's Say with that
-// word; only its writer sees it.
-function SayField(p: { pending: boolean; send: (word: string) => void; close: () => void }) {
-  const [c, t] = [usePalette(), useType()];
-  const [draft, setDraft] = useState('');
-  const [wrong, setWrong] = useState(false);
-  const send = () => {
-    if (p.pending) return;
-    if (!WORD.test(draft)) return setWrong(true);
-    (p.send(draft), p.close());
-  };
-  return (
-    <View style={{ gap: space.sm }}>
-      <TextInput
-        accessibilityLabel={LABEL.aWord}
-        autoFocus
-        allowFontScaling={false}
-        value={draft}
-        onChangeText={(s) => (setDraft(s), setWrong(false))}
-        onSubmitEditing={send}
-        onKeyPress={(e) => e.nativeEvent.key === 'Escape' && p.close()} // web and hardware keyboards
-        maxLength={32}
-        autoCorrect={false}
-        autoCapitalize="none"
-        spellCheck={false}
-        style={{
-          ...prose(c, t),
-          backgroundColor: c.bg,
-          minHeight: size.touch,
-          paddingHorizontal: space.lg,
-          borderColor: c.line,
-          borderWidth: size.rule,
-        }}
-      />
-      <View style={{ flexDirection: 'row' }}>
-        <Control label={LABEL.say} onPress={send} disabled={p.pending} />
-      </View>
-      {wrong && <Note>{LABEL.oneWord}</Note>}
-    </View>
   );
 }

@@ -18,13 +18,16 @@ registerHooks({
       : next(specifier, context);
   },
   load(url, context, next) {
-    if (url === 'test:training-react') return reactShim(`({ ref: v => ({ current: v }) })`);
+    if (url === 'test:training-react')
+      return reactShim(
+        `({ ref: v => ({ current: v }), state: v => [v, () => {}], effect: () => {} })`,
+      );
     if (url === 'test:training-native')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

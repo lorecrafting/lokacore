@@ -156,12 +156,12 @@ function wordButtons(v: GameView, text: Say): Press[] {
   });
   const phrases = v.phrases ?? [];
   return [
-    // The keyboard's Say without a word: the live twin of every typed word (actionContext); the
-    // status line's say field sends it, so phrases get no Say chip.
-    ...(offered('say') ? [{ ...chip('say', ''), input: {} }] : []),
+    // Say, shout, cast and each whisper without a word: the live twins of every typed word
+    // (actionContext) that the say field and the NPC page's Whisper send; phrases get no Say chip.
+    ...['say', 'shout', 'cast'].filter(offered).map((key) => ({ ...chip(key, ''), input: {} })),
     ...v.entities.flatMap((e) =>
       e.actions.some((a) => a.action_key === 'whisper' && a.available)
-        ? phrases.map((w) => chip('whisper', w, e))
+        ? [{ ...chip('whisper', '', e), input: {} }, ...phrases.map((w) => chip('whisper', w, e))]
         : [],
     ),
     ...(offered('shout') ? phrases.map((w) => chip('shout', w)) : []),

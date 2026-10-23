@@ -42,6 +42,7 @@ export const LABEL = {
   word: 'Word',
   say: 'Say',
   whisperTo: 'Whisper to',
+  whisper: 'Whisper',
   shout: 'Shout',
   cast: 'Cast',
   sayToRoom: 'Say to the room',

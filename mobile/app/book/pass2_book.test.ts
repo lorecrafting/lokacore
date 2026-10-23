@@ -89,7 +89,13 @@ test('price rows keep the empty Note off an NPC page', (t) => {
   const swap = (services?: unknown[]) =>
     (b.game.view = () => {
       const r = real();
-      const entities = r.view.entities.map((e) => ({ ...e, shop: undefined, services }));
+      // whisper dropped too: its Control is something to do here
+      const entities = r.view.entities.map((e) => ({
+        ...e,
+        shop: undefined,
+        services,
+        actions: e.actions.filter((a) => a.action_key !== 'whisper'),
+      }));
       return { ...r, view: { ...r.view, entities } } as never;
     });
   swap();
