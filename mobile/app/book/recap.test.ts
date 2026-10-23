@@ -1,6 +1,10 @@
 // Toolbox row W27, the away recap through the real authority and Book (book-ui.md, Away recap).
 import assert from 'node:assert/strict';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
@@ -186,4 +190,51 @@ test('a settlement that ends without settling keeps its lines in the log', () =>
   } as unknown as Logs;
   settle(s);
   assert.deepEqual([s.log, s.recap, s.away], [['a', 'a'], undefined, undefined]);
+});
+
+// The sampler with 3 HP, so the third poison tick kills the player in the dart room and they wake
+// in the hall, with authored death narration (loka-3w3q, kernel_api 1.117).
+function deadly() {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-recap-death-'));
+  try {
+    cpSync(fileURLToPath(new URL('../../../cartridges/recap_sampler', import.meta.url)), dir, {
+      recursive: true,
+    });
+    const edit = (file: string, f: (j: any) => void) => {
+      const j = JSON.parse(readFileSync(join(dir, file), 'utf8'));
+      f(j);
+      writeFileSync(join(dir, file), JSON.stringify(j));
+    };
+    edit('resources.json', (j) => (j.resources.hp.start = 3));
+    edit('text.json', (j) =>
+      Object.assign(j, { 'death.fell': 'You fall.', 'death.woke': 'You wake.' }),
+    );
+    edit('cartridge.json', (j) => {
+      j.requires.kernel_api.at_least = '1.117';
+      j.world.death.narration = { player_died: 'death.fell', woke: 'death.woke' };
+    });
+    return compiled(dir);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+}
+
+// Breaks (book-ui.md, World log; loka-x6t.26): a death in an elapsed settlement leaves the World
+// page in the dart room, keeps the old room's lines, drops the death's lines with the room change,
+// or holds them (or the rest of the settlement) into a recap.
+test('a poison death while away opens the hall page on the tick, fall and waking lines', () => {
+  const b = book(deadly() as never, undefined, ids());
+  b.map();
+  b.tap('Go east');
+  const shown = wait(b, HOURS3).text();
+  assert.equal(shown[0], 'Stone Hall', JSON.stringify(shown));
+  assert.equal(count(shown, LABEL.awayRecap), 0);
+  const at = shown.indexOf(TICK);
+  assert.deepEqual(
+    shown.slice(at, at + 3),
+    [TICK, 'You fall.', 'You wake.'],
+    JSON.stringify(shown),
+  );
+  assert.equal(count(shown, TICK), 1); // the two earlier ticks went with the dart room's log
+  assert.ok(shown.includes('Maud arrives.'), JSON.stringify(shown)); // the rest logs, not recapped
 });

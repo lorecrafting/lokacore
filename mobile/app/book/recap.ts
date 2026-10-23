@@ -19,7 +19,8 @@ export function grouped(lines: readonly string[]): RecapLine[] {
  */
 export function holding(s: Logs, was: GameView, now: GameView) {
   if (now.recap_after === undefined || s.retry) return undefined;
-  return (s.away ??= { from: was.time, log: [] });
+  // A room change (a death's recovery room) ends the recap: the rest of the settlement logs.
+  return (s.away ??= { from: was.place.id === now.place.id ? was.time : Infinity, log: [] });
 }
 
 /** Once time stops catching up: the recap if the settlement spanned the threshold, else the log. */

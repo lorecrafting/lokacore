@@ -67,7 +67,7 @@ to the actual room: after a confirmed accepted action changes place, clear the o
 before adding genuine new movement/quest/authored consequences. The room shown is the one the
 committed receipt places the player in, never the exit's destination: an arrest (a wanted player
 walking in on an arresting guard) turns the World page to the cell, and its log carries the move's
-lines in receipt order (arrest line, then the reaction's charge). Each narration record of a
+lines in receipt order (arrest line, then the reaction's charge). A death outside a combat round (a bleed or drain tick, in a press or an elapsed settlement) is the same: the World page turns to the recovery room and its cleared log opens with the death receipt's lines in receipt order (the tick, `world.death.narration.player_died`, the penalty line, `world.death.narration.woke`), never dropped by the room change; such a settlement ends any away-recap holding, its earlier held lines go with the old room's log, and its own lines never enter a recap (Beads `loka-3w3q`, `loka-x6t.26`). Each narration record of a
 receipt is its own log line, in record order; the Book never joins records into one line, and
 the `words.ts` outcome word ("Opened.") draws only for a receipt with no narration at all
 (pass-1 UO). No card, note or banner. Attempts, pending/refused/stale

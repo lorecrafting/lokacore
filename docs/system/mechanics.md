@@ -2014,6 +2014,16 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Sampler.** `cartridges/penalty_sampler`: the levelling sampler plus a brute in the yard south of the hall whose blow always kills, a tail in the pit, and a 10% penalty told as `death.penalty`. Dying at 30 keeps 30 untold; at 32 writes 30; at 50 writes 45 and tells the line.
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumer: the death sequence's player return (`kernel/ts/src/mechanics/death/sequence.ts`). Reads: `world.death.penalty`, the character's levelling row and thresholds, the body's held roots. Writes: one `levelling.set`; with `kept`, fewer `entity.transfer` ops; events, jobs and save rows: none new. Writer: levelling@story through `write`. Reused: `write`, `oneWrite`, the level-up line's site, `transferRoots`, `KERNEL_API_RANGE_INVALID`, the sampler hash pin. New: `DeathSettings.penalty`, `lose`, the composer relaxation. Missing invariant: none. Credit: n/a. Realm: per character.
 
+## Death lines outside a combat round (loka-3w3q)
+
+Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#death-narration-declarations) govern it; [Book UI](book-ui.md) turns the World page with these lines (`loka-x6t.26`).
+
+- **Fall line.** A bleed tick (`bleed/job.ts`) or a status tick (`status/fatal.ts`) that kills a player tells, after its tick line, `world.death.narration.player_died`, else `world.combat.narration.player_died`, else nothing; a tick during an open fight is not a combat round and tells it too. A combat round tells its own `player_died` (`combat/round_flow.ts`) and nothing more; a drowning's fall line is its required `world.water.drowned`, so `player_died` never follows it.
+- **Waking line.** `world.death.narration.woke`, when declared, is appended once at the end of any proposal whose events hold a player's `entity_died` (combat and drowning included), after the [penalty line](#death-penalties-toolbox-row-47). The receipt order is tick, fall, penalty, woke.
+- **NPC.** An NPC's death outside a combat round tells nothing, except a status tick that kills the last opponent of a player's open fight: it closes the fight and tells `world.combat.narration.npc_died`.
+- **Opt-in.** `narration` needs kernel_api 1.117; without it, the fall line still falls back to combat's and no waking line is told.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumers: the bleed and status fatal producers (fall and NPC lines) and `runtime/proposal.ts` (waking line). Reads: `world.death.narration`, `world.combat.narration`, the proposal's `entity_died` events. Writes: narration only; ops, events, jobs and save rows: none new. Writer groups and composers: unchanged.
+
 ## Property tags and the policy leaf set (toolbox row G1)
 
 [Toolbox row G1](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#tag-declarations) govern it; the brief and its decisions are in Beads `loka-kgd.17` (2026-10-10).

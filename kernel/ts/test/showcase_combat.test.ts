@@ -13,6 +13,7 @@ import { engaged } from '../src/mechanics/combat/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { key } from '../src/foundation/compose.ts';
 import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import {
   attribute,
@@ -44,6 +45,11 @@ const where = (w: World, k: string) => w.state.containers[k];
 const room = (w: World, k: string) => w.roomIds[ref('room', k)];
 const hp = (w: World, entity: string) => level(w, entity as never, resourceRef(w, 'hp'));
 const cues = (w: World) => gameView(w).cues;
+const withHp = (w: World, value: number): World => {
+  const k = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
+  const row = { ...w.state.resources![k]!, value, at: w.state.clock };
+  return { ...w, state: { ...w.state, resources: { ...w.state.resources, [k]: row } } };
+};
 const conditions = (w: World) => gameView(w).conditions;
 const levelling = (w: World) => gameView(w).levelling;
 const inside = (w: World, holder: string) =>
@@ -229,6 +235,9 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   w = last.world;
   assert.ok(last.lines.includes('combat.player_died'));
   assert.ok(!last.lines.includes('narration.bleeding.tick'));
+  // loka-3w3q: one fall line (the round's), then the authored waking line.
+  assert.equal(last.lines.filter((l) => l === 'combat.player_died').length, 1);
+  assert.equal(last.lines.at(-1), 'death.woke');
   assert.equal(engaged(w, w.body), undefined);
   assert.equal(where(w, w.body), room(w, 'crossroads_inn'));
   assert.deepEqual([pool(w, 'hp'), pool(w, 'mv')], [10, 100]);
@@ -288,6 +297,15 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
   const tick2 = wait(tick1, start + 1950).world;
   const over = wait(tick2, start + 2100);
   assert.deepEqual([pool(tick1, 'hp'), pool(tick2, 'hp')], [5, 4]);
+  // Breaks (loka-3w3q): a status tick that kills the player outside a fight writes no fall
+  // line or no waking line, or writes them out of order.
+  const fallen = wait(withHp(w, 1), start + 1050);
+  assert.equal(where(fallen.world, fallen.world.body), room(w, 'crossroads_inn'));
+  assert.deepEqual(fallen.lines.slice(-3), [
+    'narration.bleeding.tick',
+    'combat.player_died',
+    'death.woke',
+  ]);
   assert.ok(over.lines.includes('narration.bleeding.expired'));
   assert.deepEqual(conditions(over.world), [GORED]);
   // With it: no tick, mv + 1, the scar stays.

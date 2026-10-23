@@ -26,7 +26,21 @@ defmodule Loka.Content.Death do
 
     templates(m, defs, death) ++
       drops(m, defs, death) ++
-      if(death, do: settings(m, defs, death) ++ penalty(death["penalty"], settings, v2), else: [])
+      if(death,
+        do:
+          settings(m, defs, death) ++
+            penalty(death["penalty"], settings, v2) ++ narration(death["narration"], v2),
+        else: []
+      )
+  end
+
+  # loka-3w3q: the authored fall and waking lines resolve in text.
+  defp narration(nil, _), do: []
+
+  defp narration(words, {_, text}) do
+    for {field, key} <- words,
+        text != :unknown and not is_map_key(text, key),
+        do: diag("UNRESOLVED_REFERENCE", "cartridge.world.death.narration." <> field)
   end
 
   # Toolbox row 47: an experience penalty needs world.levelling and its narration in text.
@@ -152,7 +166,7 @@ defmodule Loka.Content.Death do
 
   defp requirements(m, d) do
     api =
-      if version(m) < if(d["penalty"], do: [1, 109], else: [1, 5]),
+      if version(m) < api_floor(d),
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
 
@@ -166,6 +180,10 @@ defmodule Loka.Content.Death do
 
     api ++ owners
   end
+
+  defp api_floor(%{"narration" => _}), do: [1, 117]
+  defp api_floor(%{"penalty" => _}), do: [1, 109]
+  defp api_floor(_), do: [1, 5]
 
   defp restore_valid?({_, _, spec}, amount),
     do: amount >= spec["minimum"] and amount <= spec["maximum"]

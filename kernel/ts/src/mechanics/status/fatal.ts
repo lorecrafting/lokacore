@@ -3,6 +3,7 @@ import type { Command, DefinitionRef, DeltaOp, EntityId, Text } from '../../cont
 import { accepted, actorOf, type Event, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter, engaged, lastOpponent } from '../combat/shared.ts';
+import { fallLine } from '../death/lines.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { endStatus } from './shared.ts';
 
@@ -24,11 +25,15 @@ export function fatalTick(
 ) {
   const player = actorOf(visit, body) !== undefined;
   const fight = engaged(visit, body);
-  if (fight && (player || lastOpponent(fight.row))) ops.push(...closeEncounter(visit, body));
+  const last = fight !== undefined && lastOpponent(fight.row);
+  if (fight && (player || last)) ops.push(...closeEncounter(visit, body));
   ops.push(endStatus(body, status, row, 0));
   const died = dies(visit, command, ops, mint);
   const all = [...events, ...died.events.map((e) => ({ ...e, position: 2 }))];
-  return accepted(visit, 'job_ran', ops, all, narration, died.rng);
+  // loka-3w3q: a player's fall line; an NPC's death line only when it ends the player's fight.
+  const npcDied = visit.cartridge.world?.combat?.narration.npc_died;
+  const lines = player ? fallLine(visit) : last && npcDied ? [{ key: npcDied }] : [];
+  return accepted(visit, 'job_ran', ops, all, [...narration, ...lines], died.rng);
 }
 
 // The ordinary death sequence after a fatal tick (its first resource.adjust is the hp loss), with

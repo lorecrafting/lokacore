@@ -38,4 +38,20 @@ defmodule Loka.ContentPenaltyTest do
       assert pairs(diags) == expected
     end
   end
+
+  # Breaks (loka-3w3q): the compiler admits a fall or waking line naming no text key (the
+  # kernel_api 1.117 floor is a protocol/fixtures/loader_floors.json case).
+  test "death narration refusals match the TS loader" do
+    dir = Loka.ContentSource.copy(@dir)
+    api = edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.117")
+
+    for field <- ~w(player_died woke) do
+      lines = edit("cartridge.json", ["world", "death", "narration"], %{field => "death.nope"})
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [api, lines])
+
+      assert pairs(diags) == [
+               {"UNRESOLVED_REFERENCE", "cartridge.world.death.narration." <> field}
+             ]
+    end
+  end
 end

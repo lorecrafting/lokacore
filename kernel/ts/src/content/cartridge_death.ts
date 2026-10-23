@@ -30,7 +30,7 @@ export function death(c: Obj, { named, text }: Checks): Diagnostic[] {
       bad(`.cartridge.items${step(ref)}.location.item`);
   out.push(...drops(c, named));
   if (!d) return out;
-  out.push(...requirements(c), ...penalty(c, text));
+  out.push(...requirements(c), ...narration(c, text));
   named(d.shrine, 'room', '.cartridge.world.death.shrine');
   for (const field of ['player_corpse', 'npc_corpse']) {
     named(d[field], 'item', `.cartridge.world.death.${field}`);
@@ -46,8 +46,9 @@ export function death(c: Obj, { named, text }: Checks): Diagnostic[] {
   return out;
 }
 
-/** Row 47: an experience penalty needs world.levelling and its narration in text. */
-function penalty(c: Obj, text: Checks['text']): Diagnostic[] {
+/** Row 47: an experience penalty needs world.levelling; its and the death's lines (loka-3w3q) are text. */
+function narration(c: Obj, text: Checks['text']): Diagnostic[] {
+  text(c.world.death.narration ?? {}, ['player_died', 'woke'], '.cartridge.world.death.narration');
   const at = '.cartridge.world.death.penalty.experience';
   const lost = c.world.death.penalty?.experience;
   if (lost) text(lost, ['narration'], at);
@@ -58,7 +59,8 @@ function penalty(c: Obj, text: Checks['text']): Diagnostic[] {
 
 function requirements(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const floor = c.world.death.penalty ? '1.109' : '1.5'; // row 47
+  const d = c.world.death;
+  const floor = d.narration ? '1.117' : d.penalty ? '1.109' : '1.5'; // loka-3w3q; row 47
   if (apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const capability of ['death', 'containment', 'position'])

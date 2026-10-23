@@ -1,3 +1,4 @@
+// size: allow 502, the drowning case also pins its death lines (loka-3w3q)
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fresh, room, entity, ref, prefix } from './water_fixture.ts';
@@ -204,10 +205,15 @@ test('deadline 70800 drowns once with actual nested possessions and same-body Ch
     green(run(before, { type: 'move', direction: 'up' }, 3)).state.containers[start.body],
     room(start, 'well_shaft'),
   );
-  const r = until(entered, 70800, 2),
+  const c = entered.cartridge,
+    w = c.world!;
+  const death = { ...w.death!, narration: { player_died: 'death.fell', woke: 'death.woke' } };
+  const r = until({ ...entered, cartridge: { ...c, world: { ...w, death } } } as World, 70800, 2),
     dead = green(r);
   assert.equal(r.decision.kind, 'accepted');
   if (r.decision.kind !== 'accepted') return;
+  const keys = (r.decision.narration ?? []).map((t) => t.key);
+  assert.deepEqual(keys, [w.water!.drowned, 'death.woke']); // loka-3w3q: no fall line
   const events = r.decision.events.filter((e) => e.payload.type === 'entity_died');
   assert.equal(events.length, 1);
   const p = events[0].payload;

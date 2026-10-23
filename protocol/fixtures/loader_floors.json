@@ -693,7 +693,8 @@
         ["reactions/wheel_3_x_shows_7.json", [], null],
         ["reactions/wheel_3_x_shows_8.json", [], null],
         ["reactions/wheel_3_x_shows_9.json", [], null],
-        ["items/training_sword.json", ["equip"], null]
+        ["items/training_sword.json", ["equip"], null],
+        ["cartridge.json", ["world", "death", "narration"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1584,7 +1585,8 @@
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
         ["statuses/burning.json", ["narration", "observed"], null],
-        ["items/training_sword.json", ["equip"], null]
+        ["items/training_sword.json", ["equip"], null],
+        ["cartridge.json", ["world", "death", "narration"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1609,7 +1611,8 @@
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
         ["statuses/burning.json", ["narration", "observed"], null],
-        ["items/training_sword.json", ["equip"], null]
+        ["items/training_sword.json", ["equip"], null],
+        ["cartridge.json", ["world", "death", "narration"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1751,6 +1754,18 @@
       "edits": [["items/leather_cap.json", ["equip"], {"wear": "item.leather_cap.short", "remove": "item.leather_cap.short", "worn": "item.leather_cap.room", "removed": "item.leather_cap.room"}]],
       "without": [
         ["items/leather_cap.json", ["equip"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.117",
+      "below": "1.116",
+      "source": "cartridges/penalty_sampler",
+      "feature": "a world.death.narration, the fall and waking lines (loka-3w3q)",
+      "edits": [["cartridge.json", ["world", "death", "narration"], {"woke": "death.penalty"}]],
+      "without": [
+        ["cartridge.json", ["world", "death", "narration"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
