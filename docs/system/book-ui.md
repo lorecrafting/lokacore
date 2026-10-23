@@ -686,6 +686,9 @@ refused one); on the NPC page's Whisper, the phrases. A chip press only fills th
 clears the bad-word Note); it never sends. A refused spell word is no chip: the Character page
 lists it under a **Spells** section title in the Action card's unavailable form `word, cast: reason`
 (`lux, cast: need 1 ash`); no refused word, no Spells section.
+Cast in the say field is for untargeted words only: a spell or skill aimed at a thing draws as a
+card on that thing's page, like any aimed action ([World](#world-and-status-entry), owner
+2026-10-23). The cast command names no target today, so aimed spells wait on that engine change.
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:
