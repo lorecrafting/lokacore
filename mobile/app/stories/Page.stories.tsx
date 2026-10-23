@@ -25,17 +25,13 @@ function Framed(p: ComponentProps<typeof Page> & { journal?: Quest[] }) {
 }
 
 function Prose({ lines }: { lines: number }) {
-  const c = usePalette();
-  const t = useType();
   return Array.from({ length: lines }, (_, i) => (
-    <Text key={i} style={prose(c, t)}>
-      {`Line ${i + 1} of the long description.`}
-    </Text>
+    <Line key={i}>{`Line ${i + 1} of the long description.`}</Line>
   ));
 }
-const Line = ({ children }: { children: string }) => (
-  <Text style={prose(usePalette(), useType())}>{children}</Text>
-);
+function Line({ children }: { children: string }) {
+  return <Text style={prose(usePalette(), useType())}>{children}</Text>;
+}
 
 // In the page's own viewport (toBeVisible ignores scrolling).
 const inView = (el: HTMLElement) => {

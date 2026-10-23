@@ -31,8 +31,7 @@ export const Plain: Story = {
     // Label in name: the shown text leads, then the hp band and where it goes.
     const name = 'hp 30/30 ma 10/10 mv 60/60; hp normal; opens Contents';
     await userEvent.click(canvas.getByRole('button', { name }));
-    await expect(args.open).toHaveBeenCalledTimes(1);
-    await expect(args.open).toHaveBeenLastCalledWith(); // no press event (Storybook cannot send one)
+    await expect(args.open.mock.calls).toEqual([[]]); // no press event (Storybook cannot send one)
   },
 };
 

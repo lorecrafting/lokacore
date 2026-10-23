@@ -41,8 +41,7 @@ export const Buff: Story = {
     await userEvent.click(icon);
     icon.focus();
     await userEvent.keyboard('{Enter}');
-    await expect(args.open).toHaveBeenCalledTimes(2);
-    await expect(args.open).toHaveBeenLastCalledWith(); // no press event (Storybook cannot send one)
+    await expect(args.open!.mock.calls).toEqual([[], []]); // no press event (Storybook cannot send one)
   },
 };
 

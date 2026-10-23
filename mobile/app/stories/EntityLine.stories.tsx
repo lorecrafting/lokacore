@@ -79,7 +79,7 @@ export const Run: Story = {
       Larger: [36, 80],
       Max: [42, 86],
     };
-    const [line, two] = sizes[globals.reading as string] ?? sizes.Standard!;
+    const [line, two] = sizes[globals.reading as string]!; // preview's initialGlobals always sets reading
     const [first, second, third] = canvas.getAllByRole('button');
     const box = (e: Element) => e.getBoundingClientRect();
     await expect(box(second).height).toBe(size.touch);
