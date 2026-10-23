@@ -470,8 +470,8 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     entity('tam', 'npc'),
   ];
   assert.deepEqual(groups(room), [
-    'Nell, tam are here.', // one sentence per group, only its first name capitalised
-    'Satchel, lamp are here.',
+    'Nell and tam are here.', // one sentence per group, only its first name capitalised
+    'Satchel and lamp are here.',
   ]);
   assert.deepEqual(groups([entity('lamp', 'item')]), ['Lamp is here.']);
 });

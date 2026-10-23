@@ -176,8 +176,9 @@ export function AwayRecap({
  * The room's people, then items, then sense cues; no headings, an empty group omitted
  * (book-ui.md, World and status entry).
  * - Use: RoomPage only.
- * - Rules: each group is one sentence, "Aldous, Bess, the alewife are here." ("is here." for one):
- *   commas and no "and", the first name capitalised, each name its own link named "<name>, open".
+ * - Rules: each group is one sentence, "Aldous, Bess, and the cook are here." ("A and B are here.",
+ *   "A is here."): serial comma, the first name capitalised, each name its own link named
+ *   "<name>, open"; commas and "and" are plain text.
  *   A person's carried-item line follows the people sentence as a Note.
  * - Story: RoomPage.stories.tsx
  */
@@ -211,7 +212,7 @@ export function Here(p: {
   ];
 }
 
-// One group as one sentence of inline name links (owner, mvl9864n2qi8).
+// One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29).
 // ponytail: names keep their authored article ("an axe") until loka-6qi gives bare-name words.
 function Present(p: {
   group: GameView['entities'];
@@ -226,7 +227,7 @@ function Present(p: {
         const name = i === 0 ? cap(p.text(e.name)) : p.text(e.name);
         return (
           <Fragment key={e.id}>
-            {i > 0 && ', '}
+            {i > 0 && (i < p.group.length - 1 ? ', ' : p.group.length > 2 ? ', and ' : ' and ')}
             <Text
               style={type.named}
               accessibilityRole="button"

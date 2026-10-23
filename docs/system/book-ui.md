@@ -46,12 +46,12 @@ concealed fixture or exit text until the game reveals it; the Book cannot hide
 an authored phrase after receiving it.
 
 Below the description, present players and NPCs form one sentence and loose room items
-a second, NPCs first (owner, mvl9864n2qi8): names joined by commas with no "and", the
-first name capitalised, ending "are here." ("is here." for one), for example "Aldous,
-Bess, the alewife, the cook are here." Each name keeps its authored article until the
+a second, NPCs first (owner, mvl9864n2qi8, mvl9q99wzm29): names joined with a serial
+comma and "and" before the last, the first name capitalised, ending "are here." ("A and B
+are here."; "A is here." for one), for example "Aldous, Bess, and the cook are here." Each name keeps its authored article until the
 cartridge supplies bare-name words (loka-6qi). Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
-its own inline link named "<name>, open" that opens its detail; the commas and "are here."
+its own inline link named "<name>, open" that opens its detail; the commas, "and" and "are here."
 are not pressable. A person's carried-item line follows the people sentence as a Note. An item's Take option appears only when currently offered; an NPC or
 player uses its own offered interactions. Omit an empty group. Player presence is a
 future projection; the current Book has NPCs and items only. This distinction is

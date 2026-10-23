@@ -156,7 +156,9 @@ export const Crowded: StoryObj = {
     const things = ['An apple', 'an axe', 'a wooden bench', 'a cob of bread', 'an iron anvil'];
     for (const group of [people, things]) {
       const links = group.map((n) => canvas.getByRole('button', { name: `${n}, open` }));
-      await expect(links[0]!.parentElement!.textContent).toBe(`${group.join(', ')} are here.`);
+      await expect(links[0]!.parentElement!.textContent).toBe(
+        `${group.slice(0, -1).join(', ')}, and ${group.at(-1)} are here.`,
+      );
     }
   },
 };

@@ -132,7 +132,7 @@ test("an NPC's asides show as quiet lines after the people, before the items", a
   const at = shown.indexOf('A crypt.');
   assert.deepEqual(shown.slice(at), [
     'A crypt.',
-    'Hal, Bram, Ada are here.',
+    'Hal, Bram, and Ada are here.',
     ...['Hal', 'Bram', 'Ada'],
     '~Hal mutters.',
     '~Hal shivers.',
