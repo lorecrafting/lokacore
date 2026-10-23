@@ -237,6 +237,7 @@ test('the room sentence shows bare names, shares an article per run and collapse
   const SAY: Record<string, string> = {
     crow: 'crow',
     crows: 'crows',
+    crows2: 'crows',
     'npc.tam.short': 'Tam, the miller',
   };
   const e = (id: string, article?: string, kind = 'npc', name = `${kind}.${id}.short`) => ({
@@ -248,8 +249,8 @@ test('the room sentence shows bare names, shares an article per run and collapse
   });
   const crows = (n: number) =>
     Array.from({ length: n }, (_, i) => ({
-      ...e(`crow${i}`, 'a', 'item', 'crow'),
-      words: { bare: 'crow', article: 'a', plural: 'crows' },
+      ...e(`crow${i}`, 'a', 'item'), // each its own name key, as the showcase's egg_01..06
+      words: { bare: 'crow', article: 'a', plural: i === 1 ? 'crows2' : 'crows' },
     }));
   const opened: string[] = [];
   const said = (entities: object[]) => {

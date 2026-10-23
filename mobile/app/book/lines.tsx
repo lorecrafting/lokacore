@@ -232,7 +232,8 @@ function Present(p: {
   type Link = { id: string; name: string; article?: string; many?: true };
   const links = p.group.flatMap((e): Link[] => {
     const { bare, article, plural } = e.words ?? {};
-    const same = plural ? p.group.filter((o) => o.words?.plural && o.name === e.name) : [e];
+    const kind = (o: (typeof p.group)[number]) => o.words?.plural && p.text(o.words.plural); // eggs keyed egg_01..06
+    const same = plural ? p.group.filter((o) => kind(o) === kind(e)) : [e];
     if (same[0] !== e) return []; // a later member of a collapsed group
     const n = same.length;
     if (n > 1) return [{ id: e.id, name: `${COUNT[n - 2] ?? n} ${p.text(plural!)}`, many: true }];
