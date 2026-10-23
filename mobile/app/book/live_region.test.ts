@@ -10,8 +10,9 @@ import { presenter } from './presenter.ts';
 
 const showcase = compiled('cartridges/toolbox_showcase');
 const live = (b: ReturnType<typeof book>) => {
-  const region = b.draw().find((n) => n.props?.['aria-live']);
-  assert.ok(region, 'no live region');
+  const heard = b.draw().find((n) => n.type?.name === 'Heard');
+  assert.ok(heard, 'no live region');
+  const region = heard.type(heard.props);
   return [region.props['aria-live'], words(region)];
 };
 

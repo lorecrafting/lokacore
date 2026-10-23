@@ -209,8 +209,13 @@ export function Here(p: {
   ];
 }
 
-// Polite and outside PageTurn, so a page turn never reads it again (loka-x6t.43). A new key per
-// batch remounts the text, so a repeated line is read again.
+/**
+ * The Book's live region: each new batch of World, combat and refused lines, read once by a screen
+ * reader and not seen (book-ui.md, Announcements).
+ * - Use: once, in the Book, outside PageTurn, so a page turn never reads it again.
+ * - Rules: polite; a new key per batch remounts the text, so a repeated line is read again.
+ * - Story: Heard.stories.tsx
+ */
 export function Heard({ said }: { said: { key: number; text: string } }) {
   return (
     <View aria-live="polite" style={unseen}>
