@@ -51,7 +51,7 @@ comma and "and" before the last, the first name capitalised, ending "are here." 
 are here."; "A is here." for one), for example "Aldous, Bess, and the cook are here." Each name keeps its authored article until the
 cartridge supplies bare-name words (loka-6qi). Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
-its own inline link named "<name>, open" that opens its detail; the commas, "and" and "are here."
+its own inline link named "<name>, open" that opens its detail (a tap, or Enter or Space on a keyboard); the commas, "and" and "are here."
 are not pressable. A person's carried-item line follows the people sentence as a Note. An item's Take option appears only when currently offered; an NPC or
 player uses its own offered interactions. Omit an empty group. Player presence is a
 future projection; the current Book has NPCs and items only. This distinction is
@@ -663,8 +663,9 @@ The World page has no Word block (owner, mvl9qy5ut2x2): every word is sent throu
 field. Saying is never a chip row (owner, wordbar1 2026-10-23). While `say`, `shout` or `cast` is
 offered and no combat, scene or conversation is open, the
 [status line](#world-and-status-entry) ends with a say icon named **Say to the room** (expanded while open; [look](../../mobile/app/book/Status.tsx));
-a tap opens the one-word field ([SayField](../../mobile/app/book/SayField.tsx)) under the line with **Say**, **Shout** and **Cast** Controls, each only while that action is offered. A press sends that action with the typed word and closes the field; Enter sends the first; Escape or the icon
-closes it unsent; a new room closes it. A tap anywhere outside the open field, its Controls and
+a tap opens the one-word field ([SayField](../../mobile/app/book/SayField.tsx)) under the line with **Say**, **Shout** and **Cast** Controls, each only while that action is offered. A press sends that action with the typed word and closes the field; Enter sends the first; Escape (from the
+field, a Control or a chip) or the icon closes it unsent; a new room or a fight closes it, and a
+return to the room does not reopen it. When it closes, focus goes back to the control that opened it. A tap anywhere outside the open field, its Controls and
 its chips (the page, the footer, the status line, the icon's own spot) also closes it unsent and
 presses nothing beneath: a second tap is needed to act there (owner, mvl9rtp93gex). The cover
 that takes that tap is not focusable, so a screen reader still closes with the expanded icon or

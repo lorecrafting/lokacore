@@ -91,11 +91,11 @@ const skyText = (p: StatusProps) =>
  *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
  *   label-in-name rule.
- *   Say icon (World page, while Say is offered): a drawn speech bubble in the sky glyph's size and dim
+ *   Say icon (World page, while say, shout or cast is offered): a drawn speech bubble in the sky glyph's size and dim
  *   ink, in a size.touch box after the pools, in their wrap
  *   unit, named "Say to the room" and expanded while open; a tap toggles the SayField under the
  *   line with Say, Shout and Cast, each only while offered, and the known words. Escape or the
- *   icon closes it; a new room closes it; a tap elsewhere on the line closes it and presses
+ *   icon closes it; a new room or a fight closes it; a tap elsewhere on the line closes it and presses
  *   nothing (BookView covers the page and footer the same way). The open state is the caller's.
  * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`);
@@ -273,6 +273,7 @@ export function useSay(
   });
   const [saying, setSaying] = useState<string>();
   const room = view.place.id;
+  if (saying && (saying !== room || !sends.length)) setSaying(undefined); // a new room or combat ends it
   const setOpen = (on: boolean) => setSaying(on ? room : undefined);
   const busy = pending || !!fault || !!catchingUp;
   return {

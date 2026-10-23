@@ -89,6 +89,35 @@ test('a tap outside the open say field closes it unsent and presses nothing bene
   assert.ok(!b.draw().some((n) => n.type === 'TextInput' || shield(n)), 'field and shields gone');
 });
 
+// Breaks: the say field reopening when the player returns to the room it was opened in (the
+// stored room compared, never cleared).
+test('leaving the room closes the say field, and returning does not reopen it', () => {
+  const b = book(speech as never);
+  const go = (d: string) =>
+    b
+      .draw()
+      .find((n) => n.type.name === 'Footer')
+      .props.go(d);
+  const start = b.game.view().view.place.id;
+  b.tap(LABEL.sayToRoom);
+  go('east');
+  assert.notEqual(b.game.view().view.place.id, start, 'no move');
+  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'open in the new room');
+  go('west');
+  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'reopened on return');
+});
+
+// Breaks: Escape closing the field only from the text field, not from a send or a chip.
+test('Escape anywhere in the open say field closes it unsent', () => {
+  const b = book(speech as never);
+  b.tap(LABEL.sayToRoom);
+  const before = revision(b);
+  const field = b.draw().find((n) => n.type === 'View' && n.props.onKeyDown);
+  field.props.onKeyDown({ key: 'Escape', preventDefault() {} });
+  assert.equal(revision(b), before, 'nothing sent');
+  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'field still open');
+});
+
 // Breaks: a word press not admitted (wrong input shape), the conversation it opens not turned to,
 // or the say icon left showing while a conversation is open.
 test('saying ward opens the elder conversation and hides the say icon', () => {

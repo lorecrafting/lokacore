@@ -11,6 +11,12 @@ import { Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
 
+// Web keys on a Text or View: react-native-web forwards onKeyDown, React Native's types lack it.
+export const onKey = (f: (key: string) => unknown) =>
+  ({
+    onKeyDown: (e: { key: string; preventDefault: () => void }) => f(e.key) && e.preventDefault(),
+  }) as object;
+
 /**
  * A MUD line that opens a detail: the name, then `rest` verbatim, a carried-item note below.
  * - Use: every row that opens a detail: held and worn, Inside, notices, Contents entries; never
@@ -233,6 +239,7 @@ function Present(p: {
               accessibilityRole="button"
               accessibilityLabel={`${name}, open`}
               onPress={() => p.open(e.id)}
+              {...onKey((k) => (k === 'Enter' || k === ' ') && (p.open(e.id), true))} // web Text has no key press
             >
               {name}
             </Text>

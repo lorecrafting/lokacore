@@ -1,10 +1,10 @@
 // The one-word field: the status line's say field and the NPC page's Whisper.
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { Chip } from './Chip.tsx';
 import { Control } from './pages.tsx';
 import { LABEL } from './labels.ts';
-import { Note } from './lines.tsx';
+import { Note, onKey } from './lines.tsx';
 import { prose, usePalette, useType } from './palette.ts';
 import { size, space } from './tokens.ts';
 
@@ -17,6 +17,8 @@ export type Send = { label: (typeof LABEL)[keyof typeof LABEL]; send: (word: str
 export const shield = (close: () => void) => (
   <Pressable
     accessible={false}
+    tabIndex={-1} // react-native-web ignores accessible={false} for focus
+    aria-hidden
     onPress={close}
     style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
   />
@@ -35,6 +37,8 @@ const bare = {
 } as const;
 const box = { minHeight: size.touch, paddingHorizontal: space.lg, borderWidth: size.rule };
 
+type SayProps = { pending: boolean; sends: Send[]; words?: readonly string[]; close: () => void };
+
 /**
  * The one-word field (book-ui.md, Word bar): one text field named "A word" (focused on open, up
  * to 32 characters, no autocorrect or autocapitalize), then one Control per send, then a Chip
@@ -45,32 +49,31 @@ const box = { minHeight: size.touch, paddingHorizontal: space.lg, borderWidth: s
  * - Rules: a press sends the typed word with that button's action and closes; Enter sends the
  *   first. A word chip only fills the field (named by its word), never sends. A word that is not
  *   1 to 32 letters is not sent, keeps the field open and shows the Note "One word, letters
- *   only."; nothing sends while pending; Escape closes it unsent.
+ *   only."; nothing sends while pending; Escape (from the field, a Control or a chip) closes it unsent and
+ *   returns focus to the control that opened it.
  * - States: open; known words; pending; bad word.
  * - Story: SayField.stories.tsx
  */
-export function SayField(p: {
-  pending: boolean;
-  sends: Send[];
-  words?: readonly string[];
-  close: () => void;
-}) {
+export function SayField(p: SayProps) {
   const [c, t] = [usePalette(), useType()];
   const [draft, setDraft] = useState('');
   const [wrong, setWrong] = useState(false);
+  // On web, the control that opened the field (focused before autoFocus) gets focus back on close.
+  const opener = useRef(globalThis.document?.activeElement as HTMLElement | null | undefined);
+  const close = () => (p.close(), opener.current?.focus?.());
   const sender = (s: Send) => () => {
     if (p.pending) return;
     if (!WORD.test(draft)) return setWrong(true);
-    (s.send(draft), p.close());
+    (s.send(draft), close());
   };
   return (
-    <View style={{ gap: space.sm }}>
+    <View style={{ gap: space.sm }} {...onKey((k) => k === 'Escape' && (close(), true))}>
       <TextInput
         {...bare}
         value={draft}
         onChangeText={(s) => (setDraft(s), setWrong(false))}
         onSubmitEditing={sender(p.sends[0]!)}
-        onKeyPress={(e) => e.nativeEvent.key === 'Escape' && p.close()} // web and hardware keyboards
+        onKeyPress={(e) => e.nativeEvent.key === 'Escape' && close()} // native keyboards; web also bubbles to the View (closing twice is harmless)
         style={{ ...prose(c, t), ...box, backgroundColor: c.bg, borderColor: c.line }}
       />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>

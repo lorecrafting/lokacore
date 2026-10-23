@@ -445,3 +445,16 @@ test('the running head shows the active quest objective on room and NPC pages', 
   assert.equal(h.text().filter((t) => t === head).length, 1); // the entry, not a head as well
   h.sql.close();
 });
+
+// Breaks: an inline room name a web keyboard cannot open (react-native-web Text has a click
+// handler only), or Space left to scroll the page.
+test('Enter or Space on a room name opens its page', () => {
+  for (const key of ['Enter', ' ']) {
+    const h = book();
+    const name = h.draw().find((n) => n.props.accessibilityLabel === 'Old Bram, open');
+    let prevented = false;
+    name.props.onKeyDown({ key, preventDefault: () => (prevented = true) });
+    assert.ok(prevented, `${JSON.stringify(key)} default kept`);
+    assert.ok(h.labels().includes('Talk to Old Bram'), `${JSON.stringify(key)} opens nothing`);
+  }
+});
