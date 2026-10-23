@@ -131,15 +131,14 @@ const fare = (c: Palette, t: Type, f: NonNullable<Notice['transport']>) => (
   </Text>
 );
 
-// A read whose text is the description (the well), or a body already shown (each entry reads
-// again), adds nothing the page does not show.
-const fresh = (description: string) => (line: DetailLine, i: number, all: readonly DetailLine[]) =>
-  typeof line !== 'string' || (plain(line) !== description && all.indexOf(line) === i);
+// A read whose text is the description (the well) adds nothing the page does not show.
+const fresh = (description: string) => (line: DetailLine) =>
+  typeof line !== 'string' || plain(line) !== description;
 
 /**
  * A notice or board detail in the detail-page order (book-ui.md, Notice board details).
  * - Use: a notice route.
- * - Rules: a read whose text is the description, or a body already shown, adds nothing.
+ * - Rules: a read whose text is the description adds nothing; equal read lines all show.
  * - States: notice with Read; dream available; dream acknowledged.
  * - Story: NoticePage.stories.tsx
  */
