@@ -107,7 +107,8 @@ test('price rows keep the empty Note off an NPC page', (t) => {
 });
 
 // Breaks: the rod's page drops its use once the rod rests between casts (R2), so the player
-// cannot tell the rod still fishes.
+// cannot tell the rod still fishes, or another target of the use refused for an unnoted reason
+// hides the note (loka-x6t.80).
 test('a resting rod keeps its use as a note', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
@@ -135,4 +136,17 @@ test('a resting rod keeps its use as a note', (t) => {
     1,
     JSON.stringify(b.text()),
   );
+  // the use's first target is refused for an unnoted reason: the resting target still draws
+  // its note, so the dedupe runs over drawn notes only (loka-x6t.80)
+  b.game.view = () => {
+    const r = real();
+    const inventory = r.view.inventory.map((e) => ({
+      ...e,
+      actions: e.actions.flatMap((a) =>
+        a.reason?.code === 'cooldown' ? [{ ...a, reason: { code: 'not_standing' } }, a] : [a],
+      ),
+    }));
+    return { ...r, view: { ...r.view, inventory } } as never;
+  };
+  assert.ok(b.text().includes('Fish in: not yet.'), JSON.stringify(b.text()));
 });

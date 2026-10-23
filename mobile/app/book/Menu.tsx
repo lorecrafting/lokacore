@@ -44,12 +44,9 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 const noted = (r: Refusal) =>
   r.cause ? reasonOf(r) : Object.hasOwn(NOTED, r.code) ? NOTED[r.code] : undefined;
 const notes = (thing: Thing | undefined, label: Say, held?: string) => {
-  const shown =
-    thing?.actions.flatMap((a, i, all) =>
-      !a.available && noted(a.reason) && all.findIndex((b) => b.action_key === a.action_key) === i // one note per use, however many targets
-        ? [{ ...a, word: noted(a.reason) }]
-        : [],
-    ) ?? [];
+  const shown = (thing?.actions ?? [])
+    .flatMap((a) => (!a.available && noted(a.reason) ? [{ ...a, word: noted(a.reason) }] : []))
+    .filter((a, i, all) => all.findIndex((b) => b.action_key === a.action_key) === i); // one note per use, however many targets (loka-x6t.80)
   return (
     shown.length > 0 && (
       <View>
