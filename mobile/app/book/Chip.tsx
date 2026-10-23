@@ -34,7 +34,7 @@ export function Chip(p: {
       accessibilityLabel={p.label}
       aria-busy={!!p.pending} // RN web maps aria-busy, not accessibilityState.busy
       disabled={off}
-      onPress={p.onPress}
+      onPress={() => p.onPress?.()} // no press event: the handler takes none
       style={{
         minHeight: size.touch,
         minWidth: size.touch,

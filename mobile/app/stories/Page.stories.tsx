@@ -2,13 +2,14 @@
 // draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import type { ComponentProps } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { expect, fn, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { ContinueButton } from '../book/actions.tsx';
 import { EntityLine, LogLines } from '../book/lines.tsx';
 import { Control, Page, RunningHead, SectionTitle } from '../book/pages.tsx';
 import { prose, usePalette, useType } from '../book/palette.ts';
+import { Text } from '../book/Text.tsx';
 import { LABEL } from '../book/labels.ts';
 
 type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
@@ -25,13 +26,12 @@ function Framed(p: ComponentProps<typeof Page> & { journal?: Quest[] }) {
 }
 
 function Prose({ lines }: { lines: number }) {
-  const c = usePalette();
-  const t = useType();
   return Array.from({ length: lines }, (_, i) => (
-    <Text key={i} style={prose(c, t)}>
-      {`Line ${i + 1} of the long description.`}
-    </Text>
+    <Line key={i}>{`Line ${i + 1} of the long description.`}</Line>
   ));
+}
+function Line({ children }: { children: string }) {
+  return <Text style={prose(usePalette(), useType())}>{children}</Text>;
 }
 
 // In the page's own viewport (toBeVisible ignores scrolling).
@@ -160,7 +160,7 @@ export const NoTitle: Story = {
     foot: undefined,
     children: (
       <>
-        <Text>The bell rings once, and the nave falls silent.</Text>
+        <Line>The bell rings once, and the nave falls silent.</Line>
         <ContinueButton label="Continue" onPress={() => {}} />
       </>
     ),

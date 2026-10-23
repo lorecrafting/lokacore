@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 export const StartOver: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Start over' }));
-    await expect(args.onPress).toHaveBeenCalledTimes(1);
+    await expect(args.onPress.mock.calls).toEqual([[]]); // the component sends no press event
   },
 };
 
