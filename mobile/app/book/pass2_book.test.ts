@@ -143,7 +143,7 @@ test('a resting rod keeps its use as a note', (t) => {
     const inventory = r.view.inventory.map((e) => ({
       ...e,
       actions: e.actions.flatMap((a) =>
-        a.reason?.code === 'cooldown' ? [{ ...a, reason: { code: 'not_standing' } }, a] : [a],
+        a.reason?.code === 'cooldown' ? [{ ...a, reason: { code: 'invalid_state' } }, a] : [a],
       ),
     }));
     return { ...r, view: { ...r.view, inventory } } as never;
