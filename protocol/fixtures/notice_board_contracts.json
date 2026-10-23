@@ -4557,5 +4557,24 @@
       "description": "notice.description"
     },
     "valid": false
+  },
+  {
+    "name": "malformed board key",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "key": "Board",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "key": "notice",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
   }
 ]
