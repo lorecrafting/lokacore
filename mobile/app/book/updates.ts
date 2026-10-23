@@ -44,9 +44,9 @@ export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   const shown = useRef<Page[] | undefined>(undefined);
   useEffect(() => {
     const open = stack.map(detailId);
-    // At mount (a cold reopen), every restored history whose page is closed starts empty.
-    if (!shown.current) pr.forgetClosed(open);
-    else for (const id of shown.current.map(detailId)) if (id && !open.includes(id)) pr.forget(id);
+    // At mount (a cold reopen) every restored history counts as shown, so a closed page starts empty.
+    const ids = shown.current ? shown.current.map(detailId) : pr.restored();
+    for (const id of ids) if (id && !open.includes(id)) pr.forget(id);
     shown.current = stack;
   }, [pr, stack]);
   useEffect(() => {
