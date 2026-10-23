@@ -9,7 +9,7 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { dur, message, reasonOf, refusedSentence } from './words.ts';
+import { doorSentence, dur, message, reasonOf, refusedSentence } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
@@ -146,7 +146,6 @@ export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
 
 // A closed exit's log line: reason tag, then the cartridge's sentence, a shut door's, or the frame.
-const AT: Record<string, string> = { up: 'above', down: 'below' };
 export const refused = (
   e: Extract<GameView['exits'][number], { available: false }>,
   text: (key: string) => string,
@@ -156,9 +155,8 @@ export const refused = (
   text: e.reason.message
     ? text(e.reason.message.key)
     : (refusedSentence(e.reason) ??
-      (e.door && e.door.state !== 'open'
-        ? `The door ${AT[e.direction] ?? `to the ${e.direction}`} is ${e.door.state}.`
-        : `The way ${e.direction} is ${why(e, text)}.`)),
+      doorSentence(e) ??
+      `The way ${e.direction} is ${why(e, text)}.`),
 });
 
 export const absent = (v: GameView) =>
