@@ -36,6 +36,7 @@ import {
   type ReadingStore,
 } from './reading.ts';
 import { color, size, space } from './tokens.ts';
+import { Heard } from './lines.tsx';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
@@ -222,24 +223,6 @@ export function BookView(p: ViewProps) {
     </PaletteContext>
   );
 }
-
-// Polite and outside PageTurn, so a page turn never reads it again (loka-x6t.43). A new key per
-// batch remounts the text, so a repeated line is read again.
-function Heard({ said }: { said: Screen['said'] }) {
-  return (
-    <View aria-live="polite" style={unseen}>
-      <Text key={said.key}>{said.text}</Text>
-    </View>
-  );
-}
-
-// Read by a screen reader, not seen: one pixel, clipped.
-const unseen = {
-  position: 'absolute',
-  width: size.unseen,
-  height: size.unseen,
-  overflow: 'hidden',
-} as const;
 
 // The footer (on the world), the status line and a press's fault.
 type BottomProps = {

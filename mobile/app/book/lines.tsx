@@ -208,3 +208,21 @@ export function Here(p: {
     ),
   ];
 }
+
+// Polite and outside PageTurn, so a page turn never reads it again (loka-x6t.43). A new key per
+// batch remounts the text, so a repeated line is read again.
+export function Heard({ said }: { said: { key: number; text: string } }) {
+  return (
+    <View aria-live="polite" style={unseen}>
+      <Text key={said.key}>{said.text}</Text>
+    </View>
+  );
+}
+
+// Read by a screen reader, not seen: one pixel, clipped.
+const unseen = {
+  position: 'absolute',
+  width: size.unseen,
+  height: size.unseen,
+  overflow: 'hidden',
+} as const;
