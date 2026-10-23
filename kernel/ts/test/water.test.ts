@@ -82,6 +82,13 @@ function load(w: World, grams: number): World {
 // Breaks: entry ignores acquired swim, nested load, exact MV minimum, posture or following child, or debits ordinary fare as well.
 test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () => {
   const base = fresh();
+  const sitting = {
+    ...learned(base),
+    state: {
+      ...learned(base).state,
+      facts: { ...learned(base).state.facts, [scoped(base, position(base))]: 'sitting' as never },
+    },
+  };
   for (const w of [
     base,
     load(learned(base), 6001),
@@ -100,13 +107,7 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
         },
       },
     },
-    {
-      ...learned(base),
-      state: {
-        ...learned(base).state,
-        facts: { ...learned(base).state.facts, [scoped(base, position(base))]: 'sitting' as never },
-      },
-    },
+    sitting,
     {
       ...learned(base),
       state: {
@@ -121,6 +122,17 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
     assert.equal(run(w, { type: 'move', direction: 'down' }).decision.kind, 'rejected');
     assert.deepEqual(w.state, before);
   }
+  // Breaks: the water edge refuses a sitter without the not_standing cause (loka-x6t.17).
+  const not_standing = { code: 'invalid_state', cause: 'not_standing' };
+  assert.deepEqual(
+    gameView(sitting).exits.find((e) => e.direction === 'down')!.reason,
+    not_standing,
+  );
+  assert.deepEqual(
+    (run(sitting, { type: 'move', direction: 'down' }).decision as never as { error: object })
+      .error,
+    not_standing,
+  );
   const w = load(learned(base), 6000),
     r = run(w, { type: 'move', direction: 'down' }),
     below = green(r);

@@ -22,7 +22,7 @@ import * as patrol from '../patrol/sequence.ts';
 import * as expedition from '../expedition/sequence.ts';
 import { exitOf, exitTo, hidden } from '../lookups.ts';
 import { lockRefused } from '../locks.ts';
-import { standing } from '../position/shared.ts';
+import { notStanding, standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 import { mounted, travel } from '../escort/shared.ts';
@@ -123,9 +123,6 @@ function routeProgress(
   };
 }
 
-/** A move while not standing: the shared code with its cause, so the Book can say why (RefusalCause). */
-const NOT_STANDING = { code: 'invalid_state', cause: 'not_standing' } as const;
-
 type Planned = Extract<ReturnType<typeof movementPlan>, { body: unknown }>;
 /** True when movementPlan admitted the move; else the plan is its refusal (a code or a GameError). */
 export const planned = (plan: Planned | ErrorCode | GameError): plan is Planned =>
@@ -161,10 +158,12 @@ export function movementPlan(
   const wet = water.edge(world, here, there, direction);
   if (wet) {
     const paid = water.admission(world, actor_id, wet.entering, steps);
-    return typeof paid === 'string' ? paid : { body, here, there, paid, water: wet };
+    return typeof paid === 'string' || 'code' in paid
+      ? paid
+      : { body, here, there, paid, water: wet };
   }
   if (engaged(world, body) && !escape) return 'invalid_state' as const;
-  if (!standing(world, actor_id)) return NOT_STANDING;
+  if (!standing(world, actor_id)) return notStanding();
   const paid = fare(world, actor_id, body, there);
   if (!paid) return 'insufficient_resource' as const;
   return { body, here, there, paid };

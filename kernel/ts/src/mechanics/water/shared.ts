@@ -11,7 +11,7 @@ import { add } from '../../foundation/int.ts';
 import { status } from '../skills.ts';
 import { load } from '../containment/shared.ts';
 import { level, pay, resourceRef } from '../resource.ts';
-import { standing } from '../position/shared.ts';
+import { notStanding, standing } from '../position/shared.ts';
 import { engaged } from '../combat/shared.ts';
 
 export function edge(world: World, here: EntityId, there: EntityId, direction: Key) {
@@ -30,11 +30,8 @@ export function admission(world: World, actor: CharacterId, entering: boolean, s
   const body = bodyOf(world, actor)!;
   if (!(level(world, body, resourceRef(world, 'hp'))! > 0)) return 'invalid_state' as const;
   if (!entering) return { ops: [] as DeltaOp[] };
-  if (
-    !standing(world, actor) ||
-    engaged(world, body) ||
-    world.state.escorts?.[actor]?.status === 'following'
-  )
+  if (!standing(world, actor)) return notStanding();
+  if (engaged(world, body) || world.state.escorts?.[actor]?.status === 'following')
     return 'invalid_state' as const;
   const settings = world.cartridge.world!.water!;
   if (!status(world, actor, settings.skill, steps).usable) return 'invalid_state' as const;

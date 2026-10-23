@@ -24,3 +24,6 @@ export const positionOf = (world: World, actor: CharacterId): FactValue | undefi
 /** False when `actor` must stand first (position@1, not standing); shared with the GameView. */
 export const standing = (world: World, actor: CharacterId) =>
   (positionOf(world, actor) ?? 'standing') === 'standing';
+
+/** The refusal of a move while not standing (RefusalCause, kernel_api 1.111); fresh per call. */
+export const notStanding = () => ({ code: 'invalid_state', cause: 'not_standing' }) as const;
