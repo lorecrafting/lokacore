@@ -437,7 +437,7 @@ The one error registry and GameError (04 §7; frozen ABI codes: docs/spec/confor
 - **ErrorCode**: A stable machine error code (04 §7). Exactly the codes in protocol/error_registry.json, which gives each one's category and description; unknown codes are invalid.
 - **ErrorRegistryEntry**: One entry of protocol/error_registry.json (04 §7): gameplay rejections, ABI or contract-validation failures (numeric-profile.md, protocol/), and evaluation faults that discard a whole proposal (04 §5.2).
 - **GameError**: A typed error: a stable code, never English text to parse (04 §7). Per-code data fields are added, as optional properties, when a code first needs them (owner decision Q5, docs/archive/decisions/owner-decisions-r3-2026-09-24.md).
-- **RefusalCause**: Why a refusal with a shared code was refused, so a client can tell the player (kernel_api at least 1.111; owner Q13 option A): not_standing, a move while the actor is not standing (position@1); cursed, reserved for a cursed worn item that will not come off. Optional on GameError and on GameView UnavailableReason; a reader that does not know it reads the code alone. The code stays the contract; a cause never changes it.
+- **RefusalCause**: Why a refusal with a shared code was refused, so a client can tell the player (owner Q13 option A): not_standing, a move while the actor is not standing (position@1); cursed, reserved for a cursed worn item that will not come off. Optional on GameError and on GameView UnavailableReason; a reader that does not know it reads the code alone. The code stays the contract; a cause never changes it.
 
 ## DomainEvent contracts (`protocol/event.schema.json`)
 

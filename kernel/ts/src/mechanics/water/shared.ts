@@ -30,9 +30,9 @@ export function admission(world: World, actor: CharacterId, entering: boolean, s
   const body = bodyOf(world, actor)!;
   if (!(level(world, body, resourceRef(world, 'hp'))! > 0)) return 'invalid_state' as const;
   if (!entering) return { ops: [] as DeltaOp[] };
-  if (!standing(world, actor)) return notStanding();
   if (engaged(world, body) || world.state.escorts?.[actor]?.status === 'following')
-    return 'invalid_state' as const;
+    return 'invalid_state' as const; // before posture, as the land exit (movement/sequence.ts)
+  if (!standing(world, actor)) return notStanding();
   const settings = world.cartridge.world!.water!;
   if (!status(world, actor, settings.skill, steps).usable) return 'invalid_state' as const;
   const mass = load(world, body, steps);

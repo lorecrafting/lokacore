@@ -89,6 +89,8 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
       facts: { ...learned(base).state.facts, [scoped(base, position(base))]: 'sitting' as never },
     },
   };
+  const following = { [base.character]: { status: 'following' } as never }; // a sitter, too
+  const held = { ...sitting, state: { ...sitting.state, escorts: following } };
   for (const w of [
     base,
     load(learned(base), 6001),
@@ -108,13 +110,7 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
       },
     },
     sitting,
-    {
-      ...learned(base),
-      state: {
-        ...learned(base).state,
-        escorts: { [base.character]: { status: 'following' } as never },
-      },
-    },
+    held,
   ]) {
     const before = w.state,
       view = gameView(w).exits.find((e) => e.direction === 'down')!;
@@ -127,6 +123,10 @@ test('water exact-edge admission is atomic at learned 6000g/MV10 boundary', () =
   const exit: any = gameView(sitting).exits.find((e) => e.direction === 'down');
   const moved: any = run(sitting, { type: 'move', direction: 'down' }).decision;
   assert.deepEqual([exit.reason, moved.error], [not_standing, not_standing]);
+  // Breaks: posture checked before a following child, unlike the land exit's engaged-first order.
+  assert.deepEqual((run(held, { type: 'move', direction: 'down' }).decision as any).error, {
+    code: 'invalid_state',
+  });
   const w = load(learned(base), 6000),
     r = run(w, { type: 'move', direction: 'down' }),
     below = green(r);
