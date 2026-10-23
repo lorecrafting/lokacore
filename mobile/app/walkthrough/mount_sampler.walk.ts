@@ -5,7 +5,7 @@ import { moves, settle, walk, type Screen } from './walk.ts';
 import { LABEL } from '../book/labels.ts';
 
 const horse = async (screen: Screen, choice: string) => {
-  await screen.getByRole('button', /^Horse is here/).tap();
+  await screen.getByRole('button', /^Horse, open$/i).tap();
   await screen.getByRole('button', /^Talk/).last().tap();
   await screen.getByRole('button', choice).tap();
   await screen.getByRole('button', LABEL.leaveConversation).tap();

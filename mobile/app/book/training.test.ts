@@ -18,13 +18,16 @@ registerHooks({
       : next(specifier, context);
   },
   load(url, context, next) {
-    if (url === 'test:training-react') return reactShim(`({ ref: v => ({ current: v }) })`);
+    if (url === 'test:training-react')
+      return reactShim(
+        `({ ref: v => ({ current: v }), state: v => [v, () => {}], effect: () => {} })`,
+      );
     if (url === 'test:training-native')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -36,9 +39,9 @@ registerHooks({
     };
   },
 });
-const { SkillDetails, ItemDetails } = await import('./skills.tsx');
+const { SkillDetails, ItemDetails, npcSkills } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { NpcDetail, NpcPage, npcSkills } = await import('./Npc.tsx');
+const { NpcDetail, NpcPage } = await import('./Npc.tsx');
 const { usePalette, useType } = await import('./palette.ts');
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);

@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { CONTENTS } from './__tests__/control.test.ts';
+import { CONTENTS, pressable } from './__tests__/control.test.ts';
 import { LABEL } from './labels.ts';
 import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
@@ -168,9 +168,7 @@ test('room is focused while Map retains directions and every detail returns to t
   const roomScroll = h.draw().find((n) => n.type === 'ScrollView');
   assert.equal(words(roomScroll).includes('Ferry Landing'), false);
   assert.ok(words(roomScroll).includes('Reeds crowd a slick wooden landing'));
-  assert.ok(
-    nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram is here., open'),
-  );
+  assert.ok(nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram, open'));
   assert.ok(h.text().includes('Ferry Landing'));
   const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Ferry Landing, look');
   assert.ok(drawnLook);
@@ -185,7 +183,7 @@ test('room is focused while Map retains directions and every detail returns to t
   drawnLook.props.onPress(); // this captured title has the pre-Look freshness token
   assert.equal(receipts(), 1);
   assert.deepEqual(h.p.screen().log, ['The page had changed; here it is again.']);
-  assert.ok(h.labels().includes('Old Bram is here., open'));
+  assert.ok(h.labels().includes('Old Bram, open'));
   assert.equal(h.text().includes('North'), false);
   assert.equal(h.text().includes('Beyond north: Well Lane — a brass lantern.'), false);
   h.map();
@@ -195,7 +193,7 @@ test('room is focused while Map retains directions and every detail returns to t
   h.tap(CONTENTS);
   h.tap(LABEL.inventory);
   h.tap('Back to World');
-  assert.ok(h.labels().includes('Old Bram is here., open'));
+  assert.ok(h.labels().includes('Old Bram, open'));
   assert.equal(h.labels().includes(`${LABEL.inventory}, open`), false);
   const sections = ['Character', LABEL.inventory, 'Map', 'Journal', 'Settings'];
   for (const section of sections) {
@@ -212,7 +210,7 @@ test('room is focused while Map retains directions and every detail returns to t
       [],
     );
     h.tap('Back to World');
-    assert.ok(h.labels().includes('Old Bram is here., open'));
+    assert.ok(h.labels().includes('Old Bram, open'));
   }
   h.sql.close();
 });
@@ -369,7 +367,7 @@ test('only World position taps directly cycle the offered states with captured f
     assert.equal(h.game.view().view.position, to);
     assert.equal(h.text().filter((s: string) => s === line).length, 1, line); // one World line (loka-x6t.22)
     assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
-    assert.ok(h.labels().includes('Old Bram is here., open'));
+    assert.ok(h.labels().includes('Old Bram, open'));
   }
   const token = h.game.view().token;
   drawn.props.onPress();
@@ -438,8 +436,8 @@ test('pending ancestry keeps its choices pressable and a later press retries the
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 1);
 });
 
-// Breaks: NPCs and loose items share one "is here" list, an NPC is listed among the items or
-// dropped, or an empty NPC group leaves its own block (book-ui.md, World and status entry).
+// Breaks: NPCs and loose items share one "are here" sentence, an NPC is listed among the items or
+// dropped, a group loses its comma form or "is"/"are", or an empty group leaves its own sentence (book-ui.md, World and status entry).
 test('the room lists NPCs first, then every other entity as items, empty groups omitted', async () => {
   const { RoomPage } = await import('./pages.tsx');
   const entity = (id: string, kind: string) => ({ id, kind, name: id });
@@ -462,11 +460,9 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
       } as any),
     )
       .filter(
-        (n) =>
-          n.type === 'View' &&
-          [n.props.children].flat().every((c: any) => c?.type?.name === 'EntityLine'),
+        (n) => n.type === 'Text' && !n.props.onPress && nodes(n.props.children).some(pressable),
       )
-      .map((n) => [n.props.children].flat().map((c: any) => c.props.name));
+      .map(words);
   const room = [
     entity('satchel', 'item'),
     entity('nell', 'npc'),
@@ -474,10 +470,10 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     entity('tam', 'npc'),
   ];
   assert.deepEqual(groups(room), [
-    ['Nell', 'Tam'],
-    ['Satchel', 'Lamp'],
+    'Nell and tam are here.', // one sentence per group, only its first name capitalised
+    'Satchel and lamp are here.',
   ]);
-  assert.deepEqual(groups([entity('lamp', 'item')]), [['Lamp']]);
+  assert.deepEqual(groups([entity('lamp', 'item')]), ['Lamp is here.']);
 });
 
 // Breaks: the Map foot loses Back to map or its clear, or Back to World leaves a page on the stack.

@@ -1,10 +1,10 @@
 id: mobile-book-text
 language: tsx
 severity: error
-message: 'A Book line reads Text from ./Text.tsx (book/reading.ts): React Native Text or TextInput scales again by the system font scale; only Text.tsx and the WordBar input draw them, with allowFontScaling={false}.'
+message: 'A Book line reads Text from ./Text.tsx (book/reading.ts): React Native Text or TextInput scales again by the system font scale; only Text.tsx and the one-word field (SayField.tsx) draw them, with allowFontScaling={false}.'
 files: [mobile/app/book/**, mobile/app/SaveError.tsx]
-# Text.tsx is the wrapper; WordBar.tsx owns the one TextInput; title.ts names Text only as a ref type.
-ignores: ['**/*.test.ts', mobile/app/book/Text.tsx, mobile/app/book/WordBar.tsx, mobile/app/book/title.ts]
+# Text.tsx is the wrapper; SayField.tsx owns the one TextInput (the one-word field); title.ts names Text only as a ref type.
+ignores: ['**/*.test.ts', mobile/app/book/Text.tsx, mobile/app/book/SayField.tsx, mobile/app/book/title.ts]
 rule:
   kind: import_specifier
   regex: '^(Text|TextInput)\b'

@@ -24,13 +24,14 @@ registerHooks({
       : next(specifier, context);
   },
   load(url, context, next) {
-    if (url === 'test:item-react') return reactShim();
+    if (url === 'test:item-react')
+      return reactShim('({ state: v => [v, () => {}], effect: () => {} })');
     if (url === 'test:item-native')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -139,7 +140,7 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
         },
         npc: m,
         text: (k: string) => k,
-        g: { on: () => [] },
+        g: { on: () => [], word: [] },
         press() {},
         log: [],
         leave() {},

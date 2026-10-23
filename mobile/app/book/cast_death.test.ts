@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
+import { LABEL } from './labels.ts';
 
 // The spell sampler with a wight that always claws for 2, a player at 3 hp and a lit crypt.
 function cartridge() {
@@ -37,7 +38,9 @@ test('cast-opened fight: rounds drained by a press still print every round and t
   t.after(() => b.sql.close());
   b.map();
   b.tap('Go east');
-  b.tap('flamma, cast');
+  b.tap(LABEL.sayToRoom);
+  b.tap('flamma');
+  b.tap(LABEL.cast);
   b.clock.wall += 6000; // two rounds at rate 50, no frame in between
   b.clock.mono += 6000;
   b.tap('Flee');

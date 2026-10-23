@@ -12,6 +12,16 @@ import { LABEL } from '../book/labels.ts';
 import { go } from '../tests/steps.ts';
 import { scene, settle, walk, type Screen, type Walk } from './walk.ts';
 
+// Change position until `to` shows, at most four turns.
+const turnTo = (screen: Screen, tap: (label: RegExp) => Promise<void>) => async (to: string) => {
+  for (
+    let i = 0;
+    i < 4 && !(await screen.getByRole('button', new RegExp(`^${to}, change`)).isVisible());
+    i++
+  )
+    await tap(/change position$/);
+};
+
 const steps = ({ screen, room }: Walk) => {
   // Every arrival checks the room page against its GameView (walk.ts room).
   const moves = async (...directions: string[]) => {
@@ -29,7 +39,7 @@ const steps = ({ screen, room }: Walk) => {
     await tap(label);
   };
   const lesson = async (...choices: string[]) => {
-    await tap(/^The carpenter is here/);
+    await tap(/^The carpenter, open$/i);
     await tap('Talk to the carpenter');
     for (const c of choices) await tap(c);
     await tap(LABEL.leaveConversation);
@@ -42,29 +52,28 @@ const steps = ({ screen, room }: Walk) => {
   };
   // An item page opened from Inventory leaves back to Inventory (x6t.23), then on to World.
   const putAway = () => tap(LABEL.leave).then(() => tap(LABEL.backToWorld));
-  const position = async (to: string) => {
-    for (
-      let i = 0;
-      i < 4 && !(await screen.getByRole('button', new RegExp(`^${to}, change`)).isVisible());
-      i++
-    )
-      await tap(/change position$/);
+  const position = turnTo(screen, tap);
+  // A known word through the say field: open it, press the word's chip, press the send.
+  const speak = async (word: string, how: string) => {
+    await tap(LABEL.sayToRoom);
+    await tap(new RegExp(`^${word}$`));
+    await tap(new RegExp(`^${how}$`));
   };
-  return { tap, take, lesson, held, putAway, position, moves };
+  return { tap, take, lesson, held, putAway, position, moves, speak };
 };
 type Steps = ReturnType<typeof steps>;
 
 const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps) => {
   await moves('north', 'west', 'west');
   await lesson('Learn whittling', 'Learn woodcutting');
-  await take(/^An axe is here/, /^Take an axe/);
-  for (let i = 0; i < 2; i++) await take(/^A stick is here/, /^Take a stick/);
+  await take(/^An axe, open$/i, /^Take an axe/);
+  for (let i = 0; i < 2; i++) await take(/^A stick, open$/i, /^Take a stick/);
   for (let i = 0; i < 2; i++) await tap('Carve a spoon');
   await lesson('Learn carving (2 pennies)');
-  await take(/^A cot is here/, /^Take a cot/);
+  await take(/^A cot, open$/i, /^Take a cot/);
   await moves('east', 'south', 'west');
   for (let i = 0; i < 4; i++) await tap('Chop wood');
-  for (let i = 0; i < 2; i++) await take(/^A rabbit pelt is here/, /^Take a rabbit pelt/);
+  for (let i = 0; i < 2; i++) await take(/^A rabbit pelt, open$/i, /^Take a rabbit pelt/);
   await moves('east', 'north', 'west');
   await lesson('Learn carpentry (2 pennies)');
   for (let i = 0; i < 2; i++) await tap('Saw timber');
@@ -72,7 +81,7 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await tap('Raise a timbered hut');
   await moves('north', 'south');
   await moves('south');
-  await take(/^A red apple is here/, /^Take a red apple/);
+  await take(/^A red apple, open$/i, /^Take a red apple/);
   await held(/^a red apple/);
   await tap(/^Give a red apple to the farmer/);
   await tap(/^The farmer/);
@@ -85,8 +94,8 @@ const pondAndStew = async (
   { tap, take, held, putAway, position, moves }: Steps,
 ) => {
   await moves('east');
-  await take(/^A fishing rod is here/, /^Take a fishing rod/);
-  const fish = /^An? (trout|salmon|eel) is here/;
+  await take(/^A fishing rod, open$/i, /^Take a fishing rod/);
+  const fish = /^An? (trout|salmon|eel), open$/i;
   let landed = 0;
   for (let i = 0; landed < 2 && i < 12; i++) {
     await held(/^a fishing rod/);
@@ -129,32 +138,32 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
     await tap(LABEL.leave);
   };
   await moves('down', 'east');
-  await npc(/^The clerk is here/, /^Deposit five pennies/);
+  await npc(/^The clerk, open$/i, /^Deposit five pennies/);
   await moves('west', 'north');
-  await npc(/^The market clerk is here/, /^Withdraw five pennies/);
-  await npc(/^The chandler is here/, /^Buy a tallow candle/);
+  await npc(/^The market clerk, open$/i, /^Withdraw five pennies/);
+  await npc(/^The chandler, open$/i, /^Buy a tallow candle/);
   await moves('south', 'west');
   await tap('Hide');
   await moves('east', 'north');
-  await tap(/^The merchant is here/);
+  await tap(/^The merchant, open$/i);
   await take(/^The merchant's purse, open/, /^Lift$/);
   await moves('south', 'west');
   await npc(/^The fence/, /^Sell the merchant's purse/);
   await moves('east', 'east');
-  await npc(/^The clerk is here/, /^Buy the strongroom/);
-  await take(/^The strongroom key is here/, /^Take the strongroom key/);
+  await npc(/^The clerk, open$/i, /^Buy the strongroom/);
+  await take(/^The strongroom key, open$/i, /^Take the strongroom key/);
   await moves('west');
   await tap('Map');
   await tap(/^Unlock the strongroom door/);
   await tap(/^Open the strongroom door/);
   await tap('Go south');
-  await take(/^A strongroom chest is here/, /^Put a tallow candle/);
+  await take(/^A strongroom chest, open$/i, /^Put a tallow candle/);
   await take(/^A tallow candle, open/, /^Take a tallow candle/);
   await settle();
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
+const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -169,11 +178,11 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
   await wizard('Learn the word lux');
   await wizard('Fetch the second word');
   await tap('Gather ash');
-  await take(/^The lantern is here/, /^Take the lantern/);
-  await tap('lux, cast');
+  await take(/^The lantern, open$/i, /^Take the lantern/);
+  await speak('lux', LABEL.cast);
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
-  await take(/^The grimoire is here/, /^Take the grimoire/);
+  await take(/^The grimoire, open$/i, /^Take the grimoire/);
   await held(/^the grimoire/);
   await tap(/^Read/);
   await putAway();
@@ -182,15 +191,15 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves }: Steps) => {
   await tap(/^Character/);
   await tap('Raise CHA');
   await tap(LABEL.backToWorld);
-  await tap('ward, cast');
+  await speak('ward', LABEL.cast);
 };
 
 const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
-  const { tap, take, held, putAway, moves } = steps;
+  const { tap, take, held, putAway, moves, speak } = steps;
   await loft(r, steps);
-  await take(/^The oilcan is here/, /^Take the oilcan/);
-  await take(/^The loft bucket is here/, /^Take the loft bucket/);
+  await take(/^The oilcan, open$/i, /^Take the oilcan/);
+  await take(/^The loft bucket, open$/i, /^Take the loft bucket/);
   await moves('east');
   await held(/^the oilcan/); // a use recipe is offered on the held tool
   await tap(/^Oil/);
@@ -202,13 +211,13 @@ const magic = async (r: Walk, steps: Steps) => {
   await moves('down');
   await r.note('The dark crypt');
   await moves('up');
-  await take(/^The lantern is here/, /^Take the lantern/);
+  await take(/^The lantern, open$/i, /^Take the lantern/);
   await moves('down');
-  await tap('flamma, cast');
+  await speak('flamma', LABEL.cast);
   await tap(/^Flee/);
   await tap(LABEL.backToWorld);
   await moves('down');
-  await tap('flamma, cast'); // the second bolt kills the wight (magic 7)
+  await speak('flamma', LABEL.cast); // the second bolt kills the wight (magic 7)
   // No Quench: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
   // cannot win reliably; kernel test magic 8 pins the quench. The bucket stays held.
   await moves('up', 'west', 'west');
@@ -254,11 +263,11 @@ walk('4-traps', "Traps: the shout in the chief's den; the goblins flee", async (
   await settle();
   await scene(screen);
   await r.room();
-  const { tap, moves } = steps(r);
+  const { tap, moves, speak } = steps(r);
   await moves('west', 'down', 'north', 'north'); // the passage plate bites on the way
   // Afraid lasts 600 game s (~12 s of wall time at rate 50): nothing slow between shout and Attack.
-  await tap('begone, shout');
-  await tap(/^A goblin is here/);
+  await speak('begone', LABEL.shout);
+  await tap(/^A goblin, open$/i);
   await tap(/Attack/);
   // A round is 150 game s, 3 s of wall time at rate 50.
   await expect(screen.getByText(/A goblin flees south/).first()).toBeVisible({ timeout: 10_000 });

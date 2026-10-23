@@ -1,11 +1,14 @@
-import { cap, plain } from './model.ts';
+import { cap, plain, why } from './model.ts';
+import { View } from 'react-native';
+import { LABEL } from './labels.ts';
+import { castWords } from './buttons.ts';
 import { Fragment } from 'react';
 import { Text } from './Text.tsx';
 import { SectionTitle } from './pages.tsx';
 import { Note } from './lines.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Thing } from './model.ts';
-import { note, prose, usePalette, useType } from './palette.ts';
+import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import type { Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
@@ -148,3 +151,49 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
     </>
   );
 }
+
+// The spell words refused here, each with its reason (owner, mvl9qy5ut2x2).
+export function spells(view: GameView | undefined, text: (key: string) => string) {
+  const refused = view?.spell_words?.length ? castWords(view).filter((s) => !s.available) : [];
+  if (!refused.length) return null;
+  return (
+    <View>
+      <SectionTitle>{LABEL.spells}</SectionTitle>
+      {refused.map((s) => (
+        <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, text)} />
+      ))}
+    </View>
+  );
+}
+
+// The skills this NPC teaches: learned or not, and whether the player qualifies now.
+export const npcSkills = (
+  c: Palette,
+  t: Type,
+  p: { view: GameView; npc?: Thing; text: (key: string) => string },
+) =>
+  p.view.skills
+    ?.filter(
+      (s) =>
+        p.npc &&
+        'lessons' in p.npc &&
+        p.npc.lessons?.some(
+          (r) =>
+            r.cartridge_id === s.skill.cartridge_id &&
+            r.cartridge_version === s.skill.cartridge_version &&
+            r.kind === s.skill.kind &&
+            r.key === s.skill.key,
+        ),
+    )
+    .map((s) => {
+      const locked = s.locked && !s.acquired; // learned reads first, as on the Character page
+      return (
+        <Text key={s.skill.key} style={note(c, t)}>
+          {s.acquired || locked
+            ? `${p.text(s.label)}: ${locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
+            : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
+          {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
+          {s.qualified && !locked ? '.' : `. ${p.text(s.requirement)}`}
+        </Text>
+      );
+    });

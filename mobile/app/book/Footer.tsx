@@ -48,7 +48,8 @@ const keys: Record<string, string> = {
 /**
  * The map joystick between two hairline rules (book-ui.md, Minimap, map and presentation
  * controls).
- * - Use: under every page.
+ * - Use: under every page; its flanking rules are the World page's only divider above it, no rule over
+ *   the footer.
  * - Rules: press to zoom, drag toward a path to light it, release to walk, drag back to the middle
  *   to cancel; a tap opens the Map page. A walk keeps the action and context from the drag start;
  *   the presenter revalidates its token.

@@ -138,37 +138,37 @@ const askButtons = (v: GameView, text: Say): Press[] =>
       ),
   );
 
-// The Word block's chips (word bar S3): each phrase said, whispered to each NPC offering whisper
-// and shouted, and each castable spell word; only while no combat, scene or conversation is open.
+// The say field's sends (book-ui.md, Word bar): only while no combat, scene or conversation is open.
 export const WORDS = ['say', 'whisper', 'shout', 'cast'];
 export const wordless = (v: GameView) => Boolean(v.combat || v.scene || v.choice);
-// The spell words the Word block shows: none unless Cast is offered here.
+// The spell words known here: none unless Cast is offered here.
 export const castWords = (v: GameView) =>
   !wordless(v) && v.actions.some((a) => a.action_key === 'cast') ? (v.spell_words ?? []) : [];
+// The say field's word chips: the known phrases, then the spell words castable here.
+export const knownWords = (v: GameView) => [
+  ...new Set([
+    ...(v.phrases ?? []),
+    ...castWords(v)
+      .filter((s) => s.available)
+      .map((s) => s.word),
+  ]),
+];
+// Say, shout, cast and each whisper without a word: the live twins of every typed word
+// (actionContext) that the say field and the NPC page's Whisper send.
 function wordButtons(v: GameView, text: Say): Press[] {
   if (wordless(v)) return [];
   const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);
-  const chip = (key: string, word: string, to?: { id: string; name: string }) => ({
-    label: `${word}, ${to ? `whisper to ${text(to.name)}` : key}`,
+  const twin = (key: string, to?: { id: string; name: string }) => ({
+    label: `, ${to ? `whisper to ${text(to.name)}` : key}`,
     action_key: key,
     target_ids: to ? [to.id] : [],
-    input: { word },
+    input: {},
   });
-  const phrases = v.phrases ?? [];
   return [
-    // First, the keyboard's Say without a word: the live twin of every typed word (actionContext).
-    ...(offered('say')
-      ? [{ ...chip('say', ''), input: {} }, ...phrases.map((w) => chip('say', w))]
-      : []),
+    ...['say', 'shout', 'cast'].filter(offered).map((key) => twin(key)),
     ...v.entities.flatMap((e) =>
-      e.actions.some((a) => a.action_key === 'whisper' && a.available)
-        ? phrases.map((w) => chip('whisper', w, e))
-        : [],
+      e.actions.some((a) => a.action_key === 'whisper' && a.available) ? [twin('whisper', e)] : [],
     ),
-    ...(offered('shout') ? phrases.map((w) => chip('shout', w)) : []),
-    ...castWords(v)
-      .filter((s) => s.available)
-      .map((s) => chip('cast', s.word)),
   ];
 }
 

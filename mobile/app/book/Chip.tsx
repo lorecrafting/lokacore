@@ -1,4 +1,4 @@
-// A word chip: one word of the World page's Word block as a pill.
+// A word chip: one known word under the say field as a pill.
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -9,11 +9,10 @@ import { steps, type Reading } from './reading.ts';
 import { opacity, radius, size, space } from './tokens.ts';
 
 /**
- * One word of the World page's Word block as a pill (book-ui.md, Word bar).
- * - Use: Word block words; a radio row setting (Reading size).
- * - Rules: a row wraps, never truncates. Name: the word, then how it is spoken (`ward, say`,
- *   `ward, whisper to the elder`). Unavailable: not pressable, its reason a `word, cast: reason`
- *   Note under the row (the Action card's form); chosen: role radio, checked.
+ * One word as a pill (book-ui.md, Word bar).
+ * - Use: the say field's known words (named by the word; a press fills the field); a radio row
+ *   setting (Reading size).
+ * - Rules: a row wraps, never truncates. Unavailable: not pressable; chosen: role radio, checked.
  * - States: available; unavailable; pending; chosen.
  * - Story: Chip.stories.tsx
  */
@@ -56,11 +55,11 @@ export function Chip(p: {
 }
 
 /**
- * A titled row of chips, centred and wrapping, its reasons as Notes under it.
- * - Use: each Word block row (Say, Whisper to <name>, Shout, Cast).
- * - Story: WordBar.stories.tsx
+ * A titled row of chips, centred and wrapping.
+ * - Use: the Reading size setting.
+ * - Story: Chip.stories.tsx
  */
-export function Row(p: { title: string; children: ReactNode[]; reasons?: string[] }) {
+export function Row(p: { title: string; children: ReactNode[] }) {
   if (!p.children.length) return null;
   return (
     <View style={{ gap: space.sm }}>
@@ -70,9 +69,6 @@ export function Row(p: { title: string; children: ReactNode[]; reasons?: string[
       >
         {p.children}
       </View>
-      {(p.reasons ?? []).map((r) => (
-        <Note key={r}>{r}</Note>
-      ))}
     </View>
   );
 }

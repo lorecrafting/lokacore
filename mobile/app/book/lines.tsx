@@ -1,5 +1,5 @@
 // Entity lines, the room's Here lines and log lines (EntityLine and LogLines doc comments).
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -11,10 +11,16 @@ import { Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
 
+// Web keys on a Text or View: react-native-web forwards onKeyDown, React Native's types lack it.
+export const onKey = (f: (key: string) => unknown) =>
+  ({
+    onKeyDown: (e: { key: string; preventDefault: () => void }) => f(e.key) && e.preventDefault(),
+  }) as object;
+
 /**
  * A MUD line that opens a detail: the name, then `rest` verbatim, a carried-item note below.
- * - Use: every row that opens a detail: people and items here, held and worn, Inside, notices,
- *   Contents entries.
+ * - Use: every row that opens a detail: held and worn, Inside, notices, Contents entries; never
+ *   the room's people and items (Here).
  * - Rules: the whole line is the touch target, its hit area Tap's bleed, so a run of lines
  *   touches at the body pitch. Name: the shown text in order, then ", open".
  * - Story: EntityLine.stories.tsx
@@ -176,6 +182,10 @@ export function AwayRecap({
  * The room's people, then items, then sense cues; no headings, an empty group omitted
  * (book-ui.md, World and status entry).
  * - Use: RoomPage only.
+ * - Rules: each group is one sentence, "Aldous, Bess, and the cook are here." ("A and B are here.",
+ *   "A is here."): serial comma, the first name capitalised, each name its own link named
+ *   "<name>, open"; commas and "and" are plain text.
+ *   A person's carried-item line follows the people sentence as a Note.
  * - Story: RoomPage.stories.tsx
  */
 export function Here(p: {
@@ -185,20 +195,19 @@ export function Here(p: {
 }) {
   const npcs = p.view.entities.filter((e) => e.kind === 'npc');
   const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  const line = (e: GameView['entities'][number]) => (
-    <EntityLine
-      key={e.id}
-      name={cap(p.text(e.name))}
-      rest=" is here."
-      note={e.carrying && p.text(e.carrying)}
-      onPress={() => p.open(e.id)}
-    />
-  );
+  const carried = npcs.flatMap((e) => (e.carrying ? [p.text(e.carrying)] : []));
   return [
-    npcs.length > 0 && <View key="npcs">{npcs.map(line)}</View>,
+    npcs.length > 0 && (
+      <View key="npcs">
+        <Present group={npcs} text={p.text} open={p.open} />
+        {carried.map((line, i) => (
+          <Note key={i}>{line}</Note>
+        ))}
+      </View>
+    ),
     // Row FD10: the present people's asides, in listed then authored order, before the items.
     <Asides key="asides" keys={npcs.flatMap((e) => e.asides ?? [])} text={p.text} />,
-    items.length > 0 && <View key="items">{items.map(line)}</View>,
+    items.length > 0 && <Present key="items" group={items} text={p.text} open={p.open} />,
     p.view.cues && (
       <View key="cues">
         {p.view.cues.map((cue, i) => (
@@ -207,6 +216,39 @@ export function Here(p: {
       </View>
     ),
   ];
+}
+
+// One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29).
+// ponytail: names keep their authored article ("an axe") until loka-6qi gives bare-name words.
+function Present(p: {
+  group: GameView['entities'];
+  text: (key: string) => string;
+  open: (id: string) => void;
+}) {
+  const c = usePalette();
+  const t = useType();
+  return (
+    <Text style={prose(c, t)}>
+      {p.group.map((e, i) => {
+        const name = i === 0 ? cap(p.text(e.name)) : p.text(e.name);
+        return (
+          <Fragment key={e.id}>
+            {i > 0 && (i < p.group.length - 1 ? ', ' : p.group.length > 2 ? ', and ' : ' and ')}
+            <Text
+              style={type.named}
+              accessibilityRole="button"
+              accessibilityLabel={`${name}, open`}
+              onPress={() => p.open(e.id)}
+              {...onKey((k) => (k === 'Enter' || k === ' ') && (p.open(e.id), true))} // web Text has no key press
+            >
+              {name}
+            </Text>
+          </Fragment>
+        );
+      })}
+      {p.group.length > 1 ? ' are here.' : ' is here.'}
+    </Text>
+  );
 }
 
 /**

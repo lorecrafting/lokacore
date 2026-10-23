@@ -23,7 +23,7 @@ walk('1-self-build', 'Self-build: chop, learn carpentry, saw, raise a timbered h
   };
   await chop();
   // Carpentry opens at woodcutting 2, and sawing needs it.
-  await tap(/^The old carver is here/);
+  await tap(/^The old carver, open$/i);
   await screen.getByRole('button', 'Talk the old carver').last().tap();
   await tap('Learn carpentry');
   await tap(LABEL.leaveConversation);
@@ -58,7 +58,7 @@ walk(
     await character();
     for (let i = 0; i < 2; i++) {
       await screen
-        .getByRole('button', /^A stick is here/)
+        .getByRole('button', /^A stick, open$/i)
         .first()
         .tap();
       await screen.getByRole('button', 'Take a stick').tap();
@@ -66,7 +66,7 @@ walk(
       await screen.getByRole('button', 'Carve a spoon').tap();
       await settle();
     }
-    await screen.getByRole('button', /^The old carver is here/).tap();
+    await screen.getByRole('button', /^The old carver, open$/i).tap();
     await screen.getByRole('button', 'Talk the old carver').tap();
     await screen.getByRole('button', 'Learn carving').tap();
     const leave = () => screen.getByRole('button', /^Leave/).first();

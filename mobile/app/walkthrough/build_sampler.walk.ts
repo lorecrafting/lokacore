@@ -11,16 +11,16 @@ walk('1-raze', 'Build: buy the plot, raise a hut, drop a timber in it, raze it',
     await screen.getByRole('button', label).first().tap();
   };
   const take = async () => {
-    await tap(/^A length of timber is here/);
+    await tap(/^A length of timber, open$/i);
     await tap(/^Take a length of timber/);
   };
   await r.app.clearState();
-  await tap(/^The seller is here/);
+  await tap(/^The seller, open$/i);
   await tap(/^Buy the plot/);
   await tap(LABEL.leave);
   await take();
   await take();
-  await tap(/^The carpenter is here/);
+  await tap(/^The carpenter, open$/i);
   await tap(/^Raise a hut/);
   await tap(LABEL.leave);
   await new Promise((done) => setTimeout(done, 160_000));
@@ -32,7 +32,7 @@ walk('1-raze', 'Build: buy the plot, raise a hut, drop a timber in it, raze it',
   await tap(/^Drop/);
   await settle();
   await moves(screen, 'south');
-  await tap(/^The carpenter is here/);
+  await tap(/^The carpenter, open$/i);
   await tap(/^Raze the hut/);
   await tap(LABEL.leave);
   await settle();

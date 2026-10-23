@@ -178,7 +178,7 @@ test('Book captures movement keys only on an active World page', (t) => {
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
     });
-    const bottom = book.props.children.props.children.props.children[1];
+    const bottom = book.props.children.props.children.props.children[2]; // after the say shield
     const footer = bottom
       .type(bottom.props)
       .props.children.find((child: any) => child?.type === Footer);
@@ -227,12 +227,12 @@ test('the chapter title page leaves only Continue', () => {
     startOver: () => {},
     shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
   });
-  const bottom = book.props.children.props.children.props.children[1];
-  const [navigation, status] = bottom.type(bottom.props).props.children;
+  const bottom = book.props.children.props.children.props.children[2]; // after the say shield
+  const [navigation, , status] = bottom.type(bottom.props).props.children; // the say shield between
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
-  // past the (absent) icon row: the row, then its two wrap units (line one; the button)
-  const button = StatusLine(status.props).props.children[1].props.children[1];
+  // past the (absent) icon row: the row, its two wrap units (line one; the button and say icon)
+  const button = StatusLine(status.props).props.children[1].props.children[1].props.children[0];
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
@@ -260,7 +260,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children[1].props.children[1];
+  const button = status.props.children[1].props.children[1].props.children[0];
   const contents = button.type(button.props);
   const text = (e: any): string =>
     e && typeof e === 'object' ? [e.props.children].flat().map(text).join('') : String(e ?? '');

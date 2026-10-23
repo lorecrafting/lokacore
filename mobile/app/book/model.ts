@@ -102,11 +102,11 @@ const OWN = [
   'sleep',
   'raise_attribute', // the Character page's own cards
 ];
-// Not a World verb line: another page's, control's or the Word block's own action.
+// Not a World verb line: another page's, control's or the say field's own action.
 export const notVerb = (key: string) => OWN.includes(key) || key === 'scan' || WORDS.includes(key);
 
 export function group(all: Button[]) {
-  const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the Word block's chips are apart
+  const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the say field's sends are apart
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
   const aimed = (b: Button) => b.target_ids.length > 0;
   return {
@@ -265,9 +265,9 @@ export function actionContext(
     b.target_ids,
     b.detail_id,
     Object.entries(b.input)
-      // A typed answer or Say word keeps the offered button's context (and its live token).
+      // A typed answer or word keeps the offered button's context (and its live token).
       .filter(([key]) => !(b.action_key === 'choose' && key === 'answer'))
-      .filter(([key]) => !(b.action_key === 'say' && key === 'word'))
+      .filter(([key]) => !(WORDS.includes(b.action_key) && key === 'word'))
       .sort(([a], [z]) => a.localeCompare(z)),
     b.detail_id?.startsWith('dream:') ? dreamAt(view, b.detail_id.slice('dream:'.length)) : null,
     view.actor_id,

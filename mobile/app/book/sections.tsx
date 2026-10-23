@@ -22,7 +22,7 @@ import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { ReadingSize } from './Chip.tsx';
 import type { Reading } from './reading.ts';
-import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
+import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from './skills.tsx';
 import { size, space } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
@@ -38,8 +38,9 @@ type Grouped = ReturnType<typeof group>;
 const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
 
 /**
- * The Character section: attributes, skills, professions, then the Raise cards (book-ui.md,
- * Skill tree details).
+ * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
+ * spell word refused here in ActionCard's unavailable form `<word>, cast: <reason>`, none when
+ * none is (book-ui.md, Skill tree details; Word bar).
  * - Use: Contents, and the status pools when only pennies show.
  * - Story: SectionPages.stories.tsx
  */
@@ -79,6 +80,7 @@ export function CharacterPage(
       {levelling && <Text style={prose(c, t)}>{xpLine(levelling)}</Text>}
       <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
+      {spells(p.view, p.text)}
     </Page>
   );
 }

@@ -98,8 +98,9 @@ export function Control(p: {
   onPress: () => void;
   disabled?: boolean;
   onInk?: true;
+  expanded?: boolean; // a Control that opens a field below it (the NPC page's Whisper)
 }) {
-  const { label, onPress, disabled, onInk } = p;
+  const { label, onPress, disabled, onInk, expanded } = p;
   const c = usePalette();
   const t = useType();
   return (
@@ -107,6 +108,7 @@ export function Control(p: {
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
+      accessibilityState={expanded === undefined ? undefined : { expanded }}
       onPress={() => onPress()} // no press event: the handler takes none
       style={{
         minHeight: size.touch,
@@ -124,9 +126,9 @@ export function Control(p: {
 
 /**
  * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet
- * card, verb lines, door cards, the log, then the Word block (book-ui.md, World and status entry).
+ * card, verb lines, door cards, then the log (book-ui.md, World and status entry).
  * - Use: the World page.
- * - Rules: the title is the Look tap, named `<title>, look`; a new paragraph at every blank line
+ * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
  *   of the authored text.
  * - Story: RoomPage.stories.tsx
  */
@@ -141,7 +143,6 @@ export function RoomPage(p: {
   open: (id: string) => void;
   openChoice: () => void;
   details: ReactNode;
-  word?: ReactNode; // the Word block, last: after the room's actions and the log (pass-1 UA)
 }) {
   const c = usePalette();
   const t = useType();
@@ -165,7 +166,6 @@ export function RoomPage(p: {
       {storylet(p.view, p.g, p.press, p.text, p.label)}
       {actions.length > 0 && <View>{actions}</View>}
       {p.log.length > 0 && <LogLines lines={p.log} />}
-      {p.word}
     </Page>
   );
 }
@@ -223,8 +223,8 @@ const storylet = (
  * - Use: every page.
  * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
  *   page header with the arriving focus; without one, the first block takes it. The room's fixed
- *   title is the only pressable title. The title is `pageTitle`, left-aligned on every page and
- *   scaled with the Reading size. A page that grows at the end scrolls to its end.
+ *   title is the only pressable title. The title is `pageTitle`, scaled with the Reading size: centred
+ *   when fixed (the room), left-aligned on every other page. A page that grows at the end scrolls to its end.
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */
@@ -278,7 +278,7 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
         color: usePalette().fg,
         ...useType().pageTitle,
         // a scrolling title is a block: the page's gap alone is its space below
-        ...(p.fixed && { paddingBottom: space.md }),
+        ...(p.fixed && { paddingBottom: space.md, textAlign: 'center' }),
       }}
     >
       {p.title}

@@ -6,7 +6,8 @@ import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
-import { StatusLine } from './Status.tsx';
+import { StatusLine, useSay } from './Status.tsx';
+import { shield } from './SayField.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -188,13 +189,12 @@ export function BookView(p: ViewProps) {
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const open = (page: Page) => p.go([...p.stack, page], 1);
-  const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
+  const say = useSay(p.screen, g, p.press, page);
   const ctx = {
     ...p,
     g,
-    open,
-    walk,
+    open: (page: Page) => p.go([...p.stack, page], 1),
+    walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
     world: () => p.go([], -1),
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
@@ -209,13 +209,13 @@ export function BookView(p: ViewProps) {
               <Body
                 {...ctx}
                 page={page}
-                talkingOn={p.talkingOn}
                 talkOn={p.talkOn ?? (() => {})}
                 chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
               />
             )}
           </PageTurn>
-          <Bottom {...ctx} page={page} />
+          {say.open && shield(() => say.setOpen(false))}
+          <Bottom {...ctx} page={page} say={say} />
           <Heard said={p.screen.said} />
           {c.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
@@ -235,45 +235,55 @@ type BottomProps = {
   page?: Page;
   startOver: () => void;
   shell: Shell;
+  say: ReturnType<typeof useSay>;
 };
 
 function Bottom(p: BottomProps) {
-  const c = usePalette();
-  const t = useType();
+  const [c, t] = [usePalette(), useType()];
   const { view, text, pending, fault, ended } = p.screen;
-  // A tap on the position line acts only on the open World page.
-  const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
   const shut = !!view.combat || !!ended;
+  const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   return (
     <View
       style={{
         paddingTop: space.sm,
         paddingHorizontal: space.xl,
         paddingBottom: space.lg,
-        borderTopWidth: size.rule,
+        // The footer's own flanking rules divide it from the page (owner, mvl8dz3dy36l).
+        borderTopWidth: nav ? 0 : size.rule,
         borderTopColor: c.line,
       }}
     >
-      {!p.page && !view.ancestry_choices && !view.scene && !shut && navigation(p)}
-      {!view.ancestry_choices && (
-        <StatusLine
-          time={view.time}
-          calendar={view.calendar_status}
-          resources={view.resources}
-          bleeding={view.bleeding}
-          conditions={view.conditions}
-          position={view.position}
-          text={text}
-          locked={!!view.scene || shut || p.page?.kind === 'chapter'}
-          openPosition={position ? () => p.press(position) : undefined}
-          pending={pending}
-          open={() => p.open({ kind: 'contents' })}
-          openCharacter={() => p.open({ kind: 'character' })}
-        />
-      )}
+      {nav && navigation(p)}
+      {p.say.open && shield(() => p.say.setOpen(false))}
+      {!view.ancestry_choices && statusLine(p)}
       {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
+  );
+}
+
+// The status line under the footer, its say field live on the open World page.
+function statusLine(p: BottomProps) {
+  const { view, text, pending, ended } = p.screen;
+  // A tap on the position line acts only on the open World page.
+  const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
+  return (
+    <StatusLine
+      time={view.time}
+      calendar={view.calendar_status}
+      resources={view.resources}
+      bleeding={view.bleeding}
+      conditions={view.conditions}
+      position={view.position}
+      text={text}
+      locked={!!view.scene || !!view.combat || !!ended || p.page?.kind === 'chapter'}
+      openPosition={position ? () => p.press(position) : undefined}
+      pending={pending}
+      open={() => p.open({ kind: 'contents' })}
+      openCharacter={() => p.open({ kind: 'character' })}
+      say={p.say.sends.length ? p.say : undefined}
+    />
   );
 }
 

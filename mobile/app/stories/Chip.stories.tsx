@@ -1,4 +1,4 @@
-// Chip: one word of the World page's Word block (Chip's doc comment).
+// Chip: one word as a pill (Chip's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { Chip, ReadingSize } from '../book/Chip.tsx';
@@ -19,7 +19,7 @@ export const Available: Story = {
   },
 };
 
-// The reason is a line under the row (WordBar), not part of the chip.
+// Not pressable: the chip draws no reason of its own.
 export const Unavailable: Story = {
   args: { label: 'ward, cast', onPress: undefined },
   play: async ({ canvas }) => {
