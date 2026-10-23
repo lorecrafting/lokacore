@@ -256,7 +256,8 @@ test('Character shows the level, xp and one Raise card per attribute only while 
   ]);
 });
 
-// Breaks: item detail invents a profile from its name, drops skill requirements, or hides actual shield chance.
+// Breaks: item detail invents a profile from its name, drops skill requirements, or hides actual shield chance,
+// or prints a fixed damage as a range, 2–2 (loka-x6t.29).
 test('item equipment detail copies current typed slot/profile/requirement and block chance', () => {
   const thing: any = {
     description: 'item.description',
@@ -273,6 +274,14 @@ test('item equipment detail copies current typed slot/profile/requirement and bl
   assert.deepEqual(
     words(ItemDetails({ thing: { slot: 'off_hand', block_chance: 37 } as any, text })),
     ['Slot: off_hand', 'Block: 37% chance.'],
+  );
+  const fixed = {
+    ...thing,
+    weapon: { ...thing.weapon, attack: { chance: 82, damage_min: 2, damage_max: 2 } },
+  };
+  assert.equal(
+    words(ItemDetails({ thing: fixed, text }))[2],
+    'Attack: 82% chance, 2 damage; requires Sword craft (STR at least 10).',
   );
 });
 
