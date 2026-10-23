@@ -1737,6 +1737,18 @@
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.116",
+      "below": "1.115",
+      "source": "cartridges/wear_sampler",
+      "feature": "an item's authored equip words (row 6a, loka-x6t.20)",
+      "edits": [["items/leather_cap.json", ["equip"], {"wear": "item.leather_cap.short", "remove": "item.leather_cap.short", "worn": "item.leather_cap.room", "removed": "item.leather_cap.room"}]],
+      "without": [
+        ["items/leather_cap.json", ["equip"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]
 }

@@ -280,7 +280,7 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, check), ...combat(c, named), ...commerce(c));
   out.push(...theft(c, named), ...mounts(c, named), ...asks(c, check));
-  out.push(...derived(c, named), ...levelling(c, check));
+  out.push(...derived(c, check), ...levelling(c, check));
   return out;
 }
 
