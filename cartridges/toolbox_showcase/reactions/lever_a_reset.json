@@ -1,0 +1,28 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "pull_a"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "lever_stage",
+        "equals": 0
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "narrate",
+      "text": "narration.lever_reset"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "lever_stage",
+      "value": 0
+    }
+  ]
+}
