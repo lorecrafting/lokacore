@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { openGame } from '../../authority/local-story/session.ts';
 import { glowBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
@@ -55,6 +56,8 @@ test('only confirmed pickup returns World, including a retry from another page',
   const token = h.game.view().token;
   h.tap('Leave');
   assert.equal(h.game.view().token, token);
+  assert.ok(h.text().includes('Held')); // item Leave returns to Carrying, not World
+  h.tap(LABEL.backToWorld);
   assert.ok(h.text().includes('Well Lane'));
   h.sql.close();
 });
@@ -81,6 +84,7 @@ test('a held item offers Give only to a present recipient and logs the confirmed
   assert.equal(h.game.view().token, token);
   assert.equal(receipts(), before);
   h.tap('Leave');
+  h.tap(LABEL.backToWorld); // item Leave returned to Carrying
   h.map();
   h.tap('Go south');
   h.tap('Old Bram is here., open');
@@ -124,6 +128,7 @@ test('inventory Drop returns World with one named event only after confirmation'
     false,
   );
   h.tap('Leave');
+  h.tap(LABEL.backToWorld); // item Leave returned to Carrying
   h.sql.exec('PRAGMA query_only = 0');
   h.map();
   h.tap('Go south'); // retries Drop without walking
@@ -145,7 +150,8 @@ test('other item actions retain their detail and show their consequences there',
       'utf8',
     ),
   );
-  const h = book(items);
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, items);
+  const h = book(items, a);
   h.tap('A sewing box');
   h.tap('Open a sewing box');
   assert.ok(h.labels().includes('Leave'));
@@ -154,6 +160,13 @@ test('other item actions retain their detail and show their consequences there',
   assert.equal(h.p.screen().log.includes('Opened.'), false);
   h.tap('Leave');
   assert.ok(h.labels().includes('A sewing box is here., open'));
+  h.tap('A sewing box is here., open');
+  assert.equal(h.text().includes('Opened.'), false); // a reopened item starts a new visit (loka-x6t.19)
+  h.unmount();
+  const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
+  r.tap('A sewing box is here., open');
+  assert.equal(r.text().includes('Opened.'), false, JSON.stringify(r.text()));
+  r.unmount();
   h.sql.close();
 });
 
@@ -331,6 +344,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('a wool cloak, open');
   h.tap('Wear a wool cloak');
   h.tap('Leave');
+  h.tap(LABEL.backToWorld); // item Leave returned to Carrying
   go('up');
   h.tap('An old trunk');
   assert.ok(h.text().includes('Take: more than you can carry.'));

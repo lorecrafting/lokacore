@@ -68,3 +68,18 @@ test('an insult mid-talk keeps the conversation page, no refusal Note', () => {
     JSON.stringify(shown),
   );
 });
+
+// Breaks (loka-x6t.21): a multi-choice showcase talk draws an authored Leave beside the foot's own.
+test('a multi-choice talk has no authored Leave; the foot Leave the conversation ends it', () => {
+  const b = book(showcase as never);
+  for (const s of ['Go south', 'Go south']) {
+    b.map();
+    b.tap(s);
+  }
+  for (const c of [/^Bess/, /^Talk/]) b.tap(c);
+  const labels = b.labels();
+  assert.ok(labels.includes('Insult the village'), JSON.stringify(labels));
+  assert.equal(labels.filter((l) => /^(Leave|Close)\b/.test(l)).join(), LABEL.leaveConversation);
+  b.tap(LABEL.leaveConversation);
+  assert.equal(b.labels().includes('Insult the village'), false);
+});

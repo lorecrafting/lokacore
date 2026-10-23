@@ -68,7 +68,7 @@ type NpcProps = {
   press: (b: Button) => void;
   log: DetailLine[];
   leave: () => void;
-  since?: number; // outside a conversation, history before this line is hidden (owner 2026-10-09)
+  since?: number; // history before this line (the last Leave the conversation) is hidden (loka-x6t.19)
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
   open: (id: string) => void;
@@ -79,7 +79,7 @@ type NpcProps = {
  * action details).
  * - Use: an NPC route.
  * - Rules: choices and services as Action cards, the conversation log, Controls in the PageFoot.
- *   Outside a conversation, earlier history is hidden.
+ *   History belongs to the page visit and restarts after Leave the conversation.
  * - States: choice; shop; services; closed conversation.
  * - Story: NpcPage.stories.tsx
  */
@@ -92,7 +92,7 @@ export function NpcPage(p: NpcProps) {
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
-  const log = talk ? p.log : p.log.slice(p.since ?? 0);
+  const log = p.log.slice(p.since ?? 0);
   const contents = held(p);
   return (
     <Page
@@ -190,14 +190,18 @@ export const npcSkills = (c: Palette, t: Type, p: NpcProps) =>
             r.key === s.skill.key,
         ),
     )
-    .map((s) => (
-      <Text key={s.skill.key} style={note(c, t)}>
-        {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
-        {s.qualified ? 'qualified' : 'unqualified'}.
-        {/* a learned, qualified skill asks nothing more (pass-1 H3) */}
-        {s.acquired && s.qualified ? '' : ` ${p.text(s.requirement)}`}
-      </Text>
-    ));
+    .map((s) => {
+      const locked = s.locked && !s.acquired; // learned reads first, as on the Character page
+      return (
+        <Text key={s.skill.key} style={note(c, t)}>
+          {s.acquired || locked
+            ? `${p.text(s.label)}: ${locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
+            : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
+          {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
+          {s.qualified && !locked ? '.' : `; ${p.text(s.requirement)}`}
+        </Text>
+      );
+    });
 
 function ShopOptions(p: NpcProps) {
   const c = usePalette();
@@ -237,7 +241,7 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
   });
 }
 
-// Per page visit: how many history lines came before it or before its last Leave the conversation.
+// Per page visit: how many history lines came before its last Leave the conversation.
 const past = new WeakMap<object, number>();
 
 /**
@@ -260,7 +264,6 @@ export function NpcDetail(p: {
   const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
   const id = npc?.id ?? p.speaker ?? view.choice?.speaker_id ?? 'conversation';
   const log = p.screen.detail(id);
-  if (p.visit && !past.has(p.visit)) past.set(p.visit, log.length);
   return (
     <NpcPage
       view={view}

@@ -45,6 +45,9 @@ export const detail = (f: Failed) =>
           ? 'The save could not be opened.'
           : undefined;
 
+// Book UI Conditions details: seconds under two minutes, whole minutes under two hours, then hours.
+export const dur = (s: number) =>
+  s >= 7200 ? `${Math.round(s / 3600)}h` : s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`;
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).
 export const OUTCOME: Record<string, string> = {
@@ -61,6 +64,10 @@ export const OUTCOME: Record<string, string> = {
   activated_with_possession: 'You take on the task. It is in your journal.',
   choice_closed: 'You leave the question for now.',
   waited: 'Time passes.',
+  stood: 'You stand up.',
+  sat: 'You sit down.',
+  rested: 'You settle down to rest.',
+  slept: 'You lie down to sleep.',
 };
 
 // A wield-slot item with no authored equip words (book-ui.md, Equipment and skills).
@@ -194,7 +201,8 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
     if (location.status === 'here') return `${who}: here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);
-    return `${who}: last seen at ${room ? text(room.title) : 'a previously observed place'} at ${location.at}s.`;
+    const ago = view.time - location.at; // a clock behind the sighting still reads just now
+    return `${who}: last seen at ${room ? text(room.title) : 'a previously observed place'}, ${ago < 120 ? 'just now' : `${dur(ago)} ago`}.`;
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;

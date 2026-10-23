@@ -9,15 +9,12 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { message, reasonOf, refusedSentence } from './words.ts';
+import { dur, message, reasonOf, refusedSentence } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
-  `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
-// Book UI Conditions details: seconds under two minutes, whole minutes under two hours, then hours.
-const dur = (s: number) =>
-  s >= 7200 ? `${Math.round(s / 3600)}h` : s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`;
+  `${text(b.label)} · ${dur(Math.max(0, b.ends_at - time))} remaining · ${b.hp_loss} HP each ${dur(b.tick_every)}`;
 // Toolbox row W24 Journal countdown (wording proposed; designer to approve).
 export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
 type Condition = NonNullable<GameView['conditions']>[number];

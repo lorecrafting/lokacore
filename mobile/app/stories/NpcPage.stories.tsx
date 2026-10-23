@@ -22,7 +22,6 @@ export const Choice: StoryObj = {
     'dialogue.reeve_talk.accept',
     'dialogue.reeve_talk.help',
     'dialogue.reeve_talk.wrong',
-    'dialogue.reeve_talk.leave',
   ]),
   name: 'Choice',
   // Breaks: the Map's "Ask where the Reeve is" (known_npcs) leaks onto her own page.

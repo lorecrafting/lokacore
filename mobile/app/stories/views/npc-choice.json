@@ -642,11 +642,6 @@
      "available": true
     },
     {
-     "choice_id": "leave",
-     "label": "dialogue.reeve_talk.leave",
-     "available": true
-    },
-    {
      "choice_id": "wrong",
      "label": "dialogue.reeve_talk.wrong",
      "available": true

@@ -27,10 +27,10 @@ defmodule Loka.ContentChoiceChecksTest do
        {"OUTCOME_MISMATCH", at <> "persuade.check"}},
       {guard,
        &Map.put(&1, "riddle", %{
-         "choice_id" => "leave",
+         "choice_id" => "persuade",
          "answer" => "x",
          "bank" => ["X"],
-         "wrong" => "dialogue.guard.leave"
+         "wrong" => "narration.guard.persuade_failed"
        }), {"OUTCOME_MISMATCH", at <> "intimidate.check"}},
       {guard,
        persuade.(

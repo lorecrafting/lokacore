@@ -2829,7 +2829,7 @@
             },
             "observed": {
               "$ref": "text.schema.json#/$defs/TextKey",
-              "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC in the player's room that the player perceives; with none, an NPC holder is silent (kernel_api at least 1.110)."
+              "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent (kernel_api at least 1.110)."
             },
             "skipped": {
               "$ref": "text.schema.json#/$defs/TextKey",

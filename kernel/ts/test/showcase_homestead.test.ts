@@ -32,6 +32,7 @@ import {
   talk,
   wait,
   where,
+  leave,
 } from './showcase_fixture.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-0000000004d8';
@@ -61,7 +62,7 @@ const reason = (key: string) => ({ code: 'invalid_state', message: { key } });
 const drop = (w: World, k: string) => play(w, { type: 'drop', item_id: id(w, 'item', k) }).world;
 const here = (w: World) => where(w, w.body);
 const cont = (w: World) => pending(w, w.character)![0];
-// The lesson hub reopens after every answer, Leave included; close_choice ends the sitting.
+// The lesson hub reopens after every answer; close_choice (Leave the conversation) ends the sitting.
 const shut = (w: World) => play(w, { type: 'close_choice', continuation_id: cont(w) }).world;
 const pennies = (w: World) => pool(w, 'pennies');
 const walk = (w: World, ...ds: string[]) => ds.reduce((x, d) => go(x, d).world, w);
@@ -110,7 +111,6 @@ test('homestead 2: the two free lessons; carving offered but unavailable; take t
   assert.deepEqual(choices(w), [
     ['carpentry', false],
     ['carving', false],
-    ['leave', true],
     ['whittling', true],
     ['woodcutting', true],
   ]);
@@ -120,7 +120,7 @@ test('homestead 2: the two free lessons; carving offered but unavailable; take t
   const forged = note(act(w, { type: 'choose', choice_id: 'carving', continuation_id: cont(w) }));
   assert.equal(forged.decision.kind, 'rejected');
   assert.equal((forged.decision as { error: { code: string } }).error.code, 'invalid_state');
-  w = shut(note(choose(w, 'leave')).world);
+  w = shut(w);
   for (const k of ['axe', 'stick_01', 'stick_02', 'cot', 'rug']) w = take(w, k);
   assert.deepEqual(
     tree(valid(w)).filter(([k]) => k === 'whittling' || k === 'woodcutting'),
@@ -154,7 +154,7 @@ test('homestead 3: carve_spoon twice; the third has no stick', () => {
   assert.deepEqual(offer(w, 'carve_spoon').reason, reason('craft.carve_spoon.needs'));
   assert.equal(refused(w, { type: 'perform', action: 'carve_spoon' }), 'invalid_state');
   // hs-14: the hidden joinery leaves no trace in any view or decision before Carving.
-  assert.equal(seen.length, 20);
+  assert.equal(seen.length, 18); // two per noted decision; the authored Leave press is gone (loka-x6t.21)
   assert.ok(!seen.some((s) => s.includes('joinery')));
 });
 
@@ -216,7 +216,7 @@ test('homestead 5: chop four logs, learn carpentry, saw two timbers', () => {
 // refused), or carpentry not open at exactly woodcutting 2.
 test('homestead 5 boundary: the eighth chop yields, the ninth is refused', () => {
   let x = walk(fresh(WORLD), 'north', 'west', 'west');
-  x = choose(choose(talk(x, 'carpenter').world, 'woodcutting').world, 'leave').world;
+  x = leave(choose(talk(x, 'carpenter').world, 'woodcutting').world);
   x = play(walk(take(x, 'axe'), 'east', 'south', 'west'), {
     type: 'perform',
     action: 'chop',

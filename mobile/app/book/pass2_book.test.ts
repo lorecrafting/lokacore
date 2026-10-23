@@ -4,6 +4,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { openGame } from '../../authority/local-story/session.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 
@@ -11,7 +13,8 @@ const showcase = () => book(compiled('cartridges/toolbox_showcase') as never);
 const go = (b: ReturnType<typeof showcase>, ...ds: string[]) =>
   ds.forEach((d) => (b.map(), b.tap(`Go ${d}`)));
 
-// Breaks: a learned, qualified skill still repeats how to learn it (H3), or an unlearned one stops.
+// Breaks: a teach line dumps its fields, a qualified one repeats how to learn it (H3), or an
+// unqualified or locked one stops naming its requirement (loka-x6t.24).
 test('a learned teach line drops its requirement', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
@@ -20,23 +23,51 @@ test('a learned teach line drops its requirement', (t) => {
   b.tap('Talk to the carpenter');
   b.tap('Learn whittling');
   const shown = b.text();
-  assert.ok(shown.includes('Whittling: learned; currently qualified.'), JSON.stringify(shown));
-  assert.ok(
-    shown.includes('Woodcutting: not learned; currently qualified. The carpenter teaches it free.'),
-    JSON.stringify(shown),
-  );
-  // the same page with whittling learned but no longer qualified (controlled view): the
-  // requirement comes back (book-ui.md, Skill tree details)
+  assert.ok(shown.includes('Whittling: learned.'), JSON.stringify(shown));
+  assert.ok(shown.includes('The carpenter teaches Woodcutting.'), JSON.stringify(shown));
+  // the same page with every skill unqualified, then woodcutting locked (controlled views): the
+  // requirement comes back (book-ui.md, Skill tree details; loka-x6t.24)
   const real = b.game.view.bind(b.game);
-  b.game.view = () => {
-    const r = real();
-    const skills = r.view.skills?.map((s) => ({ ...s, qualified: !s.acquired && s.qualified }));
-    return { ...r, view: { ...r.view, skills } } as never;
+  const skills = (f: (s: { acquired: boolean }) => object) => {
+    b.game.view = () => {
+      const r = real();
+      return {
+        ...r,
+        view: { ...r.view, skills: r.view.skills?.map((s) => ({ ...s, ...f(s) })) },
+      } as never;
+    };
+    return b.text();
   };
+  const free = 'The carpenter teaches it free.';
+  const unqualified = skills(() => ({ qualified: false }));
   assert.ok(
-    b.text().includes('Whittling: learned; currently unqualified. The carpenter teaches it free.'),
-    JSON.stringify(b.text()),
+    unqualified.includes(`Whittling: learned, unqualified; ${free}`),
+    JSON.stringify(unqualified),
   );
+  assert.ok(unqualified.includes(`The carpenter teaches Woodcutting; ${free}`));
+  const locked = skills((s) => ({ locked: !s.acquired }));
+  assert.ok(locked.includes(`Woodcutting: locked; ${free}`), JSON.stringify(locked));
+});
+
+// Breaks: reopening the save seeds the NPC page with the last visit's narration, so a fresh
+// visit opens on an old talk line (loka-x6t.19).
+test('a fresh NPC visit after a reopen starts empty', () => {
+  const cart = compiled('cartridges/toolbox_showcase') as never;
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, cart);
+  const b = book(cart, a);
+  go(b, 'north', 'west', 'west');
+  b.tap('The carpenter is here.');
+  b.tap('Talk to the carpenter');
+  b.tap('Learn whittling');
+  const taught = b.text().find((x) => x.startsWith('The carpenter shows you'));
+  assert.ok(taught, JSON.stringify(b.text()));
+  b.tap(LABEL.leaveConversation);
+  b.unmount();
+  const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
+  r.tap('The carpenter is here.');
+  assert.equal(r.text().includes(taught), false, JSON.stringify(r.text()));
+  r.unmount();
+  a.sql.close();
 });
 
 // Breaks: "Nothing to do here." draws above the fence's price rows (UH3), or no longer draws on an

@@ -215,12 +215,27 @@ defmodule Loka.Content.Lint do
   # mark (a spoken line). A status label is authored lowercase; condition.bleeding keeps its capital
   # (the kernel keys on it). book-ui.md: NPC dialogue and action details, Conditions details.
   defp labels(files, text) do
-    for {rel, d} <- Enum.sort(files),
-        {kind, key} <- label_keys(Path.split(rel), d),
-        s = text[key],
-        is_binary(s),
-        msg = label_problem(kind, key, s),
-        do: "#{rel}: label #{key} #{msg}"
+    for(
+      {rel, d} <- Enum.sort(files),
+      {kind, key} <- label_keys(Path.split(rel), d),
+      s = text[key],
+      is_binary(s),
+      msg = label_problem(kind, key, s),
+      do: "#{rel}: label #{key} #{msg}"
+    ) ++ exits(files, text)
+  end
+
+  # The page's own Leave control ends a talk, so a do-nothing Leave or Close choice is refused
+  # on a talk with more than one choice; a single-choice talk keeps it (book-ui.md NPC
+  # dialogue; loka-x6t.21).
+  defp exits(files, text) do
+    for {"dialogues/" <> _ = rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
+        map_size(cs) > 1,
+        {key, c} <- Enum.sort(cs),
+        Map.keys(c) -- ["label", "narration"] == [],
+        s = text[c["label"]],
+        is_binary(s) and s =~ ~r/^(Leave|Close)\b/,
+        do: "#{rel}: choice #{key} only leaves; the page's own Leave control ends the talk"
   end
 
   defp label_keys(["dialogues", _], d),

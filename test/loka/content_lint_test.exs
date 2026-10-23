@@ -92,6 +92,42 @@ defmodule Loka.ContentLintTest do
     assert st.("condition.bleeding", "Bleeding") == []
   end
 
+  test "a do-nothing Leave or Close choice is refused in a talk with more than one choice" do
+    talk = fn choice ->
+      %{
+        "dialogues/t.json" => %{
+          "keyword" => "k",
+          "choices" => %{"leave" => choice, "ask" => %{"label" => "a"}}
+        },
+        "text.json" => %{
+          "a" => "Ask about the mill",
+          "l" => "Leave her be",
+          "c" => "Close the ledger",
+          "s" => "Leave it with Bram",
+          "w" => "Ask why we never Leave"
+        }
+      }
+    end
+
+    bad = [
+      "dialogues/t.json: choice leave only leaves; the page's own Leave control ends the talk"
+    ]
+
+    assert Lint.findings(talk.(%{"label" => "l", "narration" => "n"})) == bad
+    assert Lint.findings(talk.(%{"label" => "c"})) == bad
+    # only a label that starts with Leave or Close is an exit
+    assert Lint.findings(talk.(%{"label" => "w"})) == []
+    # a single-choice talk keeps its own Leave
+    one =
+      put_in(talk.(%{"label" => "l"}), ["dialogues/t.json", "choices"], %{
+        "leave" => %{"label" => "l"}
+      })
+
+    assert Lint.findings(one) == []
+    # a Leave label that does something (a hand-over sequence) is a real choice
+    assert Lint.findings(talk.(%{"label" => "s", "sequence" => []})) == []
+  end
+
   # Samplers break lint rules on purpose, but not label wording (loka-p2ey, loka-z2j2).
   test "every cartridge's choice, action and status labels follow the label rules" do
     for dir <- Path.wildcard("cartridges/*"), File.exists?(Path.join(dir, "cartridge.json")) do

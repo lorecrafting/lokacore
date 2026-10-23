@@ -28,6 +28,7 @@ import {
   reload,
   take,
   wait,
+  leave,
 } from './showcase_fixture.ts';
 
 const CTX = '5ca5e000-0000-4000-8000-0000000000c0';
@@ -126,13 +127,11 @@ test('combat 2: the lesson gives the blade and the sword; say steel; the bounty'
   assert.equal(open(steel), 'aldous_steel');
   const elsewhere = play(go(w, 'west').world, { type: 'say', word: 'steel' });
   assert.equal(elsewhere.decision.kind === 'accepted' && elsewhere.decision.outcome, 'spoken');
-  const plain = talk(choose(steel, 'leave').world, 'aldous');
+  const plain = talk(leave(steel), 'aldous');
   assert.equal(plain.opened, 'aldous_talk');
   w = choose(plain.world, 'bounty').world;
   assert.equal(gameView(w).journal[0]?.state, 'active');
-  // A hub reopens after an answer; Leave the conversation closes it.
-  const [continuation_id] = pending(w, w.character)!;
-  w = play(w, { type: 'close_choice', continuation_id }).world;
+  assert.equal(pending(w, w.character), undefined); // the hub's only answer ends the talk
 });
 
 // Breaks: the Book offers no "ware" chip, a say reaches Gil through the wall, a shout does not, a shout carries two exits (from
@@ -338,7 +337,7 @@ test('combat 10: with the sword, the Warden takes hits for no loss; Flee holds',
   s = go(go(s, 'east').world, 'south').world;
   const reeve = (x: World, c: string) =>
     choose(pending(x, x.character) ? x : talk(x, 'reeve').world, c).world;
-  s = choose(reeve(reeve(s, 'wrong'), 'wrong'), 'leave').world;
+  s = leave(reeve(reeve(s, 'wrong'), 'wrong'));
   assert.equal(fact(s, 'wardle_standing'), -2);
   s = go(s, 'east').world;
   const warden = npc(s, 'warden');
