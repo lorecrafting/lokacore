@@ -33,6 +33,7 @@
   },
   "words": {
     "bare": "npc.den_goblin.bare",
-    "article": "a"
+    "article": "a",
+    "plural": "npc.den_goblin.plural"
   }
 }

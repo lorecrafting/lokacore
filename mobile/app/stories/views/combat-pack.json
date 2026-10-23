@@ -247,7 +247,8 @@
    "name": "npc.goblin.short",
    "words": {
     "article": "a",
-    "bare": "npc.goblin.bare"
+    "bare": "npc.goblin.bare",
+    "plural": "npc.goblin.plural"
    },
    "band": "ready",
    "active_opponents": [
@@ -256,7 +257,8 @@
      "name": "npc.goblin.short",
      "words": {
       "article": "a",
-      "bare": "npc.goblin.bare"
+      "bare": "npc.goblin.bare",
+      "plural": "npc.goblin.plural"
      },
      "band": "ready"
     },
@@ -265,7 +267,8 @@
      "name": "npc.goblin.short",
      "words": {
       "article": "a",
-      "bare": "npc.goblin.bare"
+      "bare": "npc.goblin.bare",
+      "plural": "npc.goblin.plural"
      },
      "band": "ready"
     }
@@ -351,7 +354,8 @@
     "name": "npc.goblin.short",
     "words": {
      "article": "a",
-     "bare": "npc.goblin.bare"
+     "bare": "npc.goblin.bare",
+     "plural": "npc.goblin.plural"
     },
     "description": "npc.goblin.description",
     "kind": "npc",
@@ -392,7 +396,8 @@
     "name": "npc.goblin.short",
     "words": {
      "article": "a",
-     "bare": "npc.goblin.bare"
+     "bare": "npc.goblin.bare",
+     "plural": "npc.goblin.plural"
     },
     "description": "npc.goblin.description",
     "kind": "npc",

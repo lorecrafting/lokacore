@@ -22,6 +22,7 @@
   ],
   "words": {
     "bare": "npc.cellar_chief.bare",
-    "article": "the"
+    "article": "the",
+    "plural": "npc.cellar_chief.plural"
   }
 }

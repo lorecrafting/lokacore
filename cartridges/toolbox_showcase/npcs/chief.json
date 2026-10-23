@@ -22,6 +22,7 @@
   ],
   "words": {
     "bare": "npc.chief.bare",
-    "article": "the"
+    "article": "the",
+    "plural": "npc.chief.plural"
   }
 }

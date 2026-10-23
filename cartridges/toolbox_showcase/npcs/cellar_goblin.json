@@ -33,6 +33,7 @@
   },
   "words": {
     "bare": "npc.cellar_goblin.bare",
-    "article": "a"
+    "article": "a",
+    "plural": "npc.cellar_goblin.plural"
   }
 }
