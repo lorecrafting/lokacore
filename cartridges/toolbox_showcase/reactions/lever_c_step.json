@@ -14,7 +14,7 @@
   "apply": [
     {
       "op": "narrate",
-      "text": "narration.lever_bolt"
+      "text": "narration.lever_open"
     },
     {
       "op": "fact.assign",

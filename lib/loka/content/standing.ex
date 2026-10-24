@@ -5,8 +5,7 @@ defmodule Loka.Content.Standing do
   has an attack (SCHEMA_VIOLATION); either, or a friendly buy_discount, needs kernel_api 1.47; a
   refuse line (Book hostile refusal) 1.104. Row 35: an arrest instead of the engage line needs
   `hostile` and no `engage` (SCHEMA_VIOLATION), a room to move the body to
-  (UNRESOLVED_REFERENCE) and kernel_api 1.105. Row FD10: asides are never on a spawn template
-  (SCHEMA_VIOLATION).
+  (UNRESOLVED_REFERENCE) and kernel_api 1.105.
   Twin of kernel/ts/src/content/cartridge_standing.ts; the conditions and the engage text are
   checked with every entity's (Loka.Content.Entities). A hostile-capable NPC speaking a dialogue
   that accepts, hands over, receives or escorts (refused while hostile): HOSTILE_QUEST_SPEAKER, a
@@ -42,17 +41,10 @@ defmodule Loka.Content.Standing do
   end
 
   defp shapes(npcs) do
-    templates(npcs) ++
-      for {rel, %{"disposition" => d} = n} <- npcs,
-          n["spawn_template"] || bad?(d, n) ||
-            (is_map_key(d, "refuse") and not is_map_key(d, "hostile")),
-          do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
-  end
-
-  # Toolbox row FD10: a spawned copy has no authored presence to remark from.
-  defp templates(npcs) do
-    for {rel, %{"spawn_template" => true, "asides" => _}} <- npcs,
-        do: diag("SCHEMA_VIOLATION", at(rel, ["asides"]), %{"error" => "invalid_value"})
+    for {rel, %{"disposition" => d} = n} <- npcs,
+        n["spawn_template"] || bad?(d, n) ||
+          (is_map_key(d, "refuse") and not is_map_key(d, "hostile")),
+        do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
   end
 
   defp bad?(%{"arrest" => _} = d, _), do: not is_map_key(d, "hostile") or is_map_key(d, "engage")

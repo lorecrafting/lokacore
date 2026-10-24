@@ -212,6 +212,12 @@ room description is the first variant whose `when` holds, else the base (`descri
 `not_found`, elsewhere `not_present`; accepted `examined`. A detail's own description is
 chosen the same way. Details are named through their aliases ([target resolution](protocol.md#target-resolution)).
 
+A recipe whose target is a detail is offered only on that detail's NoticeView `actions` (loka-x6t.120); `view.actions`
+never lists it. A detail some recipe of the actor's set targets is projected as a NoticeView while visible in the
+actor's room, titled by its authored `title` (room.schema.json, kernel_api 1.120) or, without one, its description.
+Engine verbs and quest offers stay in `view.actions` for the Book's chrome; the invariant
+`world_lists_no_fixture_action` holds it.
+
 ## readable@1 (`mechanics/readable/rule.ts`)
 
 A room detail may declare `readable {label, text}`, both catalog TextKeys.
@@ -1115,7 +1121,7 @@ room text and ordinary known traversable exits, inventory, posture and escape co
 A dark room is one with an authored `dark_description` or, from kernel_api 1.114, the
 room flag `dark: true` (`unlit`, `kernel/ts/src/mechanics/light/shared.ts`; loka-x6t.36,
 owner decision 2026-10-22, LegendMUD style). Where no `dark_description` is authored,
-the GameView place reads the engine key `place.dark` and no room aside (`placeView`,
+the GameView place reads the engine key `place.dark` (`placeView`,
 `kernel/ts/src/view/view.ts`); the Book and the text player word it "It's too dark to
 see..." unless the cartridge texts that key. Only the place line changes: an item's short
 and the player's name keep their own text. Exits stay usable, as above.
@@ -2255,15 +2261,13 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 
 [Toolbox row FD2](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#voice-declarations) govern it; the PM brief is in Beads `loka-kgd.139` (2026-10-14).
 
-- **`skill_compare {skill, at_least}`** (owned by skills@1): holds when the actor's level of the skill (`level` in `kernel/ts/src/mechanics/skills.ts`: acquired membership plus each growth threshold reached by its use count, [rows 5 and G5](#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5)) is at least `at_least` (1 or more). It reads the evaluated actor, so every policy site can use it: a variant, an aside, a recipe policy.
-- **Asides.** A room or a room's detail may declare `asides`, 1 to 16 `{when, text}`. Unlike `variants` (the first that holds replaces the text), every aside whose `when` holds for the viewing actor is shown, in authored order, after the base text, which never changes. One reader, `asides` in `kernel/ts/src/mechanics/description_variant/rule.ts`. The GameView carries them as `PlaceView.asides` and `NoticeView.asides` (text keys), absent when none holds. An NPC's asides came with [row FD10](#companion-remarks-npc-asides-toolbox-row-fd10).
-- **Ownership.** `asides` has no capability of its own (decision, Beads `loka-kgd.139`): it rides on its room or detail and its leaves on their owners; a cartridge using `skill_compare` declares skills@1. _Why not under description_variant@1:_ that would make every voice cartridge declare variants it does not use.
-- **Realm seams** ([owner decision](../decisions/owner-decision-realm-seams-2026-10-13.md)). Asides and the leaf read the viewing actor's skill facts (player scope already), never `world.character` outside `view/`; nothing is written. No trigger, payout, clock, text input, ownership, import or unique thing.
-- **Opt-in.** `asides` and the leaf need `kernel_api` 1.91, a lone leaf too. A cartridge without them keeps its bytes, hash and GameView; Chapter 1 declares none.
-- **Book.** Each one is one plain World log line, logged once per room visit ([Aside details](book-ui.md#aside-details)). The text player does not show them.
-- **Known limits.** A detail's asides show only on a detail already projected as a notice (readable, harvest, perception, bed, transport or expedition), and not on a notice board's own text. A room or detail whose dark description shows has no asides (as `describe` swaps its text). The text player's look and examine show the base text only. The Book shows an aside's links as plain words, so its touch links are not checked.
-- **Sampler.** `cartridges/voices_sampler`: studying the runes (an opposed lore check, growth [1, 2]) raises lore by one per attempt. At lore 0 the hall shows no aside and the sage "leans on a staff"; at 1 the hall adds a guild line and the carved door "the carving is guild work"; at 2 the door adds "the glyphs spell a warding, and a name" above it, the sage "nods to you as to a fellow scholar", and "Decipher the glyphs" (policy `skill_compare lore 2`) is offered.
-- **Composition record.** Consumer: the GameView (place and notices) and every policy site (the leaf). Reads: skill membership and use-count facts. Writes, events, jobs and save rows: none. Reused: `holds` and its step budget, `level`, `LeafRefs` and short-reference expansion, the room condition walk (`RoomParts.conditions`, `nodes()`), `KERNEL_API_RANGE_INVALID`. New: the leaf, `Aside` and two `asides` fields (room, detail; place and notice views); no foundation change.
+- **`skill_compare {skill, at_least}`** (owned by skills@1): holds when the actor's level of the skill (`level` in `kernel/ts/src/mechanics/skills.ts`: acquired membership plus each growth threshold reached by its use count, [rows 5 and G5](#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5)) is at least `at_least` (1 or more). It reads the evaluated actor, so every policy site can use it: a variant, a recipe policy.
+- **Asides retired** (owner, 2026-10-23; `loka-x6t.125`). The room and detail `asides` lists are gone from the schemas, both kernels and the GameView: the [room page anatomy](book-ui.md#room-page-anatomy) has no place for them. A cartridge that declares one is refused (UNKNOWN_FIELD at `rooms/hall.asides` in both kernels). Only the leaf remains.
+- **Ownership.** A cartridge using `skill_compare` declares skills@1.
+- **Realm seams** ([owner decision](../decisions/owner-decision-realm-seams-2026-10-13.md)). The leaf reads the evaluated actor's skill facts (player scope already), never `world.character` outside `view/`; nothing is written. No trigger, payout, clock, text input, ownership, import or unique thing.
+- **Opt-in.** The leaf needs `kernel_api` 1.91, a lone leaf too. A cartridge without it keeps its bytes, hash and GameView; Chapter 1 declares none.
+- **Sampler.** `cartridges/voices_sampler`: studying the runes (an opposed lore check, growth [1, 2]) raises lore by one per attempt. Below lore 2 the sage "leans on a staff"; at 2 the sage "nods to you as to a fellow scholar", and "Decipher the glyphs" (policy `skill_compare lore 2`) is offered on the carved door.
+- **Composition record.** Consumer: every policy site (the leaf). Reads: skill membership and use-count facts. Writes, events, jobs and save rows: none. Reused: `holds` and its step budget, `level`, `LeafRefs` and short-reference expansion, `KERNEL_API_RANGE_INVALID`. New: the leaf; no foundation change.
 
 ## Status modifiers (toolbox row 2c)
 
@@ -2301,7 +2305,7 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 - **Reader 2, NPC perception.** The leaf `cue_perceived {npc, sense}` holds when the NPC is alive and a cue of that sense reaches its room, read for the reading actor. In a reaction's `when` whose cause is a recipe outcome event (`check_failed`: the failure outcome; `check_passed` and `action_completed`: the success outcome) it counts only that outcome's transient cues, from the actor's room, so the guard hears the pick and not the forge next to it; an outcome without cues is heard by no one. Cues of a dead NPC are silent. _Why a leaf and transient outcome cues:_ a reaction already runs on the failed check, so the hook is one condition and no new event, state, job or save row; a stored "noise" would be authority state. An NPC perceives its own cues; a cue's own `when` never perceives (the leaf is false there, and the loader does not refuse it), so evaluation cannot recurse. Two sources with one text and direction show two lines.
 - **D9's bell cue stays.** The Chapter 1 bell (`world.bell_cue`, [D9](#d9-village-consequences-and-prior-study-access-selected-contract)) is the earlier, event-bound instance: one accepted `fact_changed`, an explicit audible room list and retained history ([protocol](protocol.md)). It is not folded, so Chapter 1 bytes and GameView are unchanged; a bell written today is a transient outcome cue for NPCs plus a room cue with a fact `when` for the player. No global sound bus.
 - **Opt-in.** A cue or a `cue_perceived` leaf needs `sense_cue@1` (UNDECLARED_CAPABILITY) and `kernel_api` at least 1.48 (KERNEL_API_RANGE_INVALID). Chapter 1 and the corpus declare none.
-- **Book.** The World page shows each cue as a quiet line ([Book UI, Sense cues details](book-ui.md#sense-cues-details); proposed wording "{text} from the {direction}", pending designer approval, Beads `loka-kgd.65`).
+- **Book.** Each cue is one plain World log line, "{text} from the {direction}" for another room's, once per room visit ([Book UI, Sense cues details](book-ui.md#sense-cues-details)).
 - **Sampler.** `cartridges/senses_sampler`: storeroom, hall, forge east of the hall, barracks north of the hall, tower east of the barracks, guardroom south of the storeroom. In the hall the player reads hammering (sound, range 1) from the east and stew (smell, range 2, from the tower kitchen) from the north, not the forge heat (range 0); a lit torch adds its smoke from the hall itself; the storeroom hears nothing. Picking the storeroom lock fails (pick 0 against rating 5) and rattles (range 1): the guard in the guardroom next door is alerted, the sentry in the barracks two rooms away is not.
 - **Composition record.** Consumer: the view and reaction conditions. Reads: definition cues, fuel rows, status rows, containers, exits and their `hidden_until` facts, the cause event of a reaction. Writes, events, jobs and save rows: none. Reused: the policy evaluator and its step budget, `fuelView`, status rows, `hidden`, reaction conditions, short-reference expansion and capability ownership. New: the `Cue` shape on six definitions, one leaf, one GameView field, and the reaction cause passed to its condition; no foundation change.
 
@@ -3196,36 +3200,8 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
 
 ## Storylet deck (toolbox row FD3)
 
-[Toolbox row FD3](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 3): "the place offers one opportunity drawn from the cards that hold". The PM brief is in Beads `loka-kgd.140` (2026-10-14, rulings A to F). [Declarations](cartridge.md#storylet-declarations) govern it.
+Retired (owner 2026-10-23, Beads `loka-x6t.125` batch; [toolbox row FD3](../MECHANICS-TOOLBOX.md#ranked-toolbox)). A recipe `target` `{kind: "storylet"}` is refused by the schema in both kernels (SCHEMA_VIOLATION at `target.kind`), `GameView.storylet` is removed, a scene `on {action}` names its `room` or `detail` again, and `cartridges/storylet_sampler` is deleted. The deck was projected but never drawn in the Book; an opportunity is an action on a person or fixture page instead ([room page anatomy](book-ui.md#room-page-anatomy)).
 
-- **Declaration.** A storylet is an [action recipe](#action_recipe1-mechanicsaction_reciperulets49) whose `target` is `{kind: "storylet", rooms?, weight?}`: `rooms` 1 to 16 rooms of this cartridge (absent: every room), `weight` 1 to 100 (default 1). Its policy, costs, cooldown, check and outcomes are the recipe's own.
-- **Pick.** For an actor whose body is in a room, the deck is the storylet recipes whose `rooms` are absent or name that room and whose policy holds for that actor, in key order (code-unit). The hour index is `floor(clock / hour)` with the cartridge's hour in logical seconds (absolute, not the hour of day). `r` is the first four bytes, big-endian, of SHA-256 over the UTF-8 of `<actor id>:<room key>:<hour index>`, modulo the deck's weight sum; the pick is the first storylet whose cumulative weight passes `r`. It is derived on every read (`kernel/ts/src/mechanics/storylet/shared.ts` `pick`): no trigger, step, job, event or save row, and never the authority RNG, so the view and the perform it invites agree within the hour and replay draws the same card.
-- **Acceptance.** `perform {action: <storylet key>}` with no `target_id` or `item_id` (else `invalid_target`); a storylet that is not the actor's pick now is `invalid_state`; the pick is decided as any recipe on the actor's body as subject (`action_recipe/rule.ts` `subjectOf`).
-- **Scene.** A [scene](#scene1-mechanicsscenerulets) `on {action, outcome: "success"}` naming a storylet recipe names neither `room` nor `detail`, and starts when that recipe completes for the event's `actor_id` (`mechanics/scene/shared.ts` `legacyStarts`).
-- **GameView.** Only the pick is listed among the place's actions, available or not as the recipe's advertise reads (a cooldown or cost shows it unavailable with its reason); `GameView.storylet` is its key exactly when it is listed (absent under a modal scene).
-- **Realm seams** (owner decision 2026-10-13, brief checklist).
-  1. Actor: met; `pick(world, actor)` reads the command's `actor_id` or the viewer actor, never `world.character`.
-  2. Reactions: not applicable; no trigger of its own; content reactions on the recipe's events use RS-4's delivery actor.
-  3. Credit: not applicable.
-  4. Time: met; the logical clock's hour index; no job, no skip.
-  5. Scope: met; the draw is per player (the actor is hashed); the card is shown to that player only; the storylet's steps write at their own declared scopes.
-  6. Text: not applicable.
-  7. Ownership: not applicable.
-  8. Trust: not applicable; nothing stored.
-  9. Instancing: met; none built.
-- **Opt-in.** A storylet target needs `kernel_api` 1.92 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.93. Chapter 1 declares none.
-- **Book.** The room page draws the pick as one Action card after the details and before the verbs; an unavailable pick is a `label: reason` note, and the pick never appears as a verb line ([storylet card](book-ui.md#storylet-card-details); `mobile/app/book/storylet.test.ts`).
-- **Known limits.** The deck draws per room and hour, not on entering a room: re-entering within the hour shows the same card. A storylet with `rooms` absent is in every room's deck. A policy that changes inside the hour can change the pick within it.
-- **Traps.** No RNG draw and no stored state; the hash is the W7 pattern.
-- **Sampler.** `cartridges/storylet_sampler`: `market` and `lane`; `pickpocket` (rooms market and lane, weight 1), `stranger_beckons` (market, weight 3, hours 0 to 2 while `scene_stranger` is 0; its scene `stranger` offers the quest `stranger_errand`), `old_friend` (every room, after three market visits). For the sampler's actor the market draws pickpocket at hour 0, stranger_beckons at hours 1 and 10, and the lane pickpocket (`kernel/ts/test/storylet.test.ts`, hashes pinned with `shasum -a 256`).
-- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
-  - Consumer: `storylet_sampler`. Later: the showcase's opportunity cards.
-  - Reads: the recipes' policies, the actor's room, the clock.
-  - Writes: none new (the recipe's own outcome ops).
-  - Events, save rows: none new (`action_completed` as any recipe).
-  - Reused: `action_recipe@1` decide and advertise, `holds`, `sha256`, the scene action start.
-  - New: the storylet `RecipeTarget`, `pick`, `GameView.storylet`, the scene start without room and detail, the 1.92 floor.
-  - Missing invariant: none (nothing stored).
 
 ## Sneak and hide (toolbox row 16)
 
@@ -3774,14 +3750,4 @@ Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.m
 
 ## Companion remarks: NPC asides (toolbox row FD10)
 
-[Toolbox row FD10](../MECHANICS-TOOLBOX.md#ranked-toolbox) (Beads `loka-kgd.147`): a companion remarks on a place. An NPC carries the [FD2 asides](#passive-skill-voices-toolbox-row-fd2), and each one whose condition holds shows with the NPC while it is present; [declarations](cartridge.md#voice-declarations) govern it.
-
-- **Declaration.** `NpcDefinition.asides` (`protocol/entity.schema.json`): 1 to 16 `Aside {when, text}`, never on a spawn template.
-- **Reader.** `asides` in `kernel/ts/src/mechanics/description_variant/rule.ts` now takes the policy target; the view passes the NPC, so `subject: "target"` reads it (a [G8 pair fact](#group-primitive-toolbox-row-g8) such as group membership), while room leaves (`has_tag subject room`, `visited_count`) read the viewer's room and visits. Every holding aside shows, in authored order. Nothing is written: "once per visit tier" is two asides gated on `visited_count` (first visit, then from the second).
-- **Where shown.** The GameView entity of a present NPC carries `asides` (text keys, `EntityView.asides`), absent when none holds; the room's `PlaceView.asides` is unchanged.
-- **Known limits.** An NPC's asides follow its listing: in a dark room only an NPC with `perception` it has discovered is listed, and its asides show there. The text player's look shows none. Like FD2, an aside's links show as plain words.
-- **Opt-in.** NPC asides need `kernel_api` 1.107 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels: `lib/loka/content/variants.ex`, `kernel/ts/src/content/cartridge_variants.ts`). A cartridge without them keeps its bytes, hash and GameView.
-- **Book.** Each of the NPC's asides is one plain World log line, logged once per room visit; the NPC's page shows none ([Aside details](book-ui.md#aside-details)).
-- **Sampler.** `cartridges/remarks_sampler`: Hal (yard) joins the player's group by talk; the crypt is tagged `cool`. On the first visit with Hal, Hal's `remark.hal.first` shows; from the second visit, `remark.hal.again`; out of the group, none. Bram, in the crypt, has one ungated aside. Tests: `kernel/ts/test/remarks.test.ts`, `test/loka/content_remarks_test.exs`.
-- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumer: the GameView entity list. Reads: the NPC's definition and whatever its `when` reads (pair facts, room tags, visit counts). Writes, events, jobs and save rows: none. Reused: `Aside`, `asides` and `holds` with its step budget, the NPC variant walk and short-reference expansion (`NpcFields`, `Entities`), the W6 floor, `KERNEL_API_RANGE_INVALID`. New: the reader's target argument and two `asides` fields (NPC definition, entity view); no foundation change.
-- **Realm seams** ([owner decision](../decisions/owner-decision-realm-seams-2026-10-13.md)). 1 Actor met (the view's actor; the NPC is the target, never `world.character` outside `view/`). 2 and 3 n/a (no reaction, no payout). 4 n/a (visit counts, no clock). 5 met (pair facts are player-scoped; nothing written). 6 met (authored text in a per-viewer GameView). 7 to 9 n/a.
+Retired (owner, 2026-10-23; `loka-x6t.125`): `NpcDefinition.asides`, `EntityView.asides`, the 1.107 floor rung and `cartridges/remarks_sampler` are gone, with the [FD2 asides](#passive-skill-voices-toolbox-row-fd2). A remark may return as talk or an emote (`loka-kgd.193`).

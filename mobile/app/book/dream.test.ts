@@ -142,7 +142,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   ui.tap('Rent room — 3p');
   ui.tap('Leave');
   ui.walk('up');
-  ui.tap('Bed');
+  ui.tap('bed, open');
   ui.tap('Rest');
   assert.deepEqual(ui.stack(), [
     { kind: 'notice', id: bed },
@@ -173,7 +173,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   assert.ok(!cold.labels().includes('Follow the fox'));
   assert.ok(!cold.text().includes('The fox waits at a fork in the reeds.'));
   assert.ok(!cold.text().includes('A red fox steps onto the track.'));
-  cold.tap('Bed');
+  cold.tap('bed, open');
   cold.tap('Resume dream');
   assert.ok(cold.text().includes('A red fox steps onto the track.'));
   assert.deepEqual(
@@ -211,7 +211,7 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   ui.tap('Rent room — 3p');
   ui.tap('Leave');
   ui.walk('up');
-  ui.tap('Bed');
+  ui.tap('bed, open');
   a.fault.kind = 'lost';
   a.fault.armed = true;
   ui.tap('Rest');

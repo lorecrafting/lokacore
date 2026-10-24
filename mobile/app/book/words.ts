@@ -180,12 +180,14 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 };
 
 // One narration line's words. A skipped combat turn (loka-x6t.30) names its status from the
-// engine line combat.skipped; it has no actor when the player skipped.
+// engine line combat.skipped; it has no actor when the player skipped. A flight (combat.fled)
+// names the way taken.
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
   view: GameView,
 ) => {
+  if (t.key === 'combat.fled') return `You flee ${String(t.bindings?.direction)}.`;
   if (t.key !== 'combat.skipped') return text(t.key);
   const actor = t.participants?.actor;
   const name = actor === undefined ? undefined : nameOf(view, actor, text);

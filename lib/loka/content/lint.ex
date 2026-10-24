@@ -46,6 +46,7 @@ defmodule Loka.Content.Lint do
     |> Kernel.++(labels(files, text))
     |> Kernel.++(items(files))
     |> Kernel.++(fills(files))
+    |> Kernel.++(Loka.Content.LintPages.run(files, text))
   end
 
   defp file(["recipes", _], rel, %{"policy" => %{"root" => root}} = r)

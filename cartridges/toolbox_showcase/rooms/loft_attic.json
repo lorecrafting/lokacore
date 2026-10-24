@@ -12,7 +12,8 @@
         "hearth",
         "ash"
       ],
-      "description": "detail.attic_hearth.description"
+      "description": "detail.attic_hearth.description",
+      "title": "detail.attic_hearth.title"
     }
   }
 }

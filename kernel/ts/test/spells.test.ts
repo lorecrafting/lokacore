@@ -15,6 +15,7 @@ import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level } from '../src/mechanics/resource.ts';
+import { noticeAction } from './notice_action.ts';
 
 function compiled(dir: string): Uint8Array {
   const scratch = mkdtempSync(join(tmpdir(), 'loka-spells-sampler-'));
@@ -278,7 +279,7 @@ test("a failed recipe policy carries the recipe's reason in the GameView; the co
   const trace = { ...content.recipes![key as never]!, reason: 'reason.ward' as never };
   const recipes = { ...content.recipes, [key]: trace } as Cartridge['recipes'];
   const v = newWorld({ ...content, recipes }, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1]);
-  const offer = gameView(v).actions.find((a) => a.label === 'actions.trace_sigil');
+  const offer = noticeAction(gameView(v), 'trace_sigil');
   assert.deepEqual(offer && !offer.available && offer.reason, reason);
   assert.equal(code(play(v, { type: 'perform', action: 'trace_sigil' })), 'invalid_state');
 });

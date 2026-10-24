@@ -98,9 +98,13 @@ function entryAgrees(
 const aimedEntry = (view: GameView, p: Any, key: string | undefined) =>
   entityView(view, p.target_id)?.actions.find((a) => a.command === 'cast' && a.action_key === key);
 
-/** The observation's maps from the actor's resolved set: each key's command, each aimed spell word's key. */
+/**
+ * The observation's maps from the actor's resolved set: each key's command, each aimed spell word's
+ * key, and the keys of recipes aimed at a room detail (loka-x6t.120).
+ */
 export const offerMaps = (actions: readonly Offered[]) => ({
   resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
+  details: actions.filter((a) => a.recipe?.target.kind === 'detail').map((a) => a.key),
   words: Object.fromEntries(
     actions.flatMap((a) =>
       a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
@@ -288,3 +292,7 @@ function dreamAgrees(view: Any, p: Any, decision: Any, key?: string) {
     ? decision.kind === 'accepted' || decision.kind === 'fault'
     : decision.kind === 'rejected' && decision.error.code === entry.reason.code;
 }
+
+/** World lists no recipe aimed at a room detail: that is its NoticeView's card (loka-x6t.120). */
+export const world_lists_no_fixture_action = (o: { view: GameView; details: readonly string[] }) =>
+  o.view.actions.every((a) => !o.details.includes(a.action_key));

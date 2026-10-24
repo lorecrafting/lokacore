@@ -23,6 +23,7 @@ import { positionOf } from '../src/mechanics/position/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import type { DefinitionRef } from '../src/contracts.gen.ts';
+import { noticeAction } from './notice_action.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-trial-'));
 let artifact: Uint8Array;
@@ -111,7 +112,7 @@ const code = (w: World, p: object) => {
 };
 const arrested = (w: World) => north(chat(w, 'crier', 'confess')).w;
 const forced = (w: World) => value(w, w.character, ref('fact', 'grate_forced'));
-const force = (w: World) => gameView(w).actions.find((a) => a.action_key === 'force_grate');
+const force = (w: World) => noticeAction(gameView(w), 'force_grate');
 const FORCE = { type: 'perform', action: 'force_grate' };
 
 // Break: hostileAt drops the arrest candidate (or keeps its no-combat bar), so nobody is arrested.

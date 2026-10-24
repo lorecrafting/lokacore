@@ -183,10 +183,16 @@ test('spell words: refused ones list their reason under Spells; lux casts once a
     castWords({ ...v, actions: v.actions.filter((x) => x.action_key !== 'cast') }),
     [],
   );
-  b.tap('Take up the apprenticeship');
+  // ponytail: a giverless quest offer has no Book control since the World verb lines went (open PM
+  // question on PR #464); accept it through the game until the Book draws one.
+  b.game.invoke({ action_key: 'apprentice', target_ids: [], input: {} } as never);
+  b.tap('sigil, open');
   b.tap('Trace the sigil');
+  b.tap(LABEL.leave);
   assert.ok(spellsBlock().includes('ward, cast: Needs level 2 and wisdom 11'));
+  b.tap('hearth, open');
   b.tap('Gather ash');
+  b.tap(LABEL.leave);
   b.tap(LABEL.sayToRoom);
   assert.ok(!b.labels().includes('ward'), 'a refused word is no chip');
   b.tap('lux');

@@ -18,6 +18,7 @@ import { detail, room } from '../play/text.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { variants } from '../src/content/cartridge_variants.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { noticeAction } from './notice_action.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-variants-'));
 let artifact: Uint8Array;
@@ -77,8 +78,7 @@ const shove = (w: World) => {
     n,
   ).decision;
 };
-const offered = (w: World) =>
-  gameView(w).actions.find((a) => a.action_key === 'shove')?.available === true;
+const offered = (w: World) => noticeAction(gameView(w), 'shove')?.available === true;
 const fresh = () =>
   newWorld(content, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
 

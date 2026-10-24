@@ -98,6 +98,11 @@ Briefs: [docs/briefs/container-open/README.md](briefs/container-open/README.md) 
 first: the showcase seed sack gets a lid, no engine change), branch `toolbox/batch-container-open`, one slice plus a
 conditional second on the owner's answer.
 
+## Room fixtures batch (draft PR #464)
+
+Briefs: [docs/briefs/room-fixtures/README.md](briefs/room-fixtures/README.md) (loka-x6t.120 fixture actions off World,
+loka-x6t.125 asides removed, loka-x6t.127 room anatomy), branch `toolbox/batch-room-fixtures`.
+
 ## Overnight results (2026-10-23)
 
 - MERGED #455 loka-3w3q + x6t.26 death lines outside combat (kernel_api 1.117; "You fall.", "You wake at the inn.";

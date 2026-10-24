@@ -317,9 +317,9 @@ test('a blind player holding a lit torch sees the well shaft dark', () => {
   assert.equal(gameView(blinded(w)).place.description.key, 'room.well_shaft.dark');
 });
 
-// Breaks (loka-x6t.36): a dark-flagged room with no dark_description shows its description, an
-// aside, Peg or the floor oil to a player without light; the peek from above shows its contents;
-// the engine line replaces a held item's short; the exit is lost; light does not restore sight.
+// Breaks (loka-x6t.36): a dark-flagged room with no dark_description shows its description,
+// Peg or the floor oil to a player without light; the peek from above shows its contents; the
+// engine line replaces a held item's short; the exit is lost; light does not restore sight.
 test('a dark-flagged room reads place.dark and hides its entities until lit', () => {
   const flagged = f.genesis((c) => {
     light(c);
@@ -327,8 +327,6 @@ test('a dark-flagged room reads place.dark and hides its entities until lit', ()
     const shaft = c.rooms[`${f.prefix}:room/well_shaft`];
     delete shaft.dark_description;
     shaft.dark = true;
-    const always = { policy_version: 1, root: { op: 'all', items: [] } };
-    shaft.asides = [{ when: always, text: 'room.well_shaft.description' }];
     c.npcs[`${f.prefix}:npc/peg`].room = f.ref('room', 'well_shaft');
   });
   const base = small(flagged);
@@ -341,7 +339,6 @@ test('a dark-flagged room reads place.dark and hides its entities until lit', ()
   let view = gameView(w);
   assert.deepEqual(validate('GameView', view), []);
   assert.equal(view.place.description.key, 'place.dark');
-  assert.equal(view.place.asides, undefined);
   assert.match(roomText(w.cartridge as never, w), /\nIt's too dark to see\.\.\.\n/);
   assert.ok(!ids(view).includes(peg) && !ids(view).includes(oil));
   assert.ok(ids(view).includes('"item.torch.short"'));
@@ -356,7 +353,6 @@ test('a dark-flagged room reads place.dark and hides its entities until lit', ()
   view = gameView(w);
   assert.deepEqual(validate('GameView', view), []);
   assert.equal(view.place.description.key, 'room.well_shaft.description');
-  assert.equal(view.place.asides?.length, 1);
   assert.ok(ids(view).includes(peg) && ids(view).includes(oil));
   assert.equal(gameView(blinded(w)).place.description.key, 'place.dark');
 });

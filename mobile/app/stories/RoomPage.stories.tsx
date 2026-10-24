@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { Body } from '../book/Body.tsx';
-import { NoticeEntries } from '../book/notices.tsx';
+import { cueLine } from '../book/model.ts';
 import { RoomPage } from '../book/pages.tsx';
 import { pageStory } from './screen.tsx';
 import RoomFirstView from './views/room-first.json';
@@ -11,14 +11,12 @@ import RoomLongLogView from './views/room-long-log.json';
 import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
-import voices from '../../../cartridges/voices_sampler/text.json';
-import remarks from '../../../cartridges/remarks_sampler/text.json';
 
 const meta: Meta = {
   tags: ['!autodocs'],
   title: 'Pages/Room',
   component: RoomPage,
-  subcomponents: { Body, NoticeEntries },
+  subcomponents: { Body },
 };
 export default meta;
 
@@ -40,8 +38,8 @@ export const Reworded: StoryObj = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('A reworded inn, set in the panel.')).toBeVisible();
     await expect(canvas.queryByText(/A low inn/)).toBeNull();
-    // The reworded description drops the signpost link, so its World line returns (loka-x6t.105).
-    await expect(canvas.getByRole('button', { name: 'The inn signpost, open' })).toBeVisible();
+    // The reworded description drops the signpost link; World draws no line for it instead.
+    await expect(canvas.queryByRole('button', { name: /signpost, open$/ })).toBeNull();
   },
 };
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
@@ -52,63 +50,25 @@ export const AtNight: StoryObj = {
   name: 'At night',
 };
 
-// The senses sampler's GameView cues (kernel/ts/test/senses.test.ts) on a generated room, worded by
-// the sampler's own text: the hall hears the forge one room east and smells the tower's stew.
-const cued = (cues: object[]): StoryObj => ({
-  ...pageStory({ ...RoomFirstView, view: { ...RoomFirstView.view, cues } }),
-  args: { words: Object.fromEntries(Object.entries(senses).filter(([k]) => k.startsWith('cue.'))) },
-});
-// Breaks: the direction phrase is dropped, so a cue next door reads as if it were here; or the
-// cues are reordered, so a farther cue reads before a nearer one.
-export const SenseCues: StoryObj = {
-  ...cued([
-    { sense: 'sound', text: 'cue.hammering', direction: 'east' },
-    { sense: 'smell', text: 'cue.stew', direction: 'north' },
-  ]),
-  name: 'Sense cues',
-  play: async ({ canvas }) => {
-    await expect(await canvas.findByText('Hammering from the east')).toBeVisible();
-    const stew = canvas.getByText('The smell of stew from the north');
-    await expect(stew).toBeVisible();
-    const hammering = canvas.getByText('Hammering from the east');
-    await expect(
-      hammering.compareDocumentPosition(stew) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-  },
-};
-// Breaks: a cue from the player's own room gets a direction phrase it has none of.
-export const SenseCuesHere: StoryObj = {
-  ...cued([
-    { sense: 'heat', text: 'cue.forge_heat' },
-    { sense: 'sound', text: 'cue.hammering' },
-  ]),
-  name: 'Sense cues here',
-  play: async ({ canvas }) => {
-    await expect(await canvas.findByText('Heat beats out from the forge.')).toBeVisible();
-    await expect(canvas.getByText('Hammering')).toBeVisible();
-  },
-};
-
-// A skill voice (toolbox row FD2) and a companion remark (FD10) as the presenter logs them: plain
-// World lines after the room's lines, no block of their own (book-ui.md Aside details; owner pick
-// mvlrbpi8u4ai). Breaks: the log drops an aside or reorders it; the logging is in polish_style.test.ts.
-export const Asides: StoryObj = {
+// A sense cue as the presenter logs it (book-ui.md, Sense cues details), worded by the senses
+// sampler's text: one log line after the room's lines. Breaks: World draws the cue as its own
+// block again (two lines). Logging once per visit: book/room_anatomy.test.ts.
+// text and direction are branded keys (TextKey, Key) in the view.
+const hammering = {
+  sense: 'sound',
+  text: 'cue.hammering' as never,
+  direction: 'east' as never,
+} as const;
+export const SenseCueLogged: StoryObj = {
   ...pageStory({
     ...RoomFirstView,
-    log: [voices['aside.hall.lore'], remarks['remark.hal.first']],
+    view: { ...RoomFirstView.view, cues: [hammering] },
+    log: [cueLine(hammering, (k) => (senses as Record<string, string>)[k] ?? k)],
   }),
-  name: 'Asides',
+  name: 'Sense cue logged',
   play: async ({ canvas }) => {
-    const aside = await canvas.findByText(voices['aside.hall.lore']);
-    await expect(aside).toBeVisible();
-    const prose = canvas.getByText(/A low inn/);
-    const remark = canvas.getByText(remarks['remark.hal.first']);
-    await expect(
-      prose.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    await expect(
-      aside.compareDocumentPosition(remark) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    await expect(await canvas.findByText('Hammering from the east')).toBeVisible();
+    await expect(canvas.getAllByText('Hammering from the east')).toHaveLength(1);
   },
 };
 

@@ -327,36 +327,6 @@
   "actions": [
    {
     "available": true,
-    "action_key": "force_hall_cupboard",
-    "label": "actions.force_hall_cupboard",
-    "target": {
-     "kind": "none"
-    },
-    "input": []
-   },
-   {
-    "available": true,
-    "action_key": "pick_hall_strongbox",
-    "label": "actions.pick_hall_strongbox",
-    "target": {
-     "kind": "none"
-    },
-    "input": []
-   },
-   {
-    "available": false,
-    "action_key": "think_hall_lectern",
-    "label": "actions.think_hall_lectern",
-    "target": {
-     "kind": "none"
-    },
-    "input": [],
-    "reason": {
-     "code": "invalid_state"
-    }
-   },
-   {
-    "available": true,
     "action_key": "cast",
     "label": "action.cast",
     "target": {
@@ -443,6 +413,62 @@
      "kind": "none"
     },
     "input": []
+   }
+  ],
+  "notices": [
+   {
+    "id": "f3c7442b-1155-8f9a-8482-3a4f621a90fd",
+    "key": "hall_cupboard",
+    "title": "detail.hall_cupboard.title",
+    "description": "detail.hall_cupboard",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "force_hall_cupboard",
+      "label": "actions.force_hall_cupboard",
+      "target": {
+       "kind": "none"
+      },
+      "input": []
+     }
+    ]
+   },
+   {
+    "id": "5618d912-3e17-8488-a2e6-0927cff37eb5",
+    "key": "hall_lectern",
+    "title": "detail.hall_lectern.title",
+    "description": "detail.hall_lectern",
+    "actions": [
+     {
+      "available": false,
+      "action_key": "think_hall_lectern",
+      "label": "actions.think_hall_lectern",
+      "target": {
+       "kind": "none"
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ]
+   },
+   {
+    "id": "dd8c6f46-accd-87e3-af31-b0caf37caeeb",
+    "key": "hall_strongbox_lock",
+    "title": "detail.hall_strongbox_lock.title",
+    "description": "detail.hall_strongbox_lock",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "pick_hall_strongbox",
+      "label": "actions.pick_hall_strongbox",
+      "target": {
+       "kind": "none"
+      },
+      "input": []
+     }
+    ]
    }
   ],
   "entities": [

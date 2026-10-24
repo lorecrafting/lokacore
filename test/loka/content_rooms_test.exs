@@ -250,6 +250,23 @@ defmodule Loka.ContentRoomsTest do
     assert {:ok, _, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
   end
 
+  # Break: a detail's title (kernel_api 1.120, loka-x6t.120) compiles naming no catalog text.
+  test "a detail title naming no text is UNRESOLVED_REFERENCE at its path", %{tmp_dir: dir} do
+    manifest = put_in(@manifest, ["requires", "kernel_api", "at_least"], "1.120")
+    titled = Map.put(detail(["hearth"]), "title", "d.missing")
+
+    assert compile(dir, %{
+             "cartridge.json" => Map.put(manifest, "entry", ref("a")),
+             "rooms/b.json" => Map.put(room(%{}), "details", %{"hearth" => titled})
+           }) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "rooms/b.details.hearth.title", %{
+                  "target" => "d.missing"
+                })
+              ]}
+  end
+
   # Breaks: readable metadata compiles without its owner or with either unresolved text key.
   test "readables require their capability and resolve both catalog keys", %{tmp_dir: dir} do
     readable = %{"label" => "read.label", "text" => "read.text"}

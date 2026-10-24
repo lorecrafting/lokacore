@@ -13,7 +13,7 @@ defmodule Loka.ContentCraftTest do
 
   # Break (Homestead hs-10; twin of the loader rows in kernel/ts/test/craft.test.ts): a craft
   # compiles with a template or non-container holder, an unresolved item, holder or reason, a
-  # duplicate item, or on a storylet or spell. The floor is loader_floors.json's "a craft" case.
+  # duplicate item, or on a spell. The floor is loader_floors.json's "a craft" case.
   test "a craft needs resolved, placed holders, distinct items, a catalog reason, a station",
        %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -48,13 +48,14 @@ defmodule Loka.ContentCraftTest do
              part("consume", "reason", "craft.unknown")
            )
 
-    assert {"SCHEMA_VIOLATION", @at} in codes(
-             dir,
-             &Map.put(&1, "target", %{"kind" => "storylet", "rooms" => ["workshop"]})
-           )
-
     spell = %{"kind" => "spell", "word" => "carve", "learned" => "spoon_carved"}
     assert {"SCHEMA_VIOLATION", @at} in codes(dir, &Map.put(&1, "target", spell))
+  end
+
+  # Break: a storylet target compiles again (FD3 retired by the owner, 2026-10-23).
+  test "a storylet target is refused", %{dir: dir} do
+    storylet = &(&1 |> Map.drop(~w(check craft)) |> Map.put("target", %{"kind" => "storylet"}))
+    assert [{"SCHEMA_VIOLATION", "recipes/carve_spoon.target.kind"}] = codes(dir, storylet)
   end
 
   # Break (hs-11; twin of the loader test in kernel/ts/test/craft.test.ts): a skill prerequisite

@@ -22,6 +22,7 @@ const turnTo = (screen: Screen, tap: (label: RegExp) => Promise<void>) => async 
     await tap(/change position$/);
 };
 
+// size: allow 46, the shared step helpers (tap, take, lesson, fixture ...) close over one screen
 const steps = ({ screen, room }: Walk) => {
   // Every arrival checks the room page against its GameView (walk.ts room).
   const moves = async (...directions: string[]) => {
@@ -59,27 +60,33 @@ const steps = ({ screen, room }: Walk) => {
     await tap(new RegExp(`^${word}$`));
     await tap(new RegExp(`^${how}$`));
   };
-  return { tap, take, lesson, held, putAway, position, moves, speak };
+  // A fixture's verbs live on its page (book-ui.md, Room page anatomy): open it, press, Leave.
+  const fixture = async (name: string, verb: string, times = 1) => {
+    await tap(`${name}, open`);
+    for (let i = 0; i < times; i++) await tap(verb);
+    await tap(LABEL.leave);
+  };
+  return { tap, take, lesson, held, putAway, position, moves, speak, fixture };
 };
 type Steps = ReturnType<typeof steps>;
 
-const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps) => {
+const crafts = async (screen: Screen, { tap, take, lesson, held, moves, fixture }: Steps) => {
   await moves('north', 'west', 'west');
   await lesson('Learn whittling', 'Learn woodcutting');
   await take(/^(?:an )?axe, open$/i, /^Take an axe/);
   for (let i = 0; i < 2; i++) await take(/^(?:two sticks|stick), open$/i, /^Take a stick/);
-  for (let i = 0; i < 2; i++) await tap('Carve a spoon');
+  await fixture('saw bench', 'Carve a spoon', 2);
   await lesson('Learn carving (2 pennies)');
   await take(/^(?:a )?cot, open$/i, /^Take a cot/);
   await moves('east', 'south', 'west');
-  for (let i = 0; i < 4; i++) await tap('Chop wood');
+  await fixture('oak', 'Chop wood', 4);
   for (let i = 0; i < 2; i++)
     await take(/^(?:three|two) rabbit pelts, open$/i, /^Take a rabbit pelt/);
   await moves('east', 'north', 'west');
   await lesson('Learn carpentry (2 pennies)');
-  for (let i = 0; i < 2; i++) await tap('Saw timber');
+  await fixture('saw bench', 'Saw timber', 2);
   await moves('east');
-  await tap('Raise a timbered hut');
+  await fixture('stakes', 'Raise a timbered hut');
   await moves('north', 'south');
   await moves('south');
   await take(/^(?:a )?red apple, open$/i, /^Take a red apple/);
@@ -130,7 +137,7 @@ const pondAndStew = async (screen: Screen, { tap, take, held, position, moves }:
 
 // Law L (docs/showcase/economy-law-district.md, Book e2e), reduced: bank, shop, hide, lift from the
 // merchant's Held list, fence, strongroom. The seen lift (wanted, fine) is a separate branch, kernel-only.
-const law = async (screen: Screen, { tap, take, moves }: Steps) => {
+const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   const npc = async (who: RegExp, ...labels: (string | RegExp)[]) => {
     await tap(who);
     for (const l of labels) await tap(l);
@@ -148,7 +155,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
   await npc(/^(?:the )?market clerk, open$/i, /^Withdraw five pennies/);
   await shop(/^(?:the )?chandler, open$/i, /^Tallow candle — /);
   await moves('south', 'west');
-  await tap('Hide');
+  await fixture('barrels', 'Hide');
   await moves('east', 'north');
   await tap(/^(?:the )?merchant, open$/i);
   await take(/^(?:the )?merchant's purse, open/i, /^Lift$/);
@@ -169,7 +176,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) => {
+const loft = async (r: Walk, { tap, take, held, putAway, moves, speak, fixture }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -183,7 +190,7 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await expect(screen.getByRole('button', /ma 5\/5/).first()).toBeVisible();
   await wizard('Learn the word lux');
   await wizard('Fetch the second word');
-  await tap('Gather ash');
+  await fixture('hearth', 'Gather ash');
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await held(/^the lantern/);
   await tap(LABEL.castASpell); // the aimed spell's Pick list on the held lamp (loka-x6t.109)

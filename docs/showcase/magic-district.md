@@ -35,7 +35,8 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   policy `all(level_compare {at_least: 2}, stat_compare {cha, at_least: 7})`; `reason:
   reason.ward` ("Needs level 2 and CHA 7"); step `status.apply warded`). No spell
   has a `duration` (the showcase is `real_elapsed`; a timed spell is also refused in a fight).
-- Recipe `gather_ash` at `hearth` (`resource.adjust {ash, by: 1}`); `attic_hearth` twin.
+- Recipe `gather_ash` at `hearth` (`resource.adjust {ash, by: 1}`); `attic_hearth` twin. Both are
+  cards on the hearth's page (its prose link), not the World page (loka-x6t.120).
 - Statuses: `warded` (600, tick 150, resource mv, `resistances {physical: 50}`; `ward_sampler`),
   `hushed` (120, `blocks ["say", "shout", "cast"]`), `wet` (600, tick 300, mv, `modifies str -1`),
   `shocked` (120, tick 60, hp -1), `stunned` (120, tick 60, hp -3), `warm` (600, tick 300, mv,
@@ -110,7 +111,7 @@ fight (rounds at +150, +300).
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | Up; read `sign_magic`; the Word bar. | The text. `spell_words` is empty (nothing learned); no chip. | |
-| 2 | Talk: `teach`, then `accept` (the errand); take the lantern; `gather_ash`; cast `lux` at the lantern. | `lux_known` true, the errand active (Journal); the held lantern's entry lists `lux` unavailable: `insufficient_resource` (ash 0), so its page draws no card; after the gather ash 1 and the card appears; the cast: ma 3, ash 0, the lantern lit (its fuel ticking), the spell's line, then the lantern's ignite line (PM ruling 2026-10-21, loka-y6yg.44). `lux` is aimed (loka-x6t.109): never in the Word bar, an untargeted cast is `invalid_target`, and an untagged held item (the bucket) lists no `lux`. | spells x reagents x light |
+| 2 | Talk: `teach`, then `accept` (the errand); take the lantern; open the hearth and `gather_ash`; cast `lux` at the lantern. | `lux_known` true, the errand active (Journal); the held lantern's entry lists `lux` unavailable: `insufficient_resource` (ash 0), so its page draws no card; after the gather ash 1 and the card appears; the cast: ma 3, ash 0, the lantern lit (its fuel ticking), the spell's line, then the lantern's ignite line (PM ruling 2026-10-21, loka-y6yg.44). `lux` is aimed (loka-x6t.109): never in the Word bar, an untargeted cast is `invalid_target`, and an untagged held item (the bucket) lists no `lux`. | spells x reagents x light |
 | 3 | North into the reading room; cast `lux` at the lantern (ash gathered first); `say` anything; wait 120; read the grimoire. | `hushed` applied on entry (120, the Conditions line); the cast and the say: `invalid_state`, no chip and no `lux` card on the lantern; after 120 both return. The grimoire: `topic_flamma_known`, `flamma_known` true; `spell_words` holds no `flamma` (aimed: it is offered on the wight's entry only, and the hedge-wizard lists none); the errand resolves `done` in the same proposal. | command blocks x spells; readables x learned gate |
 | 4 | Back in the loft: the Word bar; Raise. | `ward_taught` true, experience 30, level 2, one `level_up` line, one point; "ward, cast" reads unavailable with reason `reason.ward` (cha 6). Raise `cha`: 7; the chip is available. The loop accepts before reading on purpose: whether a quest whose objective already holds resolves at activation is unpinned anywhere, so no step relies on it. Read before accepting: Talk to the wizard now resolves it (`wizard_awaiting_report`, choice `done`). | quests x levelling x spell gates |
 | 5 | `cast ward`. | `warded` on the caster (600), its applied line; ma 2; events `status_applied`, `action_completed` (no `fact_changed`); a second cast at once: `action_completed` only (a refresh lands nothing). | spell effects x statuses |

@@ -13,6 +13,7 @@ import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
+import { noticeAction } from './notice_action.ts';
 
 const why = (a: { available: boolean; reason?: unknown }) => (a.available ? undefined : a.reason);
 
@@ -145,12 +146,15 @@ const short = (key: string, amount: number) => ({
 // judging each cost alone (50 ma and 51 ma are each affordable from 100, not both).
 test('an unaffordable recipe names the first cost the body cannot pay after the ones before it', () => {
   const pray = (costs: { resource: any; amount: number }[]) =>
-    gameView(
-      run(
-        world((c) => (c.recipes[PRAY].costs = costs)),
-        move('east'),
+    noticeAction(
+      gameView(
+        run(
+          world((c) => (c.recipes[PRAY].costs = costs)),
+          move('east'),
+        ),
       ),
-    ).actions.find((a) => a.action_key === 'pray')!;
+      'pray',
+    )!;
   assert.equal(pray([{ resource: ref('ma'), amount: 100 }]).available, true); // exactly enough
   assert.deepEqual(why(pray([{ resource: ref('ma'), amount: 101 }])), {
     code: 'insufficient_resource',
@@ -273,7 +277,7 @@ test('a failed attempt starts the cooldown too', () => {
 // Astra A2. Breaks: the GameView advertising a recipe under cooldown or with unaffordable costs,
 // or an exit the body cannot pay for, as available (the same world rejects them).
 test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavailable', () => {
-  const pray = (w: World) => gameView(w).actions.find((a) => a.action_key === 'pray');
+  const pray = (w: World) => noticeAction(gameView(w), 'pray');
   const prayed = run(world(), move('east'), perform('pray'));
   assert.deepEqual(pray(prayed), {
     available: false,

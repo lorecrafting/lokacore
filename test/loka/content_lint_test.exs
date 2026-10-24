@@ -46,13 +46,18 @@ defmodule Loka.ContentLintTest do
   end
 
   test "check 5: a readable has a title; a dialogue with no label needs action.talk (T5, UH)" do
-    room = %{"details" => %{"slate" => %{"readable" => %{"label" => "action.read"}}}}
+    room = %{
+      "description" => "room.hall",
+      "details" => %{"slate" => %{"readable" => %{"label" => "action.read"}}}
+    }
 
-    assert lint(%{"rooms/lever_hall.json" => room}) ==
+    linked = %{"room.hall" => "A [slate](slate)."}
+
+    assert lint(%{"rooms/lever_hall.json" => room, "text.json" => linked}) ==
              ["rooms/lever_hall.json: readable details.slate has no title"]
 
     titled = put_in(room, ["details", "slate", "readable", "title"], "detail.slate.title")
-    assert lint(%{"rooms/lever_hall.json" => titled}) == []
+    assert lint(%{"rooms/lever_hall.json" => titled, "text.json" => linked}) == []
 
     talk = "text.json: action.talk has no text, yet a dialogue has no label of its own"
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{}}) == [talk]
@@ -63,6 +68,35 @@ defmodule Loka.ContentLintTest do
 
     assert lint(%{"dialogues/bram.json" => %{"label" => "action.bram"}, "text.json" => %{}}) == []
     assert lint(%{"dialogues/bram.json" => %{"keyword" => "ember"}, "text.json" => %{}}) == []
+  end
+
+  # loka-x6t.120 (book-ui.md fixture rule): a detail with a page is linked from its room's prose,
+  # and a recipe aimed at a detail gives that detail a title.
+  test "a detail with a page is linked from the prose; a recipe's target detail has a title" do
+    hearth = %{"aliases" => ["hearth"], "description" => "detail.hearth"}
+    room = %{"description" => "room.loft", "details" => %{"hearth" => hearth}}
+    aim = %{"target" => %{"kind" => "detail", "room" => "loft", "detail" => "hearth"}}
+    plain = %{"room.loft" => "A low loft with a hearth."}
+    linked = %{"room.loft" => "A low loft with a [hearth](hearth)."}
+    files = &Map.merge(%{"rooms/loft.json" => room, "recipes/gather_ash.json" => aim}, &1)
+    unlinked = "rooms/loft.json: details.hearth has a page and no prose link"
+    untitled = "rooms/loft.json: details.hearth is a recipe target (gather_ash) and has no title"
+
+    assert lint(files.(%{"text.json" => plain})) == [unlinked, untitled]
+
+    titled = put_in(room, ["details", "hearth", "title"], "detail.hearth.title")
+    assert lint(files.(%{"rooms/loft.json" => titled, "text.json" => linked})) == []
+
+    # A variant's prose links it too; a detail no recipe aims at and of no page kind needs neither.
+    varied =
+      Map.put(titled, "variants", [Map.put(variant([@tide]), "description", "room.loft.lit")])
+
+    lit = Map.put(plain, "room.loft.lit", "Firelight from the [hearth](hearth).")
+    assert lint(files.(%{"rooms/loft.json" => varied, "text.json" => lit})) == []
+    assert lint(%{"rooms/loft.json" => room, "text.json" => plain}) == []
+
+    bed = put_in(room, ["details", "hearth", "bed"], %{})
+    assert lint(%{"rooms/loft.json" => bed, "text.json" => plain}) == [unlinked]
   end
 
   test "label rules: a choice or action label has no final period; a status label is lowercase" do

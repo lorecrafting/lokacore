@@ -93,6 +93,14 @@ defmodule Loka.ContentRefusalsTest do
              {"scenes/coil.json", put_in(scene, ["on", "detail"], "notice")},
              {"rooms/ferry_landing.json", notice}
            ])
+
+    # Breaks: an action scene that names neither room nor detail is admitted.
+    unplaced = update_in(scene, ["on"], &Map.drop(&1, ~w(room detail)))
+
+    assert {"SCHEMA_VIOLATION", "scenes/coil.on"} in codes(dir, [
+             api,
+             {"scenes/coil.json", unplaced}
+           ])
   end
 
   # Breaks: a duplicate offer, an offer whose item does not lead its stock, or an unfunded shop compiles.

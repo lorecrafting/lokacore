@@ -1,4 +1,3 @@
-// size: allow 510, the district walk shares one World threaded through its steps (loka-y6yg.50)
 // The showcase traps district (Sappers' Stair) walked step by step (docs/showcase/traps-district.md,
 // guided loop, steps 1 to 9; slices T1 to T3). Steps 1 to 6 and 8 continue one world; steps 7 and 9
 // branch from step 1's world and the sandbox starts fresh. Every attack is chance 100. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
@@ -232,20 +231,17 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
   validate('GameView', gameView(w));
 });
 
-// Breaks: a lever's step and reset narrate the same line or nothing; a hall aside shows off its
-// solved state (lever_stage 3; wheels 3, 1, 2) or ignores one wheel; a wheel names another digit,
-// a turn names none or two, or its readout runs before its wrap (it would name 10, not 0).
-test('traps 5-6 feedback: pulls and turns narrate; the hall says when a door is solved', () => {
-  let x = go(go(go(fresh(WORLD), 'west').world, 'down').world, 'east').world;
+// Breaks: a lever's step and reset narrate the same line or nothing; a wheel names another digit,
+// a turn names none or two, or its readout runs before its wrap (it would name 10, not 0). The
+// doors' state is the exits' (the hall's asides went with loka-x6t.125).
+test('traps 5-6 feedback: pulls and turns narrate', () => {
+  const x = go(go(go(fresh(WORLD), 'west').world, 'down').world, 'east').world;
   const said = (y: World, action: string) =>
     perform(y, action).lines.filter((l) => l !== 'narration.lever');
   assert.deepEqual(said(x, 'pull_b'), ['narration.lever_reset']);
   assert.deepEqual(said(pulls(x, 'a'), 'pull_b'), ['narration.lever_bolt']);
-  assert.deepEqual(said(pulls(x, 'ab'), 'pull_c'), ['narration.lever_bolt']);
+  assert.deepEqual(said(pulls(x, 'ab'), 'pull_c'), ['narration.lever_open']); // the solve's own line
   assert.deepEqual(said(pulls(x, 'a'), 'pull_c'), ['narration.lever_reset']);
-  const asides = (y: World) => gameView(y).place.asides?.map((a) => a.key);
-  assert.equal(asides(pulls(x, 'ab')), undefined);
-  assert.deepEqual(asides(pulls(x, 'abc')), ['aside.lever_hall.levers_drawn']);
   for (const n of [1, 2, 3]) {
     let y = x;
     const read: string[][] = [];
@@ -259,14 +255,6 @@ test('traps 5-6 feedback: pulls and turns narrate; the hall says when a door is 
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((k) => [`narration.wheel_${n}.${k}`]),
     );
   }
-  for (const off of [
-    [0, 1, 2],
-    [3, 0, 2],
-    [3, 1, 1],
-  ])
-    assert.equal(asides(off.reduce((y, k, i) => turns(y, i + 1, k), x)), undefined, off.join());
-  x = turns(turns(turns(x, 1, 3), 2, 1), 3, 2);
-  assert.deepEqual(asides(x), ['aside.lever_hall.dial_true']);
   validate('GameView', gameView(x));
 });
 

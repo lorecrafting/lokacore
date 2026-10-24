@@ -1,4 +1,4 @@
-// size: allow 576, the toolbox showcase pass joins the corpus run and the red controls
+// size: allow 584, the toolbox showcase pass joins the corpus run and the red controls (notice cards: loka-x6t.120)
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
 // (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every
@@ -95,6 +95,7 @@ test('two fresh ranges and regression seeds retain all sequence counts and cover
   assert.deepEqual(lengths, [1, 1, 0, 1, 0, 0, 1, 4]);
   assert.deepEqual([...codes].sort(), [
     'accepted',
+    'cooldown', // seed 7 prays at the shrine twice (generator 18)
     'fault budget_exceeded',
     'insufficient_resource',
     'invalid_state',
@@ -240,7 +241,7 @@ test('400 fixed showcase sequences keep every invariant and end in each district
   const pinned = readFileSync(new URL('sim_narration_baseline.txt', import.meta.url), 'utf8')
     .split('\n')
     .filter((l) => l && !l.startsWith('#'));
-  assert.ok(pinned.length <= 12, 'sim_narration_baseline.txt grew past its cap of 12');
+  assert.ok(pinned.length <= 13, 'baseline over cap 13'); // 13: put joined take/drop/give, loka-kgd.185
   assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
   // SILENT.close is justified only by item lids (a door's close is narrated): the showcase has them.
   const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.items ?? {}).some(
@@ -355,7 +356,7 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 5 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 17, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 18, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
 });
@@ -497,7 +498,14 @@ test('red control: wear listed but refused, or remove accepted but unlisted, tri
 // reason-code clause is lost, and a view offering a recipe admission refuses goes unseen.
 test('red control: a recipe shown available, or refused for another code, trips gameview_agrees_with_admission', () => {
   const view = (f: (a: AdvertisedAction) => AdvertisedAction) =>
-    planted({ gameView: (w) => ({ ...gameView(w), actions: gameView(w).actions.map(f) }) });
+    planted({
+      gameView: (w) => {
+        const v = gameView(w);
+        // a recipe aimed at a detail is offered on its notice (loka-x6t.120), the rest in actions
+        const notices = v.notices?.map((n) => ({ ...n, actions: n.actions?.map(f) }));
+        return { ...v, actions: v.actions.map(f), ...(notices && { notices }) };
+      },
+    });
   const all = view((a) => ({ ...a, available: true }));
   const swapped = view((a) =>
     a.available

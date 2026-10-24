@@ -47,19 +47,14 @@ export function scenes(c: Obj): Diagnostic[] {
 
 type Checks = ReturnType<typeof checkers>;
 
-// size: allow 41, placed and storylet (row FD3) action starts share one source check
 function source(c: Obj, s: Obj, at: string, named: Checks['named'], out: Diagnostic[]) {
   const on = s.on;
   const quest = !!on.quest,
     action = !!on.action;
-  // Row FD3: an action start naming a storylet recipe names no room or detail (scenes.ex).
   const placed = [on.room, on.detail].filter(Boolean).length;
-  const storylet = action && c.recipes?.[refString(on.action)]?.target.kind === 'storylet';
   if (
     [quest, action, !!on.story_point].filter(Boolean).length !== 1 ||
-    (action
-      ? !(placed === 2 || (storylet && placed === 0)) || on.outcome !== 'success'
-      : !on.outcome)
+    (action ? placed !== 2 || on.outcome !== 'success' : !on.outcome)
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.on`));
   if (action) {

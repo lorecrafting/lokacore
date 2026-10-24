@@ -1,9 +1,0 @@
-{
-  "title": "room.lane.title",
-  "description": "room.lane.description",
-  "exits": {
-    "west": {
-      "to": "market"
-    }
-  }
-}

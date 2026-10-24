@@ -1,9 +1,0 @@
-{
-  "title": "room.market.title",
-  "description": "room.market.description",
-  "exits": {
-    "east": {
-      "to": "lane"
-    }
-  }
-}

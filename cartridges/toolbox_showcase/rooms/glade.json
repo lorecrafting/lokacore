@@ -13,6 +13,7 @@
         "tree"
       ],
       "description": "detail.oak",
+      "title": "detail.oak.title",
       "rating": 1
     }
   }

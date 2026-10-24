@@ -50,7 +50,7 @@ defmodule Loka.Content.Replenish do
 
   @doc """
   Homestead hs-10 (docs/system/cartridge.md Craft declarations): a craft recipe needs kernel_api
-  1.101 (one diagnostic), sits on no spell or storylet, its consume and yield follow replenish's
+  1.101 (one diagnostic), sits on no spell, its consume and yield follow replenish's
   item and holder rules, and consume's reason has a catalog entry (unless `text` is `:unknown`).
   """
   @spec craft(map(), map(), map() | :unknown) :: [map()]
@@ -70,10 +70,10 @@ defmodule Loka.Content.Replenish do
         else: []
       )
 
-  # A spell or storylet has no station whose stock it could use.
+  # A spell has no station whose stock it could use.
   defp misplaced(rel, r),
     do:
-      if(r["target"]["kind"] in ~w(spell storylet),
+      if(r["target"]["kind"] == "spell",
         do: [diag("SCHEMA_VIOLATION", at(rel, ["craft"]), %{"error" => "invalid_value"})],
         else: []
       )
