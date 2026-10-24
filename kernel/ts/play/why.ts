@@ -1,0 +1,165 @@
+// `node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+// (docs/system/cartridge.md#rule-explainer-loka-kgd1943): replays a transcript up to one step,
+// decides that step and prints, per reaction rule, its trigger match, deliveries and `when`
+// leaves; on demand one recipe's or dialogue's policy. A report for authors, not a check.
+import { existsSync, readFileSync } from 'node:fs';
+import { relative } from 'node:path';
+import type { Command, DecisionResult, Policy, ReactionRule } from '../src/contracts.gen.ts';
+import { encode, type Json } from '../src/foundation/canonical.ts';
+import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
+import { primaryTarget } from '../src/commands/action_input.ts';
+import { holds } from '../src/mechanics/policy.ts';
+import { FILTERS } from '../src/mechanics/reaction.ts';
+import { refString } from '../src/runtime/decision.ts';
+import { marked, replay } from './coverage.ts';
+import { ROOT } from './obs.ts';
+import { replayRecords } from './replay.ts';
+import { decideReplay, start, type Run } from './run.ts';
+
+type Trace = ReturnType<typeof replayRecords>;
+const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+const leaves = (p: Policy): Policy[] =>
+  p.op === 'all' || p.op === 'any'
+    ? p.items.flatMap(leaves)
+    : p.op === 'not'
+      ? leaves(p.item)
+      : [p];
+// `p` with each leaf, in `leaves` order, extended by `at(leaf index)`.
+const annotate = (p: Policy, at: (i: number) => object, n = { i: 0 }): Json =>
+  (p.op === 'all' || p.op === 'any'
+    ? { ...p, items: p.items.map((x) => annotate(x, at, n)) }
+    : p.op === 'not'
+      ? { ...p, item: annotate(p.item, at, n) }
+      : { ...p, ...at(n.i++) }) as unknown as Json;
+const said = (d: DecisionResult, is: (key: string) => boolean) =>
+  d.kind === 'accepted' ? (d.narration ?? []).filter((x) => is(x.key)).length : 0;
+
+/** The explanation of step `ordinal` of `trace` (cartridge.md Rule explainer lists the evidence). */
+export function why(
+  c: Cartridge,
+  trace: Trace,
+  ordinal: number,
+  on: { recipe?: string; dialogue?: string } = {},
+) {
+  const { entries } = trace;
+  if (!Number.isInteger(ordinal) || ordinal < 1 || ordinal > entries.length)
+    throw new RangeError(`ordinal ${ordinal} is not in 1..${entries.length}`);
+  const { cartridge, ruleOf } = marked(c);
+  const r = prefix(cartridge, trace, ordinal);
+  const command: Command = entries[ordinal - 1]!.data.command;
+  const before = r.world;
+  // decideReplay advances the Run it is given (play/run.ts), so each decision gets a copy.
+  const decide = (cart: Cartridge) =>
+    decideReplay({ ...r, world: { ...before, cartridge: cart } } as Run, command).decision;
+  const d = decide(cartridge);
+  const rules = cartridge.reactions ?? {};
+  const probe = `coverage.m${Object.keys(rules).length}`; // no rule's, and never authored (marked)
+  // The deliveries at which leaf `i` of `ref` held: `ref` replaced, under its own key, by that leaf.
+  const held = (ref: string, i: number) => {
+    const { key, on, when } = rules[ref]!;
+    const leaf = { policy_version: 1, root: leaves(when!.root)[i] };
+    const probed = { key, on, when: leaf, apply: [{ op: 'narrate', text: probe }] };
+    const reactions = { ...rules, [ref]: probed };
+    return said(decide({ ...cartridge, reactions } as Cartridge), (k) => k === probe);
+  };
+  return {
+    ordinal,
+    command: command.payload.type,
+    outcome: d.kind === 'accepted' ? d.outcome : d.kind,
+    reactions: Object.entries(rules)
+      .sort(([, a], [, b]) => cmp(a.key, b.key))
+      .map(([ref, rule]) => ({
+        rule: ref,
+        causes: causes(rule, d, before),
+        fired: said(d, (key) => ruleOf(key) === ref),
+        ...(rule.when && { when: annotate(rule.when.root, (i) => ({ held: held(ref, i) })) }),
+      })),
+    ...(on.recipe !== undefined && {
+      recipe: policy(c.recipes, on.recipe, before, command, () => primaryTarget(command.payload)),
+    }),
+    ...(on.dialogue !== undefined && {
+      dialogue: policy(
+        c.dialogues,
+        on.dialogue,
+        before,
+        command,
+        (x) => before.entityIds[refString(x.npc)],
+      ),
+    }),
+  };
+}
+
+// The marked Run before step `ordinal`, once ordinals 1..ordinal-1 replay byte for byte.
+function prefix(cartridge: Cartridge, trace: Trace, ordinal: number) {
+  replay(cartridge, trace, undefined, ordinal); // throws `replay differs at ordinal <n>`
+  const { head, entries } = trace;
+  const r = start(
+    cartridge,
+    head.ids.content_hash,
+    head.ids.run_id,
+    head.data.world_context_id,
+    head.ids.seed,
+    head.ids.kernel_version,
+  );
+  for (const e of entries.slice(0, ordinal - 1)) decideReplay(r, e.data.command);
+  return r;
+}
+
+// The step's committed events of the rule's type, each declared filter matched on the world
+// before the step, as the proposal matches triggers (mechanics/reaction.ts triggered).
+const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
+  (d.kind === 'accepted' ? d.events : [])
+    .filter((e) => e.payload.type === rule.on.event)
+    .map((e) => ({
+      event: e.payload.type,
+      position: e.position,
+      filters: Object.fromEntries(
+        Object.entries(rule.on)
+          .filter(([f]) => f !== 'event')
+          .map(([f, want]) => [f, FILTERS[f]!(before, want, e.payload as never, e)]),
+      ),
+    }));
+
+// The definition keyed `key`, its policy's leaves read on `world` as admission reads them.
+function policy<D extends { key: string; policy: { root: Policy } }>(
+  defs: Readonly<Record<string, D>> | undefined,
+  key: string,
+  world: World,
+  command: Command,
+  target: (d: D) => string | undefined,
+) {
+  const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
+  if (!d) throw new RangeError(`no definition keyed ${key}`);
+  const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
+  const at = (i: number) => ({
+    holds: holds(world, command.payload.actor_id, leaves(d.policy.root)[i]!, ctx()),
+  });
+  return { rule, policy: annotate(d.policy.root, at) };
+}
+
+if (import.meta.main) {
+  const [file, path, n, ...rest] = process.argv.slice(2);
+  const flag = rest.length === 2 ? /^--(recipe|dialogue)$/.exec(rest[0]!)?.[1] : undefined;
+  if (!file || !path || !n || !existsSync(file) || (rest.length && !flag)) {
+    console.error(
+      'usage: node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]',
+    );
+    process.exit(2);
+  }
+  const loaded = loadCartridge(readFileSync(file), INSTALLED);
+  if (!loaded.ok) {
+    console.error(JSON.stringify(loaded.diagnostic));
+    process.exit(1);
+  }
+  try {
+    const pin = JSON.parse(readFileSync(path, 'utf8').split('\n')[0]!).ids.content_hash;
+    const trace = replayRecords(path, pin);
+    const on = flag ? { [flag]: rest[1] } : {};
+    console.log(
+      encode(why(loaded.cartridge as Cartridge, trace, Number(n), on) as unknown as Json),
+    );
+  } catch (e) {
+    console.error(`${relative(ROOT, path)}: ${(e as Error).message}`.replaceAll(ROOT, ''));
+    process.exit(e instanceof RangeError ? 2 : 1);
+  }
+}
