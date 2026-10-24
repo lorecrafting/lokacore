@@ -47,26 +47,37 @@ test('Book service labels: a bank fee, the MV note only on a meal or drink', () 
 });
 
 // Breaks: the commission stays beside an open order, claim and cancel show with no order (refused
-// service.no_order) or leave the Your order group, or another service's order hides this one.
+// service.no_order, or refused before the order check: a bare invalid_state from combat or 0 hp)
+// or leave the Your order group, or another service's order hides this one.
 test('an open order hides its commission and groups claim and cancel', () => {
   const ref = (key: string) => ({ kind: 'service', key });
-  const follow = (kind: string, of: string, no_order: boolean) => ({
+  // reason: undefined is available; null is a refusal with no message key.
+  const follow = (kind: string, of: string, reason?: string | null) => ({
     ...offer(`${kind}_${of}`, 0, { kind, service: ref(of) }),
-    action: no_order
-      ? { available: false, action_key: kind, reason: { message: { key: 'service.no_order' } } }
-      : { available: true, action_key: kind },
+    action:
+      reason === undefined
+        ? { available: true, action_key: kind }
+        : {
+            available: false,
+            action_key: kind,
+            reason: { code: 'invalid_state', ...(reason && { message: { key: reason } }) },
+          },
   });
   const keys = (o: ReturnType<typeof serviceOrder>) =>
     [o.plain, o.order].map((l) => l.map((s) => s.service.key));
-  const offers = (no_order: boolean) =>
+  const offers = (claim?: string | null, cancel?: string | null) =>
     [
       offer('boots', 4, { kind: 'commission' }),
-      follow('claim', 'boots', no_order),
-      follow('cancel', 'boots', no_order),
+      follow('claim', 'boots', claim),
+      follow('cancel', 'boots', cancel),
       offer('ale', 1, { kind: 'entitlement' }),
     ] as never;
-  assert.deepEqual(keys(serviceOrder(offers(false))), [['ale'], ['claim_boots', 'cancel_boots']]);
-  assert.deepEqual(keys(serviceOrder(offers(true))), [['boots', 'ale'], []]);
+  const open = [['ale'], ['claim_boots', 'cancel_boots']];
+  const none = [['boots', 'ale'], []];
+  assert.deepEqual(keys(serviceOrder(offers())), open);
+  assert.deepEqual(keys(serviceOrder(offers('service.not_ready', 'service.unaffordable'))), open);
+  assert.deepEqual(keys(serviceOrder(offers('service.no_order', 'service.no_order'))), none);
+  assert.deepEqual(keys(serviceOrder(offers(null, null))), none);
 });
 
 // Breaks: two talk offers draw two Talk cards, an authored-label talk folds into Talk, or a

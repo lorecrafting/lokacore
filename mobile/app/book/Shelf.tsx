@@ -2,7 +2,7 @@
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, type group, type Page as Route } from './model.ts';
 import type { Button, presenter } from './presenter.ts';
-import { ActionCard, Cards } from './actions.tsx';
+import { ActionCard, Cards, useFocus } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import { LABEL } from './labels.ts';
@@ -39,17 +39,33 @@ const buys = (v: GameView, shop: readonly Stock[], offered: Button[], text: Say)
     return b ? { b, label, name: label } : { label, reason: buyReason(o.buy.reason ?? '') };
   });
 
-const ShopCards = ({ rows, press }: { rows: Row[]; press: (b: Button) => void }) => (
-  <Cards>
-    {rows.map((r) =>
-      'b' in r ? (
-        <ActionCard key={r.label} b={r.b} label={r.label} press={press} />
-      ) : (
-        <ActionCard key={r.label} label={r.label} reason={r.reason} />
-      ),
-    )}
-  </Cards>
-);
+// A pressed row that goes (the last one sold, or sold out) moves focus to the page title.
+function ShopCards(p: { view: GameView; rows: Row[]; press: (b: Button) => void }) {
+  const { sent } = useFocus(
+    undefined,
+    p.view,
+    p.rows.filter((r) => 'b' in r),
+  );
+  return (
+    <Cards>
+      {p.rows.map((r) =>
+        'b' in r ? (
+          <ActionCard
+            key={r.label}
+            b={r.b}
+            label={r.label}
+            press={(b) => {
+              sent.current = r.label;
+              p.press(b);
+            }}
+          />
+        ) : (
+          <ActionCard key={r.label} label={r.label} reason={r.reason} />
+        ),
+      )}
+    </Cards>
+  );
+}
 
 /**
  * A shopkeeper's shop, two child pages of their NPC page (owner picks mvlrlvappy4w, mvlymuams73l,
@@ -61,8 +77,8 @@ const ShopCards = ({ rows, press }: { rows: Row[]; press: (b: Button) => void })
  *   afford`), the purse Note, this visit's history, then the Sell card, drawn only with a row.
  *   The sell page, titled `<Name> will buy…`, draws one card per thing the player may sell with
  *   its price, then the purse and history. A buy or sale keeps its page: its line joins the
- *   person's visit history (shared with the NPC page) and the purse redraws. No status line (a
- *   detail page).
+ *   person's visit history (shared with the NPC page) and the purse redraws; a row that goes moves
+ *   focus to the page title. No status line (a detail page).
  * - States: buyable; refused; sell page; nothing to sell.
  * - Story: NpcPage.stories.tsx
  */
@@ -79,8 +95,6 @@ export function ShelfPage(p: {
   const npc = view.entities.find((e) => e.id === p.id);
   const shop = npc?.shop ?? [];
   const offered = p.g.on(p.id);
-  // The person's visit history: the authority routes a sale's line to the NPC (narration.ts).
-  const press = (b: Button) => p.press(b, p.id);
   const sell = sales(
     view,
     shop,
@@ -90,12 +104,14 @@ export function ShelfPage(p: {
   const money = purse(view);
   const name = cap(text(npc?.name ?? ''));
   const rows = p.sale ? sell : buys(view, shop, offered, text);
+  // The person's visit history: the authority routes a sale's line to the NPC (narration.ts).
+  const press = (b: Button) => p.press(b, p.id);
   return (
     <Page
       title={p.sale ? buysTitle(name) : sellsTitle(name)}
       foot={<Control label={LABEL.leave} onPress={p.back} />}
     >
-      <ShopCards rows={rows} press={press} />
+      <ShopCards view={view} rows={rows} press={press} />
       {money !== undefined && <Note>{balance(money)}</Note>}
       <LogLines lines={p.screen.detail(p.id)} />
       {!p.sale && sell.length > 0 && (

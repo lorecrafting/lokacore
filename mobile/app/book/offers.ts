@@ -79,15 +79,24 @@ export function corpseButtons(v: GameView, text: Say): Press[] {
 const follows = (s: Offer) =>
   s.benefit.kind === 'claim' || s.benefit.kind === 'cancel' ? s.benefit.service.key : undefined;
 
+// Refusals the kernel gives only past its open-order check (mechanics/service/shared.ts `open`,
+// `pay`); hp, combat, policy or binding refuse before it, so they say nothing of an order.
+const ORDER_OPEN = new Set([
+  'service.not_ready',
+  'service.ready',
+  'service.no_output',
+  'service.unaffordable',
+]);
+
 /**
  * An NPC page's services (owner pick mvlrlvappy4w): while an order is open (its claim or cancel
- * available, or refused for a reason other than service.no_order) its commission hides and its
- * claim and cancel are `order`, drawn under Your order; with no order open they are hidden.
+ * available, or refused for a reason in ORDER_OPEN) its commission hides and its claim and cancel
+ * are `order`, drawn under Your order; with no order open they are hidden.
  */
 export function serviceOrder(offers: readonly Offer[]) {
   const open = new Set(
     offers
-      .filter((s) => s.action.available || s.action.reason?.message?.key !== 'service.no_order')
+      .filter((s) => s.action.available || ORDER_OPEN.has(s.action.reason?.message?.key ?? ''))
       .map(follows)
       .filter(Boolean),
   );

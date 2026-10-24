@@ -80,8 +80,12 @@ const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () =
 );
 
 // Opening focuses the first row. `sent` is the option whose row was pressed: the next view keeps
-// focus on it, or moves it to the page title when the option went.
-function useFocus(open: string | undefined, view: GameView, all: Pick[]) {
+// focus on it, or moves it to the page title when the option went (also a shop page's sold row).
+export function useFocus(
+  open: string | undefined,
+  view: GameView,
+  all: readonly { label: string }[],
+) {
   const title = useContext(titleContext);
   const first = useRef<View>(null);
   const sent = useRef<string>(undefined);

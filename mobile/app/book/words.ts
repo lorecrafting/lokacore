@@ -147,13 +147,13 @@ export const NOTED: Record<string, string> = {
   permission_denied: 'not yours',
   cooldown: REASON.cooldown!, // a held tool resting between uses (pass-2 R2)
 };
-// A shelf row's buy reason: the shop's stock is gone, or the player's purse is short.
+// A buy-page row's reason: the shop's stock is gone, or the player's purse is short.
 const BUY: Record<string, string> = {
   not_owned: 'sold out',
   insufficient_resource: "can't afford",
 };
 export const buyReason = (code: string) => BUY[code] ?? reason(code);
-// A shelf row's sell reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
+// A sell-page row's reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
 export const sellReason = (
   s: { reason?: string; message?: { key: string } },
   text: (key: string) => string,
