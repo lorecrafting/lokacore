@@ -130,7 +130,9 @@ export function Control(p: {
  * (book-ui.md, World and status entry).
  * - Use: the World page.
  * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
- *   of the authored text; a touch link in `links` is a name link in the prose, any other its words.
+ *   of the authored text; a touch link in `links` is a name link in the prose, any other its words;
+ *   the prose, exit warnings, people, items and cues sit `space.lg` apart, a step under the page's
+ *   `space.xl` block gap.
  * - Story: RoomPage.stories.tsx
  */
 export function RoomPage(p: {
@@ -157,9 +159,11 @@ export function RoomPage(p: {
       onTitlePress={look && (() => p.press(look))}
     >
       {p.recap && <AwayRecap lines={p.recap} />}
-      {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
-      {warnings(c, t, p.view, p.text)}
-      <Here view={p.view} text={p.text} open={p.open} />
+      <View style={{ gap: space.lg }}>
+        {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
+        {warnings(c, t, p.view, p.text)}
+        <Here view={p.view} text={p.text} open={p.open} />
+      </View>
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
         <Control label={LABEL.continueConversation} onPress={p.openChoice} />
       )}
