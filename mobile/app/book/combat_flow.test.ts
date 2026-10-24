@@ -40,7 +40,8 @@ test('committed opponent death narrates once through the existing subscription',
   // Break (review of #406): a closing receipt's line outside the combat keys (a deer's sight
   // close) lands in the World log, unseen on the ended Combat page (book-ui.md, Closure).
   assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'A door creaks.']);
-  assert.deepEqual(p.screen().log, ['The bell rings.']);
+  // The room log is the full record: the fight's lines land there too, once (book-ui.md Line placement).
+  assert.deepEqual(p.screen().log, ['The bell rings.', 'The marsh rat falls.', 'A door creaks.']);
 });
 
 // Real Book state/effect routing over controlled committed Game projections; no native layout claim.
@@ -202,12 +203,18 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
         assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
       h.tap('Back to World');
       assert.equal(h.texts().includes('Combat'), false);
+      // The fight's lines stay in the room log; a death's room change clears the cellar's.
+      const kept = {
+        closed: ['You strike the marsh rat.'],
+        opponent_dead: ['You strike the marsh rat.', 'The marsh rat falls.'],
+        player_dead: ['You wake at the shrine.'],
+      }[ending]!;
       for (const text of [
         'You strike the marsh rat.',
         'The marsh rat falls.',
         'You wake at the shrine.',
       ])
-        assert.equal(h.texts().includes(text), false);
+        assert.equal(h.texts().includes(text), kept.includes(text), `${ending}: ${text}`);
       assert.ok(h.texts().includes(ending === 'player_dead' ? 'The shrine' : 'The cellar'));
     } finally {
       h.close();
@@ -267,11 +274,9 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.tap('Back to World');
     assert.equal(h.texts().includes('Combat'), false);
     assert.ok(h.texts().includes('The road'));
-    assert.equal(h.texts().includes('You escape to the road.'), false);
-    assert.equal(
-      h.texts().some((t) => t.includes('Crows')),
-      false,
-    );
+    // The flee's lines open the road's room log; the cellar's lines went with its room.
+    assert.equal(h.texts().filter((t) => t === 'You escape to the road.').length, 1);
+    assert.equal(h.texts().filter((t) => t.includes('Crows')).length, 1);
     assert.equal(h.texts().includes('You strike the marsh rat.'), false);
     assert.equal(h.texts().includes("You can't do that: locked."), false);
   } finally {
@@ -295,6 +300,7 @@ test('reopening an encounter restores the combat page and last committed narrati
 });
 
 // Break: a reopened terminal combat receipt leaks into World because there is no active encounter.
+// Now (narration log slice 3): the closing line is in the room log once, never the combat page.
 test('reopening after escape or either death never restores combat into the World log', () => {
   for (const key of ['combat.hit', 'combat.result', 'combat.flee', 'combat.death']) {
     const h = mounted(view({ combat: undefined, actions: [] }), {
@@ -304,18 +310,20 @@ test('reopening after escape or either death never restores combat into the Worl
     } as never);
     try {
       assert.ok(h.texts().includes('The cellar'));
+      assert.equal(h.texts().includes('Combat'), false, key);
       assert.equal(
         h
           .texts()
-          .some((line) =>
+          .filter((line) =>
             [
               'You strike the marsh rat.',
               'The marsh rat falls.',
               'You escape to the road.',
               'You wake at the shrine.',
             ].includes(line),
-          ),
-        false,
+          ).length,
+        1,
+        key,
       );
     } finally {
       h.close();

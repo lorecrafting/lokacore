@@ -78,7 +78,7 @@ test('a foe line casts on the Combat page, into its log, until the foe dies', (t
   b.tap('Flamma, cast flamma on a wight'); // the wight lives: the fight goes on
   assert.ok(b.game.view().view.combat && b.text().includes('Combat'), 'still the Combat page');
   assert.ok(b.p.screen().combatLog.includes(FLAMMA));
-  assert.ok(!b.p.screen().log.includes(FLAMMA));
+  assert.ok(b.p.screen().log.includes(FLAMMA), 'the room log is the full record, combat too');
   b.tap('Cast a spell…');
   b.tap('Flamma, cast flamma on a wight');
   assert.ok(b.labels().includes('Back to World'), 'the closed fight keeps its page');

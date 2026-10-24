@@ -172,7 +172,11 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   assert.deepEqual(cold.stack(), []);
   assert.ok(!cold.labels().includes('Follow the fox'));
   assert.ok(!cold.text().includes('The fox waits at a fork in the reeds.'));
-  assert.ok(!cold.text().includes('A red fox steps onto the track.'));
+  // The last dream line is in the room log too (book-ui.md Line placement; for the designer pass).
+  assert.equal(
+    cold.text().filter((t: string) => t.includes('A red fox steps onto the track.')).length,
+    1,
+  );
   cold.tap('bed, open');
   cold.tap('Resume dream');
   assert.ok(cold.text().includes('A red fox steps onto the track.'));

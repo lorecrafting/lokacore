@@ -170,9 +170,11 @@ test('message receive and terminal handoff reopen with their own NPC narration a
   a.sql.close();
   a = setup(path);
   assert.equal(a.lines('bram', bramLine).length, 1);
+  // Every line lands in the room log too, restored once (book-ui.md Line placement).
   assert.equal(
-    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(bramLine)),
-    false,
+    a.book.screen().log.filter((s) => (typeof s === 'string' ? s : s.text).includes(bramLine))
+      .length,
+    1,
   );
   assert.equal(a.row('containers', message), bram);
   assert.equal(a.quest()!.state, 'resolved');

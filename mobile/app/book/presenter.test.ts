@@ -72,6 +72,7 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
         view: () => ({ view, token: 'view:r:0' }),
         pending: () => pending,
       });
+      p.screen(); // mounted: the live region reads only what comes after
       p.press(
         {
           label: action,
@@ -85,16 +86,22 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
       assert.equal(p.screen().returnWorld, false);
       assert.equal(p.screen().view, view);
       assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
-      assert.deepEqual(p.screen().log, []);
+      const refused = { kind: 'refused', reason: 'not here', text: "You can't do that: not here." };
+      // A detail-page refusal is in place and in the room log (book-ui.md Line placement).
+      assert.deepEqual(p.screen().log, pending ? [] : [refused]);
       assert.equal(p.screen().pending, pending);
       assert.deepEqual(
         p.screen().detail(context).slice(-1),
-        pending
-          ? action === 'close_choice'
-            ? ['choice.prompt']
-            : []
-          : [{ kind: 'refused', reason: 'not here', text: "You can't do that: not here." }],
+        pending ? (action === 'close_choice' ? ['choice.prompt'] : []) : [refused],
       );
+      // Logged in both places, it is announced once: one live-region text, not one per place.
+      if (!pending)
+        assert.deepEqual(p.screen().said, {
+          log: 1,
+          place: VIEW.place.id,
+          key: 1,
+          text: `not here, ${refused.text}`,
+        });
     }
   }
 });
@@ -405,6 +412,7 @@ test('combat receipt history is once-only when completion follows an already dis
     pendingInvocation: () => 'reserved',
     invoke: () => ({ kind: 'catching_up', invocation_id: 'reserved' }),
   });
+  p.screen();
   for (const [key, after] of [
     [
       'combat.result',
@@ -433,7 +441,10 @@ test('combat receipt history is once-only when completion follows an already dis
     });
   }
   assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'The marsh rat falls.']);
-  assert.deepEqual(p.screen().log, []);
+  // The room log holds each combat line once too; the road's starts empty, so only the flee's shows.
+  assert.deepEqual(p.screen().log, ['The marsh rat falls.']);
+  // Read once: the live region reads the room log, not the combat history beside it.
+  assert.equal(p.screen().said.text, 'The marsh rat falls.');
 });
 
 // Breaks: an NPC whose cartridge name starts lower case ("a crow") leaves or arrives mid-sentence.

@@ -206,13 +206,17 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     assert.ok(h.labels().includes('Leave the conversation'));
     assert.ok(h.text().includes('They are not here to answer. Find them, or close this.'));
     assert.deepEqual(h.p.screen().detail(speaker), before);
-    assert.deepEqual(h.p.screen().log, ['Old Bram leaves.']);
+    // The talk prompt lands in the room log too (book-ui.md Line placement).
+    const prompt = h.p.screen().log[0];
+    assert.match(prompt, /^Bram keeps his eyes on the reeds\./);
+    assert.deepEqual(h.p.screen().log, [prompt, 'Old Bram leaves.']);
     assert.equal(turn(), opened);
     // Consecutive committed boundaries in one host pulse must each be consumed, despite batching.
     h.clock.wall = 1810000;
     h.clock.mono = 1800000;
     assert.equal(h.game.pulse().kind, 'ready');
     assert.deepEqual(h.p.screen().log, [
+      prompt,
       'Old Bram leaves.',
       'Old Bram arrives.',
       'Old Bram leaves.',

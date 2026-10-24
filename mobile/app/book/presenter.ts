@@ -45,6 +45,7 @@ import {
   leaveLog,
   logLines,
   narrationLines,
+  quietOf,
   resetLogs,
   restoredLogs,
   type Logs,
@@ -100,12 +101,14 @@ function narrate(
   const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
-  if (!last.read) world(s, away, [...lines, ...combat]); // Read text: its page only
-  if (!lines.length) return;
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  to?.push(...lines);
+  // A quiet receipt settled in the background is never in place, as when restored.
+  const quiet = !last.read && quietOf(s, last.lines, last.detail_id);
+  if (quiet && !away) return logLines(s, [...lines, ...combat], to, quiet);
+  if (!last.read) world(s, away, [...lines, ...combat]); // Read text: its page only
+  if (lines.length && !quiet) to?.push(...lines);
 }
 
 const confirmed = (reply: Reply) =>

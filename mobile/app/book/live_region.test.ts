@@ -37,7 +37,7 @@ test("the Book reads each press's new line politely", () => {
 });
 
 // Breaks: the restored log read at open, a redraw counted as a new batch, a repeat not read again, the trim at 200 lines losing a
-// line, a refused line read without its reason, combat lines left out, or a room or encounter change
+// line, a refused line read without its reason, combat lines read twice, or a room or encounter change
 // (which empties its log) hiding the new log's first lines.
 test('each batch holds only the lines new since the last screen', () => {
   let current: GameView = view({ combat: undefined });
@@ -57,17 +57,15 @@ test('each batch holds only the lines new since the last screen', () => {
   assert.equal(said().text, 'The bell rings.');
   assert.notEqual(said().key, first.key);
   s.log.push(...Array(200).fill('-'), 'A door creaks.');
-  s.combatLog.push(...Array(201).fill('-'));
-  assert.equal(
-    said().text,
-    [...Array(200).fill('-'), 'A door creaks.', ...Array(201).fill('-')].join(' '),
-  );
+  s.combatLog.push(...Array(201).fill('-')); // never read: the room log is the one source
+  assert.equal(said().text, [...Array(200).fill('-'), 'A door creaks.'].join(' '));
   s.log.push({ kind: 'refused', reason: 'closed', text: 'The way north is closed.' });
-  s.combatLog.push('The marsh rat bites.');
+  // A combat line lands in both logs (Line placement) and is read once.
+  for (const l of [s.log, s.combatLog]) l.push('The marsh rat bites.');
   assert.equal(said().text, 'closed, The way north is closed. The marsh rat bites.');
   current = view();
   s.combatLog.length = 0;
-  s.combatLog.push('A marsh rat attacks.');
+  for (const l of [s.log, s.combatLog]) l.push('A marsh rat attacks.');
   assert.equal(said().text, 'A marsh rat attacks.');
   current = { ...view({ combat: undefined }), place: { ...current.place, id: 'yard' } };
   s.log.length = 0;

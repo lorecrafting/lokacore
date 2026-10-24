@@ -105,13 +105,17 @@ test('a fresh story has no Chronicle and still says Nothing written yet', () => 
   assert.ok(!shown.includes(LABEL.chronicle));
 });
 
-// Breaks: a routine engine line (a take) enters the Chronicle beside the story's own line (PM
-// ruling, loka-kgd.185: the Chronicle stays as before the narration log batch).
-test('a take stays out of the Chronicle; the story line beside it stays in', () => {
+// Breaks: a routine engine line (a take) or a talk prompt enters the Chronicle beside the story's
+// own line (PM ruling, loka-kgd.185: the Chronicle stays as before the narration log batch).
+test('a take and a talk prompt stay out of the Chronicle; the story line beside it stays in', () => {
   const view = { place: { title: { key: 't' } } } as never;
   const record = {
     command_id: 'c',
-    lines: [{ key: 'item.taken', bindings: { item: 'item.key.short' } }, { key: 'narration.x' }],
+    lines: [
+      { key: 'item.taken', bindings: { item: 'item.key.short' } },
+      { key: 'dialogue.bram.prompt' },
+      { key: 'narration.x' },
+    ],
   };
   const shown = days([{ day: 1, record, milestone: false } as never], view, (k) => k);
   assert.deepEqual(
