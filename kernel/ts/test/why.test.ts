@@ -194,6 +194,7 @@ test('W8: the CLI prints the explanation and refuses bad arguments', () => {
       [],
     ])
       assert.equal(run(...args).status, 2, args.join(' '));
+    assert.equal(run('7', '--recipe', 'nope').stderr, 'no definition keyed nope\n'); // no path: not the transcript's
     writeFileSync(
       file,
       artifact((c) => (c.reactions[BELL].when.root.equals = 1)),
