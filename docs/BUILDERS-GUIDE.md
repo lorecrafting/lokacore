@@ -102,7 +102,9 @@ the toolbox showcase.
 | A consequence or story presentation | `reactions/<key>.json`, `story_points/<key>.json`, `scenes/<key>.json`; [bell scene](../cartridges/scene_sampler/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |
 
 Put player-facing words in `text.json` and reference their keys from blueprints and story
-definitions ([text rules](system/cartridge.md#text)). Put tunable costs, resource bounds and
+definitions ([text rules](system/cartridge.md#text)), or write them in place as
+`{"prose": "<words>"}`; the compiler lowers each to a generated key
+([inline prose](system/cartridge.md#source-shortcuts)). Put tunable costs, resource bounds and
 other world numbers in cartridge data, not engine code ([world parameters](world-parameters.md)).
 
 ## What the current builder can express
