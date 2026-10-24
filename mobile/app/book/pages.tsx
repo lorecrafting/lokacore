@@ -309,7 +309,7 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
 
 /**
  * The page's local returns, nearest first: Controls centred under a hairline.
- * - Use: every page with a return; outside the scroll, above the status line.
+ * - Use: every page with a return; outside the scroll, above any status line.
  * - Rules: wraps onto a second row when the Reading size needs it.
  * - States: one return; two (nested item).
  * - Story: PageFoot.stories.tsx

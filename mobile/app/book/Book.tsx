@@ -15,6 +15,7 @@ import {
   initialPages,
   restoredItemPages,
   npcPage,
+  detailPage,
   nextPosition,
   type Hint,
   type Page,
@@ -243,6 +244,8 @@ function Bottom(p: BottomProps) {
   const { view, text, pending, fault, ended } = p.screen;
   const shut = !!view.combat || !!ended;
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
+  const detail = !shut && detailPage(p.page);
+  if (detail && !pending && !p.screen.catchingUp && !fault) return null;
   return (
     <View
       style={{
@@ -250,13 +253,16 @@ function Bottom(p: BottomProps) {
         paddingHorizontal: space.xl,
         paddingBottom: space.lg,
         // The footer's own flanking rules divide it from the page (owner, mvl8dz3dy36l).
-        borderTopWidth: nav ? 0 : size.rule,
+        borderTopWidth: nav || detail ? 0 : size.rule, // a detail's PageFoot draws the rule
         borderTopColor: c.line,
       }}
     >
       {nav && navigation(p)}
       {p.say.open && shield(() => p.say.setOpen(false))}
-      {!view.ancestry_choices && statusLine(p)}
+      {!view.ancestry_choices && !detail && statusLine(p)}
+      {detail && pending && (
+        <Text style={{ ...t.small, color: c.dim, textAlign: 'center' }}>save not confirmed</Text>
+      )}
       {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>

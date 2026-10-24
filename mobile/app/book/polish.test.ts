@@ -296,16 +296,6 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.tap('Leave');
   h.tap('Old Bram');
   h.tap('Talk to Old Bram');
-  h.tap(CONTENTS);
-  h.tap('Map');
-  h.tap('Go north'); // local section navigation preserves the pending choice
-  h.tap('Continue conversation');
-  h.tap('Leave the conversation'); // actual offered Close works without a projected speaker
-  assert.equal(h.game.view().view.choice, undefined);
-  h.map();
-  h.tap('Go south');
-  h.tap('Old Bram');
-  h.tap('Talk to Old Bram');
   const beforeResult = turn();
   h.tap("Offer to fetch Bram's lantern");
   assert.equal(turn(), beforeResult);
@@ -330,8 +320,9 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   );
   assert.ok(h.labels().includes('Leave the conversation'));
   assert.ok(!h.labels().includes('Talk to Old Bram'));
-  h.tap(CONTENTS); // leaving by Contents also ends it: the later fresh visit offers Talk again
-  h.tap('Map');
+  h.tap('Leave the conversation'); // the later fresh visit offers Talk again
+  h.tap('Leave');
+  h.map();
   assert.equal(h.text().includes('Journal updated'), false);
   h.tap('Go north');
   h.tap('A brass lantern');
@@ -401,9 +392,7 @@ test('an NPC choice retried from the world keeps its result in the original deta
     [],
   );
   h.sql.exec('PRAGMA query_only = 0');
-  h.tap(CONTENTS);
-  h.tap('Map');
-  h.tap('Go north'); // GameSession retries the choice, so no move occurs.
+  h.tap('Leave the conversation'); // GameSession retries the choice, not the Leave
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.place.title.key, 'room.ferry_landing.title');
   assert.deepEqual(h.p.screen().log, []);

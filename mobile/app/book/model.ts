@@ -58,12 +58,16 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing' | 'board' | 'notice' | 'dream'; id: string }
+  | { kind: 'thing' | 'board' | 'notice' | 'dream' | 'shelf'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
+
+// A detail page draws no status line (owner pick mvlrlvappy4w); the shell keeps it elsewhere.
+export const detailPage = (page: Page | undefined) =>
+  ['thing', 'board', 'notice', 'dialogue', 'shelf'].includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 

@@ -5,32 +5,7 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { book, bundle } from './__tests__/polish-book.test.ts';
-import { CONTENTS } from './__tests__/control.test.ts';
 import { LABEL } from './labels.ts';
-
-const REPLY = "You say you'll fetch it. Bram nods toward the path north.";
-
-// Breaks: a delayed answer that settles after its page closed writes into the closed page's
-// history, and the next visit opens on that old reply (and its Journal updated).
-test('a reply that lands after its page closed is not on the next visit', () => {
-  const h = book(bundle('containers_sampler_v010_hash'));
-  h.tap('Old Bram');
-  h.tap('Talk to Old Bram');
-  h.clock.wall += 15552000; // half a year idle: the answer waits on catch-up
-  h.clock.mono = 15552000;
-  h.tap("Offer to fetch Bram's lantern");
-  assert.equal(h.game.pending(), true);
-  h.tap(CONTENTS);
-  h.tap(LABEL.backToWorld);
-  h.draw(); // the world page draws before the answer settles
-  h.game.pulse();
-  h.draw();
-  h.tap('Old Bram');
-  assert.equal(h.text().includes(REPLY), false);
-  assert.equal(h.text().includes('Journal updated'), false);
-  h.unmount();
-  h.sql.close();
-});
 
 // Breaks: the sweep drops the question of a choice that opened while its speaker's page was
 // closed; the choice card does not draw it, so the reopened page shows only the answers.
@@ -41,8 +16,6 @@ test("an open choice's question stays for its speaker's next visit", () => {
   h.clock.mono = 15552000;
   h.tap('Talk to Old Bram');
   assert.equal(h.game.pending(), true);
-  h.tap(CONTENTS);
-  h.tap(LABEL.backToWorld);
   h.draw();
   h.game.pulse();
   h.draw(); // the world page draws with the choice open
@@ -116,4 +89,19 @@ test('a restored pickup shows on the corpse visit after reopen, then only once',
   assert.equal(r.text().includes(PICKUP), false);
   r.unmount();
   a.sql.close();
+});
+
+// Breaks: a detail page draws the status line again (its Contents button, compass or say icon),
+// or an offered action or the status line follows the page's Leave (owner pick mvlrlvappy4w).
+test('a detail page has no status line and Leave is its last control', () => {
+  const h = book(bundle('containers_sampler_v010_hash'));
+  assert.ok(h.labels().some((l) => l.endsWith('opens Contents'))); // World keeps it
+  h.tap('Old Bram');
+  const labels = h.labels();
+  assert.equal(
+    labels.some((l) => l.endsWith('opens Contents')),
+    false,
+  );
+  assert.equal(labels.at(-1), LABEL.leave);
+  h.sql.close();
 });
