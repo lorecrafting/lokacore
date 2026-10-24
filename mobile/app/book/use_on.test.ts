@@ -109,6 +109,20 @@ test('a pair refused for another reason draws no option on either page', () => {
   assert.ok(!b.labels().includes(LABEL.useOn), b.labels().join(' | '));
 });
 
+// Breaks: a pair whose other object the view does not project still draws a row (PM ruling a).
+test('a pair with an unprojected target draws no Use on… on the tool', () => {
+  const b = yard();
+  const cart = id(b, 'cart');
+  const real = b.game.view.bind(b.game);
+  b.game.view = () => {
+    const r = real();
+    return { ...r, view: { ...r.view, entities: r.view.entities.filter((e) => e.id !== cart) } };
+  };
+  assert.deepEqual(validate('GameView', b.game.view().view), []);
+  held(b, 'bucket');
+  assert.ok(!b.labels().includes(LABEL.useOn), b.labels().join(' | '));
+});
+
 // Breaks: an accepted pick whose receipt has no narration logs no line, or one without the
 // recipe's label and the pair's names (book-ui.md: the use pair's fallback line).
 test('a pick without narration logs the use line once', () => {

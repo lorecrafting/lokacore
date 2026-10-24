@@ -46,7 +46,7 @@ export function picks(v: GameView, buttons: Button[], id: string, text: (key: st
         : cap(name(end(b)));
     const rows = pairs.flatMap((b): Row[] => {
       const reason = b.pick!.reason;
-      if (reason) return [{ label: tool ? b.label : cap(name(end(b))), reason }];
+      if (reason) return [{ label: tool ? b.label : shown(b), reason }];
       const twin = pairs.some((o) => o !== b && !o.pick!.reason && shown(o) === shown(b));
       return [
         {

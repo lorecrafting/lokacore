@@ -232,7 +232,8 @@ function heldButtons(
       )
       .flatMap((a) => {
         const two = other(a, e.id);
-        if (two) return pickRows(button(a, ''), a.available, [e.id, two]);
+        // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)
+        if (two) return names.has(two) ? pickRows(button(a, ''), a.available, [e.id, two]) : [];
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(

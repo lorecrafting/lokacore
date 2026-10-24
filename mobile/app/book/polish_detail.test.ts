@@ -119,6 +119,28 @@ test("the farmer's Give an item… lists the apple; the pick returns to World wi
   h.sql.close();
 });
 
+// Breaks: a stale pick (the apple dropped since the list drew) leaves the list open or shows no
+// stale note (PM ruling c: the same as other stale presses).
+test('a stale Give pick closes the list and shows the stale note', () => {
+  const h = book(compiled('cartridges/gift_sampler') as never);
+  for (const thing of ['apple', 'stone']) {
+    h.tap(new RegExp(`^an? ${thing}, open$`, 'i'));
+    h.tap(`Take a${thing === 'apple' ? 'n' : ''} ${thing}`);
+  }
+  h.tap(/^The farmer, open$/i);
+  h.tap(LABEL.giveAnItem);
+  const label = 'An apple, give an apple to the farmer';
+  const row = h.draw().find((n) => n.props?.accessibilityLabel === label);
+  const apple = h.game.view().view.inventory.find((e) => e.name.includes('apple'))!.id;
+  h.game.invoke({ action_key: 'drop', target_ids: [apple], input: {} } as never);
+  row.props.onPress();
+  const at = h.labels().indexOf(LABEL.giveAnItem);
+  assert.ok(at >= 0, h.labels().join(' | ')); // the stone keeps the option
+  assert.equal(h.labels()[at + 1]?.startsWith('A stone'), false, h.labels().join(' | ')); // closed
+  assert.ok(h.text().includes('The page had changed; here it is again.'), h.text().join(' | '));
+  h.sql.close();
+});
+
 // Breaks: inventory Drop stays in detail, falsely succeeds while pending, or retry loses its name.
 test('inventory Drop returns World with one named event only after confirmation', () => {
   const h = book();
