@@ -58,8 +58,8 @@ Keep lessons in area files; link here only when relevant to all work.
 - For CI, hooks, skip rules or randomized tests, read [check lessons](docs/lessons/checks.md).
 - Before drafting or reviewing a district or area plan, read the [area authoring checklist](docs/guides/area-authoring.md).
 - Before writing or reviewing cartridge source, read the [Builders' Guide](docs/BUILDERS-GUIDE.md):
-  use its compile-time shortcuts (`extends`, `areas/` bundles, inline `prose`, `signal`, zones)
-  instead of repeated JSON, and check content with `coverage.ts` and `why.ts`.
+  use its compile-time shortcuts instead of repeated JSON, and check content with `coverage.ts`
+  and `why.ts`.
 
 **All work**
 - Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
