@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Rewritten 2026-10-24 ~01:00 local by Claude Code (Opus 5.5), PM session 661e816a, overnight while the owner slept (see "Start here" first). Previous header: 2026-10-23 ~19:30 local, before /clear. Earlier header: written 2026-10-23 ~01:30 local, AS OF
+Rewritten 2026-10-24 ~09:45 local by Claude Code (Opus 5.5), PM session 661e816a, AS OF #475 merged; weekly session closed at 97% usage (resets 2026-10-28 05:00 HST). Earlier header: 2026-10-24 ~01:00 local, overnight while the owner slept. Previous header: 2026-10-23 ~19:30 local, before /clear. Earlier header: written 2026-10-23 ~01:30 local, AS OF
 main after #453 plus the overnight batches below. Owner (2026-10-22, quoted): "Please work on the engine stuff, and the
 followups from todays reviews ... the polish phase will be ready for me tomorrow right?"
 Open objective: the owner's Storybook polish pass. Owner hold (2026-10-22, paraphrased): only polish and the bugs it
@@ -32,7 +32,30 @@ PLease set things up so that its easy for me to do my ui polish there".
 - "Close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR comments, green hosted CI, merge with
   `--match-head-commit`, `bin/after_merge.sh`, `bin/preview_update.sh` (it refuses while a session is served).
 
-## Start here (2026-10-24)
+## Start here (2026-10-24, closing the weekly session)
+
+- Owner (2026-10-24, quoted): "we are closing up for this weekly session, just finish those slices". Picks Monitor is
+  disarmed; Storybook 6006 still serves polish/session-2026-10-23 (updated to main after #475). Re-arm only when the owner
+  is back at Storybook.
+- MERGED #475 (loka-kgd.185, x6t.129, x6t.124; narration log batch): every take/drop/give/put/move/position/door/
+  equip/talk/buy/sell narrates (words in mobile/packages/game-view/line_words.ts); every line lands in the room event
+  log, combat too; detail pages keep their own lines; display table in place / log / quiet (own buy/sell on shop pages,
+  own take/put on an open container page), quiet lines compacted "<line> (N times)" and still announced. Conformance
+  lantern-traces v3 / adverse-cases v4 re-frozen by hand (narration only; docs/spec/IMPORT.md 2026-10-24). Review record
+  docs/reviews/2026-10-24-narration-log-batch-review.md. Designer pass: built Book matches the spec; fox line in the dream
+  and prompts in the room log accepted.
+- Filed from it: loka-h1gl follow-ups (unnamed actor reads "You", chronicle prompt regex, stock merge, background quiet,
+  line.ts:67), loka-r9mr prompt line has no speaker (PM rec: "Nell: …"; owner may rule), loka-1dax compaction story.
+  Retro: loka-2zak split M slices (two developers hit the context stop), loka-1whq briefs list conformance fixtures and
+  live play functions in Risks.
+- Owner questions answered this session (no change): Elixir conformance stays (cheap; the cost is the content compiler,
+  left alone while work is polish + content); exits/online architecture explained (data + mechanics; ADR-074 "which
+  kernel runs online" is the open decision before Realm work).
+- Next, in order (owner-approved): loka-x6t.127 remainder (away recap -> bottom of the event log; NPC carried-item note ->
+  NPC page; exit warnings and Continue conversation under the anatomy rule; PM idea: exit warning as a movement log line).
+  Later: x6t.130 verbose/brief setting.
+
+## Earlier start (2026-10-24 overnight)
 
 - Owner, going to sleep (2026-10-23, quoted): "ok keep going until all tasks are done, and use your best
   recommendation and judgement for things because i will be going to sleep". Stopped at weekly usage 93% (cache
