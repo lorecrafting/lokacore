@@ -6,7 +6,9 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
 import { encode } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
@@ -140,14 +142,19 @@ test('E: coverage of a stale transcript (the byte guard missing)', () => {
   assert.throws(() => coverage(edited, [{ ...t, head }]), /replay differs at ordinal 0/);
 });
 
-test('F: the CLI wiring', () => {
-  const run = (args: string[], input = artifact('protocol/fixtures/cartridge_scene_hash.json')) =>
-    spawnSync(process.execPath, [`${ROOT}kernel/ts/play/coverage.ts`, ...args], {
+test('F: the CLI wiring', (t) => {
+  // A temp file, not /dev/stdin: on Linux runners spawnSync's stdin is a socket (ENXIO).
+  const dir = mkdtempSync(join(tmpdir(), 'coverage-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const art = join(dir, 'artifact.json');
+  const run = (args: string[], input = artifact('protocol/fixtures/cartridge_scene_hash.json')) => {
+    writeFileSync(art, input);
+    return spawnSync(process.execPath, [`${ROOT}kernel/ts/play/coverage.ts`, ...args], {
       cwd: ROOT,
       encoding: 'utf8',
-      input,
     });
-  const ok = run(['/dev/stdin', SCENE]);
+  };
+  const ok = run([art, SCENE]);
   assert.equal(ok.status, 0, ok.stderr);
   assert.deepEqual(JSON.parse(ok.stdout).never, {
     reactions: [],
@@ -155,21 +162,21 @@ test('F: the CLI wiring', () => {
     choices: [choice('bram', 'leave')],
     quests: [],
   });
-  assert.equal(run(['/dev/stdin']).stdout, ok.stdout); // the default: the cartridge's own
-  const other = run(['/dev/stdin', DUSK]);
+  assert.equal(run([art]).stdout, ok.stdout); // the default: the cartridge's own
+  const other = run([art, DUSK]);
   assert.equal(other.status, 1);
   assert.match(
     other.stderr,
     /^cartridges\/check_sampler\/transcripts\/schedule\.jsonl: replay differs/,
   );
-  const refused = run(['/dev/stdin'], '{}'); // the loader refuses: its diagnostic, not a crash
+  const refused = run([art], '{}'); // the loader refuses: its diagnostic, not a crash
   assert.equal(refused.status, 1);
   assert.equal(JSON.parse(refused.stderr).code, 'UNKNOWN_FORMAT');
   assert.equal(run([]).status, 2);
   assert.equal(run(['missing.json']).status, 2);
   // A file that is not a trace is named (pin's own parse error).
   assert.match(
-    run(['/dev/stdin', 'kernel/ts/play/coverage.ts']).stderr,
+    run([art, 'kernel/ts/play/coverage.ts']).stderr,
     /^kernel\/ts\/play\/coverage\.ts: /,
   );
 });
