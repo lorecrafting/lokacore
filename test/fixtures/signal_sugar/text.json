@@ -1,0 +1,7 @@
+{
+  "room.yard.title": "Yard",
+  "room.yard.description": "A yard. The hall is east.",
+  "room.hall.title": "Hall",
+  "room.hall.description": "A hall. The yard is west.",
+  "bell.heard": "A bell rings."
+}

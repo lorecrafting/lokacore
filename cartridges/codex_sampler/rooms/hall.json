@@ -1,4 +1,5 @@
 {
+  "zones": ["priory"],
   "title": "room.hall.title",
   "description": "room.hall.description",
   "exits": { "north": { "to": "mill" }, "east": { "to": "yard" }, "south": { "to": "road" }, "west": { "to": "study" } }

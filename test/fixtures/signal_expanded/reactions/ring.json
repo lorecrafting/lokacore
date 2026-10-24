@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "hall"
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "signal_bell",
+      "amount": 1
+    }
+  ],
+  "silent": true
+}

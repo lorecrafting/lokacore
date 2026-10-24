@@ -1,12 +1,9 @@
 defmodule Loka.Content.Source do
   @moduledoc """
-  Reads a cartridge source directory and builds diagnostics in the path grammar of
-  `Diagnostic.path` (protocol/cartridge.schema.json).
-
-  The loaded view is already flattened (`Loka.Content.Extends`). A step list holds member
-  names (strings) and array indexes (integers).
+  Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
+  in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Bundles, Extends, Prose}
+  alias Loka.Content.{Bundles, Extends, Prose, Signals, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -45,11 +42,8 @@ defmodule Loka.Content.Source do
              | :blueprint, String.t(), steps()}
 
   @doc """
-  Every `.json` regular file under `dir` (dot files included) as `{relative path, kind, decoded
-  value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics and the refusals of
-  the source shortcuts (`Bundles`, `Extends`, `Prose`). A definition in a bundle is `{bundle rel,
-  {kind, key, [dir, key]}, value}`. A recognised file that fails to decode has the value
-  `:invalid` (present, not absent); a file in an unrecognised place is left out.
+  Each recognised `.json` file under `dir` (dot files too) as `{rel, kind, value}` (`:invalid` if
+  undecodable; bundled: `{bundle rel, {kind, key, [dir, key]}, value}`), with its diagnostics.
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
@@ -57,9 +51,15 @@ defmodule Loka.Content.Source do
     {files, opened} = Bundles.split(files, dirs())
     {files, repeats} = Bundles.unique(files)
     {files, faults} = Extends.flatten(files)
-    {files, clashes} = Prose.lower(files)
-    located = Enum.map(opened ++ repeats ++ clashes, &bundle_diag/1)
+    {files, located} = shortcuts(files, opened ++ repeats)
     {files, diags ++ located ++ Enum.map(faults, &extends_diag/1)}
+  end
+
+  defp shortcuts(files, faults) do
+    {files, clashes} = Prose.lower(files)
+    {files, unsent} = Signals.lower(files)
+    {files, zoned} = Zones.expand(files)
+    {files, Enum.map(faults ++ clashes ++ unsent ++ zoned, &bundle_diag/1)}
   end
 
   defp read(dir) do
