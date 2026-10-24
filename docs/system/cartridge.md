@@ -693,6 +693,45 @@ JSON document. Nothing is committed or checked in CI; only its unit test runs.
   in a transcript shows unfired; scene choices and cartridge `actions` are out of scope;
   transcripts only, not browser walks.
 
+### Rule explainer (loka-kgd.194.3)
+
+Beads `loka-kgd.194.3` ([design audit](../rnd/design-audit-abilities-authoring-2026-10-23.md)
+finding 22, approach E, plan phase 4) says why a rule did or did not run at one transcript step.
+`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+loads and refuses as `reach.ts` above (exit 1). It reads the transcript with its own pinned
+`content_hash`, so an edited, recompiled artifact still runs. It replays ordinals `1..ordinal-1`
+on the marked copy of Transcript coverage above, comparing each line with the recording; a
+difference exits 1 (`<transcript>: replay differs at ordinal <n>`, the path relative to the
+repository). Step `<ordinal>` itself is decided, never compared, so an edited rule can be
+explained. Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
+1..entries, or a `--recipe`/`--dialogue` key no definition has. Otherwise it prints one canonical
+JSON document. Nothing is committed or checked in CI; only its unit test runs.
+
+- **Output** `{ordinal, command: <payload type>, outcome: <accepted outcome, else the decision
+  kind>, reactions: [{rule, causes: [{event, position, filters: {<name>: bool}}], fired, when?}],
+  recipe?: {rule, policy}, dialogue?: {rule, policy}}`. `reactions` holds every rule in rule-key
+  order; `rule` is the DefinitionRefString.
+- **Causes.** Each committed event of the step whose type is the rule's `on.event`, with every
+  declared filter evaluated on the world before the step, as the proposal matches triggers
+  ([reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts)). No such event: `[]`.
+- **Fired.** The number of the rule's markers in the step's narration: deliveries whose `when`
+  held and whose steps ran.
+- **When.** Each leaf gets `held`: the deliveries at which it held. The step is decided again
+  from the same world, once per leaf, with the rule replaced under its own key by one whose
+  `when` is that leaf alone and whose only step narrates a probe key. The kernel then evaluates
+  the leaf at the rule's own place in rule-key order, reading the writes of the rules and
+  deliveries before it in the same command (reaction@1). `all`, `any` and `not` keep their
+  shape; every leaf is evaluated, with no short-circuit.
+- **Policy** (on demand). A recipe's or dialogue's `policy`, each leaf with `holds`, read on the
+  world before the step, where admission reads it: the recipe for the command's primary target,
+  the dialogue for its NPC.
+- ponytail: a leaf's value is its truth (`held`, `holds`), not the fact or stat it read, which
+  needs a kernel hook. For a rule delivered more than once in a step, only the first delivery is
+  exact. A delayed rule's `fired` shows at its job's step, and a job run's narration can be
+  deduplicated. The recipe target is the payload's primary target, not a detail resolved
+  through `detailAt`; the dialogue target is the authored NPC, not a `choose` row's bound
+  speaker (`speakerOf`), which differs only when the binding is not the npc's entity.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
