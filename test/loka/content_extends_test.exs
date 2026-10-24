@@ -57,6 +57,13 @@ defmodule Loka.ContentExtendsTest do
              [{"SCHEMA_VIOLATION", "npcs/crow.extends", %{"error" => "invalid_type"}}]
   end
 
+  # Breaks: a parent that is not an object crashes the merge, or its children add refusals of
+  # their own (the parent's error is the one report).
+  test "a parent that is not an object is reported once, at the parent", %{dir: dir} do
+    assert {:error, ds} = Source.compile(dir, [{"npcs/wild.json", ["beast"]}])
+    assert ds != [] and Enum.all?(ds, &String.starts_with?(&1["path"], "npcs/wild"))
+  end
+
   # Breaks: root files are flattened too, so a manifest extends is silently dropped.
   test "a root file's extends is an unknown field", %{dir: dir} do
     assert {"UNKNOWN_FIELD", "cartridge.extends", %{}} in diags(dir, [
