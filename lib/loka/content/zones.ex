@@ -31,10 +31,10 @@ defmodule Loka.Content.Zones do
   defp malformed({rel, _, steps, _}),
     do: {"SCHEMA_VIOLATION", {rel, steps ++ ["zones"]}, invalid("type")}
 
-  # Zone => member rooms in room-key order.
+  # Zone => member rooms; copy order is irrelevant (the artifact keys reactions by id).
   defp members(rooms) do
     pairs = for {_, room, _, zs} <- rooms, zone <- zs, do: {zone, room}
-    pairs |> Enum.sort() |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    pairs |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
   end
 
   defp keys?(zones),
