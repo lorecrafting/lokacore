@@ -321,5 +321,5 @@ Gaps (no pattern or no check yet):
   loka-x6t.117. NPC conditions page: loka-x6t.70.
 - Two foes with the same name give two identical Cast options on the Combat page: needs filing.
 - Skill-gated room depth: loka-x6t.126, on hold (owner, quoted: "hold on that for now").
-- Open question for the owner: is Journal's "Nothing written yet." a filler line to remove, or
-  the one allowed empty state (this file keeps it allowed until answered)?
+- Journal's "Nothing written yet." stays the one allowed empty state (owner 2026-10-23 chose
+  "Keep it" over removal).
