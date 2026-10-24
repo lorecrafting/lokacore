@@ -1,7 +1,8 @@
 import { accepted, event, rejected, type Rule } from '../../runtime/decision.ts';
+import { actorLine } from '../line.ts';
 import { exchange } from './shared.ts';
 
-export const decide: Rule<'commerce'> = (world, command, mint, steps) => {
+export const decide: Rule<'commerce'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
   const result = exchange(
     world,
@@ -36,6 +37,14 @@ export const decide: Rule<'commerce'> = (world, command, mint, steps) => {
         holder_id: result.destination,
       }),
     ],
-    [{ key: p.type === 'buy' ? result.shop.bought : result.shop.sold }],
+    [
+      actorLine(
+        world,
+        p.actor_id,
+        `commerce.${p.type === 'buy' ? 'bought' : 'sold'}`,
+        { item: result.moved },
+        steps,
+      ),
+    ],
   );
 };

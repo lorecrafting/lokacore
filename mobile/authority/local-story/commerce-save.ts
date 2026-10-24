@@ -159,7 +159,8 @@ function shopReceipt(
       destination_id: destination,
     }) ||
     d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
-    !same(d.narration, [{ key: p.type === 'buy' ? shop.bought : shop.sold }])
+    d.narration?.length !== 1 ||
+    d.narration[0].key !== (p.type === 'buy' ? 'commerce.bought' : 'commerce.sold')
   )
     invalid();
   if (!acquiredOnce(world, command, d, moved, destination)) invalid();

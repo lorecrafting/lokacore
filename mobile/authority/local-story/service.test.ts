@@ -298,7 +298,7 @@ test('real failed COMMIT and both uncertain outcomes keep room/meal/ale all old 
     }
 });
 
-// Breaks: differently keyed meal action gets omitted, Book sends use_service instead of the alias, or recovery routes a line to World/another NPC.
+// Breaks: differently keyed meal action gets omitted, Book sends use_service instead of the alias, or recovery routes a line to another NPC or misses the room log.
 test('real Book captured alias press and lost acknowledgement restore one original-cook line', (t) => {
   const a = setup();
   t.after(() => a.sql.close());
@@ -326,10 +326,10 @@ test('real Book captured alias press and lost acknowledgement restore one origin
   );
   const line = 'kitchen_meal used';
   assert.deepEqual(book.screen().detail(cook), [line]);
-  assert.deepEqual(book.screen().log, []);
+  assert.deepEqual(book.screen().log, [line]); // in place: the page and the room log
   const reopened = presenter(openGame(a.db, a.b, a.host));
   assert.deepEqual(reopened.screen().detail(cook), [line]);
-  assert.deepEqual(reopened.screen().log, []);
+  assert.deepEqual(reopened.screen().log, [line]);
   const b = setup();
   t.after(() => b.sql.close());
   const pending = presenter(b.game);

@@ -6,6 +6,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain } from './model.ts';
 import { COUNT, LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
+import { lineText } from './words.ts';
 import type { RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
@@ -67,7 +68,7 @@ export function Note({ children }: { children: string }) {
  *   ink italic, plain prose with no tag or chip (owner pick mvlyp3gphp2t, 2026-10-23); its reason
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads it). A speech line
  *   (speaker bar) waits until the log projects a speaker.
- * - States: narration; system; refused.
+ * - States: narration (a repeated quiet line reads `<line> (N times)`); system; refused.
  * - Story: LogLines.stories.tsx
  */
 export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
@@ -78,9 +79,9 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
     <View testID="log-lines" style={{ gap: space.sm }}>
       {lines.map((line, i) =>
-        typeof line === 'string' ? (
+        typeof line === 'string' || 'quiet' in line ? (
           <Text key={i} style={{ ...t.log, color: c.fg }}>
-            {line}
+            {lineText(line)}
           </Text>
         ) : 'event' in line ? (
           <Text key={i} style={{ ...t.log, color: c.dim, ...type.italic }}>

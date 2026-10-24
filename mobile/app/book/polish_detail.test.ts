@@ -170,7 +170,7 @@ test('other item actions retain their detail and show their consequences there',
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
   assert.ok(h.text().includes("You open the sewing box's lid."));
-  assert.equal(h.p.screen().log.includes("You open the sewing box's lid."), false);
+  assert.equal(h.p.screen().log.filter((l) => l === "You open the sewing box's lid.").length, 1);
   h.tap('Leave');
   assert.ok(h.labels().includes('A sewing box, open'));
   h.tap('A sewing box, open');
@@ -391,7 +391,7 @@ test('self-luminous Notice invokes its projected targetless recipe and retains t
     h.tap('glows, open');
     h.tap('Search');
     assert.ok(h.text().includes('You search.')); // narration.search
-    assert.equal(h.p.screen().log.includes('You search.'), false);
+    assert.equal(h.p.screen().log.filter((l) => l === 'You search.').length, 1); // in place
     assert.ok(h.labels().includes('Leave'));
   } finally {
     h.unmount();

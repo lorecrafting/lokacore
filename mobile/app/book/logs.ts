@@ -9,7 +9,7 @@ import type {
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
 import { cueLine } from './model.ts';
-import { lineWords, withoutHeading } from './words.ts';
+import { lineText, lineWords, withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
 // One log line per narration record, then the cue (book-ui.md, Live action freshness; pass-1 UO):
@@ -19,12 +19,13 @@ export const narrationLines = (
   view: GameView,
   text: Say,
   past = false,
+  was?: GameView,
 ) => [
   [
-    ...rendered(last, view, text, false),
+    ...rendered(last, view, text, false, was),
     last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '',
   ].filter(Boolean),
-  rendered(last, view, text, true),
+  rendered(last, view, text, true, was),
 ];
 
 export const rendered = (
@@ -32,15 +33,20 @@ export const rendered = (
   view: GameView,
   text: Say,
   combat: boolean,
+  was?: GameView,
 ) =>
   withoutHeading(
     (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
     view,
-  ).map((line) => liquidLine(line, text, view));
+  ).map((line) => liquidLine(line, text, view, was));
 
-// A refused line (a barred exit) leads with its reason tag (LogLines's doc comment).
+// A refused line (a barred exit) leads with its reason tag (LogLines's doc comment); a quiet line
+// keeps its structured identity and count, `text` with " (N times)" once merged (logLines).
 export type DetailLine =
-  string | { text: string; event: true } | { kind: 'refused'; reason: string; text: string };
+  | string
+  | { text: string; event: true }
+  | { kind: 'refused'; reason: string; text: string }
+  | { quiet: string; plain: string; times: number; text: string };
 export type Logs = {
   log: DetailLine[];
   combatLog: DetailLine[];
@@ -54,7 +60,9 @@ export type Logs = {
   confirmedRead?: string;
   returnWorld?: boolean;
   returnDetail?: string;
-  pickedFrom?: string; // a restored pickup's corpse, whose next visit still shows it
+  visits?: number; // the page visit a quiet line belongs to, counted when the open pages change
+  open?: string;
+  merged?: string[]; // quiet lines merged since the last screen, read again by the live region
   fault?: string;
   // An open elapsed settlement's held World entries, one per line.
   away?: { from: number; log: string[] };
@@ -63,35 +71,66 @@ export type Logs = {
   noted?: Set<string>; // the cue lines logged this room visit
 };
 
-export function pickupLine(last: NarrationRecord | undefined, text: Say) {
-  return last?.pickup_name ? `You take ${text(last.pickup_name)}.` : '';
+// The display table (book-ui.md Line placement): the player's own buy, sale, take or put, its
+// receipt routed to the page it was pressed on, is quiet. Its identity is structured: key, bindings,
+// actor, pressed target and page visit. A receipt here is the player's own press, so its one line
+// is theirs (another person's action never comes back as the press's receipt).
+const QUIET = ['commerce.bought', 'commerce.sold', 'item.taken', 'item.put'];
+export function quietOf(
+  s: Logs,
+  lines: NarrationRecord['lines'] | undefined,
+  target?: unknown,
+  page?: string,
+) {
+  const l = lines?.length === 1 ? lines[0]! : undefined;
+  // A take or put pressed on the item's own page is in place: quiet is a container's page only.
+  const own = Array.isArray(target) && l?.key.startsWith('item.') && target[0] === page;
+  if (l && QUIET.includes(l.key) && !own)
+    return JSON.stringify([l.key, l.bindings, l.participants?.actor, target, s.visits]);
+}
+
+// Every line lands in the room log; `page` (the open page's history) keeps it in place too, unless
+// it is quiet: then it is the room log's only, and merges into an equal quiet line just before it.
+export function logLines(s: Logs, lines: DetailLine[], page?: DetailLine[], quiet?: string) {
+  if (!quiet || !page || lines.length !== 1) {
+    page?.push(...lines);
+    s.log.push(...lines);
+    return;
+  }
+  const plain = lineText(lines[0]!);
+  const last = s.log.at(-1);
+  if (typeof last !== 'object' || !('quiet' in last) || last.quiet !== quiet)
+    return void s.log.push({ quiet, plain, times: 1, text: plain });
+  last.times++;
+  last.text = `${plain} (${last.times} times)`;
+  (s.merged ??= []).push(plain);
 }
 
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
   const [narrated, combat] = narrationLines(last, view, text, true);
-  const pickup = pickupLine(last, text);
-  const restored = pickup ? [pickup] : narrated;
-  const log = !view.choice && !last?.detail_id ? restored : [];
-  const details = new Map<string, DetailLine[]>();
-  if (restored.length && last?.detail_id) details.set(last.detail_id, restored);
-  else if (restored.length && view.choice)
-    details.set(view.choice.speaker_id ?? 'conversation', restored);
-  if (view.choice) {
-    const id = view.choice.speaker_id ?? 'conversation';
-    details.set(id, [...(details.get(id) ?? []), text(view.choice.prompt.key)]);
-  }
   const s: Logs = {
-    log,
-    combatLog: combat,
-    details,
+    log: [],
+    combatLog: [],
+    details: new Map(),
     narrationId: last?.command_id,
-    pickedFrom: pickup ? last?.detail_id : undefined,
     projection: game.view(),
     status: { kind: 'ready' },
   };
-  log.push(...cueLines(s, view, text));
+  const speaker = view.choice && (view.choice.speaker_id ?? 'conversation');
+  const page = last?.detail_id ?? speaker;
+  if (last?.read && page) detailLines(s, page).push(...narrated);
+  else
+    logLines(
+      s,
+      narrated,
+      page ? detailLines(s, page) : undefined,
+      quietOf(s, last?.lines, last?.detail_id),
+    );
+  logLines(s, combat, s.combatLog);
+  if (speaker) detailLines(s, speaker).push(text(view.choice!.prompt.key));
+  s.log.push(...cueLines(s, view, text));
   return s;
 }
 
@@ -142,8 +181,13 @@ export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | 
   (['engaged', 'fled'].includes(d.outcome) ||
     d.events.some((e) => e.payload.type === 'attack_result'));
 
-function liquidLine(line: NarrationRecord['lines'][number], text: Say, view: GameView): string {
-  const sentence = lineWords(line, text, view);
+function liquidLine(
+  line: NarrationRecord['lines'][number],
+  text: Say,
+  view: GameView,
+  was?: GameView,
+): string {
+  const sentence = lineWords(line, text, view, was);
   if (line.key === 'item.recovered' && typeof line.bindings?.item === 'string')
     return `${sentence} ${text(line.bindings.item)}.`;
   if (!['liquid.filled', 'liquid.poured', 'liquid.drank'].includes(line.key)) return sentence;
@@ -161,12 +205,14 @@ export function detailLines(s: Logs, id: string) {
 }
 
 // Drops each history whose page is not open (book-ui.md Detail-page order), so a late write for a
-// closed page is gone by its next visit; a dream's (resumed, not revisited), a restored pickup's
-// (until its corpse opens) and an open choice's speaker's (its question, as on a cold reopen) stay.
+// closed page is gone by its next visit; a dream's (resumed, not revisited) and an open choice's
+// speaker's (its question, as on a cold reopen) stay. A change of open pages is a new visit.
 export function visit(s: Logs, open: (string | undefined)[]) {
-  if (open.includes(s.pickedFrom)) s.pickedFrom = undefined;
+  const at = JSON.stringify(open);
+  if (at !== s.open) s.visits = (s.visits ?? 0) + 1;
+  s.open = at;
   const choice = s.projection.view.choice;
-  const keep = [...open, s.pickedFrom, choice && (choice.speaker_id ?? 'conversation')];
+  const keep = [...open, choice && (choice.speaker_id ?? 'conversation')];
   for (const id of s.details.keys())
     if (!keep.includes(id) && !id.startsWith('dream:')) s.details.delete(id);
 }

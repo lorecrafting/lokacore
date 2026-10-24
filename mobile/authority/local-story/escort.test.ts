@@ -225,8 +225,9 @@ test('real SQLite escort reopens start, death separation, Rejoin and terminal wi
   a = setup(path);
   assert.equal(a.lines('child', startLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(startLine)),
-    false,
+    a.book.screen().log.filter((s) => (typeof s === 'string' ? s : s.text).includes(startLine))
+      .length,
+    1, // its page's line also lands in the room log once (book-ui.md Line placement)
   );
   a.move('south');
   assert.equal(a.quest().value.state, 'active');

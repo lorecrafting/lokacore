@@ -151,8 +151,9 @@ test('message receive and terminal handoff reopen with their own NPC narration a
   assert.equal(a.view().choice, undefined);
   assert.equal(a.lines('courier', courierLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(courierLine)),
-    false,
+    a.book.screen().log.filter((s) => (typeof s === 'string' ? s : s.text).includes(courierLine))
+      .length,
+    1, // its page's line also lands in the room log once (book-ui.md Line placement)
   );
   a.terminal();
   a.press('bram');

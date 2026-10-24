@@ -7,8 +7,9 @@ import {
   closing,
   combatResult,
   detailLines,
+  logLines,
   narrationLines,
-  pickupLine,
+  quietOf,
   resetLogs,
   savedNarration,
   type Logs,
@@ -62,24 +63,30 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
     itemChanged,
     now,
   );
-  const lines =
+  // Every line goes to the room log; a fight or detail page also keeps its own (book-ui.md).
+  const page =
     (was.combat || now.combat) && !accepted?.narration?.length
       ? s.combatLog
       : detail &&
           (!itemChanged || !!pickup) &&
           (!moved || accepted?.outcome === 'read' || readableDetail)
         ? detailLines(s, detail)
-        : s.log;
+        : undefined;
   if (s.fault && combatResult(accepted)) return '';
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
   const routed = retained ? routedLines(retained, was, now, attempt.button, text) : undefined;
-  const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
   const fallback = fallbackLine(accepted, attempt);
-  const said = taken ? [taken] : (routed?.[0] ?? replyLine(reply, text, now, fallback));
-  if (!repeated) lines.push(...said);
-  if (!repeated && routed) s.combatLog.push(...routed[1]);
+  const said = routed?.[0] ?? replyLine(reply, text, now, fallback, was);
+  const quiet =
+    page === s.combatLog
+      ? undefined
+      : quietOf(s, accepted?.narration, attempt.button.target_ids, detail);
+  // Read text stays on its page, never in the room log (book-ui.md Notice-board details).
+  if (!repeated && accepted?.outcome === 'read' && page) page.push(...said);
+  else if (!repeated) logLines(s, said, page, quiet);
+  if (!repeated && routed) logLines(s, routed[1], s.combatLog);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
   return repeated ? '' : said.map(lineText).join(' ');
@@ -92,7 +99,7 @@ const routedLines = (
   now: GameView,
   b: Button,
   text: Say,
-) => narrationLines(closing(retained, was, now, commandOf(b) === 'cast'), now, text);
+) => narrationLines(closing(retained, was, now, commandOf(b) === 'cast'), now, text, false, was);
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 

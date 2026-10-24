@@ -2,6 +2,7 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { lineText } from './words.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
@@ -76,9 +77,9 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
       .screen()
       .detail(corpse.id)
       .filter((x: string) => x === 'You take a goblin ear.').length,
-    1,
+    0, // the own take is quiet on the corpse page
   );
-  assert.equal(h.p.screen().log.includes('You take a goblin ear.'), false);
+  assert.equal(h.p.screen().log.filter((l) => lineText(l) === 'You take a goblin ear.').length, 1);
   assert.ok(h.game.view().view.inventory.some((e) => e.id === ear.id));
   const refused = h.game.invoke({ action_key: 'take', target_ids: [ear.id], input: {} } as never);
   assert.equal(refused.kind, 'saved');

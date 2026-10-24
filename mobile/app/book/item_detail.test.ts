@@ -82,12 +82,12 @@ test('retained item results appear chronologically between description and optio
   const cloak = ['A wool cloak', 'Heavy grey wool. Rain runs off it.'];
   assert.deepEqual(text(), [...cloak, 'Wear a wool cloak', 'Drop a wool cloak', 'Leave']); // act, then move (pass-1 UR)
   tap('Wear a wool cloak');
-  assert.deepEqual(text(), [...cloak, 'You put it on.', 'Remove a wool cloak', 'Leave']);
+  assert.deepEqual(text(), [...cloak, 'You put on a wool cloak.', 'Remove a wool cloak', 'Leave']);
   tap('Remove a wool cloak');
   assert.deepEqual(text(), [
     ...cloak,
-    'You put it on.',
-    'You take it off.',
+    'You put on a wool cloak.',
+    'You take off a wool cloak.',
     'Wear a wool cloak',
     'Drop a wool cloak',
     'Leave',
@@ -96,9 +96,9 @@ test('retained item results appear chronologically between description and optio
   assert.deepEqual(book.screen().log, ['You go up.', 'You take a wool cloak.']); // a move starts the room's log
 });
 
-// Breaks: a wield-slot item with no equip words reads Wear, or answers "You put it on." /
-// "You take it off." (book-ui.md, Equipment and skills); the cloak above keeps those.
-test('a wield-slot item with no equip words reads Wield, You take it up. and You put it away.', (t) => {
+// Breaks: a wield-slot item with no equip words reads Wear, or answers "You put on a pickaxe." /
+// "You take off a pickaxe." (book-ui.md, Equipment and skills); the cloak above keeps those.
+test('a wield-slot item with no equip words reads Wield, You take up and You put away the item.', (t) => {
   const bundle = JSON.parse(
     readFileSync(
       new URL('../../../protocol/fixtures/harvest_sampler_hash.json', import.meta.url),
@@ -116,7 +116,7 @@ test('a wield-slot item with no equip words reads Wield, You take it up. and You
   tap('Remove a pickaxe');
   assert.deepEqual(book.screen().log, [
     'You take a pickaxe.',
-    'You take it up.',
-    'You put it away.',
+    'You take up a pickaxe.',
+    'You put away a pickaxe.',
   ]);
 });

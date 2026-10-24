@@ -271,11 +271,17 @@ test('door, wear, position and move lines read in the first and the third person
   } as never);
   const rows: [string, Record<string, string>, string, string, string?][] = [
     ['barrier.opened', { barrier: 'the gate' }, 'You open the gate.', 'npc.rat opens the gate.'],
-    ['equipment.worn', { item: 'the cap' }, 'You put it on.', 'npc.rat puts on the cap.', 'cap'],
+    [
+      'equipment.worn',
+      { item: 'the cap' },
+      'You put on the cap.',
+      'npc.rat puts on the cap.',
+      'cap',
+    ],
     [
       'equipment.worn',
       { item: 'the sword' },
-      'You take it up.',
+      'You take up the sword.',
       'npc.rat takes up the sword.',
       'sword',
     ],
