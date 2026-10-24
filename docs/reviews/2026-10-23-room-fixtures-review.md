@@ -87,3 +87,21 @@ Verdict: **CHANGES REQUIRED**.
 - Load refusal is clear in both kernels: asides are UNKNOWN_FIELD at the field and a storylet target is SCHEMA_VIOLATION at `target.kind`. TS and Elixir twins exist in `voices.test.ts`/`content_voices_test.exs` and `craft.test.ts`/`content_craft_test.exs`, and `invalid.json` adds the retired cases. kernel_api is not bumped, which the PM ruling permits.
 - Focused runs at the head pass: TS voices, craft, detail_scene, light and loader_floors; mix voices, craft, refusals and loader_floors, 24/24.
 - No save, migration, hash-fixture or transcript file changed in `e68b0d52e..6ba602b37`. The storylet draw was a pure function of the world (`pick`), so no state is lost.
+
+## Fix re-check at `f3831dadd`
+
+Commits reviewed: `8063d2951`, `1ab8b6316`, `6a3fb4def`, `fd4498611`, `f3831dadd`, the ones after `6ba602b37` only. Verdict: **APPROVE**, provided the hosted jobs still running finish green.
+
+- Blocker 1 (flee): fixed. `kernel/ts/src/mechanics/combat/flee.ts` narrates `combat.fled` with the direction taken, and the Book words it "You flee west.". A local `test:sim:showcase` passes, and the hosted `sim (showcase)` in ci 40084619962 succeeds. Red controls:
+  - dropping the `fled` narration fails `combat_flee.test.ts`, 2 tests;
+  - deleting the `combat.fled` branch in `words.ts` fails `combat.test.ts` "a flight reads ...".
+- Blocker 2 (storybook tsc): fixed (`fd4498611`). The `storybook` job in book-e2e 40084619965 succeeds.
+- Lever hall solved line: fixed. `lever_c_step` now narrates `narration.lever_open`. Red control: putting `lever_bolt` back in the compiled hash fixture fails `showcase_traps.test.ts` "traps 5-6 feedback". The test reads the pinned fixture, not the source JSON, so a source-only revert stays green there. `test/loka/content_showcase_test.exs` ties the source to the fixture, and the hosted `elixir` job passes.
+- Refused Read reason: fixed (`notices.tsx`). Red control: dropping the `reads(...)` spread fails `fixture_page.test.ts` "a refused Read draws its reason".
+- The "storylet card" mentions are gone from `book-ui.md` and `interaction-patterns.md`. The doubled blank line in `cartridge.md` is gone.
+- Hash and live stories: the canonical diff of `toolbox_showcase_hash.json` has exactly two changes:
+  - the new `text/narration.lever_open`;
+  - the `lever_c_step` text key.
+  After the old hash is mapped to the new one, all 7 regenerated `stories/live/*.sql` files are byte-identical.
+- The `presenter.ts:197` nit is withdrawn. The developer is right: `616dfecaa` already changed the comment to "Cues are present tense".
+- Still open: should-fix 3 (the PR body report for slices 4-6) is not verified here.
