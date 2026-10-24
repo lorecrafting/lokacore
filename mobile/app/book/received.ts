@@ -100,8 +100,7 @@ type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: '
 function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
   const command_id =
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
-  return (accepted?.narration?.length || accepted?.outcome === 'taken') &&
-    (command_id || accepted.outcome !== 'riddle_wrong')
+  return accepted?.narration?.length && (command_id || accepted.outcome !== 'riddle_wrong')
     ? savedNarration(game, s, command_id)
     : undefined;
 }

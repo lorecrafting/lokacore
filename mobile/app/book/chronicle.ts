@@ -1,5 +1,6 @@
 // Toolbox row FD6, the Chronicle (book-ui.md, Chronicle details): the story's committed narration
 // grouped by day, each day's lines as the away recap groups them. Nothing is stored.
+import { LINE_WORDS } from '../../packages/game-view/line_words.ts';
 import type { ChronicleEntry, GameView } from '../../packages/game-view/session.ts';
 import { rendered } from './logs.ts';
 import { grouped, type RecapLine } from './recap.ts';
@@ -7,7 +8,9 @@ import { grouped, type RecapLine } from './recap.ts';
 export type ChronicleDay = { day: number; lines: RecapLine[]; milestones: Set<string> };
 
 /** Days in entry order (ascending), each shown line once with its count; a line is a milestone
- * when any receipt that showed it on that day reached a story point. */
+ * when any receipt that showed it on that day reached a story point. The engine's routine lines
+ * (take, drop, give, put, doors, wear, position, move: LINE_WORDS) stay out (PM ruling,
+ * loka-kgd.185). */
 export function days(
   entries: readonly ChronicleEntry[],
   view: GameView,
@@ -15,7 +18,7 @@ export function days(
 ) {
   const out: (Omit<ChronicleDay, 'lines'> & { lines: string[] })[] = [];
   for (const e of entries)
-    for (const line of rendered(e.record, view, text, false)) {
+    for (const line of rendered(story(e.record), view, text, false)) {
       let d = out.at(-1);
       if (d?.day !== e.day) out.push((d = { day: e.day, lines: [], milestones: new Set() }));
       d.lines.push(line);
@@ -23,3 +26,8 @@ export function days(
     }
   return out.map((d): ChronicleDay => ({ ...d, lines: grouped(d.lines) }));
 }
+
+const story = (r: ChronicleEntry['record']) => ({
+  ...r,
+  lines: r.lines.filter((l) => !LINE_WORDS.has(l.key)),
+});

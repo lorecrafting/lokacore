@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
+import { days } from './chronicle.ts';
 import { LABEL } from './labels.ts';
 import { type } from './tokens.ts';
 
@@ -62,7 +63,6 @@ test('the Chronicle: days ascending, the latest open, each day grouped; a milest
   assert.deepEqual(after(shown, LABEL.chronicle, 'Back to World'), [
     'Day 1',
     'Day 7',
-    'You go east.',
     DART,
     CHILL,
     TICK,
@@ -70,10 +70,8 @@ test('the Chronicle: days ascending, the latest open, each day grouped; a milest
   b.tap('Day 1, show');
   shown = b.text();
   assert.deepEqual(after(shown, 'Day 1', 'Day 7'), [
-    'You go east.',
     DART,
     CHILL,
-    'You go west.',
     `${TICK} (11 times)`,
     'You shiver.',
     'The chill passes.',
@@ -105,4 +103,19 @@ test('a fresh story has no Chronicle and still says Nothing written yet', () => 
   const shown = b.text();
   assert.ok(shown.includes('Nothing written yet.'));
   assert.ok(!shown.includes(LABEL.chronicle));
+});
+
+// Breaks: a routine engine line (a take) enters the Chronicle beside the story's own line (PM
+// ruling, loka-kgd.185: the Chronicle stays as before the narration log batch).
+test('a take stays out of the Chronicle; the story line beside it stays in', () => {
+  const view = { place: { title: { key: 't' } } } as never;
+  const record = {
+    command_id: 'c',
+    lines: [{ key: 'item.taken', bindings: { item: 'item.key.short' } }, { key: 'narration.x' }],
+  };
+  const shown = days([{ day: 1, record, milestone: false } as never], view, (k) => k);
+  assert.deepEqual(
+    shown.map((d) => d.lines),
+    [[{ line: 'narration.x', count: 1 }]],
+  );
 });

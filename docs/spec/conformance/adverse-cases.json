@@ -1,5 +1,5 @@
 {
-  "fixture_version": 3,
+  "fixture_version": 4,
   "evidence_class": "specification-known-answers",
   "note": "Adverse known answers. Tiny and Lantern steps use the cases.json/lantern-traces.json shapes; see conformance/README.md.",
   "uniform": [
@@ -3727,7 +3727,64 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -3763,6 +3820,62 @@
               4
             ],
             "narration": [
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
               {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
@@ -3804,11 +3917,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -3848,11 +4024,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -3912,11 +4151,81 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.dropped",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -3956,11 +4265,81 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.dropped",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -3996,11 +4375,81 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.dropped",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4050,11 +4499,81 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4094,11 +4613,81 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4134,11 +4723,81 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4189,11 +4848,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4245,11 +4967,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4259,6 +5044,13 @@
                   "actor": "hero",
                   "bram": "bram",
                   "lantern": "lantern"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4303,11 +5095,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4317,6 +5172,13 @@
                   "actor": "hero",
                   "bram": "bram",
                   "lantern": "lantern"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4371,11 +5233,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4428,11 +5353,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4485,11 +5473,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4556,11 +5607,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4600,11 +5714,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4671,11 +5848,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4707,11 +5947,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4750,11 +6053,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4782,11 +6148,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4818,11 +6247,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4862,11 +6354,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -4933,11 +6488,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -4969,11 +6587,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5012,11 +6693,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5044,11 +6788,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5071,11 +6878,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -5120,11 +6990,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -5177,11 +7110,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -5248,11 +7244,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5275,11 +7334,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -5324,11 +7446,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -5381,11 +7566,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               },
               {
@@ -5445,11 +7693,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5485,11 +7796,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5525,11 +7899,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5581,11 +8018,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],
@@ -5624,11 +8124,74 @@
             ],
             "narration": [
               {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram_offer.prompt",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
                 "id": "offer-choice:offer:outcome",
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "item.taken",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "movement.moved",
+                "bindings": {
+                  "actor": "hero"
+                }
+              },
+              {
+                "id": "null:outcome",
+                "text_key": "dialogue.bram.prompt",
+                "bindings": {
+                  "actor": "hero"
                 }
               }
             ],

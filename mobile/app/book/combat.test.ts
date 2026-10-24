@@ -281,6 +281,7 @@ test('door, wear, position and move lines read in the first and the third person
     ],
     ['position.sat', {}, 'You sit down.', 'npc.rat sits down.'],
     ['movement.moved', { direction: 'north' }, 'You go north.', 'npc.rat goes north.'],
+    ['movement.moved', {}, 'movement.moved', 'movement.moved'], // a missing binding: the key, not "undefined"
   ];
   for (const [key, bindings, mine, theirs, item] of rows)
     for (const [actor, words] of [

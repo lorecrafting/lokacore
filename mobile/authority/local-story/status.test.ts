@@ -79,7 +79,14 @@ test('status tick and cure survive reopen, failed and lost COMMIT, and replay on
       assert.equal(story.invoke(dart).kind, 'saved');
       story = reopen();
       // The dart's applied line is in the receipt: reopen shows it and replay returns it.
-      const applied = [{ key: 'narration.poison.applied' }];
+      const applied = [
+        {
+          key: 'movement.moved',
+          bindings: { direction: 'east' },
+          participants: { actor: story.world().body },
+        },
+        { key: 'narration.poison.applied' },
+      ];
       assert.deepEqual(story.narration()?.lines, applied);
       const again = story.invoke(dart);
       assert.deepEqual(

@@ -2,7 +2,7 @@
 // client, a later telnet client; PM ruling 2026-10-24, loka-kgd.185). The kernel emits only the
 // key, its bindings and participants; each entry is [first person, third person], its {slots}
 // filled from the line's bindings as the client words them, {actor} with the actor's name.
-const LINE_WORDS = new Map<string, readonly [string, string]>([
+export const LINE_WORDS = new Map<string, readonly [string, string]>([
   ['item.taken', ['You take {item}.', '{actor} takes {item}.']],
   ['item.dropped', ['You drop {item}.', '{actor} drops {item}.']],
   ['item.given', ['You give {item} to {to}.', '{actor} gives {item} to {to}.']],
@@ -20,15 +20,20 @@ const LINE_WORDS = new Map<string, readonly [string, string]>([
   ['movement.moved', ['You go {direction}.', '{actor} goes {direction}.']],
 ]);
 
-/** A line's sentence from the table, or undefined for a key it lacks. `word` words one binding;
- * `actor` is the acting person's name, absent when the reader acted (first person); `pair`
- * replaces the table's entry (a client's own wording for the same key). */
+/** A line's sentence from the table, or undefined for a key it lacks or a slot its bindings lack
+ * (the client then shows the key, never "undefined"). `word` words one binding; `actor` is the
+ * acting person's name, absent when the reader acted (first person); `pair` replaces the table's
+ * entry (a client's own wording for the same key). */
 export const lineSentence = (
   t: { key: string; bindings?: Readonly<Record<string, unknown>> },
   word: (value: unknown) => string,
   actor?: string,
   pair = LINE_WORDS.get(t.key),
-): string | undefined =>
-  pair?.[actor ? 1 : 0].replace(/\{(\w+)\}/g, (_, slot: string) =>
-    slot === 'actor' ? actor! : word(t.bindings?.[slot]),
+): string | undefined => {
+  const words = pair?.[actor ? 1 : 0];
+  const slots = [...(words ?? '').matchAll(/\{(\w+)\}/g)].map((m) => m[1]!);
+  if (!words || slots.some((k) => k !== 'actor' && t.bindings?.[k] === undefined)) return undefined;
+  return words.replace(/\{(\w+)\}/g, (_, k: string) =>
+    k === 'actor' ? actor! : word(t.bindings![k]),
   );
+};
