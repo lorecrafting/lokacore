@@ -22,6 +22,7 @@ const turnTo = (screen: Screen, tap: (label: RegExp) => Promise<void>) => async 
     await tap(/change position$/);
 };
 
+// size: allow 46, the shared step helpers (tap, take, lesson, fixture ...) close over one screen
 const steps = ({ screen, room }: Walk) => {
   // Every arrival checks the room page against its GameView (walk.ts room).
   const moves = async (...directions: string[]) => {
