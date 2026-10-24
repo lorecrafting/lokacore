@@ -407,7 +407,7 @@ test('a notice page shows its description once and every other read line as read
   const shown = nodes(
     NoticePage({
       screen: {
-        view: { notices: [{ id: 'well', title: 'The well', description: well }] },
+        view: { actions: [], notices: [{ id: 'well', title: 'The well', description: well }] },
         text: (key: string) => key,
         detail: () => [well, 'You read it twice.', 'You read it twice.'],
       },

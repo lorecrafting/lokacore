@@ -46,7 +46,7 @@ Book still draws it, the passage names the Beads item that removes it.
 
 World is one current-room page ([room page anatomy](#room-page-anatomy)). Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
 description, the people and items sentences and, last, the event log (words go through the
-[say field](#word-bar)). World draws no verb line, refused `label: reason` note, storylet card or
+[say field](#word-bar)). World draws no verb line, refused `label: reason` note or
 notice entry: every action, available or refused, draws on its target's fixture, person or item
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the

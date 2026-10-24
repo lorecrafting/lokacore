@@ -13,7 +13,11 @@ const TEXT: Record<string, string> = {
   'detail.hearth.description': 'A cold hearth, grey with ash.',
   'actions.gather_ash': 'Gather ash',
 };
-const draw = async (offer: object = {}, prose = TEXT['room.loft.description']) => {
+const draw = async (
+  offer: object = {},
+  prose = TEXT['room.loft.description'],
+  actions: object[] = [],
+) => {
   const text = (key: string) => (key === 'room.loft.description' ? prose : (TEXT[key] ?? key));
   const { RoomPage } = await import('./pages.tsx');
   const { NoticePage, proseLinks } = await import('./notices.tsx');
@@ -22,7 +26,7 @@ const draw = async (offer: object = {}, prose = TEXT['room.loft.description']) =
     exits: [],
     entities: [],
     inventory: [],
-    actions: [],
+    actions,
     notices: [
       {
         id: 'n1',
@@ -101,4 +105,20 @@ test('a refused fixture offer draws its reason on the page, not a card', async (
       .map(words)
       .some((t) => t.startsWith('Gather ash: ')),
   );
+});
+
+// Break (PR #464 ruling 4): a refused Read on a linked notice opens its page with no reason shown.
+test('a refused Read draws its reason on the notice page', async () => {
+  const read = {
+    action_key: 'read',
+    label: 'Read',
+    available: false,
+    reason: { code: 'x', message: { key: 'Too dark to read.' } },
+    target: { kind: 'entity', scopes: ['inspectable_details'] },
+    input: [],
+    target_ids: ['n1'],
+  };
+  const { page } = await draw({}, undefined, [read]);
+  const shown = page.filter((n) => n.type === 'Text').map(words);
+  assert.ok(shown.includes('Read: Too dark to read.'), JSON.stringify(shown));
 });

@@ -158,9 +158,11 @@ export function NoticePage(
         </View>
       )}
       <Cards>
-        {('actions' in detail ? (detail.actions ?? []) : []).map((o) =>
-          offerControl(p, detail.id, o),
-        )}
+        {[
+          // A refused Read says why here: the link only opens the page (interaction-patterns.md).
+          ...reads(p.screen.view, detail.id).filter((o) => !o.available),
+          ...('actions' in detail ? (detail.actions ?? []) : []),
+        ].map((o) => offerControl(p, detail.id, o))}
       </Cards>
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
     </Page>

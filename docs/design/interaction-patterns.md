@@ -19,7 +19,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Order: room title; description paragraph (only fixture and furniture links interactive); people
   paragraph (PCs and NPCs as links); items paragraph (items as links); event log, where every
   ambient line appends.
-- Never appears: action cards, chips, boxed tags, verb lists, warnings, storylet cards, notes,
+- Never appears: action cards, chips, boxed tags, verb lists, warnings, notes,
   filler lines. Minimap, joystick, status line and the say field sit outside the scrolling page.
 - Source: owner, quoted: "no random one off things"; the rest of the anatomy is his list in the
   [decision](../decisions/owner-decision-room-page-anatomy-2026-10-23.md); spec
