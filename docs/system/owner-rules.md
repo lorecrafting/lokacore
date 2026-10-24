@@ -31,6 +31,7 @@ and not repeated here.
 
 - Detail pages follow the [canonical Book order](book-ui.md#detail-page-order), with no empty event-log heading or placeholder ([record](../decisions/owner-decision-detail-page-order-2026-10-05.md)).
 - The World page is title, description (fixture links only), people, items and the event log, nothing else; actions live on detail pages, ambient output in the log ([record](../decisions/owner-decision-room-page-anatomy-2026-10-23.md)).
+- Each room's event log speaks from that room's point of view: the room reached opens with "You arrive from the south." or, after a flight, "You run in from the south." ([record](../decisions/owner-decision-room-point-of-view-2026-10-24.md)).
 
 - The first chapter is retired: the app bundles only the toolbox showcase, and the real game is rebuilt from zero after UI polish ([record](../decisions/owner-decision-retire-first-chapter-2026-10-21.md)).
 

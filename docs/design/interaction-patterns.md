@@ -289,6 +289,19 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Enforcement: `item_detail.test.ts:101` (equip words); [mobile-book-text] (all lines through
   `Text.tsx`); content lint refuses an authored Leave-only choice.
 
+### Each room speaks from its own point of view
+
+- Rule: a room's log tells only what that room sees. Moving: the room left logs nothing new for
+  the player (others: "Nell leaves north."); the room reached opens with "You arrive from the
+  south." Fleeing: "You flee north." ends the fight room's log; the room reached opens with "You
+  run in from the south." The direction is the arrival room's exit back to the origin; no way back
+  reads "You arrive." / "You run in."; up and down read "from below" / "from above". Dying: "You fall." ends the fight room's
+  log; the recovery room opens with "You wake at the inn."
+- Why: the log is the room's record, not the player's diary.
+- Do: "You arrive from the south." Don't: "You go north." in the new room.
+- Source: [Line placement](../system/book-ui.md#line-placement), [record](../decisions/owner-decision-room-point-of-view-2026-10-24.md).
+- Enforcement: none yet (not built: Beads `loka-glj8`).
+
 ### Ellipsis
 
 - Rule: an ellipsis (…, one character) ends a label that opens a pick or a heading that is
