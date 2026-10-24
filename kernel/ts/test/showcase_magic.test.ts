@@ -392,16 +392,11 @@ test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone sho
   let y = go(go(go(w, 'up').world, 'west').world, 'west').world; // all of step 8's load in hand
   for (const k of ['rain_bucket', 'spark_jar', 'yard_torch']) y = take(y, k);
   const told = (w: World, k: string) => act(w, { type: 'drop', item_id: id(w, 'item', k) }).lines;
-  assert.deepEqual(told(y, 'rain_bucket'), ['item.dropped', 'narration.wet.applied']);
-  assert.deepEqual(told(drop(y, 'rain_bucket'), 'spark_jar'), [
-    'item.dropped',
-    'narration.shocked.applied',
-    'narration.stunned.applied',
-  ]);
-  assert.deepEqual(told(drop(y, 'rain_bucket'), 'yard_torch'), [
-    'item.dropped',
-    'narration.warm.applied',
-  ]);
+  // The drop's own line, then each status applied on the golem.
+  const lines = (...s: string[]) => ['item.dropped', ...s.map((x) => `narration.${x}.applied`)];
+  assert.deepEqual(told(y, 'rain_bucket'), lines('wet'));
+  assert.deepEqual(told(drop(y, 'rain_bucket'), 'spark_jar'), lines('shocked', 'stunned'));
+  assert.deepEqual(told(drop(y, 'rain_bucket'), 'yard_torch'), lines('warm'));
   const wet = drop(y, 'rain_bucket');
   assert.deepEqual(statuses(wet, 'golem'), ['wet']);
   const stun = drop(wet, 'spark_jar');

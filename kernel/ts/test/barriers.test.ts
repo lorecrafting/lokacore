@@ -143,25 +143,16 @@ test('each door verb and a move tell their line, naming the actor', () => {
     return JSON.parse(JSON.stringify(d.kind === 'accepted' ? d.narration : d));
   };
   let w = withKey();
-  for (const [type, outcome] of [
-    ['unlock', 'unlocked'],
-    ['open', 'opened'],
-    ['close', 'closed'],
-    ['lock', 'locked'],
-  ]) {
-    assert.deepEqual(line(w, door(type, 'east')), [
-      {
-        key: `barrier.${outcome}`,
-        bindings: { barrier: CELL_SHORT },
-        participants: { actor: w.body },
-      },
-    ]);
+  const verbs = { unlock: 'unlocked', open: 'opened', close: 'closed', lock: 'locked' };
+  for (const [type, outcome] of Object.entries(verbs)) {
+    const want = { key: `barrier.${outcome}`, bindings: { barrier: CELL_SHORT } };
+    assert.deepEqual(line(w, door(type, 'east')), [{ ...want, participants: { actor: w.body } }]);
     w = run(w, door(type, 'east'));
   }
   const opened = run(world(), door('open', 'north'));
+  const moved = { key: 'movement.moved', bindings: { direction: 'north' } };
   assert.deepEqual(line(opened, move('north'))[0], {
-    key: 'movement.moved',
-    bindings: { direction: 'north' },
+    ...moved,
     participants: { actor: opened.body },
   });
 });

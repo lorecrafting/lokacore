@@ -343,10 +343,8 @@ test('the log stops growing in one room, its last line the latest answer', () =>
     return p.screen().log;
   };
   const [once, log] = [cycles().length, cycles()];
-  assert.deepEqual(
-    [log.length, ...log.slice(-2)],
-    [once, 'You take on the task. It is in your journal.', 'Time passes.'],
-  );
+  const last = ['You take on the task. It is in your journal.', 'Time passes.'];
+  assert.deepEqual([log.length, ...log.slice(-2)], [once, ...last]);
 });
 
 // Breaks (review N-1): a Start over that is not confirmed shown as its empty message, or a failed
