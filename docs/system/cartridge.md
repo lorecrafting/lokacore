@@ -595,6 +595,42 @@ committed or checked in CI (gating is `loka-kgd.107.3`).
   by_command, drift, revisits, moves, backtracks, new_facts}`, summed over seeds. ponytail: one
   policy; no heat map image (the by-room table is the map); no gate.
 
+### Transcript coverage (loka-kgd.194.2)
+
+Beads `loka-kgd.194.2` ([design audit](../rnd/design-audit-abilities-authoring-2026-10-23.md)
+findings 16 and 23, approach F, plan phase 4) lists the definitions that no example transcript
+exercises. `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]` replays each
+transcript (by default `cartridges/<manifest id>/transcripts/*.jsonl`, sorted) against the
+artifact. It loads and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
+1 when a transcript does not replay byte for byte (`<transcript>: replay differs at ordinal <n>`,
+the path relative to the repository) or when a replayed decision reaches the 64-line narration cap
+(`<transcript>: narration cap reached at ordinal <n>`: a cut marker would report a fired rule as
+never fired), exits 2 on bad arguments (none, or an artifact path that does not exist), and
+otherwise prints one canonical
+JSON document. Nothing is committed or checked in CI; only its unit test runs.
+
+- **The replay.** A `Run` starts with the trace header's own ids (its `content_hash` too, so an
+  edited cartridge still writes the recorded header) and decides each entry as
+  `transcripts.test.ts` does. Each produced line is compared with the recorded line at its
+  ordinal; the first difference stops the tool.
+- **Reactions.** No committed event names the rule that produced it, so the replay runs a copy of
+  the cartridge in which each reaction's `apply` ends with one more `narrate` step whose text is a
+  key unique to that rule ([reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts)).
+  Narration is neither a trace field nor state, so the marked replay must still equal the
+  recording, and the byte check above proves it on every transcript. A rule is exercised when its
+  key is in an accepted decision's narration: its `when` held and (for `after`) its job ran.
+- **Recipes.** Exercised by a committed `action_completed` whose `action` is the recipe's key (a
+  cast too); a `failure` outcome emits none.
+- **Dialogue choices.** Exercised by a committed `choice_resolved {continuation_id, choice_id}`,
+  attributed to the dialogue named by the `source` of that continuation in the world before the
+  step; rows whose source is a scene are not dialogue choices.
+- **Quests.** Exercised by a committed `quest_resolved`; `quest_failed` does not count.
+- **Output** `{cartridge: "<id>@<version>", transcripts, never: {reactions, recipes, choices,
+  quests}}`: sorted DefinitionRefStrings, and `choices` as `[{dialogue, choice}]` sorted by
+  dialogue, then choice. ponytail: firing means steps ran, so a delayed rule whose job never ran
+  in a transcript shows unfired; scene choices and cartridge `actions` are out of scope;
+  transcripts only, not browser walks.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
