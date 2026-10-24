@@ -118,14 +118,15 @@ defmodule Loka.ContentShowcaseTest do
       ) ++
         for(w <- 1..3, k <- 0..9, do: {"reactions/wheel_#{w}_x_shows_#{k}.json", nil})
 
-  # Name words need API 1.118 (loka-6qi): the low-API rows drop them from every NPC and item.
+  # Name words need API 1.118 (loka-6qi): the low-API rows drop them from every NPC and item,
+  # and the room detail titles with them.
   defp unworded,
     do:
       for(
         d <- ~w(npcs items),
         f <- File.ls!("cartridges/toolbox_showcase/#{d}"),
         do: {"#{d}/#{f}", &Map.delete(&1, "words")}
-      )
+      ) ++ untitled()
 
   # Detail titles need API 1.120 (loka-x6t.120): the low-API rows drop them from every room.
   defp untitled,
@@ -141,8 +142,7 @@ defmodule Loka.ContentShowcaseTest do
 
   defp homestead,
     do:
-      untitled() ++
-        unworded() ++
+      unworded() ++
         homestead_edits() ++
         unnarrated() ++
         Enum.map(~w(afraid burning wet shocked stunned warm), &unobserved/1) ++
