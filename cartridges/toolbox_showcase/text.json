@@ -1057,6 +1057,7 @@
   "narration.lean_warden_failed": "The Warden laughs in your face.",
   "narration.lever": "The lever clanks down and springs back.",
   "narration.lever_bolt": "Behind the north door, a bolt slides back.",
+  "narration.lever_open": "Behind the north door, the last bolt slides back.",
   "narration.lever_reset": "Behind the north door, the bolts clatter home.",
   "narration.lift_store_bar.success": "You heave the bar out of its brackets and lean it against the logs.",
   "narration.look_about": "Gulls wheel over the water.",

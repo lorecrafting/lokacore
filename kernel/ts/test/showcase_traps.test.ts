@@ -240,7 +240,7 @@ test('traps 5-6 feedback: pulls and turns narrate', () => {
     perform(y, action).lines.filter((l) => l !== 'narration.lever');
   assert.deepEqual(said(x, 'pull_b'), ['narration.lever_reset']);
   assert.deepEqual(said(pulls(x, 'a'), 'pull_b'), ['narration.lever_bolt']);
-  assert.deepEqual(said(pulls(x, 'ab'), 'pull_c'), ['narration.lever_bolt']);
+  assert.deepEqual(said(pulls(x, 'ab'), 'pull_c'), ['narration.lever_open']); // the solve's own line
   assert.deepEqual(said(pulls(x, 'a'), 'pull_c'), ['narration.lever_reset']);
   for (const n of [1, 2, 3]) {
     let y = x;
