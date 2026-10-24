@@ -1,8 +1,9 @@
 // A full reading page with the offered actions following its combat history.
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import { bandPhrase, type group } from './model.ts';
-import { ActionCard, Cards, PickLists } from './actions.tsx';
+import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
 import { commandOf } from './buttons.ts';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
@@ -29,6 +30,8 @@ function Fight(
   const t = useType();
   const { view, text, combat } = p;
   const { opponent_id: id, name, band, words } = combat;
+  // one open state for every foe's list: one list open at a time (book-ui.md Pick list)
+  const shown: Shown = useState();
   return (
     <View>
       {(combat.active_opponents ?? [{ id, name, band, words }]).map((opponent) => (
@@ -53,6 +56,7 @@ function Fight(
             text={text}
             press={p.press}
             pending={p.pending}
+            state={shown}
           />
         </View>
       ))}

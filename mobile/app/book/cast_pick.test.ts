@@ -10,8 +10,9 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 
 // The showcase with flamma and lux known from the start, the game starting in a lit crypt beside the wight (8 hp,
-// one flamma kills it) and the lantern, with `ash` ash for lux.
-function cartridge(ash = 0) {
+// one flamma kills it) and the lantern, with `ash` ash for lux. `den` starts in the goblin den
+// instead, with flamma's wight-only policy negated so each goblin offers it.
+function cartridge(ash = 0, den = false) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-cast-pick-'));
   const source = new URL('../../../cartridges/toolbox_showcase', import.meta.url);
   const edit = (file: string, change: (json: any) => void) => {
@@ -26,7 +27,9 @@ function cartridge(ash = 0) {
     });
     for (const spell of ['flamma', 'lux'])
       edit(`recipes/${spell}.json`, (j) => (j.target.learned = 'known_here'));
-    edit('cartridge.json', (j) => (j.entry = 'crypt'));
+    edit('cartridge.json', (j) => (j.entry = den ? 'chief_den' : 'crypt'));
+    if (den)
+      edit('recipes/flamma.json', (j) => (j.policy.root = { op: 'not', item: j.policy.root }));
     edit('resources.json', (j) => (j.resources.ash.start = ash));
     edit('rooms/crypt.json', (j) => delete j.dark_description);
     edit('items/lantern.json', (j) => (j.location.room = 'crypt'));
@@ -103,4 +106,19 @@ test("Character's Cast on… lists a spell's targets; the pick turns to World wi
   b.tap(/lantern/);
   b.tap('Cast a spell…');
   assert.ok(b.text().includes('Lux: need 1 ash'), b.text().join(' | '));
+});
+
+// Breaks: one list per foe line each with its own open state, so two lists open at once
+// (book-ui.md Pick list: one list open at a time).
+test("opening a second foe's Cast a spell… closes the first", (t) => {
+  const b = book(cartridge(0, true) as never);
+  t.after(() => b.sql.close());
+  b.tap('two goblins, open');
+  b.tap(/^Attack/);
+  const options = () => b.draw().filter((n) => n.props?.accessibilityLabel === 'Cast a spell…');
+  assert.equal(options().length, 2, b.labels().join(' | '));
+  options()[0].props.onPress();
+  options()[1].props.onPress();
+  const rows = b.labels().filter((l) => l === 'Flamma, cast flamma on a goblin');
+  assert.equal(rows.length, 1, b.labels().join(' | '));
 });

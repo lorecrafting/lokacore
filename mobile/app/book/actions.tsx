@@ -84,6 +84,8 @@ const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () =
  * - States: closed; open; open with an unavailable row; recipes mixed; pending.
  * - Story: PickList.stories.tsx
  */
+export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>;
+
 export function PickLists(p: {
   page: string;
   view: GameView;
@@ -91,8 +93,11 @@ export function PickLists(p: {
   text: (key: string) => string;
   press: (b: Button) => void;
   pending?: boolean;
+  /** shared open state, for lists on one screen under several pages (Combat's foe lines) */
+  state?: Shown;
 }) {
-  const [shown, setShown] = useState<{ page: string; label: string }>();
+  const own = useState<{ page: string; label: string }>();
+  const [shown, setShown] = p.state ?? own;
   const open = shown?.page === p.page ? shown.label : undefined;
   const option = useRef<View>(null);
   const first = useRef<View>(null);
