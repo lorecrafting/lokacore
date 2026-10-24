@@ -4,6 +4,7 @@
 // value is the current position, after opted pools settle and change rate. The same position
 // is invalid_state. The host logs fact_changed. A Sleep provokes a hostile NPC in the room (toolbox
 // row W9: G11's engage, as walking in does).
+import { engineLine } from '../line.ts';
 import { accepted, bodyOf, refString, rejected, event, type Rule } from '../../runtime/decision.ts';
 import { assigned } from '../fact.ts';
 import { fact, positionOf, VERBS } from './shared.ts';
@@ -42,12 +43,12 @@ export const decide: Rule<'position'> = (world, command, mint, steps = { n: 0 })
     type === 'sleep'
       ? engage(world, command, body, here, mint, steps, run.position + 1, free)
       : undefined;
-  const narration = met?.narration.length ? met.narration : undefined;
   return accepted(
     world,
     outcome,
     [...run.ops, ...(met?.ops ?? [])],
     [...events, ...(met?.events ?? [])],
-    narration,
+    // The position line (loka-kgd.185), then any engage lines.
+    [engineLine(`position.${outcome}`, { actor: body }), ...(met?.narration ?? [])],
   );
 };

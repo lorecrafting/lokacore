@@ -103,27 +103,14 @@ export async function fresh(
 /** A step's action key (a recipe's key, else the command type) when it commits a change. */
 export function changeKey(command: Command, d: DecisionResult): string | undefined {
   const p = command.payload as { type: string; action?: string };
-  // A recipe key is prefixed, so a recipe named like a pinned verb never hides behind that pin.
+  // A recipe key is prefixed, so a silent recipe named like a verb is reported as the recipe.
   const key = p.action ? `${p.type}:${p.action}` : p.type;
   return d.kind === 'accepted' && d.delta.ops.length ? key : undefined;
 }
 
-// Action keys meant to commit a change with no narration line, each with its reason (pass-1 check 4).
-export const SILENT: Record<string, string> = {
-  close:
-    'the closed lid is its own line on the page; same as pinned open (loka-kgd.185, loka-x6t.121)',
-};
-
-/** Check 4's findings: a new silent key, and a pinned one now narrated (remove its pin). */
-export function unnarrated(s: Pick<Summary, 'changed' | 'silent'>, pinned: string[]): string[] {
-  return [
-    ...[...s.silent]
-      .filter((k) => !pinned.includes(k) && !Object.hasOwn(SILENT, k))
-      .map((k) => `${k}: commits a change with no narration line`),
-    ...pinned
-      .filter((k) => s.changed.has(k) && !s.silent.has(k))
-      .map((k) => `${k}: narrated now; remove it from the baseline`),
-  ].sort();
+/** Check 4's findings: an action key that commits a change with no narration line. */
+export function unnarrated(s: Pick<Summary, 'silent'>): string[] {
+  return [...s.silent].map((k) => `${k}: commits a change with no narration line`).sort();
 }
 
 if (!isMainThread) {

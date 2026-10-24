@@ -109,7 +109,9 @@ test('talk opens one pending choice bound to EntityIds, stamped with its revisio
     decision.events.map((e) => e.payload),
     [{ type: 'choice_opened', continuation_id: C }],
   );
-  assert.deepEqual(decision.narration ?? [], []);
+  assert.deepEqual(decision.narration, [
+    { key: 'dialogue.bram.prompt', participants: { actor: BODY } },
+  ]);
   assert.equal(w.state.choices![C]!.opened_revision, 3);
 });
 

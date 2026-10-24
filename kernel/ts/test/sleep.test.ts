@@ -94,7 +94,11 @@ test('a Sleep beside the hostile hound opens the fight with its engage line; Res
   const r = play(fresh(), { type: 'sleep' });
   const w = ok(r);
   assert.ok(engaged(w, w.body), 'the encounter is open');
-  assert.ok(said(r).includes('npc.hound.engage'), String(said(r)));
+  assert.deepEqual(
+    said(r).slice(0, 2),
+    ['position.slept', 'npc.hound.engage'],
+    'lie down, then the bite',
+  );
   assert.equal(w.state.clock, 0, 'Sleep passes no time');
   assert.deepEqual(verbs(w), ['look', 'stand'], 'both filters: the fight and the sleeper');
   assert.equal(code(play(w, { type: 'flee' })), 'invalid_state');
@@ -103,6 +107,27 @@ test('a Sleep beside the hostile hound opens the fight with its engage line; Res
     const quiet = act(fresh(), { type });
     assert.equal(engaged(quiet, quiet.body), undefined, type);
   }
+});
+
+// Breaks: a position verb that commits with no line of its own, a line that is not first, or one
+// that does not name the actor's body (pass-1 check 4, loka-kgd.185).
+test('each position verb tells its own line first, naming the actor', () => {
+  const first = (r: ReturnType<typeof step>) =>
+    r.decision.kind === 'accepted' ? r.decision.narration?.[0] : undefined;
+  for (const [type, outcome] of [
+    ['sit', 'sat'],
+    ['rest', 'rested'],
+    ['sleep', 'slept'],
+  ]) {
+    const r = play(fresh(), { type });
+    assert.deepEqual(
+      first(r),
+      { key: `position.${outcome}`, participants: { actor: r.world.body } },
+      type,
+    );
+  }
+  const r = play(act(fresh(), { type: 'sit' }), { type: 'stand' });
+  assert.deepEqual(first(r), { key: 'position.stood', participants: { actor: r.world.body } });
 });
 
 // Breaks: the sleep multiplier or the wake is lost on the provoked first round.

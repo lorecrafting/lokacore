@@ -169,16 +169,20 @@ test('other item actions retain their detail and show their consequences there',
   h.tap('Open a sewing box');
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
-  assert.ok(h.text().includes('Opened.'));
-  assert.equal(h.p.screen().log.includes('Opened.'), false);
+  assert.ok(h.text().includes("You open the sewing box's lid."));
+  assert.equal(h.p.screen().log.includes("You open the sewing box's lid."), false);
   h.tap('Leave');
   assert.ok(h.labels().includes('A sewing box, open'));
   h.tap('A sewing box, open');
-  assert.equal(h.text().includes('Opened.'), false); // a reopened item starts a new visit (loka-x6t.19)
+  assert.equal(h.text().includes("You open the sewing box's lid."), false); // a reopened item starts a new visit (loka-x6t.19)
   h.unmount();
   const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
   r.tap('A sewing box, open');
-  assert.equal(r.text().includes('Opened.'), false, JSON.stringify(r.text()));
+  assert.equal(
+    r.text().includes("You open the sewing box's lid."),
+    false,
+    JSON.stringify(r.text()),
+  );
   r.unmount();
   h.sql.close();
 });
@@ -274,7 +278,6 @@ test('delayed Take returns once with its original item name after a conflicting 
       h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length,
       1,
     );
-    assert.equal(h.p.screen().log.includes('Taken.'), false);
     assert.equal(h.p.update(completed[0]), false);
     assert.equal(
       h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length,

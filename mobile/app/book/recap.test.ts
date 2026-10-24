@@ -82,6 +82,7 @@ test('a two-minute absence shows no recap: its log is as without the field', () 
     shown.indexOf('The poison fades from your blood.'),
   );
   assert.deepEqual(log, [
+    'You go west.',
     TICK,
     'You shiver.',
     TICK,

@@ -70,7 +70,8 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
   const d = spokenBy(world, p.actor_id, p.target_id, steps, p.dialogue);
   if (!d || talking(world, p.actor_id, p.target_id)) return rejected('invalid_state');
   const [op, opened] = opening(world, command, mint, d, steps);
-  return accepted(world, 'choice_opened', [...leave(world, p.actor_id), op], [opened]);
+  const line = { key: d.prompt, participants: { actor: bodyOf(world, p.actor_id)! } };
+  return accepted(world, 'choice_opened', [...leave(world, p.actor_id), op], [opened], [line]);
 }
 
 function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow, used: Steps) {

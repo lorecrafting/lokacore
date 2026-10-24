@@ -33,6 +33,7 @@ import {
   type Steps,
   type World,
 } from '../../runtime/decision.ts';
+import { engineLine } from '../line.ts';
 import { barrierState, exitOf, reach } from '../lookups.ts';
 import { holds } from '../policy.ts';
 
@@ -60,7 +61,12 @@ export const decide: Rule<'barrier'> = (world, command, mint, steps = { n: 0 }) 
   const { barrier, from, to, outcome } = t;
   const op = { op: 'barrier.transition', writer_group: 0, barrier, from, to } as const;
   const changed = { type: 'barrier_changed', barrier, from, to } as const;
-  return accepted(world, outcome, [op], [event(world, command, mint, 1, changed)]);
+  const line = engineLine(
+    `barrier.${outcome}`,
+    { actor: bodyOf(world, actor_id)! },
+    { barrier: world.cartridge.barriers![refString(barrier)].short },
+  );
+  return accepted(world, outcome, [op], [event(world, command, mint, 1, changed)], [line]);
 };
 
 /** Where a door verb acts: an exit's direction or an item's id, exactly one. */

@@ -730,6 +730,7 @@
  },
  "stack": [],
  "log": [
+  "You go south.",
   {
    "kind": "refused",
    "reason": "closed",

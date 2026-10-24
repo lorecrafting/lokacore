@@ -762,7 +762,9 @@
    "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783"
   }
  ],
- "log": [],
+ "log": [
+  "You go south."
+ ],
  "combatLog": [],
  "details": {
   "dce25ff1-322e-80ae-8f48-e0c4062c2783": [

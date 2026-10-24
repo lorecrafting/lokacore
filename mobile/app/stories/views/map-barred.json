@@ -733,7 +733,9 @@
    "kind": "map"
   }
  ],
- "log": [],
+ "log": [
+  "You go south."
+ ],
  "combatLog": [],
  "details": {}
 }

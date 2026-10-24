@@ -904,7 +904,9 @@
    "id": "331fb134-17eb-866f-a2fa-57583b9ac017"
   }
  ],
- "log": [],
+ "log": [
+  "You go south."
+ ],
  "combatLog": [],
  "details": {}
 }

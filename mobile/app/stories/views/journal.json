@@ -799,7 +799,9 @@
    "kind": "journal"
   }
  ],
- "log": [],
+ "log": [
+  "You go south."
+ ],
  "combatLog": [],
  "details": {}
 }

@@ -582,7 +582,9 @@
    "id": "65d77be3-068c-8eff-a84e-8b17a5777bcc"
   }
  ],
- "log": [],
+ "log": [
+  "You go west."
+ ],
  "combatLog": [],
  "details": {}
 }

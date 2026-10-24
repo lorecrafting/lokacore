@@ -11,6 +11,7 @@ import type {
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
 import { lineSentence } from '../../packages/game-view/line_words.ts';
+import { things } from './item-pages.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -55,26 +56,16 @@ export const dur = (s: number) =>
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).
 export const OUTCOME: Record<string, string> = {
-  opened: 'Opened.',
-  closed: 'Closed.',
-  locked: 'Locked.',
-  unlocked: 'Unlocked.',
-  worn: 'You put it on.',
-  removed: 'You take it off.',
   activated: 'You take on the task. It is in your journal.',
   activated_with_possession: 'You take on the task. It is in your journal.',
   choice_closed: 'You leave the question for now.',
   waited: 'Time passes.',
-  stood: 'You stand up.',
-  sat: 'You sit down.',
-  rested: 'You settle down to rest.',
-  slept: 'You lie down to sleep.',
 };
 
 // A wield-slot item with no authored equip words (book-ui.md, Equipment and skills).
-export const WIELD: Record<string, string> = {
-  worn: 'You take it up.',
-  removed: 'You put it away.',
+const WIELD: Record<string, readonly [string, string]> = {
+  'equipment.worn': ['You take it up.', '{actor} takes up {item}.'],
+  'equipment.removed': ['You put it away.', '{actor} puts away {item}.'],
 };
 
 // The refusal codes an offer can carry (book/reasons.test.ts).
@@ -185,13 +176,15 @@ export const lineWords = (
   text: Say,
   view: GameView,
 ) => {
-  const told = lineSentence(t, (v) => text(String(v)), nameOf(view, t.participants?.actor, text));
+  const wield =
+    t.key in WIELD && things(view).find((x) => x.id === t.participants?.item)?.slot === 'wield';
+  const id = t.participants?.actor;
+  const actor = id === undefined ? undefined : nameOf(view, id, text);
+  const told = lineSentence(t, (v) => text(String(v)), actor, wield ? WIELD[t.key] : undefined);
   if (told) return told;
   if (t.key === 'combat.fled') return `You flee ${String(t.bindings?.direction)}.`;
   if (t.key !== 'combat.skipped') return text(t.key);
-  const actor = t.participants?.actor;
-  const name = actor === undefined ? undefined : nameOf(view, actor, text);
-  const who = actor === undefined ? 'You are' : name ? `${name} is` : 'They are';
+  const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
   return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);
 };
 

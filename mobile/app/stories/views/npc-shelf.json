@@ -818,7 +818,9 @@
    "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9"
   }
  ],
- "log": [],
+ "log": [
+  "You go south."
+ ],
  "combatLog": [],
  "details": {
   "f0e76c82-d099-811e-a6ba-caef3f2615e9": [

@@ -261,3 +261,34 @@ test('item.taken reads "You take" for the viewer and "<Name> takes" for a named 
   assert.equal(said('body'), 'You take the rope.');
   assert.equal(said('rat'), 'npc.rat takes the rope.');
 });
+
+// Breaks: a door, wear, position or move line missing from the shared table (the Book shows its
+// raw key), worded only in the first person, or a wield-slot item read as "put it on" instead of
+// "take it up" (book-ui.md, Equipment and skills; loka-kgd.185).
+test('door, wear, position and move lines read in the first and the third person', () => {
+  const v = view({
+    inventory: [{ id: 'sword', kind: 'item', name: 'the sword', slot: 'wield', actions: [] }],
+  } as never);
+  const rows: [string, Record<string, string>, string, string, string?][] = [
+    ['barrier.opened', { barrier: 'the gate' }, 'You open the gate.', 'npc.rat opens the gate.'],
+    ['equipment.worn', { item: 'the cap' }, 'You put it on.', 'npc.rat puts on the cap.', 'cap'],
+    [
+      'equipment.worn',
+      { item: 'the sword' },
+      'You take it up.',
+      'npc.rat takes up the sword.',
+      'sword',
+    ],
+    ['position.sat', {}, 'You sit down.', 'npc.rat sits down.'],
+    ['movement.moved', { direction: 'north' }, 'You go north.', 'npc.rat goes north.'],
+  ];
+  for (const [key, bindings, mine, theirs, item] of rows)
+    for (const [actor, words] of [
+      ['body', mine],
+      ['rat', theirs],
+    ])
+      assert.equal(
+        lineWords({ key, bindings, participants: { actor, item } }, (k) => k, v),
+        words,
+      );
+});

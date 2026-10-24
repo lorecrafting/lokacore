@@ -62,6 +62,7 @@ test('the Chronicle: days ascending, the latest open, each day grouped; a milest
   assert.deepEqual(after(shown, LABEL.chronicle, 'Back to World'), [
     'Day 1',
     'Day 7',
+    'You go east.',
     DART,
     CHILL,
     TICK,
@@ -69,8 +70,10 @@ test('the Chronicle: days ascending, the latest open, each day grouped; a milest
   b.tap('Day 1, show');
   shown = b.text();
   assert.deepEqual(after(shown, 'Day 1', 'Day 7'), [
+    'You go east.',
     DART,
     CHILL,
+    'You go west.',
     `${TICK} (11 times)`,
     'You shiver.',
     'The chill passes.',

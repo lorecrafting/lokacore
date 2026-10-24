@@ -19,7 +19,7 @@ for (const failed of [false, true])
     b.map();
     b.tap('Open the barred cell door (east)');
     b.tap('Back to World');
-    assert.ok(b.text().includes('Opened.'), JSON.stringify(b.text())); // a square line to lose
+    assert.ok(b.text().includes('You open the barred cell door.'), JSON.stringify(b.text())); // a square line to lose
     for (const c of ['the crier, open', /^Talk/, 'Confess to the theft']) b.tap(c);
     b.tap(LABEL.leaveConversation);
     b.tap(LABEL.leave);
@@ -36,7 +36,7 @@ for (const failed of [false, true])
       shown[arm + 1],
       'The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.',
     );
-    assert.ok(!shown.includes('Opened.'), JSON.stringify(shown));
+    assert.ok(!shown.includes('You open the barred cell door.'), JSON.stringify(shown));
     const reopened = book(trial, { sql: b.sql, clock: b.clock } as never).text(); // a cold open
     const at = reopened.indexOf(shown[arm]);
     assert.ok(at >= 0, JSON.stringify(reopened));

@@ -93,7 +93,7 @@ test('retained item results appear chronologically between description and optio
     'Leave',
   ]);
   assert.equal(book.screen().returnWorld, false);
-  assert.deepEqual(book.screen().log, ['You take a wool cloak.']);
+  assert.deepEqual(book.screen().log, ['You go up.', 'You take a wool cloak.']); // a move starts the room's log
 });
 
 // Breaks: a wield-slot item with no equip words reads Wear, or answers "You put it on." /

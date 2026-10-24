@@ -1,7 +1,7 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { cast, comings, lineText, replyLine, spoken, used, WIELD } from './words.ts';
+import { cast, comings, lineText, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
 import {
   closing,
@@ -76,7 +76,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const routed = retained ? routedLines(retained, was, now, attempt.button, text) : undefined;
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
-  const fallback = fallbackLine(accepted, attempt, now);
+  const fallback = fallbackLine(accepted, attempt);
   const said = taken ? [taken] : (routed?.[0] ?? replyLine(reply, text, now, fallback));
   if (!repeated) lines.push(...said);
   if (!repeated && routed) s.combatLog.push(...routed[1]);
@@ -119,7 +119,6 @@ export function named(b: Button, was: GameView) {
 const fallbackLine = (
   accepted: Accepted | undefined,
   { item, to, button }: NonNullable<Logs['retry']>,
-  now: GameView,
 ) =>
   accepted?.outcome === 'spoken'
     ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
@@ -127,9 +126,7 @@ const fallbackLine = (
       ? item && (to ? used(button.label, item, to) : cast(button.label, item))
       : accepted?.outcome === 'choice_closed'
         ? ''
-        : things(now).find((t) => t.id === button.target_ids[0])?.slot === 'wield'
-          ? WIELD[accepted?.outcome ?? '']
-          : undefined;
+        : undefined;
 
 // A changed journal notes itself on the speaker's page; a new choice prompt joins its speaker's.
 function conversationLines(

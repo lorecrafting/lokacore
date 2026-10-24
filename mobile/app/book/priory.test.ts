@@ -113,7 +113,7 @@ test('actual nested book Item opens locally and Read stays between description a
     p.screen().view.topics?.map((t) => t.label),
     ['topic.mill'],
   );
-  assert.deepEqual(p.screen().detail(ward), ['Stored.', LEDGER]);
+  assert.deepEqual(p.screen().detail(ward), ['You put a mill ledger in a chest.', LEDGER]);
   const texts = draw(ward)
     .filter((n) => n.type === 'Text')
     .map((n) => n.props.children);
