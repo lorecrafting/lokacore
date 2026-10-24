@@ -145,6 +145,8 @@ test('F: the CLI wiring', () => {
     other.stderr,
     /^cartridges\/check_sampler\/transcripts\/schedule\.jsonl: replay differs/,
   );
-  assert.equal(run(['/dev/stdin'], '{}').status, 1); // the loader refuses
+  const refused = run(['/dev/stdin'], '{}'); // the loader refuses: its diagnostic, not a crash
+  assert.equal(refused.status, 1);
+  assert.equal(JSON.parse(refused.stderr).code, 'UNKNOWN_FORMAT');
   assert.equal(run([]).status, 2);
 });
