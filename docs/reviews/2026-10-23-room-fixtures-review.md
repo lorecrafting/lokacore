@@ -38,3 +38,52 @@
 - Mutant on the page condition: dropping `!a.command ||` at `notice_boards.ts:35` fails 4 tests in `fixture_pages.test.ts`.
 - Title floor, with the loop restricted to the 1.120 case in a throwaway edit: green at base in both kernels. Removing `titled` from the ladder turns `Loka.LoaderFloorsTest` and `loader_floors.test.ts` red. The floor is guarded in both kernels once finding 1 lets the loop reach that case. The unrestricted mutant runs were invalid, because the suite was red at base.
 - Save impact: none, as claimed. `detailTitle` falls back by `??`, so a cartridge without titles is unchanged. The size allowances (`sim.test.ts` 579, `sim.ts` 561) each give their reason. `put` was pinned under loka-kgd.185 (cap 13) per the PM ruling.
+
+## Slices 4-6 (Book anatomy and guard, asides retired, storylets retired)
+
+Commits reviewed: `2f0b60e53`, `06921cc5f` (slice 4), `616dfecaa` (slice 5), `38705ef4d`, `c92eebf2d`, `6ba602b37` (slice 6). The PR head is `6ba602b37fd7eae5a11cd341132246ecd293756d`. The PM-ruling fixes are not pushed yet. Governing texts: the owner room-page anatomy call (loka-x6t.127, recorded in `docs/system/book-ui.md` at the PR head), owner calls "Remove both" (asides) and "Retire them" (storylets), `docs/briefs/room-fixtures/README.md`.
+
+Verdict: **CHANGES REQUIRED**.
+
+### Must be true
+
+1. The World page draws only the title, the description with fixture links, people, items and the log. The exit warning and Continue conversation are the two listed exceptions (loka-x6t.127).
+2. The guard test fails when any removed block comes back.
+3. A cue logs once per visit, after narration, in projected order, and the dedupe resets on a room change.
+4. A notice is reached only through its prose link, and a linked readable reads.
+5. Asides and storylets are gone from both schemas, both kernels, the view and the samplers. A cartridge that still declares them is refused at load in both kernels, with a clear diagnostic.
+6. No save, migration, hash or transcript change.
+7. The docs carry no residue.
+8. Hosted CI is green on the head.
+
+1-6 hold. 7 and 8 do not.
+
+### Findings
+
+1. **Blocker**: hosted `ci` 40083445133, job `sim (showcase)` fails. `✖ 400 fixed showcase sequences ...` gives `actual: [ 'flee: commits a change with no narration line' ]`, which is check 4 at `kernel/ts/test/sim_batch.ts:122`. Slices 4-6 do not touch `sim_batch.ts` or combat, so a changed sequence path now reaches a flee that is not narrated. Per the PM ruling, the fix is to narrate flee in the kernel, not to pin it in `SILENT`. `ci-green` fails. A local `npm run test:sim:showcase` at the head also exits 1.
+2. **Blocker**: hosted `book-e2e` 40083445152, job `storybook` fails at `tsc -p .storybook`. `mobile/app/stories/RoomPage.stories.tsx:61` passes `cueLine(hammering, ...)`, but `hammering` (`:56`, `as const`) has `direction: 'east'`, a plain string where the type wants the branded `Key` (TS2345). Slice 4 (`2f0b60e53`) added the story. The storybook smoke build cannot run, so `book-e2e-green` fails. The `e2e` and `walk` jobs pass.
+3. **Should-fix**: the PR body does not report slices 4-6. It has no runs, no mutant table, no `/code-review` result and no 390 px screenshot of the showcase loft, which brief acceptance 4 requires. Line 3 cites the hosted runs on `e68b0d52e`, not on the head.
+4. **Should-fix** (PM ruling, pending): `docs/system/book-ui.md:49` and `docs/design/interaction-patterns.md:22` still name "storylet card". The other PM rulings are also not at the head yet: lever_hall solved feedback as a log line, and the refused Read reason on a linked readable.
+5. **Nit**: `mobile/app/book/presenter.ts:197`. The comment "Asides are present tense ..." now sits above a `cueLines` call, but asides are retired, so it describes code that no longer exists.
+6. **Nit**: `docs/system/cartridge.md` under "Storylet declarations" has a doubled blank line after the retired note.
+
+### Developer open items, rated
+
+- `cartridge_variants.ts:11` (the title floor skips blueprint details): dismissed. `BlueprintDefinition` has no `details` property (`protocol/cartridge.schema.json`), so there is no blueprint detail to title.
+- `lint.ex:180` (pages lint skips in-room recipes and nested room files): nit. The lint is an authoring aid, and a missed title falls back to the kind title. Revisit with loka-kgd.194.5 bundles.
+- `logs.ts:100` (identical cues merge into one line): accepted. Dedupe by line text is the once-per-visit rule; two sources with the same words read as one line.
+- `protocol/invariants.json:188` (`world_lists_no_fixture_action` is TS-only): dismissed. GameView is TypeScript, as the slices 1-3 ruling says.
+- `notice_boards.ts:35` (double derive): nit, pure and cheap. Same rating as slices 1-3.
+
+### Verified
+
+- Slices 1-3 blocker fixed (`a16a54709`). `test/loka/loader_floors_test.exs` and `kernel/ts/test/loader_floors.test.ts` pass at the head, and the hosted `elixir` and `kernel` jobs succeed.
+- Guard red controls in `mobile/app/book/room_anatomy.test.ts`, 5 of 5 killed:
+  - restoring the cue Note block, ActionCards over `g.place`, or unlinked notice titles fails test 1;
+  - dropping the `noted` check, or dropping its reset, fails test 3.
+- Engine mutants, both killed. Re-admitting a scene `on` that names neither room nor detail kills each:
+  - TS: `placed === 1` at `cartridge_scenes.ts:57` fails `detail_scene.test.ts` "a loaded action scene must name its room and detail".
+  - Elixir: `placed != 1` at `scenes.ex:169` fails `content_refusals_test.exs`.
+- Load refusal is clear in both kernels: asides are UNKNOWN_FIELD at the field and a storylet target is SCHEMA_VIOLATION at `target.kind`. TS and Elixir twins exist in `voices.test.ts`/`content_voices_test.exs` and `craft.test.ts`/`content_craft_test.exs`, and `invalid.json` adds the retired cases. kernel_api is not bumped, which the PM ruling permits.
+- Focused runs at the head pass: TS voices, craft, detail_scene, light and loader_floors; mix voices, craft, refusals and loader_floors, 24/24.
+- No save, migration, hash-fixture or transcript file changed in `e68b0d52e..6ba602b37`. The storylet draw was a pure function of the world (`pick`), so no state is lost.
