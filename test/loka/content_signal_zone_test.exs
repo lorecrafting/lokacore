@@ -72,6 +72,21 @@ defmodule Loka.ContentSignalZoneTest do
              {"UNRESOLVED_REFERENCE", "reactions/hear.on.signal", %{"target" => "bell"}}
            ]
 
+    assert refused(@sugar, [
+             {"reactions/ring.json", &put_in(&1, ["apply", Access.at(0), "amount"], 5)},
+             {"reactions/hear.json", &put_in(&1, ["on", "fact"], "heard")}
+           ]) == [
+             {"SCHEMA_VIOLATION", "reactions/hear.on.event", %{"error" => "unknown_variant"}},
+             {"SCHEMA_VIOLATION", "reactions/ring.apply[0].op", %{"error" => "unknown_variant"}}
+           ]
+
+    assert refused(@sugar, [
+             {"reactions/ring.json", &put_in(&1, ["apply", Access.at(0), "signal"], "Bell!")}
+           ]) == [
+             {"SCHEMA_VIOLATION", "reactions/ring.apply[0].op", %{"error" => "unknown_variant"}},
+             {"UNRESOLVED_REFERENCE", "reactions/hear.on.signal", %{"target" => "bell"}}
+           ]
+
     assert refused(@codex, [{"reactions/wanderer.json", &Map.put(&1, "zone", 1)}]) == [
              {"SCHEMA_VIOLATION", "reactions/wanderer.on.room", %{"error" => "missing_property"}},
              {"UNKNOWN_FIELD", "reactions/wanderer.zone", %{}}
@@ -105,6 +120,22 @@ defmodule Loka.ContentSignalZoneTest do
       assert refused(@codex, [{"rooms/hall.json", &Map.put(&1, "zones", zones)}]) ==
                [{"SCHEMA_VIOLATION", "rooms/hall.zones", %{"error" => "invalid_type"}}]
     end
+  end
+
+  # Breaks: a room listing a zone twice gets two same-key copies, or a cartridge with no signal
+  # and no facts.json gains a facts.json entry it never wrote.
+  test "a repeated zone is one membership and no signal adds no facts.json" do
+    twice = &Map.put(&1, "zones", ["priory", "priory"])
+
+    assert {:ok, _, []} =
+             Loka.ContentSource.compile(Loka.ContentSource.copy(@codex), [
+               {"rooms/hall.json", twice}
+             ])
+
+    dir = Loka.ContentSource.copy("cartridges/shoo_sampler")
+    File.rm!(Path.join(dir, "facts.json"))
+    {files, _} = Loka.Content.Source.load(dir)
+    refute List.keymember?(files, "facts.json", 0)
   end
 
   # Breaks: copies lose the authored location, so a bad ref in a zone rule reports at a copy key

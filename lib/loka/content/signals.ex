@@ -6,13 +6,15 @@ defmodule Loka.Content.Signals do
   shortcuts). It returns faults; Source builds the diagnostics, so this module never calls Source.
   """
 
+  alias Loka.Core.Contracts
+
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
   @typedoc "A refusal: code, `{rel, steps}` and diagnostic data."
   @type fault :: {String.t(), {String.t(), [String.t() | non_neg_integer()]}, map()}
 
   # ponytail: max 2^53-2, so a send into a full counter clamps and stays silent (fact.ts:254); at
-  # 2^53-1 int.ts add overflows before the clamp (loka-kgd.195). An event.emit step lifts the cap.
+  # 2^53-1 int.ts add overflows before the clamp (loka-kgd.195).
   @spec_of %{
     "version" => 1,
     "value_type" => %{
@@ -30,7 +32,8 @@ defmodule Loka.Content.Signals do
     sent =
       for {_, {:reaction, _, _}, %{"apply" => steps}} <- files,
           is_list(steps),
-          %{"op" => "signal", "signal" => name} when is_binary(name) <- steps,
+          %{"op" => "signal", "signal" => name} <- steps,
+          Contracts.validate("Key", name) == :ok,
           uniq: true,
           do: name
 
@@ -40,7 +43,7 @@ defmodule Loka.Content.Signals do
   end
 
   defp rule({rel, {:reaction, _, _} = id, %{"apply" => apply} = value}, sent) when is_list(apply),
-    do: listen({rel, id, %{value | "apply" => Enum.map(apply, &sending/1)}}, sent)
+    do: listen({rel, id, %{value | "apply" => Enum.map(apply, &sending(&1, sent))}}, sent)
 
   defp rule(file, sent), do: listen(file, sent)
 
@@ -49,7 +52,7 @@ defmodule Loka.Content.Signals do
           %{"on" => %{"event" => "signal", "signal" => name} = on} = value},
          sent
        )
-       when is_binary(name) do
+       when is_binary(name) and not is_map_key(on, "fact") do
     if name in sent do
       on =
         on
@@ -65,16 +68,24 @@ defmodule Loka.Content.Signals do
 
   defp listen(file, _), do: {file, []}
 
-  # Other members stay, so the schema still refuses them at the author's step.
-  defp sending(%{"op" => "signal", "signal" => name} = step) when is_binary(name),
-    do:
-      step
-      |> Map.delete("signal")
-      |> Map.merge(%{"op" => "fact.adjust", "fact" => fact(name), "amount" => 1})
+  # A bad name or an authored fact or amount stays a signal step, so the schema refuses it there.
+  # Other members stay too, so the schema still refuses them at the author's step.
+  defp sending(%{"op" => "signal", "signal" => name} = step, sent)
+       when not is_map_key(step, "fact") and not is_map_key(step, "amount") do
+    if name in sent,
+      do:
+        step
+        |> Map.delete("signal")
+        |> Map.merge(%{"op" => "fact.adjust", "fact" => fact(name), "amount" => 1}),
+      else: step
+  end
 
-  defp sending(step), do: step
+  defp sending(step, _), do: step
 
-  # An undecodable or malformed facts.json takes nothing; its own diagnostic stands.
+  # No signal, no generated facts.json. An undecodable or malformed one takes nothing; its own
+  # diagnostic stands.
+  defp facts(files, []), do: {files, []}
+
   defp facts(files, names) do
     case List.keyfind(files, "facts.json", 0, {"facts.json", :facts, %{"facts" => %{}}}) do
       {_, _, %{"facts" => %{} = authored} = file} ->

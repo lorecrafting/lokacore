@@ -461,18 +461,20 @@ inline; its artifact equals the hand-keyed one byte for byte.
 |---|---|---|---|
 | An authored fact named exactly `signal_<name>` | `FACT_NAME_COLLISION` | `facts.facts.signal_<name>` | `{}` |
 | A listener whose name no sending step uses | `UNRESOLVED_REFERENCE` | `<src>.on.signal` | `{"target": "<name>"}` |
+| A sending step whose name is not a Key, or with its own `fact` or `amount` | `SCHEMA_VIOLATION` | `<src>.apply[<i>].op` | `{"error": "unknown_variant"}` |
+| A trigger with its own `fact` | `SCHEMA_VIOLATION` | `<src>.on.event` | `{"error": "unknown_variant"}` |
 
-The dotted `signal.<name>` collides through the ordinary fact-name check, and a name that makes
-an invalid Key reports at its fact. [signal_sugar](../../test/fixtures/signal_sugar/) is the
+The dotted `signal.<name>` collides through the ordinary fact-name check. A refused step or
+trigger stays unlowered, so the schema reports it at the author's path. [signal_sugar](../../test/fixtures/signal_sugar/) is the
 working example; it compiles to the same artifact as its hand-expanded twin
 [signal_expanded](../../test/fixtures/signal_expanded/).
 
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
 - A reaction with `"zone": "<Key>"` and no `on.room` is replaced by one copy per room listing
-  that zone, in room-key order. A copy has `on.room` set to its room, no `zone`, the key
-  `<rule>_<room>` (`wanderer` in `hall` is `wanderer_hall`), and the authored rule's location, so
-  every diagnostic of a copy reports once at the authored rule.
+  that zone (once, however often the room lists it). A copy has `on.room` set to its room, no
+  `zone`, the key `<rule>_<room>` (`wanderer` in `hall` is `wanderer_hall`), and the authored
+  rule's location, so every diagnostic of a copy reports once at the authored rule.
 - Copies sort by the bytes of `<rule>_<room>`: copies of one rule sort among themselves by room
   key, and `_` (0x5F) sorts after digits and before lowercase letters, so `wanderer9` <
   `wanderer_hall` < `wanderer_mill` < `wanderera` < `wandererx`. An entry or rest event matches
