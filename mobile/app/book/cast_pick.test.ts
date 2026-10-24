@@ -61,12 +61,15 @@ test("the wight's Cast a spell… lists Flamma alone; the pick opens the fight",
 });
 
 // Breaks: a foe line with no list, a fight cast that turns to World or logs on World (book-ui.md,
-// Live combat response), or a dead foe that keeps its list.
+// Live combat response), another target's spell on the foe line, or a dead foe that keeps its list.
 test('a foe line casts on the Combat page, into its log, until the foe dies', (t) => {
-  const b = book(cartridge() as never);
+  const b = book(cartridge(1) as never);
   t.after(() => b.sql.close());
+  b.tap('lantern, open');
+  b.tap('Take the lantern'); // lux is offered on the held lantern, never on the foe line
   b.tap('wight, open');
   b.tap('Attack a wight');
+  assert.ok(!b.labels().includes('Lux, cast on…'), "only the foe's own spells on its line");
   b.tap('Cast a spell…');
   b.tap('Flamma, cast flamma on a wight'); // the wight lives: the fight goes on
   assert.ok(b.game.view().view.combat && b.text().includes('Combat'), 'still the Combat page');
