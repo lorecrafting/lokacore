@@ -75,7 +75,7 @@ type NpcProps = {
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
   open: (id: string) => void;
-  shelf?: () => void; // opens the person's shelf page (Shelf.tsx)
+  shelf?: () => void; // opens the person's shop page (Shelf.tsx)
 };
 type Offer = NonNullable<GameView['entities'][number]['services']>[number];
 
@@ -84,12 +84,13 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  * action details).
  * - Use: an NPC route.
  * - Rules: the description, state notes and this visit's history, then one ordered list of Action
- *   cards (owner pick mvlrlvappy4w): Buy or sell (opens the shelf page), one Talk card (the
- *   first available talk; with none, no card and no filler line), Use an
- *   item… and Cast a spell…, Take and other acts, Give an item…, Ask about, then services, an
- *   open order's claim and cancel under Your order with its commission hidden. Leave in the
- *   PageFoot. No Whisper (loka-x6t.115). The purse shows only beside a priced service; shelf
- *   stock is not Held. History restarts after Leave the conversation.
+ *   cards (owner picks mvlrlvappy4w, mvlymuams73l): one Talk card reading `Talk`, its accessible
+ *   name the offer's own label (the first available talk; with none, no card and no filler
+ *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
+ *   Ask about, then services, an open order's claim and cancel under Your order with its
+ *   commission hidden. Leave in the PageFoot. No Whisper (loka-x6t.115), no Give an item… card. The
+ *   purse shows only beside a priced service; shop stock is not Held. History restarts after
+ *   Leave the conversation.
  * - States: choice; shop; services; open order; nothing to say (no line); closed conversation.
  * - Story: NpcPage.stories.tsx
  */
@@ -123,7 +124,8 @@ export function NpcPage(p: NpcProps) {
 
 const hostile = (n?: Thing) => (n && 'hostile' in n && n.hostile ? n : undefined);
 
-// The person's offers in the page order (NpcPage's Rules); Give an item… shares Use's open state.
+// The person's offers in the page order (NpcPage's Rules); no Give an item… (owner pick mvlymuams73l:
+// a gift goes from the item's own Give to…).
 function Offered(
   p: NpcProps & { actions: Button[]; enemy: boolean; services: ReturnType<typeof serviceOrder> },
 ) {
@@ -134,26 +136,22 @@ function Offered(
     p.actions.filter((b) => !['buy', 'sell'].includes(b.action_key)),
   );
   const all = picks(p.view, rest, p.npc.id, p.text);
-  const lists = (give: boolean) => (
-    <PickLists
-      {...p}
-      page={p.npc!.id}
-      lists={all.filter((k) => (k.label === LABEL.giveAnItem) === give)}
-      state={shown}
-    />
-  );
   const card = (b: Button) => <ActionCard key={cardKey(b)} b={b} press={p.press} />;
   const plain = rest.filter((b) => !b.pick && b.command !== 'use_service');
   const shop = !p.enemy && 'shop' in p.npc && !!p.npc.shop?.length && p.shelf;
   return (
     <>
       <Cards>
-        {shop && <ActionCard label={LABEL.buyOrSell} onPress={shop} />}
-        {talk && card(talk)}
+        {talk && <ActionCard b={talk} label={LABEL.talk} name={talk.label} press={p.press} />}
+        {shop && <ActionCard label={LABEL.trade} onPress={shop} />}
       </Cards>
-      {lists(false)}
+      <PickLists
+        {...p}
+        page={p.npc.id}
+        lists={all.filter((k) => k.label !== LABEL.giveAnItem)}
+        state={shown}
+      />
       <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>
-      {lists(true)}
       <Cards>
         {plain.filter((b) => b.command === 'ask').map(card)}
         {p.services.plain.map((s) => service(s, p))}
@@ -188,7 +186,7 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 };
 
 // What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
-// Shelf stock is the shelf page's, not Held.
+// Shop stock is the shop page's, not Held.
 const held = ({ npc, view }: NpcProps) => {
   const stock = npc && 'shop' in npc ? (npc.shop ?? []).map((o) => o.item_id) : [];
   return npc

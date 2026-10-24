@@ -19,7 +19,7 @@ import { radius, size, space, type } from './tokens.ts';
  *   Note reading `label: reason` (a service's price and benefit stay inside the label's
  *   parentheses), or the label alone with no reason (book-ui.md, Notice board details). Never a
  *   disabled card. With `onPress` it sends nothing: a Pick list's option (with `expanded`) or a
- *   card that opens a child page (the NPC page's Buy or sell). A row may show its own label,
+ *   card that opens a child page (the NPC page's Trade). A row may show its own label,
  *   accessible name and quiet note in place of the Button's label.
  * - States: available; unavailable.
  * - Story: ActionCard.stories.tsx
@@ -100,8 +100,8 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
 /**
  * A page's Pick lists: per option, an Action card that opens its rows in the page's flow
  * (book-ui.md, Pick a second thing; BOOK-UI-COMPONENTS.md, Pick list).
- * - Use: a thing's or a person's page among its offered actions, rows from pick.ts; a shelf
- *   page's Sell…, rows from its shelf.
+ * - Use: a thing's or a person's page among its offered actions, rows from pick.ts or prebuilt
+ *   by the page (`lists`).
  * - Rules: one list open at a time, closed on another page; opening focuses the first row, and
  *   the option or Escape closes it with focus back on the option. A row press sends its pair and
  *   closes the list, unless an action is pending (nothing sends then, and the list stays); when
@@ -114,7 +114,7 @@ export function PickLists(p: {
   page: string;
   view: GameView;
   buttons?: Button[];
-  /** prebuilt lists (the shelf's Sell…), drawn in place of the buttons' pairs */
+  /** prebuilt lists (the NPC page's), drawn in place of the buttons' pairs */
   lists?: Pick[];
   text: (key: string) => string;
   press: (b: Button) => void;

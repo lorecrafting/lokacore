@@ -162,8 +162,9 @@ export const sellReason = (
 export const holding = (name: string) => `${name} is holding it.`;
 export const balance = (pennies: number) => `You have ${pennies}p.`;
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
-// The title of a shopkeeper's shelf page (owner pick mvlrlvappy4w).
-export const shelfTitle = (name: string) => `${name}'s shelf`;
+// The titles of a shopkeeper's buy and sell pages (owner picks mvlymuams73l, mvlynyikyw57).
+export const sellsTitle = (name: string) => `${name} can sell you…`;
+export const buysTitle = (name: string) => `${name} will buy…`;
 
 type Say = (key: string) => string;
 

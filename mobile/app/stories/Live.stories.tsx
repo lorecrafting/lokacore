@@ -84,9 +84,9 @@ export const NellShop: StoryObj = {
   play: async ({ canvasElement }) => {
     const { page, tap } = opened(canvasElement);
     await tap('Nell, open'); // a checkpoint restores the save, not the open page
-    await tap(LABEL.buyOrSell);
+    await tap(LABEL.trade);
     await tap('Cob of bread — 4p');
-    await page.findByText('You buy it.'); // the shelf stays open, its purse redrawn
+    await page.findByText('You buy it.'); // the buy page stays open, its purse redrawn
     await page.findByText('You have 6p.');
     await tap(LABEL.leave);
     await tap(LABEL.leave);

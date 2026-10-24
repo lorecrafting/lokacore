@@ -14,7 +14,9 @@ Governing direction: the owner's rulings on [touch and resumption](../decisions/
 [journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md)
 [detail-page order](../decisions/owner-decision-detail-page-order-2026-10-05.md)
 and the detail-page redesign (owner pick mvlrlvappy4w, 2026-10-23: no status line on detail
-pages, the shelf page, one Talk card, services grouped by order, Whisper hidden).
+pages, the shop page, one Talk card, services grouped by order, Whisper hidden) and its follow-ups
+(owner picks mvlyb5x2m9i3, mvlymuams73l, mvlynyikyw57: no filler lines, Talk then Trade, no Give
+an item…, the shop's buy and sell pages).
 Original feedback lives in those records; independent reviews and retained interaction proof
 are listed in the generated [review index](../reviews/README.md). The per-mechanic detail
 sections of retired chapters were removed on 2026-10-22; the rules they shared are stated below,
@@ -244,14 +246,14 @@ chronological event log (a notice's [asides](#aside-details) first) only when en
 scrolling content. Options list in one fixed order (pass-1 UR): first the verbs that act on the
 thing itself (Read, Eat, Drink, Wear, Light, Open, Talk, Attack, a recipe), then the verbs that
 move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into <container>,
-Give an item…, Give to…), then asks, Buy or sell and services (Buy or sell leads on a
-shopkeeper's page, [rule](#npc-dialogue-and-action-details)); the thing's own pick options (Use an item…, Use on…, Cast a
+Give to…), then asks, Trade and services (a person's page orders its own cards,
+[rule](#npc-dialogue-and-action-details)); the thing's own pick options (Use an item…, Use on…, Cast a
 spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
 A page's local returns (Leave, Back to World, Back to board, Back to map,
 Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
-control ends the page; offered actions never do. Item, notice, board, NPC and shelf pages draw
+control ends the page; offered actions never do. Item, notice, board, NPC and shop pages draw
 no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pending save shows
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
 fault show there as on every page. Combat, Character, Contents, the map and World keep the
@@ -305,19 +307,25 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as one
 ordered list of Action cards straight after the description and history (owner pick
-mvlrlvappy4w, 2026-10-23): **Talk**, the [pick options](#item-details-and-takedrop) Use an
-item… and Cast a spell…, Lift or Take, Give an item…, [Ask about](#fd7-ask-details), then
-**Buy or sell** and the services; on a page whose person keeps a shelf, Buy or sell comes
-first. The foot is Leave. Several Talk offers draw one Talk card, the first available one;
-with none available the page draws nothing in its place, no filler line and never "Talk: not
-now" (owner pick mvlyb5x2m9i3): a person with nothing to do shows title, description, then
-Leave. **Buy or sell** shows while the person's shelf has a row; it
-opens the child page **<Name>'s shelf**, as a notice opens from its board, and the shelf's Leave
-returns to the person. The shelf page holds the purse Note **You have <n>p.**, then one buy card
-per shelf row ("Cob of bread — 4p"; refused, "Cob of bread — 4p: can't afford"), then one
-**Sell…** [pick option](#item-details-and-takedrop) with a row per sellable thing and its price.
-A buy or sale keeps the shelf page open: its line joins the person's visit history, drawn under
-the purse on the shelf and again on the person's page, and the purse redraws. Shelf stock is not listed under the person's Held. Each service is its own Action card
+mvlrlvappy4w, mvlymuams73l, 2026-10-23): **Talk**, then **Trade**, the [pick
+options](#item-details-and-takedrop) Use an item… and Cast a spell…, Lift or Take, [Ask
+about](#fd7-ask-details), then the services. The foot is Leave. The Talk card reads **Talk**;
+its accessible name stays the offer's label ("Talk to Nell"). Several Talk offers draw one Talk
+card, the first available one; with none available the page draws nothing in its place, no
+filler line and never "Talk: not now" (owner pick mvlyb5x2m9i3): a person with nothing to do
+shows title, description, then Leave. A person's page draws no Give an item… card: a gift is
+given from the item's own Give to… (owner pick mvlymuams73l). **Trade** shows while the
+person's shop has a row; it opens the child buy page **<Name> can sell you…**, as a notice opens
+from its board, and its Leave returns to the person. The buy page holds one buy card per stock
+row ("Cob of bread — 4p"; refused, "Cob of bread — 4p: can't afford"), then the purse Note
+**You have <n>p.** under the list, the visit history, then a **Sell** card (no ellipsis), drawn
+only while the player holds something the person will buy. Sell opens the child sell page
+**<Name> will buy…** (owner pick mvlynyikyw57): one card per thing the GameView offers to sell
+to this person, with its price ("Cob of bread — 1p"), then the purse and history; Leave
+returns to the buy page. It lists only what the engine marks sellable (wider sale lists are
+loka-x6t.117). A buy or sale keeps its page open: its line joins the person's visit history,
+drawn there and again on the person's page, and the purse redraws. Shop stock is not listed
+under the person's Held. Each service is its own Action card
 with its authored label; the claim and cancel of an order sit under a **Your order** Section
 title after the order card, and show only while an order is open (either is offered, or either
 is refused for a reason other than `service.no_order`); while Your order shows, the commission
@@ -380,13 +388,13 @@ hostile (a derived read, absent otherwise) and, when the cartridge authors
 as `refusal`. While `hostile` is projected the page shows the description, then one
 [Note](../BOOK-UI-COMPONENTS.md#component-catalogue) in place of Talk: the `refusal` line, or
 without one the sentence [words](../../mobile/app/book/words.ts) owns ("<Name> will have
-nothing to do with you."). No Talk, Buy or sell or Ask about card is drawn; services and lessons
+nothing to do with you."). No Talk, Trade or Ask about card is drawn; services and lessons
 stay as offered; the foot is Leave. The authored line names the mood, never the cause
 ("Nell turns her back on you.", not what the player did); hostility ending redraws the actions
-without a line. A shelf page buy card's reason is always a word from `words.ts` `reason()` ("not now",
+without a line. A buy page card's reason is always a word from `words.ts` `reason()` ("not now",
 "too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
 stays "sold out", and one refused `insufficient_resource` reads "can't afford" (`buyReason`).
-A shelf reason from the cartridge is a lowercase fragment with no period.
+A shop reason from the cartridge is a lowercase fragment with no period.
 
 ## Item details and Take/Drop
 
@@ -425,11 +433,11 @@ Put appears as a concrete pair button using projected source/destination names a
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
-**Pick a second thing.** An action that needs a second object never draws one card per pair; its page draws one option that opens a list of the GameView's pairs, and a pick sends one (owner 2026-10-23, quoted: "you click that option and it opens a list and you pick an item and then the item detail closes with an echo the log"). There are five such options, each a `LABEL` word ending in an ellipsis:
+**Pick a second thing.** An action that needs a second object never draws one card per pair; its page draws one option that opens a list of the GameView's pairs, and a pick sends one (owner 2026-10-23, quoted: "you click that option and it opens a list and you pick an item and then the item detail closes with an echo the log"). There are four such options drawn, each a `LABEL` word ending in an ellipsis:
 - **Use an item…** on a target's page (an item, a person, a notice or a fixture with a page): one row per carried tool the GameView lists in a use pair (G4) on this target, target_ids [target, tool], labelled with the tool's projected name.
 - **Use on…** on a held tool's page: one row per target the GameView lists in a use pair with this tool, labelled with the target's projected name.
 - **Cast a spell…** on a target's page: one row per aimed spell the GameView offers on it, labelled with the spell's word (`lux`), as the say field's chips name it. The cast-with-target command is engine row loka-x6t.109; until it lands no target lists one.
-- **Give an item…** on a person's page: one row per carried item the GameView lists in a Give pair with this person, target_ids [item, recipient], labelled with the item's projected name.
+- **Give an item…** is not drawn: a person's page has no Give card (owner pick mvlymuams73l, 2026-10-23); the item's Give to… gives.
 - **Give to…** on a held item's page, its reverse (PM 2026-10-23, for symmetry with Use on…): one row per person the GameView lists in a Give pair with this item, labelled with the person's projected name.
 
 Rows keep the GameView's order. When one list holds pairs of more than one recipe, each row reads the recipe's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one row in the Action card's unavailable form (`rod: not yet`; under Use on…, one row per recipe, `Fish in: not yet`, whatever its targets); a refused aimed spell reads `lux: need 1 ash`; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still draws.

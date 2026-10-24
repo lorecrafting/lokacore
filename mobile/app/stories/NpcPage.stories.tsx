@@ -35,10 +35,10 @@ export const Choice: StoryObj = {
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
-// Breaks: a bought cob not offered back under Sell…, or the buy turning away from the shelf.
+// Breaks: Sell not opening the sell page, or a bought cob not offered back on it with its price.
 export const Shelf: StoryObj = {
   ...pageStory(NpcShelfView),
-  name: 'Shelf, Sell… open',
+  name: 'Shop, sell page',
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(await canvas.findByRole('button', { name: LABEL.sell }));
     await canvas.findByRole('button', { name: 'Cob of bread — 1p' });
@@ -69,7 +69,7 @@ export const OpenOrder: StoryObj = {
     await expect(canvas.queryByText(/^Order a knife/)).toBeNull();
   },
 };
-export const NothingToSay: StoryObj = { ...pageStory(NpcSilentView), name: 'Nothing to say' };
+export const NothingToSay: StoryObj = { ...pageStory(NpcSilentView), name: 'Nothing to do' };
 export const ClosedConversation: StoryObj = {
   ...pageStory(NpcClosedView),
   name: 'Closed conversation',

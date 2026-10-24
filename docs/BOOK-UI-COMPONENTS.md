@@ -51,7 +51,7 @@ words remain in the cartridge; Book owns layout and navigation.
 | Player interaction | Start with | Check in the mechanic brief |
 |---|---|---|
 | Talk, quest choice or service | NPC detail and offered action list | Exact speaker, available/refused choice, detail-local result, Leave and reopen. |
-| Buy or sell | The NPC's Buy or sell card and its shelf page ([rule](system/book-ui.md#npc-dialogue-and-action-details)) | Exact row and price, refused reason, the page stays after a trade, Leave back to the person. |
+| Trade | The NPC's Trade card, its buy page and the buy page's Sell page ([rule](system/book-ui.md#npc-dialogue-and-action-details)) | Exact row and price, refused reason, the page stays after a trade, Leave back to the person. |
 | Inspect, take, equip or use an item/container | Item detail and nested `Page` route | Exact item/custody, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
@@ -223,8 +223,8 @@ thickness token, since no platform's `Text` sets one); linked, or plain prose wh
 projected.
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
-chips and scene pick cards. The mock's shop price rows are not adopted either: a shelf row is an
-`ActionCard` on `ShelfPage` and a sale a `PickLists` row (owner pick mvlrlvappy4w, 2026-10-23).
+chips and scene pick cards. The mock's shop price rows are not adopted either: a stock row and a sale
+row are each an `ActionCard` on `ShelfPage` (owner picks mvlrlvappy4w, mvlynyikyw57, 2026-10-23).
 
 ## Page turn
 

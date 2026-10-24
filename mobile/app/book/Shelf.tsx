@@ -1,14 +1,14 @@
-// A shopkeeper's shelf, a child page of their NPC page (book-ui.md, NPC dialogue and action details).
+// A shopkeeper's buy and sell pages, child pages of their NPC page (book-ui.md, NPC dialogue and action details).
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, type group } from './model.ts';
+import { cap, type group, type Page as Route } from './model.ts';
 import type { Button, presenter } from './presenter.ts';
-import { ActionCard, Cards, PickLists } from './actions.tsx';
+import { ActionCard, Cards } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import { things } from './item-pages.ts';
 import type { Row } from './pick.ts';
-import { balance, buyReason, sellReason, shelfTitle } from './words.ts';
+import { balance, buyReason, buysTitle, sellReason, sellsTitle } from './words.ts';
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Say = (key: string) => string;
 type Stock = NonNullable<GameView['entities'][number]['shop']>[number];
@@ -22,7 +22,7 @@ export const purse = (v: GameView) =>
 const bare = (v: GameView, o: Stock, text: Say) =>
   cap(text(things(v).find((e) => e.id === o.item_id)?.words?.bare ?? o.name));
 
-// One Sell… row per thing the player may sell; stock the player does not hold is no row.
+// One sell-page row per thing the player may sell; stock the player does not hold is no row.
 const sales = (v: GameView, shop: readonly Stock[], sells: Button[], text: Say): Row[] =>
   shop.flatMap((o): Row[] => {
     const label = `${bare(v, o, text)} — ${o.sell.price}p`;
@@ -32,21 +32,27 @@ const sales = (v: GameView, shop: readonly Stock[], sells: Button[], text: Say):
   });
 
 /**
- * A shopkeeper's shelf: the purse, one buy card per row, then the Sell… list (owner pick
- * mvlrlvappy4w, 2026-10-23).
- * - Use: the child page the NPC page's Buy or sell card opens; Leave returns to the person.
- * - Rules: the purse Note first; a buy card reads `Cob of bread — 4p`, refused as its Note form
- *   with a words.ts reason (`… — 4p: can't afford`); Sell… is a PickLists option, its rows the
- *   sellable things with their prices, and drawn only with a row. A buy or sale keeps the page:
- *   its line joins the person's visit history (shared with the NPC page) and the purse redraws. No status line (a detail page).
- * - States: buyable; refused; Sell… open; nothing to sell.
+ * A shopkeeper's shop, two child pages of their NPC page (owner picks mvlrlvappy4w, mvlymuams73l,
+ * mvlynyikyw57, 2026-10-23).
+ * - Use: the buy page the NPC page's Trade card opens, and the sell page its Sell card opens;
+ *   Leave returns one page.
+ * - Rules: the buy page, titled `<Name> can sell you…`, draws one buy card per stock row
+ *   (`Cob of bread — 4p`, refused as its Note form with a words.ts reason, `… — 4p: can't
+ *   afford`), the purse Note, this visit's history, then the Sell card, drawn only with a row.
+ *   The sell page, titled `<Name> will buy…`, draws one card per thing the player may sell with
+ *   its price, then the purse and history. A buy or sale keeps its page: its line joins the
+ *   person's visit history (shared with the NPC page) and the purse redraws. No status line (a
+ *   detail page).
+ * - States: buyable; refused; sell page; nothing to sell.
  * - Story: NpcPage.stories.tsx
  */
 export function ShelfPage(p: {
   id: string;
+  sale?: boolean; // the sell page
   screen: Screen;
   g: ReturnType<typeof group>;
   press: (b: Button, detail?: string) => void;
+  open: (page: Route) => void;
   back: () => void;
 }) {
   const { view, text } = p.screen;
@@ -62,33 +68,34 @@ export function ShelfPage(p: {
     text,
   );
   const money = purse(view);
+  const name = cap(text(npc?.name ?? ''));
+  const rows: Row[] = p.sale
+    ? sell
+    : shop.map((o) => {
+        const label = `${bare(view, o, text)} — ${o.buy.price}p`;
+        const b = offered.find((b) => b.action_key === 'buy' && b.target_ids[1] === o.item_id);
+        return b ? { b, label, name: label } : { label, reason: buyReason(o.buy.reason ?? '') };
+      });
   return (
     <Page
-      title={shelfTitle(cap(text(npc?.name ?? '')))}
+      title={p.sale ? buysTitle(name) : sellsTitle(name)}
       foot={<Control label={LABEL.leave} onPress={p.back} />}
     >
+      <Cards>
+        {rows.map((r) =>
+          'b' in r ? (
+            <ActionCard key={r.label} b={r.b} label={r.label} press={press} />
+          ) : (
+            <ActionCard key={r.label} label={r.label} reason={r.reason} />
+          ),
+        )}
+      </Cards>
       {money !== undefined && <Note>{balance(money)}</Note>}
       <LogLines lines={p.screen.detail(p.id)} />
-      <Cards>
-        {shop.map((o) => {
-          const label = `${bare(view, o, text)} — ${o.buy.price}p`;
-          const b = offered.find((b) => b.action_key === 'buy' && b.target_ids[1] === o.item_id);
-          return b ? (
-            <ActionCard key={o.item_id} b={b} label={label} press={press} />
-          ) : (
-            <ActionCard key={o.item_id} label={label} reason={buyReason(o.buy.reason ?? '')} />
-          );
-        })}
-      </Cards>
-      {sell.length > 0 && (
-        <PickLists
-          page={`shelf:${p.id}`}
-          view={view}
-          lists={[{ label: LABEL.sell, rows: sell }]}
-          text={text}
-          press={press}
-          pending={p.screen.pending}
-        />
+      {!p.sale && sell.length > 0 && (
+        <Cards>
+          <ActionCard label={LABEL.sell} onPress={() => p.open({ kind: 'sale', id: p.id })} />
+        </Cards>
       )}
     </Page>
   );

@@ -136,23 +136,24 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
     for (const l of labels) await tap(l);
     await tap(LABEL.leave);
   };
-  // Buy or sell opens the person's shelf page: Leave it, then the person.
-  const shelf = async (who: RegExp, ...labels: (string | RegExp)[]) => {
-    await npc(who, LABEL.buyOrSell, ...labels);
+  // Trade opens the person's buy page and its Sell card the sell page: Leave each, then the person.
+  const shop = async (who: RegExp, ...labels: (string | RegExp)[]) => {
+    await npc(who, LABEL.trade, ...labels);
     await tap(LABEL.leave);
+    if (labels.includes(LABEL.sell)) await tap(LABEL.leave);
   };
   await moves('down', 'east');
   await npc(/^(?:the )?clerk, open$/i, /^Deposit five pennies/);
   await moves('west', 'north');
   await npc(/^(?:the )?market clerk, open$/i, /^Withdraw five pennies/);
-  await shelf(/^(?:the )?chandler, open$/i, /^Tallow candle — /);
+  await shop(/^(?:the )?chandler, open$/i, /^Tallow candle — /);
   await moves('south', 'west');
   await tap('Hide');
   await moves('east', 'north');
   await tap(/^(?:the )?merchant, open$/i);
   await take(/^(?:the )?merchant's purse, open/i, /^Lift$/);
   await moves('south', 'west');
-  await shelf(/^(?:the )?fence, open$/i, LABEL.sell, /^Merchant's purse — /);
+  await shop(/^(?:the )?fence, open$/i, LABEL.sell, /^Merchant's purse — /);
   await moves('east', 'east');
   await npc(/^(?:the )?clerk, open$/i, /^Buy the strongroom/);
   await take(/^(?:the )?strongroom key, open$/i, /^Take the strongroom key/);

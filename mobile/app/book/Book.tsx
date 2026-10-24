@@ -96,7 +96,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   else if (pr.recovered()) p.shell.recovered?.(true);
   const inline =
     npcPage(before.stack.at(-1), before.view) ||
-    before.stack.at(-1)?.kind === 'shelf' ||
+    ['shelf', 'sale'].includes(before.stack.at(-1)?.kind ?? '') ||
     POSITION_ACTIONS.includes(b.command ?? b.action_key);
   if (next === before.stack && inline && !before.view.scene && !after.view.scene)
     s.redraw((n) => n + 1);

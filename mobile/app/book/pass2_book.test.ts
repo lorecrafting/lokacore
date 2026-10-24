@@ -70,23 +70,23 @@ test('a fresh NPC visit after a reopen starts empty', () => {
   a.sql.close();
 });
 
-// Breaks: an NPC page lists the shelf's rows (they live on the shelf page), draws "Nothing to do
-// here.", "Talk: not now" or any filler line for a person with no talk, or keeps Buy or sell
-// with the shelf emptied (owner picks mvlrlvappy4w, mvlyb5x2m9i3).
-test('a shop NPC with no talk: Buy or sell, then Leave, no filler', (t) => {
+// Breaks: an NPC page lists the shop's rows (they live on the buy page), draws "Nothing to do
+// here.", "Talk: not now" or any filler line for a person with no talk, or keeps Trade
+// with the stock emptied (owner picks mvlrlvappy4w, mvlyb5x2m9i3, mvlymuams73l).
+test('a shop NPC with no talk: Trade, then Leave, no filler', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'down', 'west');
   b.tap('fence, open');
   const shown = b.text();
-  assert.deepEqual(shown.slice(2), [LABEL.buyOrSell, LABEL.leave]);
+  assert.deepEqual(shown.slice(2), [LABEL.trade, LABEL.leave]);
   const real = b.game.view.bind(b.game);
   b.game.view = () => {
     const r = real();
     const entities = r.view.entities.map((e) => ({ ...e, shop: undefined }));
     return { ...r, view: { ...r.view, entities } } as never;
   };
-  assert.ok(!b.labels().includes(LABEL.buyOrSell), JSON.stringify(b.labels()));
+  assert.ok(!b.labels().includes(LABEL.trade), JSON.stringify(b.labels()));
 });
 
 // Breaks: the rod's page drops its use once the rod rests between casts (R2), so the player

@@ -99,7 +99,8 @@ function PageBody(p: BodyProps & Talk) {
         visit={page}
       />
     );
-  if (page.kind === 'shelf') return <ShelfPage {...p} id={page.id} />;
+  if (page.kind === 'shelf' || page.kind === 'sale')
+    return <ShelfPage {...p} id={page.id} sale={page.kind === 'sale'} />;
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;

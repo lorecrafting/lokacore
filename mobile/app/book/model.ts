@@ -58,7 +58,7 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing' | 'board' | 'notice' | 'dream' | 'shelf'; id: string }
+  | { kind: 'thing' | 'board' | 'notice' | 'dream' | 'shelf' | 'sale'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
@@ -67,7 +67,7 @@ export const npcPage = (page: Page | undefined, view: GameView) =>
 
 // A detail page draws no status line (owner pick mvlrlvappy4w); the shell keeps it elsewhere.
 export const detailPage = (page: Page | undefined) =>
-  ['thing', 'board', 'notice', 'dialogue', 'shelf'].includes(page?.kind ?? '');
+  ['thing', 'board', 'notice', 'dialogue', 'shelf', 'sale'].includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 
@@ -87,9 +87,12 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  // A shelf goes with its keeper (Shelf.tsx).
+  // A shop's pages go with their keeper (Shelf.tsx).
   const gone = stack.findIndex(
-    (p) => (p.kind === 'thing' || p.kind === 'shelf') && !visible.some((e) => e.id === p.id),
+    (p) =>
+      ['thing', 'shelf', 'sale'].includes(p.kind) &&
+      'id' in p &&
+      !visible.some((e) => e.id === p.id),
   );
   if (gone < 0) return stack;
   const page = stack[gone];

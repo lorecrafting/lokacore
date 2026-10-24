@@ -59,9 +59,10 @@ export const LABEL = {
   giveTo: 'Give to…',
   castASpell: 'Cast a spell…',
   castOn: 'Cast on…', // a Character Spells line's list of the aimed spell's targets (loka-x6t.109.5)
-  // The NPC page's shop card, its shelf page's sale list, the services' order group (owner pick mvlrlvappy4w).
-  buyOrSell: 'Buy or sell',
-  sell: 'Sell…',
+  // The NPC page's Talk and shop cards, the shop page's Sell card (owner picks mvlrlvappy4w, mvlymuams73l).
+  talk: 'Talk',
+  trade: 'Trade',
+  sell: 'Sell',
   yourOrder: 'Your order',
   // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
   the: 'the',

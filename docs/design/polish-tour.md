@@ -33,8 +33,8 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: loka-4l3 (refusal tag on native), x6t.29 (resting exit says "not now", "1 doses", "2-2 damage").
 
 ## 5. NPC page
-- pages-npc--choice, --shop, --services, --closed-conversation
-- Look at: choice cards, shop rows, the Leave control.
+- pages-npc--choice, --shop, --shelf, --services, --nothing-to-say, --closed-conversation
+- Look at: Talk then Trade, the buy page ("Nell can sell you…", purse, Sell) and the sell page ("Nell will buy…"), no filler on an idle person, the Leave control.
 - Known: x6t.70 (NPC conditions), x6t.14 (wording M4/M5).
 
 ## 6. Item page
