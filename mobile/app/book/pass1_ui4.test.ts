@@ -6,7 +6,7 @@ import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { nodes, words } from './__tests__/polish-book.test.ts';
+import { book, nodes, words } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
@@ -224,4 +224,16 @@ test('one balance Note after the description on a page with a priced service', a
   assert.ok(!draw({ ...bare, services: [service(1)] }, true).includes('You have 10p.')); // a conversation hides it
   assert.ok(!draw({ ...bare, services: [service(0)] }).includes('You have 10p.'));
   assert.ok(!draw(bare).some((l) => l.startsWith('You have')));
+});
+
+// Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or
+// drops the reason from what a screen reader hears (owner pick mvlyp3gphp2t, 2026-10-23).
+test('a refused World line is one prose Text; its reason stays in the accessible name', () => {
+  const b = book(compiled('cartridges/toolbox_showcase') as never);
+  b.p.screen().log.push({ kind: 'refused', reason: 'locked', text: 'The way west is locked.' });
+  const line = b.draw().filter((n) => n.type === 'Text' && words(n) === 'The way west is locked.');
+  assert.equal(line.length, 1);
+  assert.equal(line[0].props.accessibilityLabel, 'locked, The way west is locked.');
+  assert.ok(!b.text().includes('locked'), JSON.stringify(b.text()));
+  b.sql.close();
 });

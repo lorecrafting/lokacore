@@ -9,7 +9,7 @@ import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
-import { radius, size, space, type } from './tokens.ts';
+import { size, space, type } from './tokens.ts';
 
 // Web keys on a Text or View: react-native-web forwards onKeyDown, React Native's types lack it.
 export const onKey = (f: (key: string) => unknown) =>
@@ -64,9 +64,9 @@ export function Note({ children }: { children: string }) {
  * The log: one Text per narration record, never records joined.
  * - Use: room, detail and combat logs; no lines, no block.
  * - Rules: narration and the Book's speech echo in ink; a system line dim italic; a refused line
- *   leads with its reason tag, always the reason word even when the sentence repeats it. The tag
- *   is its own Text in a row beside the sentence, never nested (native draws no border on nested
- *   Text). A speech line (speaker bar) waits until the log projects a speaker.
+ *   ink italic, plain prose with no tag or chip (owner pick mvlyp3gphp2t, 2026-10-23); its reason
+ *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads it). A speech line
+ *   (speaker bar) waits until the log projects a speaker.
  * - States: narration; system; refused.
  * - Story: LogLines.stories.tsx
  */
@@ -87,24 +87,13 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
             {line.text}
           </Text>
         ) : (
-          <View
+          <Text
             key={i}
-            style={{ flexDirection: 'row', alignItems: 'baseline', columnGap: space.xs }}
+            accessibilityLabel={`${line.reason}, ${line.text}`}
+            style={{ ...t.log, color: c.fg, ...type.italic }}
           >
-            <Text
-              style={{
-                ...t.tag,
-                color: c.danger,
-                borderColor: c.danger,
-                borderWidth: size.rule,
-                borderRadius: radius.tag,
-                paddingHorizontal: space.xs,
-              }}
-            >
-              {line.reason}
-            </Text>
-            <Text style={{ ...t.log, color: c.fg, flex: 1 }}>{line.text}</Text>
-          </View>
+            {line.text}
+          </Text>
         ),
       )}
     </View>

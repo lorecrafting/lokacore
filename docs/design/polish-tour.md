@@ -28,9 +28,9 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.67 (homestead verbs read like container moves; x6t.54 merged into it).
 
 ## 4. Logs
-- book-loglines--narration, --system-line, --refused-with-tag, --thirty-lines, --empty
-- Look at: how narration, system lines and refused lines differ; scroll at 30 lines.
-- Known: loka-4l3 (refusal tag on native), x6t.29 (resting exit says "not now", "1 doses", "2-2 damage").
+- book-loglines--narration, --system-line, --refused-with-tag (now "Refused"), --thirty-lines, --empty
+- Look at: how narration, system lines and refused lines differ (a refused line is ink italic, no chip); scroll at 30 lines.
+- Known: x6t.29 (resting exit says "not now", "1 doses", "2-2 damage").
 
 ## 5. NPC page
 - pages-npc--choice, --shop, --shelf, --services, --nothing-to-say, --closed-conversation

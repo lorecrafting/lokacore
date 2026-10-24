@@ -604,9 +604,11 @@ code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pe
 save retries keep the existing original-attempt behavior for any subsequent press. A press
 refused after a catch-up gets no "what changed" sentence: the catch-up's own lines (rounds, a
 death, an expiry) already precede the refused line in order, and the refused line carries its
-reason word. Proposed for designer approval (loka-x6t.17, owner Q13 option A): a refusal that
+reason word. A refused line is plain log prose, ink italic, with no tag or chip (no chips in the
+game-world pane, owner pick mvlyp3gphp2t, 2026-10-23); its reason word stays in its accessible
+name, "<reason>, <sentence>", as [Announcements](#announcements) reads it. Proposed for designer approval (loka-x6t.17, owner Q13 option A): a refusal that
 carries a `cause` (GameError or an exit's reason, `RefusalCause`) takes the cause's word as its
-tag and the cause's sentence before the code's ([words](../../mobile/app/book/words.ts)
+reason word and the cause's sentence before the code's ([words](../../mobile/app/book/words.ts)
 `reason`, `refusedSentence`): a move while sitting reads **not standing**, "You are not
 standing.", never "The way north is not standing." or "not now".
 
