@@ -175,3 +175,39 @@ test('a detail title naming no text is UNRESOLVED_REFERENCE at its path', () => 
     ['UNRESOLVED_REFERENCE', `.cartridge.rooms["${TOWER}"].details.hearth.title`],
   );
 });
+
+// Break: a bed detail's page replaces its actions with the bed's Rest, dropping the recipe card
+// aimed at it (offered nowhere, since view.actions never lists a detail recipe).
+test('a recipe aimed at a bed detail keeps its card on that page', () => {
+  const v = view(
+    world((c) => {
+      for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
+        Object.assign(caps, { position: 1, service: 1 });
+      c.facts[`${P}:fact/position`] = {
+        key: 'position',
+        version: 1,
+        value_type: {
+          type: 'enum',
+          values: ['standing', 'sitting', 'resting', 'sleeping'],
+          default: 'standing',
+        },
+        scopes: ['player'],
+        meaning: "The character's position (position@1): only its rule writes it.",
+      };
+      c.rooms[TOWER].details.hearth.bed = {
+        title: 'detail.hearth.title',
+        entitlement: {
+          cartridge_id: 'spells_sampler',
+          cartridge_version: '0.0.1',
+          kind: 'fact',
+          key: 'sigil_traced',
+        },
+      };
+    }),
+  );
+  const { bed, actions } = notice(v, 'hearth');
+  assert.deepEqual(
+    [bed, actions?.map((a: { action_key: string }) => a.action_key)],
+    [true, ['gather_ash']],
+  );
+});

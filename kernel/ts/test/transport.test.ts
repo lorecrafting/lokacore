@@ -204,3 +204,36 @@ test('boarding remains inspectable with a disabled offer during a real encounter
   assert.equal(notice.transport!.action.available, false);
   assert.equal(ride(fighting).decision.kind, 'rejected');
 });
+
+// Break: the transport page replaces its actions with the ride, dropping the recipe card aimed at
+// the post (offered nowhere, since view.actions never lists a detail recipe; loka-x6t.120).
+test('a recipe aimed at a transport detail keeps its card beside the ride', () => {
+  const w = fresh((c) => {
+    c.lock.capabilities.action_recipe = c.manifest.requires.capabilities.action_recipe = 1;
+    c.recipes = {
+      [`${prefix}:recipe/polish_post`]: {
+        key: 'polish_post',
+        aliases: ['polish'],
+        label: 'actions.polish_post',
+        priority: 5,
+        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        target: { kind: 'detail', room: ref('room', 'north_post'), detail: 'post' },
+        outcomes: {
+          success: {
+            narration: { actor: 'narration.polish_post' },
+            sequence: [{ op: 'resource.adjust', resource: ref('resource', 'coins'), by: 1 }],
+          },
+        },
+      },
+    };
+    Object.assign(c.text, {
+      'actions.polish_post': 'Polish the post',
+      'narration.polish_post': 'You polish the post.',
+    });
+  });
+  const notice = gameView(w).notices!.find((n) => n.transport)!;
+  assert.deepEqual(
+    notice.actions!.map((a) => a.action_key),
+    [notice.transport!.action.action_key, 'polish_post'],
+  );
+});

@@ -241,7 +241,8 @@ test('400 fixed showcase sequences keep every invariant and end in each district
   const pinned = readFileSync(new URL('sim_narration_baseline.txt', import.meta.url), 'utf8')
     .split('\n')
     .filter((l) => l && !l.startsWith('#'));
-  assert.ok(pinned.length <= 12, 'sim_narration_baseline.txt grew past its cap of 12');
+  // Cap 13: put joined take/drop/give under loka-kgd.185 (PM ruling, loka-x6t.120 generator 18).
+  assert.ok(pinned.length <= 13, 'sim_narration_baseline.txt grew past its cap of 13');
   assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
   assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
