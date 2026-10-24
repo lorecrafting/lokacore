@@ -107,8 +107,6 @@ export const SackContents: StoryObj = {
     await tap('seed sack, open');
     // the page a turn brings takes focus at its title (pages.tsx titleFocus), for screen readers
     await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('heading'));
-    await tap('Open a seed sack'); // the tie starts closed: no Inside until opened
-    await page.findByText('Opened.');
     await tap('A turnip seed, open'); // its Inside row
     await tap('Take a turnip seed');
     // book-ui.md (Take from a container): the pickup line shows, then the sack reopens with Put and Leave

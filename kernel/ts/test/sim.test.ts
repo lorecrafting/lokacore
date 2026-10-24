@@ -1,4 +1,4 @@
-// size: allow 571, the toolbox showcase pass joins the corpus run and the red controls
+// size: allow 576, the toolbox showcase pass joins the corpus run and the red controls
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
 // (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every
@@ -242,6 +242,11 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     .filter((l) => l && !l.startsWith('#'));
   assert.ok(pinned.length <= 12, 'sim_narration_baseline.txt grew past its cap of 12');
   assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
+  // SILENT.close is justified only by lids: this (the only unnarrated caller) cartridge declares them.
+  const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.barriers ?? {}).some(
+    (b) => b.initial === 'closed',
+  );
+  assert.ok(lidded || !silent.has('close'), 'close is silent in a cartridge with no lids');
   assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
   for (const seed of PINNED)
