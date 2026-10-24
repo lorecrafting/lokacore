@@ -522,6 +522,7 @@ test('economy 8: buy the strongroom, unlock, enter, use the chest, lock behind',
   assert.equal(where(s, s.body), room(s, 'strongroom'));
   const chest = id(s, 'item', 'strongroom_chest');
   const key_ = id(s, 'item', 'strongroom_key');
+  s = play(s, { type: 'open', target_id: chest }).world;
   const put = { type: 'put', item_id: key_, container_id: chest };
   assert.equal(refused(forge(s, 'owns_strongroom', false), put), 'permission_denied');
   s = play(s, put).world;
@@ -560,6 +561,19 @@ test('economy 8 branch: without the purchase the key, the door and the room refu
   assert.equal(refused(forced, { type: 'move', direction: 'south' }), 'permission_denied');
 });
 
+// Breaks: a lid missing on a chest or crate (contents shown or takeable before Open), or the shop's
+// own stock move needing the lid open (the storeroom crate restocks while closed).
+test('economy yard: the crate and the hoard chest start closed, hiding what is in them', () => {
+  const y = walk(fresh(WORLD), 'down', 'down');
+  const shown = (k: string) => gameView(y).entities.find((e) => e.id === id(y, 'item', k))!;
+  for (const k of ['yard_crate', 'hoard_chest']) {
+    assert.equal(shown(k).state, 'closed', k);
+    assert.equal(shown(k).contents, undefined, k);
+  }
+  // the sealed storeroom crate is out of reach: its lid is read from the compiled cartridge
+  assert.equal(y.cartridge.barriers!['toolbox_showcase@0.0.1:barrier/crate_lid'].initial, 'closed');
+});
+
 // Breaks: the yard shelf's table (one held 3, two held 2), its hour, its cap of 1, its crate, or the crate's lock.
 test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () => {
   let y = walk(fresh(WORLD), 'down', 'down');
@@ -567,8 +581,9 @@ test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () =>
   const held = (x: World) =>
     ['yard_candle_01', 'yard_candle_02'].filter((c) => where(x, id(x, 'item', c)) === seller);
   assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 3);
+  const opened = play(y, { type: 'open', target_id: id(y, 'item', 'yard_crate') }).world;
   assert.equal(
-    refused(y, { type: 'take', item_id: id(y, 'item', 'yard_candle_02') }),
+    refused(opened, { type: 'take', item_id: id(y, 'item', 'yard_candle_02') }),
     'permission_denied',
   );
   y = play(y, trade(y, 'buy', 'yard_candle_01', 3, 'yard_chandler')).world;

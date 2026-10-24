@@ -50,7 +50,7 @@ both are built, and plan 6's slice checks it). The hub pin's exit count rises by
 
 ## Rooms and map
 
-Sealed: `storeroom` (the crate with `candle_04`, `candle_05`), `forge_back` (escrow custody, holding
+Sealed: `storeroom` (the crate, lid closed at start, with `candle_04`, `candle_05`), `forge_back` (escrow custody, holding
 `smith_knife` until claimed).
 
 | Room | Exits | Holds |
@@ -62,8 +62,8 @@ Sealed: `storeroom` (the crate with `candle_04`, `candle_05`), `forge_back` (esc
 | `forge_stall` | south `market_row` | **the smith**; `ore_01..04` on the floor |
 | `counting_house` | west `undercroft` | **clerk A**; **the vault** (an NPC with `pennies` 20 and `locks.get` that always refuses, `theft_sampler/npcs/vault.json`); `strongroom_key` (`locks.get fact_compare owns_strongroom true`) |
 | `pawn_alley` | east `undercroft` | **the fence** (`pennies` 6; `locks.get` always refuses); detail `barrels` (rating 0; recipe `hide`) |
-| `strongroom` | north `undercroft` through `strongroom_door`; `locks.enter fact_compare owns_strongroom true` | `strongroom_chest` (container; `locks.get` and `locks.put` on `owns_strongroom`) |
-| `vault_yard` (sandbox) | up `undercroft` | **the mark** (holds `yard_purse`, alertness 0); **the watchman** (alertness 1, hostile on `wanted`, chance 0); detail `yard_barrels` (hide); `hoard_chest` (get and put on `owns_strongroom`); `yard_crate` holding `yard_candle_01..02` with a shelf job to a **yard chandler**: stock table [3, 2], sells for 1, purse 5 pennies; the crate refuses every take (`locks.get` always false) and the shelf caps at 1 |
+| `strongroom` | north `undercroft` through `strongroom_door`; `locks.enter fact_compare owns_strongroom true` | `strongroom_chest` (container, lid closed at start; `locks.get` and `locks.put` on `owns_strongroom`) |
+| `vault_yard` (sandbox) | up `undercroft` | **the mark** (holds `yard_purse`, alertness 0); **the watchman** (alertness 1, hostile on `wanted`, chance 0); detail `yard_barrels` (hide); `hoard_chest` (lid closed at start; get and put on `owns_strongroom`); `yard_crate` (lid closed at start) holding `yard_candle_01..02` with a shelf job to a **yard chandler**: stock table [3, 2], sells for 1, purse 5 pennies; once opened the crate refuses every take (`locks.get` always false) and the shelf caps at 1 |
 
 ### Signpost (`sign_law`, readable in `undercroft`)
 
