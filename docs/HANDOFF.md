@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-23 ~01:30 local by Claude Code (Opus 5.5), PM session 661e816a (continued after the reboot), AS OF
+Rewritten 2026-10-23 ~19:30 local by Claude Code (Opus 5.5), PM session 661e816a, before /clear (see "Open polish batch" first). Earlier header: written 2026-10-23 ~01:30 local, AS OF
 main after #453 plus the overnight batches below. Owner (2026-10-22, quoted): "Please work on the engine stuff, and the
 followups from todays reviews ... the polish phase will be ready for me tomorrow right?"
 Open objective: the owner's Storybook polish pass. Owner hold (2026-10-22, paraphrased): only polish and the bugs it
@@ -31,6 +31,23 @@ PLease set things up so that its easy for me to do my ui polish there".
 - Mechanics, save, protocol or engine picks leave as Beads issues (`bin/br_create.sh`) with a panel log line.
 - "Close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR comments, green hosted CI, merge with
   `--match-head-commit`, `bin/after_merge.sh`, `bin/preview_update.sh` (it refuses while a session is served).
+
+## Open polish batch (start here after /clear)
+
+- Session `polish/session-2026-10-23` in ~/dev/lokacore-session, served on Storybook 6006, NOT pushed. It holds the
+  NPC/item detail-page redesign (owner pick mvlrlvappy4w; owner 2026-10-23, quoted: "Go wtih all your leans and
+  recommendations"): commits a5857ed40..68d264952 (spec; no status line on detail pages, Leave last; one card order;
+  "Buy or sell" opens the shopkeeper's shelf page with purse, buy cards and Sell…; "Your order" group; one Talk card
+  or "<Name> has nothing to say just now."; Whisper hidden). Book suite 737/0, tsc, size, sg clean; walk edited, not run.
+- Next: owner looks in Storybook; then "close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR
+  comments, green hosted CI, merge with `--match-head-commit`, `bin/after_merge.sh`, restart the session.
+- Designer's open should-fixes for that review: offers.ts:87 serviceOrder reads any non-no_order refusal as an open
+  order (real fix needs loka-x6t.118); Shelf.tsx:83 selling the last item drops screen-reader focus. Flags: whisper
+  and old shelf-row tests removed; speech can't be aimed at a person until loka-x6t.115; NPC pages lost their Contents
+  opener; the OpenOrder story uses a shaped view.
+- Filed today from owner leans: x6t.115 whisper listeners, x6t.116 repair service, x6t.117 sell non-shelf items,
+  x6t.118 order state projection, x6t.119 steal from shelf, kgd.193 canned emotes (P2), loka-9ch9 after_merge flush
+  conflict (housekeeping). Owner's cut-off note ("And sometimes…"): owner doesn't remember; dropped.
 
 ## Today 2026-10-23 (owner live in Storybook), all merged
 
