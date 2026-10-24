@@ -21,6 +21,7 @@
         "lock"
       ],
       "description": "detail.strongbox_lock",
+      "title": "detail.strongbox_lock.title",
       "rating": 1
     },
     "tollhouse_door": {
@@ -30,6 +31,7 @@
         "door"
       ],
       "description": "detail.tollhouse_door",
+      "title": "detail.tollhouse_door.title",
       "rating": 5
     },
     "iron_door": {
@@ -38,6 +40,7 @@
         "door"
       ],
       "description": "detail.iron_door",
+      "title": "detail.iron_door.title",
       "rating": 5
     }
   }

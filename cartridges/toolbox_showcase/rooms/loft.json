@@ -36,7 +36,8 @@
         "hearth",
         "ash"
       ],
-      "description": "detail.hearth.description"
+      "description": "detail.hearth.description",
+      "title": "detail.hearth.title"
     }
   }
 }

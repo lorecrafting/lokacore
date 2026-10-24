@@ -20,7 +20,8 @@
         "cleft",
         "crack"
       ],
-      "description": "detail.cleft"
+      "description": "detail.cleft",
+      "title": "detail.cleft.title"
     }
   },
   "variants": [

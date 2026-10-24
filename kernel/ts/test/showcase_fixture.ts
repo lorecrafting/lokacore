@@ -162,6 +162,8 @@ export function reload(edit: (c: any) => void) {
 // loader rows; twin of homestead/0 in test/loka/content_showcase_test.exs.
 export function homestead(c: any) {
   for (const e of [...Object.values<any>(c.npcs), ...Object.values<any>(c.items)]) delete e.words; // 1.118 (loka-6qi)
+  for (const r of Object.values<any>(c.rooms))
+    for (const d of Object.values<any>(r.details ?? {})) delete d.title; // 1.120 (loka-x6t.120)
   delete c.world.construction;
   delete c.rooms[ref('room', 'holding_lane')].site;
   delete c.npcs[ref('npc', 'carpenter')].services;
@@ -182,9 +184,8 @@ export function homestead(c: any) {
   delete c.statuses[ref('status', 'wanted')].kind; // 1.102 (the law's wanted icon, E1)
   delete c.items[ref('item', 'training_sword')].equip; // 1.116 (loka-x6t.20)
   delete c.world.death.narration; // 1.117 (loka-3w3q)
-  // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91);
-  // the Loft's errand handover line (1.103).
-  delete c.rooms[ref('room', 'lever_hall')].asides;
+  // The traps district's narrate lines and wheel readouts (1.103); the Loft's errand handover
+  // line (1.103).
   for (const r of [
     'lever_a_step',
     'lever_a_reset',

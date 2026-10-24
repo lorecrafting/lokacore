@@ -13,6 +13,7 @@
         "sawbench"
       ],
       "description": "detail.saw_bench",
+      "title": "detail.saw_bench.title",
       "rating": 1
     }
   }

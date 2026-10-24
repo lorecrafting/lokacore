@@ -480,7 +480,7 @@
    {
     "id": "13e64759-6fc3-8b88-ade5-56dbaa5d940d",
     "key": "hearth",
-    "title": "detail.hearth.description",
+    "title": "detail.hearth.title",
     "description": "detail.hearth.description",
     "actions": [
      {

@@ -17,7 +17,8 @@
       "aliases": [
         "post"
       ],
-      "description": "detail.fold_post"
+      "description": "detail.fold_post",
+      "title": "detail.fold_post.title"
     },
     "fold_bones": {
       "aliases": [
@@ -25,6 +26,7 @@
         "bones"
       ],
       "description": "detail.fold_bones",
+      "title": "detail.fold_bones.title",
       "rating": 11
     },
     "fold_hearth": {
@@ -32,7 +34,8 @@
         "hearth",
         "fire"
       ],
-      "description": "detail.fold_hearth"
+      "description": "detail.fold_hearth",
+      "title": "detail.fold_hearth.title"
     }
   }
 }

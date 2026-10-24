@@ -11,7 +11,8 @@
       "aliases": [
         "lectern"
       ],
-      "description": "detail.lectern"
+      "description": "detail.lectern",
+      "title": "detail.lectern.title"
     }
   }
 }

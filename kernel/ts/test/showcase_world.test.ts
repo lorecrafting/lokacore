@@ -26,6 +26,7 @@ import {
   take,
   wait,
 } from './showcase_fixture.ts';
+import { noticeAction } from './notice_action.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-000000000268';
 const place = (w: World) => gameView(w).place.description.key;
@@ -84,7 +85,7 @@ test('world 3-4: the drop without the rope hurts 3 and lands on the stair; with 
 test('world 5: at 10:00 the cleft search is unavailable and the cave shows only west', () => {
   w = wait(go(w, 'down').world, 10 * HOUR).world;
   assert.equal(here(w), w.roomIds[ref('room', 'sea_cave')]);
-  const search = gameView(w).actions.find((a) => a.action_key === 'search_cleft');
+  const search = noticeAction(gameView(w), 'search_cleft');
   assert.equal(search?.available, false);
   assert.equal(act(w, { type: 'perform', action: 'search_cleft' }).decision.kind, 'rejected');
   assert.deepEqual(exits(w), ['west']);

@@ -30,6 +30,7 @@ import {
   wait,
   where,
 } from './showcase_fixture.ts';
+import { noticeAction } from './notice_action.ts';
 
 // Cause and effect (docs/showcase/cause-and-effect.md, steps 15 to 21): ECHO's days 2 and 3 are
 // clear, so Tam reaches the green at 11:00. Weather oracle as in showcase_social.test.ts: for d in
@@ -41,8 +42,7 @@ const statuses = (w: World) =>
     .map(([k, r]) => [decode(k) as { body_id: string; status: { key: string } }, r] as const)
     .filter(([k, r]) => r.active && k.status.key === 'word_travels')
     .map(([k, r]) => [k.body_id, r.active && r.ends_at]);
-const offered = (w: World, action: string) =>
-  gameView(w).actions.find((a) => a.action_key === action)?.available;
+const offered = (w: World, action: string) => noticeAction(gameView(w), action)?.available;
 const looks = (w: World, who: string) =>
   (['room_line', 'description'] as const).map((f) =>
     describeEntity(w, w.character, npc(w, who), f),

@@ -11,7 +11,8 @@
       "aliases": [
         "hearth"
       ],
-      "description": "detail.hearth"
+      "description": "detail.hearth",
+      "title": "detail.hearth.title"
     },
     "knucklebones": {
       "aliases": [
@@ -19,6 +20,7 @@
         "bones"
       ],
       "description": "detail.knucklebones",
+      "title": "detail.knucklebones.title",
       "rating": 11
     }
   }

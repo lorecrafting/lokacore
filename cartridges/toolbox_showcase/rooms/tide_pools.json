@@ -18,7 +18,8 @@
       "aliases": [
         "cleft"
       ],
-      "description": "detail.pool_cleft"
+      "description": "detail.pool_cleft",
+      "title": "detail.pool_cleft.title"
     },
     "pool_sky": {
       "aliases": [

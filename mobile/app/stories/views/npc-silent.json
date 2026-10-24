@@ -366,7 +366,7 @@
    {
     "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
     "key": "barrels",
-    "title": "detail.barrels",
+    "title": "detail.barrels.title",
     "description": "detail.barrels",
     "actions": [
      {

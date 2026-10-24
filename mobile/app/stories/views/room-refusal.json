@@ -419,7 +419,7 @@
    {
     "id": "f3c7442b-1155-8f9a-8482-3a4f621a90fd",
     "key": "hall_cupboard",
-    "title": "detail.hall_cupboard",
+    "title": "detail.hall_cupboard.title",
     "description": "detail.hall_cupboard",
     "actions": [
      {
@@ -436,7 +436,7 @@
    {
     "id": "5618d912-3e17-8488-a2e6-0927cff37eb5",
     "key": "hall_lectern",
-    "title": "detail.hall_lectern",
+    "title": "detail.hall_lectern.title",
     "description": "detail.hall_lectern",
     "actions": [
      {
@@ -456,7 +456,7 @@
    {
     "id": "dd8c6f46-accd-87e3-af31-b0caf37caeeb",
     "key": "hall_strongbox_lock",
-    "title": "detail.hall_strongbox_lock",
+    "title": "detail.hall_strongbox_lock.title",
     "description": "detail.hall_strongbox_lock",
     "actions": [
      {
