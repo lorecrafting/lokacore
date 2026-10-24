@@ -56,7 +56,6 @@ defmodule Loka.Content.Source do
   def load(dir) do
     {files, diags} = read(dir)
     {files, opened} = Bundles.split(files, dirs())
-    # Repeats go before extends, which indexes one definition per kind and key.
     {files, repeats} = Bundles.unique(files)
     {files, faults} = Extends.flatten(files)
     faults = Enum.map(opened ++ repeats, &bundle_diag/1) ++ Enum.map(faults, &extends_diag/1)
