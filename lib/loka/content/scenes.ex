@@ -1,4 +1,4 @@
-# size: allow 326, action-started and storylet-started (row FD3) scenes validate source and end exports beside modal rules
+# size: allow 326, action-started scenes validate source and end exports beside modal rules
 defmodule Loka.Content.Scenes do
   @moduledoc """
   scene@1's modal ordered subset, trigger/text references and compiler-added facts
@@ -143,7 +143,7 @@ defmodule Loka.Content.Scenes do
     kind = trigger_kind(s["on"])
 
     shape =
-      if valid_source?(s["on"], kind, storylet?(s["on"], kind, m, defs)),
+      if valid_source?(s["on"], kind),
         do: [],
         else: [diag("SCHEMA_VIOLATION", at(rel, steps ++ ["on"]))]
 
@@ -160,24 +160,14 @@ defmodule Loka.Content.Scenes do
     end
   end
 
-  # Toolbox row FD3: an action start naming a storylet recipe names no room or detail.
-  defp valid_source?(on, kind, storylet?) do
+  defp valid_source?(on, kind) do
     placed = Enum.count(~w(room detail), &is_map_key(on, &1))
 
     Enum.count(~w(action quest story_point), &is_map_key(on, &1)) == 1 and
       is_map_key(on, "outcome") and
       (kind != "action" or
-         ((placed == 2 or (storylet? and placed == 0)) and on["outcome"] == "success"))
+         (placed == 2 and on["outcome"] == "success"))
   end
-
-  defp storylet?(on, "action", m, defs),
-    do:
-      match?(
-        {_, _, %{"target" => %{"kind" => "storylet"}}},
-        resolve(on["action"], "recipe", m, defs)
-      )
-
-  defp storylet?(_, _, _, _), do: false
 
   defp start_ref(rel, steps, on, "action", m, defs) do
     action = resolve(on["action"], "recipe", m, defs)

@@ -30,8 +30,8 @@ export function craft(c: Obj, { named, text }: Checks): Diagnostic[] {
   for (const [ref, r] of crafts) {
     const at = `.cartridge.recipes${step(ref)}.craft`;
     const { consume, yield: made } = r.craft;
-    // A spell or storylet has no station whose stock it could use (craft recipes are station recipes).
-    if (['spell', 'storylet'].includes(r.target.kind))
+    // A spell has no station whose stock it could use (craft recipes are station recipes).
+    if (r.target.kind === 'spell')
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
     if (consume) {
       out.push(...stock(c, named, `${at}.consume`, consume.items, { to: consume.to }));

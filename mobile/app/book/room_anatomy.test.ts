@@ -66,7 +66,6 @@ const forge = (more: object = {}) =>
       read('sign'),
       read('flyer'),
     ],
-    storylet: 'gather_ash',
     exits: [{ direction: 'north', available: true, warning: 'warn.ice' }],
     entities: [
       { id: 'smith', name: 'npc.smith', kind: 'npc', actions: [] },
@@ -129,7 +128,7 @@ const world = async (view: GameView, opened: Page[] = [], pressed: string[] = []
   );
 };
 
-// Breaks: any removed block restored (World verb lines, the refused note, the storylet card, the
+// Breaks: any removed block restored (World verb lines, the refused note, the
 // unlinked notice, board, bed and ferry entries, the cue block).
 test('the World page draws only title, linked prose, people, items and log', async () => {
   const drawn = await world(forge());

@@ -30067,6 +30067,48 @@
     ]
   },
   {
+    "name": "recipe_target_storylet_retired",
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "storylet"
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "name": "game_view_storylet_retired",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "storylet": "gather_ash"
+    },
+    "errors": [
+      {
+        "path": "/storylet",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "BlueprintDefinition",
     "value": {
       "x": 1

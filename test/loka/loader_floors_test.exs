@@ -101,7 +101,6 @@ defmodule Loka.LoaderFloorsTest do
     "1.89 rivals_sampler",
     "1.90 raid_sampler",
     "1.91 voices_sampler",
-    "1.92 storylet_sampler",
     "1.93 sneak_sampler",
     "1.94 theft_sampler",
     "1.95 rivals_sampler",

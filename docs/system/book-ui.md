@@ -769,7 +769,8 @@ word anywhere; only its writer sees it.
 
 ## Storylet card details
 
-The Book draws no storylet card ([room page anatomy](#room-page-anatomy)); the pick is projected and not shown until FD3 is anchored on a person or fixture page or retired (owner call).
+Removed: storylets are retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)), so there is no storylet card and no pick to show.
+
 
 ## Skill tree details
 

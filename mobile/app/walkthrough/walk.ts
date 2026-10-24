@@ -44,7 +44,6 @@ type View = {
   scene?: JsonValue;
   combat?: JsonValue;
   choice?: JsonValue;
-  storylet?: string;
   notices?: { id: string }[];
   notice_boards?: { notices: { id: string }[] }[];
 };
