@@ -323,8 +323,11 @@ only while the player holds something the person will buy. Sell opens the child 
 **<Name> will buy…** (owner pick mvlynyikyw57): one card per thing the GameView offers to sell
 to this person, with its price ("Cob of bread — 1p"), then the purse and history; Leave
 returns to the buy page. It lists only what the engine marks sellable (wider sale lists are
-loka-x6t.117). A buy or sale keeps its page open: its line joins the person's visit history,
-drawn there and again on the person's page, and the purse redraws. Shop stock is not listed
+loka-x6t.117). A buy or sale keeps its page open, with no page turn and no return to the person (owner,
+2026-10-23): its line joins the person's visit history, drawn there and again on the person's
+page, the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
+"Cob of bread — 4p: sold out"; a thing sold leaves the sell list). A row that goes moves focus to
+the page title. Shop stock is not listed
 under the person's Held. Each service is its own Action card
 with its authored label; the claim and cancel of an order sit under a **Your order** Section
 title after the order card, and show only while an order is open (either is offered, or either
