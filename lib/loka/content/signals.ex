@@ -75,8 +75,6 @@ defmodule Loka.Content.Signals do
   defp sending(step), do: step
 
   # An undecodable or malformed facts.json takes nothing; its own diagnostic stands.
-  defp facts(files, []), do: {files, []}
-
   defp facts(files, names) do
     case List.keyfind(files, "facts.json", 0, {"facts.json", :facts, %{"facts" => %{}}}) do
       {_, _, %{"facts" => %{} = authored} = file} ->

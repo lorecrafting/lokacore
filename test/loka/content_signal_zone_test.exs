@@ -56,6 +56,28 @@ defmodule Loka.ContentSignalZoneTest do
 
   @codex "cartridges/codex_sampler"
 
+  # Breaks: a non-string signal name, a non-list apply, or a non-string zone crashes the pass
+  # instead of reaching the schema check at the author's path.
+  test "a malformed signal or zone shortcut is refused, not a crash" do
+    assert refused(@sugar, [
+             {"reactions/ring.json", &put_in(&1, ["apply", Access.at(0), "signal"], 1)},
+             {"reactions/hear.json", &put_in(&1, ["on", "signal"], 1)}
+           ]) == [
+             {"SCHEMA_VIOLATION", "reactions/hear.on.event", %{"error" => "unknown_variant"}},
+             {"SCHEMA_VIOLATION", "reactions/ring.apply[0].op", %{"error" => "unknown_variant"}}
+           ]
+
+    assert refused(@sugar, [{"reactions/ring.json", &Map.put(&1, "apply", "x")}]) == [
+             {"SCHEMA_VIOLATION", "reactions/ring.apply", %{"error" => "invalid_type"}},
+             {"UNRESOLVED_REFERENCE", "reactions/hear.on.signal", %{"target" => "bell"}}
+           ]
+
+    assert refused(@codex, [{"reactions/wanderer.json", &Map.put(&1, "zone", 1)}]) == [
+             {"SCHEMA_VIOLATION", "reactions/wanderer.on.room", %{"error" => "missing_property"}},
+             {"UNKNOWN_FIELD", "reactions/wanderer.zone", %{}}
+           ]
+  end
+
   # Breaks: zone together with on.room accepted, an unknown zone dropped, a copy key that repeats
   # an authored rule kept once, or a malformed `zones` accepted or crashing.
   test "a zone rule refuses on.room, an unknown zone, a repeated copy key and malformed zones" do
