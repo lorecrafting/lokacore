@@ -77,6 +77,22 @@ const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () =
   </View>
 );
 
+// Opening focuses the first row. `sent` is the option whose row was pressed: the next view keeps
+// focus on it, or moves it to the page title when the option went.
+function useFocus(open: string | undefined, view: GameView, all: Pick[]) {
+  const title = useContext(titleContext);
+  const first = useRef<View>(null);
+  const sent = useRef<string>(undefined);
+  useEffect(() => {
+    if (open) first.current?.focus();
+  }, [open]);
+  useEffect(() => {
+    if (sent.current && !all.some((k) => k.label === sent.current)) focusTitle(title.last);
+    sent.current = undefined;
+  }, [view]);
+  return { first, sent };
+}
+
 export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>;
 
 /**
@@ -105,17 +121,8 @@ export function PickLists(p: {
   const [shown, setShown] = p.state ?? own;
   const open = shown?.page === p.page ? shown.label : undefined;
   const option = useRef<View>(null);
-  const first = useRef<View>(null);
-  const title = useContext(titleContext);
-  const sent = useRef<string>(undefined); // the option whose row was pressed, until the next view
   const all = picks(p.view, p.buttons, p.page, p.text);
-  useEffect(() => {
-    if (open) first.current?.focus();
-  }, [open]);
-  useEffect(() => {
-    if (sent.current && !all.some((k) => k.label === sent.current)) focusTitle(title.last);
-    sent.current = undefined;
-  }, [p.view]);
+  const { first, sent } = useFocus(open, p.view, all);
   const close = () => {
     setShown(undefined);
     option.current?.focus();
