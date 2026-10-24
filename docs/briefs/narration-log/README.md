@@ -16,23 +16,26 @@ narrates, "every line in the room log" leaves holes. The PR is marked ready only
   in `accepted(...)`'s narration (`runtime/decision.ts:303`). The record carries the engine key, the names it binds
   (`entity.short` TextKeys, as `item.recovered` does at `containment/recovery.ts:67-70`), and
   `participants.actor`. A client has to word the same line in the same way. It never decides whether a line exists.
-- **Person is placement.** There is one record per change, for every viewer. A client words it in the first person
-  when `participants.actor` is the viewer's body ("You take the rope.") and in the third person otherwise ("Bram
-  takes the rope."). This is today's `combat.skipped` pattern (`words.ts` `lineWords`). The kernel delivers no
-  per-observer line: `RecipeNarration.observers` is only text-checked (`content/cartridge_recipes.ts:61`). This
-  batch adds no observer channel.
-- **Where the sentences live.** One table of English sentences per engine key, in `mobile/app/book/words.ts`
-  `lineWords`, as `combat.fled` does (commit 8063d2951, the precedent: kernel line and Book words in one commit).
-  The kernel has no text interpolation and no catalog for engine keys (the compiler checks no engine key against
-  cartridge text). A telnet client would word the same keys from the same table. Moving the table into a
-  host-neutral module is a later row (open question 1). Authored narration still wins: an item's `equip` lines,
+- **Person is placement.** There is one record per change, for every viewer, with `participants.actor` pinned to
+  the actor's body. GameView has `actor_id` (a CharacterId) but no body id, so the Book words the line in the third
+  person when `nameOf(view, actor)` finds another person in the view ("Bram takes the rope.") and in the first person
+  otherwise ("You take the rope."). That is the `combat.skipped` fallback (`words.ts` `lineWords`). Today all 13
+  keys come from the player's own commands. The kernel delivers no per-observer line:
+  `RecipeNarration.observers` is only text-checked (`content/cartridge_recipes.ts:61`). This batch adds no observer
+  channel and no GameView field.
+- **Where the sentences live (a deviation for the PM).** The kernel carries TextKeys, never display text, and has
+  no interpolation or engine-key catalog. So the English stays client-side, as `combat.fled` does (commit 8063d2951:
+  kernel line and Book words in one commit). It goes in one new Book file, `mobile/app/book/line_words.ts`, a
+  table from engine key to sentence that `lineWords` looks up (`words.ts` is 279/300 lines). A telnet client words
+  the same keys from a copy of that table. Engine-owned English would need cartridge text with interpolation, which
+  is a separate engine row. Authored narration still wins: an item's `equip` lines,
   theft's `narration.seen/unseen` and a recipe's narration keep their place, and no engine line is added beside
   them.
 - **Book placement.** Every narration line, refusal line and arrival or departure goes to the room event log
   (`s.log`, through `world(s, away, lines)` so the away recap still holds background lines). A line whose receipt
   routes to an open detail page (`detail_id`, a shop, a conversation, an item page) is also drawn in that page's
   visit history. That page never draws the room log, so nothing is drawn twice on screen. Combat lines stay in the
-  combat log only (open question 2).
+  combat log only (open question 1).
 - **Announcements (x6t.124).** The live region keeps one source, the room log (`presenter.ts` `heard`). Once
   detail lines are in `s.log`, a buy, a sale or an NPC reply is read once with no new code path. A second source
   (detail histories) would read each line twice. No new announcement code is needed.
@@ -55,7 +58,7 @@ narrates, "every line in the room log" leaves holes. The PR is marked ready only
 Goal. `containment/rule.ts` `decide` adds one line to each accepted take, drop, give and put. Proposed keys:
 `item.taken`, `item.dropped` (bindings `item`), `item.given` (`item`, `to`), `item.put` (`item`, `container`), all with
 `participants.actor` (plus `recipient` or `container`). A stolen take keeps theft's authored line. The Book words
-each key in `lineWords` ("You pick up X." and "You drop X." keep book-ui's wording, "You give X to Y.", "You put X
+each key through `lineWords` and the new `line_words.ts` table ("You pick up X." and "You drop X." keep book-ui's wording, "You give X to Y.", "You put X
 in Y.", third person "<Name> picks up X.") and deletes what the engine line replaces: the take, drop and give branches of
 `received.ts` `fallbackLine`, `words.ts` `given`, and `OUTCOME` `taken`, `dropped`, `put`.
 
@@ -66,7 +69,7 @@ kernel/ts/src/mechanics/containment/rule.ts      (121 lines; decide is at its si
  34: export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
 kernel/ts/src/runtime/decision.ts
 303: export const accepted = <E>(world, outcome, ops, events, narration?: readonly Text[], rng = world.state.rng)
-mobile/app/book/words.ts                          (279 lines)
+mobile/app/book/words.ts                          (279 lines; new sentences go in line_words.ts)
  56: export const OUTCOME: Record<string, string> = {
 133: export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 185: export const lineWords = (
@@ -88,7 +91,8 @@ Acceptance:
    NPC id in `view.entities` reads "Bram picks up the rope.". Take and Drop still return to World with one line
    (the existing `polish_detail.test.ts` cases stay green with the fallback deleted).
 
-Stop and ask if a corpse take (`pickup_name`, `logs.ts` `pickupLine`) would show two lines, or if `named` is still
+Stop and ask if the viewer's own body appears in `view.entities` with a name (then the person test needs a GameView
+body id, a protocol change with a `kernel_api` bump), if a corpse take (`pickup_name`, `logs.ts` `pickupLine`) would show two lines, or if `named` is still
 needed after the fallback goes (then delete it with its caller, whisper's listener excepted).
 
 ## Slice 2: loka-kgd.185 part 2, the other nine keys narrate; the pin list goes (M, engine and Book words)
@@ -99,12 +103,13 @@ Goal. Each remaining pinned key gets an engine line when no authored line exists
   comment) and reuse that line if one exists.
 - `wear`, `remove` (`equipment/rule.ts:36-41`): `equipment.worn` and `equipment.removed` (`item`) when `e.equip` is absent.
   Wield-slot words stay `WIELD`'s, keyed by the line.
-- `stand`, `sit`, `rest`, `sleep` (`position/rule.ts` `decide`): `position.stood`, `sat`, `rested`, `slept`, put
-  before any `engage` narration from sleep.
+- `stand`, `sit`, `rest`, `sleep` (`position/rule.ts` `decide`, lines 14-53, already at the 40-line clause limit:
+  use a helper): `position.stood`, `sat`, `rested`, `slept`, put before any `engage` narration from sleep.
 - `talk` (`dialogue/rule.ts:67` `talk`): narrate the opened choice's prompt key. `received.ts`
   `conversationLines` already skips the prompt when the narration has it, so it is not drawn twice.
-- `move` (`movement/rule.ts` `decide` via `moveSequence`): `movement.moved` (`direction`). The Book's
-  `withoutHeading` filter stays (open question 3).
+- `move` (`movement/rule.ts:36-39` `decide`, on its `moved` result only, never inside `moveSequence`: flee also
+  calls `moveSequence` and already narrates `combat.fled`): `movement.moved` (`direction`). The Book's
+  `withoutHeading` filter stays (open question 2).
 
 The Book words each key in `lineWords` from today's `OUTCOME` strings ("You stand up.", "Opened." becomes "You
 open the crate."), then deletes the `OUTCOME` entries the engine now covers. Delete
@@ -136,7 +141,8 @@ Acceptance:
    Book tests stay green after the deleted `OUTCOME` entries.
 4. `npm run test:sim:showcase` passes locally. Hosted `sim (showcase)` is green on the head.
 
-Stop and ask if the move line shows on World next to the heading in a way the walk contact sheet makes worse, or
+Stop and ask if NPC schedule, patrol or water steps go through movement `decide`, because a third-person move line
+would double the Book's inferred `comings()` "X leaves." and "X arrives." lines. Also stop and ask if the move line shows on World next to the heading in a way the walk contact sheet makes worse, or
 if a key needs a new binding that `TextValue` cannot carry (a protocol change).
 
 ## Slice 3: loka-x6t.129 and loka-x6t.124, every line in the room log; detail lines announced (M, Book)
@@ -150,7 +156,9 @@ There are three sites:
 - `received.ts` `received` (a press's reply): `lines` becomes "the detail history, if routed" plus the room log
   (through the held `away` log when one is open). Combat routing is unchanged.
 - `presenter.ts` `pressed` pending path (`:178`): the same two targets.
-`heard` is unchanged: it reads `s.log` only. Its comment and book-ui Announcements say why.
+`heard` is unchanged: it reads `s.log` only. Its comment and book-ui Announcements say why. `presenter.ts` is 297/300
+lines: put the code that pushes to both targets in `logs.ts` (185 lines) and call it from the three sites, so
+`presenter.ts` does not grow.
 
 Files (outline signatures):
 
@@ -198,7 +206,7 @@ Change these passages so they match the placement rule:
   these are engine lines now, and the Book only words them.
 - `docs/system/book-ui.md:168`: position fallbacks ("You stand up." and the others) become the engine's position lines.
 - `docs/system/book-ui.md` Announcements (`:566-571`): it reads new room-log lines, which now include detail-page
-  lines. It drops "World, combat and refused" (combat as open question 2 decides).
+  lines. It drops "World, combat and refused" (combat as open question 1 decides).
 - `docs/design/interaction-patterns.md` Item detail, "Never appears: a second copy of a World line"; Room, "every
   ambient line appends" (every line); Feedback, "After an action you stay where you are"; Screen-reader
   announcements (remove "Gap: ... loka-x6t.124").
@@ -209,11 +217,9 @@ Change these passages so they match the placement rule:
 
 ## Open questions (owner)
 
-1. Engine sentences live in the Book's `words.ts` for now. Should they move into a shared, host-neutral table before a
-   second client exists? The default is no: a later row moves them.
-2. Combat narration stays in the combat log only. Should a fight's lines also land in the room event log, so the room log is the
+1. Combat narration stays in the combat log only. Should a fight's lines also land in the room event log, so the room log is the
    full transcript? The default is no (book-ui combat rules, interaction-patterns Combat "Never appears").
-3. A plain move: should the new room's log open with "You go north." (the MUD style without the room text), or
+2. A plain move: should the new room's log open with "You go north." (the MUD style without the room text), or
    should the Book hide the engine's move line and let the new page speak? The default is to show it.
 
 ## Risks
