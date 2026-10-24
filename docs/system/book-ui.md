@@ -315,8 +315,8 @@ opens the child page **<Name>'s shelf**, as a notice opens from its board, and t
 returns to the person. The shelf page holds the purse Note **You have <n>p.**, then one buy card
 per shelf row ("Cob of bread — 4p"; refused, "Cob of bread — 4p: can't afford"), then one
 **Sell…** [pick option](#item-details-and-takedrop) with a row per sellable thing and its price.
-A buy or sale keeps the shelf page open: its line joins the shelf's visit history and the purse
-redraws. Shelf stock is not listed under the person's Held. Each service is its own Action card
+A buy or sale keeps the shelf page open: its line joins the person's visit history, drawn under
+the purse on the shelf and again on the person's page, and the purse redraws. Shelf stock is not listed under the person's Held. Each service is its own Action card
 with its authored label; the claim and cancel of an order sit under a **Your order** Section
 title after the order card, and show only while an order is open (either is offered, or either
 is refused for a reason other than `service.no_order`); while Your order shows, the commission
