@@ -1,12 +1,11 @@
 // Toolbox row W6 at the cartridge trust boundary: an entity text variant (all but an item's older
 // room_line_variants) or a status_active or npc_present leaf needs kernel_api 1.46; a status_active
 // leaf reading self or subject (status reader 1, row G3) 1.53; a resource_compare with subject or
-// at_least_percent (row 39) 1.87; a room's or detail's asides or a skill_compare leaf (row FD2)
-// 1.91; world.identity (rows W15, FD9) 1.97; an item_present leaf (Homestead hs-6) 1.102; an
-// NPC's asides (row FD10) 1.107; an NPC's or item's name words (loka-6qi) 1.118; a detail's title
-// (loka-x6t.120) 1.120. Twin of lib/loka/content/variants.ex.
+// at_least_percent (row 39) 1.87; a skill_compare leaf (row FD2) 1.91; world.identity (rows W15,
+// FD9) 1.97; an item_present leaf (Homestead hs-6) 1.102; an NPC's or item's name words (loka-6qi)
+// 1.118; a detail's title (loka-x6t.120) 1.120. Twin of lib/loka/content/variants.ex.
 import type { Diagnostic } from '../contracts.gen.ts';
-import { asideParts, diag, nodes, type Obj } from './cartridge_refs.ts';
+import { diag, nodes, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
 const titledDetail = (c: Obj) =>
@@ -20,9 +19,8 @@ export function variants(c: Obj): Diagnostic[] {
   const relative = leaves.some(
     (p) => p.op === 'resource_compare' && (p.subject || p.at_least_percent),
   );
-  const voices = asideParts(c).length > 0 || leaves.some((p) => p.op === 'skill_compare');
+  const voices = leaves.some((p) => p.op === 'skill_compare');
   const furnish = leaves.some((p) => p.op === 'item_present');
-  const remarks = Object.values((c.npcs ?? {}) as Obj).some((n) => n.asides);
   const words = [c.npcs, c.items].some((m) => Object.values((m ?? {}) as Obj).some((e) => e.words));
   const titled = titledDetail(c);
   const used =
@@ -41,7 +39,6 @@ export function variants(c: Obj): Diagnostic[] {
       [
         [titled, '1.120'],
         [words, '1.118'],
-        [remarks, '1.107'],
         [furnish, '1.102'],
         [c.world?.identity, '1.97'],
         [voices, '1.91'],

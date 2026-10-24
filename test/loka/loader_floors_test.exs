@@ -121,7 +121,6 @@ defmodule Loka.LoaderFloorsTest do
     "1.105 trial_sampler",
     "1.105 toolbox_showcase",
     "1.106 climb_sampler",
-    "1.107 remarks_sampler",
     "1.108 mount_sampler",
     "1.109 penalty_sampler"
   ]

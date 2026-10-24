@@ -24,8 +24,6 @@ const SAY: Record<string, string> = {
   'action.read': 'Read',
   'action.gather_ash': 'Gather ash',
   'action.fish': 'Fish',
-  'aside.place': 'The bellows wheeze.',
-  'aside.npc': 'The smith grunts.',
   'cue.hammering': 'Hammering',
   'cue.heat': 'Heat beats out from the forge.',
   'warn.ice': 'The north path is iced.',
@@ -60,7 +58,6 @@ const forge = (more: object = {}) =>
       id: 'forge',
       title: { key: 'room.forge' },
       description: { key: 'room.forge.d' },
-      asides: [{ key: 'aside.place' }],
     },
     actions: [
       action('look'),
@@ -72,7 +69,7 @@ const forge = (more: object = {}) =>
     storylet: 'gather_ash',
     exits: [{ direction: 'north', available: true, warning: 'warn.ice' }],
     entities: [
-      { id: 'smith', name: 'npc.smith', kind: 'npc', actions: [], asides: [{ key: 'aside.npc' }] },
+      { id: 'smith', name: 'npc.smith', kind: 'npc', actions: [] },
       { id: 'tongs', name: 'item.tongs', kind: 'item', actions: [] },
     ],
     notices: [
@@ -133,7 +130,7 @@ const world = async (view: GameView, opened: Page[] = [], pressed: string[] = []
 };
 
 // Breaks: any removed block restored (World verb lines, the refused note, the storylet card, the
-// unlinked notice, board, bed and ferry entries, the cue block, an aside drawn on the page).
+// unlinked notice, board, bed and ferry entries, the cue block).
 test('the World page draws only title, linked prose, people, items and log', async () => {
   const drawn = await world(forge());
   assert.deepEqual(
@@ -152,17 +149,7 @@ test('the World page draws only title, linked prose, people, items and log', asy
     .filter((n) => n.type === 'Text')
     .map(words)
     .join('\n');
-  for (const gone of [
-    'Gather ash',
-    'Fish',
-    'not yet',
-    'flyer',
-    'cot',
-    'ferry',
-    'board',
-    'The bellows wheeze.',
-    'The smith grunts.',
-  ])
+  for (const gone of ['Gather ash', 'Fish', 'not yet', 'flyer', 'cot', 'ferry', 'board'])
     assert.ok(!page.includes(gone), `${gone} is drawn on World`);
   // A cue is a log line only: a restored cue block would draw it twice.
   for (const cue of ['Hammering', 'Heat beats'])

@@ -1,4 +1,4 @@
-// size: allow 318, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2; the Book hostile refusal (loka-x6t.33); NPC asides (row FD10)
+// size: allow 318, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2; the Book hostile refusal (loka-x6t.33)
 import { wordViews } from './spells.ts';
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan, planned } from '../mechanics/movement/sequence.ts';
@@ -35,7 +35,7 @@ import { refusal, resolved } from '../commands/actions.ts';
 import { bodyOf, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened } from '../mechanics/lookups.ts';
 import { choiceView } from '../mechanics/dialogue/shared.ts';
-import { asides, describe, describeEntity } from '../mechanics/description_variant/rule.ts';
+import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
 import { holds } from '../mechanics/policy.ts';
@@ -122,11 +122,10 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
     return { id: '' as EntityId, title: text('' as TextKey), description: text('' as TextKey) };
   const room = world.rooms[here];
   // In the dark, the authored dark_description, else the engine line (loka-x6t.36); not in
-  // `describe`, which also names held items and the player. Lit, `describe` and `asides` get no
-  // dark_description so they do not test darkness again (query budget).
+  // `describe`, which also names held items and the player. Lit, `describe` gets no
+  // dark_description so it does not test darkness again (query budget).
   const unseen = dark(world, actor, steps);
   const lit = { ...room, dark_description: undefined };
-  const lines = unseen ? [] : asides(world, actor, lit, steps);
   return {
     id: here,
     title: text(room.title),
@@ -135,7 +134,6 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
         ? (room.dark_description ?? ('place.dark' as TextKey))
         : describe(world, actor, lit, steps),
     ),
-    ...(lines.length > 0 && { asides: lines.map(text) }),
   };
 }
 
@@ -181,12 +179,9 @@ function within(
                 (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
               )
             : [];
-      // Row FD10: a present NPC's asides, read with the NPC as the target.
-      const lines = e.kind === 'npc' ? asides(world, actor, e, steps, id as EntityId) : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
-        ...(lines.length > 0 && { asides: lines.map((key) => ({ key })) }),
       };
     });
 }

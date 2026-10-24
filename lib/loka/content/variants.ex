@@ -3,13 +3,12 @@ defmodule Loka.Content.Variants do
   Toolbox row W6: an entity text variant (all but an item's older `room_line_variants`) or a
   `status_active` or `npc_present` leaf needs kernel_api 1.46; a `status_active` leaf reading
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
-  `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
-  (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
-  1.102; an NPC's `asides` (row FD10) 1.107; an NPC's or item's name `words` (loka-6qi) 1.118;
-  a detail's `title` (loka-x6t.120) 1.120. Twin of kernel/ts/src/content/cartridge_variants.ts.
+  `at_least_percent` (row 39) 1.87; a `skill_compare` leaf (row FD2) 1.91; world.identity
+  (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6) 1.102; an NPC's or item's name
+  `words` (loka-6qi) 1.118; a detail's `title` (loka-x6t.120) 1.120. Twin of kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
-  alias Loka.Content.{Entities, RoomParts}
+  alias Loka.Content.Entities
 
   # A missing or schema-invalid manifest (nil) has its own diagnostics.
   def check(nil, _, _), do: []
@@ -30,7 +29,7 @@ defmodule Loka.Content.Variants do
   # The floor ladder, newest first: the first feature present sets the floor.
   defp need(defs, settings) do
     relative = relative?(defs) or relative?(settings)
-    voices = voice?(defs) or aside?(defs)
+    voices = voice?(defs)
     identity = is_map_key(settings["world"] || %{}, "identity")
     words = Enum.any?(Entities.all(defs), fn {_, _, e} -> is_map_key(e, "words") end)
 
@@ -39,7 +38,6 @@ defmodule Loka.Content.Variants do
     ladder = [
       {titled, [1, 120]},
       {words, [1, 118]},
-      {remarks?(defs), [1, 107]},
       {furnish?([defs, settings]), [1, 102]},
       {identity, [1, 97]},
       {voices, [1, 91]},
@@ -73,17 +71,6 @@ defmodule Loka.Content.Variants do
   defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
   defp leaf?(_), do: false
-
-  # Twin of TS asideParts (rooms, details and, row FD10, NPCs): never a key named so elsewhere.
-  defp aside?(defs),
-    do:
-      remarks?(defs) or
-        Enum.any?(
-          for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != [])
-        )
-
-  defp remarks?(defs),
-    do: Enum.any?(for {_, {_, [], n}} <- Map.get(defs, "npc", %{}), do: is_map_key(n, "asides"))
 
   defp furnish?(%{"op" => "item_present"}), do: true
   defp furnish?(v) when is_map(v), do: Enum.any?(Map.values(v), &furnish?/1)

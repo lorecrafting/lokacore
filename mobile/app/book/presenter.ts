@@ -194,7 +194,7 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   if (update.kind === 'state') {
     background(game, update, s, text);
     settle(s);
-    // Asides are present tense: never held for the away recap; they log once it settles.
+    // Cues are present tense: never held for the away recap; they log once it settles.
     if (!s.away) s.log.push(...cueLines(s, s.projection.view, text));
     return false;
   }

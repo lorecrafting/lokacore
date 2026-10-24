@@ -1,4 +1,4 @@
-// size: allow 355, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35), NPC asides (row FD10) and mounts (row 43b) join shared reference admission
+// size: allow 355, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -128,19 +128,6 @@ const gateRoots = (c: Obj): [Obj, string][] =>
     ),
   );
 
-/** Toolbox row FD2: each room's and detail's aside with its path; row FD10: each NPC's. */
-export const asideParts = (c: Obj): [Obj, string][] =>
-  [
-    ...Object.entries((c.rooms ?? {}) as Obj).flatMap(([ref, r]) => [
-      [r, `.cartridge.rooms${step(ref)}`],
-      ...Object.entries((r.details ?? {}) as Obj).map(([k, d]) => [
-        d,
-        `.cartridge.rooms${step(ref)}.details${step(k)}`,
-      ]),
-    ]),
-    ...Object.entries((c.npcs ?? {}) as Obj).map(([ref, n]) => [n, `.cartridge.npcs${step(ref)}`]),
-  ].flatMap(([d, at]) => (d.asides ?? []).map((a: Obj, i: number) => [a, `${at}.asides[${i}]`]));
-
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
 /** Each node of one policy tree with its path. */
 export const walk = (p: Obj, at: string): [Obj, string][] => [
@@ -178,7 +165,6 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
-    ...asideParts(c).flatMap(([a, at]) => walk(a.when.root, `${at}.when.root`)),
     ...lockRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...gateRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
@@ -272,7 +258,6 @@ export function refStage(c: Obj): Diagnostic[] {
     text(d, TEXT[kind] ?? ['description'], at);
     if (d.words) text(d.words, ['bare', 'plural'], `${at}.words`); // loka-6qi
   }
-  for (const [a, at] of asideParts(c)) text(a, ['text'], at);
   text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
   ancestryRefs(c, check, out);

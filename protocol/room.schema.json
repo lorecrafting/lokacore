@@ -149,15 +149,6 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "asides": {
-          "description": "Toolbox row FD2 (kernel_api at least 1.91): passive voices. Every aside whose condition holds for the viewing actor is shown, in authored order, beside the description (GameView asides); none changes state.",
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Aside"
-          },
-          "minItems": 1,
-          "maxItems": 16
-        },
         "rating": {
           "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks; kernel_api at least 1.44): the value an opposed recipe check against this detail must reach.",
           "type": "integer"
@@ -476,15 +467,6 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "asides": {
-          "description": "Toolbox row FD2 (kernel_api at least 1.91): passive voices. Every aside whose condition holds for the viewing actor is shown, in authored order, beside the description (GameView asides); none changes state.",
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Aside"
-          },
-          "minItems": 1,
-          "maxItems": 16
-        },
         "actions": {
           "type": "array",
           "items": {
@@ -648,41 +630,6 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    "Aside": {
-      "description": "A passive voice line (toolbox row FD2): text is shown while when holds for the viewing actor over committed state (policy.schema.json VersionedPolicy; typically skills@1's skill_compare). Unlike a DescriptionVariant, every holding aside is shown, not the first. No capability of its own: it rides on its room or detail; its condition's ops are owned by their owners.",
-      "type": "object",
-      "properties": {
-        "when": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
-        },
-        "text": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "when",
-        "text"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "skill_compare",
-              "skill": {
-                "cartridge_id": "voices_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "skill",
-                "key": "lore"
-              },
-              "at_least": 1
-            }
-          },
-          "text": "aside.hall.lore"
         }
       ]
     },

@@ -784,15 +784,6 @@
           ],
           "additionalProperties": false
         },
-        "asides": {
-          "description": "Toolbox row FD10 (kernel_api at least 1.107): companion remarks. Every aside whose condition holds for the viewing actor, read with this NPC as the target, is shown in authored order with the NPC while it is present (GameView entity asides); none changes state. Never on a spawn template.",
-          "type": "array",
-          "items": {
-            "$ref": "room.schema.json#/$defs/Aside"
-          },
-          "minItems": 1,
-          "maxItems": 16
-        },
         "mount": {
           "description": "Toolbox row 43b (kernel_api at least 1.108; needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
           "type": "object",

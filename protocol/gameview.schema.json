@@ -569,14 +569,6 @@
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
-        },
-        "asides": {
-          "description": "Toolbox row FD10 (kernel_api at least 1.107): the text of every aside of this present NPC whose condition holds for the viewing actor, the NPC the target, in authored order (entity.schema.json NpcDefinition asides); absent when none holds.",
-          "type": "array",
-          "items": {
-            "$ref": "text.schema.json#/$defs/Text"
-          },
-          "minItems": 1
         }
       },
       "additionalProperties": false,
@@ -1110,14 +1102,6 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/Text"
-        },
-        "asides": {
-          "description": "Toolbox row FD2: the text of every aside of this room whose condition holds for the viewing actor, in authored order (room.schema.json Aside); absent when none holds.",
-          "type": "array",
-          "items": {
-            "$ref": "text.schema.json#/$defs/Text"
-          },
-          "minItems": 1
         }
       },
       "required": [
@@ -2231,14 +2215,6 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "asides": {
-          "description": "Toolbox row FD2: the text of every aside of this detail whose condition holds for the viewing actor, in authored order (room.schema.json Aside); absent when none holds.",
-          "type": "array",
-          "items": {
-            "$ref": "text.schema.json#/$defs/Text"
-          },
-          "minItems": 1
         },
         "actions": {
           "type": "array",

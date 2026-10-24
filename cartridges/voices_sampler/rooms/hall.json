@@ -2,19 +2,6 @@
   "title": "room.hall.title",
   "description": "room.hall.description",
   "exits": {},
-  "asides": [
-    {
-      "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "skill_compare",
-          "skill": "lore",
-          "at_least": 1
-        }
-      },
-      "text": "aside.hall.lore"
-    }
-  ],
   "details": {
     "runes": {
       "aliases": [
@@ -32,31 +19,7 @@
         "label": "actions.read_door",
         "text": "readable.door",
         "title": "detail.carved_door.title"
-      },
-      "asides": [
-        {
-          "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "skill_compare",
-              "skill": "lore",
-              "at_least": 2
-            }
-          },
-          "text": "aside.door.lore"
-        },
-        {
-          "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "skill_compare",
-              "skill": "lore",
-              "at_least": 1
-            }
-          },
-          "text": "aside.door.glance"
-        }
-      ]
+      }
     }
   }
 }

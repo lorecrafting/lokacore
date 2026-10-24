@@ -447,7 +447,7 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
-      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98), disposition.refuse (1.104) and the Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft, hide, NPC locks, stolen offers and fine, and the magic district's light capability, lanterns, lamp oil, dark crypt, lux, ward, flamma and its sparks, the observed lines (1.110), and the traps district's lever, wheel and needle lines and the errand reward line (narrate, 1.103) and lever hall asides (1.91), and name words (1.118) and detail titles (1.120), dropped",
+      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98), disposition.refuse (1.104) and the Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft, hide, NPC locks, stolen offers and fine, and the magic district's light capability, lanterns, lamp oil, dark crypt, lux, ward, flamma and its sparks, the observed lines (1.110), and the traps district's lever, wheel and needle lines and the errand reward line (narrate, 1.103), and name words (1.118) and detail titles (1.120), dropped",
       "edits": [
         ["cartridge.json", ["speech"], null],
         ["statuses/gored.json", ["kind"], null],
@@ -662,7 +662,6 @@
         ["reactions/cellar_springs.json", ["apply"], [{"op": "status.apply", "status": "poisoned"}, {"op": "fact.assign", "fact": "cellar_sprung", "value": true}]],
         ["reactions/cellar_bites.json", ["apply"], [{"op": "status.apply", "status": "poisoned"}]],
         ["reactions/errand_reward.json", ["apply"], [{"op": "fact.assign", "fact": "ward_taught", "value": true}, {"op": "experience.grant", "amount": 30}]],
-        ["rooms/lever_hall.json", ["asides"], null],
         ["reactions/wheel_1_x_shows_0.json", [], null],
         ["reactions/wheel_1_x_shows_1.json", [], null],
         ["reactions/wheel_1_x_shows_2.json", [], null],
@@ -2305,15 +2304,6 @@
       "without": [
         ["cartridge.json", ["world", "movement"], null]
       ],
-      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
-      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
-    },
-    {
-      "floor": "1.107",
-      "below": "1.106",
-      "source": "cartridges/remarks_sampler",
-      "feature": "an NPC's asides (row FD10)",
-      "edits": [],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },

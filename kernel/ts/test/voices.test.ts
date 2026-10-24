@@ -1,5 +1,5 @@
-// Toolbox row FD2 on the compiled voices sampler: the skill_compare leaf and room and detail
-// asides. Studying the runes raises lore (growth [1, 2]); asides, the sage's line and the
+// Toolbox row FD2 on the compiled voices sampler: the skill_compare leaf (asides retired,
+// loka-x6t.125). Studying the runes raises lore (growth [1, 2]); the sage's line and the
 // decipher recipe follow the level.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
@@ -50,13 +51,10 @@ const study = (w: World) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 };
-// What the player sees: the hall's asides, the door's asides, the sage's line, decipher offered.
+// What the player sees: the sage's line and whether decipher is offered on the door.
 const seen = (w: World) => {
-  const v = gameView(w);
-  const door = v.notices?.find((x) => w.details[x.id]?.key === 'carved_door');
+  const door = gameView(w).notices?.find((x) => w.details[x.id]?.key === 'carved_door');
   return {
-    hall: v.place.asides?.map((t) => t.key),
-    door: door?.asides?.map((t) => t.key),
     sage: describeEntity(w, w.character, w.entityIds[`${C}:npc/sage`] as EntityId, 'room_line'),
     decipher: door?.actions?.find((a) => a.action_key === 'read_glyphs')?.available === true,
   };
@@ -64,52 +62,19 @@ const seen = (w: World) => {
 const fresh = () =>
   newWorld(content, '6f1c2b3a-4d5e-4f60-8a7b-9c0d1e2f3a4b' as never, [5, 6, 7, 8]);
 
-// Breaks: skill_compare reading the attribute, membership alone or a strict comparison; asides
-// ignoring `when`, losing authored order or not projected on the place or the notice; the
+// Breaks: skill_compare reading the attribute, membership alone or a strict comparison; the
 // leaf not gating room_line_variants or a recipe policy.
-test('lore 0, 1 and 2 show more asides, the scholar line and the decipher action', () => {
+test('lore 0, 1 and 2: the scholar line and the decipher action wait for lore 2', () => {
   let w = fresh();
-  assert.deepEqual(seen(w), {
-    hall: undefined,
-    door: undefined,
-    sage: 'npc.sage.line',
-    decipher: false,
-  });
+  const before = { sage: 'npc.sage.line', decipher: false };
+  assert.deepEqual(seen(w), before);
   assert.equal(perform(w, 'read_glyphs').decision.kind, 'rejected');
   w = study(w); // lore 1
-  assert.deepEqual(seen(w), {
-    hall: ['aside.hall.lore'],
-    door: ['aside.door.glance'],
-    sage: 'npc.sage.line',
-    decipher: false,
-  });
+  assert.deepEqual(seen(w), before);
   w = study(w); // lore 2: the last growth threshold
-  assert.deepEqual(seen(w), {
-    hall: ['aside.hall.lore'],
-    door: ['aside.door.lore', 'aside.door.glance'],
-    sage: 'npc.sage.line.scholar',
-    decipher: true,
-  });
+  assert.deepEqual(seen(w), { sage: 'npc.sage.line.scholar', decipher: true });
   assert.equal(perform(w, 'read_glyphs').decision.kind, 'accepted');
-});
-
-// Breaks: asides shown while the room's dark description replaces its text (sighted lines in the
-// dark), or a board notice not carrying its detail's asides.
-test('a dark room shows no asides; a board notice carries its detail asides', () => {
-  const w = study(study(fresh())); // lore 2
-  const room = w.roomIds[`${C}:room/hall`]!;
-  const runes = Object.keys(w.details).find((id) => w.details[id]!.key === 'runes')!;
-  const notice_board = { title: 'board', notices: [{ detail: 'carved_door', title: 'door' }] };
-  const boarded = {
-    ...w,
-    details: { ...w.details, [runes]: { ...w.details[runes]!, notice_board } },
-  };
-  assert.deepEqual(
-    gameView(boarded as World).notice_boards?.[0]?.notices[0]?.asides?.map((t) => t.key),
-    ['aside.door.lore', 'aside.door.glance'],
-  );
-  const dim = { ...w, rooms: { ...w.rooms, [room]: { ...w.rooms[room]!, dark_description: 'x' } } };
-  assert.equal(gameView(dim as World).place.asides, undefined);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
 });
 
 const load = (change: (c: any) => void) => {
@@ -124,71 +89,54 @@ const load = (change: (c: any) => void) => {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data];
 };
 const hall = `${C}:room/hall`;
-const door = `.cartridge.rooms[${JSON.stringify(hall)}].details.carved_door`;
+const sage = `${C}:npc/sage`;
+const glyphs = `${C}:recipe/read_glyphs`;
+const floor = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}];
 
-// Breaks: the loader stops walking asides (an undeclared skill or a missing text key loads and
-// fails in play), the leaf loses its owner, or the 1.91 floor misses asides or a lone leaf
+// Breaks: the loader stops walking the leaf (an undeclared skill loads and fails in play), the
+// leaf loses its owner, the 1.91 floor misses a lone leaf, or a retired `asides` field loads
 // (twin of content_voices_test.exs).
-test('the loader checks asides and skill_compare: references, text, owner and floor', () => {
+test('the loader checks skill_compare (reference, owner, floor) and refuses asides', () => {
   const rows: [(c: any) => void, unknown][] = [
     [
-      (c) => (c.rooms[hall].details.carved_door.asides[0].when.root.skill.key = 'ghost'),
-      ['UNRESOLVED_REFERENCE', `${door}.asides[0].when.root.skill`, { target: `${C}:skill/ghost` }],
-    ],
-    [
-      (c) => (c.rooms[hall].asides[0].text = 'aside.gone'),
+      (c) => (c.npcs[sage].room_line_variants[0].when.root.skill.key = 'ghost'),
       [
         'UNRESOLVED_REFERENCE',
-        `.cartridge.rooms[${JSON.stringify(hall)}].asides[0].text`,
-        { target: 'aside.gone' },
+        `.cartridge.npcs[${JSON.stringify(sage)}].room_line_variants[0].when.root.skill`,
+        { target: `${C}:skill/ghost` },
       ],
     ],
     [
       (c) => {
         delete c.manifest.requires.capabilities.skills;
         delete c.lock.capabilities.skills;
-        delete c.npcs[`${C}:npc/sage`].room_line_variants;
-        delete c.recipes[`${C}:recipe/read_glyphs`];
+        delete c.recipes[glyphs];
       },
       [
         'UNDECLARED_CAPABILITY',
-        `.cartridge.rooms[${JSON.stringify(hall)}].asides[0].when.root.op`,
+        `.cartridge.npcs[${JSON.stringify(sage)}].room_line_variants[0].when.root.op`,
         { capability: 'skills' },
       ],
     ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.90'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
-    ],
+    [(c) => (c.manifest.requires.kernel_api.at_least = '1.90'), floor],
     [
       (c) => {
         c.manifest.requires.kernel_api.at_least = '1.90';
-        delete c.rooms[hall].asides;
-        delete c.rooms[hall].details.carved_door.asides;
+        delete c.recipes[glyphs];
       },
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
+      floor,
     ],
     [
       (c) => {
         c.manifest.requires.kernel_api.at_least = '1.90';
-        c.rooms[hall].asides[0].when.root = { op: 'all', items: [] };
-        delete c.rooms[hall].details.carved_door.asides;
-        delete c.npcs[`${C}:npc/sage`].room_line_variants;
-        delete c.recipes[`${C}:recipe/read_glyphs`];
-      },
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
-    ],
-    [
-      // A detail named `asides` is no aside: with no aside and no leaf, 1.90 still loads.
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.90';
-        delete c.rooms[hall].asides;
-        delete c.rooms[hall].details.carved_door.asides;
-        c.rooms[hall].details.asides = { ...c.rooms[hall].details.runes, aliases: ['plaque'] };
-        delete c.npcs[`${C}:npc/sage`].room_line_variants;
-        delete c.recipes[`${C}:recipe/read_glyphs`];
+        delete c.npcs[sage].room_line_variants;
+        delete c.recipes[glyphs];
       },
       'loaded',
+    ],
+    [
+      (c) => (c.rooms[hall].asides = []),
+      ['UNKNOWN_FIELD', `.cartridge.rooms[${JSON.stringify(hall)}].asides`, {}],
     ],
   ];
   for (const [change, expected] of rows) {
