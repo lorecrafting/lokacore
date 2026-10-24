@@ -295,11 +295,12 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
   the player (others: "Nell leaves north."); the room reached opens with "You arrive from the
   south." Fleeing: "You flee north." ends the fight room's log; the room reached opens with "You
   run in from the south." The direction is the arrival room's exit back to the origin; no way back
-  reads "You arrive." / "You run in."; up and down read "from below" / "from above".
+  reads "You arrive." / "You run in."; up and down read "from below" / "from above". Dying: "You fall." ends the fight room's
+  log; the recovery room opens with "You wake at the inn."
 - Why: the log is the room's record, not the player's diary.
 - Do: "You arrive from the south." Don't: "You go north." in the new room.
 - Source: [Line placement](../system/book-ui.md#line-placement), [record](../decisions/owner-decision-room-point-of-view-2026-10-24.md).
-- Enforcement: none yet (not built).
+- Enforcement: none yet (not built: Beads `loka-glj8`).
 
 ### Ellipsis
 

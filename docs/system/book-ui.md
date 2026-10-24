@@ -300,7 +300,7 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   ([Announcements](#announcements)).
 - A refusal on a detail page draws in that page's history and in the room log, and is read once.
   A refusal is never quiet.
-- Each room speaks from its own point of view ([record](../decisions/owner-decision-room-point-of-view-2026-10-24.md); target, build tracked in Beads).
+- Each room speaks from its own point of view ([record](../decisions/owner-decision-room-point-of-view-2026-10-24.md); target, not yet built: Beads `loka-glj8`).
   A room change clears the old room's log; the arrival lines then open the new room's log in
   receipt order. A plain move logs nothing new for the player in the room left (others there see
   "<Name> leaves north."); the room reached opens with "You arrive from the south." (others:
@@ -308,7 +308,9 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   the origin (its reciprocal face, as `cartridge_barriers.ts` finds it), never a blind opposite;
   with no way back the line is "You arrive."; up and down read "from below" and "from above". A
   flight's "You flee north." stays the last line in the fight room's log; the room reached opens
-  with "You run in from the south." (same direction rules; "You run in." with no way back). Room
+  with "You run in from the south." (same direction rules; "You run in." with no way back). A death in combat: "You fall." and the
+  fight's last lines stay in the fight room's log; the recovery room's log opens with "You wake at
+  the inn." Room
   text the World page already draws (the title and description) is not repeated in its log.
 
 Later, not this batch: a verbose or brief setting that shows quiet lines in place.
@@ -716,7 +718,8 @@ never presents an unconfirmed hit, death, escape or encounter end as committed. 
 narrate once through the existing subscription and cartridge text. Combat narration draws on the
 combat page and its retained history and also lands in the World room event log, the full record
 (owner 2026-10-24), including the engage line, closure, death and Flee; a closure that changes room
-opens the new room's log with its lines ([line placement](#line-placement)). Routing to the combat page uses
+leaves the fight's lines (including "You flee north." or "You fall.") in the fight room's log, and the room reached
+opens with its own arrival line ("You run in from the south.", "You wake at the inn.") ([line placement](#line-placement)). Routing to the combat page uses
 structured committed receipt metadata (an encounter present after the receipt that the settled
 pre-command view lacked, or gone after it), never rendered prose; ordinary room events draw
 only in the World log even when delivered in the same receipt as combat, except the closing receipt,
