@@ -64,6 +64,23 @@ defmodule Loka.ContentExtendsTest do
     assert ds != [] and Enum.all?(ds, &String.starts_with?(&1["path"], "npcs/wild"))
   end
 
+  # Breaks: an abstract definition stays referable, or a bundle naming a missing NPC or corpse
+  # compiles (an invalid one counts as reported; review of d1d6acc78).
+  test "a bundle naming an abstract NPC or corpse is refused", %{dir: dir} do
+    for {field, key} <- [{"npc", "wild"}, {"corpse", "corpse"}] do
+      changes = [{"population_bundles/orchard_deer.json", &Map.put(&1, field, key)}]
+      assert diags(dir, changes) == [{"SCHEMA_VIOLATION", "populations/orchard_deer.bundle", %{}}]
+    end
+  end
+
+  # Breaks: a home room left invalid by its extends crashes the population check (`not nil`).
+  test "a population whose home room is refused reports, not crashes", %{dir: dir} do
+    assert {"UNRESOLVED_REFERENCE", "rooms/orchard.extends", %{"target" => "rooms/ghost"}} in diags(
+             dir,
+             [{"rooms/orchard.json", extends("ghost")}]
+           )
+  end
+
   # Breaks: root files are flattened too, so a manifest extends is silently dropped.
   test "a root file's extends is an unknown field", %{dir: dir} do
     assert {"UNKNOWN_FIELD", "cartridge.extends", %{}} in diags(dir, [
