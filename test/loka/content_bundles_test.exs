@@ -50,6 +50,15 @@ defmodule Loka.ContentBundlesTest do
     assert {"BARRIER_MISMATCH", "areas/village.rooms.lane.exits.east.hidden_until", %{}} in diags
   end
 
+  # Breaks: an `extends` refusal on a bundled definition names the bundle file's directory
+  # (`areas/ghost`) instead of the definition's kind directory.
+  test "an unresolved extends in a bundle names the target in the definition's directory" do
+    assert {"UNRESOLVED_REFERENCE", "areas/village.npcs.elder.extends",
+            %{"target" => "npcs/ghost"}} in refused([
+             {@bundle, &put_in(&1, ["npcs", "elder", "extends"], "ghost")}
+           ])
+  end
+
   # Breaks: lint keys a bundled definition by its file, so a check that dispatches on the
   # directory (check 3: reactions narrate or are silent) never sees it.
   test "lint reads a bundled reaction as its definition address" do
