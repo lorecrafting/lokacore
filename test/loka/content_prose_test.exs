@@ -51,7 +51,7 @@ defmodule Loka.ContentProseTest do
     dir = Loka.ContentSource.copy("cartridges/speech_sampler")
     File.write!(Path.join(dir, "text.json"), "{")
     assert {:error, diags} = Loka.Content.compile(dir)
-    assert {"INVALID_JSON", "text", %{}} in triples(diags)
+    assert triples(diags) == [{"INVALID_JSON", "text", %{}}]
   end
 
   # Breaks: a marker inside a list is not lowered, or a near-marker is taken as prose instead
