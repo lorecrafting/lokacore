@@ -158,6 +158,6 @@ test('a resting pair is a `label: reason` row; Escape closes the list onto its o
     .find((n) => n.props.onKeyDown)
     .props.onKeyDown({ key: 'Escape', preventDefault() {} });
   assert.deepEqual(focused, ['option']);
-  assert.equal(option().props.accessibilityState.expanded, false);
+  assert.equal(option().props['aria-expanded'], false);
   assert.ok(!b.text().includes('A bucket: not yet.'));
 });

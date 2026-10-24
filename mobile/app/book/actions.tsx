@@ -39,7 +39,7 @@ export function ActionCard(
       ref={p.ref}
       accessibilityRole="button"
       accessibilityLabel={('b' in p && p.name) || label}
-      accessibilityState={'expanded' in p ? { expanded: p.expanded } : undefined}
+      aria-expanded={'expanded' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
       onPress={'b' in p ? () => p.press(p.b) : p.onPress}
       style={{
         backgroundColor: c.card,
@@ -52,8 +52,11 @@ export function ActionCard(
         paddingHorizontal: space.lg,
       }}
     >
-      <Text style={prose(c, t)}>{label}</Text>
-      {'b' in p && p.note && <Text style={note(c, t)}>{p.note}</Text>}
+      <Text style={prose(c, t)}>
+        {label}
+        {/* One text node with a line break, so axe reads "label note" as the name's start. */}
+        {'b' in p && p.note && <Text style={note(c, t)}>{`\n${p.note}`}</Text>}
+      </Text>
     </Pressable>
   );
 }
@@ -73,6 +76,8 @@ const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () =
   </View>
 );
 
+export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>;
+
 /**
  * A page's Pick lists: per option, an Action card that opens its rows in the page's flow
  * (book-ui.md, Pick a second thing; BOOK-UI-COMPONENTS.md, Pick list).
@@ -84,8 +89,6 @@ const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () =
  * - States: closed; open; open with an unavailable row; recipes mixed; pending.
  * - Story: PickList.stories.tsx
  */
-export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>;
-
 export function PickLists(p: {
   page: string;
   view: GameView;

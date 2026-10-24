@@ -44,6 +44,12 @@ test('mixed recipes name their verb; same-name tools carry their state', () => {
       ],
     ],
   ]);
+  // Breaks: twins share one accessible name, or the name drops the shown note (label in name).
+  const named = picks(view, buttons, 'cart', say)[0]!.rows.map((r) => 'b' in r && r.name);
+  assert.deepEqual(named.slice(0, 2), [
+    'Quench with a bucket Full, quench a cart',
+    'Quench with a bucket Empty, quench a cart',
+  ]);
   assert.deepEqual(shown(picks(view, buttons.slice(0, 1), 'cart', say)), [
     ['Use an item…', [['A bucket', undefined]]],
   ]);

@@ -91,18 +91,15 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await tap(LABEL.leave);
 };
 
-const pondAndStew = async (
-  screen: Screen,
-  { tap, take, held, putAway, position, moves }: Steps,
-) => {
+const pondAndStew = async (screen: Screen, { tap, take, held, position, moves }: Steps) => {
   await moves('east');
   await take(/^(?:a )?fishing rod, open$/i, /^Take a fishing rod/);
   const fish = /^(?:an? )?(trout|salmon|eel), open$/i;
   let landed = 0;
   for (let i = 0; landed < 2 && i < 12; i++) {
     await held(/^a fishing rod/);
-    await tap(/^Fish in/);
-    await putAway();
+    await tap(LABEL.useOn); // the rod's Pick list; a pick returns to World (loka-x6t.109)
+    await tap(/, fish in the pond$/);
     if (await screen.getByRole('button', fish).first().isVisible()) {
       await take(fish, /^Take an? (trout|salmon|eel)/);
       landed++;
@@ -183,8 +180,7 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await held(/^the lantern/);
   await tap(LABEL.castASpell); // the aimed spell's Pick list on the held lamp (loka-x6t.109)
-  await tap(/^Lux, cast lux on/);
-  await putAway();
+  await tap(/^Lux, cast lux on/); // a pick returns to World
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
   await take(/^(?:the )?grimoire, open$/i, /^Take the grimoire/);
@@ -201,14 +197,14 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
 
 const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
-  const { tap, take, held, putAway, moves, speak } = steps;
+  const { tap, take, held, moves, speak } = steps;
   await loft(r, steps);
   await take(/^(?:the )?oilcan, open$/i, /^Take the oilcan/);
   await take(/^(?:the )?loft bucket, open$/i, /^Take the loft bucket/);
   await moves('east');
   await held(/^the oilcan/); // a use recipe is offered on the held tool
-  await tap(/^Oil/);
-  await putAway();
+  await tap(LABEL.useOn); // the oilcan's Pick list; a pick returns to World
+  await tap(/, oil the winch$/);
   await tap('Map');
   await tap(/^Open/);
   await held(/^the lantern/);

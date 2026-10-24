@@ -291,6 +291,7 @@ defmodule Loka.ContentLintTest do
     assert matches == %{
              "recipes/fish.json rod" => ["items/rod", "items/rod_2"],
              "recipes/fish.json water" => ["items/pond_water"],
+             "recipes/lux.json lamp" => ["items/attic_lantern", "items/lantern"],
              "recipes/oil_winch.json metal" => Enum.map(metal, &"items/#{&1}"),
              "recipes/quench.json liquid_holding" => holding,
              "recipes/water_croft.json liquid_holding" => holding,

@@ -45,7 +45,6 @@ function journalChanged(was: GameView, now: GameView, detail: string) {
 // Pick a second thing).
 const CHANGED = ['taken', 'dropped', 'given', 'eaten', 'bandaged'];
 
-// size: allow 41, the fight-cast flag that routes a cast's lines to the combat log
 export function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
   const attempt = s.retry!;
   const now = game.view().view;
@@ -74,9 +73,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   if (s.fault && combatResult(accepted)) return '';
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
-  const routed = retained
-    ? narrationLines(closing(retained, was, now, commandOf(attempt.button) === 'cast'), now, text)
-    : undefined;
+  const routed = retained ? routedLines(retained, was, now, attempt.button, text) : undefined;
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
   const fallback = fallbackLine(itemChanged, accepted, attempt, now);
@@ -87,6 +84,15 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   conversationLines(s, was, now, accepted, attempt.detail, text);
   return repeated ? '' : said.map(lineText).join(' ');
 }
+
+// The narration routed to its logs; a cast in a fight sends its lines to the combat log.
+const routedLines = (
+  retained: Parameters<typeof closing>[0],
+  was: GameView,
+  now: GameView,
+  b: Button,
+  text: Say,
+) => narrationLines(closing(retained, was, now, commandOf(b) === 'cast'), now, text);
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 

@@ -60,14 +60,10 @@ export function picks(v: GameView, buttons: Button[], id: string, text: (key: st
       const reason = b.pick!.reason;
       if (reason) return [{ label: tool ? b.label : shown(b), reason }];
       const twin = pairs.some((o) => o !== b && !o.pick!.reason && shown(o) === shown(b));
-      return [
-        {
-          b,
-          label: shown(b),
-          name: `${shown(b)}, ${phrase(b, name)}`,
-          note: (twin && state(all.get(end(b)), text)) || undefined,
-        },
-      ];
+      const note = (twin && state(all.get(end(b)), text)) || undefined;
+      // The name starts with the shown text, note included (label in name), so twins differ.
+      const seen = note ? `${shown(b)} ${note}` : shown(b);
+      return [{ b, label: shown(b), name: `${seen}, ${phrase(b, name)}`, note }];
     });
     // Under Use on…, a resting use is one row per recipe, whatever its targets.
     return {
