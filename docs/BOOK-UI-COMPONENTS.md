@@ -55,7 +55,6 @@ words remain in the cartridge; Book owns layout and navigation.
 | Inspect, take, equip or use an item/container | Item detail and nested `Page` route | Exact item/custody, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
-| Accept a storylet | Room page Action card (superseded by the [room page anatomy](system/book-ui.md#room-page-anatomy); removed by loka-x6t.127; storylets are to be retired, owner 2026-10-23) ([storylet rule](system/book-ui.md#storylet-card-details)) | Exact key, one card at most, unavailable note, stale refusal after an hour change, result in the World log. |
 | Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
 | Resume a bed dream | [`DreamPage.tsx`](../mobile/app/book/DreamPage.tsx), ordinary bed → dream detail route | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([rule](system/book-ui.md#chapters-scenes-and-recovery)). |
 | Use, give or cast with a second thing | Pick list on the target's or the held thing's page ([rule](system/book-ui.md#item-details-and-takedrop)) | Rows only from GameView pairs, option hidden when empty, pick returns to World, refused pick keeps the page. |
@@ -180,7 +179,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Heard` | `book/lines.tsx` | Heard |
 | `Here` | `book/lines.tsx` | RoomPage |
 | `Fault` | `book/lines.tsx` | Live |
-| `NoticeEntries` | `book/notices.tsx` | RoomPage |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
 | `Text` | `book/Text.tsx` | Note |
 | `Tap` | `book/pages.tsx` | VerbLine |

@@ -1,23 +1,20 @@
 // size: allow 350, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The book's page shell, the room page and their shared controls (the Contents sections:
-// sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
-// focus: title.ts).
+// sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { LINK, plain, why, type group, type Pool } from './model.ts';
+import { LINK, plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { tapBleed } from './reading.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { opacity, size, space } from './tokens.ts';
-import { ActionCard } from './actions.tsx';
 import { AwayRecap, Here, LogLines, nameLink } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
-import { placeActions } from './place.tsx';
 export { useTitleFocus };
 
 type Say = (key: string) => string;
@@ -138,20 +135,17 @@ export function Control(p: {
 export function RoomPage(p: {
   view: GameView;
   text: Say;
-  label: Say; // the action-label resolver: refused place lines read the same word as offered ones
   log: DetailLine[];
   recap?: RecapLine[];
   g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
   openChoice: () => void;
-  details: ReactNode;
   links?: ReadonlyMap<string, () => void>; // a linked fixture's press, by link target (proseLinks)
 }) {
   const c = usePalette();
   const t = useType();
   const look = p.g.look;
-  const actions = placeActions(p.view, p.g, p.press, p.text, p.label); // one list, as the room's lines
   return (
     <Page
       title={p.text(p.view.place.title.key)}
@@ -167,9 +161,6 @@ export function RoomPage(p: {
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
         <Control label={LABEL.continueConversation} onPress={p.openChoice} />
       )}
-      {p.details}
-      {storylet(p.view, p.g, p.press, p.text, p.label)}
-      {actions.length > 0 && <View>{actions}</View>}
       {p.log.length > 0 && <LogLines lines={p.log} />}
     </Page>
   );
@@ -211,24 +202,6 @@ const warnings = (c: Palette, t: Type, view: GameView, text: Say) => {
         ))}
       </View>
     )
-  );
-};
-
-// The deck's pick here this hour (book-ui.md, Storylet card details): its card, or the
-// unavailable note with the action's reason.
-const storylet = (
-  view: GameView,
-  g: Grouped,
-  press: (b: Button) => void,
-  text: Say,
-  label: Say,
-) => {
-  if (!view.storylet) return null;
-  const b = g.place.find((x) => x.action_key === view.storylet);
-  if (b) return <ActionCard b={b} press={press} />;
-  const offer = view.actions.find((a) => a.action_key === view.storylet);
-  return (
-    offer && !offer.available && <ActionCard label={label(offer.label)} reason={why(offer, text)} />
   );
 };
 

@@ -219,7 +219,7 @@ function dreamSource(c: any) {
     'item.corpse.room': 'A corpse lies here.',
     'item.corpse.description': 'A corpse.',
     'room.inn_rooms.title': 'Inn Rooms',
-    'room.inn_rooms.description': 'A narrow room under the eaves.',
+    'room.inn_rooms.description': 'A narrow room under the eaves; a [bed](bed) by the wall.',
     'detail.bed.title': 'Bed',
     'detail.bed.free': 'A plain bed. Maud rents it downstairs.',
     'detail.bed.paid': 'You have paid for this bed.',

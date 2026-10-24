@@ -72,79 +72,39 @@ function control(screen: Screen, id: string) {
     : undefined;
 }
 
-// A bed, a ferry or a counted harvest opens its page without reading (book-ui.md, Notice-board details).
-const kept = (n: Notice) => n.bed || n.transport || n.remaining !== undefined;
 const read = (p: Props, id: string, b: Button) => () => {
   p.open({ kind: 'notice', id });
   p.press(b, id);
 };
 
-// The notices the room description links, by key (book-ui.md fixture rule); they draw in the prose
-// and not as World lines. A readable's link opens its page and reads; a fixture's only opens it.
+// The notices and boards the room description links, by key (book-ui.md, Room page anatomy): the
+// only way to them. A readable's link opens its page and reads; any other, or a refused Read, opens its page only.
 export function proseLinks(p: Props): Map<string, () => void> {
   const targets = [...p.screen.text(p.screen.view.place.description.key).matchAll(LINK)].map(
     (m) => m[2],
   );
-  return new Map(
-    (p.screen.view.notices ?? []).flatMap((n) => {
-      if (kept(n) || !targets.includes(n.key)) return [];
-      if (!reads(p.screen.view, n.id).length)
-        return [[n.key, () => p.open({ kind: 'notice', id: n.id })] as const];
-      const b = control(p.screen, n.id);
-      return b ? [[n.key, read(p, n.id, b)] as const] : [];
-    }),
+  const boards = (p.screen.view.notice_boards ?? []).flatMap((b) =>
+    targets.includes(b.key) ? [[b.key, () => p.open({ kind: 'board', id: b.id })] as const] : [],
   );
+  return new Map([
+    ...boards,
+    ...(p.screen.view.notices ?? []).flatMap((n) => {
+      if (!targets.includes(n.key)) return [];
+      const b = reads(p.screen.view, n.id).length ? control(p.screen, n.id) : undefined;
+      return [[n.key, b ? read(p, n.id, b) : () => p.open({ kind: 'notice', id: n.id })] as const];
+    }),
+  ]);
 }
 
+// A board's notice: it reads when its Read is offered, else it opens its page.
 function NoticeLink(p: Props & { notice: Notice }) {
   const { notice, screen } = p;
-  const title = screen.text(notice.title),
-    b = control(screen, notice.id);
-  const offer = noticeOffer(screen.view, notice.id);
-  // a fixture (no Read) opens its page only, as its prose link does (loka-x6t.120)
-  if (kept(notice) || !reads(screen.view, notice.id).length)
-    return (
-      <EntityLine
-        name={title}
-        rest={notice.remaining === undefined ? undefined : ` (${notice.remaining})`}
-        onPress={() => p.open({ kind: 'notice', id: notice.id })}
-      />
-    );
-  return b ? (
-    <EntityLine name={title} onPress={read(p, notice.id, b)} />
-  ) : (
-    <ActionCard
-      label={title}
-      reason={offer && !offer.available ? why(offer, screen.text) : undefined}
-    />
-  );
-}
-
-/**
- * A room's notices and boards: an Entity line when Read is offered, else the Action card's
- * unavailable form; a notice the description links (proseLinks) draws in the prose instead.
- *   Superseded by book-ui.md Room page anatomy: every one becomes a prose link (loka-x6t.127).
- * - Use: the room page.
- * - Story: RoomPage.stories.tsx
- */
-export function NoticeEntries(p: Props) {
-  const linked = proseLinks(p);
-  const { notice_boards: boards = [] } = p.screen.view;
-  const notices = (p.screen.view.notices ?? []).filter((n) => !linked.has(n.key));
-  if (!boards.length && !notices.length) return null;
+  const b = control(screen, notice.id);
   return (
-    <View>
-      {boards.map((board) => (
-        <EntityLine
-          key={board.id}
-          name={p.screen.text(board.title)}
-          onPress={() => p.open({ kind: 'board', id: board.id })}
-        />
-      ))}
-      {notices.map((notice) => (
-        <NoticeLink key={notice.id} {...p} notice={notice} />
-      ))}
-    </View>
+    <EntityLine
+      name={screen.text(notice.title)}
+      onPress={b ? read(p, notice.id, b) : () => p.open({ kind: 'notice', id: notice.id })}
+    />
   );
 }
 
@@ -161,21 +121,14 @@ const fare = (c: Palette, t: Type, f: NonNullable<Notice['transport']>) => (
 const fresh = (description: string) => (line: DetailLine) =>
   typeof line !== 'string' || plain(line) !== description;
 
-// The notice's asides as plain lines, then its fresh reads (book-ui.md, Aside details).
-const history = (
-  screen: Screen,
-  detail: { id: string; asides?: readonly { key: string }[] },
-  description: string,
-) => [
-  ...(detail.asides ?? []).map((a) => plain(screen.text(a.key))),
-  ...screen.detail(detail.id).filter(fresh(description)),
-];
+// The notice's fresh reads.
+const history = (screen: Screen, id: string, description: string) =>
+  screen.detail(id).filter(fresh(description));
 
 /**
  * A notice or board detail in the detail-page order (book-ui.md, Notice board details).
  * - Use: a notice route.
- * - Rules: a read whose text is the description adds nothing; equal read lines all show; its
- *   asides lead its history as plain lines (book-ui.md, Aside details).
+ * - Rules: a read whose text is the description adds nothing; equal read lines all show.
  * - States: notice with Read; dream available; dream acknowledged.
  * - Story: NoticePage.stories.tsx
  */
@@ -195,7 +148,7 @@ export function NoticePage(
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c, t)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c, t)}>Remaining: {detail.remaining}</Text>}
-      <LogLines lines={history(p.screen, detail, description)} />
+      <LogLines lines={history(p.screen, detail.id, description)} />
       {'transport' in detail && detail.transport && fare(c, t, detail.transport)}
       {!!board?.notices.length && (
         <View>

@@ -8,7 +8,7 @@ import type {
   DecisionResult,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { plain } from './model.ts';
+import { cueLine } from './model.ts';
 import { lineWords, withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
@@ -60,7 +60,7 @@ export type Logs = {
   away?: { from: number; log: string[] };
   recap?: string[]; // the away recap's lines, grouped when drawn
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
-  asided?: Set<string>; // the asides logged this room visit
+  noted?: Set<string>; // the cue lines logged this room visit
 };
 
 export function pickupLine(last: NarrationRecord | undefined, text: Say) {
@@ -91,26 +91,18 @@ export function restoredLogs(game: Game, text: Say): Logs {
     projection: game.view(),
     status: { kind: 'ready' },
   };
-  log.push(...asideLines(s, view, text));
+  log.push(...cueLines(s, view, text));
   return s;
 }
 
-// The room's and present people's asides, in projected order, as owner-and-key ids.
-const asidesOf = (view: GameView) => [
-  ...(view.place.asides ?? []).map((a) => ['', a.key] as const),
-  ...view.entities.flatMap((e) =>
-    (e.kind === 'npc' ? (e.asides ?? []) : []).map((a) => [e.id, a.key] as const),
-  ),
-];
-
-// Each aside is one plain World line the first time it shows in a room visit (book-ui.md, Aside
-// details); one that stops holding and comes back is not logged again.
-export function asideLines(s: Logs, view: GameView, text: Say) {
-  return asidesOf(view).flatMap(([at, key]) => {
-    const id = `${at} ${key}`;
-    if ((s.asided ??= new Set()).has(id)) return [];
-    s.asided.add(id);
-    return [plain(text(key))];
+// Each sense cue is one plain World line the first time it shows in a room visit (book-ui.md,
+// Sense cues details); one that stops and comes back is not logged again.
+export function cueLines(s: Logs, view: GameView, text: Say) {
+  return (view.cues ?? []).flatMap((c) => {
+    const line = cueLine(c, text);
+    if ((s.noted ??= new Set()).has(line)) return [];
+    s.noted.add(line);
+    return [line];
   });
 }
 
@@ -126,7 +118,7 @@ export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
   if (was.place.id !== now.place.id) {
     s.log.length = 0;
-    s.asided = new Set();
+    s.noted = new Set();
     s.away = s.recap = undefined; // held and shown recap lines belong to the room left, as its log
   }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;

@@ -25,8 +25,8 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
   [decision](../decisions/owner-decision-room-page-anatomy-2026-10-23.md); spec
   [Room page anatomy](../system/book-ui.md#room-page-anatomy).
 - Enforcement: `refused_verbs.test.ts:66` (an aimed verb draws on its page, not World);
-  `word_bar.test.ts:48` (word chips only in the open say field); room-level cards still drawn
-  by code: see [conflicts](#conflicts-and-gaps). Anatomy conformance check: loka-x6t.127.
+  `word_bar.test.ts:48` (word chips only in the open say field); `room_anatomy.test.ts` (the World
+  page's pressables are the title, prose links, people and items; cues are log lines).
 
 ### Person (NPC or PC) detail
 
@@ -176,7 +176,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Why: movement is spatial, so it lives on the spatial control, not in the prose.
 - Source: [Minimap, Map and presentation controls](../system/book-ui.md#minimap-map-and-presentation-controls).
 - Enforcement: joystick and minimap tests under `mobile/app/book/`; none yet for "no door card on
-  World" beyond the anatomy check (loka-x6t.127).
+  World" beyond `room_anatomy.test.ts`.
 
 ### Page turns
 
@@ -304,19 +304,13 @@ For a brief that adds or changes anything the player sees or taps
 
 Conflicts (code or spec contradicts a pattern above):
 
-- Room-level action cards (Gather ash and kin) still draw on World: loka-x6t.120 (in progress).
-- Storylet card (storylets are to be retired, owner 2026-10-23), sense cues block, unlinked notice,
-  board, bed, transport and harvest entries, exit warning notes and the Continue conversation
-  button still draw on the World page outside the five parts: loka-x6t.127.
-- Asides drawn on World ([Aside details](../system/book-ui.md#aside-details)): loka-x6t.125 (owner,
-  quoted: "we should get rid of asides").
+- Exit warning notes and the Continue conversation button still draw on the World page outside
+  the five parts: loka-x6t.127 follow-ups.
 - Containers show contents without Open: loka-x6t.121 (in progress).
 - Detail-page result lines are not announced: loka-x6t.124.
 
 Gaps (no pattern or no check yet):
 
-- Mechanical anatomy check for the World page (no card, chip or note outside the five parts):
-  loka-x6t.127; proposed as an ast-grep rule over `mobile/app/book/pages.tsx` (RoomPage) plus a render test.
 - Fixed Contents list and "no Chip inside a page": needs filing (one render test each).
 - Label-in-name prefix rule: needs filing (one accessibility-name test).
 - Device Back on a pick list: loka-x6t.113. Whisper hidden until loka-x6t.115. Wider sale lists:

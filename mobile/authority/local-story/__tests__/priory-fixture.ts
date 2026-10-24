@@ -61,6 +61,9 @@ export function glowBundle() {
     const den = c.rooms['bleed_sampler@0.0.1:room/den'];
     den.dark_description = 'room.den.dark';
     den.details.bones.perception = { self_luminous: true, title: 'detail.den.glow' };
-    Object.assign(c.text, { 'room.den.dark': 'Dark', 'detail.den.glow': 'Glow' });
+    Object.assign(c.text, {
+      'room.den.dark': 'Dark; something [glows](bones).',
+      'detail.den.glow': 'Glow',
+    });
   });
 }

@@ -758,7 +758,9 @@
    "kind": "character"
   }
  ],
- "log": [],
+ "log": [
+  "a boar grunting from the north"
+ ],
  "combatLog": [],
  "details": {}
 }
