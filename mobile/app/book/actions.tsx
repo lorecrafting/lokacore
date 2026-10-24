@@ -1,5 +1,5 @@
 // The offered-action controls: action card, pick lists, verb line, continue button (BOOK-UI-COMPONENTS.md).
-import { Children, type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
+import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import { Tap } from './pages.tsx';
@@ -7,6 +7,7 @@ import { note, prose, usePalette, useType } from './palette.ts';
 import { onKey } from './lines.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { picks, type Pick } from './pick.ts';
+import { focusTitle, titleContext } from './title.ts';
 import type { Button } from './presenter.ts';
 import { radius, size, space, type } from './tokens.ts';
 
@@ -84,7 +85,8 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
  * - Use: a thing's or a person's page, after its offered actions; rows from pick.ts only.
  * - Rules: one list open at a time, closed on another page; opening focuses the first row, and
  *   the option or Escape closes it with focus back on the option. A row press sends its pair and
- *   closes the list, unless an action is pending (nothing sends then, and the list stays).
+ *   closes the list, unless an action is pending (nothing sends then, and the list stays); when
+ *   the answer leaves the option no row, the option goes and focus moves to the page title.
  *   Rows are inset space.lg; an unavailable row is the unavailable form.
  * - States: closed; open; open with an unavailable row; recipes mixed; pending.
  * - Story: PickList.stories.tsx
@@ -104,18 +106,27 @@ export function PickLists(p: {
   const open = shown?.page === p.page ? shown.label : undefined;
   const option = useRef<View>(null);
   const first = useRef<View>(null);
+  const title = useContext(titleContext);
+  const sent = useRef<string>(undefined); // the option whose row was pressed, until the next view
+  const all = picks(p.view, p.buttons, p.page, p.text);
   useEffect(() => {
     if (open) first.current?.focus();
   }, [open]);
+  useEffect(() => {
+    if (sent.current && !all.some((k) => k.label === sent.current)) focusTitle(title.last);
+    sent.current = undefined;
+  }, [p.view]);
   const close = () => {
     setShown(undefined);
     option.current?.focus();
   };
   const press = (b: Button) => {
     p.press(b);
-    if (!p.pending) close();
+    if (p.pending) return;
+    sent.current = open;
+    close();
   };
-  return picks(p.view, p.buttons, p.page, p.text).map((k) => (
+  return all.map((k) => (
     <View key={k.label} style={{ gap: space.sm }}>
       <ActionCard
         ref={k.label === open ? option : undefined}
