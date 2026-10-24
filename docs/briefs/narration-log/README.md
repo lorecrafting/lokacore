@@ -232,3 +232,13 @@ Change these passages so they match the placement rule:
   now" never fires and a stale pin could stay. Slice 2 deletes the pin file, so this risk ends there.
 - Room logs grow by the lines of every detail page. A long shop visit fills World's log. Accepted: it is the
   transcript the owner's rule asks for.
+
+
+## PM and owner rulings (2026-10-24)
+
+- Words table: the kernel keeps emitting text keys; the English sentences live in ONE shared table that any client
+  can use (a future telnet client included), not in a Book-only file. Put it beside the kernel's other shared text
+  (kernel/ts, imported by the Book), not in mobile/app/book. Engine-owned interpolated cartridge text stays out of this
+  batch (PM ruling).
+- Combat lines also land in the room event log: the log is the full record (owner chose "Yes, full record").
+- A plain move starts the new room's log with "You go north." (owner chose "Yes").
