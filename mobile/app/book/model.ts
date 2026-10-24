@@ -87,7 +87,10 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  const gone = stack.findIndex((p) => p.kind === 'thing' && !visible.some((e) => e.id === p.id));
+  // A shelf goes with its keeper (Shelf.tsx).
+  const gone = stack.findIndex(
+    (p) => (p.kind === 'thing' || p.kind === 'shelf') && !visible.some((e) => e.id === p.id),
+  );
   if (gone < 0) return stack;
   const page = stack[gone];
   if (page.kind === 'thing' && after.choice?.speaker_id === page.id)

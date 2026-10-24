@@ -76,11 +76,12 @@ test('several talks collapse into the first available; an authored talk stays ap
     actions: [
       { action_key: 't1', label: 'action.talk' },
       { action_key: 't2', label: 'actions.talk' },
+      { action_key: 't3', label: 'watch.talk' },
       { action_key: 'fine', label: 'dialogue.clerk_fine.open' },
     ],
   };
   const b = (action_key: string) => ({ action_key, label: action_key }) as never;
-  const { talk, rest } = talkOf(npc, [b('t2'), b('take'), b('t1'), b('fine')]);
+  const { talk, rest } = talkOf(npc, [b('t2'), b('take'), b('t3'), b('t1'), b('fine')]);
   assert.equal(talk?.action_key, 't2');
   assert.deepEqual(
     rest.map((r) => r.action_key),

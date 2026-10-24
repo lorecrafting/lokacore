@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
+import { ShelfPage } from '../book/Shelf.tsx';
 import { pageStory } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcShopView from './views/npc-shop.json';
@@ -14,7 +15,7 @@ import { LABEL } from '../book/labels.ts';
 const meta: Meta = {
   title: 'Pages/NPC',
   component: NpcPage,
-  subcomponents: { NpcDetail },
+  subcomponents: { NpcDetail, ShelfPage },
   tags: ['!autodocs'],
 };
 export default meta;

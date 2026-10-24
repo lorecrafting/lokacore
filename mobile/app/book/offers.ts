@@ -97,17 +97,18 @@ export function serviceOrder(offers: readonly Offer[]) {
   };
 }
 
-// The talk offers' default labels (kernel dialogue/selection.ts; hello_sampler's action).
-// ponytail: GameView drops the talk command, so an authored-label talk stays its own card;
+// A talk offer's label ends `.talk` (kernel dialogue/selection.ts `action.talk`, hello_sampler's
+// `actions.talk`, patrol's `watch.talk`).
+// ponytail: GameView drops the talk command, so a talk with another label stays its own card;
 // project `command: 'talk'` (view/action_lists.ts commanded) if that matters.
-const TALK = ['action.talk', 'actions.talk'];
+const talky = (label: string) => label.endsWith('.talk');
 
 /** The NPC page's one Talk card, the first available talk offer, and the person's other buttons. */
 export function talkOf(
   npc: { actions: readonly { action_key: string; label: string }[] },
   buttons: Button[],
 ) {
-  const keys = new Set(npc.actions.filter((a) => TALK.includes(a.label)).map((a) => a.action_key));
+  const keys = new Set(npc.actions.filter((a) => talky(a.label)).map((a) => a.action_key));
   return {
     talk: buttons.find((b) => keys.has(b.action_key)),
     rest: buttons.filter((b) => !keys.has(b.action_key)),

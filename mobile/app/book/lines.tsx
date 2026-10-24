@@ -275,9 +275,14 @@ const unseen = {
   overflow: 'hidden',
 } as const;
 
-// A press that threw (a damaged page, a full disk): its message, and Start over beside the retry
-// that any press still sends (03 §14).
-// The message sits outside the button: its accessibilityLabel replaces the children it reads.
+/**
+ * A press that threw (a damaged page, a full disk): its message, and Start over beside the retry
+ * that any press still sends (03 §14).
+ * - Use: Book's foot, after a press throws.
+ * - Rules: the message sits outside the button, since its accessibilityLabel replaces the
+ *   children it reads.
+ * - Story: Live.stories.tsx
+ */
 export function Fault(p: { fault: string; startOver: () => void }) {
   const c = usePalette();
   return (

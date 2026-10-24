@@ -179,6 +179,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
 | `Heard` | `book/lines.tsx` | Heard |
 | `Here` | `book/lines.tsx` | RoomPage |
+| `Fault` | `book/lines.tsx` | Live |
 | `NoticeEntries` | `book/notices.tsx` | RoomPage |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
 | `Text` | `book/Text.tsx` | Note |
