@@ -9,7 +9,7 @@ import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
 import { holding, NOTED, reasonOf, type Refusal } from './words.ts';
-import { commandOf } from './buttons.ts';
+import { commandOf, other } from './buttons.ts';
 import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 
@@ -48,7 +48,7 @@ const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown = (thing?.actions ?? [])
     .flatMap((a) => {
       // A resting use pair is its Pick list row instead (book-ui.md, Pick a second thing).
-      const row = (r: Refusal) => a.target_ids?.[1] === thing?.id && r.code === 'cooldown';
+      const row = (r: Refusal) => !!thing && !!other(a, thing.id) && r.code === 'cooldown';
       const word = !a.available && !row(a.reason) && noted(a.reason);
       return word ? [{ ...a, word }] : [];
     })

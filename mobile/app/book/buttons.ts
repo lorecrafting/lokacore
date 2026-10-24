@@ -197,7 +197,7 @@ const JOIN: Record<string, string> = { refuel: 'from', pour: 'into' };
 const NOT_USE = ['fill', 'pour', 'refuel', 'put', 'buy', 'sell'];
 // The other object of a use pair (G4: [target, tool], on the tool) or a Give pair ([item, person]);
 // a use pair resting between uses (cooldown) stays a Pick list row (book-ui.md, Pick a second thing).
-const other = (
+export const other = (
   a: { action_key: string; command?: string; target_ids?: readonly string[] },
   id: string,
 ) =>
