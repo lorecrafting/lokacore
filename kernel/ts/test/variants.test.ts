@@ -115,7 +115,7 @@ test('Maud is bruised and the sword notched after the 07:00 raid; the guard slee
     n,
   ).decision;
   assert.equal(
-    took.kind === 'accepted' && took.narration?.[0]?.bindings.item,
+    took.kind === 'accepted' && took.narration?.[0]?.bindings?.item,
     'item.sword.short_notched',
   );
 });

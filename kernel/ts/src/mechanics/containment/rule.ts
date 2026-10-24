@@ -23,7 +23,8 @@ import {
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
-import { carrying, giveRefused, itemLine, putRefused, recipient } from './shared.ts';
+import { carrying, giveRefused, putRefused, recipient } from './shared.ts';
+import { itemLine } from './line.ts';
 import { stolen, theftRefused } from './theft.ts';
 import { movable } from '../../runtime/created.ts';
 
@@ -89,7 +90,7 @@ const transfer: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) =
   return accepted(world, 'given', move(p.recipient_id), acquired(p.recipient_id));
 };
 
-// Each accepted take, drop, give and put narrates one engine line (loka-kgd.185, shared.ts
+// Each accepted take, drop, give and put narrates one engine line (loka-kgd.185, line.ts
 // itemLine). A line already there (a stolen take's theft narration) stands alone.
 export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const d = transfer(world, command, mint, steps);
