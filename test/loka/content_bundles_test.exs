@@ -11,7 +11,7 @@ defmodule Loka.ContentBundlesTest do
     pairs(diags)
   end
 
-  # Breaks: a bundle that is not an object, or a bundle member that is not a definition directory, or not an object, is dropped
+  # Breaks: an undecodable bundle also reports SCHEMA_VIOLATION; a bundle that is not an object, or a bundle member that is not a definition directory, or not an object, is dropped
   # silently; a bundled definition that repeats a plain file wins or loses without a word, or an
   # abstract repeat removes both copies before the repeat is refused (extends ran first).
   test "a bundle refuses a non-object bundle, an unknown member, a non-object member and a repeated definition" do
@@ -25,6 +25,12 @@ defmodule Loka.ContentBundlesTest do
     assert {"SCHEMA_VIOLATION", "areas/village", %{"error" => "invalid_type"}} in refused([
              {@bundle, []}
            ])
+
+    broken = Loka.ContentSource.copy("cartridges/speech_sampler")
+    File.write!(Path.join(broken, @bundle), "{")
+    assert {:error, diags} = Loka.Content.compile(broken)
+    assert {"INVALID_JSON", "areas/village"} in Enum.map(pairs(diags), &Tuple.delete_at(&1, 2))
+    refute Enum.any?(pairs(diags), &match?({"SCHEMA_VIOLATION", "areas/village", _}, &1))
 
     lane = fn dir -> JSON.decode!(File.read!(Path.join(dir, @bundle)))["rooms"]["lane"] end
     dir = Loka.ContentSource.copy("cartridges/speech_sampler")
