@@ -13,9 +13,8 @@ const TEXT: Record<string, string> = {
   'detail.hearth.description': 'A cold hearth, grey with ash.',
   'actions.gather_ash': 'Gather ash',
 };
-const text = (key: string) => TEXT[key] ?? key;
-
-const draw = async (offer: object = {}) => {
+const draw = async (offer: object = {}, prose = TEXT['room.loft.description']) => {
+  const text = (key: string) => (key === 'room.loft.description' ? prose : (TEXT[key] ?? key));
   const { RoomPage } = await import('./pages.tsx');
   const { NoticeEntries, NoticePage, proseLinks } = await import('./notices.tsx');
   const view = {
@@ -103,4 +102,14 @@ test('a refused fixture offer draws its reason on the page, not a card', async (
       .map(words)
       .some((t) => t.startsWith('Gather ash: ')),
   );
+});
+
+// Breaks: an unlinked fixture's World line presses its first offer on tap (it sent gather_ash), or
+// with every offer refused draws an inert card whose page cannot be opened.
+test('an unlinked fixture opens its page from its World line, even with every offer refused', async () => {
+  for (const offer of [{}, { available: false, reason: { code: 'insufficient_resource' } }]) {
+    const { room, done } = await draw(offer, 'A low loft.');
+    room.find((n) => n.props?.accessibilityLabel === 'The hearth, open').props.onPress();
+    assert.deepEqual(done, [{ kind: 'notice', id: 'n1' }]);
+  }
 });

@@ -139,9 +139,7 @@ defmodule Loka.Content.RoomParts do
 
   defp detail_text(rel, key, detail, text) do
     fields =
-      [{["description"], detail["description"]}] ++
-        for({field, value} <- Map.take(detail, ["title"]), do: {[field], value}) ++
-        for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value}) ++
+      own_text(detail) ++
         board_text(detail) ++
         harvest_text(detail)
 
@@ -149,6 +147,11 @@ defmodule Loka.Content.RoomParts do
         not is_map_key(text, value),
         do: diag("UNRESOLVED_REFERENCE", at(rel, ["details", key] ++ steps), %{"target" => value})
   end
+
+  defp own_text(detail),
+    do:
+      for({field, value} <- Map.take(detail, ["description", "title"]), do: {[field], value}) ++
+        for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value})
 
   defp harvest_text(detail),
     do:

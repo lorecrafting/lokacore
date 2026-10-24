@@ -101,7 +101,8 @@ function NoticeLink(p: Props & { notice: Notice }) {
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
   const offer = noticeOffer(screen.view, notice.id);
-  if (kept(notice))
+  // a fixture (no Read) opens its page only, as its prose link does (loka-x6t.120)
+  if (kept(notice) || !reads(screen.view, notice.id).length)
     return (
       <EntityLine
         name={title}

@@ -17,8 +17,10 @@ walk('1-self-build', 'Self-build: chop, learn carpentry, saw, raise a timbered h
   await tap(/^Take/);
   const chop = async () => {
     await moves(screen, 'west');
+    await tap('oak, open'); // a recipe aimed at a detail is on its page (loka-x6t.120)
     await tap('Chop wood');
     await tap('Chop wood');
+    await tap(LABEL.leave);
     await moves(screen, 'east');
   };
   await chop();
@@ -28,11 +30,18 @@ walk('1-self-build', 'Self-build: chop, learn carpentry, saw, raise a timbered h
   await tap('Learn carpentry');
   await tap(LABEL.leaveConversation);
   await tap(LABEL.leave);
-  await tap('Saw timber');
+  const saw = async () => {
+    await tap('sawhorse, open');
+    await tap('Saw timber');
+    await tap(LABEL.leave);
+  };
+  await saw();
   await chop();
-  await tap('Saw timber');
+  await saw();
   await moves(screen, 'east');
+  await tap('plot, open');
   await tap('Raise a timbered hut');
+  await tap(LABEL.leave);
   await moves(screen, 'north');
 });
 
@@ -63,8 +72,10 @@ walk(
         .tap();
       await screen.getByRole('button', 'Take a stick').tap();
       await settle();
+      await screen.getByRole('button', 'bench, open').tap();
       await screen.getByRole('button', 'Carve a spoon').tap();
       await settle();
+      await screen.getByRole('button', LABEL.leave).first().tap();
     }
     await screen.getByRole('button', /^The old carver, open$/i).tap();
     await screen.getByRole('button', 'Talk the old carver').tap();

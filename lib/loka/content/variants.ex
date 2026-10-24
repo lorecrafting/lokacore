@@ -5,8 +5,8 @@ defmodule Loka.Content.Variants do
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
   `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
   (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
-  1.102; an NPC's `asides` (row FD10) 1.107; an NPC's or item's name `words` (loka-6qi) 1.118.
-  Twin of kernel/ts/src/content/cartridge_variants.ts.
+  1.102; an NPC's `asides` (row FD10) 1.107; an NPC's or item's name `words` (loka-6qi) 1.118;
+  a detail's `title` (loka-x6t.120) 1.120. Twin of kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
   alias Loka.Content.{Entities, RoomParts}
@@ -34,12 +34,7 @@ defmodule Loka.Content.Variants do
     identity = is_map_key(settings["world"] || %{}, "identity")
     words = Enum.any?(Entities.all(defs), fn {_, _, e} -> is_map_key(e, "words") end)
 
-    titled =
-      Enum.any?(
-        for {_, {_, [], r}} <- Map.get(defs, "room", %{}),
-            {_, d} <- Map.get(r, "details", %{}),
-            do: is_map_key(d, "title")
-      )
+    titled = titled?(defs)
 
     ladder = [
       {titled, [1, 120]},
@@ -55,6 +50,15 @@ defmodule Loka.Content.Variants do
     {Enum.any?([titled, words, identity, voices, relative]) or used?(defs, settings),
      Enum.find_value(ladder, [1, 46], fn {on, floor} -> on && floor end)}
   end
+
+  # A room detail's authored page title (loka-x6t.120).
+  defp titled?(defs),
+    do:
+      Enum.any?(
+        for {_, {_, [], r}} <- Map.get(defs, "room", %{}),
+            {_, d} <- Map.get(r, "details", %{}),
+            do: is_map_key(d, "title")
+      )
 
   defp used?(defs, settings),
     do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)

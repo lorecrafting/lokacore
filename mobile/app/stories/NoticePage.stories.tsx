@@ -39,7 +39,13 @@ export const FixtureWithCards: StoryObj = {
     view: { ...NoticeReadView.view, notices: [hearth] },
     stack: [{ kind: 'notice', id: 'hearth' }],
   }),
-  args: { words: { 'detail.hearth.title': 'The hearth' } },
+  args: {
+    words: {
+      'detail.hearth.title': 'The hearth',
+      'detail.hearth.description': 'A cold hearth, grey with ash.',
+      'actions.gather_ash': 'Gather ash',
+    },
+  },
   name: 'Fixture with cards',
 };
 
