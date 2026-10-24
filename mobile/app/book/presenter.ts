@@ -80,7 +80,6 @@ function background(
   }
   if (last && last.command_id !== s.narrationId)
     narrate(s, closing(last, was, now), now, away, text);
-  world(s, away, asideLines(s, now, text));
 }
 
 // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
@@ -194,6 +193,8 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   if (update.kind === 'state') {
     background(game, update, s, text);
     settle(s);
+    // Asides are present tense: never held for the away recap; they log once it settles.
+    if (!s.away) s.log.push(...asideLines(s, s.projection.view, text));
     return false;
   }
   if (!s.retry || update.invocation_id !== s.retry.invocation) return false;

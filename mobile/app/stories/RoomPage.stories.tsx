@@ -91,7 +91,7 @@ export const SenseCuesHere: StoryObj = {
 
 // A skill voice (toolbox row FD2) and a companion remark (FD10) as the presenter logs them: plain
 // World lines after the room's lines, no block of their own (book-ui.md Aside details; owner pick
-// mvlrbpi8u4ai). Breaks: the log drops an aside or reorders it; the logging is in logs.test.ts.
+// mvlrbpi8u4ai). Breaks: the log drops an aside or reorders it; the logging is in polish_style.test.ts.
 export const Asides: StoryObj = {
   ...pageStory({
     ...RoomFirstView,

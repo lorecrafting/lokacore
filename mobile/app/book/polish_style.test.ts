@@ -81,6 +81,69 @@ test('each aside is one plain World log line, once per room visit', async () => 
   assert.deepEqual(show(at('hall', [runes])), ['You know these runes.']);
 });
 
+// Breaks: a cold open, a tap into a room or a tick's narration logs no aside or logs it twice; an
+// aside comes before the narration or arrivals, or a person's before the room's; or an open away
+// settlement holds an aside for its recap instead of logging it once the recap settles.
+test('asides log after narration and arrivals on open, tap and tick, never in the recap', async () => {
+  const { presenter } = await import('./presenter.ts');
+  const at = (id: string, more: object = {}) => ({
+    place: { id, title: { key: 'T' }, asides: [{ key: `${id} lore.` }] },
+    entities: [
+      { id: 'hal', name: 'Hal', kind: 'npc', actions: [], asides: [{ key: 'Hal mutters.' }] },
+    ],
+    ...{ exits: [], actions: [], inventory: [], journal: [], time: 0 },
+    ...more,
+  });
+  let view: object = at('hall');
+  let n = 0;
+  let last: object | undefined = { command_id: 'c0', lines: [{ key: 'T' }, { key: 'You wake.' }] };
+  const game = {
+    view: () => ({ view, token: `t${n}` }),
+    text: () => undefined,
+    lastNarration: () => last,
+    pending: () => false,
+    pendingInvocation: () => undefined,
+    invoke: () => {
+      view = { ...at('yard'), entities: [] };
+      n++;
+      const narration = [{ key: 'The gate closes.' }];
+      last = { command_id: 'move', lines: narration };
+      return {
+        kind: 'saved',
+        decision: { kind: 'accepted', events: [], outcome: 'moved', narration },
+      };
+    },
+  } as any;
+  const p = presenter(game);
+  assert.deepEqual(p.screen().log, ['You wake.', 'hall lore.', 'Hal mutters.']);
+  p.press({ label: 'Go north', action_key: 'move', target_ids: [], input: {} });
+  assert.deepEqual(p.screen().log, ['The gate closes.', 'yard lore.']);
+  const tick = (next: object, status: string, narration?: string) => {
+    view = next;
+    n++;
+    if (narration) last = { command_id: `c${n}`, lines: [{ key: narration }] };
+    p.update({ kind: 'state', projection: game.view(), status: { kind: status } } as any);
+    return p.screen();
+  };
+  assert.deepEqual(tick(at('yard'), 'ready', 'Rain falls.').log.slice(2), [
+    'Hal arrives.',
+    'Rain falls.',
+    'Hal mutters.',
+  ]);
+  const away = { recap_after: 1, entities: [] };
+  tick({ ...at('cellar', away), place: { id: 'cellar', title: { key: 'T' } } }, 'ready');
+  assert.deepEqual(tick(at('cellar', { ...away, time: 5 }), 'catching_up', 'Hours pass.').log, []);
+  const settled = tick(
+    at('cellar', {
+      ...away,
+      time: 9,
+      place: { id: 'cellar', title: { key: 'T' }, asides: [{ key: 'Damp.' }] },
+    }),
+    'ready',
+  );
+  assert.deepEqual([settled.recap, settled.log], [[{ line: 'Hours pass.', count: 1 }], ['Damp.']]);
+});
+
 // Breaks: an aside draws as its own block on World (a place's or a person's), or a notice's asides do not
 // lead its history as plain lines.
 test('asides draw no block; a notice leads its history with them', async () => {
