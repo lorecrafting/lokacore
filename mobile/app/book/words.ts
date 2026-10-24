@@ -256,3 +256,10 @@ export function comings(was: GameView, now: GameView, text: Say, events: Events 
     ...gone(now, was).map((e) => `${sentence(text(e.name))} arrives.`),
   ];
 }
+
+type Offered =
+  | { available: true }
+  | { available: false; reason: Refusal & { message?: Parameters<typeof message>[0] } };
+// An offer's refusal as the Book says it: the cartridge's sentence, else the code's word; '' when offered.
+export const why = (e: Offered, text: (key: string) => string) =>
+  e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);

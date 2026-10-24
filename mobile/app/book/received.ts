@@ -45,6 +45,7 @@ function journalChanged(was: GameView, now: GameView, detail: string) {
 // Pick a second thing).
 const CHANGED = ['taken', 'dropped', 'given', 'eaten', 'bandaged'];
 
+// size: allow 41, the fight-cast flag that routes a cast's lines to the combat log
 export function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
   const attempt = s.retry!;
   const now = game.view().view;

@@ -12,7 +12,7 @@ import { book } from './__tests__/polish-book.test.ts';
 // The showcase with flamma and lux known from the start, the game starting in a lit crypt beside the wight (8 hp,
 // one flamma kills it) and the lantern, with `ash` ash for lux. `den` starts in the goblin den
 // instead, with flamma's wight-only policy negated so each goblin offers it.
-function cartridge(ash = 0, den = false) {
+function cartridge(ash = 0, den = false, luxCooldown = 0) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-cast-pick-'));
   const source = new URL('../../../cartridges/toolbox_showcase', import.meta.url);
   const edit = (file: string, change: (json: any) => void) => {
@@ -30,6 +30,7 @@ function cartridge(ash = 0, den = false) {
     edit('cartridge.json', (j) => (j.entry = den ? 'chief_den' : 'crypt'));
     if (den)
       edit('recipes/flamma.json', (j) => (j.policy.root = { op: 'not', item: j.policy.root }));
+    if (luxCooldown) edit('recipes/lux.json', (j) => (j.cooldown = luxCooldown));
     edit('resources.json', (j) => (j.resources.ash.start = ash));
     edit('rooms/crypt.json', (j) => delete j.dark_description);
     edit('items/lantern.json', (j) => (j.location.room = 'crypt'));
@@ -121,4 +122,23 @@ test("opening a second foe's Cast a spell… closes the first", (t) => {
   options()[1].props.onPress();
   const rows = b.labels().filter((l) => l === 'Flamma, cast flamma on a goblin');
   assert.equal(rows.length, 1, b.labels().join(' | '));
+});
+
+// Breaks: a resting aimed spell drawn twice on its target's page, as a refusal note and as its row.
+test('a resting spell is its Cast a spell… row alone, no refusal note', (t) => {
+  const b = book(cartridge(2, false, 600) as never);
+  t.after(() => b.sql.close());
+  b.tap('lantern, open');
+  b.tap('Take the lantern');
+  const lantern = () => (b.tap(/opens Contents/), b.tap('Inventory, open'), b.tap(/lantern/));
+  lantern();
+  b.tap('Cast a spell…');
+  b.tap('Lux, cast lux on the lantern');
+  lantern();
+  b.tap('Cast a spell…');
+  assert.deepEqual(
+    b.text().filter((l) => l.startsWith('Lux:')),
+    ['Lux: not yet'],
+    b.text().join(' | '),
+  );
 });

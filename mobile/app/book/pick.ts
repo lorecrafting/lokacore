@@ -30,19 +30,21 @@ const state = (e: Thing | undefined, text: (key: string) => string) =>
     : e?.liquid &&
       `${text(e.liquid.label)}: ${e.liquid.quantity}/${e.liquid.capacity} ${text(e.liquid.unit_label)}`;
 
+// The option a pair is listed under on page `id`. A spell: one list of spells on its target's page,
+// elsewhere (Character) one list per spell.
+const option = (b: Button, id: string) =>
+  commandOf(b) !== 'cast'
+    ? OPTION[commandOf(b) === 'give' ? 'give' : 'use'][b.target_ids.indexOf(id)]!
+    : b.target_ids.includes(id)
+      ? LABEL.castASpell
+      : `${b.label}, ${lower(LABEL.castOn)}`;
+
 export function picks(v: GameView, buttons: Button[], id: string, text: (key: string) => string) {
   const all = new Map<string, Thing>(things(v).map((e) => [e.id, e]));
   const name = (i: string) => text(all.get(i)?.name ?? '');
   const lists = new Map<string, Button[]>();
   for (const b of buttons.filter((b) => b.pick)) {
-    const label =
-      commandOf(b) === 'cast'
-        ? // on the target's page one list of spells; elsewhere (Character) one list per spell
-          b.target_ids.includes(id)
-          ? LABEL.castASpell
-          : `${b.label}, ${lower(LABEL.castOn)}`
-        : OPTION[commandOf(b) === 'give' ? 'give' : 'use'][b.target_ids.indexOf(id)]!;
-    lists.set(label, [...(lists.get(label) ?? []), b]);
+    lists.set(option(b, id), [...(lists.get(option(b, id)) ?? []), b]);
   }
   return [...lists].map(([label, pairs]): Pick => {
     const tool = label === LABEL.useOn;

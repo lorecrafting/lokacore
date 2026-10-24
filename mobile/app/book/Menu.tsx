@@ -47,8 +47,9 @@ const noted = (r: Refusal) =>
 const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown = (thing?.actions ?? [])
     .flatMap((a) => {
-      // A resting use pair is its Pick list row instead (book-ui.md, Pick a second thing).
-      const row = (r: Refusal) => !!thing && !!other(a, thing.id) && r.code === 'cooldown';
+      // A resting use pair, or any refused aimed spell, is its Pick list row instead (book-ui.md, Pick a second thing).
+      const row = (r: Refusal) =>
+        commandOf(a) === 'cast' || (!!thing && !!other(a, thing.id) && r.code === 'cooldown');
       const word = !a.available && !row(a.reason) && noted(a.reason);
       return word ? [{ ...a, word }] : [];
     })

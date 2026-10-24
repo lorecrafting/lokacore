@@ -6,7 +6,7 @@ import { things } from './item-pages.ts';
 import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import type { Button } from './presenter.ts';
 import { LABEL } from './labels.ts';
-import { message, NOTED, reasonOf } from './words.ts';
+import { NOTED, why } from './words.ts';
 
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -205,12 +205,12 @@ export const other = (
   !NOT_USE.includes(commandOf(a)) &&
   (a.target_ids[1] === id ? a.target_ids[0] : commandOf(a) === 'give' && a.target_ids[1]);
 // A use or Give pair is a Pick list row on both its pages (pick.ts), its label the recipe's.
-const pickRows = (row: Press, available: boolean, ids: string[]) =>
-  ids.map((id) => ({
-    ...row,
-    pick: available ? {} : { reason: `${NOTED.cooldown}.` },
-    detail_id: id,
-  }));
+const pickRows = (row: Press, reason: string, ids: string[]) =>
+  ids.map((id) => ({ ...row, pick: reason ? { reason } : {}, detail_id: id }));
+
+// An offer a held thing's page draws: offered, an aimed spell (refused, its row), or a resting use pair.
+const held = (a: ReturnType<typeof things>[number]['actions'][number], id: string) =>
+  a.available || commandOf(a) === 'cast' || (!!other(a, id) && a.reason?.code === 'cooldown');
 
 function heldButtons(
   v: GameView,
@@ -221,30 +221,20 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter(
-        (a) =>
-          (a.available ||
-            commandOf(a) === 'cast' ||
-            (!!other(a, e.id) && a.reason?.code === 'cooldown')) &&
-          !['ask', 'whisper'].includes(a.action_key),
-      ) // whisper is wordButtons, ask is askButtons
+      .filter((a) => held(a, e.id) && !['ask', 'whisper'].includes(a.action_key)) // whisper is wordButtons, ask is askButtons
       // An unauthored Wear on a wield-slot item reads Wield (book-ui.md, Equipment and skills).
       .map((o) =>
         o.label === 'action.wear' && e.slot === 'wield' ? { ...o, label: 'action.wield' } : o,
       )
       .flatMap((a) => {
         // An aimed spell is a Cast a spell… row on its target, refused as `Lux: need 1 ash` (pick.ts).
-        if (commandOf(a) === 'cast')
-          return {
-            ...button(a, ''),
-            pick: a.available
-              ? {}
-              : { reason: a.reason.message ? message(a.reason.message, text) : reasonOf(a.reason) },
-            detail_id: e.id,
-          };
+        if (commandOf(a) === 'cast') return pickRows(button(a, ''), why(a, text), [e.id]);
         const two = other(a, e.id);
         // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)
-        if (two) return names.has(two) ? pickRows(button(a, ''), a.available, [e.id, two]) : [];
+        if (two)
+          return names.has(two)
+            ? pickRows(button(a, ''), a.available ? '' : `${NOTED.cooldown}.`, [e.id, two])
+            : [];
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(
