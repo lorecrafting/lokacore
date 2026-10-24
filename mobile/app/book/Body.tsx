@@ -7,6 +7,7 @@ import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
+import { ShelfPage } from './Shelf.tsx';
 import { NoticeEntries, NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
@@ -88,16 +89,13 @@ function PageBody(p: BodyProps & Talk) {
       />
     );
   if (!page) return <WorldPage {...p} />;
-  if (page.kind === 'dialogue' || npcPage(page, view))
-    return (
-      <NpcDetail
-        {...p}
-        speaker={
-          page.kind === 'dialogue' ? page.speaker : page.kind === 'thing' ? page.id : undefined
-        }
-        visit={page}
-      />
-    );
+  if (page.kind === 'dialogue' || npcPage(page, view)) {
+    const speaker =
+      page.kind === 'dialogue' ? page.speaker : page.kind === 'thing' ? page.id : undefined;
+    return <NpcDetail {...p} speaker={speaker} visit={page} />;
+  }
+  if (page.kind === 'shelf' || page.kind === 'sale')
+    return <ShelfPage {...p} id={page.id} sale={page.kind === 'sale'} />;
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;

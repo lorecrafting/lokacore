@@ -28,13 +28,13 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.67 (homestead verbs read like container moves; x6t.54 merged into it).
 
 ## 4. Logs
-- book-loglines--narration, --system-line, --refused-with-tag, --thirty-lines, --empty
-- Look at: how narration, system lines and refused lines differ; scroll at 30 lines.
-- Known: loka-4l3 (refusal tag on native), x6t.29 (resting exit says "not now", "1 doses", "2-2 damage").
+- book-loglines--narration, --system-line, --refused-with-tag (now "Refused"), --thirty-lines, --empty
+- Look at: how narration, system lines and refused lines differ (a refused line is ink italic, no chip); scroll at 30 lines.
+- Known: x6t.29 (resting exit says "not now", "1 doses", "2-2 damage").
 
 ## 5. NPC page
-- pages-npc--choice, --shop, --services, --closed-conversation
-- Look at: choice cards, shop rows, the Leave control.
+- pages-npc--choice, --shop, --shelf, --services, --nothing-to-say, --closed-conversation
+- Look at: Talk then Trade, the buy page ("Nell can sell you…", purse, Sell) and the sell page ("Nell will buy…"), no filler on an idle person, the Leave control.
 - Known: x6t.70 (NPC conditions), x6t.14 (wording M4/M5).
 
 ## 6. Item page
@@ -54,7 +54,7 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.56 (lore shown twice on Character), x6t.57.
 
 ## 9. Say field and away recap
-- book-sayfield--whisper, --pending, --known-words
+- book-sayfield--send, --pending, --known-words
 - book-awayrecap--collapsed, --open, --milestone
 - Look at: chip density under the field, the bad-word note.
 - Known: none filed.

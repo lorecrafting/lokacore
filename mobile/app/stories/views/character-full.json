@@ -752,10 +752,6 @@
  },
  "stack": [
   {
-   "kind": "thing",
-   "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8"
-  },
-  {
    "kind": "contents"
   },
   {
@@ -764,10 +760,5 @@
  ],
  "log": [],
  "combatLog": [],
- "details": {
-  "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8": [
-   "Aldous looks you over. \"Want to learn the blade?\"",
-   "Aldous drills you until your arm aches, then hands you the training sword. \"Keep your guard up.\""
-  ]
- }
+ "details": {}
 }

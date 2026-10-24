@@ -12,7 +12,11 @@ Governing direction: the owner's rulings on [touch and resumption](../decisions/
 [room and detail polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md),
 [dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md),
 [journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md)
-and [detail-page order](../decisions/owner-decision-detail-page-order-2026-10-05.md).
+[detail-page order](../decisions/owner-decision-detail-page-order-2026-10-05.md)
+and the detail-page redesign (owner pick mvlrlvappy4w, 2026-10-23: no status line on detail
+pages, the shop page, one Talk card, services grouped by order, Whisper hidden) and its follow-ups
+(owner picks mvlyb5x2m9i3, mvlymuams73l, mvlynyikyw57: no filler lines, Talk then Trade, no Give
+an item…, the shop's buy and sell pages).
 Original feedback lives in those records; independent reviews and retained interaction proof
 are listed in the generated [review index](../reviews/README.md). The per-mechanic detail
 sections of retired chapters were removed on 2026-10-22; the rules they shared are stated below,
@@ -242,13 +246,18 @@ chronological event log (a notice's [asides](#aside-details) first) only when en
 scrolling content. Options list in one fixed order (pass-1 UR): first the verbs that act on the
 thing itself (Read, Eat, Drink, Wear, Light, Open, Talk, Attack, a recipe), then the verbs that
 move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into <container>,
-Give an item…, Give to…), then asks and services; the thing's own pick options (Use an item…, Use on…, Cast a
+Give to…), then asks, Trade and services (a person's page orders its own cards,
+[rule](#npc-dialogue-and-action-details)); the thing's own pick options (Use an item…, Use on…, Cast a
 spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
 A page's local returns (Leave, Back to World, Back to board, Back to map,
-Close) sit in its page foot, below the scrolling content and above the status line, nearest first;
-offered actions never do. World, a scene, a chapter title, the ancestry choice and combat have no
+Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
+control ends the page; offered actions never do. Item, notice, board, NPC and shop pages draw
+no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pending save shows
+as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
+fault show there as on every page. Combat, Character, Contents, the map and World keep the
+[status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
 foot. A control that opens a child (Resume dream, Continue conversation) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); no line shows twice for one receipt. Combat closure and the notice-board readable restore are the exceptions in their sections.
 
 ## Notice-board details
@@ -296,11 +305,33 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 ## NPC dialogue and action details
 
 Tapping an NPC opens full details using its actual projected name, authored description and
-actions. Description comes first. Outside a conversation the page offers the person's actions as
-cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers, and the [pick options](#item-details-and-takedrop) Use an item…, Cast a spell… and Give an item…; the foot is Leave. A page
-with any priced offer (a shelf, a bank, a priced service) draws one Note **You have <n>p.**
-after the description, before the shelf rows, from the projected pennies; it is the only place
-the balance is written, and "can't afford" stays a bare reason (pass-1 E15). It shows
+actions. Description comes first. Outside a conversation the page offers the person's actions as one
+ordered list of Action cards straight after the description and history (owner pick
+mvlrlvappy4w, mvlymuams73l, 2026-10-23): **Talk**, then **Trade**, the [pick
+options](#item-details-and-takedrop) Use an item… and Cast a spell…, Lift or Take, [Ask
+about](#fd7-ask-details), then the services. The foot is Leave. The Talk card reads **Talk**;
+its accessible name stays the offer's label ("Talk to Nell"). Several Talk offers draw one Talk
+card, the first available one; with none available the page draws nothing in its place, no
+filler line and never "Talk: not now" (owner pick mvlyb5x2m9i3): a person with nothing to do
+shows title, description, then Leave. A person's page draws no Give an item… card: a gift is
+given from the item's own Give to… (owner pick mvlymuams73l). **Trade** shows while the
+person's shop has a row; it opens the child buy page **<Name> can sell you…**, as a notice opens
+from its board, and its Leave returns to the person. The buy page holds one buy card per stock
+row ("Cob of bread — 4p"; refused, "Cob of bread — 4p: can't afford"), then the purse Note
+**You have <n>p.** under the list, the visit history, then a **Sell** card (no ellipsis), drawn
+only while the player holds something the person will buy. Sell opens the child sell page
+**<Name> will buy…** (owner pick mvlynyikyw57): one card per thing the GameView offers to sell
+to this person, with its price ("Cob of bread — 1p"), then the purse and history; Leave
+returns to the buy page. It lists only what the engine marks sellable (wider sale lists are
+loka-x6t.117). A buy or sale keeps its page open: its line joins the person's visit history,
+drawn there and again on the person's page, and the purse redraws. Shop stock is not listed
+under the person's Held. Each service is its own Action card
+with its authored label; the claim and cancel of an order sit under a **Your order** Section
+title after the order card, and show only while an order is open (either is offered, or either
+is refused for a reason other than `service.no_order`); while Your order shows, the commission
+card is not drawn. The purse Note shows on the NPC page only when a priced service is drawn,
+after the description; pennies show nowhere else on a detail page, and "can't afford" stays a
+bare reason (pass-1 E15). It shows
 no past conversation log on a fresh visit to the page or after Leave the conversation; lines since that visit began or that Leave are the only
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
@@ -357,13 +388,13 @@ hostile (a derived read, absent otherwise) and, when the cartridge authors
 as `refusal`. While `hostile` is projected the page shows the description, then one
 [Note](../BOOK-UI-COMPONENTS.md#component-catalogue) in place of Talk: the `refusal` line, or
 without one the sentence [words](../../mobile/app/book/words.ts) owns ("<Name> will have
-nothing to do with you."). No Talk, shelf or Ask about card is drawn; services and lessons
+nothing to do with you."). No Talk, Trade or Ask about card is drawn; services and lessons
 stay as offered; the foot is Leave. The authored line names the mood, never the cause
 ("Nell turns her back on you.", not what the player did); hostility ending redraws the actions
-without a line. A shelf row's reason is always a word from `words.ts` `reason()` ("not now",
+without a line. A buy page card's reason is always a word from `words.ts` `reason()` ("not now",
 "too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
 stays "sold out", and one refused `insufficient_resource` reads "can't afford" (`buyReason`).
-A shelf reason from the cartridge is a lowercase fragment with no period.
+A shop reason from the cartridge is a lowercase fragment with no period.
 
 ## Item details and Take/Drop
 
@@ -387,10 +418,9 @@ An item action advertised unavailable with `too_heavy` appears as a non-action n
 actual catalog label and **too heavy to carry**; one refused because the load is full reads
 **more than you can carry** (kernel code `over_load`) (pass-1 R3). `resource.short` reads "need <n> <key>"; `permission_denied` reads "not yours". It invokes nothing; available actions retain their
 existing buttons. The note follows the latest GameView, including Take aliases and Contents,
-and disappears when shedding held load makes Take legal. While any such note shows, the page
-draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3). The
-same holds on an NPC page: its shop price rows and service rows, available or not, keep the Note off
-(pass-2).
+and disappears when shedding held load makes Take legal. An item or NPC page with nothing to do
+draws no filler line ("Nothing to do here.", "<Name> has nothing to say just now."): title,
+description, then Leave (owner pick mvlyb5x2m9i3, 2026-10-23).
 
 
 Successful ordinary Take/Drop are the specific exceptions to item-page retention; corpse-content
@@ -403,16 +433,16 @@ Put appears as a concrete pair button using projected source/destination names a
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
-**Pick a second thing.** An action that needs a second object never draws one card per pair; its page draws one option that opens a list of the GameView's pairs, and a pick sends one (owner 2026-10-23, quoted: "you click that option and it opens a list and you pick an item and then the item detail closes with an echo the log"). There are five such options, each a `LABEL` word ending in an ellipsis:
+**Pick a second thing.** An action that needs a second object never draws one card per pair; its page draws one option that opens a list of the GameView's pairs, and a pick sends one (owner 2026-10-23, quoted: "you click that option and it opens a list and you pick an item and then the item detail closes with an echo the log"). There are four such options drawn, each a `LABEL` word ending in an ellipsis:
 - **Use an item…** on a target's page (an item, a person, a notice or a fixture with a page): one row per carried tool the GameView lists in a use pair (G4) on this target, target_ids [target, tool], labelled with the tool's projected name.
 - **Use on…** on a held tool's page: one row per target the GameView lists in a use pair with this tool, labelled with the target's projected name.
 - **Cast a spell…** on a target's page: one row per aimed spell the GameView offers on it, labelled with the spell's word (`lux`), as the say field's chips name it. The cast-with-target command is engine row loka-x6t.109; until it lands no target lists one.
-- **Give an item…** on a person's page: one row per carried item the GameView lists in a Give pair with this person, target_ids [item, recipient], labelled with the item's projected name.
+- **Give an item…** is not drawn: a person's page has no Give card (owner pick mvlymuams73l, 2026-10-23); the item's Give to… gives.
 - **Give to…** on a held item's page, its reverse (PM 2026-10-23, for symmetry with Use on…): one row per person the GameView lists in a Give pair with this item, labelled with the person's projected name.
 
-Rows keep the GameView's order. When one list holds pairs of more than one recipe, each row reads the recipe's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one row in the Action card's unavailable form (`rod: not yet`; under Use on…, one row per recipe, `Fish in: not yet`, whatever its targets); a refused aimed spell reads `lux: need 1 ash`; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still counts as something to do (no "Nothing to do here." Note).
+Rows keep the GameView's order. When one list holds pairs of more than one recipe, each row reads the recipe's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one row in the Action card's unavailable form (`rod: not yet`; under Use on…, one row per recipe, `Fish in: not yet`, whatever its targets); a refused aimed spell reads `lux: need 1 ash`; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still draws.
 
-The option is an Action card that sends nothing: a press opens its list in the page's flow directly beneath it, as the [Whisper field](#word-bar) does, and focus moves to the first row; the option reads as expanded while open. The option again, Escape from anywhere in the list, or the device's Back (Android back, browser back) closes it unsent and returns focus to the option; Back closes an open list before it leaves the page (PM 2026-10-23). Device Back is not built yet: the Book has no Back handling on native or web (loka-x6t.113); until then the option and Escape close the list. One list is open at a time: opening another closes the first. Leaving the page by any route closes it, and a reopened page starts closed. A redraw keeps the list open with the latest rows; when it would be empty the option goes and focus moves to the page title.
+The option is an Action card that sends nothing: a press opens its list in the page's flow directly beneath it, and focus moves to the first row; the option reads as expanded while open. The option again, Escape from anywhere in the list, or the device's Back (Android back, browser back) closes it unsent and returns focus to the option; Back closes an open list before it leaves the page (PM 2026-10-23). Device Back is not built yet: the Book has no Back handling on native or web (loka-x6t.113); until then the option and Escape close the list. One list is open at a time: opening another closes the first. Leaving the page by any route closes it, and a reopened page starts closed. A redraw keeps the list open with the latest rows; when it would be empty the option goes and focus moves to the page title.
 
 A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the recipe's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a Note in that page's history in the unavailable form; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
@@ -532,7 +562,7 @@ Attack/skill controls wait until GameView offers them; there are no placeholders
 character data. Reading-time safety and interruption integration remains
 future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
 A refusal reads as the kernel reports it: preserve genuine errors and meaningful history
-rather than hiding errors or clearing same-room history. Whisper needs a word, so the NPC page offers no Whisper card; whispering is the [Word bar](#word-bar)'s.
+rather than hiding errors or clearing same-room history. Whisper waits for loka-x6t.115 ([Word bar](#word-bar)).
 
 ## Combat interaction
 
@@ -574,9 +604,11 @@ code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pe
 save retries keep the existing original-attempt behavior for any subsequent press. A press
 refused after a catch-up gets no "what changed" sentence: the catch-up's own lines (rounds, a
 death, an expiry) already precede the refused line in order, and the refused line carries its
-reason word. Proposed for designer approval (loka-x6t.17, owner Q13 option A): a refusal that
+reason word. A refused line is plain log prose, ink italic, with no tag or chip (no chips in the
+game-world pane, owner pick mvlyp3gphp2t, 2026-10-23); its reason word stays in its accessible
+name, "<reason>, <sentence>", as [Announcements](#announcements) reads it. Proposed for designer approval (loka-x6t.17, owner Q13 option A): a refusal that
 carries a `cause` (GameError or an exit's reason, `RefusalCause`) takes the cause's word as its
-tag and the cause's sentence before the code's ([words](../../mobile/app/book/words.ts)
+reason word and the cause's sentence before the code's ([words](../../mobile/app/book/words.ts)
 `reason`, `refusedSentence`): a move while sitting reads **not standing**, "You are not
 standing.", never "The way north is not standing." or "not now".
 
@@ -665,7 +697,7 @@ GameView `attributes` carries each attribute's current value, which already incl
 
 ## Levelling details
 
-GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows on the status line as on every page, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
+GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows on the Character page's status line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
 
 ## Displayed name details
 
@@ -703,14 +735,13 @@ return to the room does not reopen it. When it closes, focus goes back to the co
 its chips (the page, the footer, the status line, the icon's own spot) also closes it unsent and
 presses nothing beneath: a second tap is needed to act there (owner, mvl9rtp93gex). The cover
 that takes that tap is not focusable, so a screen reader still closes with the expanded icon or
-Escape. On an NPC page, while `whisper` to that person is offered, a **Whisper** Control after the action cards opens the same field with one **Whisper** Control aimed at them; it counts as something to do there. That field sits in the page's flow under its own Control, so
-the tap-outside rule does not cover it: the Control or Escape closes it. Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
+Escape. Whisper is hidden on every page until loka-x6t.115 (owner pick mvlrlvappy4w, 2026-10-23). Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
 shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it.
 
 Known words are [Chips](../BOOK-UI-COMPONENTS.md) under the open field, each named by its word: on
 the status line, the cartridge phrases (GameView `phrases`), then each learned spell word the
 GameView offers to cast here (`spell_words`, only while Cast is offered; never an unlearned or a
-refused one); on the NPC page's Whisper, the phrases. A chip press only fills the field (and
+refused one). A chip press only fills the field (and
 clears the bad-word Note); it never sends. A refused spell word is no chip: the Character page
 lists it under a **Spells** section title in the Action card's unavailable form `word, cast: reason`
 (`lux, cast: need 1 ash`); no refused word, no Spells section.

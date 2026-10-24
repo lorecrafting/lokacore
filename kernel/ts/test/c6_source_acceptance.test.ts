@@ -6,7 +6,8 @@ import { key } from '../src/foundation/compose.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { fragment } from './fragment.ts';
 import { fatal } from './death_fixture.ts';
-import { buttonsOf, expeditionLine } from '../../../mobile/app/book/model.ts';
+import { buttonsOf } from '../../../mobile/app/book/model.ts';
+import { expeditionLine } from '../../../mobile/app/book/words.ts';
 
 const { genesis, ref } = fragment('protocol/fixtures/expedition_sampler_hash.json');
 

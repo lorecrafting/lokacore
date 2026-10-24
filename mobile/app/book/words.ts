@@ -147,13 +147,13 @@ export const NOTED: Record<string, string> = {
   permission_denied: 'not yours',
   cooldown: REASON.cooldown!, // a held tool resting between uses (pass-2 R2)
 };
-// A shelf row's buy reason: the shop's stock is gone, or the player's purse is short.
+// A buy-page row's reason: the shop's stock is gone, or the player's purse is short.
 const BUY: Record<string, string> = {
   not_owned: 'sold out',
   insufficient_resource: "can't afford",
 };
 export const buyReason = (code: string) => BUY[code] ?? reason(code);
-// A shelf row's sell reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
+// A sell-page row's reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
 export const sellReason = (
   s: { reason?: string; message?: { key: string } },
   text: (key: string) => string,
@@ -162,6 +162,9 @@ export const sellReason = (
 export const holding = (name: string) => `${name} is holding it.`;
 export const balance = (pennies: number) => `You have ${pennies}p.`;
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
+// The titles of a shopkeeper's buy and sell pages (owner picks mvlymuams73l, mvlynyikyw57).
+export const sellsTitle = (name: string) => `${name} can sell you…`;
+export const buysTitle = (name: string) => `${name} will buy…`;
 
 type Say = (key: string) => string;
 
@@ -263,3 +266,12 @@ type Offered =
 // An offer's refusal as the Book says it: the cartridge's sentence, else the code's word; '' when offered.
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
+export const expeditionLine = (
+  e: NonNullable<GameView['journal'][number]['expedition']>,
+  text: Say,
+) =>
+  e.status === 'active' && e.next_title
+    ? e.direction
+      ? `Next: ${e.direction} to ${text(e.next_title)}.`
+      : `Next checkpoint: ${text(e.next_title)}.`
+    : '';

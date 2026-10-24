@@ -18,6 +18,7 @@ const EXEMPT: Record<string, string> = {
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
   'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
+  'book/lines.tsx:Fault': 'a press that threw; reached live only, no story throws one',
 };
 
 // Every exported component, with its doc comment (stories/specs.ts, shared with the specs page).

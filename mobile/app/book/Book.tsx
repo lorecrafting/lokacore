@@ -12,9 +12,9 @@ import {
   group,
   POSITION_ACTIONS,
   pagesAfter,
-  initialPages,
   restoredItemPages,
   npcPage,
+  detailPage,
   nextPosition,
   type Hint,
   type Page,
@@ -37,15 +37,19 @@ import {
   type ReadingStore,
 } from './reading.ts';
 import { color, size, space } from './tokens.ts';
-import { Heard } from './lines.tsx';
-import { Control } from './pages.tsx';
+import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
-import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
 import { PageTurn } from './PageTurn.tsx';
-import { resultPages, useUpdates, wordTurn, type BookState, type Presenter } from './updates.ts';
-import { LABEL } from './labels.ts';
+import {
+  firstPages,
+  resultPages,
+  useUpdates,
+  wordTurn,
+  type BookState,
+  type Presenter,
+} from './updates.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
 export type Shell = {
@@ -92,6 +96,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   else if (pr.recovered()) p.shell.recovered?.(true);
   const inline =
     npcPage(before.stack.at(-1), before.view) ||
+    ['shelf', 'sale'].includes(before.stack.at(-1)?.kind ?? '') ||
     POSITION_ACTIONS.includes(b.command ?? b.action_key);
   if (next === before.stack && inline && !before.view.scene && !after.view.scene)
     s.redraw((n) => n + 1);
@@ -100,12 +105,6 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
     s.setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
   }
 }
-
-const firstPages = (s: ReturnType<Presenter['screen']>): Page[] => [
-  ...restoredNoticePages(s),
-  ...restoredItemPages(s.view, s.detail),
-  ...initialPages(s.view),
-];
 
 /**
  * The Book: draws GameView through its presenter; App injects the shell.
@@ -243,6 +242,8 @@ function Bottom(p: BottomProps) {
   const { view, text, pending, fault, ended } = p.screen;
   const shut = !!view.combat || !!ended;
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
+  const detail = !shut && detailPage(p.page);
+  if (detail && !pending && !p.screen.catchingUp && !fault) return null;
   return (
     <View
       style={{
@@ -250,13 +251,14 @@ function Bottom(p: BottomProps) {
         paddingHorizontal: space.xl,
         paddingBottom: space.lg,
         // The footer's own flanking rules divide it from the page (owner, mvl8dz3dy36l).
-        borderTopWidth: nav ? 0 : size.rule,
+        borderTopWidth: nav || detail ? 0 : size.rule, // a detail's PageFoot draws the rule
         borderTopColor: c.line,
       }}
     >
       {nav && navigation(p)}
       {p.say.open && shield(() => p.say.setOpen(false))}
-      {!view.ancestry_choices && statusLine(p)}
+      {!view.ancestry_choices && !detail && statusLine(p)}
+      {detail && pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
       {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
@@ -305,16 +307,3 @@ function navigation(p: BottomProps) {
 }
 
 type Screen = ReturnType<Presenter['screen']>;
-
-// A press that threw (a damaged page, a full disk): its message, and Start over beside the retry
-// that any press still sends (03 §14).
-// The message sits outside the button: its accessibilityLabel replaces the children it reads.
-function Fault(p: { fault: string; startOver: () => void }) {
-  const c = usePalette();
-  return (
-    <View style={{ alignItems: 'center' }}>
-      <Text style={{ ...useType().small, color: c.dim }}>{p.fault}</Text>
-      <Control label={LABEL.startOver} onPress={p.startOver} />
-    </View>
-  );
-}

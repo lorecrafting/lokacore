@@ -33,15 +33,6 @@ export const statusTip = (c: Condition, time: number, text: Say) =>
 // Book UI Sense cues details (wording proposed; designer to approve): the direction key, none here.
 export const cueLine = (c: NonNullable<GameView['cues']>[number], text: Say) =>
   `${text(c.text)}${c.direction ? ` from the ${c.direction}` : ''}`;
-export const expeditionLine = (
-  e: NonNullable<GameView['journal'][number]['expedition']>,
-  text: Say,
-) =>
-  e.status === 'active' && e.next_title
-    ? e.direction
-      ? `Next: ${e.direction} to ${text(e.next_title)}.`
-      : `Next checkpoint: ${text(e.next_title)}.`
-    : '';
 
 export type Exit = { direction: string; button: Button };
 export type Thing =
@@ -58,12 +49,16 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing' | 'board' | 'notice' | 'dream'; id: string }
+  | { kind: 'thing' | 'board' | 'notice' | 'dream' | 'shelf' | 'sale'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
+
+// A detail page draws no status line (owner pick mvlrlvappy4w); the shell keeps it elsewhere.
+export const detailPage = (page: Page | undefined) =>
+  ['thing', 'board', 'notice', 'dialogue', 'shelf', 'sale'].includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 
@@ -83,7 +78,13 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  const gone = stack.findIndex((p) => p.kind === 'thing' && !visible.some((e) => e.id === p.id));
+  // A person's pages, shop pages included, go with them (Shelf.tsx).
+  const gone = stack.findIndex(
+    (p) =>
+      'id' in p &&
+      ['thing', 'shelf', 'sale'].includes(p.kind) &&
+      !visible.some((e) => e.id === p.id),
+  );
   if (gone < 0) return stack;
   const page = stack[gone];
   if (page.kind === 'thing' && after.choice?.speaker_id === page.id)

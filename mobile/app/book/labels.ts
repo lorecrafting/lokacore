@@ -39,7 +39,6 @@ export const LABEL = {
   awayRecap: 'While you were away',
   // The say field's sends, the status line's say icon and field; the Character page's Spells.
   say: 'Say',
-  whisper: 'Whisper',
   shout: 'Shout',
   cast: 'Cast',
   sayToRoom: 'Say to the room',
@@ -60,6 +59,11 @@ export const LABEL = {
   giveTo: 'Give to…',
   castASpell: 'Cast a spell…',
   castOn: 'Cast on…', // a Character Spells line's list of the aimed spell's targets (loka-x6t.109.5)
+  // The NPC page's Talk and shop cards, the shop page's Sell card (owner picks mvlrlvappy4w, mvlymuams73l).
+  talk: 'Talk',
+  trade: 'Trade',
+  sell: 'Sell',
+  yourOrder: 'Your order',
   // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
   the: 'the',
 } as const;

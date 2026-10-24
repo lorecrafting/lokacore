@@ -56,8 +56,8 @@ test('each step scales every text role, the system scale stops at the cap, modif
   assert.equal(tapBleed(48), 0);
   const big = readingType(max);
   assert.deepEqual(
-    [big.speaker, big.tag, big.runningHead, big.tile].map((r) => r.fontSize),
-    [26, 20, 18, 35],
+    [big.speaker, big.runningHead, big.tile].map((r) => r.fontSize),
+    [26, 18, 35],
   );
   assert.deepEqual([big.named, big.italic], [type.named, type.italic]);
 });

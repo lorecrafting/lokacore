@@ -5,7 +5,7 @@ import { Note } from '../book/lines.tsx';
 const meta = {
   title: 'Book/Note',
   component: Note,
-  args: { children: 'Nothing to do here.' },
+  args: { children: 'You have 12p.' },
 } satisfies Meta<typeof Note>;
 export default meta;
 type Story = StoryObj<typeof meta>;

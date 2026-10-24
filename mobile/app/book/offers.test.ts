@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { offerLabel, priceNote, serviceButtons } from './offers.ts';
+import { offerLabel, priceNote, serviceButtons, serviceOrder, talkOf } from './offers.ts';
 
 const offer = (key: string, price: number, benefit: object) => ({
   service: { kind: 'service', key },
@@ -44,4 +44,59 @@ test('Book service labels: a bank fee, the MV note only on a meal or drink', () 
   assert.equal(offerLabel(meal, text, wrapped), 'service.meal (2p; up to +4 MV, capped)');
   assert.equal(offerLabel(barter, text, wrapped), 'service.barter');
   assert.equal(priceNote(view.entities[0]!.services[1] as never), 'fee 1p');
+});
+
+// Breaks: the commission stays beside an open order, claim and cancel show with no order (refused
+// service.no_order, or refused before the order check: a bare invalid_state from combat or 0 hp)
+// or leave the Your order group, or another service's order hides this one.
+test('an open order hides its commission and groups claim and cancel', () => {
+  const ref = (key: string) => ({ kind: 'service', key });
+  // reason: undefined is available; null is a refusal with no message key.
+  const follow = (kind: string, of: string, reason?: string | null) => ({
+    ...offer(`${kind}_${of}`, 0, { kind, service: ref(of) }),
+    action:
+      reason === undefined
+        ? { available: true, action_key: kind }
+        : {
+            available: false,
+            action_key: kind,
+            reason: { code: 'invalid_state', ...(reason && { message: { key: reason } }) },
+          },
+  });
+  const keys = (o: ReturnType<typeof serviceOrder>) =>
+    [o.plain, o.order].map((l) => l.map((s) => s.service.key));
+  const offers = (claim?: string | null, cancel?: string | null) =>
+    [
+      offer('boots', 4, { kind: 'commission' }),
+      follow('claim', 'boots', claim),
+      follow('cancel', 'boots', cancel),
+      offer('ale', 1, { kind: 'entitlement' }),
+    ] as never;
+  const open = [['ale'], ['claim_boots', 'cancel_boots']];
+  const none = [['boots', 'ale'], []];
+  assert.deepEqual(keys(serviceOrder(offers())), open);
+  assert.deepEqual(keys(serviceOrder(offers('service.not_ready', 'service.unaffordable'))), open);
+  assert.deepEqual(keys(serviceOrder(offers('service.no_order', 'service.no_order'))), none);
+  assert.deepEqual(keys(serviceOrder(offers(null, null))), none);
+});
+
+// Breaks: two talk offers draw two Talk cards, an authored-label talk folds into Talk, or a
+// talk button leaks into the person's other buttons.
+test('several talks collapse into the first available; an authored talk stays apart', () => {
+  const npc = {
+    actions: [
+      { action_key: 't1', label: 'action.talk' },
+      { action_key: 't2', label: 'actions.talk' },
+      { action_key: 't3', label: 'watch.talk' },
+      { action_key: 'fine', label: 'dialogue.clerk_fine.open' },
+    ],
+  };
+  const b = (action_key: string) => ({ action_key, label: action_key }) as never;
+  const { talk, rest } = talkOf(npc, [b('t2'), b('take'), b('t3'), b('t1'), b('fine')]);
+  assert.equal(talk?.action_key, 't2');
+  assert.deepEqual(
+    rest.map((r) => r.action_key),
+    ['take', 'fine'],
+  );
+  assert.equal(talkOf(npc, [b('take')]).talk, undefined);
 });

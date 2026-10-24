@@ -10,7 +10,7 @@ const light = {
   line: '#d0c7b0', // hairline rules, card borders, the speech bar
   card: '#e4decd', // action cards and letter tiles
   action: '#7b2d20', // what can be tapped to act
-  danger: '#6b2160', // the danger band, barred ways, refusal tags: plum against the oxblood action
+  danger: '#6b2160', // the danger band, barred ways: plum against the oxblood action
   warning: '#845512', // the warning band
 };
 
@@ -82,7 +82,6 @@ export const type = {
   sectionTitle: { fontFamily: font.caps, fontSize: 23, lineHeight: 25, letterSpacing: 0.5 }, // Inside, Held, Worn; the mock's h2
   runningHead: { fontFamily: font.caps, fontSize: 12, lineHeight: 16, letterSpacing: 1.7 }, // the quest objective
   control: { fontFamily: font.caps, fontSize: 14, lineHeight: 20, letterSpacing: 1.1 }, // Back, Back to World, Got it, Start over
-  tag: { fontFamily: font.caps, fontSize: 13, lineHeight: 18, letterSpacing: 0.7 }, // a refusal's reason tag
   label: { fontFamily: font.caps, fontSize: 11, lineHeight: 16, letterSpacing: 0.7 }, // every resource key in the status
   speaker: { fontFamily: font.caps, fontSize: 17, lineHeight: 24, letterSpacing: 0.5 }, // a speech line's name
   tile: { fontFamily: font.head, fontSize: 23, lineHeight: 28 }, // a riddle letter on a touch-sized card
@@ -120,7 +119,7 @@ export const size = {
   unseen: 1, // a box a screen reader reads and the eye cannot see (the live region)
 };
 
-export const radius = { tag: 3, card: 10, chip: 22 }; // chip: a pill, half size.touch
+export const radius = { card: 10, chip: 22 }; // chip: a pill, half size.touch
 
 export const opacity = { disabled: 0.45 };
 

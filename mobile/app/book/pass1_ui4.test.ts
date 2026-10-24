@@ -1,12 +1,13 @@
 // Pass-1 UI4 (book-ui.md, Detail-page order; NPC details): an item page's option groups (UR), Lift
-// on an item an NPC holds (E14), no empty Note beside a refusal (UH3), the purse beside a price (E15).
+// on an item an NPC holds (E14), no filler line on an empty page (mvlyb5x2m9i3), the purse beside a price (E15).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { nodes, words } from './__tests__/polish-book.test.ts';
+import { book, nodes, words } from './__tests__/polish-book.test.ts';
+import { LABEL } from './labels.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
 
@@ -161,10 +162,10 @@ test('a resting Put draws no card but keeps its note', async () => {
   );
 });
 
-// Breaks: "Nothing to do here." draws beside a "not yours" note (UH3), or no longer draws on a
-// page with neither notes, actions nor contents; or a cartridge without action label text prints the
+// Breaks: an item page with no actions, contents or notes draws a filler line instead of title,
+// description, Leave (owner pick mvlyb5x2m9i3); or a cartridge without action label text prints the
 // refusal's raw key, "action.take: not yours." (loka-x6t.53).
-test('the empty Note only when nothing, not even a refusal, shows', async () => {
+test('a refusal reads its word; an empty item page draws no filler', async () => {
   const v = nellView();
   const refused = action('take', { available: false, reason: { code: 'permission_denied' } });
   const view = {
@@ -173,13 +174,15 @@ test('the empty Note only when nothing, not even a refusal, shows', async () => 
   } as GameView;
   const coin = await page(view, ID.coin);
   assert.ok(coin.includes('Take: not yours.'), JSON.stringify(coin));
-  assert.ok(!coin.includes('Nothing to do here.'), JSON.stringify(coin));
-  assert.ok((await page(view, ID.pebble)).includes('Nothing to do here.'));
+  const pebble = await page(view, ID.pebble);
+  assert.equal(pebble.at(-1), LABEL.leave, JSON.stringify(pebble));
+  assert.ok(!pebble.includes('Nothing to do here.'), JSON.stringify(pebble));
 });
 
-// Breaks: the balance Note is missing beside a shelf or a priced service (the bank's fee is 1p),
-// sits after the shelf rows, repeats, or shows beside a free service or no offer at all (E15).
-test('one balance Note after the description on a page with a priced offer', async () => {
+// Breaks: the balance Note is missing beside a priced service (the bank's fee is 1p), sits away
+// from the description, repeats, or shows beside a shop alone (the shelf page has it), a free
+// service or no offer at all (E15; owner pick mvlrlvappy4w).
+test('one balance Note after the description on a page with a priced service', async () => {
   const { NpcPage } = await import('./Npc.tsx');
   (globalThis as any)[Symbol.for('loka-book-test-state')] ??= (v: unknown) => [v, () => {}]; // no Book harness here
   const v = nellView();
@@ -214,15 +217,23 @@ test('one balance Note after the description on a page with a priced offer', asy
     );
   };
   const { shop: _shop, ...bare } = nell;
-  const shelf = draw(nell);
-  assert.deepEqual(shelf.slice(1, 4), [
-    'npc.nell.description',
-    'You have 10p.',
-    'item.bread.short: Buy 4p; Sell 1p (you are not holding it).',
-  ]);
-  assert.equal(shelf.filter((l) => l === 'You have 10p.').length, 1);
-  assert.ok(!draw(nell, true).includes('You have 10p.')); // a conversation hides the shelf and purse
-  assert.ok(draw({ ...bare, services: [service(1)] }).includes('You have 10p.'));
+  assert.ok(!draw(nell).some((l) => l.startsWith('You have')));
+  const priced = draw({ ...bare, services: [service(1)] });
+  assert.deepEqual(priced.slice(1, 3), ['npc.nell.description', 'You have 10p.']);
+  assert.equal(priced.filter((l) => l === 'You have 10p.').length, 1);
+  assert.ok(!draw({ ...bare, services: [service(1)] }, true).includes('You have 10p.')); // a conversation hides it
   assert.ok(!draw({ ...bare, services: [service(0)] }).includes('You have 10p.'));
   assert.ok(!draw(bare).some((l) => l.startsWith('You have')));
+});
+
+// Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or
+// drops the reason from what a screen reader hears (owner pick mvlyp3gphp2t, 2026-10-23).
+test('a refused World line is one prose Text; its reason stays in the accessible name', () => {
+  const b = book(compiled('cartridges/toolbox_showcase') as never);
+  b.p.screen().log.push({ kind: 'refused', reason: 'locked', text: 'The way west is locked.' });
+  const line = b.draw().filter((n) => n.type === 'Text' && words(n) === 'The way west is locked.');
+  assert.equal(line.length, 1);
+  assert.equal(line[0].props.accessibilityLabel, 'locked, The way west is locked.');
+  assert.ok(!b.text().includes('locked'), JSON.stringify(b.text()));
+  b.sql.close();
 });

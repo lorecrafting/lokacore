@@ -102,42 +102,20 @@ test('a held item offers Give to… only a present recipient and logs the confir
   h.sql.close();
 });
 
-// Breaks: the person's page offers no Give an item…, lists an item not held, or the pick stays on
-// the page or logs its line twice. Literals from cartridges/gift_sampler/text.json.
-test("the farmer's Give an item… lists the apple; the pick returns to World with one line", () => {
+// Breaks: the person's page brings back its generic Give an item… list; a gift is given from the
+// item's own Give to… (owner pick mvlymuams73l, 2026-10-23).
+test("the farmer's page has no Give an item…; the apple's page gives to the farmer", () => {
   const h = book(compiled('cartridges/gift_sampler') as never);
   h.tap(/^An apple, open$/i);
   h.tap('Take an apple');
   h.tap(/^The farmer, open$/i);
-  h.tap(LABEL.giveAnItem);
-  const at = h.labels().indexOf(LABEL.giveAnItem);
-  assert.deepEqual(h.labels().slice(at + 1, at + 2), ['An apple, give an apple to the farmer']);
-  h.tap('An apple, give an apple to the farmer');
-  assert.ok(h.labels().includes('The farmer, open'), h.labels().join(' | ')); // World
-  const line = 'You give an apple to the farmer.';
-  assert.equal(h.p.screen().log.filter((s: string) => s === line).length, 1);
-  h.sql.close();
-});
-
-// Breaks: a stale pick (the apple dropped since the list drew) leaves the list open or shows no
-// stale note (PM ruling c: the same as other stale presses).
-test('a stale Give pick closes the list and shows the stale note', () => {
-  const h = book(compiled('cartridges/gift_sampler') as never);
-  for (const thing of ['apple', 'stone']) {
-    h.tap(new RegExp(`^an? ${thing}, open$`, 'i'));
-    h.tap(`Take a${thing === 'apple' ? 'n' : ''} ${thing}`);
-  }
-  h.tap(/^The farmer, open$/i);
-  h.tap(LABEL.giveAnItem);
-  const label = 'An apple, give an apple to the farmer';
-  const row = h.draw().find((n) => n.props?.accessibilityLabel === label);
-  const apple = h.game.view().view.inventory.find((e) => e.name.includes('apple'))!.id;
-  h.game.invoke({ action_key: 'drop', target_ids: [apple], input: {} } as never);
-  row.props.onPress();
-  const at = h.labels().indexOf(LABEL.giveAnItem);
-  assert.ok(at >= 0, h.labels().join(' | ')); // the stone keeps the option
-  assert.equal(h.labels()[at + 1]?.startsWith('A stone'), false, h.labels().join(' | ')); // closed
-  assert.ok(h.text().includes('The page had changed; here it is again.'), h.text().join(' | '));
+  assert.ok(!h.labels().includes(LABEL.giveAnItem), h.labels().join(' | '));
+  h.tap(LABEL.leave);
+  h.tap(CONTENTS);
+  h.tap(LABEL.inventory);
+  h.tap(/^An apple, open$/i);
+  h.tap(LABEL.giveTo);
+  assert.ok(h.labels().includes('The farmer, give an apple to the farmer'), h.labels().join(' | '));
   h.sql.close();
 });
 

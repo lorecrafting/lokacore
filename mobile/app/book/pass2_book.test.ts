@@ -70,46 +70,23 @@ test('a fresh NPC visit after a reopen starts empty', () => {
   a.sql.close();
 });
 
-// Breaks: "Nothing to do here." draws above the fence's price rows (UH3), or no longer draws on an
-// NPC page with nothing at all.
-test('price rows keep the empty Note off an NPC page', (t) => {
+// Breaks: an NPC page lists the shop's rows (they live on the buy page), draws "Nothing to do
+// here.", "Talk: not now" or any filler line for a person with no talk, or keeps Trade
+// with the stock emptied (owner picks mvlrlvappy4w, mvlyb5x2m9i3, mvlymuams73l).
+test('a shop NPC with no talk: Trade, then Leave, no filler', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'down', 'west');
   b.tap('fence, open');
   const shown = b.text();
-  assert.ok(
-    shown.includes('a beeswax candle: Buy 4p (sold out); Sell 2p (you are not holding it).'),
-    JSON.stringify(shown),
-  );
-  assert.ok(!shown.includes('Nothing to do here.'), JSON.stringify(shown));
-  // the same page with the shelf emptied (controlled view): nothing left to read, unless an
-  // unavailable service row stands in for it
+  assert.deepEqual(shown.slice(2), [LABEL.trade, LABEL.leave]);
   const real = b.game.view.bind(b.game);
-  const swap = (services?: unknown[]) =>
-    (b.game.view = () => {
-      const r = real();
-      // whisper dropped too: its Control is something to do here
-      const entities = r.view.entities.map((e) => ({
-        ...e,
-        shop: undefined,
-        services,
-        actions: e.actions.filter((a) => a.action_key !== 'whisper'),
-      }));
-      return { ...r, view: { ...r.view, entities } } as never;
-    });
-  swap();
-  assert.ok(b.text().includes('Nothing to do here.'), JSON.stringify(b.text()));
-  swap([
-    {
-      service: { key: 'vault' },
-      label: 'Rent a vault',
-      price: 3,
-      benefit: { kind: 'deposit' },
-      action: { action_key: 'vault', available: false, reason: { code: 'cooldown' } },
-    },
-  ]);
-  assert.ok(!b.text().includes('Nothing to do here.'), JSON.stringify(b.text()));
+  b.game.view = () => {
+    const r = real();
+    const entities = r.view.entities.map((e) => ({ ...e, shop: undefined }));
+    return { ...r, view: { ...r.view, entities } } as never;
+  };
+  assert.ok(!b.labels().includes(LABEL.trade), JSON.stringify(b.labels()));
 });
 
 // Breaks: the rod's page drops its use once the rod rests between casts (R2), so the player

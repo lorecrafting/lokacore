@@ -304,3 +304,12 @@ test('a duration reads in seconds, then minutes, then hours from two hours', () 
   ];
   for (const [s, want] of cases) assert.equal(timeLeft(s), `Time left: ${want}`);
 });
+
+// Breaks: a shelf stays open, empty, after its keeper walks away.
+test('a shelf closes when its keeper leaves the room', () => {
+  const view = (ids: string[]) =>
+    ({ place: { id: 'yard' }, inventory: [], entities: ids.map((id) => ({ id })) }) as never;
+  const stack = [{ kind: 'shelf', id: 'nell' }] as Page[];
+  assert.deepEqual(pagesAfter(stack, view(['nell']), view(['nell'])), stack);
+  assert.deepEqual(pagesAfter(stack, view(['nell']), view([])), []);
+});

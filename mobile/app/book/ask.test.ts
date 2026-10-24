@@ -31,8 +31,6 @@ test('the smith offers one Ask about card per known topic; no topic, no card', (
   const b = smith();
   assert.deepEqual(asks(b), [`${LABEL.askAbout} The mill`, `${LABEL.askAbout} The moon`]);
   const labels = b.labels();
-  // the Whisper Control (opens the one-word field) follows the cards (book-ui.md, Word bar)
-  assert.ok(labels.indexOf(LABEL.whisper) > labels.indexOf(`${LABEL.askAbout} The moon`));
   const talk = labels.findIndex((l) => l.startsWith('Talk'));
   assert.ok(talk >= 0 && talk < labels.indexOf(`${LABEL.askAbout} The mill`));
   const v = b.game.view().view;

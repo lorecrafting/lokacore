@@ -204,8 +204,8 @@ test('Book captures movement keys only on an active World page', (t) => {
     });
     const bottom = book.props.children.props.children.props.children[2]; // after the say shield
     const footer = bottom
-      .type(bottom.props)
-      .props.children.find((child: any) => child?.type === Footer);
+      .type(bottom.props) // null: a detail page draws no status line
+      ?.props.children.find((child: any) => child?.type === Footer);
     if (footer) Footer(footer.props);
     return key('ArrowUp');
   };

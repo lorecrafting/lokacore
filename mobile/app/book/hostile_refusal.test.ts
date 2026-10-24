@@ -25,31 +25,41 @@ function nell(cheat: boolean) {
 // Breaks: the page ignores hostility (the shelf with its raw "invalid state" reasons stays; the
 // kernel refuses Talk), shows the fallback over the authored line, or marks Nell hostile at standing 0; the shelf
 // shows raw reason codes.
-test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she trades', () => {
+test('Nell at standing -2 shows her refusal line, no Talk or Trade; at 0 she trades', () => {
   const [shown, labels] = nell(true);
   assert.ok(shown.includes('Nell turns her back on you.'), JSON.stringify(shown));
   assert.ok(!shown.some((l) => /invalid state|Buy \d|Nothing to do here/.test(l)));
   assert.ok(!labels.some((l) => l.startsWith('Talk')), JSON.stringify(labels));
+  assert.ok(!labels.includes(LABEL.trade), JSON.stringify(labels));
   assert.ok(labels.includes(LABEL.leave));
   const [calm, calmLabels] = nell(false);
   assert.ok(!calm.includes('Nell turns her back on you.'));
-  // Shelf reasons come from words.ts reason(), not the raw code ("not owned").
-  assert.ok(
-    calm.includes('a cob of bread: Buy 4p; Sell 1p (you are not holding it).'),
-    JSON.stringify(calm),
-  );
+  assert.ok(calmLabels.includes(LABEL.trade), JSON.stringify(calmLabels));
   assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
 });
 
-// Breaks: a refused buy shows its raw code ("invalid state"), not a word (Nell's one cob of bread, bought).
-test("a shelf row's buy reason is a word, never the code", () => {
+// Breaks: a buy leaves the buy page, its line misses the page's history, the purse does not
+// redraw, Sell does not open the sell page, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought).
+test('a buy keeps the buy page: its line, the new purse, the row refused in words', () => {
   const b = book(showcase as never);
   b.map();
   b.tap('Go south');
-  b.tap('Nell, open');
-  b.tap('Buy a cob of bread — 4p');
-  const row = 'a cob of bread: Buy 4p (sold out); Sell 1p.';
-  assert.ok(b.text().includes(row), JSON.stringify(b.text()));
+  for (const c of ['Nell, open', LABEL.trade]) b.tap(c);
+  const purse = (t: string[]) => t.find((l) => /^You have \d+p\.$/.test(l));
+  const before = purse(b.text());
+  b.tap('Cob of bread — 4p');
+  const shown = b.text();
+  assert.equal(shown[0], 'Nell, the baker can sell you…', JSON.stringify(shown));
+  assert.ok(shown.includes('Cob of bread — 4p: sold out'), JSON.stringify(shown));
+  assert.ok(before && purse(shown) && purse(shown) !== before, JSON.stringify([before, shown]));
+  assert.ok(shown.includes('You buy it.'), 'the buy line joins the page history');
+  b.tap(LABEL.sell); // the sell page lists the bought cob with its price (owner pick mvlynyikyw57)
+  assert.equal(b.text()[0], 'Nell, the baker will buy…', JSON.stringify(b.text()));
+  assert.ok(b.labels().includes('Cob of bread — 1p'), JSON.stringify(b.labels()));
+  b.tap(LABEL.leave);
+  assert.equal(b.text()[0], 'Nell, the baker can sell you…');
+  b.tap(LABEL.leave);
+  assert.equal(b.text()[0], 'Nell, the baker');
 });
 
 // Breaks: a talk that turns its NPC hostile (Bess, insulted) shows the refusal Note over the open

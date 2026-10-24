@@ -74,3 +74,52 @@ export function corpseButtons(v: GameView, text: Say): Press[] {
     place: true,
   }));
 }
+
+// A claim's or cancel's commission key; another service has none.
+const follows = (s: Offer) =>
+  s.benefit.kind === 'claim' || s.benefit.kind === 'cancel' ? s.benefit.service.key : undefined;
+
+// Refusals the kernel gives only past its open-order check (mechanics/service/shared.ts `open`,
+// `pay`); hp, combat, policy or binding refuse before it, so they say nothing of an order.
+const ORDER_OPEN = new Set([
+  'service.not_ready',
+  'service.ready',
+  'service.no_output',
+  'service.unaffordable',
+]);
+
+/**
+ * An NPC page's services (owner pick mvlrlvappy4w): while an order is open (its claim or cancel
+ * available, or refused for a reason in ORDER_OPEN) its commission hides and its claim and cancel
+ * are `order`, drawn under Your order; with no order open they are hidden.
+ */
+export function serviceOrder(offers: readonly Offer[]) {
+  const open = new Set(
+    offers
+      .filter((s) => s.action.available || ORDER_OPEN.has(s.action.reason?.message?.key ?? ''))
+      .map(follows)
+      .filter(Boolean),
+  );
+  return {
+    plain: offers.filter((s) => !follows(s) && !open.has(s.service.key)),
+    order: offers.filter((s) => open.has(follows(s))),
+  };
+}
+
+// A talk offer's label ends `.talk` (kernel dialogue/selection.ts `action.talk`, hello_sampler's
+// `actions.talk`, patrol's `watch.talk`).
+// ponytail: GameView drops the talk command, so a talk with another label stays its own card;
+// project `command: 'talk'` (view/action_lists.ts commanded) if that matters.
+const talky = (label: string) => label.endsWith('.talk');
+
+/** The NPC page's one Talk card, the first available talk offer, and the person's other buttons. */
+export function talkOf(
+  npc: { actions: readonly { action_key: string; label: string }[] },
+  buttons: Button[],
+) {
+  const keys = new Set(npc.actions.filter((a) => talky(a.label)).map((a) => a.action_key));
+  return {
+    talk: buttons.find((b) => keys.has(b.action_key)),
+    rest: buttons.filter((b) => !keys.has(b.action_key)),
+  };
+}
