@@ -242,6 +242,10 @@ Change these passages so they match the placement rule:
   batch (PM ruling).
 - Combat lines also land in the room event log: the log is the full record (owner chose "Yes, full record").
 - A plain move starts the new room's log with "You go north." (owner chose "Yes").
+- Words table placement, revised (PM ruling, option B): the table lives in `mobile/packages/game-view/line_words.ts`,
+  imported by the Book and by the terminal client (`kernel/ts/play/main.ts`). A kernel/ts table would break the
+  lint boundaries `mobile-kernel-via-local-story` (spec 10 §2) and `mobile-renderer-imports`; the GameSession package
+  is already open to the renderer. Take reads "You take X." / "<Name> takes X." (the Take card's word), not "pick up".
 
 ## Display table and squelch (owner 2026-10-24, quoted: "Yes i like your idea if still logging to the room but compacted and yes go with all your recs")
 

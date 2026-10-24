@@ -252,3 +252,12 @@ test('a flight reads "You flee <direction>."', () => {
   const line = lineWords({ key: 'combat.fled', bindings: { direction: 'west' } }, (k) => k, view());
   assert.equal(line, 'You flee west.');
 });
+
+// Breaks: an engine item line worded only in the first person (an NPC's take reads "You pick
+// up"), or the viewer's own take named as a third person (the shared table, loka-kgd.185).
+test('item.taken reads "You take" for the viewer and "<Name> takes" for a named NPC', () => {
+  const rope = { key: 'item.taken', bindings: { item: 'the rope' } };
+  const said = (actor: string) => lineWords({ ...rope, participants: { actor } }, (k) => k, view());
+  assert.equal(said('body'), 'You take the rope.');
+  assert.equal(said('rat'), 'npc.rat takes the rope.');
+});

@@ -29,7 +29,7 @@ test('only confirmed pickup returns World, including a retry from another page',
   assert.ok(h.labels().includes('Leave'));
   assert.deepEqual(h.game.view().view.inventory, []);
   assert.equal(
-    h.p.screen().log.some((s: string) => s === 'You pick up a brass lantern.'),
+    h.p.screen().log.some((s: string) => s === 'You take a brass lantern.'),
     false,
   );
   assert.match(h.p.screen().fault!, /readonly/);
@@ -40,16 +40,13 @@ test('only confirmed pickup returns World, including a retry from another page',
   assert.equal(h.game.view().view.place.title.key, 'room.well_lane.title');
   assert.ok(h.text().includes('Well Lane'));
   assert.equal(h.labels().includes('Take a brass lantern'), false);
-  assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
+  assert.equal(h.p.screen().log.at(-1), 'You take a brass lantern.');
   h.draw();
-  assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
+  assert.equal(h.p.screen().log.at(-1), 'You take a brass lantern.');
   drawnTake.props.onPress();
   assert.ok(h.labels().includes('standing, change position'));
   assert.equal(h.labels().includes('Leave'), false);
-  assert.equal(
-    h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
-    1,
-  );
+  assert.equal(h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length, 1);
   h.tap(CONTENTS);
   h.tap(LABEL.inventory);
   assert.ok(h.text().includes('Held'));
@@ -274,13 +271,13 @@ test('delayed Take returns once with its original item name after a conflicting 
     assert.equal(h.game.pulse().kind, 'ready');
     assert.ok(h.text().includes('Ferry Landing'));
     assert.equal(
-      h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
+      h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length,
       1,
     );
     assert.equal(h.p.screen().log.includes('Taken.'), false);
     assert.equal(h.p.update(completed[0]), false);
     assert.equal(
-      h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
+      h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length,
       1,
     );
     h.tap(CONTENTS);

@@ -1,14 +1,10 @@
-# Pinned silent action keys (pass-1 check 4) loka-kgd.185 clears; the showcase sim test caps this list at 13 lines: shrink it, never grow it.
-drop
-give
+# Pinned silent action keys (pass-1 check 4) loka-kgd.185 clears; the showcase sim test caps this list at 9 lines: shrink it, never grow it.
 move
 open
-put
 remove
 rest
 sit
 sleep
 stand
-take
 talk
 wear

@@ -1,7 +1,7 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { cast, comings, given, lineText, replyLine, spoken, used, WIELD } from './words.ts';
+import { cast, comings, lineText, replyLine, spoken, used, WIELD } from './words.ts';
 import { things } from './item-pages.ts';
 import {
   closing,
@@ -76,7 +76,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const routed = retained ? routedLines(retained, was, now, attempt.button, text) : undefined;
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
-  const fallback = fallbackLine(itemChanged, accepted, attempt, now);
+  const fallback = fallbackLine(accepted, attempt, now);
   const said = taken ? [taken] : (routed?.[0] ?? replyLine(reply, text, now, fallback));
   if (!repeated) lines.push(...said);
   if (!repeated && routed) s.combatLog.push(...routed[1]);
@@ -109,7 +109,7 @@ function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepte
 // A press's item and listener names, for its fallback line (fallbackLine below).
 export function named(b: Button, was: GameView) {
   const name = (id?: string) => things(was).find((t) => t.id === id)?.name;
-  return ['take', 'drop', 'give'].includes(b.action_key) || b.pick
+  return b.pick
     ? b.target_ids.map(name)
     : b.action_key === 'whisper'
       ? [undefined, name(b.target_ids[0])] // the speech echo's listener
@@ -117,24 +117,19 @@ export function named(b: Button, was: GameView) {
 }
 
 const fallbackLine = (
-  itemChanged: boolean,
   accepted: Accepted | undefined,
   { item, to, button }: NonNullable<Logs['retry']>,
   now: GameView,
 ) =>
-  accepted?.outcome === 'given'
-    ? item && to && given(item, to)
-    : accepted?.outcome === 'spoken'
-      ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
-      : button.pick
-        ? item && (to ? used(button.label, item, to) : cast(button.label, item))
-        : itemChanged && accepted?.outcome !== 'eaten' && item
-          ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${item}.`
-          : accepted?.outcome === 'choice_closed'
-            ? ''
-            : things(now).find((t) => t.id === button.target_ids[0])?.slot === 'wield'
-              ? WIELD[accepted?.outcome ?? '']
-              : undefined;
+  accepted?.outcome === 'spoken'
+    ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
+    : button.pick
+      ? item && (to ? used(button.label, item, to) : cast(button.label, item))
+      : accepted?.outcome === 'choice_closed'
+        ? ''
+        : things(now).find((t) => t.id === button.target_ids[0])?.slot === 'wield'
+          ? WIELD[accepted?.outcome ?? '']
+          : undefined;
 
 // A changed journal notes itself on the speaker's page; a new choice prompt joins its speaker's.
 function conversationLines(

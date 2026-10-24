@@ -241,7 +241,7 @@ test('400 fixed showcase sequences keep every invariant and end in each district
   const pinned = readFileSync(new URL('sim_narration_baseline.txt', import.meta.url), 'utf8')
     .split('\n')
     .filter((l) => l && !l.startsWith('#'));
-  assert.ok(pinned.length <= 13, 'baseline over cap 13'); // 13: put joined take/drop/give, loka-kgd.185
+  assert.ok(pinned.length <= 9, 'baseline over cap 9'); // 9: take/drop/give/put narrate, loka-kgd.185
   assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
   // SILENT.close is justified only by item lids (a door's close is narrated): the showcase has them.
   const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.items ?? {}).some(

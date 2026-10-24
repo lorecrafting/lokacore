@@ -25,7 +25,8 @@ function play(lines: string[]) {
   assert.equal(r.status, 0, r.stderr);
   return r.stdout
     .split(/^> /m)
-    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''));
+    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''))
+    .map((s) => s.replace(/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/g, 'ID')); // a script run mints fresh ids
 }
 
 const GATEHOUSE =
@@ -85,7 +86,7 @@ test('doors are named by direction or keywords, and refusals read as words', () 
       'close west\nThere is no exit that way.\n',
       'open up\nThere is no exit that way.\n',
       `n\n${COURTYARD}`,
-      'take key\nYou take an iron key.\n',
+      'take key\nYou take an iron key.\n[item.taken: actor ID]\n',
       's\nGatehouse\nExits: east (locked), north\n',
       'unlock cell door\nYou unlock the cell door.\n',
       'lock e\nYou lock the cell door.\n',
@@ -101,7 +102,7 @@ test('scan shows each door that bars the way, else the room beyond and what is i
     'open north\nYou open the oak door.\n',
     'scan\neast: the cell door (locked).\nnorth (Courtyard): an iron key.\n',
     `n\n${COURTYARD}`,
-    'take key\nYou take an iron key.\n',
+    'take key\nYou take an iron key.\n[item.taken: actor ID]\n',
     'scan\nsouth (Gatehouse).\n',
   ]);
 });

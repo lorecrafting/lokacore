@@ -80,7 +80,7 @@ test('a restored pickup shows on the corpse visit after reopen, then only once',
   b.tap('Take a goblin ear');
   b.unmount();
   const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
-  const PICKUP = 'You pick up a goblin ear.';
+  const PICKUP = 'You take a goblin ear.';
   assert.equal(r.text().includes(PICKUP), false); // the world, not the corpse, opens
   r.tap('corpse, open');
   assert.ok(r.text().includes(PICKUP));

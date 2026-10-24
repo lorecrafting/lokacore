@@ -10,6 +10,7 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
+import { lineSentence } from '../../packages/game-view/line_words.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -54,9 +55,6 @@ export const dur = (s: number) =>
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).
 export const OUTCOME: Record<string, string> = {
-  put: 'Stored.',
-  taken: 'Taken.',
-  dropped: 'Dropped.',
   opened: 'Opened.',
   closed: 'Closed.',
   locked: 'Locked.',
@@ -130,7 +128,6 @@ const CAUSE: Record<string, string> = {
   not_standing: 'not standing',
   cursed: 'it will not come off',
 };
-export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 // A use pair's line without narration: "You quench a cart with a bucket." (book-ui.md, Pick a second thing).
 export const used = (label: string, target: string, tool: string) =>
@@ -179,14 +176,17 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
   return name && text(name);
 };
 
-// One narration line's words. A skipped combat turn (loka-x6t.30) names its status from the
-// engine line combat.skipped; it has no actor when the player skipped. A flight (combat.fled)
-// names the way taken.
+// One narration line's words: an engine key from the shared table (packages/game-view/line_words.ts), in the
+// third person when its actor is a person the view names. A skipped combat turn (loka-x6t.30)
+// names its status from the engine line combat.skipped; it has no actor when the player skipped.
+// A flight (combat.fled) names the way taken.
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
   view: GameView,
 ) => {
+  const told = lineSentence(t, (v) => text(String(v)), nameOf(view, t.participants?.actor, text));
+  if (told) return told;
   if (t.key === 'combat.fled') return `You flee ${String(t.bindings?.direction)}.`;
   if (t.key !== 'combat.skipped') return text(t.key);
   const actor = t.participants?.actor;

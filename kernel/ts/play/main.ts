@@ -10,6 +10,7 @@ import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts'
 import { commandId } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { gameView } from '../src/view/view.ts';
+import { lineSentence } from '../../../mobile/packages/game-view/line_words.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { sha256Hex } from '../src/foundation/sha256.ts';
 import { doors, normalize } from '../src/commands/target.ts';
@@ -142,16 +143,15 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
   const { trace, latency, decision } = result;
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
-  const name = (id?: string) => say(cartridge, r.world.entities[id!]?.short ?? '');
+  // A line's words: an engine key from the shared table (mobile/packages/game-view/line_words.ts), else cartridge text.
+  const spoken = (t: { key: string; bindings?: Readonly<Record<string, unknown>> }) =>
+    lineSentence(t, (v) => say(cartridge, String(v))) ?? say(cartridge, t.key);
   const dir = (p as { direction?: string }).direction ?? '';
   const it = door(cartridge, r.world, dir);
   // A door without a key_item has no lock: lock and unlock say so, not that a key is missing.
   const lockless =
     ['lock', 'unlock'].includes(p.type) && !barrierAt(cartridge, r.world, dir)?.key_item;
   const done: Record<string, string> = {
-    taken: `You take ${name(p.item_id)}.\n`,
-    dropped: `You drop ${name(p.item_id)}.\n`,
-    given: `You give ${name(p.item_id)} to ${name((p as { recipient_id?: string }).recipient_id)}.\n`,
     waited: `Time passes. It is ${clock(r.world.state.clock, r.world.cartridge)}.\n`,
     opened: `You open ${it}.\n`,
     closed: `You close ${it}.\n`,
@@ -168,7 +168,7 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     decision.kind !== 'accepted'
       ? `${reason(decision, lockless ? 'lockless' : p.type)}\n`
       : narrated
-        ? narrated.map((t) => `${say(cartridge, t.key)}\n${pinned(t)}`).join('')
+        ? narrated.map((t) => `${spoken(t)}\n${pinned(t)}`).join('')
         : (done[decision.outcome] ??
           (p.target_id
             ? detail(cartridge, r.world, p.target_id)

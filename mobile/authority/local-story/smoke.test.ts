@@ -80,7 +80,7 @@ test('a scripted session survives a restart and plays on', () => {
   ]);
   a.press('Take a leather satchel');
   assert.deepEqual(a.now().carrying, ['a leather satchel']);
-  assert.deepEqual(a.now().log, ['You pick up a leather satchel.']);
+  assert.deepEqual(a.now().log, ['You take a leather satchel.']);
   a.press('Go north');
   assert.equal(a.now().place, 'Village Green');
   a.sql.close();
@@ -88,7 +88,8 @@ test('a scripted session survives a restart and plays on', () => {
   const b = processOn(path);
   assert.equal(b.now().place, 'Village Green');
   assert.deepEqual(b.now().carrying, ['a leather satchel']);
-  assert.deepEqual(b.now().log, []);
+  // A reopen restores the last narrated receipt; the take narrates (loka-kgd.185), the move not yet.
+  assert.deepEqual(b.now().log, ['You take a leather satchel.']);
   assert.ok(b.now().buttons.includes('Drop a leather satchel'));
   b.press('Go south');
   assert.deepEqual([b.now().log, b.now().place], [[], 'Ferry Landing']);

@@ -416,7 +416,7 @@ Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
-pickup event using the original projected item name: **You pick up <name>.** Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
+pickup event using the original projected item name: **You take <name>.** Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
 returns to World with the original projected name: **You drop <name>.** Held items
 open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.

@@ -64,7 +64,7 @@ export type Logs = {
 };
 
 export function pickupLine(last: NarrationRecord | undefined, text: Say) {
-  return last?.pickup_name ? `You pick up ${text(last.pickup_name)}.` : '';
+  return last?.pickup_name ? `You take ${text(last.pickup_name)}.` : '';
 }
 
 export function restoredLogs(game: Game, text: Say): Logs {

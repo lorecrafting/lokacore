@@ -1,12 +1,18 @@
 // Derived carrying admission (docs/system/mechanics.md containment@1). The context lives
 // only for this decision/list projection; custody and pinned item definitions remain authoritative.
-import { LIMITS, type CharacterId, type EntityId } from '../../contracts.gen.ts';
+import {
+  LIMITS,
+  type CharacterId,
+  type CommandPayload,
+  type EntityId,
+  type TextKey,
+} from '../../contracts.gen.ts';
 import { liquidRowValid } from '../../foundation/compose_liquid.ts';
 import { add, mul, saturate } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
-import { actorOf, has, refString, values } from '../../runtime/decision.ts';
+import { actorOf, bodyOf, has, refString, values } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { movable } from '../../runtime/created.ts';
 import { derived } from '../attributes/shared.ts';
@@ -294,4 +300,27 @@ function effective(world: World, id: string, grams: number): number | Failure {
     return 'precondition_failed';
   const mass = add(grams, mul(row!.quantity, density));
   return mass > 2147483647 ? 'precondition_failed' : mass;
+}
+
+/** The engine line of a take, drop, give or put (loka-kgd.185): `item.<outcome>` binding the item's
+ * short (and the recipient's or container's), the actor as a participant; words: mobile/packages/game-view/line_words.ts. */
+export function itemLine(world: World, p: CommandPayload) {
+  const short = (id: EntityId) => world.entities[id].short;
+  const line = (
+    q: { actor_id: CharacterId; item_id: EntityId },
+    key: string,
+    other = {},
+    role = {},
+  ) => ({
+    key: key as TextKey,
+    bindings: { item: short(q.item_id), ...other },
+    participants: { actor: bodyOf(world, q.actor_id)!, ...role },
+  });
+  if (p.type === 'take') return line(p, 'item.taken');
+  if (p.type === 'drop') return line(p, 'item.dropped');
+  if (p.type === 'give')
+    return line(p, 'item.given', { to: short(p.recipient_id) }, { recipient: p.recipient_id });
+  if (p.type === 'put')
+    return line(p, 'item.put', { container: short(p.container_id) }, { container: p.container_id });
+  return undefined;
 }

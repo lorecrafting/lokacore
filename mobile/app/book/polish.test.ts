@@ -75,10 +75,10 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a goblin ear.').length,
+      .filter((x: string) => x === 'You take a goblin ear.').length,
     1,
   );
-  assert.equal(h.p.screen().log.includes('You pick up a goblin ear.'), false);
+  assert.equal(h.p.screen().log.includes('You take a goblin ear.'), false);
   assert.ok(h.game.view().view.inventory.some((e) => e.id === ear.id));
   const refused = h.game.invoke({ action_key: 'take', target_ids: [ear.id], input: {} } as never);
   assert.equal(refused.kind, 'saved');
@@ -87,26 +87,36 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a goblin ear.').length,
+      .filter((x: string) => x === 'You take a goblin ear.').length,
     1,
   );
   h.tap('Leave');
   assert.deepEqual(h.stack, []);
-  const drop = h.game.invoke({ action_key: 'drop', target_ids: [ear.id], input: {} } as never);
-  assert.equal(drop.kind, 'saved');
-  if (drop.kind === 'saved') assert.equal(drop.decision.kind, 'accepted');
   h.unmount();
   const reopened = book(chapter, { ...a, game: openGame(a.db, chapter, a.host) });
-  assert.equal(reopened.p.screen().log.includes('You pick up a goblin ear.'), false);
+  assert.equal(reopened.p.screen().log.includes('You take a goblin ear.'), false);
   reopened.tap(reopened.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
   assert.equal(
     reopened.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a goblin ear.').length,
+      .filter((x: string) => x === 'You take a goblin ear.').length,
     1,
   );
+  reopened.tap('Leave');
+  // A later drop narrates (loka-kgd.185), so it is the line a reopen restores, on World.
+  const drop = reopened.game.invoke({
+    action_key: 'drop',
+    target_ids: [ear.id],
+    input: {},
+  } as never);
+  assert.equal(drop.kind, 'saved');
+  if (drop.kind === 'saved') assert.equal(drop.decision.kind, 'accepted');
   reopened.unmount();
+  const again = book(chapter, { ...a, game: openGame(a.db, chapter, a.host) });
+  assert.deepEqual(again.p.screen().log.slice(-1), ['You drop a goblin ear.']);
+  assert.equal(again.p.screen().log.includes('You take a goblin ear.'), false);
+  again.unmount();
   a.sql.close();
 });
 
@@ -151,10 +161,10 @@ test('remounted pending ear Take settles on its exact corpse detail', () => {
     remounted.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a goblin ear.').length,
+      .filter((x: string) => x === 'You take a goblin ear.').length,
     1,
   );
-  assert.equal(remounted.p.screen().log.includes('You pick up a goblin ear.'), false);
+  assert.equal(remounted.p.screen().log.includes('You take a goblin ear.'), false);
   assert.ok(a.game.view().view.inventory.some((e) => e.id === ear.id));
   remounted.tap('Leave');
   assert.deepEqual(remounted.stack, []);
@@ -252,7 +262,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   assert.deepEqual(h.p.screen().log, []);
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
-  assert.deepEqual(h.p.screen().log, ['You pick up a brass lantern.']);
+  assert.deepEqual(h.p.screen().log, ['You take a brass lantern.']);
   h.sql.close();
 });
 
