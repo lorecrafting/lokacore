@@ -13,6 +13,9 @@ import { actorLine } from '../../../kernel/ts/src/mechanics/line.ts';
 import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 import { acquiredOnce } from './shop-event.ts';
+
+// The line commerce/rule.ts narrates for each command type.
+const SAID = { buy: 'commerce.bought', sell: 'commerce.sold' } as const;
 type Row = {
   command_id: string;
   actor_id: string;
@@ -160,15 +163,7 @@ function shopReceipt(
       destination_id: destination,
     }) ||
     d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
-    !same(d.narration, [
-      actorLine(
-        world,
-        world.character,
-        p.type === 'buy' ? 'commerce.bought' : 'commerce.sold',
-        { item: moved },
-        { n: 0 },
-      ),
-    ])
+    !same(d.narration, [actorLine(world, world.character, SAID[p.type], { item: moved }, { n: 0 })])
   )
     invalid();
   if (!acquiredOnce(world, command, d, moved, destination)) invalid();
