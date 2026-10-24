@@ -14,6 +14,8 @@ Further open questions moved from worldbuilding stubs (2026-10-15): spell declar
 
 ## Table of contents
 
+- [Abilities design: professions, skills and spells (2026-10-23)](abilities-design-2026-10-23.md)
+
 
 ### 00-foundations
 

@@ -8,6 +8,7 @@ and not repeated here.
 
 ## Product and scope
 
+- The prologue teaches every basic (Tending, Making, Guarding, Words) through quests of gifts or labour, no coin; houses and guilds open at the landing; Skills stay on Character, one collapsed line per profession, until the landing ([record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)).
 - Chapter 1 proof order: E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 - Book design foundation: the Chapter 1 mock's base look with only the page curl (one Skia shader for web and phone) and paper sound; day and night follow in-game time (no override for now) ([record](../decisions/owner-decision-design-foundation-2026-10-07.md)).
@@ -109,6 +110,7 @@ and not repeated here.
 
 ## Architecture and engine
 
+- No custom authoring language or script interpreter: cartridge source stays JSON with compile-time shortcuts (`extends`, behaviours, zones, `signal`, `wait`) lowered to today's cartridge, YAML later; an AI-assisted visual builder sits on top ([record](../decisions/owner-decision-authoring-builder-2026-10-23.md)).
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
   [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
