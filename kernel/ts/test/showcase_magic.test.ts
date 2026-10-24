@@ -392,12 +392,16 @@ test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone sho
   let y = go(go(go(w, 'up').world, 'west').world, 'west').world; // all of step 8's load in hand
   for (const k of ['rain_bucket', 'spark_jar', 'yard_torch']) y = take(y, k);
   const told = (w: World, k: string) => act(w, { type: 'drop', item_id: id(w, 'item', k) }).lines;
-  assert.deepEqual(told(y, 'rain_bucket'), ['narration.wet.applied']);
+  assert.deepEqual(told(y, 'rain_bucket'), ['item.dropped', 'narration.wet.applied']);
   assert.deepEqual(told(drop(y, 'rain_bucket'), 'spark_jar'), [
+    'item.dropped',
     'narration.shocked.applied',
     'narration.stunned.applied',
   ]);
-  assert.deepEqual(told(drop(y, 'rain_bucket'), 'yard_torch'), ['narration.warm.applied']);
+  assert.deepEqual(told(drop(y, 'rain_bucket'), 'yard_torch'), [
+    'item.dropped',
+    'narration.warm.applied',
+  ]);
   const wet = drop(y, 'rain_bucket');
   assert.deepEqual(statuses(wet, 'golem'), ['wet']);
   const stun = drop(wet, 'spark_jar');
@@ -433,7 +437,7 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
   for (const v of [off, hidden]) {
     const r = act(v, { type: 'drop', item_id: id(v, 'item', 'rain_bucket') });
     assert.deepEqual(statuses(r.world, 'golem'), v === hidden ? ['hidden', 'wet'] : ['wet']);
-    assert.deepEqual(r.lines, []);
+    assert.deepEqual(r.lines, ['item.dropped']); // the player's own line only
   }
   const said = (holder: string | string[], s: string) =>
     statusStep(

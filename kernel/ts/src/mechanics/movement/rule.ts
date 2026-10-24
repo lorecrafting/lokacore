@@ -51,7 +51,7 @@ const wentLine = <E>(
   p: { actor_id: CharacterId; direction: Key },
   d: Decision<E>,
 ): Decision<E> =>
-  d.kind === 'accepted' && d.outcome === 'moved'
+  d.kind === 'accepted'
     ? {
         ...d,
         narration: [
