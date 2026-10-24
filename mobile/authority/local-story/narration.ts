@@ -45,8 +45,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
       lines,
       ...(cue && { cue }),
       ...(combat_lines.length && { combat_lines }),
-      ...(detail_id && { detail_id }),
-      ...(d.outcome === 'read' && { read: true }),
+      ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
       ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
     } as NarrationRecord;
   }

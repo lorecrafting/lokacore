@@ -763,7 +763,8 @@
   }
  ],
  "log": [
-  "You go south."
+  "You go south.",
+  "\"Well, stranger?\""
  ],
  "combatLog": [],
  "details": {

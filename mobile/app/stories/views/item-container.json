@@ -933,12 +933,15 @@
  ],
  "log": [
   "You go south.",
-  "You take a turnip seed."
+  "You open the sack's tie.",
+  "You take a turnip seed.",
+  {
+   "quiet": "[\"item.put\",{\"item\":\"item.seed_01.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"ec6a2b0d-b917-8425-8cac-63c888eed0aa\",\"331fb134-17eb-866f-a2fa-57583b9ac017\"],11]",
+   "plain": "You put a turnip seed in a seed sack.",
+   "times": 1,
+   "text": "You put a turnip seed in a seed sack."
+  }
  ],
  "combatLog": [],
- "details": {
-  "331fb134-17eb-866f-a2fa-57583b9ac017": [
-   "You put a turnip seed in a seed sack."
-  ]
- }
+ "details": {}
 }

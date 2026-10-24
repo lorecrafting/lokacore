@@ -527,6 +527,8 @@
   "a boar grunting",
   "The tusk opens a wound; you are bleeding.",
   "The tusk leaves a scar that will not fade.",
+  "You miss.",
+  "The blow catches you.",
   "the iron smell of your own blood"
  ],
  "combatLog": [

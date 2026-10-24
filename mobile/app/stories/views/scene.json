@@ -559,7 +559,9 @@
   }
  ],
  "log": [
-  "You go east."
+  "You go east.",
+  "Wat eyes the letter in your hand.",
+  "Wat takes the letter and breaks the seal."
  ],
  "combatLog": [],
  "details": {

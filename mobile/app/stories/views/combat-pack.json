@@ -560,7 +560,8 @@
   }
  ],
  "log": [
-  "You go south."
+  "You go south.",
+  "Another goblin joins the fight."
  ],
  "combatLog": [
   "Another goblin joins the fight."
