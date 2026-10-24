@@ -6,7 +6,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
-import { ActionCard, Cards } from './actions.tsx';
+import { ActionCard, Cards, PickLists } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
 import { inside } from './Menu.tsx';
@@ -95,7 +95,7 @@ export function NpcPage(p: NpcProps) {
   const enemy = hostile(p.npc);
   // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
-  const cards = actions.filter((b) => b.command !== 'use_service');
+  const cards = actions.filter((b) => b.command !== 'use_service' && !b.pick);
   const { talk, answer, foot } = conversation(p, choice);
   const contents = held(p);
   const quietLine = !talk && quiet(p, enemy, actions, contents);
@@ -118,6 +118,9 @@ export function NpcPage(p: NpcProps) {
           ))}
           <ServiceOptions {...p} actions={actions} />
         </Cards>
+      )}
+      {!talk && p.npc && actions.some((b) => b.pick) && (
+        <PickLists {...p} page={p.npc.id} buttons={actions} />
       )}
       {!talk && <Whisper {...p} />}
       {!talk && inside({ thing: p.npc, contents, text: p.text, open: p.open })}

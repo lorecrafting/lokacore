@@ -35,6 +35,7 @@ walk('2-give', 'Give: the apple to the farmer from its page', async (r) => {
     .first()
     .tap();
   await settle();
-  await screen.getByRole('button', /^Give an apple to the farmer/).tap();
+  await screen.getByRole('button', LABEL.giveTo).tap();
+  await screen.getByRole('button', /^The farmer, give an apple/).tap();
   await settle();
 });

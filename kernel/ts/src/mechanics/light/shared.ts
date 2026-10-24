@@ -14,7 +14,7 @@ import { weather } from '../calendar.ts';
 import { concealed, perceives } from '../status/shared.ts';
 
 export const VERBS: readonly string[] = ['ignite', 'douse', 'refuel'];
-const held = (w: World, body: EntityId, item: string) =>
+export const held = (w: World, body: EntityId, item: string) =>
   w.state.containers[item] === body ||
   (w.state.containers[item] === w.slots.light && w.state.containers[w.slots.light] === body);
 export function fuelView(w: World, item: string) {

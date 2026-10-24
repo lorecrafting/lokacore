@@ -46,6 +46,11 @@ PLease set things up so that its easy for me to do my ui polish there".
   loka-3w3q to P1. Proposal file was a scratchpad file; the br notes on each survivor carry what was merged.
 - Polish tour for the owner: [docs/design/polish-tour.md](design/polish-tour.md).
 
+## Aimed targets batch (owner go 2026-10-23)
+
+Briefs: [docs/briefs/aimed-targets/README.md](briefs/aimed-targets/README.md) (loka-x6t.109 aimed spells, pick lists,
+Douse), branch `toolbox/batch-aimed-spells`, five slices in order.
+
 ## Room words engine batch (owner go 2026-10-23)
 
 Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),

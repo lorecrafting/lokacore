@@ -24024,20 +24024,6 @@
     "contract": "RecipeStep",
     "value": {
       "op": "damage",
-      "kind": "fire",
-      "amount": 8
-    },
-    "errors": [
-      {
-        "path": "/npc",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
-    "contract": "RecipeStep",
-    "value": {
-      "op": "damage",
       "npc": {
         "cartridge_id": "spell_effects_sampler",
         "cartridge_version": "0.0.1",
@@ -24129,18 +24115,6 @@
       {
         "path": "/kind",
         "code": "not_in_enum"
-      }
-    ]
-  },
-  {
-    "contract": "RecipeStep",
-    "value": {
-      "op": "light.ignite"
-    },
-    "errors": [
-      {
-        "path": "/item",
-        "code": "missing_property"
       }
     ]
   },

@@ -1,5 +1,5 @@
 // size: allow 350, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
-import { craftRefused, policyRefusal } from '../mechanics/action_recipe/shared.ts';
+import { aimedRefused, craftRefused, policyRefusal } from '../mechanics/action_recipe/shared.ts';
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -71,7 +71,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const take = takeAdmission(world, actor, body, steps);
   const drawn = pick(world, actor, steps, set)?.key; // row FD3: the one storylet offered here
   const here = (a: Offered, d = detailAt(world, a)) =>
-    !a.recipe ||
+    [undefined, 'spell'].includes(a.recipe?.target.kind) ||
     (d !== undefined &&
       world.details[d].room === world.state.containers[body!] &&
       light.visible(world, actor, d, steps));
@@ -153,7 +153,9 @@ function entityOffered(
   steps: Steps,
 ) {
   if (scope === 'worn' && !light.VERBS.includes(a.command))
-    return a.command === 'remove' && (fits(world, actor, a, id) || !!heldOn(world, actor, a, id));
+    return a.command === 'cast' // an aimed spell at the light slot's lantern (loka-x6t.109)
+      ? !!a.recipe && !aimedRefused(world, actor, a.recipe, id, steps)
+      : a.command === 'remove' && (fits(world, actor, a, id) || !!heldOn(world, actor, a, id));
   if (light.VERBS.includes(a.command))
     return (
       ['inventory', 'worn'].includes(scope) &&
@@ -169,8 +171,13 @@ function entityOffered(
       : a.target.kind === 'entity' &&
         a.target.scopes.includes(scope as never) &&
         (!equip(a) || fits(world, actor, a, id)) &&
-        (a.command !== 'ask' || !!(world.entities[id] as NpcDefinition | undefined)?.ask); // row FD7
+        (a.command !== 'ask' || !!(world.entities[id] as NpcDefinition | undefined)?.ask) && // row FD7
+        !aimedRefused(world, actor, a.recipe, id, steps);
 }
+
+const commanded = (a: Offered) =>
+  [...light.VERBS, 'harvest', 'expedition'].includes(a.command) ||
+  (a.command === 'cast' && !!a.recipe);
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
@@ -189,9 +196,7 @@ function advertise(
   const target_ids = targetsFor(world, actor, a, id);
   const shown = {
     action_key: a.key,
-    ...((light.VERBS.includes(a.command) || ['harvest', 'expedition'].includes(a.command)) && {
-      command: a.command,
-    }),
+    ...(commanded(a) && { command: a.command }),
     label: patch && !a.input.includes('method') ? patch.label : worded(world, a, id),
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
@@ -199,7 +204,8 @@ function advertise(
     ...(patch && { target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
-  const target = (a.recipe ? detailAt(world, a) : id) as EntityId | undefined;
+  const target = (a.recipe && a.command !== 'cast' ? detailAt(world, a) : id) as
+    EntityId | undefined;
   const gathered = harvestOffered(world, actor, a, target, steps);
   const excursion = expedition.actionRefused(world, actor, a, target);
   const talk =
@@ -330,7 +336,7 @@ function lightOffered(world: World, actor: CharacterId, a: Offered, item: Entity
 }
 
 function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
-  if (a.command === 'expedition' && id) return [id as EntityId];
+  if ((a.command === 'expedition' || a.command === 'cast') && id) return [id as EntityId];
   return id && light.VERBS.includes(a.command)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
     : undefined;

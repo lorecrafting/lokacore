@@ -1275,7 +1275,7 @@
           "$ref": "#/$defs/SceneView"
         },
         "spell_words": {
-          "description": "Word bar S2 (toolbox row 29a): one entry per spell whose learned fact reads true for the actor, in recipe key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the recipe's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
+          "description": "Word bar S2 (toolbox row 29a): one entry per unaimed spell whose learned fact reads true for the actor (an aimed spell, kernel_api 1.119, is offered on its targets' entries as command cast instead), in recipe key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the recipe's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
           "type": "array",
           "minItems": 1,
           "items": {

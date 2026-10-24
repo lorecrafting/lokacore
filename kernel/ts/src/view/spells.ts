@@ -20,7 +20,8 @@ function spellWords(world: World, actor: CharacterId, steps: Steps): SpellWord[]
   const body = bodyOf(world, actor);
   const set = resolved(world, actor);
   return Object.values(world.cartridge.recipes ?? {}).flatMap((r): SpellWord[] => {
-    if (r.target.kind !== 'spell' || factValue(world, actor, r.target.learned) !== true) return [];
+    if (r.target.kind !== 'spell' || r.target.aimed) return []; // an aimed spell is offered on its target
+    if (factValue(world, actor, r.target.learned) !== true) return [];
     const word = r.target.word;
     const cast = { type: 'cast', actor_id: actor, word: word as string as Word } as const;
     const admitted = body ? admission(world, r, actor, body) : 'not_found';

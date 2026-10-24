@@ -1,7 +1,7 @@
 import { cap, plain, why } from './model.ts';
 import { View } from 'react-native';
 import { LABEL } from './labels.ts';
-import { castWords } from './buttons.ts';
+import { castWords, commandOf } from './buttons.ts';
 import { Fragment } from 'react';
 import { Text } from './Text.tsx';
 import { SectionTitle } from './pages.tsx';
@@ -9,7 +9,7 @@ import { Note } from './lines.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Thing } from './model.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
-import { ActionCard, Cards } from './actions.tsx';
+import { ActionCard, Cards, PickLists } from './actions.tsx';
 import type { Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 
@@ -152,16 +152,34 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
   );
 }
 
-// The spell words refused here, each with its reason (owner, mvl9qy5ut2x2).
-export function spells(view: GameView | undefined, text: (key: string) => string) {
-  const refused = view?.spell_words?.length ? castWords(view).filter((s) => !s.available) : [];
-  if (!refused.length) return null;
+// The spell words refused here, each with its reason (owner, mvl9qy5ut2x2), then each aimed spell's
+// Cast on… list of its targets (loka-x6t.109.5): the target pages' Cast a spell… rows (buttons.ts).
+export function spells(p: {
+  view?: GameView;
+  text: (key: string) => string;
+  buttons?: Button[];
+  press?: (b: Button) => void;
+  pending?: boolean;
+}) {
+  const refused = p.view?.spell_words?.length ? castWords(p.view).filter((s) => !s.available) : [];
+  const aimed = (p.buttons ?? []).filter((b) => b.pick && commandOf(b) === 'cast');
+  if (!refused.length && !aimed.length) return null;
   return (
     <View>
       <SectionTitle>{LABEL.spells}</SectionTitle>
       {refused.map((s) => (
-        <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, text)} />
+        <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, p.text)} />
       ))}
+      {p.view && p.press && aimed.length > 0 && (
+        <PickLists
+          page="character"
+          view={p.view}
+          buttons={aimed}
+          text={p.text}
+          press={p.press}
+          pending={p.pending}
+        />
+      )}
     </View>
   );
 }

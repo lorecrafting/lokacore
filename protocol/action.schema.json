@@ -606,7 +606,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29a (kernel_api at least 1.98; word bar S2): a spell, cast only by the cast command typing its word (no other spell recipe has it), never offered by key or performed; it acts on the caster's body. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
+          "description": "Toolbox row 29a (kernel_api at least 1.98; word bar S2): a spell, cast only by the cast command typing its word (no other spell recipe has it), never offered by key or performed; it acts on the caster's body. With aimed (kernel_api at least 1.119, loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
           "type": "object",
           "properties": {
             "kind": {
@@ -617,6 +617,20 @@
             },
             "learned": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "aimed": {
+              "type": "object",
+              "properties": {
+                "scopes": {
+                  "type": "array",
+                  "items": {
+                    "enum": ["room_occupants", "room_contents", "inventory"]
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": ["scopes"],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -760,7 +774,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29b (spell recipes only, compiler and loader SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "description": "Toolbox row 29b (spell recipes only, compiler and loader SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
           "type": "object",
           "properties": {
             "op": {
@@ -780,7 +794,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29b (spell recipes only): the named NPC's instance, when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "description": "Toolbox row 29b (spell recipes only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler and loader SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
           "type": "object",
           "properties": {
             "op": {
@@ -800,14 +814,13 @@
           },
           "required": [
             "op",
-            "npc",
             "kind",
             "amount"
           ],
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29b (spell recipes only): ignite the named fuel source as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "description": "Toolbox row 29b (spell recipes only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler and loader SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
           "type": "object",
           "properties": {
             "op": {
@@ -818,8 +831,7 @@
             }
           },
           "required": [
-            "op",
-            "item"
+            "op"
           ],
           "additionalProperties": false
         },

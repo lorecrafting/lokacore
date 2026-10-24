@@ -9,7 +9,7 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { doorSentence, dur, message, reasonOf, refusedSentence } from './words.ts';
+import { doorSentence, dur, message, reasonOf, refusedSentence, why } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
@@ -137,13 +137,7 @@ export function group(all: Button[]) {
 export const LINK = /\[([^\]]*)\]\(([^)]*)\)/g;
 export const plain = (s: string) => s.replace(LINK, '$1');
 
-type Offered =
-  | GameView['exits'][number]
-  | GameView['actions'][number]
-  | NonNullable<GameView['choice']>['choices'][number]
-  | NonNullable<GameView['spell_words']>[number];
-export const why = (e: Offered, text: (key: string) => string) =>
-  e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
+export { why };
 
 // A closed exit's log line: reason tag, then the cartridge's sentence, a shut door's, or the frame.
 export const refused = (

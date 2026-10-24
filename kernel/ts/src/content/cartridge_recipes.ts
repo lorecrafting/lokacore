@@ -131,8 +131,9 @@ function uses(c: Obj): Diagnostic[] {
 }
 
 // Toolbox row 29a: a spell target needs kernel_api 1.98 (as do word bar S2's speech.phrases, which
-// also need speech@1), and no two spells share a word (DUPLICATE_DEFINITION at each one's word); row 29b: an effect
-// step sits on a spell (SCHEMA_VIOLATION at its op).
+// also need speech@1), an aimed one 1.119 (loka-x6t.109), and no two spells share a word (DUPLICATE_DEFINITION at each one's word); row 29b: an effect
+// step sits on a spell (SCHEMA_VIOLATION at its op), and an unaimed spell's damage names its npc and
+// its light.ignite its item (SCHEMA_VIOLATION at the missing field).
 function spells(c: Obj): Diagnostic[] {
   const recipes = Object.entries((c.recipes ?? {}) as Obj);
   const all = recipes.filter(([, r]) => r.target.kind === 'spell');
@@ -143,15 +144,18 @@ function spells(c: Obj): Diagnostic[] {
     Object.entries(r.outcomes as Obj).flatMap(([name, o]) =>
       o.sequence.flatMap((s: Obj, i: number) =>
         EFFECTS.includes(s.op)
-          ? [[r, `.cartridge.recipes${step(ref)}.outcomes.${name}.sequence[${i}].op`]]
+          ? [[r, `.cartridge.recipes${step(ref)}.outcomes.${name}.sequence[${i}]`, s]]
           : [],
       ),
     ),
-  ) as [Obj, string][];
-  for (const [r, at] of effects)
+  ) as [Obj, string, Obj][];
+  for (const [r, at, s] of effects)
     if (r.target.kind !== 'spell')
-      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-  if ((all.length || c.speech) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.98') < 0)
+      out.push(diag('SCHEMA_VIOLATION', `${at}.op`, { error: 'invalid_value' }));
+    else if (!r.target.aimed && BARE[s.op] && !s[BARE[s.op]])
+      out.push(diag('SCHEMA_VIOLATION', `${at}.${BARE[s.op]}`, { error: 'missing_property' }));
+  const floor = all.some(([, r]) => r.target.aimed) ? '1.119' : '1.98';
+  if ((all.length || c.speech) && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   if (c.speech && c.lock.capabilities.speech !== 1)
     out.push(
@@ -162,6 +166,7 @@ function spells(c: Obj): Diagnostic[] {
   return out;
 }
 const EFFECTS = ['status.apply', 'damage', 'light.ignite'];
+const BARE: Obj = { damage: 'npc', 'light.ignite': 'item' };
 
 // Each key of a room's action contribution names a registered command, an action, a recipe, a
 // quest (its offer) or a dialogue (its talk). A spell is cast by word, never by key (row 29a).

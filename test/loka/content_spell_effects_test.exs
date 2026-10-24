@@ -48,4 +48,60 @@ defmodule Loka.ContentSpellEffectsTest do
              {"UNDECLARED_CAPABILITY", "recipes/lux.outcomes.success.sequence[0].op"}
            ]
   end
+
+  # Breaks (loka-x6t.109): the compiler accepts a damage step without npc on an unaimed spell, an
+  # aimed scope outside room_occupants and inventory, or aimed on a use target (the TS loader
+  # refuses them too; aimed_spells.test.ts).
+  test "aimed rows refused" do
+    dir = Loka.ContentSource.copy(@dir)
+    floor = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.119")}
+
+    bare =
+      &update_in(&1, ["outcomes", "success", "sequence", Access.at(0)], fn s ->
+        Map.delete(s, "npc")
+      end)
+
+    details = &put_in(&1, ["target", "aimed"], %{"scopes" => ["inspectable_details"]})
+
+    use = %{
+      "kind" => "use",
+      "tool" => %{"tag" => "silver"},
+      "aimed" => %{"scopes" => ["inventory"]}
+    }
+
+    for {edits, want} <- [
+          {[{"recipes/flamma.json", bare}],
+           {"SCHEMA_VIOLATION", "recipes/flamma.outcomes.success.sequence[0].npc"}},
+          {[floor, {"recipes/flamma.json", details}],
+           {"SCHEMA_VIOLATION", "recipes/flamma.target.aimed.scopes[0]"}},
+          {[floor, {"recipes/ward.json", &Map.put(&1, "target", use)}],
+           {"UNKNOWN_FIELD", "recipes/ward.target.aimed"}}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert pairs(diags) == [want]
+    end
+  end
+
+  # Breaks (loka-x6t.109): the schema still requires npc on damage or item on light.ignite, so an
+  # aimed spell cannot leave its target to the cast.
+  test "an aimed spell's damage and light.ignite need no npc or item" do
+    dir = Loka.ContentSource.copy(@dir)
+    floor = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.119")}
+
+    aimed = fn field, scopes ->
+      fn r ->
+        r
+        |> put_in(["target", "aimed"], %{"scopes" => scopes})
+        |> update_in(["outcomes", "success", "sequence", Access.at(0)], &Map.delete(&1, field))
+      end
+    end
+
+    edits = [
+      floor,
+      {"recipes/flamma.json", aimed.("npc", ["room_occupants"])},
+      {"recipes/lux.json", aimed.("item", ["inventory"])}
+    ]
+
+    assert {:ok, _, []} = Loka.ContentSource.compile(dir, edits)
+  end
 end

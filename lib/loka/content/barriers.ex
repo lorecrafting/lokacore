@@ -113,12 +113,13 @@ defmodule Loka.Content.Barriers do
 
   # Status reader 7: the terrain tags (air, chasm, water; a room so tagged bars moves into it) are
   # new Tag members, so a room, item or barrier declaring one needs kernel_api 1.62; row 43a's road
-  # and marsh need 1.106.
+  # and marsh need 1.106; lamp (aimed spells, loka-x6t.109) needs 1.119.
   defp terrain_floor(m, defs) do
     tags = tags(defs)
 
     if (Enum.any?(tags, &(&1 in ~w(air chasm water))) and api(m) < [1, 62]) or
-         (Enum.any?(tags, &(&1 in ~w(road marsh))) and api(m) < [1, 106]),
+         (Enum.any?(tags, &(&1 in ~w(road marsh))) and api(m) < [1, 106]) or
+         ("lamp" in tags and api(m) < [1, 119]),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
        else: []
   end

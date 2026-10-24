@@ -70,6 +70,7 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   shoo: ['crow_id'],
   talk: ['target_id'],
   ask: ['target_id'],
+  cast: ['target_id'],
   whisper: ['target_id'],
   perform: ['target_id', 'item_id'],
   buy: ['provider_id', 'item_id'],
@@ -111,11 +112,13 @@ export function resolve(
   const targets = Object.fromEntries(i.target_ids.map((t, n) => [slots[n], t]));
   const named = a.dialogue
     ? { dialogue: a.dialogue }
-    : a.recipe
-      ? { action: a.key }
-      : a.quest
-        ? { quest: a.quest }
-        : a.continuation && { continuation_id: a.continuation };
+    : a.recipe?.target.kind === 'spell'
+      ? { word: a.recipe.target.word }
+      : a.recipe
+        ? { action: a.key }
+        : a.quest
+          ? { quest: a.quest }
+          : a.continuation && { continuation_id: a.continuation };
   const payload = { type: a.command, actor_id: i.actor_id, ...named, ...i.input, ...targets };
   const command = { id: command_id, world_context_id: world.context, payload };
   return validate('Command', command).length

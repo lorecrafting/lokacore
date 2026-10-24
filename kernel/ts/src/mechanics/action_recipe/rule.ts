@@ -122,7 +122,7 @@ const recipeOf = (world: World, p: Command['payload']) =>
 
 // The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
 // item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach
-// fault faults the decision); or (row 29a) a spell's caster's body; or (row FD3) a storylet's
+// fault faults the decision); or (row 29a) a spell's caster's body, an aimed one's target_id; or (row FD3) a storylet's
 // performer's body, while the deck draws it (storylet/shared.ts pick; no target_id or item_id).
 function subjectOf(
   world: World,
@@ -131,7 +131,9 @@ function subjectOf(
   body: EntityId,
   steps: Steps,
 ) {
-  if (target.kind === 'spell') return body;
+  if (target.kind === 'spell' && !target.aimed) return body;
+  if (target.kind === 'spell')
+    return (p.type === 'cast' && p.target_id) || rejected('invalid_target');
   if (p.type === 'cast') return rejected('invalid_state'); // spellOf names only spells
   if (target.kind === 'storylet') {
     if (p.item_id !== undefined || p.target_id !== undefined) return rejected('invalid_target');
@@ -274,5 +276,5 @@ const step =
     }
     if (s.op === 'fact.assign')
       return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
-    return effect(world, command, mint, body, r, s);
+    return effect(world, command, mint, body, r, s, subject_id);
   };

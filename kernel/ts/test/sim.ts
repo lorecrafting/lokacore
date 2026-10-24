@@ -19,6 +19,7 @@ import { id } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { offerMaps } from '../src/view/invariants_view.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { MOVES } from '../src/mechanics/barrier/rule.ts';
 import { next, type RngState } from '../src/foundation/rng.ts';
@@ -266,9 +267,7 @@ function violated(
     decision,
     view,
     world_context_id: before.context,
-    resolves: Object.fromEntries(
-      Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
-    ),
+    ...offerMaps(Object.values(resolved(before, before.character))),
   };
   const ids = CHECKED.step.filter((i) => i !== 'target_candidates_ordered');
   return (
