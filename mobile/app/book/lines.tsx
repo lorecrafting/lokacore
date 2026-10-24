@@ -148,7 +148,7 @@ export function AwayRecap({
 /**
  * The room's people, then items, then sense cues; no headings, an empty group omitted
  * (book-ui.md, World and status entry). Superseded by book-ui.md Room page anatomy: cues become
- * log lines (to be filed).
+ * log lines (loka-x6t.127).
  * - Use: RoomPage only.
  * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
  *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word

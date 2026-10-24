@@ -126,7 +126,8 @@ export function Control(p: {
  * The place: fixed title, prose, exit warnings, entity lines, sense cues, the storylet
  * card, the room's own verb lines (aimed ones draw on their target's page), then the log
  * (book-ui.md, World and status entry). Superseded by book-ui.md Room page anatomy: exit warnings,
- * the storylet card and the verb lines go (verbs: loka-x6t.120; the rest to be filed).
+ * the storylet card and the verb lines go (verbs: loka-x6t.120; the rest: loka-x6t.127; storylets
+ * are to be retired, owner 2026-10-23).
  * - Use: the World page.
  * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
  *   of the authored text; a touch link in `links` is a name link in the prose, any other its words;

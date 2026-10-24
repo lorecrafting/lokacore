@@ -39,7 +39,8 @@ test('Nell at standing -2 shows her refusal line, no Talk or Trade; at 0 she tra
 });
 
 // Breaks: a buy leaves the buy page, its line misses the page's history, the purse does not
-// redraw, Sell does not open the sell page, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought).
+// redraw, Sell does not open the sell page, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought);
+// a sale leaves the sell page, does not redraw the purse, or keeps the sold row.
 test('a buy keeps the buy page: its line, the new purse, the row refused in words', () => {
   const b = book(showcase as never);
   b.map();

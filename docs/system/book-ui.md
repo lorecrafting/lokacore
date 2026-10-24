@@ -45,9 +45,10 @@ Book still draws it, the passage names the Beads item that removes it.
 ## World and status entry
 
 Superseded where it differs by the [room page anatomy](#room-page-anatomy): the place verbs, unavailable
-verb lines and aimed World verb lines below are removed by `loka-x6t.120`; the storylet card, the
-unlinked notice, board, bed, transport and harvest entries and the exit warning notes are still drawn
-and await their removal item.
+verb lines and aimed World verb lines below are removed by `loka-x6t.120`; the storylet card
+(storylets are to be retired, owner 2026-10-23), the unlinked notice, board, bed, transport and
+harvest entries, the exit warning notes and the sense cues block are still drawn and are removed by
+`loka-x6t.127`.
 
 World is one current-room page. Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
 description, projected interactibles, offered place actions and, last, the event log, so a
@@ -733,7 +734,7 @@ When GameView carries actor_name, the Character page's first line is its authore
 
 ## Sense cues details
 
-Superseded by the [room page anatomy](#room-page-anatomy): a cue is an ambient log line, not a block after the entity lines; the Book still draws the block (removal item to be filed).
+Superseded by the [room page anatomy](#room-page-anatomy): a cue is an ambient log line, not a block after the entity lines; the Book still draws the block (removed by `loka-x6t.127`).
 
 GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block. The presenter never walks exits or decides what reaches the player.
 
@@ -789,7 +790,7 @@ word anywhere; only its writer sees it.
 
 ## Storylet card details
 
-Superseded by the [room page anatomy](#room-page-anatomy): the World page draws no card; the Book still draws it (removal item to be filed).
+Superseded by the [room page anatomy](#room-page-anatomy): the World page draws no card; the Book still draws it (removed by `loka-x6t.127`; storylets are to be retired, owner 2026-10-23).
 
 GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never among them, so the hour's one pick is told from the place's standing verbs; available or unavailable it keeps that block (pass-1 R2). The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
 

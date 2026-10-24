@@ -43,8 +43,9 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 ### Item detail
 
 - Order: name; description; projected state (worn, lit, held by); visit history (only when
-  nonempty); options: self verbs (Read, Eat, Wield, Remove…), move verbs (Take, Drop, Lift),
-  store and hand-over (Put in…, Give to…), aimed use (Use on…); Leave last.
+  nonempty); options: self verbs (Read, Eat, Wield, Remove…), then the pick options (Use an item…,
+  Use on…, Cast a spell…), move verbs (Take, Lift, Drop), store and hand-over (Put in…, Give
+  to…); Leave last.
 - Never appears: a second copy of a World line, an empty history heading.
 - Source: [Item details and Take/Drop](../system/book-ui.md#item-details-and-takedrop),
   [detail-page order decision](../decisions/owner-decision-detail-page-order-2026-10-05.md),
@@ -304,8 +305,9 @@ For a brief that adds or changes anything the player sees or taps
 Conflicts (code or spec contradicts a pattern above):
 
 - Room-level action cards (Gather ash and kin) still draw on World: loka-x6t.120 (in progress).
-- Storylet card, unlinked notice, board, bed, transport and harvest entries, and exit warning
-  notes still draw on the World page outside the five parts: needs filing (removal slices).
+- Storylet card (storylets are to be retired, owner 2026-10-23), sense cues block, unlinked notice,
+  board, bed, transport and harvest entries, exit warning notes and the Continue conversation
+  button still draw on the World page outside the five parts: loka-x6t.127.
 - Asides drawn on World ([Aside details](../system/book-ui.md#aside-details)): loka-x6t.125 (owner,
   quoted: "we should get rid of asides").
 - Containers show contents without Open: loka-x6t.121 (in progress).
@@ -314,7 +316,7 @@ Conflicts (code or spec contradicts a pattern above):
 Gaps (no pattern or no check yet):
 
 - Mechanical anatomy check for the World page (no card, chip or note outside the five parts):
-  loka-x6t.127; proposed as an ast-grep rule over `mobile/app/book/World*.tsx` plus a render test.
+  loka-x6t.127; proposed as an ast-grep rule over `mobile/app/book/pages.tsx` (RoomPage) plus a render test.
 - Fixed Contents list and "no Chip inside a page": needs filing (one render test each).
 - Label-in-name prefix rule: needs filing (one accessibility-name test).
 - Device Back on a pick list: loka-x6t.113. Whisper hidden until loka-x6t.115. Wider sale lists:

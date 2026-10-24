@@ -12,7 +12,7 @@ paragraph if it passes the lore/perc check or whatever, but hold on that for now
 paragraph, and then items paragraph, and below that is the room event log. So any ambient things
 just append to the even tlog, like sounds heard from the next room, weather changes, room events,
 npcs doing things, emoting, etc, do you understand this simple design, please set it in stone and
-codify it and put in design guides if not already"
+codify it and put in design guides if not already, and please repeat that you know now and what the 'room' does"
 
 - The World page is the room title, the description paragraph (its only pressables the fixture and
   furniture links), the people paragraph, the items paragraph and the room event log, in that
