@@ -287,7 +287,8 @@ otherwise; an authored line keeps its own text.
   **in place** (the open page's history and the room log), **log** (the room log only) or
   **quiet** (the room log only, compacted; no text on the open page). Quiet so far: the player's
   own buy and sale on the buy and sell pages, and the player's own take and put on an open
-  container's page (a corpse included). The page's own redraw (purse, list, contents) is the
+  container's page (a corpse included). Any other line whose receipt routes to the open page is
+in place; every other line is log. The page's own redraw (purse, list, contents) is the
   feedback. Another person's action is never quiet.
 - A page never draws the room log, so no line shows twice on one page.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
@@ -301,7 +302,8 @@ otherwise; an authored line keeps its own text.
   A refusal is never quiet.
 - A room change clears the old room's log; the receipt's lines then open the new room's log in
   receipt order. A plain move's log opens with "You go north."; a Flee or a death in combat opens
-  the arrival room's log with the closing receipt's lines.
+  the arrival room's log with the closing receipt's lines. Room text the World page already draws
+(the title and description) is not repeated in its log.
 
 Later, not this batch: a verbose or brief setting that shows quiet lines in place.
 
