@@ -20,4 +20,5 @@ recommendation: no custom language for now ("yes please").
    and `LokaWeb` boundaries ([architecture](../system/architecture.md)): describe in prose, the AI
    proposes a diff, the compiler and transcript replay check it, the web Book previews it.
 4. Order and gates: [design audit 2026-10-23](../rnd/design-audit-abilities-authoring-2026-10-23.md)
-   §4, phases 1 to 4 before the builder (phase 8).
+   §4: the source shortcuts and content tools (phases 3 and 4) before the builder (phase 8); the
+   builder does not wait for the prologue sampler.

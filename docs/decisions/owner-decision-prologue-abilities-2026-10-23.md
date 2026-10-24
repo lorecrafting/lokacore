@@ -21,8 +21,8 @@ accepted ("I like your idea"; "go for it").
    failed craft still loses its inputs.
 3. Houses (one per character) and guilds (several) open at the landing; their design is parked.
 4. Skills stay on the Character page, each profession collapsed to one line that opens its tree;
-   a separate Skills page splits out at the landing, when a character can hold more than two
-   professions. This replaces the trigger in the
+   a separate Skills page splits out at the landing (the prologue's four basics never trigger
+   it). This replaces the trigger in the
    [Skills on Character ruling](pm-decision-skills-on-character-2026-10-15.md) ("until a second
    profession exists").
 5. The prologue sampler waits until the owner lays down more prologue lore (Beads

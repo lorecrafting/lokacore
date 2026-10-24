@@ -42,11 +42,13 @@ Each finding: what, evidence, what to do.
    `skill_<key>` facts into the definitions before the spell check runs
    (`lib/loka/content/compiler.ex:222-231`, `:109`), and the check wants a bool player fact
    (`lib/loka/content/spells.ex:51-67`), which `skill_<key>` is. Not run; prove with the sampler.
-6. **Verified yes, with a precedent: gift for a lesson exists.** The showcase teaches `blade` with
-   `receive` (a training sword) and `skill.acquire` in one choice
-   (`cartridges/toolbox_showcase/dialogues/aldous_lesson.json`). No loader rule forbids
-   `skill.acquire` in a quest-resolving dialogue (the refusals at `lib/loka/content/dialogues.ex:193`
-   concern `check` and `accept`); still a sampler case. A reaction has no `skill.acquire` step
+6. **Verified yes: a lesson can take a gift.** A gift to the teacher is `hand_over` (the player
+   gives, [mechanics](../system/mechanics.md)); `receive` is the reverse: Aldous gives the player a
+   training sword with `skill.acquire` in one choice
+   (`cartridges/toolbox_showcase/dialogues/aldous_lesson.json`). A choice without
+   `lesson_payment` may grant one skill and take no payment (`lib/loka/content/skills.ex:313-316`);
+   the dialogue `check` and `accept` refusals (`lib/loka/content/dialogues.ex:301-307`) do not
+   apply; still a sampler case. A reaction has no `skill.acquire` step
    (`protocol/reaction.schema.json` ReactionRule.apply: 16 ops), so §11 option B is engine, as said.
 7. **Missing: the quest can be the box.** A quest objective is any `current_state` policy
    (`protocol/quest.schema.json`), so "learn Tending" can be an objective (`skill_compare`), its
@@ -157,7 +159,7 @@ Each finding: what, evidence, what to do.
 
 | # | Approach | Grounded in | Buys | Cost |
 |---|---|---|---|---|
-| A | **The quest is the box.** Each prologue box is a quest whose objective is `skill_compare` on the box; journal stage hints say what to practise; the teacher's choice takes the gift (`receive`) and grants (`skill.acquire`); `quest_resolved` reactions set descent-stage facts that room `variants` and `sky` read | quests, hs-11, FD2, W6 variants, row 31 sky; `aldous_lesson.json` | stability (installed mechanics only), the story clock equals the quest log | S content |
+| A | **The quest is the box.** Each prologue box is a quest whose objective is `skill_compare` on the box; journal stage hints say what to practise; the teacher's choice takes the gift (`hand_over`) and grants (`skill.acquire`); `quest_resolved` reactions set descent-stage facts that room `variants` and `sky` read | quests, hs-11, FD2, W6 variants, row 31 sky; `aldous_lesson.json` | stability (installed mechanics only), the story clock equals the quest log | S content |
 | B | **Signals as counters, zones as expansions.** `signal` lowers to a synthesized bounded int plus `fact.adjust`; `on signal` to `fact_changed`; a zone rule expands to one rule per tagged room | reaction@1 cascade to quiescence, room tags | extensibility, morphability (retag a room, the zone follows) | S compile-time |
 | C | **Area bundles with inline prose and `extends`.** One file per area; prose inline, keys generated deterministically from the path; boxes and spell tiers from templates; merge rule: objects merge, else replace | `Source.load`, the text catalog, the artifact hash as proof of equivalence | buildability (one place per line of prose), morphability (retune a tier once) | M compile-time |
 | D | **Byte-identical lowering as the gate.** Re-express an existing sampler in sugar; its artifact must hash the same as the JSON original | content hash, known-answer fixtures | stability: the sugar provably changes nothing | folded into C |
@@ -175,10 +177,10 @@ protocol, save and kernel_api; "none" is explicit.
 | Phase | Deliverables | Size | Contract | Depends on | Gate | Serves |
 |---|---|---|---|---|---|---|
 | 0. Correct the drafts | Fix §3.4 reagents (finding 2); re-aim slice 0 at the prologue (1); park the six-starter roster, capacity, surrender and the growth window to the landing with their reasons (3, 4, 8); two decision records: prologue gifts not fees, Skills on Character collapse | S docs | none | owner answers below | docs merged; every "verify" in the design has a cited answer or a sampler case | S |
-| 1. Prologue sampler, Tending | `cartridges/prologue_sampler`: Tending novice plus two branches of two (5 boxes) as quests (A); gifts by `receive`; one labour box (a deed counter from `action_completed`); `lux` with `learned` = a box fact; the descent-stage facts driving one room variant and the sky; one ritual (§3.6 A); a transcript and a phone-width walk | M content | none | 0 | transcript replays byte for byte; every box learned and every quest resolved in it; `reach.ts` shows no `write_only` fact; `mix loka.lint` clean; record lines and files per box as the baseline | S, B |
+| 1. Prologue sampler, Tending | `cartridges/prologue_sampler`: Tending novice plus two branches of two (5 boxes) as quests (A); gifts by `hand_over`; one labour box (a deed counter from `action_completed`); `lux` with `learned` = a box fact; the descent-stage facts driving one room variant and the sky; one ritual (§3.6 A); a transcript and a phone-width walk | M content | none | 0 | transcript replays byte for byte; every box learned and every quest resolved in it; `reach.ts` shows no `write_only` fact; `mix loka.lint` clean; record lines and files per box as the baseline | S, B |
 | 2. ACTS parity pack | `cartridges/acts_sampler`: the six scenarios in today's JSON, one transcript each; a table of lines and files per scenario; the alarm scenario's delayed move recorded as refused | S-M content | none | none (parallel with 1) | five of six replay; the sixth names the FD1 refusal and `loka-v86w` | E |
 | 3. Source sugar in the compiler | Under `Source.load`: bundle files, inline prose, `extends` (objects merge, else replace; `abstract`; cycle and missing-parent refusal; `data.from` provenance), `signal`, `zone`; docs in cartridge.md Compiler; lint reads the flattened view | M Elixir | none (artifact unchanged) | 1, 2 as baselines | phases 1 and 2 rewritten in sugar hash byte-identical to their JSON originals (D); at least 40 percent fewer lines and 70 percent fewer files against the phase 1 baseline | B, M |
-| 4. Tools | `why.ts` (E) and `coverage.ts` (F) as play tools; `coverage.ts` on the showcase listed in content reports | M TS | none | 1 | `why.ts` explains one deliberately broken guard in the parity pack; `coverage.ts` names the showcase's never-fired reactions | S, B |
+| 4. Tools | `why.ts` (E) and `coverage.ts` (F) as play tools; `coverage.ts` on the showcase listed in content reports | M TS | none | none (existing samplers and the showcase's transcripts) | `why.ts` explains one deliberately broken guard edited in-test into an existing sampler; `coverage.ts` names the showcase's never-fired reactions | S, B |
 | 5. Prologue roster | The other three basics (Making, Guarding, Words) in sugar: 15 more boxes, ark teachers, the companion sparring, the light word the night the light dies | M content | none | 3 | one blind playtest at phone width before the owner plays; every box reached in its transcript; refusal report `per_100` not above the showcase's | S, B, M |
 | 6. Engine rows, each on evidence | a. Delayed-rule subject (`loka-v86w`) lifting the FD1 refusals, when phase 2's sixth scenario is wanted; b. spell fixed `rating` check, when a prologue word needs a fizzle; c. aimed skills on the aimed-spells field after 1.119 merges | S-M each | a: save (job row gains a subject), kernel_api; b: action schema, kernel_api; c: action, command, GameView, kernel_api | 2, 5 | each row's sampler plus the parity scenario it unblocks replaying | E |
 | 7. Landing | Capacity, surrender, growth window if a playtest shows grinding, six starters, houses and guilds as rank facts, coin fees | L | per §9 of the design | 5, owner's landing lore | deferred | E, M |
@@ -186,7 +188,8 @@ protocol, save and kernel_api; "none" is explicit.
 
 Owner order (2026-10-23, paraphrased): 0, then 4 (tools), then 3 (source shortcuts) are the
 foundation, built now; phase 1 and later wait for prologue lore. Phase 3's byte-identical gate
-then uses existing samplers instead of phases 1 and 2. Beads `loka-kgd.194`.
+then uses existing samplers instead of phases 1 and 2. Phase 2 (the parity pack) has no slot yet:
+it is a measurement, built when the shortcuts need a second baseline. Beads `loka-kgd.194`.
 
 Audit's original order of value: 0 and 1 first (a week of content proves the whole shape); 2 and 4 in parallel;
 3 only after both baselines exist, so its gate is real.
@@ -203,7 +206,7 @@ Each is answerable in one line; the default applies if unanswered.
 6. Spell reagents stay pools until `loka-kgd.83`? Default: yes.
 7. Fund the delayed-rule subject (`loka-v86w`) only if the parity pack's alarm scenario is wanted in the prologue? Default: yes.
 8. The parity pack is one sampler cartridge with six transcripts? Default: yes.
-9. The phase 3 gate is byte-identical artifacts for phases 1 and 2? Default: yes.
+9. The phase 3 gate is byte-identical artifacts for existing samplers re-expressed in sugar (owner order: phases 1 and 2 come later)? Default: yes.
 10. Skills on Character: collapse each profession to a title line now, split a page at the landing? Default: yes.
 
 Skipped: no compile or test run (the design worktree has no built dependencies and the machine was

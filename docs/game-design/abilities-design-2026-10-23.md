@@ -404,7 +404,7 @@ professions. B departs from the ruling, so it needs a new decision record.
 **Tree view** (exists, [skill tree details](../system/book-ui.md#skill-tree-details)): learned
 boxes with level, locked and not-learned notes with their requirement. Add per box: the
 `unlocks` line (§1.3) and the capacity line ("Capacity 24 of 40") once §1.5 lands. Hidden boxes
-draw nothing until learned.
+draw nothing until the player qualifies ([secret-elites ruling](../decisions/owner-decision-hidden-elites-secret-2026-10-15.md)).
 
 **What to train next.** The player learns it from: the requirement and unlocks lines; teacher
 lesson lines; asides that appear as a box nears its next level; FD9 titles at mastery. No
@@ -579,7 +579,7 @@ stage 4, so the coin fee starts after the prologue. This departs from the coin-f
 
 | Option | Engine | Verdict |
 |---|---|---|
-| **A. The questline ends at the teacher: a dialogue choice offered once the quest's objective holds does `skill.acquire`, no payment** | none: quests, dialogue choices and `skill.acquire` exist | **Recommended**; precedent: `cartridges/toolbox_showcase/dialogues/aldous_lesson.json` takes a gift (`receive`) and teaches in one choice (audit finding 6) |
+| **A. The questline ends at the teacher: a dialogue choice offered once the quest's objective holds does `skill.acquire`, no payment** | none: quests, dialogue choices and `skill.acquire` exist | **Recommended**; a choice may teach a skill with no payment (`lib/loka/content/skills.ex:313-316`); the gift to the teacher is a `hand_over` (the player gives; `receive` is the reverse, the NPC giving, as `cartridges/toolbox_showcase/dialogues/aldous_lesson.json` does) |
 | B. A `skill.acquire` step on the `quest_resolved` reaction | new reaction step; save recovery checks each acquired fact against a dialogue grant receipt (`skills-save.ts`) | Only if A cannot carry it |
 | C. Gift as a `lesson_payment` in items | lesson payments are coin today | Not needed: the gift is a quest objective |
 
