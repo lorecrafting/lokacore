@@ -53,7 +53,12 @@ export const AtNight: StoryObj = {
 // A sense cue as the presenter logs it (book-ui.md, Sense cues details), worded by the senses
 // sampler's text: one log line after the room's lines. Breaks: World draws the cue as its own
 // block again (two lines). Logging once per visit: book/room_anatomy.test.ts.
-const hammering = { sense: 'sound', text: 'cue.hammering', direction: 'east' } as const;
+// text and direction are branded keys (TextKey, Key) in the view.
+const hammering = {
+  sense: 'sound',
+  text: 'cue.hammering' as never,
+  direction: 'east' as never,
+} as const;
 export const SenseCueLogged: StoryObj = {
   ...pageStory({
     ...RoomFirstView,
