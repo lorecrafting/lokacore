@@ -12,6 +12,7 @@ import {
   quietOf,
   resetLogs,
   savedNarration,
+  type DetailLine,
   type Logs,
 } from './logs.ts';
 import type { Button } from './presenter.ts';
@@ -79,13 +80,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   // Empty routed combat narration deliberately stays out of World after escape.
   const fallback = fallbackLine(accepted, attempt);
   const said = routed?.[0] ?? replyLine(reply, text, now, fallback, was);
-  const quiet =
-    page === s.combatLog
-      ? undefined
-      : quietOf(s, accepted?.narration, attempt.button.target_ids, detail);
-  // Read text stays on its page, never in the room log (book-ui.md Notice-board details).
-  if (!repeated && accepted?.outcome === 'read' && page) page.push(...said);
-  else if (!repeated) logLines(s, said, page, quiet);
+  if (!repeated) place(s, said, page, accepted, attempt.button.target_ids, detail);
   if (!repeated && routed) logLines(s, routed[1], s.combatLog);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
@@ -93,6 +88,24 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
 }
 
 // The narration routed to its logs; a cast in a fight sends its lines to the combat log.
+// Read text stays on its page, never in the room log (book-ui.md Notice-board details).
+const place = (
+  s: Logs,
+  said: DetailLine[],
+  page: DetailLine[] | undefined,
+  accepted: Accepted | undefined,
+  target: unknown,
+  detail?: string,
+) =>
+  accepted?.outcome === 'read' && page
+    ? page.push(...said)
+    : logLines(
+        s,
+        said,
+        page,
+        page === s.combatLog ? undefined : quietOf(s, accepted?.narration, target, detail),
+      );
+
 const routedLines = (
   retained: Parameters<typeof closing>[0],
   was: GameView,

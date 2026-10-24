@@ -4,6 +4,7 @@ import { exchange } from './shared.ts';
 
 export const decide: Rule<'commerce'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
+  const line = p.type === 'buy' ? 'commerce.bought' : 'commerce.sold';
   const result = exchange(
     world,
     p.actor_id,
@@ -37,14 +38,6 @@ export const decide: Rule<'commerce'> = (world, command, mint, steps = { n: 0 })
         holder_id: result.destination,
       }),
     ],
-    [
-      actorLine(
-        world,
-        p.actor_id,
-        `commerce.${p.type === 'buy' ? 'bought' : 'sold'}`,
-        { item: result.moved },
-        steps,
-      ),
-    ],
+    [actorLine(world, p.actor_id, line, { item: result.moved }, steps)],
   );
 };
