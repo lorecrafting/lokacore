@@ -55,7 +55,7 @@ PLease set things up so that its easy for me to do my ui polish there".
      list; loka-x6t.129 every line lands in the room event log (combat too; "You go north." starts a visit), a detail
      page also shows its own lines; loka-x6t.124 announcements. Brief on branch toolbox/batch-narration-log
      (docs/briefs/narration-log/README.md, rulings appended); the brief branch also adds a HANDOFF section, expect a
-     conflict here. STARTED 2026-10-24 ~06:00 (owner: "It's okay please star the work no"): one Opus developer builds slices 1-3 on
+     conflict here. STARTED 2026-10-24 ~06:00 (owner: "It's okay please star the work no"): one Opus developer builds slices 1-3 on draft PR #475 (slice 1 pushed at 2eb1d6f39; words table in mobile/packages/game-view/line_words.ts, PM ruling option B, "You take X."), on
      that branch (draft PR after slice 1); then one Opus reviewer on the draft head, green hosted CI, merge,
      after_merge; one designer pass at batch end. Brief rulings appended: shared words table, combat in the room log,
      "You go north.", display table (in place / log / quiet), quiet own buy/sell and container take/put, compacted room
