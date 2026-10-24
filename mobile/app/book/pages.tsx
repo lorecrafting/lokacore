@@ -13,7 +13,7 @@ import { tapBleed } from './reading.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { opacity, size, space } from './tokens.ts';
 import { ActionCard } from './actions.tsx';
-import { Asides, AwayRecap, Here, LogLines, nameLink } from './lines.tsx';
+import { AwayRecap, Here, LogLines, nameLink } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
@@ -125,7 +125,7 @@ export function Control(p: {
 }
 
 /**
- * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet
+ * The place: fixed title, prose, exit warnings, entity lines, sense cues, the storylet
  * card, the room's own verb lines (aimed ones draw on their target's page), then the log
  * (book-ui.md, World and status entry).
  * - Use: the World page.
@@ -158,7 +158,6 @@ export function RoomPage(p: {
     >
       {p.recap && <AwayRecap lines={p.recap} />}
       {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
-      <Asides keys={p.view.place.asides} text={p.text} />
       {warnings(c, t, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (

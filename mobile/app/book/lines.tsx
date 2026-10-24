@@ -51,35 +51,13 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
 
 /**
  * A dim body line that is not pressable and carries no action.
- * - Use: an aside, a sense cue, every empty state ("Nothing to do here."), a page's "save not
+ * - Use: a sense cue, every empty state ("Nothing to do here."), a page's "save not
  *   confirmed", a priced page's balance, a held item's holder; never a Text the page styles.
  * - Rules: an empty-state Note never shares a page with an unavailable action line.
  * - Story: Note.stories.tsx
  */
 export function Note({ children }: { children: string }) {
   return <Text style={note(usePalette(), useType())}>{children}</Text>;
-}
-
-/**
- * The character's passive voices as one block of Notes, links as plain words (book-ui.md, Aside
- * details).
- * - Use: the room page and people's asides; no asides, no block.
- * - Story: RoomPage.stories.tsx
- */
-export function Asides({
-  keys = [],
-  text,
-}: {
-  keys?: readonly { key: string }[];
-  text: (key: string) => string;
-}) {
-  return keys.length > 0 ? (
-    <View>
-      {keys.map((a, i) => (
-        <Note key={i}>{plain(text(a.key))}</Note>
-      ))}
-    </View>
-  ) : null;
 }
 
 /**
@@ -206,8 +184,6 @@ export function Here(p: {
         ))}
       </View>
     ),
-    // Row FD10: the present people's asides, in listed then authored order, before the items.
-    <Asides key="asides" keys={npcs.flatMap((e) => e.asides ?? [])} text={p.text} />,
     items.length > 0 && <Present key="items" group={items} text={p.text} open={p.open} />,
     p.view.cues && (
       <View key="cues">

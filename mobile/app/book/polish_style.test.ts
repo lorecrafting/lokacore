@@ -38,126 +38,76 @@ test('a blank line in the room description starts a new paragraph; a line break 
   ]);
 });
 
-// Breaks (toolbox row FD2, book-ui.md Aside details): an aside is dropped, reordered, pressable,
-// shows link markup, or moves off its place (World: after the prose, before the exit warnings;
-// a notice: straight after the description, before its item state).
-test('asides show as quiet lines after the description, in projected order', async () => {
-  const { RoomPage } = await import('./pages.tsx');
-  const { NoticePage } = await import('./notices.tsx');
-  const asides = [{ key: 'You know these [runes](runes).' }, { key: 'A mason marked this.' }];
-  const { Note } = await import('./lines.tsx');
-  const quiet = JSON.stringify(Note({ children: 'x' }).props.style);
-  // A Note-styled line shows as `~line`, so an aside drawn in prose style no longer matches.
-  const flow = (page: any) =>
-    nodes(page)
-      .filter((n) => n.type === 'Text' || n.type === 'Pressable')
-      .map((n) =>
-        n.type === 'Pressable'
-          ? 'TAP'
-          : (JSON.stringify(n.props.style) === quiet ? '~' : '') + words(n),
-      );
-  const world = (place: object) => {
-    const r = room('The hall is cold.');
-    const view = { ...r.view, place: { ...r.view.place, ...place } };
-    const exit = { direction: 'north', warning: 'Water roars to the north.' };
-    return flow(RoomPage({ ...r, view: { ...view, exits: [exit] } } as any));
+// Breaks (rows FD2/FD10, book-ui.md Aside details; owner pick mvlrbpi8u4ai): an aside is not
+// logged, keeps link markup, logs again while the visit lasts (a re-render, a vanish and return, a
+// person's same line twice), is not logged anew on the next visit, or a lit room's aside is lost.
+test('each aside is one plain World log line, once per room visit', async () => {
+  const { presenter } = await import('./presenter.ts');
+  const hal = (asides: object[]) => ({ id: 'hal', name: 'Hal', kind: 'npc', actions: [], asides });
+  const at = (id: string, asides?: object[], entities: object[] = []) => ({
+    place: { id, title: { key: 'T' }, description: { key: 'D' }, ...(asides && { asides }) },
+    entities,
+    exits: [],
+    actions: [],
+    inventory: [],
+    journal: [],
+    time: 0,
+  });
+  const runes = { key: 'You know these [runes](runes).' };
+  let n = 0;
+  let view: object = at('hall', [runes], [hal([])]);
+  const game = {
+    view: () => ({ view, token: `t${n}` }),
+    text: () => undefined,
+    lastNarration: () => undefined,
+    pending: () => false,
+  } as any;
+  const p = presenter(game);
+  const show = (next: object) => {
+    view = next;
+    p.update({ kind: 'state', projection: game.view(), status: { kind: 'ready' } } as any);
+    n++;
+    return [...p.screen().log];
   };
-  const shown = world({ asides });
-  const at = shown.indexOf('The hall is cold.');
-  assert.deepEqual(shown.slice(at, at + 4), [
-    'The hall is cold.',
-    '~You know these runes.',
-    '~A mason marked this.',
-    '~Water roars to the north.',
+  n++;
+  assert.deepEqual(show(at('hall', [runes], [hal([])])), ['You know these runes.']);
+  assert.deepEqual(show(at('hall', [], [hal([{ key: 'Hal mutters.' }])])), [
+    'You know these runes.',
+    'Hal mutters.',
   ]);
-  assert.deepEqual(world({}).slice(at, at + 2), [
-    'The hall is cold.',
-    '~Water roars to the north.',
-  ]);
-  const notice = (extra: object) =>
-    flow(
-      NoticePage({
-        screen: {
-          view: { notices: [{ id: 'd', title: 'Door', description: 'A door.', ...extra }] },
-          text: (key: string) => key,
-          detail: () => [],
-        },
-        page: { kind: 'notice', id: 'd' },
-        open: () => {},
-        press: () => {},
-        world: () => {},
-      } as any),
-    );
-  assert.deepEqual(notice({ asides, remaining: 2 }).slice(0, 5), [
-    'Door',
-    'A door.',
-    '~You know these runes.',
-    '~A mason marked this.',
-    '~Remaining: 2',
-  ]);
-  assert.deepEqual(notice({ remaining: 2 }).slice(0, 3), ['Door', 'A door.', '~Remaining: 2']);
+  assert.deepEqual(show(at('hall', [runes], [hal([{ key: 'Hal mutters.' }])])).length, 2);
+  assert.deepEqual(show(at('cellar')), []); // dark: the engine sends no place asides
+  assert.deepEqual(show(at('cellar', [runes])), ['You know these runes.']); // lit
+  assert.deepEqual(show(at('hall', [runes])), ['You know these runes.']);
 });
 
-// Breaks (toolbox row FD10): a present NPC's asides are dropped, shown loud or pressable, out of
-// order, or after the loose items instead of straight after the people; on the NPC's own page,
-// dropped or moved off its description.
-test("an NPC's asides show as quiet lines after the people, before the items", async () => {
+// Breaks: an aside draws as its own block on World (a place's or a person's), or a notice's asides do not
+// lead its history as plain lines.
+test('asides draw no block; a notice leads its history with them', async () => {
   const { RoomPage } = await import('./pages.tsx');
-  const { NpcPage } = await import('./Npc.tsx');
-  const { Note } = await import('./lines.tsx');
-  const quiet = JSON.stringify(Note({ children: 'x' }).props.style);
-  const flow = (page: any) =>
-    nodes(page)
-      .filter((n) => n.type === 'Text' || n.type === 'Pressable')
-      .map((n) =>
-        n.type === 'Pressable'
-          ? 'TAP'
-          : (JSON.stringify(n.props.style) === quiet ? '~' : '') + words(n),
-      );
-  const npc = (name: string, asides?: object[]) => ({
-    id: name,
-    name,
-    kind: 'npc',
-    actions: [],
-    ...(asides && { asides }),
-  });
-  const r = room('A crypt.');
-  const entities = [
-    { id: 'lamp', name: 'A lamp', kind: 'item', actions: [] },
-    npc('Hal', [{ key: 'Hal mutters.' }, { key: 'Hal [shivers](cold).' }]),
-    npc('Bram', [{ key: 'Bram hums.' }]),
-    npc('Ada'),
-  ];
-  const shown = flow(RoomPage({ ...r, view: { ...r.view, entities } } as any));
-  const at = shown.indexOf('A crypt.');
-  assert.deepEqual(shown.slice(at), [
-    'A crypt.',
-    'Hal, Bram, and Ada are here.',
-    ...['Hal', 'Bram', 'Ada'],
-    '~Hal mutters.',
-    '~Hal shivers.',
-    '~Bram hums.',
-    'A lamp is here.',
-    'A lamp',
-  ]);
-  const page = (e: object) =>
-    flow(
-      NpcPage({
-        view: { entities: [e], inventory: [] },
-        npc: { ...e, description: 'A hireling.' },
+  const { NoticePage } = await import('./notices.tsx');
+  const asides = [{ key: 'You know these [runes](runes).' }];
+  const r = room('The hall is cold.');
+  const npc = { id: 'hal', name: 'Hal', kind: 'npc', actions: [], asides };
+  const view = { ...r.view, place: { ...r.view.place, asides }, entities: [npc] };
+  const world = nodes(RoomPage({ ...r, view } as any)).map(words);
+  assert.ok(!world.some((w) => w.includes('runes')));
+  const notice = nodes(
+    NoticePage({
+      screen: {
+        view: { notices: [{ id: 'd', title: 'Door', description: 'A door.', asides }] },
         text: (key: string) => key,
-        g: { on: () => [] },
-        press: () => {},
-        log: [],
-        leave: () => {},
-        talking: true,
-      } as any),
-    );
-  assert.deepEqual(page(entities[1]).slice(1, 4), [
-    'A hireling.',
-    '~Hal mutters.',
-    '~Hal shivers.',
-  ]);
+        detail: () => ['It creaks.'],
+      },
+      page: { kind: 'notice', id: 'd' },
+      open: () => {},
+      press: () => {},
+      world: () => {},
+    } as any),
+  )
+    .filter((n) => n.type === 'Text')
+    .map(words);
+  assert.deepEqual(notice.slice(0, 4), ['Door', 'A door.', 'You know these runes.', 'It creaks.']);
 });
 
 // Breaks (loka-x6t.105, book-ui.md fixture rule): a description's link to a readable notice stays

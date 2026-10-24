@@ -36,6 +36,7 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
+  asideLines,
   closedLog,
   closing,
   detailLines,
@@ -79,6 +80,7 @@ function background(
   }
   if (last && last.command_id !== s.narrationId)
     narrate(s, closing(last, was, now), now, away, text);
+  world(s, away, asideLines(s, now, text));
 }
 
 // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
@@ -115,6 +117,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
           : undefined;
   closedLog(s, reply.kind === 'saved' && reply.decision.kind === 'accepted');
   const line = s.fault ? '' : received(game, reply, was, s, text);
+  if (!s.fault) s.log.push(...asideLines(s, game.view().view, text));
   if (s.fault) {
     s.returnWorld = false;
     s.returnDetail = undefined;

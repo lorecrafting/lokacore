@@ -5,7 +5,7 @@ import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { LINK, plain, why, type Page as Route } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { Asides, EntityLine, LogLines } from './lines.tsx';
+import { EntityLine, LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
@@ -152,10 +152,21 @@ const fare = (c: Palette, t: Type, f: NonNullable<Notice['transport']>) => (
 const fresh = (description: string) => (line: DetailLine) =>
   typeof line !== 'string' || plain(line) !== description;
 
+// The notice's asides as plain lines, then its fresh reads (book-ui.md, Aside details).
+const history = (
+  screen: Screen,
+  detail: { id: string; asides?: readonly { key: string }[] },
+  description: string,
+) => [
+  ...(detail.asides ?? []).map((a) => plain(screen.text(a.key))),
+  ...screen.detail(detail.id).filter(fresh(description)),
+];
+
 /**
  * A notice or board detail in the detail-page order (book-ui.md, Notice board details).
  * - Use: a notice route.
- * - Rules: a read whose text is the description adds nothing; equal read lines all show.
+ * - Rules: a read whose text is the description adds nothing; equal read lines all show; its
+ *   asides lead its history as plain lines (book-ui.md, Aside details).
  * - States: notice with Read; dream available; dream acknowledged.
  * - Story: NoticePage.stories.tsx
  */
@@ -174,9 +185,8 @@ export function NoticePage(
   return (
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c, t)}>{description}</Text>
-      <Asides keys={'asides' in detail ? detail.asides : undefined} text={p.screen.text} />
       {'remaining' in detail && <Text style={note(c, t)}>Remaining: {detail.remaining}</Text>}
-      <LogLines lines={p.screen.detail(detail.id).filter(fresh(description))} />
+      <LogLines lines={history(p.screen, detail, description)} />
       {'transport' in detail && detail.transport && fare(c, t, detail.transport)}
       {!!board?.notices.length && (
         <View>
