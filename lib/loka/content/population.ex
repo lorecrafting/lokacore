@@ -109,8 +109,8 @@ defmodule Loka.Content.Population do
   # ponytail: report this finite plan's linked source errors together; split on another plan shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp plan_errors(manifest, defs, calendar, text, p) do
     bundle = value(Refs.resolve(p["bundle"], "population_bundle", manifest, defs))
-    rooms = Enum.map(p["area"], &value(Refs.resolve(&1, "room", manifest, defs)))
-    home = value(Refs.resolve(p["home"], "room", manifest, defs))
+    room_refs = Enum.map([p["home"] | p["area"]], &Refs.resolve(&1, "room", manifest, defs))
+    [home | rooms] = Enum.map(room_refs, &value/1)
     n = p["cap"]
     targets = p["day_target"] <= p["night_target"] and p["night_target"] <= n
     hours = calendar && calendar["hours_per_day"]
@@ -123,9 +123,11 @@ defmodule Loka.Content.Population do
         rem(p["wander_interval"], period) == 0 and
         p["replacement_delay"] <= div(9_007_199_254_740_991, 2)
 
+    # A room refused at its own path (e.g. its extends) is not reported again here.
     connected =
-      home && Enum.uniq(p["area"]) == p["area"] && Enum.member?(p["area"], p["home"]) &&
-        Enum.all?(rooms, &is_map/1) && reciprocal?(rooms, p["area"])
+      :invalid in room_refs or
+        (is_map(home) and Enum.uniq(p["area"]) == p["area"] and Enum.member?(p["area"], p["home"]) and
+           Enum.all?(rooms, &is_map/1) and reciprocal?(rooms, p["area"]))
 
     bundle_ok =
       is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"], p["scavenge"] != nil)
@@ -239,22 +241,29 @@ defmodule Loka.Content.Population do
 
   # ponytail: the optional companion keeps the existing bounded population bundle shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp bundle_valid?(b, manifest, defs, home, allow_empty) do
-    npc = value(Refs.resolve(b["npc"], "npc", manifest, defs))
-    item = if b["item"], do: value(Refs.resolve(b["item"], "item", manifest, defs))
-    corpse = value(Refs.resolve(b["corpse"], "item", manifest, defs))
+    refs = [
+      Refs.resolve(b["npc"], "npc", manifest, defs),
+      Refs.resolve(b["corpse"], "item", manifest, defs),
+      b["item"] && Refs.resolve(b["item"], "item", manifest, defs)
+    ]
+
+    [npc, corpse, item] = Enum.map(refs, &value/1)
 
     roles_ok =
       (b["member_role"] == nil and b["loot_role"] == nil) or
         (b["member_role"] == "deer" and b["loot_role"] == "hide")
 
-    roles_ok && (b["item"] != nil or allow_empty) && npc && corpse &&
-      npc["spawn_template"] == true && npc["room"] == home &&
-      is_map(npc["hp"]) && is_map(npc["attack"]) &&
-      (b["item"] == nil or
-         ((is_map(item) and item["location"] == %{"in" => "template"} and item["container"] == nil and
-             item["capacity"] == nil) && item["slot"] == nil && item["barrier"] == nil)) &&
-      corpse["location"] == %{"in" => "template"} && corpse["container"] == true &&
-      corpse["capacity"] == nil
+    # An invalid NPC, corpse or item is already reported at its own path; a missing one is refused here.
+    :invalid in refs or
+      (roles_ok && (b["item"] != nil or allow_empty) && npc && corpse &&
+         npc["spawn_template"] == true && npc["room"] == home &&
+         is_map(npc["hp"]) && is_map(npc["attack"]) &&
+         (b["item"] == nil or
+            ((is_map(item) and item["location"] == %{"in" => "template"} and
+                item["container"] == nil and
+                item["capacity"] == nil) && item["slot"] == nil && item["barrier"] == nil)) &&
+         corpse["location"] == %{"in" => "template"} && corpse["container"] == true &&
+         corpse["capacity"] == nil) == true
   end
 
   # ponytail: inspect the two declared adjacent rooms together; split on a wider area. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize

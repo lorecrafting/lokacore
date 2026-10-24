@@ -3,8 +3,10 @@ defmodule Loka.Content.Source do
   Reads a cartridge source directory and builds diagnostics in the path grammar of
   `Diagnostic.path` (protocol/cartridge.schema.json).
 
-  A step list holds member names (strings) and array indexes (integers).
+  The loaded view is already flattened (`Loka.Content.Extends`). A step list holds member
+  names (strings) and array indexes (integers).
   """
+  alias Loka.Content.Extends
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -41,7 +43,8 @@ defmodule Loka.Content.Source do
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
-  decoded value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics.
+  decoded value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics and the
+  `extends` refusals.
   A recognised file that fails to decode has the value `:invalid` (present, not absent);
   a file in an unrecognised place is left out.
   """
@@ -54,8 +57,19 @@ defmodule Loka.Content.Source do
       |> Path.wildcard(match_dot: true)
       |> Enum.filter(&File.regular?/1)
       |> Enum.map(&entry(Path.relative_to(&1, dir), dir))
+      |> Enum.unzip()
 
-    {for({file, _} <- entries, file != nil, do: file), for({_, ds} <- entries, d <- ds, do: d)}
+    flattened(entries)
+  end
+
+  defp flattened({files, diags}) do
+    {files, faults} = Extends.flatten(Enum.reject(files, &is_nil/1))
+    {files, List.flatten(diags) ++ Enum.map(faults, &extends_diag/1)}
+  end
+
+  defp extends_diag({code, rel, data, from}) do
+    data = if from, do: Map.put(data, "from", at(from, [])), else: data
+    diag(code, at(rel, ["extends"]), data)
   end
 
   defp entry(rel, dir), do: entry(rel, classify(rel), dir)

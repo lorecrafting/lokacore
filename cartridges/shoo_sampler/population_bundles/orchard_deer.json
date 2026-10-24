@@ -1,7 +1,4 @@
 {
-  "npc": "orchard_deer",
-  "item": "deer_hide",
-  "corpse": "deer_corpse",
-  "member_role": "deer",
-  "loot_role": "hide"
+  "extends": "oak_deer",
+  "npc": "orchard_deer"
 }
