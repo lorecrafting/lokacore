@@ -1,4 +1,4 @@
-// size: allow 560, seed-picked corpus, --cartridge loader and offers (reused by play/flows.ts)
+// size: allow 561, seed-picked corpus, --cartridge loader and offers incl. notice recipes (reused by play/flows.ts)
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView

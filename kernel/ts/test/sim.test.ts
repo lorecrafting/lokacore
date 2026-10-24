@@ -1,4 +1,4 @@
-// size: allow 571, the toolbox showcase pass joins the corpus run and the red controls
+// size: allow 579, the toolbox showcase pass joins the corpus run and the red controls (notice cards: loka-x6t.120)
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
 // (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every

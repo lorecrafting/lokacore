@@ -9,6 +9,11 @@ import type { Diagnostic } from '../contracts.gen.ts';
 import { asideParts, diag, nodes, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
+const titledDetail = (c: Obj) =>
+  Object.values((c.rooms ?? {}) as Obj).some((r) =>
+    Object.values((r.details ?? {}) as Obj).some((d) => d.title),
+  );
+
 export function variants(c: Obj): Diagnostic[] {
   const item = (e: Obj) => e.short_variants || e.description_variants;
   const leaves = nodes(c).map(([p]) => p);
@@ -19,9 +24,7 @@ export function variants(c: Obj): Diagnostic[] {
   const furnish = leaves.some((p) => p.op === 'item_present');
   const remarks = Object.values((c.npcs ?? {}) as Obj).some((n) => n.asides);
   const words = [c.npcs, c.items].some((m) => Object.values((m ?? {}) as Obj).some((e) => e.words));
-  const titled = Object.values((c.rooms ?? {}) as Obj).some((r) =>
-    Object.values((r.details ?? {}) as Obj).some((d) => d.title),
-  );
+  const titled = titledDetail(c);
   const used =
     titled ||
     words ||
@@ -33,23 +36,19 @@ export function variants(c: Obj): Diagnostic[] {
     Object.values((c.items ?? {}) as Obj).some(item) ||
     leaves.some((p) => p.op === 'status_active' || p.op === 'npc_present');
   const reader = leaves.some((p) => p.op === 'status_active' && p.subject !== 'target');
-  const floor = titled
-    ? '1.120'
-    : words
-      ? '1.118'
-      : remarks
-        ? '1.107'
-        : furnish
-          ? '1.102'
-          : c.world?.identity
-            ? '1.97'
-            : voices
-              ? '1.91'
-              : relative
-                ? '1.87'
-                : reader
-                  ? '1.53'
-                  : '1.46';
+  const floor =
+    (
+      [
+        [titled, '1.120'],
+        [words, '1.118'],
+        [remarks, '1.107'],
+        [furnish, '1.102'],
+        [c.world?.identity, '1.97'],
+        [voices, '1.91'],
+        [relative, '1.87'],
+        [reader, '1.53'],
+      ] as const
+    ).find(([on]) => on)?.[1] ?? '1.46';
   return used && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
