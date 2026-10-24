@@ -38,3 +38,17 @@
 Not findings: lux on an already-lit lantern spends ash (pre-existing unaimed behaviour); known-open loka-x6t.109.6-.9.
 
 Verdict: CHANGES REQUIRED.
+
+## Fix re-check: `5a6c6f4b030d7debe6eeb7a76857dd88a37dd5bf` (commits ebf5be65e, 8260a59d1, 5a6c6f4b0)
+
+Reviewed only the three fix commits, the code they touch and its direct callers.
+
+1. blocker → fixed. `protocol/fixtures/invalid.json` drops the two stale RecipeStep cases; `test/loka/content_lint_test.exs:294` pins `recipes/lux.json lamp`; `toolbox_showcase.walk.ts:100-101,183,207-208` pick through `Use on…` / the lux row and no longer `putAway()`; `ActionCard` sets `aria-expanded` (`use_on.test.ts:161` follows); the `PickLists` doc comment now sits on the export (catalogue row resolves). `lux.json` gains `reason.lux`; new showcase sha `f9ca0707…` in 15 fixture/transcript/.sql files, zero old. Focused runs green: mobile 19/19, kernel 35/35, Elixir 18/18 (`validate`, `aimed_spells`, `showcase_magic`, `pick`, `use_on`, `cast_pick`, `cast_death`, `reading`, `content_lint`, `content_spell_effects`, `contracts`). Hosted `ci` and `book-e2e` on the fix head were still in progress at the time of this re-check; the PM watches them.
+2. should-fix → fixed. `received.ts:48` allowance gone; the fight-cast flag moved to `routedLines` (`received.ts:88-95`), same `closing(...)` call.
+3. should-fix → fixed. `actions.tsx:82-95` `useFocus`: `sent` remembers the pressed option; on the next view, if `picks()` no longer lists it, `focusTitle(title.last)` (`title.ts:9-12,18-22`). Covered by stories `AnswerEmptiesList` / `AnswerKeepsOption` (`PickList.stories.tsx:117-134`), which run in the hosted Storybook smoke, not locally. Question, not a finding: the effect keys on `[view]`, so an unrelated view redraw between press and answer would clear `sent` early and leave focus on the body; not reproduced.
+4. should-fix → deferred by PM ruling: Back is unbuilt Book-wide; spec gets a one-line note pointing at loka-x6t.113, added by the PM with this record.
+5. nit → fixed (`book-ui.md:419` "PM approved as built 2026-10-23").
+6. nit → fixed. `mobile-book-labels.yml:36` lists `Cast a spell…|Cast on…`; red control: a planted `tap('Leave')` in `mobile/app/book` is flagged (1 hit). The test and story literals cited earlier sit outside the rule's `files` scope by design.
+7. nit → fixed (PR body line 9 reports `/code-review medium`, low for content).
+
+Verdict: APPROVE WITH NOTES.
