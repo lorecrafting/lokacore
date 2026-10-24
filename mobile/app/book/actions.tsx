@@ -54,9 +54,10 @@ export function ActionCard(
       }}
     >
       <Text style={prose(c, t)}>
-        {label}
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
-        {'b' in p && p.note && <Text style={note(c, t)}>{`\n${p.note}`}</Text>}
+        {'b' in p && p.note
+          ? [label, <Text key="note" style={note(c, t)}>{`\n${p.note}`}</Text>]
+          : label}
       </Text>
     </Pressable>
   );

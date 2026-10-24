@@ -145,7 +145,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
   await tap('Hide');
   await moves('east', 'north');
   await tap(/^(?:the )?merchant, open$/i);
-  await take(/^The merchant's purse, open/, /^Lift$/);
+  await take(/^(?:the )?merchant's purse, open/i, /^Lift$/);
   await moves('south', 'west');
   await npc(/^(?:the )?fence, open$/i, /^Sell the merchant's purse/);
   await moves('east', 'east');
@@ -157,7 +157,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
   await tap(/^Open the strongroom door/);
   await tap('Go south');
   await take(/^(?:a )?strongroom chest, open$/i, /^Put a tallow candle/);
-  await take(/^A tallow candle, open/, /^Take a tallow candle/);
+  await take(/^(?:a )?tallow candle, open/i, /^Take a tallow candle/);
   await settle();
 };
 
@@ -215,7 +215,7 @@ const magic = async (r: Walk, steps: Steps) => {
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await moves('down');
   const flamma = async () => {
-    await tap(/^A wight, open$/);
+    await tap(/^(?:an? )?wight, open$/i);
     await tap(LABEL.castASpell); // the aimed spell's Pick list on the wight's page (loka-x6t.109)
     await tap(/^Flamma, cast flamma on/);
   };
