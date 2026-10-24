@@ -94,7 +94,7 @@ Sealed holders (no exits, never entered) hold the yields: `woodpile` (8 `log`s),
 |---|---|---|
 | `holding_lane` (sign) | east `fell_gate`, west `carpenter_shop`, south `farm_yard`, up `holding_croft`; **site** `{directions: [north], blueprints: [hut_plain, hut_timbered]}` (`craft_sampler/rooms/lane.json`) | detail `sign_homestead`; detail `plot_stakes` (rating 1; the raise recipe's target) |
 | `carpenter_shop` | east `holding_lane` | **the carpenter**; detail `saw_bench` (rating 1); `axe`; `cot` (tag `bed`, 1500 g: the axe, cot, rug and sticks fit the 5000 g carry); `rug` (tag `rug`); 2 `stick`s |
-| `farm_yard` | north `holding_lane`, west `glade`, east `pond`, south `farm_kitchen` | **the farmer**; `plot` (container, 20000 g, `immune: [growing]`, `locks {get, put}` on `owns_plot`, description variants on `time_since sown_at` 3600 and 64800 and on `withered`; `farm_sampler/items/plot.json`); `sack` (holds `seed_01`); `watering_can` (vessel, water 4); `holding_apple`; `dead_rat` |
+| `farm_yard` | north `holding_lane`, west `glade`, east `pond`, south `farm_kitchen` | **the farmer**; `plot` (container, 20000 g, `immune: [growing]`, `locks {get, put}` on `owns_plot`, description variants on `time_since sown_at` 3600 and 64800 and on `withered`; `farm_sampler/items/plot.json`); `sack` (tie, starts closed; holds `seed_01`); `watering_can` (vessel, water 4); `holding_apple`; `dead_rat` |
 | `glade` | east `farm_yard` | detail `oak` (rating 1; `chop`); 3 `pelt`s on the frame |
 | `pond` | west `farm_yard` | detail `pond_water` (tag `water`); `rod` (tags `rod`, `wooden`) |
 | `farm_kitchen` | north `farm_yard` | **the cook**; detail `hearth` (rating 1 for `cook_stew`, 2 for `cook_feast`) |

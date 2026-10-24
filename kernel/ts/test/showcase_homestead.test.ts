@@ -524,10 +524,11 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
 const put = (w: World, k: string, c: string) =>
   act(w, { type: 'put', item_id: id(w, 'item', k), container_id: id(w, 'item', c) });
 const yard = () => walk(fresh(WORLD), 'north', 'west', 'south');
+const untie = (w: World) => play(w, { type: 'open', target_id: id(w, 'item', 'sack') }).world;
 /** A fresh yard at `clock` with the plot bought and the seed (and can) held. */
 const sowable = (clock: number) =>
   wait(
-    take(take(play(yard(), farmer(yard(), 'buy_plot', 3)).world, 'seed_01'), 'watering_can'),
+    take(take(untie(play(yard(), farmer(yard(), 'buy_plot', 3)).world), 'seed_01'), 'watering_can'),
     clock,
   ).world;
 const sown = sowable(28800);
@@ -548,11 +549,44 @@ const croftTouched = (w: World) =>
     (k) => where(w, id(w, 'item', k)) === id(w, 'item', 'croft_plot'),
   );
 
+// Breaks: the sack losing its tie (seed visible or takeable while closed), a keyless tie listing
+// Unlock, Put skipping the lid, the open state not persisting across rooms.
+test('homestead sandbox: the seed sack starts tied, opens once, stays open and refuses behind its tie', () => {
+  const sack = (x: World) =>
+    gameView(valid(x)).entities.find((e) => e.id === id(x, 'item', 'sack'))!;
+  const keys = (x: World) => sack(x).actions.map((a) => a.action_key);
+  const closed = yard();
+  assert.equal(sack(closed).state, 'closed');
+  assert.equal(sack(closed).contents, undefined);
+  assert.ok(keys(closed).includes('open') && !keys(closed).includes('unlock'));
+  assert.equal(
+    refused(closed, { type: 'take', item_id: id(closed, 'item', 'seed_01') }),
+    'not_present',
+  );
+  const held = take(closed, 'holding_apple');
+  assert.equal(
+    refused(held, {
+      type: 'put',
+      item_id: id(held, 'item', 'holding_apple'),
+      container_id: id(held, 'item', 'sack'),
+    }),
+    'exit_closed',
+  );
+  const open = walk(untie(closed), 'north', 'south');
+  assert.equal(sack(open).state, 'open');
+  assert.deepEqual(
+    sack(open).contents?.map((c) => [c.id, c.container_id]),
+    [[id(open, 'item', 'seed_01'), id(open, 'item', 'sack')]],
+  );
+  assert.ok(keys(open).includes('close'));
+  assert.equal(refused(open, { type: 'take', item_id: id(open, 'item', 'sack') }), 'too_heavy');
+});
+
 // Breaks: the plot lock, the sow rule (status, stamp, spent seed), the description thresholds,
 // the water midpoint (43200 is late), the seed return, the cure on resowing, the winter guard,
 // a seed given away (sow would start the plot's clock on the farmer).
 test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harvest', () => {
-  const seed = take(yard(), 'seed_01');
+  const seed = take(untie(yard()), 'seed_01');
   const gift = {
     type: 'give',
     item_id: id(seed, 'item', 'seed_01'),
@@ -560,7 +594,7 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   };
   assert.equal(refused(seed, gift), 'invalid_state');
   assert.equal(
-    refused(take(yard(), 'seed_01'), {
+    refused(take(untie(yard()), 'seed_01'), {
       type: 'put',
       item_id: id(sown, 'item', 'seed_01'),
       container_id: plot(sown),
@@ -672,7 +706,7 @@ test('homestead sandbox: the croft plot is locked, ripens when watered early, wi
     ['turnip_01', 'turnip_02', 'turnip_03'].filter(
       (k) => where(x, id(x, 'item', k)) === id(x, 'item', 'croft_plot'),
     );
-  const tenant = walk(take(yard(), 'seed_01'), 'north', 'up');
+  const tenant = walk(take(untie(yard()), 'seed_01'), 'north', 'up');
   const sowing = {
     type: 'put',
     item_id: id(tenant, 'item', 'seed_01'),

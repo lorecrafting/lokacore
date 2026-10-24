@@ -707,7 +707,20 @@
     },
     "description": "item.sack.description",
     "kind": "item",
+    "state": "closed",
     "actions": [
+     {
+      "available": true,
+      "action_key": "open",
+      "label": "action.open",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": []
+     },
      {
       "available": false,
       "action_key": "take",
@@ -722,33 +735,6 @@
       "reason": {
        "code": "too_heavy"
       }
-     }
-    ],
-    "contents": [
-     {
-      "id": "ec6a2b0d-b917-8425-8cac-63c888eed0aa",
-      "name": "item.seed_01.short",
-      "words": {
-       "article": "a",
-       "bare": "item.seed_01.bare"
-      },
-      "description": "item.seed_01.description",
-      "kind": "item",
-      "actions": [
-       {
-        "available": true,
-        "action_key": "take",
-        "label": "action.take",
-        "target": {
-         "kind": "entity",
-         "scopes": [
-          "room_contents"
-         ]
-        },
-        "input": []
-       }
-      ],
-      "container_id": "331fb134-17eb-866f-a2fa-57583b9ac017"
      }
     ]
    },
