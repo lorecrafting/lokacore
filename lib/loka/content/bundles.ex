@@ -2,9 +2,10 @@ defmodule Loka.Content.Bundles do
   @moduledoc """
   Area bundles: `areas/<name>.json` holds `{"<dir>": {"<key>": definition without key}}` for
   any definition directory (docs/system/cartridge.md, Source shortcuts). `split/2` opens them
-  into definition entries at steps `[dir, key]`; `unique/1`, run before `extends` is flattened,
-  refuses two definitions of one kind and key (Extends indexes one per kind and key). Both return faults; Source builds the
-  diagnostics, so this module never calls Source (a call either way is an xref cycle).
+  into definition entries at steps `[dir, key]`; `unique/1`, run before `extends` is flattened
+  (Extends indexes one per kind and key), refuses two definitions of one kind and key. Both
+  return faults; Source builds the diagnostics, so this module never calls Source (a call
+  either way is an xref cycle).
   """
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
