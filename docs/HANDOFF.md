@@ -60,6 +60,11 @@ PLease set things up so that its easy for me to do my ui polish there".
      after_merge; one designer pass at batch end. Brief rulings appended: shared words table, combat in the room log,
      "You go north.", display table (in place / log / quiet), quiet own buy/sell and container take/put, compacted room
      log lines, quiet still announced. Later: x6t.130 verbose/brief setting.
+  3. Authoring batch A (owner go 2026-10-24, queued for the weekly reset ~Wed 2026-10-28; usage was 95%): start after
+     #475 merges. Order loka-kgd.194.12, .13, .14 (diagnostics at the author's line), .16 behaviours, .18 prototype
+     parameters, .17 source JSON Schema last (covers .16/.18), .9 showcase walk transcripts. One draft branch; Opus
+     developer and reviewer; PM decides whether .17 is a Fable contract brief. Purpose: groundwork for the visual
+     builder (.8), which follows this batch and the owner's paper prologue plan. Not in it: .15 .11 .19 .20; .7 waits on lore.
 - Owner rules set tonight (repo now states them): room page anatomy
   (docs/decisions/owner-decision-room-page-anatomy-2026-10-23.md); interaction patterns doc is the pattern layer UI
   briefs cite; brief models: Opus default, Fable for save/protocol/contract briefs under ~80% weekly usage, never Sonnet.
