@@ -29,12 +29,12 @@
 - `notice_boards.ts:35` (two `actions(id)` calls): nit, pure and cheap.
 - `cartridge_variants.ts` truthiness vs Elixir `is_map_key`: dismissed. TextKey's pattern `^[a-z][a-z0-9_.]*$` (`protocol/text.schema.json:9`) forbids an empty title. The Elixir `{_, {_, [], r}}` pattern is the file-root path, used the same way in `remarks?`.
 - `notices.tsx:86` (an unavailable readable treated as a fixture): dismissed. `reads()` does not filter on `available`, so a listed but refused Read still counts as a readable; only an unlisted Read falls through to the fixture path.
-- Floors guard TS-only: dismissed. 1.120 is in both ladders and `Loka.LoaderFloorsTest` covers the Elixir side once finding 1 is fixed. The invariant is TypeScript by design, because GameView is TypeScript.
+- Floors guard TS-only: dismissed. 1.120 is in both ladders and `Loka.LoaderFloorsTest` covers the Elixir side (shown by the restricted run under Verified). The invariant is TypeScript by design, because GameView is TypeScript.
 
 ## Verified
 
 - sim.ts:271 is a false alarm. `view` (`sim.ts:224`, `gameView(before)`) and the offer maps (`resolved(before, ...)`) both read the world before the step.
 - Bed/transport fix: mutants killed. Dropping `...recipes` beside the ride fails `transport.test.ts` "keeps its card beside the ride"; dropping it beside the bed fails `fixture_pages.test.ts` "bed detail keeps its card".
 - Mutant on the page condition: dropping `!a.command ||` at `notice_boards.ts:35` fails 4 tests in `fixture_pages.test.ts`.
-- Mutants on the title floor, in the Elixir ladder and the TS ladder: invalid. Both suites were already red at base (finding 1).
+- Title floor, with the loop restricted to the 1.120 case in a throwaway edit: green at base in both kernels. Removing `titled` from the ladder turns `Loka.LoaderFloorsTest` and `loader_floors.test.ts` red. The floor is guarded in both kernels once finding 1 lets the loop reach that case. The unrestricted mutant runs were invalid, because the suite was red at base.
 - Save impact: none, as claimed. `detailTitle` falls back by `??`, so a cartridge without titles is unchanged. The size allowances (`sim.test.ts` 579, `sim.ts` 561) each give their reason. `put` was pinned under loka-kgd.185 (cap 13) per the PM ruling.
