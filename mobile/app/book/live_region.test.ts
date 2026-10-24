@@ -1,7 +1,11 @@
 // Book live region (loka-x6t.43): a screen reader hears each new batch of World, combat and refused
 // lines once, politely, and never the history a page or a reopen draws again.
 import assert from 'node:assert/strict';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { game, view } from './__tests__/combat-book.test.ts';
@@ -74,13 +78,23 @@ test('each batch holds only the lines new since the last screen', () => {
 });
 
 // Breaks (loka-x6t.124): an own buy merged into "(2 times)" adds no log line, so the second buy on
-// the chandler's page is never read; quiet is visual only.
+// the chandler's page is never read; quiet is visual only. The showcase's two tallow candles have
+// their own shorts, so they never merge; this copy gives both the same one.
 test('two equal buys on a shop page are each read in full', () => {
-  const b = book(showcase as never);
+  const dir = mkdtempSync(join(tmpdir(), 'loka-shared-short-'));
+  const item = join(dir, 'items/candle_02.json');
+  cpSync(fileURLToPath(new URL('../../../cartridges/toolbox_showcase', import.meta.url)), dir, {
+    recursive: true,
+  });
+  writeFileSync(item, readFileSync(item, 'utf8').replace('candle_02.short', 'candle_03.short'));
+  const b = book(compiled(dir) as never);
+  rmSync(dir, { recursive: true });
   for (const c of ['Go down', 'Go north']) (b.map(), b.tap(c));
   for (const c of ['chandler, open', LABEL.trade]) b.tap(c);
-  for (let i = 0; i < 2; i++) {
+  const batches = [0, 1].map(() => {
     b.tap(/^Tallow candle — /);
-    assert.deepEqual(live(b), ['polite', 'You buy a tallow candle.'], String(i));
-  }
+    assert.deepEqual(live(b), ['polite', 'You buy a tallow candle.']);
+    return b.draw().find((n) => n.type?.name === 'Heard')!.props.said.key;
+  });
+  assert.notEqual(batches[0], batches[1], 'the second buy is a new batch, so it is read again');
 });
