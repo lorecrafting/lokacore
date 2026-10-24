@@ -1,0 +1,106 @@
+// A fixture the room description links opens its page (book-ui.md fixture rule, Notice-board
+// details; loka-x6t.120). Hand view: the hearth with a Gather ash offer and no Read.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { nodes, words } from './__tests__/polish-book.test.ts';
+import { buttonsOf } from './buttons.ts';
+import { intentOf } from './model.ts';
+
+const TEXT: Record<string, string> = {
+  'room.loft.title': 'Loft',
+  'room.loft.description': 'A low loft. A [hearth](hearth) smokes in the corner.',
+  'detail.hearth.title': 'The hearth',
+  'detail.hearth.description': 'A cold hearth, grey with ash.',
+  'actions.gather_ash': 'Gather ash',
+};
+const text = (key: string) => TEXT[key] ?? key;
+
+const draw = async (offer: object = {}) => {
+  const { RoomPage } = await import('./pages.tsx');
+  const { NoticeEntries, NoticePage, proseLinks } = await import('./notices.tsx');
+  const view = {
+    place: { title: { key: 'room.loft.title' }, description: { key: 'room.loft.description' } },
+    exits: [],
+    entities: [],
+    inventory: [],
+    actions: [],
+    notices: [
+      {
+        id: 'n1',
+        key: 'hearth',
+        title: 'detail.hearth.title',
+        description: 'detail.hearth.description',
+        actions: [
+          {
+            action_key: 'gather_ash',
+            label: 'actions.gather_ash',
+            target: { kind: 'none' },
+            input: [],
+            available: true,
+            ...offer,
+          },
+        ],
+      },
+    ],
+  } as any;
+  const done: unknown[] = [];
+  const p = {
+    screen: {
+      view,
+      text,
+      label: text,
+      buttons: buttonsOf(view, text, text),
+      detail: () => [],
+    },
+    open: (page: unknown) => done.push(page),
+    press: (b: any) => {
+      const { action_key, target_ids, input } = intentOf(b);
+      done.push({ action_key, target_ids, input });
+    },
+    world: () => done.push('world'),
+  } as any;
+  const room = nodes(
+    RoomPage({
+      view,
+      text,
+      log: [],
+      g: { place: [], door: () => [] },
+      press: () => {},
+      open: () => {},
+      openChoice: () => {},
+      details: NoticeEntries(p),
+      links: proseLinks(p),
+    } as any),
+  );
+  const page = nodes(NoticePage({ ...p, page: { kind: 'notice', id: 'n1' } }));
+  return { room, page, done };
+};
+
+// Breaks: the link presses the fixture's first offer (it sent gather_ash on tap), the prose does
+// not link the fixture, or its page card does not send the offer or leaves the page.
+test('a linked fixture opens its page on tap and its card sends the offer', async () => {
+  const { room, page, done } = await draw();
+  const link = room.find((n) => n.props?.accessibilityLabel === 'hearth, open');
+  assert.ok(link, 'no hearth link in the prose');
+  link.props.onKeyDown({ key: 'Enter', preventDefault: () => {} });
+  assert.deepEqual(done, [{ kind: 'notice', id: 'n1' }]);
+  const shown = page.filter((n) => n.type === 'Text').map(words);
+  assert.ok(shown.includes('The hearth') && shown.includes('A cold hearth, grey with ash.'));
+  page.find((n) => n.props?.accessibilityLabel === 'Gather ash').props.onPress();
+  assert.deepEqual(done.slice(1), [{ action_key: 'gather_ash', target_ids: [], input: {} }]);
+});
+
+// Break: a refused offer on the page draws as a pressable card, or is dropped with its reason.
+test('a refused fixture offer draws its reason on the page, not a card', async () => {
+  const { page } = await draw({ available: false, reason: { code: 'insufficient_resource' } });
+  assert.equal(
+    page.some((n) => n.props?.accessibilityLabel === 'Gather ash'),
+    false,
+  );
+  assert.ok(
+    page
+      .filter((n) => n.type === 'Text')
+      .map(words)
+      .some((t) => t.startsWith('Gather ash: ')),
+  );
+});

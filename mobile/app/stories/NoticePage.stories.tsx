@@ -17,6 +17,32 @@ export const NoticeWithRead: StoryObj = {
   name: 'Notice with Read',
 };
 
+// A fixture the prose links: its page shows its offered cards (hand view on the inn; loka-x6t.120).
+const hearth = {
+  id: 'hearth',
+  key: 'hearth',
+  title: 'detail.hearth.title',
+  description: 'detail.hearth.description',
+  actions: [
+    {
+      action_key: 'gather_ash',
+      label: 'actions.gather_ash',
+      target: { kind: 'none' },
+      input: [],
+      available: true,
+    },
+  ],
+};
+export const FixtureWithCards: StoryObj = {
+  ...pageStory({
+    ...NoticeReadView,
+    view: { ...NoticeReadView.view, notices: [hearth] },
+    stack: [{ kind: 'notice', id: 'hearth' }],
+  }),
+  args: { words: { 'detail.hearth.title': 'The hearth' } },
+  name: 'Fixture with cards',
+};
+
 // The showcase authors no dream, so the resume control takes a synthetic notice.
 // Breaks: an available dream shows no Resume control, or an acknowledged one still offers it.
 const notice = (dream: object) => ({ id: 'n', dream }) as never;

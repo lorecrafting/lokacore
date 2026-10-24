@@ -51,7 +51,7 @@ immovable room content: it cannot be taken, dropped, stored or otherwise removed
 from the room. A removable object is a loose item in the item group instead.
 The link opens a detail only when the current GameView supplies a visible,
 current-room identity and detail route (a notice whose `key` is the
-link's target, with its captured Read offer). The Book does not infer visibility, identity,
+link's target); the link opens that detail's page, and a readable one also invokes its captured Read (Notice-board details). The Book does not infer visibility, identity,
 detail or an action from bracketed prose alone. If that projection is absent,
 the words remain ordinary prose until a mechanic adds the required projection
 and admission contract. A readable detail the selected description links, whose
@@ -262,7 +262,7 @@ foot. A control that opens a child (Resume dream, Continue conversation) stays i
 
 ## Notice-board details
 
-Every readable notice opens its own detail page. A standalone notice opens from its prose link, or from its World line when the selected description does not link it, and invokes its captured Read offer. Its Leave
+Every projected detail opens its own page from its prose link; a readable one invokes its captured Read on entry, a plain fixture shows its description and its offered cards. Every readable notice opens its own detail page. A standalone notice opens from its prose link, or from its World line when the selected description does not link it, and invokes its captured Read offer. Its Leave
 option returns to World. Its page title is an authored noun distinct from the action label.
 Read text never enters the room event log.
 

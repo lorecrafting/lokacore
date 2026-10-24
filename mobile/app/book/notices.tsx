@@ -42,8 +42,9 @@ export function restoredNoticePages(screen: Screen): Route[] {
     : [];
 }
 
-function noticeOffer(view: GameView, id: string) {
-  const offers = view.actions.filter(
+// A readable's captured Read: the world offer aimed at the detail alone.
+const reads = (view: GameView, id: string) =>
+  view.actions.filter(
     (a) =>
       a.target.kind === 'entity' &&
       a.target.scopes.includes('inspectable_details') &&
@@ -51,6 +52,9 @@ function noticeOffer(view: GameView, id: string) {
       a.target_ids?.length === 1 &&
       a.target_ids[0] === id,
   );
+
+function noticeOffer(view: GameView, id: string) {
+  const offers = reads(view, id);
   const contextual = offers.length
     ? offers
     : (view.notices?.find((n) => n.id === id)?.actions ?? []);
@@ -75,16 +79,19 @@ const read = (p: Props, id: string, b: Button) => () => {
   p.press(b, id);
 };
 
-// The readable notices the room description links, by key, each to its read press (book-ui.md
-// fixture rule); they draw in the prose and not as World lines.
+// The notices the room description links, by key (book-ui.md fixture rule); they draw in the prose
+// and not as World lines. A readable's link opens its page and reads; a fixture's only opens it.
 export function proseLinks(p: Props): Map<string, () => void> {
   const targets = [...p.screen.text(p.screen.view.place.description.key).matchAll(LINK)].map(
     (m) => m[2],
   );
   return new Map(
     (p.screen.view.notices ?? []).flatMap((n) => {
+      if (kept(n) || !targets.includes(n.key)) return [];
+      if (!reads(p.screen.view, n.id).length)
+        return [[n.key, () => p.open({ kind: 'notice', id: n.id })] as const];
       const b = control(p.screen, n.id);
-      return b && !kept(n) && targets.includes(n.key) ? [[n.key, read(p, n.id, b)] as const] : [];
+      return b ? [[n.key, read(p, n.id, b)] as const] : [];
     }),
   );
 }
