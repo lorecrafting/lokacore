@@ -81,6 +81,12 @@ defmodule Loka.ContentSignalZoneTest do
            ]
 
     assert refused(@sugar, [
+             {"reactions/ring.json", &put_in(&1, ["apply", Access.at(0), "fact"], "heard")}
+           ]) == [
+             {"SCHEMA_VIOLATION", "reactions/ring.apply[0].op", %{"error" => "unknown_variant"}}
+           ]
+
+    assert refused(@sugar, [
              {"reactions/ring.json", &put_in(&1, ["apply", Access.at(0), "signal"], "Bell!")}
            ]) == [
              {"SCHEMA_VIOLATION", "reactions/ring.apply[0].op", %{"error" => "unknown_variant"}},
