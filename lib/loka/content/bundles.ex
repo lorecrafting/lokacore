@@ -2,8 +2,8 @@ defmodule Loka.Content.Bundles do
   @moduledoc """
   Area bundles: `areas/<name>.json` holds `{"<dir>": {"<key>": definition without key}}` for
   any definition directory (docs/system/cartridge.md, Source shortcuts). `split/1` opens them
-  into definition entries at steps `[dir, key]`; `unique/1`, the last source stage, refuses two
-  definitions of one kind and key.
+  into definition entries at steps `[dir, key]`; `unique/1`, run before `extends` is flattened,
+  refuses two definitions of one kind and key.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, dirs: 0]
 

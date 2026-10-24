@@ -54,9 +54,10 @@ defmodule Loka.Content.Source do
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
-    {files, diags} = dir |> read() |> Bundles.split()
+    # Repeats go before extends, which indexes one definition per kind and key.
+    {files, diags} = dir |> read() |> Bundles.split() |> Bundles.unique()
     {files, faults} = Extends.flatten(files)
-    Bundles.unique({files, diags ++ Enum.map(faults, &extends_diag/1)})
+    {files, diags ++ Enum.map(faults, &extends_diag/1)}
   end
 
   defp read(dir) do
@@ -223,7 +224,7 @@ defmodule Loka.Content.Source do
   Diagnostics for `Loka.Core.Contracts.validate/2` errors on `value`, which sits at `steps`
   of `rel`: unknown_property is UNKNOWN_FIELD, any other code SCHEMA_VIOLATION.
   """
-  @spec schema(String.t(), steps(), term(), [map()]) :: [map()]
+  @spec schema(location(), steps(), term(), [map()]) :: [map()]
   def schema(rel, steps, value, errors) do
     for %{path: pointer, code: code} <- errors do
       path = at(rel, steps ++ pointer_steps(value, pointer))

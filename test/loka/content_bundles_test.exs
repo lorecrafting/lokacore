@@ -12,7 +12,8 @@ defmodule Loka.ContentBundlesTest do
   end
 
   # Breaks: a bundle that is not an object, or a bundle member that is not a definition directory, or not an object, is dropped
-  # silently; a bundled definition that repeats a plain file wins or loses without a word.
+  # silently; a bundled definition that repeats a plain file wins or loses without a word, or an
+  # abstract repeat removes both copies before the repeat is refused (extends ran first).
   test "a bundle refuses a non-object bundle, an unknown member, a non-object member and a repeated definition" do
     assert refused([{@bundle, &Map.put(&1, "widgets", %{})}]) ==
              [{"UNKNOWN_FIELD", "areas/village.widgets", %{}}]
@@ -27,7 +28,11 @@ defmodule Loka.ContentBundlesTest do
 
     lane = fn dir -> JSON.decode!(File.read!(Path.join(dir, @bundle)))["rooms"]["lane"] end
     dir = Loka.ContentSource.copy("cartridges/speech_sampler")
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"rooms/lane.json", lane.(dir)}])
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [
+               {"rooms/lane.json", Map.put(lane.(dir), "abstract", true)}
+             ])
 
     assert Enum.sort(pairs(diags)) == [
              {"DUPLICATE_DEFINITION", "areas/village.rooms.lane", %{}},
