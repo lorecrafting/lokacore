@@ -163,16 +163,29 @@ test('one buy at each of two shops survives cold reopen', (t) => {
   coldReopen(path, basketShop.bundle);
 });
 
+// Breaks: a buy saved on main ([{ key: shop.bought }]) or one whose item short changed since (a
+// variant) is save_corrupt on reopen, because the check rebuilds the line.
+test('a main-era receipt key and a stale item short reopen', (t) => {
+  const path = join(scratchDir(t), 'legacy.db');
+  const truth = basketShop.play(path, twoBuys(basketShop));
+  basketShop.forge(path, 1, (_, response) => (response.narration = [{ key: 'shop.bought' }]));
+  basketShop.forge(
+    path,
+    2,
+    (_, response) => (response.narration[0].bindings.item = 'item.old.short'),
+  );
+  assert.deepEqual(basketShop.reopened(path), truth);
+});
+
 // Breaks: a receipt is checked only under a shop it does not name, so its narration is never bound
-// to that shop's bought line, or its line names another item or actor; or a receipt naming a provider that is not a shop, with no money ops
+// to that shop's bought line, or its line names another actor; or a receipt naming a provider that is not a shop, with no money ops
 // and penny rows that agree with that, is never bound to any shop (a free basket).
 test('a forged receipt at either shop, or naming no shop, is save_corrupt', (t) => {
   const { monger, fisher, fish, basket, initial, bundle, play, forge } = basketShop;
   const dir = scratchDir(t);
   const forgeries: [number, (command: any, response: any) => void][] = [
     [1, (_, response) => (response.narration = [{ key: 'shop.sold' }])],
-    [2, (_, response) => (response.narration = [{ key: 'shop.sold' }])],
-    [1, (_, response) => (response.narration[0].bindings.item = 'item.forged.short')],
+    [2, (_, response) => (response.narration[0].key = 'commerce.sold')],
     [2, (_, response) => (response.narration[0].participants.actor = fisher)],
   ];
   for (const [i, [n, change]] of forgeries.entries()) {

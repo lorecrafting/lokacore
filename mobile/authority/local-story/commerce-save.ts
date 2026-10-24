@@ -1,4 +1,4 @@
-// Reconcile conserved penny receipts and shelf custody at each original commit.
+// size: allow 308, reconciles conserved penny receipts and shelf custody at each original commit; main-era receipt keys
 import type {
   Command,
   DecisionResult,
@@ -9,7 +9,6 @@ import type {
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
-import { actorLine } from '../../../kernel/ts/src/mechanics/line.ts';
 import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 import { acquiredOnce } from './shop-event.ts';
@@ -129,6 +128,14 @@ function receipts(world: World, db: Db, meta: Meta, revision: number) {
   });
 }
 
+// A main-era receipt holds the shop's own key; never rebuild the short (a variant changes it).
+const said = (l: Accepted['narration'], old: string, key: string, actor: EntityId) =>
+  same(l, [{ key: old }]) ||
+  same(
+    l?.map((x) => [x.key, x.participants ?? null]),
+    [[key, { actor }]],
+  );
+
 // Opted Buy quotes and stock offers (row W11) are already recomputed at their original revision by
 // receiptHistory, so only the shape of a stock offer's move is checked here.
 function shopReceipt(
@@ -141,6 +148,7 @@ function shopReceipt(
 ) {
   const p = command.payload;
   if (p.type !== 'buy' && p.type !== 'sell') invalid();
+  const outcome = p.type === 'buy' ? 'bought' : 'sold';
   const offer = shop.offers.find((o) => world.entityIds[refString(o.item)] === p.item_id);
   const source = p.type === 'buy' ? provider : world.body,
     destination = p.type === 'buy' ? world.body : provider;
@@ -160,8 +168,8 @@ function shopReceipt(
       source_id: source,
       destination_id: destination,
     }) ||
-    d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
-    !same(d.narration, [actorLine(world, world.character, SAID[p.type], { item: moved }, { n: 0 })])
+    d.outcome !== outcome ||
+    !said(d.narration, shop[outcome], SAID[p.type], world.body)
   )
     invalid();
   if (!acquiredOnce(world, command, d, moved, destination)) invalid();

@@ -72,3 +72,15 @@ test('each batch holds only the lines new since the last screen', () => {
   s.log.push('The yard is wet.', { text: 'A crow lands.', event: true });
   assert.equal(said().text, 'The yard is wet. A crow lands.');
 });
+
+// Breaks (loka-x6t.124): an own buy merged into "(2 times)" adds no log line, so the second buy on
+// the chandler's page is never read; quiet is visual only.
+test('two equal buys on a shop page are each read in full', () => {
+  const b = book(showcase as never);
+  for (const c of ['Go down', 'Go north']) (b.map(), b.tap(c));
+  for (const c of ['chandler, open', LABEL.trade]) b.tap(c);
+  for (let i = 0; i < 2; i++) {
+    b.tap(/^Tallow candle — /);
+    assert.deepEqual(live(b), ['polite', 'You buy a tallow candle.'], String(i));
+  }
+});

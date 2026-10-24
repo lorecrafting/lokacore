@@ -91,9 +91,7 @@ export function exchange(
   const full = room(world, destination, steps);
   if (full) return full;
   const paid = transfer(world, destination, source, npc.shop.resource, price);
-  return paid
-    ? { body, source, destination, paid, shop: npc.shop, moved }
-    : ('insufficient_resource' as const);
+  return paid ? { body, source, destination, paid, moved } : ('insufficient_resource' as const);
 }
 
 export function shelf(
