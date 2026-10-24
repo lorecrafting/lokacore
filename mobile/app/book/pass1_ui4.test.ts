@@ -121,7 +121,7 @@ test('detail options: act on it, then move it, then store it', async () => {
     entities: [
       ...v.entities,
       thing('coin', []),
-      thing('corpse', [action('put'), action('take')]),
+      thing('corpse', [action('put', { target_ids: [ID.coin, ID.corpse] }), action('take')]),
       thing('book', [action('take'), action('read')]),
     ],
   } as GameView;
@@ -138,6 +138,23 @@ test('detail options: act on it, then move it, then store it', async () => {
     order.map((b) => b.action_key),
     ['read', 'give', 'use_service', 'ask'],
   );
+});
+
+// Breaks: a refused two-target offer that is no use pair (a Put resting, cooldown) is let through
+// as a use pair would be and draws as a pressable card on its container's page.
+test('a resting Put draws no card', async () => {
+  const v = nellView();
+  const resting = {
+    available: false,
+    reason: { code: 'cooldown' },
+    target_ids: [ID.coin, ID.corpse],
+  };
+  const view = {
+    ...v,
+    entities: [...v.entities, thing('coin', []), thing('corpse', [action('put', resting)])],
+  } as GameView;
+  const corpse = await page(view, ID.corpse);
+  assert.ok(!corpse.some((l) => l.startsWith('Put')), JSON.stringify(corpse));
 });
 
 // Breaks: "Nothing to do here." draws beside a "not yours" note (UH3), or no longer draws on a

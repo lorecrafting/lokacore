@@ -81,24 +81,58 @@ test('the bucket offers Use on… with the cart and no per-pair card', () => {
   assert.ok(b.labels().includes('A cart, quench a cart'), b.labels().join(' | '));
 });
 
-// Breaks: a resting pair becomes a pressable row or loses its reason; Escape leaves the list open
-// or drops focus instead of returning it to the option.
-test('a resting pair is a `label: reason` row; Escape closes the list onto its option', () => {
-  const b = yard();
+/** The bucket's quench pair refused with `code` (a controlled view). */
+function refused(b: Book, code: 'cooldown' | 'invalid_state') {
   const real = b.game.view.bind(b.game);
   b.game.view = () => {
     const r = real();
     const inventory = r.view.inventory.map((e) => ({
       ...e,
       actions: e.actions.map((a) =>
-        a.action_key === 'quench'
-          ? { ...a, available: false, reason: { code: 'cooldown' as const } }
-          : a,
+        a.action_key === 'quench' ? { ...a, available: false, reason: { code } } : a,
       ),
     }));
     return { ...r, view: { ...r.view, inventory } } as never;
   };
   assert.deepEqual(validate('GameView', b.game.view().view), []);
+}
+
+// Breaks: a use pair refused for a reason other than cooldown still draws a row (and its option),
+// read as "not yet" (book-ui.md: any other refused use pair is no row).
+test('a pair refused for another reason draws no option on either page', () => {
+  const b = yard();
+  refused(b, 'invalid_state');
+  here(b, 'cart');
+  assert.ok(!b.labels().includes(LABEL.useAnItem), b.labels().join(' | '));
+  b.tap(LABEL.leave);
+  held(b, 'bucket');
+  assert.ok(!b.labels().includes(LABEL.useOn), b.labels().join(' | '));
+});
+
+// Breaks: an accepted pick whose receipt has no narration logs no line, or one without the
+// recipe's label and the pair's names (book-ui.md: the use pair's fallback line).
+test('a pick without narration logs the use line once', () => {
+  const b = yard();
+  const invoke = b.game.invoke.bind(b.game);
+  b.game.invoke = (i) => {
+    const r = invoke(i) as any;
+    return r.kind === 'saved' && r.decision.kind === 'accepted'
+      ? { ...r, decision: { ...r.decision, narration: [] } }
+      : r;
+  };
+  here(b, 'cart');
+  b.tap(LABEL.useAnItem);
+  b.tap('A bucket, quench a cart');
+  const line = 'You quench a cart with a bucket.';
+  assert.equal(b.p.screen().log.at(-1), line);
+  assert.equal(b.p.screen().log.filter((s: string) => s === line).length, 1);
+});
+
+// Breaks: a resting pair becomes a pressable row or loses its reason; Escape leaves the list open
+// or drops focus instead of returning it to the option.
+test('a resting pair is a `label: reason` row; Escape closes the list onto its option', () => {
+  const b = yard();
+  refused(b, 'cooldown');
   here(b, 'cart');
   const option = () => b.draw().find((n) => n.props.accessibilityLabel === LABEL.useAnItem);
   b.tap(LABEL.useAnItem);

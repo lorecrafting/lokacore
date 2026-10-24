@@ -40,16 +40,16 @@ function journalChanged(was: GameView, now: GameView, detail: string) {
   );
 }
 
+// Outcomes that send the reader back to World; an accepted Pick list row does too (book-ui.md,
+// Pick a second thing).
+const CHANGED = ['taken', 'dropped', 'given', 'eaten', 'bandaged'];
+
 export function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
   const attempt = s.retry!;
   const now = game.view().view;
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
-  // An accepted Pick list row goes back to World too (book-ui.md, Pick a second thing).
-  const itemChanged =
-    !!accepted &&
-    (!!attempt.button.pick ||
-      ['taken', 'dropped', 'given', 'eaten', 'bandaged'].includes(accepted.outcome));
+  const itemChanged = !!accepted && (!!attempt.button.pick || CHANGED.includes(accepted.outcome));
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
   const retained = retainedNarration(game, s, reply, accepted);

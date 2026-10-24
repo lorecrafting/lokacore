@@ -192,6 +192,9 @@ function placeButtons(v: GameView, button: ToButton) {
 }
 
 const JOIN: Record<string, string> = { refuel: 'from', pour: 'into' };
+// Two-target commands that are no use pair (kernel commands/invocation.ts TARGETS); Put keeps its card.
+// ponytail: an authored key aliasing one of these, with no projected command, reads as a use pair.
+const NOT_USE = ['fill', 'pour', 'refuel', 'put', 'buy', 'sell'];
 // The other object of a use pair (G4: [target, tool], on the tool) or a Give pair ([item, person]);
 // a use pair resting between uses (cooldown) stays a Pick list row (book-ui.md, Pick a second thing).
 const other = (
@@ -199,6 +202,7 @@ const other = (
   id: string,
 ) =>
   a.target_ids?.length === 2 &&
+  !NOT_USE.includes(commandOf(a)) &&
   (a.target_ids[1] === id ? a.target_ids[0] : commandOf(a) === 'give' && a.target_ids[1]);
 // A use or Give pair is a Pick list row on both its pages (pick.ts), its label the recipe's.
 const pickRows = (row: Press, available: boolean, ids: string[]) =>
@@ -219,7 +223,7 @@ function heldButtons(
     e.actions
       .filter(
         (a) =>
-          (a.available || (a.target_ids?.[1] === e.id && a.reason?.code === 'cooldown')) &&
+          (a.available || (!!other(a, e.id) && a.reason?.code === 'cooldown')) &&
           !['ask', 'whisper'].includes(a.action_key),
       ) // whisper is wordButtons, ask is askButtons
       // An unauthored Wear on a wield-slot item reads Wield (book-ui.md, Equipment and skills).
@@ -228,12 +232,7 @@ function heldButtons(
       )
       .flatMap((a) => {
         const two = other(a, e.id);
-        if (two)
-          return pickRows(
-            button(a, ''),
-            a.available,
-            [e.id, two].filter((id) => names.has(id)),
-          );
+        if (two) return pickRows(button(a, ''), a.available, [e.id, two]);
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(

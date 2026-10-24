@@ -24,7 +24,7 @@ registerHooks({
   load(url, context, next) {
     if (url === 'test:riddle-react')
       return reactShim(
-        `({ state: globalThis[Symbol.for('riddle-state')], ref: v => ({ current: v }) })`,
+        `({ state: globalThis[Symbol.for('riddle-state')], ref: v => ({ current: v }), effect: () => {} })`,
       );
     if (url === 'test:riddle-native')
       return {
