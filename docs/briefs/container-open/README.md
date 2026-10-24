@@ -195,3 +195,5 @@ No Book or spec text. Acceptance: slice 1's rows 1-3 and 5-6 per container. Not 
 
 1. Which other showcase containers get a lid now: the chandler's `crate` and the `yard_crate` (candles inside), the
    `hoard_chest` and `strongroom_chest` (empty at start)? Corpses, plots, nest and trough stay open.
+
+Owner answer 2026-10-23: yes, `crate`, `yard_crate`, `hoard_chest` and `strongroom_chest` get lids (slice 2), folded into this branch as a second commit; corpses, plots, nest and trough stay open.

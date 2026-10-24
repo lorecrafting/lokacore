@@ -558,11 +558,17 @@ test('homestead sandbox: the seed sack starts tied, opens once, stays open and r
   const closed = yard();
   assert.equal(sack(closed).state, 'closed');
   assert.equal(sack(closed).contents, undefined);
-  assert.ok(keys(closed).includes('open') && !keys(closed).includes('unlock'));
+  assert.deepEqual(
+    keys(closed)
+      .filter((k) => ['open', 'take', 'close', 'unlock'].includes(k))
+      .sort(),
+    ['open', 'take'],
+  );
   assert.equal(
     refused(closed, { type: 'take', item_id: id(closed, 'item', 'seed_01') }),
     'not_present',
   );
+  assert.equal(refused(closed, { type: 'take', item_id: id(closed, 'item', 'sack') }), 'too_heavy');
   const held = take(closed, 'holding_apple');
   assert.equal(
     refused(held, {
@@ -579,7 +585,6 @@ test('homestead sandbox: the seed sack starts tied, opens once, stays open and r
     [[id(open, 'item', 'seed_01'), id(open, 'item', 'sack')]],
   );
   assert.ok(keys(open).includes('close'));
-  assert.equal(refused(open, { type: 'take', item_id: id(open, 'item', 'sack') }), 'too_heavy');
 });
 
 // Breaks: the plot lock, the sow rule (status, stamp, spent seed), the description thresholds,

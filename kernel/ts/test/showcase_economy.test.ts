@@ -561,8 +561,8 @@ test('economy 8 branch: without the purchase the key, the door and the room refu
   assert.equal(refused(forced, { type: 'move', direction: 'south' }), 'permission_denied');
 });
 
-// Breaks: a lid missing on a chest or crate (contents shown or takeable before Open), or the shop's
-// own stock move needing the lid open (the storeroom crate restocks while closed).
+// Breaks: a lid missing on a chest or crate (contents shown before Open). The shelf restock from
+// the closed storeroom crate is pinned by economy 5 above, which never opens it.
 test('economy yard: the crate and the hoard chest start closed, hiding what is in them', () => {
   const y = walk(fresh(WORLD), 'down', 'down');
   const shown = (k: string) => gameView(y).entities.find((e) => e.id === id(y, 'item', k))!;
