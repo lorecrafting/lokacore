@@ -2,7 +2,6 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { Body } from '../book/Body.tsx';
-import { Asides as AsideLines } from '../book/lines.tsx';
 import { NoticeEntries } from '../book/notices.tsx';
 import { RoomPage } from '../book/pages.tsx';
 import { pageStory } from './screen.tsx';
@@ -19,7 +18,7 @@ const meta: Meta = {
   tags: ['!autodocs'],
   title: 'Pages/Room',
   component: RoomPage,
-  subcomponents: { Body, NoticeEntries, Asides: AsideLines },
+  subcomponents: { Body, NoticeEntries },
 };
 export default meta;
 
@@ -90,48 +89,25 @@ export const SenseCuesHere: StoryObj = {
   },
 };
 
-// The voices sampler's hall aside (toolbox row FD2, book-ui.md Aside details) on a generated room.
-// Breaks: the aside is dropped or drawn before the room's prose.
+// A skill voice (toolbox row FD2) and a companion remark (FD10) as the presenter logs them: plain
+// World lines after the room's lines, no block of their own (book-ui.md Aside details; owner pick
+// mvlrbpi8u4ai). Breaks: the log drops an aside or reorders it; the logging is in polish_style.test.ts.
 export const Asides: StoryObj = {
   ...pageStory({
     ...RoomFirstView,
-    view: {
-      ...RoomFirstView.view,
-      place: { ...RoomFirstView.view.place, asides: [{ key: 'aside.hall.lore' }] },
-    },
+    log: [voices['aside.hall.lore'], remarks['remark.hal.first']],
   }),
-  args: { words: { 'aside.hall.lore': voices['aside.hall.lore'] } },
   name: 'Asides',
   play: async ({ canvas }) => {
     const aside = await canvas.findByText(voices['aside.hall.lore']);
     await expect(aside).toBeVisible();
     const prose = canvas.getByText(/A low inn/);
+    const remark = canvas.getByText(remarks['remark.hal.first']);
     await expect(
       prose.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-  },
-};
-
-// A companion remark (toolbox row FD10): a present NPC's aside, worded by the remarks sampler.
-// Breaks: the remark is dropped or drawn after the loose items instead of after the people.
-export const CompanionRemark: StoryObj = {
-  ...pageStory({
-    ...RoomNpcsItemsView,
-    view: {
-      ...RoomNpcsItemsView.view,
-      entities: RoomNpcsItemsView.view.entities
-        .map((e, i) => (i === 0 ? { ...e, asides: [{ key: 'remark.hal.first' }] } : e))
-        .slice(0, 3),
-    },
-  }),
-  args: { words: { 'remark.hal.first': remarks['remark.hal.first'] } },
-  name: 'Companion remark',
-  play: async ({ canvas }) => {
-    const remark = await canvas.findByText(remarks['remark.hal.first']);
-    await expect(remark).toBeVisible();
-    const item = canvas.getByText(/apple/);
     await expect(
-      remark.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING,
+      aside.compareDocumentPosition(remark) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   },
 };

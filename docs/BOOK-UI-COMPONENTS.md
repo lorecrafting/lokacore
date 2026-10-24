@@ -173,7 +173,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `JournalPage` | `book/journal.tsx` | SectionPages |
 | `EntityLine` | `book/lines.tsx` | EntityLine |
 | `Note` | `book/lines.tsx` | Note |
-| `Asides` | `book/lines.tsx` | RoomPage |
 | `LogLines` | `book/lines.tsx` | LogLines |
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
 | `Heard` | `book/lines.tsx` | Heard |

@@ -10,8 +10,8 @@ x6t.17 refused lines tagged with a reason, x6t.18 one card per offer, x6t.19 + x
 x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on hold), x6t.99 signpost wording / Word bar height, x6t.103 swept lines (designer), x6t.104 dream closes a one-shot offer silently, loka-3tc7 a death in the inn itself still recaps, y6yg.51 "X leaves." for an NPC killed in the background, y6yg.59 lever reset line at stage 3, loka-g96 paragraphs outside rooms, loka-6qi plurals and "the".
 
 ## 1. World page (seen most)
-- pages-room--first-room, --reworded, --npcs-and-items, --long-log, --refusal-line, --at-night, --sense-cues, --sense-cues-here, --asides, --companion-remark
-- Look at: prose rhythm, entity lines, the log tail, night tint, aside spacing.
+- pages-room--first-room, --reworded, --npcs-and-items, --long-log, --refusal-line, --at-night, --sense-cues, --sense-cues-here, --asides
+- Look at: prose rhythm, entity lines, the log tail, night tint.
 - Known: loka-6qi (plurals and "the"), loka-g96 (paragraphs outside rooms; deferred), x6t.71 (room line variants not drawn, unlabelled), x6t.6 (stars only outdoors), x6t.7 (lamp glow), x6t.99.
 
 ## 2. Status line and icons

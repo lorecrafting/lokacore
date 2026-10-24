@@ -237,8 +237,8 @@ shows it. A control whose shown text is its whole name (Leave, Got it, an action
 
 ## Detail-page order
 
-Detail pages show title/identity, authored description and its [asides](#aside-details), projected item state, then their
-chronological event log only when entries exist, then currently offered options in the same
+Detail pages show title/identity, authored description, projected item state, then their
+chronological event log (a notice's [asides](#aside-details) first) only when entries exist, then currently offered options in the same
 scrolling content. Options list in one fixed order (pass-1 UR): first the verbs that act on the
 thing itself (Read, Eat, Drink, Wear, Light, Open, Talk, Attack, a recipe), then the verbs that
 move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into <container>,
@@ -677,7 +677,7 @@ GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-h
 
 ## Aside details
 
-GameView `place.asides`, a notice's `asides` and an NPC's `asides` are quiet lines: the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)) or a present person's remark ([companion remarks](mechanics.md#companion-remarks-npc-asides-toolbox-row-fd10)). Each is one Note, in projected order, as one block directly after its owner: room asides after the authored description, on World before the exit warnings, on a detail before its projected item state; on World the present people's asides, in listed then authored order, form one block right after the people, before the loose items; on an NPC's page its asides come right after its description. The skill or speaker is in the authored words, never a label, icon or colour; the line is not pressable, carries no touch link (link markup shows as plain words) and its accessible name is its text. No asides, no block. Darkness is the engine's omission: a dark room carries no `place.asides`, while a perceived NPC's asides arrive and show; the presenter never decides which aside holds.
+GameView `place.asides`, a present NPC's `asides` and a notice's `asides` are the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)) or a present person's remark ([companion remarks](mechanics.md#companion-remarks-npc-asides-toolbox-row-fd10)). They draw no block of their own on any page (owner pick mvlrbpi8u4ai). A room's and a present person's aside is one plain line in the World log, drawn in ink as narration is (never a dim Note), logged when it first shows in the GameView during the room visit (on entering, on a cold open, or later when it starts to hold: a skill rises, a person arrives, the room is lit), after that update's narration and arrivals, room asides first, then the people's in listed then authored order. It logs once per room visit, keyed by owner and text key: a re-render, an aside that stops and starts holding again, or a person who leaves and returns does not log it again; a room change starts a new visit and logs it anew. Asides are present tense and never join the [away recap](#away-recap): while a settlement's lines are held, an aside waits and logs once the settlement settles, after its lines. An NPC's page shows none (its asides are in the World log). A notice's asides lead that notice's history, plain lines in projected order before its read lines, for as long as the page is open. The skill or speaker is in the authored words, never a label, icon or colour; link markup shows as plain words. Darkness is the engine's omission: a dark room carries no `place.asides`, while a perceived NPC's asides arrive and log; the presenter never decides which aside holds.
 
 ## Lore details
 

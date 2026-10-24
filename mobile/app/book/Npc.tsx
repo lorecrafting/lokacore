@@ -7,7 +7,7 @@ import { absent, cap, plain, things, why, type group, type Page as Route } from 
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
-import { Asides, LogLines, Note } from './lines.tsx';
+import { LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
 import { inside } from './Menu.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
@@ -211,7 +211,6 @@ const purse = (v: GameView) => v.resources?.find((r) => r.resource.key === 'penn
 const about = (c: Palette, t: Type, p: NpcProps, shelf: boolean) => (
   <>
     {p.npc?.description && <Text style={prose(c, t)}>{plain(p.text(p.npc.description))}</Text>}
-    {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
     {p.npc && 'carrying' in p.npc && p.npc.carrying && (
       <Text style={note(c, t)}>{p.text(p.npc.carrying)}</Text>
     )}
