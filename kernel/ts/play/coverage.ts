@@ -2,7 +2,7 @@
 // (docs/system/cartridge.md#transcript-coverage-loka-kgd1942): replays a cartridge's transcripts
 // and prints the reactions, recipes, dialogue choices and quests none of them exercises, as one
 // canonical JSON document. A report for authors, not a check.
-import { globSync, readFileSync } from 'node:fs';
+import { existsSync, globSync, readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import type { DecisionResult } from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
@@ -71,8 +71,11 @@ export function coverage(c: Cartridge, traces: Trace[]) {
   const done = new Set<string>(); // completed recipe keys
   traces.forEach((t, i) => {
     try {
-      replay(cartridge, t, (before, d) => {
+      replay(cartridge, t, (before, d, n) => {
         if (d.kind !== 'accepted') return;
+        // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
+        if ((d.narration?.length ?? 0) >= 64)
+          throw new Error(`narration cap reached at ordinal ${n}`);
         for (const n of d.narration ?? []) seen.add(ruleOf(n.key) ?? '');
         for (const { payload: p } of d.events) {
           // action_recipe/rule.ts:78 (action = recipe.key), :99-101 (none on failure)
@@ -111,7 +114,7 @@ const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
 if (import.meta.main) {
   const [file, ...paths] = process.argv.slice(2);
-  if (!file) {
+  if (!file || !existsSync(file)) {
     console.error('usage: node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]');
     process.exit(2);
   }
@@ -129,7 +132,13 @@ if (import.meta.main) {
         .map((p) => ROOT + p);
   try {
     const pin = (p: string) => JSON.parse(readFileSync(p, 'utf8').split('\n')[0]!).ids.content_hash;
-    const traces = files.map((p) => replayRecords(p, pin(p)));
+    const traces = files.map((p, i) => {
+      try {
+        return replayRecords(p, pin(p));
+      } catch (e) {
+        throw new Error((e as Error).message, { cause: i });
+      }
+    });
     console.log(encode(coverage(c, traces) as unknown as Json));
   } catch (e) {
     const { message, cause } = e as Error;

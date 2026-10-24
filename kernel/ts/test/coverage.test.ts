@@ -114,6 +114,17 @@ test('E: coverage of a stale transcript (the byte guard missing)', () => {
     c.reactions[`${S}reaction/bell_after`].when.root.equals = 1;
   });
   assert.throws(() => coverage(stale, [trace(SCENE)]), /replay differs at ordinal 4/);
+  // 64 lines from bell_after (its job runs at 7) push its marker past closing()'s cut; set after the
+  // loader, as marked() does, since a reaction narrate needs a newer kernel_api.
+  const base = load('protocol/fixtures/cartridge_scene_hash.json');
+  const bell = base.reactions![`${S}reaction/bell_after`]!;
+  const narrate = { op: 'narrate', text: 'scene.bell' } as any;
+  const apply = [...bell.apply, ...Array(64).fill(narrate)];
+  const loud = {
+    ...base,
+    reactions: { ...base.reactions, [`${S}reaction/bell_after`]: { ...bell, apply } },
+  };
+  assert.throws(() => coverage(loud, [trace(SCENE)]), /narration cap reached at ordinal 7/);
   // The header is compared too: a head whose ids differ from its recorded line 0.
   const t = trace(SCENE);
   const head = {
@@ -149,4 +160,10 @@ test('F: the CLI wiring', () => {
   assert.equal(refused.status, 1);
   assert.equal(JSON.parse(refused.stderr).code, 'UNKNOWN_FORMAT');
   assert.equal(run([]).status, 2);
+  assert.equal(run(['missing.json']).status, 2);
+  // A file that is not a trace is named (pin's own parse error).
+  assert.match(
+    run(['/dev/stdin', 'kernel/ts/play/coverage.ts']).stderr,
+    /^kernel\/ts\/play\/coverage\.ts: /,
+  );
 });

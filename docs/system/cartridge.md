@@ -603,7 +603,10 @@ exercises. `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]`
 transcript (by default `cartridges/<manifest id>/transcripts/*.jsonl`, sorted) against the
 artifact. It loads and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
 1 when a transcript does not replay byte for byte (`<transcript>: replay differs at ordinal <n>`,
-the path relative to the repository), exits 2 on bad arguments, and otherwise prints one canonical
+the path relative to the repository) or when a replayed decision reaches the 64-line narration cap
+(`<transcript>: narration cap reached at ordinal <n>`: a cut marker would report a fired rule as
+never fired), exits 2 on bad arguments (none, or an artifact path that does not exist), and
+otherwise prints one canonical
 JSON document. Nothing is committed or checked in CI; only its unit test runs.
 
 - **The replay.** A `Run` starts with the trace header's own ids (its `content_hash` too, so an
