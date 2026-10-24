@@ -54,10 +54,13 @@ defmodule Loka.Content.Source do
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
+    {files, diags} = read(dir)
+    {files, opened} = Bundles.split(files, dirs())
     # Repeats go before extends, which indexes one definition per kind and key.
-    {files, diags} = dir |> read() |> Bundles.split() |> Bundles.unique()
+    {files, repeats} = Bundles.unique(files)
     {files, faults} = Extends.flatten(files)
-    {files, diags ++ Enum.map(faults, &extends_diag/1)}
+    faults = Enum.map(opened ++ repeats, &bundle_diag/1) ++ Enum.map(faults, &extends_diag/1)
+    {files, diags ++ faults}
   end
 
   defp read(dir) do
@@ -72,6 +75,8 @@ defmodule Loka.Content.Source do
 
     {Enum.reject(files, &is_nil/1), List.flatten(diags)}
   end
+
+  defp bundle_diag({code, location, data}), do: diag(code, at(location, []), data)
 
   defp extends_diag({code, rel, data, from}) do
     data = if from, do: Map.put(data, "from", at(from, [])), else: data
@@ -160,9 +165,7 @@ defmodule Loka.Content.Source do
     end
   end
 
-  @doc "The definition directories and their kinds."
-  @spec dirs() :: %{String.t() => atom()}
-  def dirs, do: @dirs
+  defp dirs, do: @dirs
 
   @doc "The `kind` definitions as `{key, location, value}`; a bundled one is located at `{rel, steps}`."
   @spec of_kind([{String.t(), file(), term()}], atom()) :: [{String.t(), location(), term()}]
