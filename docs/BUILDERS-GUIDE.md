@@ -108,6 +108,12 @@ definitions ([text rules](system/cartridge.md#text)), or write them in place as
 ([inline prose](system/cartridge.md#source-shortcuts)). Put tunable costs, resource bounds and
 other world numbers in cartridge data, not engine code ([world parameters](world-parameters.md)).
 
+To check content, replay its transcripts: `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]`
+lists the definitions that no transcript exercises
+([transcript coverage](system/cartridge.md#transcript-coverage-loka-kgd1942)), and
+`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+says why a rule did or did not run at that step ([rule explainer](system/cartridge.md#rule-explainer-loka-kgd1943)).
+
 ## What the current builder can express
 
 The installed core covers deterministic IDs and decisions, typed commands/events and
