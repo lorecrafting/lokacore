@@ -54,6 +54,12 @@ PLease set things up so that its easy for me to do my ui polish there".
 - Next, in order (owner-approved): loka-x6t.127 remainder (away recap -> bottom of the event log; NPC carried-item note ->
   NPC page; exit warnings and Continue conversation under the anatomy rule; PM idea: exit warning as a movement log line).
   Later: x6t.130 verbose/brief setting.
+- MERGED #476 (docs, loka-glj8 build open): owner rule "each room speaks from the room's point of view"
+  (docs/decisions/owner-decision-room-point-of-view-2026-10-24.md). Replaces "You go north." with "You arrive from the
+  south." / flight "You run in from the south."; flee and fall lines stay in the fight room's log. Older lines below that
+  say "You go north." are history. Build loka-glj8 after the reset.
+- Owner asked about formal verification (Lynx tweet): PM answer given, nothing filed yet (property tests with fast-check
+  for law-shaped rules later; a TLA+ model of the authority/Realm protocol before Realm work).
 
 ## Earlier start (2026-10-24 overnight)
 
