@@ -117,6 +117,10 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
   assert.equal(a.fired, 0);
   assert.equal((a.when as any).held, 0);
   assert.equal(row(heard, 7).fired, 1);
+  assert.deepEqual(
+    why(heard, trace, 7).reactions.map((x) => x.rule),
+    ['a_heard', 'bell_after', 'never'].map((k) => `${S}reaction/${k}`), // by rule key
+  );
   // A rule with no `when` whose event never happens.
   assert.deepEqual(row(heard, 7, `${S}reaction/never`), {
     rule: `${S}reaction/never`,
@@ -129,16 +133,33 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
 // accept_quest; at 2 the lantern is held after take).
 test('W5, W6: dialogue and recipe policies read on the world before the step', () => {
   const c = load((c) => {
+    c.manifest.requires.capabilities.target_resolution = c.lock.capabilities.target_resolution = 1;
+    const present = { op: 'target_present' }; // reads the target: undefined is false
     c.recipes[`${S}recipe/coil_rope`].policy.root = {
-      op: 'has_item',
-      item: ref('item', 'lantern'),
+      op: 'all',
+      items: [{ op: 'has_item', item: ref('item', 'lantern') }, present],
     };
+    const bram = c.dialogues[`${S}dialogue/bram`].policy;
+    bram.root = { op: 'all', items: [bram.root, present] };
   });
   const dialogue = (n: number) => why(c, trace, n, { dialogue: 'bram' }).dialogue as any;
   assert.equal(dialogue(1).rule, `${S}dialogue/bram`);
-  assert.deepEqual([dialogue(1).policy.holds, dialogue(3).policy.holds], [false, true]);
+  assert.deepEqual(
+    [1, 3, 4].map((n) => dialogue(n).policy.items.map((x: any) => x.holds)),
+    [
+      [false, true],
+      [true, true],
+      [true, true],
+    ], // at 4, choose: the row's bound speaker
+  );
   const recipe = (n: number) => (why(c, trace, n, { recipe: 'coil_rope' }).recipe as any).policy;
-  assert.deepEqual([recipe(2).holds, recipe(3).holds], [false, true]);
+  assert.deepEqual(
+    [2, 3].map((n) => recipe(n).items.map((x: any) => x.holds)),
+    [
+      [false, true],
+      [true, true],
+    ],
+  );
 });
 
 // Break: the prefix guard removed (at 4 the edited rule writes bell_heard; the recording has none).
