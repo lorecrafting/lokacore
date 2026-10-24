@@ -19,6 +19,8 @@ world's definitions and text:
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
 file outside these recognized root files and definition directories is `UNKNOWN_FIELD`. A
+definition file may name a parent of its own kind with `"extends"` and may be marked
+`"abstract": true`; the compiler flattens both away first ([Source shortcuts](#source-shortcuts)). A
 source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
@@ -343,6 +345,41 @@ there is no per-feature minimum-version detector for legacy quest-resolving rece
 [pre-production policy](../decisions/owner-decision-forward-development-2026-10-05.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
 single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
+
+### Source shortcuts
+
+The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
+`lib/loka/content/extends.ex`), so `mix loka.compile` and `mix loka.lint` see the same
+flattened files. The artifact never carries `extends` or `abstract`; the loader is unchanged.
+
+**`extends`.** A file in a definition directory may hold `"extends": "<key>"`, the key of a
+definition of the same kind (the short-reference convention), in any file of that kind.
+- One parent, any depth; resolution stops on a cycle.
+- Objects merge key by key, recursively; everything else (strings, numbers, lists, `null`)
+  replaces. There is no append, and a child cannot delete an inherited key, so a field whose
+  maps differ between children (shoo's deer `sight.narration`) stays out of the parent.
+- A child never inherits `extends` or `abstract`.
+- A schema error inside an inherited field reports at the child's path.
+
+**`abstract`.** A definition with `"abstract": true` is removed after its children resolve. It
+is never validated (an abstract NPC needs no `room`), and a reference to it is an ordinary
+`UNRESOLVED_REFERENCE`. Any other `abstract` value stays and is `UNKNOWN_FIELD`.
+
+Root files are not flattened: `extends` in `cartridge.json`, `facts.json`, `resources.json`,
+`attributes.json` or `map_positions.json` is `UNKNOWN_FIELD` (for example `cartridge.extends`);
+in `text.json` it is an ordinary TextKey. A child whose parent failed to decode, or whose parent
+chain reaches a cycle it is not in, is dropped without a diagnostic of its own; the parent's
+diagnostic fails the build. The refusals, with `<src>` the file's source path:
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| No definition of the child's kind has the key | `UNRESOLVED_REFERENCE` | `<src>.extends` | `{"target": "<dir>/<key>"}` |
+| The key exists only in another kind | `UNRESOLVED_REFERENCE` | `<src>.extends` | `{"target": "<dir>/<key>", "from": "<other src>"}` |
+| A cycle, including a file that extends itself | `SCHEMA_VIOLATION` | `<src>.extends` of each member | `{"error": "invalid_value", "from": "<its parent's src>"}` |
+| `extends` is not a string | `SCHEMA_VIOLATION` | `<src>.extends` | `{"error": "invalid_type"}` |
+
+[shoo_sampler](../../cartridges/shoo_sampler/) is the working example: `npcs/wild.json`,
+`items/corpse.json` and `populations/herd.json` are abstract prototypes.
 
 ## Artifact and loader
 
