@@ -1,4 +1,4 @@
-// size: allow 750, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
+// size: allow 790, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
 // The showcase Homestead district walked step by step (docs/showcase/homestead-district.md,
 // guided loop steps 1 to 8). Each test continues the world the one before it left.
 import assert from 'node:assert/strict';
@@ -554,7 +554,7 @@ const croftTouched = (w: World) =>
 test('homestead sandbox: the seed sack starts tied, opens once, stays open and refuses behind its tie', () => {
   const sack = (x: World) =>
     gameView(valid(x)).entities.find((e) => e.id === id(x, 'item', 'sack'))!;
-  const keys = (x: World) => sack(x).actions.map((a) => a.action_key);
+  const keys = (x: World) => sack(x).actions.map((a) => String(a.action_key));
   const closed = yard();
   assert.equal(sack(closed).state, 'closed');
   assert.equal(sack(closed).contents, undefined);
