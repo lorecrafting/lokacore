@@ -15,6 +15,8 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { check } from '../src/runtime/invariants.ts';
+import { resolved } from '../src/commands/actions.ts';
+import { offerMaps } from '../src/view/invariants_view.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { dark } from '../src/mechanics/light/shared.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
@@ -199,7 +201,7 @@ test('invariant: a cast accepted at a target whose aimed offer is unavailable di
       target_id: w.entityIds[`${P}:npc/wight`],
     },
   };
-  const words = { flamma: 'flamma', ward: 'ward' };
+  const { words } = offerMaps(Object.values(resolved(w, w.character)));
   const { decision } = at(w, 'ward', 'npc/wight');
   assert.ok(check('gameview_agrees_with_admission', { view, command, decision, words }));
   const off = structuredClone(view) as any;
@@ -218,6 +220,23 @@ test('invariant: a cast accepted at a target whose aimed offer is unavailable di
     .find((e: { id: string }) => e.id === command.payload.target_id)
     .actions.unshift({ action_key: 'ward', available: false, reason: { code: 'invalid_state' } });
   assert.ok(check('gameview_agrees_with_admission', { view: other, command, decision, words }));
+  const none = structuredClone(view) as any; // no entry: only a code the view could not show agrees
+  const target = none.entities.find((e: { id: string }) => e.id === command.payload.target_id);
+  target.actions = target.actions.filter((a: { action_key: string }) => a.action_key !== 'ward');
+  const agrees = (decision: object, payload = command.payload) =>
+    check('gameview_agrees_with_admission', {
+      view: none,
+      command: { ...command, payload },
+      decision,
+      words,
+    });
+  const refused = (code: string) => ({ kind: 'rejected', error: { code } });
+  assert.deepEqual(
+    [decision, refused('invalid_state'), refused('insufficient_resource')].map((d) => agrees(d)),
+    [false, true, false],
+  );
+  const { target_id, ...untargeted } = command.payload; // the engine cast entry shows no spell's cost
+  assert.ok(target_id && agrees(refused('insufficient_resource'), untargeted as never));
 });
 
 // Breaks: an unlearned word aimed at an unseen target tells not_present (or a bad target tells
@@ -294,4 +313,74 @@ test('loader: aimed rows refused', () => {
     const r = variant(change);
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [diagnostic, path]);
   }
+});
+
+const mana = (w: World) => level(w, w.body, resourceRef(w, 'mana'));
+const restricted = (w: World, actions: object[]): World => {
+  const here = w.state.containers[w.body]!;
+  return { ...w, rooms: { ...w.rooms, [here]: { ...w.rooms[here], actions } } } as World;
+};
+
+// Breaks: a room that removes cast still lists or admits an aimed spell, its code differs from the
+// untargeted cast's or an unknown word's (a code that tells spells), or an allow-list naming cast
+// refuses aimed spells.
+test('room cast availability: subtract offers and refuses none alike; an allow-list keeps them', () => {
+  let w = hall();
+  const orb = w.entityIds[`${P}:item/orb`]!;
+  w = restricted(ok(play(w, { type: 'take', item_id: orb })), [
+    { op: 'subtract', actions: ['cast'] },
+  ]);
+  assert.ok(!entry(w, orb)!.actions.some((a) => a.command === 'cast'));
+  const codes = [at(w, 'lux', 'item/orb'), at(w, 'zzz', 'item/orb'), at(w, 'lux')].map(code);
+  assert.equal(new Set(codes).size, 1, codes.join());
+  assert.notEqual(codes[0], 'accepted');
+  for (const op of ['intersect', 'replace']) {
+    const kept = restricted(crypt(), [{ op, actions: ['cast'] }]);
+    assert.equal(wightHp(ok(at(kept, 'flamma', 'npc/wight'))), 4, op);
+  }
+});
+
+// Breaks: an aimed inventory spell refuses a held lantern worn in the light slot, or the worn entry
+// does not list its offer.
+test('aimed lux at a lantern worn in the light slot is listed and accepted', () => {
+  const r = variant((c) => {
+    aimedChange(c);
+    c.items[`${P}:item/orb`].slot = 'light';
+    for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.equipment = 1;
+  }) as { cartridge: Cartridge };
+  let w = hall(r.cartridge);
+  const orb = w.entityIds[`${P}:item/orb`]!;
+  w = ok(play(w, { type: 'take', item_id: orb }));
+  w = ok(play(w, { type: 'wear', item_id: orb }));
+  const worn = gameView(w).equipment!.find((e) => e.slot === 'light')!.item!;
+  assert.ok(worn.actions.some((a) => a.action_key === 'lux' && a.available));
+  ok(at(w, 'lux', 'item/orb'));
+});
+
+// Breaks: a dead NPC is a valid aimed target (the cost is paid, the offer is listed).
+test('a dead wight is no aimed target: invalid_target, no mana paid, not listed', () => {
+  let w = crypt();
+  const wight = w.entityIds[`${P}:npc/wight`]!;
+  w = ok(play(w, { type: 'attack', target_id: wight }));
+  w = ok(at(ok(at(w, 'flamma', 'npc/wight')), 'flamma', 'npc/wight'));
+  assert.equal(wightHp(w), 0);
+  const r = at(w, 'flamma', 'npc/wight');
+  assert.equal(code(r), 'invalid_target');
+  assert.equal(r.decision.kind === 'rejected' && mana(r.world), mana(w));
+  const offers = gameView(w).entities.flatMap((e) => e.actions.map((a) => a.action_key));
+  assert.ok(!offers.includes('flamma'));
+});
+
+// Breaks: an unaimed spell whose step names an npc absent from the world puts the status on the
+// caster.
+test('a ward naming an npc not in the world lands on no one', () => {
+  const r = variant((c) => {
+    const npc = c.recipes[R('flamma')].outcomes.success.sequence[0].npc;
+    c.recipes[R('ward')].outcomes.success.sequence[0].npc = npc;
+  }) as { cartridge: Cartridge };
+  const w = hall(r.cartridge);
+  delete (w.entityIds as Record<string, unknown>)[`${P}:npc/wight`];
+  const cast = at(w, 'ward');
+  assert.ok(['accepted', 'rejected'].includes(cast.decision.kind), JSON.stringify(cast.decision));
+  assert.equal(activeStatuses(cast.world, w.body as never).length, 0);
 });

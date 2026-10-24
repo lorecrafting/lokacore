@@ -153,7 +153,9 @@ function entityOffered(
   steps: Steps,
 ) {
   if (scope === 'worn' && !light.VERBS.includes(a.command))
-    return a.command === 'remove' && (fits(world, actor, a, id) || !!heldOn(world, actor, a, id));
+    return a.command === 'cast' // an aimed spell at the light slot's lantern (loka-x6t.109)
+      ? !!a.recipe && !aimedRefused(world, actor, a.recipe, id, steps)
+      : a.command === 'remove' && (fits(world, actor, a, id) || !!heldOn(world, actor, a, id));
   if (light.VERBS.includes(a.command))
     return (
       ['inventory', 'worn'].includes(scope) &&

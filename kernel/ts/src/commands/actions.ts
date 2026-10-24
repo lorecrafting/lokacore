@@ -1,4 +1,3 @@
-// size: allow 313, the command refusal and its GameView reason share one admission chain (loka-j64e)
 // ActionSet: engine, cartridge, room, choice; combat restricts admission/projection (06 §19).
 import {
   CAPABILITY_OWNERS,
@@ -25,7 +24,7 @@ import { permits } from '../mechanics/status/permits.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
-import { accepts, aimedOffers, primaryTarget } from './action_input.ts';
+import { accepts, aimedOffers, hiddenTarget, primaryTarget } from './action_input.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
@@ -142,8 +141,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
   });
-  const said = [...talks(world, actor), ...aimedOffers(world, actor)]; // loka-x6t.109
-  return Object.fromEntries([...actions, ...recipes, ...quests, ...said]);
+  return Object.fromEntries([...actions, ...recipes, ...quests, ...talks(world, actor)]);
 }
 
 /**
@@ -167,7 +165,8 @@ export function composed(world: World, actor: CharacterId): ActionSet {
       ),
     apply(apply({}, 'union', verbs), 'override', own),
   );
-  return { ...set, ...modal(world, actor) };
+  const aimed = set.cast && Object.fromEntries(aimedOffers(world, actor)); // where cast is offered (loka-x6t.109)
+  return { ...set, ...aimed, ...modal(world, actor) };
 }
 
 const fighting = (world: World, actor: CharacterId, body = bodyOf(world, actor)) =>
@@ -222,8 +221,11 @@ import { visible } from '../mechanics/light/shared.ts';
 
 export const refusal = (...args: Parameters<typeof refusalReason>) => refusalReason(...args)?.code;
 
+const untimed = (world: World, p: CommandPayload) =>
+  p.type === 'wait' && !!world.cartridge.manifest.time_policy && !fighting(world, p.actor_id);
+
 /** refusal with its reason: a failed spell policy carries the recipe's `reason` text (loka-j64e). */
-// size: allow 46, the reason rides the same admission chain as the code
+// size: allow 43, the reason rides the same admission chain as the code
 export function refusalReason(
   world: World,
   payload: CommandPayload,
@@ -233,12 +235,7 @@ export function refusalReason(
 ): UnavailableReason | undefined {
   const gated = 'actor_id' in payload && !['choose_ancestry', 'elapsed'].includes(payload.type);
   if (gated && needsAncestry(world, payload.actor_id)) return { code: 'invalid_state' }; // `in`: types only, run_job never gets here
-  if (
-    payload.type === 'wait' &&
-    world.cartridge.manifest.time_policy &&
-    !fighting(world, payload.actor_id)
-  )
-    return { code: 'permission_denied' };
+  if (untimed(world, payload)) return { code: 'permission_denied' };
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const offers = Object.values(set ?? resolved(world, actor));
   const cast = payload.type === 'cast' && offers.some((a) => a.key === 'cast');
@@ -295,19 +292,4 @@ export function admission(
     return 'cooldown' as const;
   const paid = pay(world, body, recipe.costs ?? []);
   return paid ? { paid, last, from } : ('insufficient_resource' as const);
-}
-
-function hiddenTarget(world: World, payload: CommandPayload, steps: Steps) {
-  if (payload.type === 'where') return false;
-  const p = payload as { actor_id: CharacterId } & Partial<
-    Record<
-      'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id' | 'crow_id',
-      EntityId
-    >
-  >;
-  const ids = [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id, p.crow_id];
-  if (payload.type === 'fill') ids.push(payload.source_id, payload.vessel_id);
-  if (payload.type === 'pour') ids.push(payload.source_id, payload.receiver_id);
-  if (payload.type === 'drink') ids.push(payload.vessel_id);
-  return ids.some((id) => id && !visible(world, p.actor_id, id, steps));
 }

@@ -9,6 +9,7 @@ import type { Offered } from './actions.ts';
 import { value as factValue } from '../mechanics/fact.ts';
 import { definition as expeditionDefinition } from '../mechanics/expedition/shared.ts';
 import { spellOf } from '../mechanics/action_recipe/shared.ts';
+import { visible } from '../mechanics/light/shared.ts';
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
 const INPUTS: readonly string[] = [
@@ -132,4 +133,20 @@ export function primaryTarget(payload: CommandPayload): EntityId | undefined {
   if (payload.type === 'drink') return payload.vessel_id;
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   return p.target_id ?? p.item_id;
+}
+
+/** Whether a target the payload names is unseen by its actor (commands/actions.ts refusal: not_present). */
+export function hiddenTarget(world: World, payload: CommandPayload, steps: Steps) {
+  if (payload.type === 'where') return false;
+  const p = payload as { actor_id: CharacterId } & Partial<
+    Record<
+      'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id' | 'crow_id',
+      EntityId
+    >
+  >;
+  const ids = [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id, p.crow_id];
+  if (payload.type === 'fill') ids.push(payload.source_id, payload.vessel_id);
+  if (payload.type === 'pour') ids.push(payload.source_id, payload.receiver_id);
+  if (payload.type === 'drink') ids.push(payload.vessel_id);
+  return ids.some((id) => id && !visible(world, p.actor_id, id, steps));
 }

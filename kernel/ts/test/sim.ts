@@ -1,4 +1,4 @@
-// size: allow 564, seed-picked corpus, --cartridge loader and offers (reused by play/flows.ts)
+// size: allow 560, seed-picked corpus, --cartridge loader and offers (reused by play/flows.ts)
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -19,6 +19,7 @@ import { id } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { offerMaps } from '../src/view/invariants_view.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { MOVES } from '../src/mechanics/barrier/rule.ts';
 import { next, type RngState } from '../src/foundation/rng.ts';
@@ -256,7 +257,6 @@ function violated(
     : decision.kind === 'fault'
       ? { fault: decision }
       : { changes: [] };
-  const actions = Object.values(resolved(before, before.character));
   const obs = {
     state,
     delta,
@@ -267,12 +267,7 @@ function violated(
     decision,
     view,
     world_context_id: before.context,
-    resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
-    words: Object.fromEntries(
-      actions.flatMap((a) =>
-        a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
-      ),
-    ),
+    ...offerMaps(Object.values(resolved(before, before.character))),
   };
   const ids = CHECKED.step.filter((i) => i !== 'target_candidates_ordered');
   return (

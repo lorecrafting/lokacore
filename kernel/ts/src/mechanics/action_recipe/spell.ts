@@ -86,7 +86,7 @@ export function effect<R extends Effected>(
       o.op === 'status.transition' ? [`${o.body_id}|${refString(o.status)}`] : [],
     ),
   );
-  const on = [npc ?? body];
+  const on = npc ? [npc] : s.npc ? [] : [body]; // a named npc not in the world: no holder
   const sees = (id: EntityId) => visible(world, command.payload.actor_id, id);
   const done = statusStep(world, s, on, body, 0, { holders: new Map(), applied }, mint, emit, sees);
   const lines = [...r.lines, ...done.narration];

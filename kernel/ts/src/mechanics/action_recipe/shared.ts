@@ -22,6 +22,8 @@ import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { unbuildable } from '../service/build.ts';
 import { folded } from '../speech/shared.ts';
+import { living } from '../death/shared.ts';
+import { held } from '../light/shared.ts';
 
 export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
 
@@ -115,18 +117,19 @@ export function castAdmission(
     : policyRefusal(spell);
 }
 
-/** An aimed spell's target (loka-x6t.109): held by the caster, or an npc or item in its room. */
+/** An aimed spell's target (loka-x6t.109): held by the caster (its light slot too), or a living npc or an item in its room. */
 const aimedAt = (
   world: World,
   body: EntityId,
   id: EntityId | undefined,
   scopes: readonly string[],
 ) => {
-  const at = id && world.state.containers[id];
-  const kind = id && world.entities[id]?.kind;
+  if (!id || !living(world, id)) return false;
+  const at = world.state.containers[id];
+  const kind = world.entities[id]?.kind;
   return scopes.some((s) =>
     s === 'inventory'
-      ? at === body
+      ? held(world, body, id)
       : at === world.state.containers[body] && kind === (s === 'room_occupants' ? 'npc' : 'item'),
   );
 };

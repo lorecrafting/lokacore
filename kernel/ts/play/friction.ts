@@ -9,7 +9,7 @@ import type { DecisionResult, GameView } from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView } from '../src/runtime/world.ts';
-import { gameview_agrees_with_admission } from '../src/view/invariants_view.ts';
+import { gameview_agrees_with_admission, offerMaps } from '../src/view/invariants_view.ts';
 import type { Payload } from '../test/sim.ts';
 import { flows, median, worker, type Observe, type Policy } from './flows.ts';
 
@@ -95,19 +95,13 @@ function walk(t: T, before: World, after: World, step: number) {
 
 // The view invariant on a refused step, with the actor's resolved actions as the simulator builds
 // them; built once per world, as a step's refused candidates share it.
-const seen = new WeakMap<World, { view: GameView; resolves: Record<string, string> }>();
+const seen = new WeakMap<World, { view: GameView } & ReturnType<typeof offerMaps>>();
 function agrees(before: World, command: At['command'], decision: DecisionResult) {
   let obs = seen.get(before);
   if (!obs) {
-    const actions = Object.values(resolved(before, before.character));
     obs = {
       view: gameView(before),
-      resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
-      words: Object.fromEntries(
-        actions.flatMap((a) =>
-          a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
-        ),
-      ),
+      ...offerMaps(Object.values(resolved(before, before.character))),
     };
     seen.set(before, obs);
   }
