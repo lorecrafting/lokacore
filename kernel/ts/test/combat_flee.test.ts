@@ -38,8 +38,18 @@ const flee = (w: ReturnType<typeof twoExits>) =>
 // Breaks: choosing first/insertion-order exits, burning an IdSource draw, or dropping selected RNG.
 test('two-exit Flee selects canonical north/west using independent seeded answers', () => {
   const cases = [
-    { seed: [1, 2, 3, 4], after: [7, 0, 1026, 12288], destination: 'drowned_lantern' },
-    { seed: [1, 33554432, 3, 4], after: [33554437, 33554434, 2, 8208], destination: 'chapel_nave' },
+    {
+      seed: [1, 2, 3, 4],
+      after: [7, 0, 1026, 12288],
+      destination: 'drowned_lantern',
+      way: 'north',
+    },
+    {
+      seed: [1, 33554432, 3, 4],
+      after: [33554437, 33554434, 2, 8208],
+      destination: 'chapel_nave',
+      way: 'west',
+    },
   ];
   for (const c of cases) {
     const initial = twoExits();
@@ -54,6 +64,11 @@ test('two-exit Flee selects canonical north/west using independent seeded answer
     assert.deepEqual(result.world.state.rng, c.after);
     assert.equal(level(result.world, w.body, resourceRef(w, 'mv')), 98);
     assert.equal(Object.values(result.world.state.encounters!)[0].status, 'closed');
+    // Breaks: a flight commits with no narration line (sim check 4).
+    assert.deepEqual((result.decision as { narration?: unknown[] }).narration?.[0], {
+      key: 'combat.fled',
+      bindings: { direction: c.way },
+    });
     assert.deepEqual(flee(w).decision, result.decision);
   }
 });
