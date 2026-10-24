@@ -13,6 +13,7 @@ import { replayRecords } from './replay.ts';
 import { decideReplay, header, start } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
+const MARK = /^coverage\.m(\d+)$/;
 
 /**
  * A copy of `c` whose every reaction ends with a `narrate` of a key unique to it, and the map
@@ -21,6 +22,8 @@ type Trace = ReturnType<typeof replayRecords>;
  * `when` held (:152) and the steps ran; narration never enters state (proposal_adopt.ts:39-51).
  */
 export function marked(c: Cartridge) {
+  const clash = Object.keys(c.text ?? {}).find((k) => MARK.test(k));
+  if (clash) throw new Error(`authored text key ${clash} collides with a coverage marker`);
   const refs = Object.keys(c.reactions ?? {});
   const reactions = Object.fromEntries(
     refs.map((ref, i) => {
@@ -28,7 +31,7 @@ export function marked(c: Cartridge) {
       return [ref, { ...r, apply: [...r.apply, { op: 'narrate', text: `coverage.m${i}` }] }];
     }),
   );
-  const ruleOf = (key: string) => refs[Number(/^coverage\.m(\d+)$/.exec(key)?.[1] ?? NaN)];
+  const ruleOf = (key: string) => refs[Number(MARK.exec(key)?.[1] ?? NaN)];
   return { cartridge: { ...c, reactions } as Cartridge, ruleOf };
 }
 

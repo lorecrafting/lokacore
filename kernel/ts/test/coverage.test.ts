@@ -74,6 +74,7 @@ const choice = (dialogue: string, c: string) => ({
 
 test('A, B: a rule whose when failed, a choice keyed without its dialogue, an activated quest', () => {
   // Breaks: trigger counted as fired, choice_id alone, marker on the wrong rule, wrong header hash.
+  const authored = JSON.stringify(edited.reactions);
   assert.deepEqual(coverage(edited, [trace(SCENE)]).never, {
     reactions: [`${S}reaction/never_held`, `${S}reaction/never_matched`],
     recipes: [`${S}recipe/coil_rope`],
@@ -96,6 +97,11 @@ test('A, B: a rule whose when failed, a choice keyed without its dialogue, an ac
   const seen: number[] = [];
   replay(edited, trace(SCENE), (_w, _d, n) => seen.push(n), 4);
   assert.deepEqual(seen, [1, 2, 3]);
+  // Break: the marker pushed onto the loaded cartridge's own rules.
+  assert.equal(JSON.stringify(edited.reactions), authored);
+  // Break: an authored key equal to a marker read as that marker's rule.
+  const clash = { ...edited, text: { ...edited.text, 'coverage.m0': 'x' } };
+  assert.throws(() => coverage(clash, [trace(SCENE)]), /text key coverage\.m0 collides/);
 });
 
 test('C, D: a failed perform counted as completed, a wrong recipe-to-action mapping', () => {
