@@ -6,7 +6,7 @@ defmodule Loka.Content.Source do
   The loaded view is already flattened (`Loka.Content.Extends`). A step list holds member
   names (strings) and array indexes (integers).
   """
-  alias Loka.Content.{Bundles, Extends}
+  alias Loka.Content.{Bundles, Extends, Prose}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -45,12 +45,11 @@ defmodule Loka.Content.Source do
              | :blueprint, String.t(), steps()}
 
   @doc """
-  Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
-  decoded value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics, the
-  `extends` refusals and the area bundle refusals (`Loka.Content.Bundles`). A definition in a
-  bundle is `{bundle rel, {kind, key, [dir, key]}, value}`.
-  A recognised file that fails to decode has the value `:invalid` (present, not absent);
-  a file in an unrecognised place is left out.
+  Every `.json` regular file under `dir` (dot files included) as `{relative path, kind, decoded
+  value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics and the refusals of
+  the source shortcuts (`Bundles`, `Extends`, `Prose`). A definition in a bundle is `{bundle rel,
+  {kind, key, [dir, key]}, value}`. A recognised file that fails to decode has the value
+  `:invalid` (present, not absent); a file in an unrecognised place is left out.
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
@@ -58,8 +57,9 @@ defmodule Loka.Content.Source do
     {files, opened} = Bundles.split(files, dirs())
     {files, repeats} = Bundles.unique(files)
     {files, faults} = Extends.flatten(files)
-    faults = Enum.map(opened ++ repeats, &bundle_diag/1) ++ Enum.map(faults, &extends_diag/1)
-    {files, diags ++ faults}
+    {files, clashes} = Prose.lower(files)
+    located = Enum.map(opened ++ repeats ++ clashes, &bundle_diag/1)
+    {files, diags ++ located ++ Enum.map(faults, &extends_diag/1)}
   end
 
   defp read(dir) do

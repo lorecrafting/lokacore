@@ -351,10 +351,10 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
-`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`), so `mix loka.compile` and
+`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`), so `mix loka.compile` and
 `mix loka.lint` see the same flattened definitions. The order is: open area bundles, refuse
-repeated definitions, flatten `extends`. The artifact never carries a bundle, `extends` or
-`abstract`; the loader is unchanged.
+repeated definitions, flatten `extends`, lower inline prose. The artifact never carries a bundle,
+`extends`, `abstract` or a prose marker; the loader is unchanged.
 
 **Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
@@ -405,6 +405,30 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 
 [shoo_sampler](../../cartridges/shoo_sampler/) is the working example: `npcs/wild.json`,
 `items/corpse.json` and `populations/herd.json` are abstract prototypes.
+
+**Inline prose.** A text field may hold its words in place: `"short": {"prose": "the elder"}`.
+- The marker is an object whose only member is `"prose"`, a non-empty string, anywhere inside a
+  definition (a plain file or a bundle). Any other `{"prose": ...}` shape stays, and the schema
+  reports it at its site. Root files (`text.json` too) are not lowered.
+- The compiler writes the generated key `<kind>.<key>.<path>` in its place: `<kind>` singular
+  (`npc`, `room`, `story_point`), `<key>` the definition key, `<path>` the steps from the
+  definition to the marker joined by `.`, array indexes in decimal. One alias: a step
+  `room_line` is written `room` (the house `npc.<key>.room` convention). So `npcs.elder.short`
+  is `npc.elder.short`, a choice label `dialogue.elder_ward.choices.thank.label`, and a room
+  variant `room.lane.variants.0.description`.
+- The words join the one `text.json` catalog (created when absent; an undecodable one takes
+  nothing, its `INVALID_JSON` fails the build). A generated key that fails TextKey is the
+  schema's usual error at the marker.
+- Prose runs after `extends`: an inherited marker gets a key per child, from the child's kind,
+  key and path; the prototype owns no line.
+- A shared line (`shop.bought`) stays an authored key; there is no per-site key override.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| A generated key already in the catalog (authored, or generated earlier) | `DUPLICATE_KEY` | the marker's site | `{"target": "<key>"}` |
+
+[speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
+inline; its artifact equals the hand-keyed one byte for byte.
 
 ## Artifact and loader
 
@@ -746,7 +770,9 @@ module exists without its row. A cartridge locking an uninstalled capability fai
 `Text` is `{key, bindings}`; a committed narration line may carry `participants`, each name
 bound to an EntityId at commit (`kernel/ts/src/mechanics/action_recipe/rule.ts:89`), so redisplay and
 replay never resolve a name again. Catalog strings carry the touch links above; the phone's
-model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`).
+model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`). In
+source, a line may be written in place and lowered to a generated key
+([inline prose](#source-shortcuts)).
 
 ## Development cartridges
 

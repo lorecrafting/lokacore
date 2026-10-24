@@ -1,8 +1,8 @@
 {
   "rooms": {
     "lane": {
-      "title": "room.lane.title",
-      "description": "room.lane.description",
+      "title": { "prose": "Lane" },
+      "description": { "prose": "A lane west of the square." },
       "exits": {
         "east": {
           "to": "square"
@@ -13,8 +13,8 @@
       }
     },
     "mill": {
-      "title": "room.mill.title",
-      "description": "room.mill.description",
+      "title": { "prose": "Mill" },
+      "description": { "prose": "A mill at the end of the lane." },
       "exits": {
         "east": {
           "to": "lane"
@@ -22,8 +22,8 @@
       }
     },
     "square": {
-      "title": "room.square.title",
-      "description": "room.square.description",
+      "title": { "prose": "Square" },
+      "description": { "prose": "A village square." },
       "exits": {
         "east": {
           "to": "watchhouse"
@@ -34,8 +34,8 @@
       }
     },
     "watchhouse": {
-      "title": "room.watchhouse.title",
-      "description": "room.watchhouse.description",
+      "title": { "prose": "Watchhouse" },
+      "description": { "prose": "A watchhouse east of the square." },
       "exits": {
         "west": {
           "to": "square"
@@ -48,36 +48,36 @@
       "keywords": [
         "elder"
       ],
-      "short": "npc.elder.short",
-      "room_line": "npc.elder.room",
-      "description": "npc.elder.description",
+      "short": { "prose": "the elder" },
+      "room_line": { "prose": "The [elder](elder) sits by the well." },
+      "description": { "prose": "An old woman who knows the old wards." },
       "room": "square"
     },
     "miller": {
       "keywords": [
         "miller"
       ],
-      "short": "npc.miller.short",
-      "room_line": "npc.miller.room",
-      "description": "npc.miller.description",
+      "short": { "prose": "the miller" },
+      "room_line": { "prose": "The [miller](miller) sacks flour." },
+      "description": { "prose": "A dusty miller." },
       "room": "mill"
     },
     "smith": {
       "keywords": [
         "smith"
       ],
-      "short": "npc.smith.short",
-      "room_line": "npc.smith.room",
-      "description": "npc.smith.description",
+      "short": { "prose": "the smith" },
+      "room_line": { "prose": "The [smith](smith) rests on a bench." },
+      "description": { "prose": "A smith on her break." },
       "room": "square"
     },
     "watchman": {
       "keywords": [
         "watchman"
       ],
-      "short": "npc.watchman.short",
-      "room_line": "npc.watchman.room",
-      "description": "npc.watchman.description",
+      "short": { "prose": "the watchman" },
+      "room_line": { "prose": "The [watchman](watchman) dozes." },
+      "description": { "prose": "A sleepy watchman." },
       "room": "watchhouse"
     }
   },
@@ -92,7 +92,7 @@
           "items": []
         }
       },
-      "prompt": "dialogue.elder_ward.prompt",
+      "prompt": { "prose": "The elder leans close. \"The ward fails at the new moon.\"" },
       "roles": {
         "elder": {
           "role": "npc",
