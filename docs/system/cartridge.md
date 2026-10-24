@@ -418,7 +418,8 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
   variant `room.lane.variants.0.description`.
 - The words join the one `text.json` catalog (created when absent; an undecodable one takes
   nothing, its `INVALID_JSON` fails the build). A generated key that fails TextKey is the
-  schema's usual error at the marker.
+  schema's error at the marker and again at `text["<key>"]`; a word-length error is reported
+  only at `text["<key>"]`.
 - Prose runs after `extends`: an inherited marker gets a key per child, from the child's kind,
   key and path; the prototype owns no line.
 - A shared line (`shop.bought`) stays an authored key; there is no per-site key override.

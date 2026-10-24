@@ -19,13 +19,17 @@ defmodule Loka.ContentProseTest do
              {"DUPLICATE_KEY", "areas/village.npcs.elder.short", %{"target" => "npc.elder.short"}}
            ]
 
+    # An npc has no `room` member, so the schema also refuses the stray field itself.
     room = &put_in(&1, @elder ++ ["room"], %{"prose" => "x"})
     assert {:error, diags} = speech([{@bundle, room}])
 
     clash =
       {"DUPLICATE_KEY", "areas/village.npcs.elder.room_line", %{"target" => "npc.elder.room"}}
 
-    assert clash in triples(diags)
+    stray =
+      {"SCHEMA_VIOLATION", "areas/village.npcs.elder.room", %{"error" => "pattern_mismatch"}}
+
+    assert triples(diags) == [stray, clash]
   end
 
   # Breaks: with no text.json the generated lines are dropped, or an undecodable text.json
