@@ -180,7 +180,9 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await wizard('Fetch the second word');
   await tap('Gather ash');
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
-  await speak('lux', LABEL.cast);
+  await held(/^the lantern/);
+  await tap('Lux the lantern'); // the aimed spell's card on the held lamp (loka-x6t.109)
+  await putAway();
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
   await take(/^(?:the )?grimoire, open$/i, /^Take the grimoire/);
@@ -214,11 +216,15 @@ const magic = async (r: Walk, steps: Steps) => {
   await moves('up');
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await moves('down');
-  await speak('flamma', LABEL.cast);
+  const flamma = async () => {
+    await tap(/^A wight, open$/);
+    await tap('Flamma a wight'); // the aimed spell's card on the wight's page (loka-x6t.109)
+  };
+  await flamma();
   await tap(/^Flee/);
   await tap(LABEL.backToWorld);
   await moves('down');
-  await speak('flamma', LABEL.cast); // the second bolt kills the wight (magic 7)
+  await flamma(); // the second bolt kills the wight (magic 7)
   // No Douse: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
   // cannot win reliably; kernel test magic 8 pins the quench. The bucket stays held.
   await moves('up', 'west', 'west');

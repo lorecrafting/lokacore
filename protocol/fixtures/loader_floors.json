@@ -1712,7 +1712,7 @@
       "floor": "1.104",
       "below": "1.103",
       "source": "cartridges/toolbox_showcase",
-      "feature": "an NPC's disposition.refuse line (Book hostile refusal); the observed lines (1.110) and name words (1.118) dropped",
+      "feature": "an NPC's disposition.refuse line (Book hostile refusal); the observed lines (1.110) and name words (1.118), aimed lux and flamma and the lamp tags (1.119) dropped",
       "edits": [
         ["npcs/guard.json", ["disposition"], null],
         ["statuses/wet.json", ["narration", "observed"], null],
@@ -1903,7 +1903,12 @@
         ["items/yard_candle_02.json", ["words"], null],
         ["items/yard_crate.json", ["words"], null],
         ["items/yard_purse.json", ["words"], null],
-        ["items/yard_torch.json", ["words"], null]
+        ["items/yard_torch.json", ["words"], null],
+        ["recipes/lux.json", [], null],
+        ["recipes/flamma.json", [], null],
+        ["reactions/flamma_sparks.json", [], null],
+        ["items/lantern.json", ["tags"], ["metal"]],
+        ["items/attic_lantern.json", ["tags"], ["metal"]]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1920,7 +1925,7 @@
       "floor": "1.105",
       "below": "1.104",
       "source": "cartridges/toolbox_showcase",
-      "feature": "an NPC's disposition.arrest (the law district's guard); the observed lines (1.110) and name words (1.118) dropped",
+      "feature": "an NPC's disposition.arrest (the law district's guard); the observed lines (1.110) and name words (1.118), aimed lux and flamma and the lamp tags (1.119) dropped",
       "edits": [
         ["statuses/wet.json", ["narration", "observed"], null],
         ["statuses/shocked.json", ["narration", "observed"], null],
@@ -2110,7 +2115,12 @@
         ["items/yard_candle_02.json", ["words"], null],
         ["items/yard_crate.json", ["words"], null],
         ["items/yard_purse.json", ["words"], null],
-        ["items/yard_torch.json", ["words"], null]
+        ["items/yard_torch.json", ["words"], null],
+        ["recipes/lux.json", [], null],
+        ["recipes/flamma.json", [], null],
+        ["reactions/flamma_sparks.json", [], null],
+        ["items/lantern.json", ["tags"], ["metal"]],
+        ["items/attic_lantern.json", ["tags"], ["metal"]]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -2289,6 +2299,16 @@
       "without": [
         ["recipes/flamma.json", ["target", "aimed"], null]
       ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.119",
+      "below": "1.118",
+      "source": "cartridges/tags_sampler",
+      "feature": "an item tagged lamp (loka-x6t.109)",
+      "edits": [["items/rod.json", ["tags"], ["metal", "lamp"]]],
+      "without": [["items/rod.json", ["tags"], ["metal"]]],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }

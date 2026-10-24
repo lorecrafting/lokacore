@@ -9,9 +9,9 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
-import { LABEL } from './labels.ts';
 
-// The spell sampler with a wight that always claws for 2, a player at 3 hp and a lit crypt.
+// The spell sampler with a wight that always claws for 2, a player at 3 hp, a lit crypt and flamma
+// aimed at the room's occupants (loka-x6t.109).
 function cartridge() {
   const dir = mkdtempSync(join(tmpdir(), 'loka-cast-death-'));
   const source = new URL('../../../cartridges/spell_effects_sampler', import.meta.url);
@@ -25,6 +25,11 @@ function cartridge() {
     edit('npcs/wight.json', (j) => (j.attack = { chance: 100, damage_min: 2, damage_max: 2 }));
     edit('resources.json', (j) => (j.resources.hp.start = 3));
     edit('rooms/crypt.json', (j) => delete j.dark_description);
+    edit('cartridge.json', (j) => (j.requires.kernel_api.at_least = '1.119'));
+    edit('recipes/flamma.json', (j) => {
+      j.target.aimed = { scopes: ['room_occupants'] };
+      delete j.outcomes.success.sequence[0].npc;
+    });
     return compiled(dir);
   } finally {
     rmSync(dir, { recursive: true });
@@ -38,9 +43,8 @@ test('cast-opened fight: rounds drained by a press still print every round and t
   t.after(() => b.sql.close());
   b.map();
   b.tap('Go east');
-  b.tap(LABEL.sayToRoom);
-  b.tap('flamma');
-  b.tap(LABEL.cast);
+  b.tap('A wight, open');
+  b.tap('Flamma a wight'); // the aimed spell's card on the wight's page
   b.clock.wall += 6000; // two rounds at rate 50, no frame in between
   b.clock.mono += 6000;
   b.tap('Flee');

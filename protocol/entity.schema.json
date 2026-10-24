@@ -388,7 +388,7 @@
       ]
     },
     "Tag": {
-      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7, kernel_api at least 1.62) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent (kernel_api at least 1.106 for a room, item or barrier tagged road or marsh).",
+      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7, kernel_api at least 1.62) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent (kernel_api at least 1.106 for a room, item or barrier tagged road or marsh). Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target (kernel_api at least 1.119 for a room, item or barrier tagged lamp).",
       "enum": [
         "air",
         "bed",
@@ -399,6 +399,7 @@
         "exposed",
         "forge",
         "fragile",
+        "lamp",
         "liquid_holding",
         "marsh",
         "metal",
@@ -470,6 +471,9 @@
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "fragile": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "lamp": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "liquid_holding": {

@@ -1353,7 +1353,7 @@
               "description": "Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed). Needs kernel_api 1.106.",
               "type": "object",
               "propertyNames": {
-                "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$"
+                "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|lamp|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$"
               },
               "additionalProperties": {
                 "type": "integer",
