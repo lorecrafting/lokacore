@@ -43,18 +43,17 @@ function Fight(
             {/* a closed encounter's band is stale (a dead foe has none) */}
             {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
           </Text>
-          {view.combat && (
-            <PickLists
-              page={opponent.id}
-              view={view}
-              buttons={p.buttons.filter(
-                (b) => b.detail_id === opponent.id && commandOf(b) === 'cast',
-              )}
-              text={text}
-              press={p.press}
-              pending={p.pending}
-            />
-          )}
+          {/* no guard on view.combat: a closed fight's foe is dead or out of the room, so it has no offers */}
+          <PickLists
+            page={opponent.id}
+            view={view}
+            buttons={p.buttons.filter(
+              (b) => b.detail_id === opponent.id && commandOf(b) === 'cast',
+            )}
+            text={text}
+            press={p.press}
+            pending={p.pending}
+          />
         </View>
       ))}
     </View>
