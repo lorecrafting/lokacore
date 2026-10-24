@@ -17,7 +17,7 @@ export const NoticeWithRead: StoryObj = {
   name: 'Notice with Read',
 };
 
-// A fixture the prose links: its page shows its offered cards (hand view on the inn; loka-x6t.120).
+// A fixture the prose links: its page shows its offered cards (a hand notice dropped into the inn view; loka-x6t.120).
 const hearth = {
   id: 'hearth',
   key: 'hearth',
