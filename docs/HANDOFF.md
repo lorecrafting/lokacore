@@ -51,7 +51,15 @@ PLease set things up so that its easy for me to do my ui polish there".
   1. loka-x6t.127 remainder: away recap -> a new entry at the bottom of the event log (owner, quoted: "It should be a
      new entry in the event log, meaning at the very bottom"); NPC carried-item note -> NPC page; exit warning notes and
      the Continue conversation button under the anatomy rule.
-  2. loka-x6t.124 screen readers hear nothing on detail pages (presenter.ts `heard`); designer ruling first.
+  2. Narration log batch (owner go 2026-10-24, "Yes"): loka-kgd.185 narrate take/drop/give/put and empty the silent
+     list; loka-x6t.129 every line lands in the room event log (combat too; "You go north." starts a visit), a detail
+     page also shows its own lines; loka-x6t.124 announcements. Brief on branch toolbox/batch-narration-log
+     (docs/briefs/narration-log/README.md, rulings appended); the brief branch also adds a HANDOFF section, expect a
+     conflict here. STARTED 2026-10-24 ~06:00 (owner: "It's okay please star the work no"): one Opus developer builds slices 1-3 on
+     that branch (draft PR after slice 1); then one Opus reviewer on the draft head, green hosted CI, merge,
+     after_merge; one designer pass at batch end. Brief rulings appended: shared words table, combat in the room log,
+     "You go north.", display table (in place / log / quiet), quiet own buy/sell and container take/put, compacted room
+     log lines, quiet still announced. Later: x6t.130 verbose/brief setting.
 - Owner rules set tonight (repo now states them): room page anatomy
   (docs/decisions/owner-decision-room-page-anatomy-2026-10-23.md); interaction patterns doc is the pattern layer UI
   briefs cite; brief models: Opus default, Fable for save/protocol/contract briefs under ~80% weekly usage, never Sonnet.
