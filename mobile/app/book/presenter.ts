@@ -104,11 +104,9 @@ function narrate(
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  // A quiet receipt settled in the background is never in place, as when restored.
-  const quiet = !last.read && quietOf(s, last.lines, last.detail_id);
-  if (quiet && !away) return logLines(s, [...lines, ...combat], to, quiet);
   if (!last.read) world(s, away, [...lines, ...combat]); // Read text: its page only
-  if (lines.length && !quiet) to?.push(...lines);
+  // A quiet receipt settled in the background is the room log's only, as when restored.
+  if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }
 
 const confirmed = (reply: Reply) =>
