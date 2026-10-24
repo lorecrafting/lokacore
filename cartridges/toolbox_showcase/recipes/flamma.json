@@ -7,7 +7,12 @@
   "target": {
     "kind": "spell",
     "word": "flamma",
-    "learned": "flamma_known"
+    "learned": "flamma_known",
+    "aimed": {
+      "scopes": [
+        "room_occupants"
+      ]
+    }
   },
   "priority": 0,
   "policy": {
@@ -28,7 +33,6 @@
       "sequence": [
         {
           "op": "damage",
-          "npc": "wight",
           "kind": "fire",
           "amount": 8
         }

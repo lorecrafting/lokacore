@@ -3,17 +3,24 @@
   "aliases": [
     "lux"
   ],
+  "reason": "reason.lux",
   "target": {
     "kind": "spell",
     "word": "lux",
-    "learned": "lux_known"
+    "learned": "lux_known",
+    "aimed": {
+      "scopes": [
+        "inventory"
+      ]
+    }
   },
   "priority": 0,
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "all",
-      "items": []
+      "op": "has_tag",
+      "subject": "target",
+      "tag": "lamp"
     }
   },
   "costs": [
@@ -30,12 +37,7 @@
     "success": {
       "sequence": [
         {
-          "op": "light.ignite",
-          "item": "lantern"
-        },
-        {
-          "op": "light.ignite",
-          "item": "attic_lantern"
+          "op": "light.ignite"
         }
       ],
       "narration": {

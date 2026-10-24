@@ -51,8 +51,14 @@ const pools = (w: World) =>
       .filter((r) => ['ma', 'ash'].includes(r.resource.key))
       .map((r) => [r.resource.key, r.current]),
   );
-const cast = (w: World, word: string) => play(w, { type: 'cast', word });
+const cast = (w: World, word: string, target_id: string) =>
+  play(w, { type: 'cast', word, target_id });
 const lit = (w: World) => fuelView(w, id(w, 'item', 'lantern'))?.lit;
+/** An aimed spell's offer on its target's entry (loka-x6t.109). */
+const offer = (w: World, target: string, key: string) =>
+  [...view(w).entities, ...view(w).inventory]
+    .find((e) => e.id === target)
+    ?.actions.find((a) => a.action_key === key);
 const raise = (w: World, key: string) =>
   play(w, { type: 'raise_attribute', attribute: { ...C, kind: 'attribute', key } }).world;
 
@@ -85,8 +91,7 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
-// unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
-// keeps its pools, the climb back to the loft closes the errand before flamma is known, or the
+// unlit or writes no lit line, an untargeted lux casts, the climb back to the loft closes the errand before flamma is known, or the
 // errand dialogue (its accept refused) still opens while the errand is active, or the accept
 // reopens the errand's page with "Fetch the second word: not now" (M10c).
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
@@ -101,25 +106,22 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   // the accept is the offer's one answer: the conversation ends, no hub reopens on a refused accept
   assert.equal(pending(w, w.character), undefined);
   assert.equal(talk(w, 'hedge_wizard').opened, 'wizard_awaiting');
-  assert.deepEqual(words(w), [
-    {
-      word: 'lux',
-      available: false,
-      reason: {
-        code: 'insufficient_resource',
-        message: { key: 'resource.short', bindings: { amount: 1, resource: 'ash' } },
-      },
-    },
-  ]);
-  assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'insufficient_resource');
+  w = take(w, 'lantern');
+  const lantern = id(w, 'item', 'lantern');
+  const short = offer(w, lantern, 'lux');
+  assert.deepEqual(short?.available === false && short.reason, {
+    code: 'insufficient_resource',
+    message: { key: 'resource.short', bindings: { amount: 1, resource: 'ash' } },
+  });
+  assert.equal(
+    refused(w, { type: 'cast', word: 'lux', target_id: lantern }),
+    'insufficient_resource',
+  );
   w = perform(w, 'gather_ash').world;
   assert.deepEqual(pools(w), { ma: 5, ash: 1 });
-  const bare = cast(w, 'lux');
-  assert.deepEqual(bare.lines, ['narration.lux']); // nothing lit, no lit line
-  assert.deepEqual(pools(bare.world), { ma: 3, ash: 0 });
-  assert.equal(lit(bare.world), false);
-  w = take(w, 'lantern');
-  const r = cast(w, 'lux');
+  assert.equal(offer(w, lantern, 'lux')?.available, true);
+  assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'invalid_target'); // aimed: a target is required
+  const r = cast(w, 'lux', lantern);
   assert.deepEqual(r.lines, ['narration.lux', 'light.lantern_ignited']); // loka-y6yg.44 (M2b)
   w = r.world;
   assert.deepEqual(pools(w), { ma: 3, ash: 0 });
@@ -129,35 +131,32 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
 });
 
 // Breaks: the hush is not applied on entry or ends early or late, it leaves the cast, the say or
-// the shout open, the grimoire does not teach flamma, flamma's refusal names no reason (M1), the
+// the shout open, the grimoire does not teach flamma, an aimed spell is listed in spell_words, the
 // level-up or handover line is missing or doubled (M6), or the errand does not resolve in the read.
 test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma and ends the errand', () => {
   w = go(perform(w, 'gather_ash').world, 'north').world; // ash in hand: the hush, not the cost, refuses
   const entered = w.state.clock;
   assert.ok(labels(w).includes('condition.hushed'));
-  assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'invalid_state');
+  const lux = { type: 'cast', word: 'lux', target_id: id(w, 'item', 'lantern') } as const;
+  assert.equal(refused(w, lux), 'invalid_state');
   assert.equal(refused(w, { type: 'say', word: 'hello' }), 'invalid_state');
   assert.equal(refused(w, { type: 'shout', word: 'hello' }), 'invalid_state');
-  assert.equal(words(w)?.[0]?.available, false);
-  assert.equal(chip(w, 'say'), undefined); // a blocked verb offers no chip
+  assert.equal(offer(w, lux.target_id, 'lux'), undefined); // a blocked verb offers no chip or card
+  assert.equal(chip(w, 'say'), undefined);
   const still = wait(w, entered + 119).world;
-  assert.equal(refused(still, { type: 'cast', word: 'lux' }), 'invalid_state');
+  assert.equal(refused(still, lux), 'invalid_state');
   w = wait(still, entered + 120).world;
   assert.ok(!labels(w).includes('condition.hushed'));
-  assert.equal(words(w)?.[0]?.available, true);
+  assert.equal(offer(w, lux.target_id, 'lux')?.available, true);
   assert.equal(chip(w, 'say')?.available, true);
   w = take(w, 'grimoire'); // a readable item reads in hand
   const r = act(w, { type: 'read', target_id: id(w, 'item', 'grimoire') });
   assert.equal(r.decision.kind, 'accepted');
   w = r.world;
-  // Listed after the read; refused until the wight is in the room (its policy is npc_present).
+  // aimed spells are offered on their targets, never as words
   assert.deepEqual(
-    words(w)?.find((s) => s.word === 'flamma'),
-    {
-      word: 'flamma',
-      available: false,
-      reason: { code: 'invalid_state', message: { key: 'reason.flamma' } },
-    },
+    (words(w) ?? []).filter((s) => ['flamma', 'lux'].includes(s.word)),
+    [],
   );
   for (const line of ['levelling.level_up', 'narration.errand_reward'])
     assert.equal(r.lines.filter((l) => l === line).length, 1, line);
@@ -168,6 +167,7 @@ test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma an
 // Breaks: the errand pays no ward_taught or experience, or ward's policy passes at cha 6 or fails at cha 7 (the cha boundary).
 test('magic 4: level 2 from the errand; ward needs cha 7, one raise', () => {
   w = go(w, 'south').world;
+  assert.equal(offer(w, npc(w, 'hedge_wizard'), 'flamma'), undefined); // flamma's policy is npc_present wight
   assert.equal(fact(w, 'ward_taught'), true);
   assert.deepEqual(view(w).levelling, { level: 2, experience: 30, next: 100, unspent: 1 });
   const ward = {
@@ -264,7 +264,9 @@ const SMOKE = [{ sense: 'smell', text: 'cue.smoke', direction: 'down' }];
 // the lit crypt hides the wight, or the unlit crypt reads lit (lists the wight, misses
 // dark_description).
 test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', () => {
-  w = go(take(take(w, 'oilcan'), 'loft_bucket'), 'east').world;
+  w = take(take(w, 'oilcan'), 'loft_bucket');
+  assert.equal(offer(w, id(w, 'item', 'loft_bucket'), 'lux'), undefined); // lux needs a lamp
+  w = go(w, 'east').world;
   assert.equal(refused(w, { type: 'move', direction: 'down' }), 'exit_closed');
   assert.equal(refused(w, { type: 'open', direction: 'down' }), 'invalid_state');
   const card = view(w)
@@ -303,13 +305,12 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
 // Breaks: flamma ignores the wight's fire resistance or its own damage, opens no fight, leaves the
 // bier unburnt or the stair without smoke, ward does not halve the physical blow, Flee goes
 // elsewhere, the returning wight re-engages, the kill credits no one or the wrong body or writes no
-// kill line, or a third bolt casts on the corpse.
+// kill line, a third bolt casts on the corpse, or a wight hidden in the dark can be aimed at.
 test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the second bolt kills', () => {
   const lantern = { type: 'douse', item_id: id(w, 'item', 'lantern') };
-  const unseen = act(play(w, lantern).world, { type: 'cast', word: 'flamma' }); // loka-y6yg.48
-  assert.deepEqual(bier(unseen.world), ['burning']);
-  assert.deepEqual(unseen.lines, ['narration.flamma']); // the bier lights unseen in the dark
-  const r = act(w, { type: 'cast', word: 'flamma' });
+  const flamma = { type: 'cast', word: 'flamma', target_id: npc(w, 'wight') } as const;
+  assert.equal(refused(play(w, lantern).world, flamma), 'not_present'); // no aim at a wight in the dark
+  const r = act(w, flamma);
   assert.deepEqual(r.lines, ['narration.flamma', 'narration.burning.observed']); // the seen bier
   assert.deepEqual(types(r), ['action_completed', 'status_applied']);
   w = r.world;
@@ -327,7 +328,7 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   assert.deepEqual(view(w).cues, SMOKE);
   w = go(w, 'down').world;
   assert.equal(view(w).combat, undefined);
-  const kill = act(w, { type: 'cast', word: 'flamma' });
+  const kill = act(w, flamma);
   assert.deepEqual(kill.lines, ['narration.flamma', 'combat.npc_died']); // one kill line (M3)
   w = kill.world;
   const died =
@@ -338,12 +339,12 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   assert.equal(hp(w, 'wight'), 0);
   assert.deepEqual(view(w).levelling, { level: 2, experience: 40, next: 100, unspent: 0 });
   assert.equal(pools(w).ma, 0);
-  assert.equal(refused(w, { type: 'cast', word: 'flamma' }), 'invalid_state');
+  assert.equal(refused(w, flamma), 'invalid_target'); // a dead wight is no aimed target (loka-x6t.109.2)
 });
 
 // Breaks (loka-y6yg.48): the bier going out is not told in the lit crypt, told twice, or told to a
-// player who left or doused the lantern; Quench still works once the burn has ended.
-test('magic 7b: the bier going out is told only while seen; then Quench is refused', () => {
+// player who left or doused the lantern; Douse still works once the burn has ended.
+test('magic 7b: the bier going out is told only while seen; then Douse is refused', () => {
   const out = (v: World) => {
     const r = wait(v, v.state.clock + 180);
     return { world: r.world, lines: r.lines.filter((k) => k.startsWith('narration.burning')) };
@@ -485,7 +486,8 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
 test('magic sandbox: the attic; every word and the fight without a light', () => {
   let a = perform(go(taught(), 'up').world, 'gather_attic_ash').world;
   assert.equal(pools(a).ash, 1);
-  a = cast(take(a, 'attic_lantern'), 'lux').world;
+  a = take(a, 'attic_lantern');
+  a = cast(a, 'lux', id(a, 'item', 'attic_lantern')).world;
   assert.equal(fuelView(a, id(a, 'item', 'attic_lantern'))?.lit, true);
   for (const k of ['attic_bucket', 'attic_jar', 'attic_torch']) a = take(a, k);
   assert.deepEqual(statuses(drop(a, 'attic_torch'), 'attic_golem'), ['warm']);

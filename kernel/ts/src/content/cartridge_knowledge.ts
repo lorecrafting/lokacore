@@ -73,14 +73,16 @@ function mapPositions(c: Obj, named: Checks['named'], out: Diagnostic[]) {
 
 // Status reader 7: the terrain tags (air, chasm, water; a room so tagged bars moves into it) are
 // new Tag members, so a room, item or barrier declaring one needs kernel_api 1.62; row 43a's road
-// and marsh need 1.106.
+// and marsh need 1.106; lamp (aimed spells, loka-x6t.109) needs 1.119.
 function terrainFloor(c: Obj): Diagnostic[] {
   const uses = (tags: readonly string[]) =>
     [c.rooms, c.items, c.barriers].some((defs) =>
       Object.values((defs ?? {}) as Obj).some((d) => d.tags?.some((t: string) => tags.includes(t))),
     );
   const below = (v: string) => apiCmp(c.manifest.requires.kernel_api.at_least, v) < 0;
-  return (uses(TERRAIN) && below('1.62')) || (uses(['road', 'marsh']) && below('1.106'))
+  return (uses(TERRAIN) && below('1.62')) ||
+    (uses(['road', 'marsh']) && below('1.106')) ||
+    (uses(['lamp']) && below('1.119'))
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
 }

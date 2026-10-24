@@ -61,9 +61,12 @@ export function effect<R extends Effected>(
   body: EntityId,
   r: R,
   s: Effect,
+  subject: EntityId,
 ): R {
+  // An aimed spell's step that names no npc or item acts on its target (loka-x6t.109).
+  const aim = subject === body ? undefined : subject;
   if (s.op === 'light.ignite') {
-    const item = world.entityIds[refString(s.item)];
+    const item = s.item ? world.entityIds[refString(s.item)] : aim;
     const lit = item && transition(world, command.payload.actor_id, 'ignite', item);
     // A second ignite of one source reads the same committed fuel row: it writes nothing.
     const again = r.ops.some((o) => o.op === 'fuel.set' && o.item_id === item);
@@ -71,7 +74,7 @@ export function effect<R extends Effected>(
       ? { ...r, ops: [...r.ops, ...lit.ops], lines: [...r.lines, ...lit.narration] }
       : r;
   }
-  const npc = s.npc && world.entityIds[refString(s.npc)];
+  const npc = s.npc ? world.entityIds[refString(s.npc)] : aim;
   if (npc && (!living(world, npc) || slain(world, r.levels, npc))) return r;
   if (s.op === 'damage') return npc ? damage(world, command, mint, body, r, npc, s) : r;
   const events = [...r.events];
@@ -83,7 +86,7 @@ export function effect<R extends Effected>(
       o.op === 'status.transition' ? [`${o.body_id}|${refString(o.status)}`] : [],
     ),
   );
-  const on = [s.npc ? npc : body];
+  const on = npc ? [npc] : s.npc ? [] : [body]; // a named npc not in the world: no holder
   const sees = (id: EntityId) => visible(world, command.payload.actor_id, id);
   const done = statusStep(world, s, on, body, 0, { holders: new Map(), applied }, mint, emit, sees);
   const lines = [...r.lines, ...done.narration];

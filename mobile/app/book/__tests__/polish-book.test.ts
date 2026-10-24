@@ -60,6 +60,12 @@ export const bundle = (name = 'containers_cartridge_sampler_hash') =>
     readFileSync(new URL(`../../../../protocol/fixtures/${name}.json`, import.meta.url), 'utf8'),
   );
 export const fixture = bundle();
+// A component drawn outside book() (nodes() alone) gets stateless hooks; book()'s draw sets its own.
+(globalThis as any)[Symbol.for('loka-book-test-state')] = (v: any) => [
+  typeof v === 'function' ? v() : v,
+  () => {},
+];
+(globalThis as any)[Symbol.for('loka-book-test-effect')] = () => {};
 
 // Expand pure components only. Native animation and map gestures are exercised in Simulator review.
 let owner: unknown; // the component whose hooks run now: a slot another component held starts fresh

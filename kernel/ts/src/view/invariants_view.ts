@@ -10,7 +10,9 @@ import type {
   ExitView,
   GameView,
 } from '../contracts.gen.ts';
+import type { Offered } from '../commands/actions.ts';
 import { MOVES } from '../mechanics/barrier/rule.ts';
+import { folded } from '../mechanics/speech/shared.ts';
 import { VERBS as EQUIP_VERBS } from '../mechanics/equipment/rule.ts';
 import { VERBS as POSITION_VERBS } from '../mechanics/position/shared.ts';
 
@@ -28,12 +30,14 @@ type Any = any;
 // among the place's actions; a listed take is never refused not_present. A position verb
 // (position@1, c1-position) uses the selected action_key when supplied, else any matching place
 // action: available, it is never refused invalid_state; unavailable or absent, never accepted.
+// A cast at a target is its spell's offer there: `words` maps each spell word to its recipe key.
 export const gameview_agrees_with_admission = ({
   view,
   command,
   world_context_id: context = command.world_context_id,
   decision,
   resolves = {},
+  words = {},
   action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
@@ -62,12 +66,47 @@ export const gameview_agrees_with_admission = ({
   }
   if (type === 'read' || Object.hasOwn(POSITION_VERBS, type))
     return placeAgrees(view, command.payload, decision, action_key, commandOf);
-  const entry = advertised(view, command.payload, action_key, commandOf);
-  const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
-  if (!entry) return type !== 'perform' || decision.kind !== 'accepted';
+  return entryAgrees(view, command.payload, decision, action_key, commandOf, words);
+};
+
+// Any other verb: its listed entry, or for an aimed cast its spell's offer on the target.
+function entryAgrees(
+  view: GameView,
+  p: Any,
+  decision: Any,
+  action_key: string | undefined,
+  commandOf: (a: AdvertisedAction) => string | undefined,
+  words: Record<string, string>,
+) {
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  const aimed = p.type === 'cast' && p.target_id !== undefined;
+  const entry = aimed
+    ? aimedEntry(view, p, action_key ?? words[folded(p.word) ?? ''])
+    : advertised(view, p, action_key, commandOf);
+  // An untargeted cast's entry is the engine verb, which shows no spell's codes.
+  const shown = Object.hasOwn(SHOWN, p.type) && (p.type !== 'cast' || aimed) ? SHOWN[p.type]! : [];
+  if (!entry)
+    return aimed
+      ? decision.kind !== 'accepted' && !shown.includes(code)
+      : p.type !== 'perform' || decision.kind !== 'accepted';
   if (entry.available) return !shown.includes(code);
   return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
-};
+}
+
+// An aimed cast's entry is its spell's offer on the target (loka-x6t.109). The view lists none
+// that cast admission refuses, so with no entry only a cost or cooldown is a code it could show.
+const aimedEntry = (view: GameView, p: Any, key: string | undefined) =>
+  entityView(view, p.target_id)?.actions.find((a) => a.command === 'cast' && a.action_key === key);
+
+/** The observation's maps from the actor's resolved set: each key's command, each aimed spell word's key. */
+export const offerMaps = (actions: readonly Offered[]) => ({
+  resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
+  words: Object.fromEntries(
+    actions.flatMap((a) =>
+      a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
+    ),
+  ),
+});
 
 // Read targets one concrete detail; position targets the place. Respect the selected action key.
 function placeAgrees(
@@ -101,6 +140,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
     'invalid_state',
     'insufficient_resource',
   ],
+  cast: ['cooldown', 'insufficient_resource'], // an aimed offer is listed only where its policy holds
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
   put: ['not_present', 'not_owned', 'invalid_state', 'exit_closed', 'exit_locked'],
   take: ['not_present', 'too_heavy', 'over_load'], // reach and voluntary carrying admission
@@ -152,7 +192,7 @@ function advertised(
         a.target_ids?.[1] === p.container_id
       : p.type === 'take'
         ? (action_key === undefined || a.action_key === action_key) &&
-          (commandOf(a) ?? a.action_key) === 'take'
+          (a.command ?? commandOf(a) ?? a.action_key) === p.type
         : a.action_key === p.type,
   );
 }

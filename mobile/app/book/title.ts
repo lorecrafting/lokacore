@@ -6,13 +6,18 @@ import { AccessibilityInfo, Text } from 'react-native';
 // The first page (launch, a story) takes none, so no ring shows before keyboard use. One ref per
 // Book, read as each title mounts, so the page a turn leaves behind is not focused again.
 type Title = (Text & { focus?: () => void }) | null;
+export function focusTitle(title: Title) {
+  title?.focus?.();
+  if (title) AccessibilityInfo.sendAccessibilityEvent?.(title, 'focus');
+}
 export function titleFocus() {
   const box = {
     turned: false,
+    /** the latest title mounted, for a control that goes from under the focus (a Pick list's option) */
+    last: null as Title,
     ref: (title: Title) => {
-      if (!title || !box.turned) return;
-      title.focus?.();
-      AccessibilityInfo.sendAccessibilityEvent?.(title, 'focus');
+      if (title) box.last = title;
+      if (title && box.turned) focusTitle(title);
     },
   };
   return box;

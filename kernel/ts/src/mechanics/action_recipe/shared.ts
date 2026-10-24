@@ -10,6 +10,7 @@ import type {
   RecipeTarget,
   UnavailableReason,
   UseTool,
+  Word,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
@@ -21,6 +22,8 @@ import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { unbuildable } from '../service/build.ts';
 import { folded } from '../speech/shared.ts';
+import { living } from '../death/shared.ts';
+import { held } from '../light/shared.ts';
 
 export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
 
@@ -102,13 +105,54 @@ export function castAdmission(
 ): UnavailableReason | undefined {
   if (payload.type !== 'cast') return undefined;
   const spell = spellOf(world, payload.actor_id, payload.word);
+  // no `!body` guard: step refuses a foreign (bodiless) actor not_found before admission
   const body = bodyOf(world, payload.actor_id);
   const busy = !!spell?.duration && !!body && !!engaged(world, body);
   if (!spell || busy) return { code: 'invalid_state' };
-  return holds(world, payload.actor_id, spell.policy.root, { steps })
+  const id = payload.target_id;
+  const aimed = spell.target.kind === 'spell' ? spell.target.aimed : undefined;
+  if (aimed ? !aimedAt(world, body!, id, aimed.scopes) : id) return { code: 'invalid_target' };
+  return holds(world, payload.actor_id, spell.policy.root, { target: id, steps })
     ? undefined
     : policyRefusal(spell);
 }
+
+/** An aimed spell's target (loka-x6t.109): held by the caster (its light slot too), or a living npc or an item in its room. */
+const aimedAt = (
+  world: World,
+  body: EntityId,
+  id: EntityId | undefined,
+  scopes: readonly string[],
+) => {
+  if (!id || !living(world, id)) return false;
+  const at = world.state.containers[id];
+  const kind = world.entities[id]?.kind;
+  return scopes.some((s) =>
+    s === 'inventory'
+      ? held(world, body, id)
+      : at === world.state.containers[body] && kind === (s === 'room_occupants' ? 'npc' : 'item'),
+  );
+};
+
+/** Whether a view hides aimed spell `recipe` on `id` (loka-x6t.109): its cast there is refused. */
+export const aimedRefused = (
+  world: World,
+  actor: CharacterId,
+  recipe: ActionRecipe | undefined,
+  id: string,
+  steps: Steps,
+) =>
+  recipe?.target.kind === 'spell' &&
+  !!castAdmission(
+    world,
+    {
+      type: 'cast',
+      actor_id: actor,
+      word: recipe.target.word as string as Word,
+      target_id: id as EntityId,
+    },
+    steps,
+  );
 
 /** A failed policy's refusal, carrying the recipe's authored `reason` text when it has one (loka-j64e). */
 export const policyRefusal = (recipe?: ActionRecipe): UnavailableReason =>

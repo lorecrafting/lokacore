@@ -3,12 +3,13 @@ import { View } from 'react-native';
 import { cap, things, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
-import { ActionCard, Cards } from './actions.tsx';
+import { ActionCard, Cards, PickLists } from './actions.tsx';
+import type { GameView } from '../../packages/game-view/session.ts';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
 import { holding, NOTED, reasonOf, type Refusal } from './words.ts';
-import { commandOf } from './buttons.ts';
+import { commandOf, other } from './buttons.ts';
 import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 
@@ -46,7 +47,10 @@ const noted = (r: Refusal) =>
 const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown = (thing?.actions ?? [])
     .flatMap((a) => {
-      const word = !a.available && noted(a.reason);
+      // A resting use pair, or any refused aimed spell, is its Pick list row instead (book-ui.md, Pick a second thing).
+      const row = (r: Refusal) =>
+        commandOf(a) === 'cast' || (!!thing && !!other(a, thing.id) && r.code === 'cooldown');
+      const word = !a.available && !row(a.reason) && noted(a.reason);
       return word ? [{ ...a, word }] : [];
     })
     .filter((a, i, all) => all.findIndex((b) => b.action_key === a.action_key) === i); // one note per use, however many targets (loka-x6t.80)
@@ -96,7 +100,9 @@ export function ThingPage(p: {
   holder?: string; // a living NPC holding it (pass-1 E14)
   text: Say;
   label: Say; // a refused action reads the same word as an offered one
-  actions: Button[];
+  actions: Button[]; // its Pick list rows too (buttons.ts)
+  view: GameView;
+  pending?: boolean;
   log: DetailLine[];
   press: (b: Button) => void;
   contents: Thing[];
@@ -115,10 +121,15 @@ export function ThingPage(p: {
       {refusals}
       {!refusals && !p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
       <Cards>
-        {p.actions.map((b) => (
-          <ActionCard key={cardKey(b)} b={b} press={p.press} />
-        ))}
+        {p.actions
+          .filter((b) => !b.pick)
+          .map((b) => (
+            <ActionCard key={cardKey(b)} b={b} press={p.press} />
+          ))}
       </Cards>
+      {p.thing && p.actions.some((b) => b.pick) && (
+        <PickLists {...p} page={p.thing.id} buttons={p.actions} />
+      )}
       {inside(p)}
     </Page>
   );
@@ -151,6 +162,8 @@ export function Item(p: {
       actions={p.g
         .on(p.id)
         .map((b) => (held && commandOf(b) === 'take' ? { ...b, label: LABEL.lift } : b))}
+      view={p.screen.view}
+      pending={p.screen.pending}
       log={p.screen.detail(p.id)}
       press={(b) => p.press(b, p.id)}
       contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}

@@ -24,6 +24,7 @@ export type Button = {
   input: object;
   detail_id?: string; // UI owner only; concrete participants retain their wire target contract
   place?: true; // a concrete target offered among GameView's place actions
+  pick?: { reason?: string }; // a row of a Pick list (pick.ts); with a reason, its unavailable form
   token?: string; // none: no freshness check (a test's hand-made button)
   context?: string; // only projected buttons can refresh across an unchanged live update
 };

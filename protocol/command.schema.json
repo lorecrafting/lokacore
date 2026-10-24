@@ -640,7 +640,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
+          "description": "Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it; target_id is the one entity an aimed spell is cast at (kernel_api 1.119, loka-x6t.109), refused invalid_target on an unaimed spell, missing on an aimed one or outside its scopes. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
           "type": "object",
           "properties": {
             "type": {
@@ -651,6 +651,9 @@
             },
             "word": {
               "$ref": "action.schema.json#/$defs/Word"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": ["type", "actor_id", "word"],

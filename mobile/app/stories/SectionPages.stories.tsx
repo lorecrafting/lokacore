@@ -1,5 +1,6 @@
 // C row Pages, Sections (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+import { expect } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
@@ -53,6 +54,34 @@ export const CharacterPointsToSpend: StoryObj = {
     },
   }),
   name: 'Character with points to spend',
+};
+// An aimed spell (loka-x6t.109.5): the Spells block draws a Cast on… list of its targets, never a
+// Spells-section line. Breaks: the list is missing, or the spell shows as `lux, cast: …`.
+const sword = CharacterFullView.view.inventory[0]!;
+const lux = {
+  action_key: 'lux',
+  command: 'cast',
+  label: 'spell.lux',
+  target: { kind: 'entity', scopes: ['inventory'] },
+  target_ids: [sword.id],
+  available: true,
+};
+export const CharacterAimedSpell: StoryObj = {
+  ...pageStory({
+    ...CharacterFullView,
+    view: {
+      ...CharacterFullView.view,
+      inventory: [{ ...sword, actions: [...sword.actions, lux] }],
+    },
+  }),
+  name: 'Character with an aimed spell',
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Lux, cast on…' }));
+    await expect(
+      canvas.getByRole('button', { name: /^A training sword, cast lux on/i }),
+    ).toBeVisible();
+    await expect(canvas.queryByText(/, cast:/)).toBeNull();
+  },
 };
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };

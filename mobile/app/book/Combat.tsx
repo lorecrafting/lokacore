@@ -1,8 +1,10 @@
 // A full reading page with the offered actions following its combat history.
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import { bandPhrase, type group } from './model.ts';
-import { ActionCard, Cards } from './actions.tsx';
+import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
+import { commandOf } from './buttons.ts';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
 import { Control, Page, RunningHead } from './pages.tsx';
@@ -17,23 +19,43 @@ type Encounter = NonNullable<Screen['ended']>;
 // mock's entity lines; Page's doc comment). A foe with name words reads definite, "the goblin"
 // (a proper name stays bare), one line per foe (loka-6qi). Your own bleeding and conditions stay on the
 // status line and Character (book-ui.md, Live combat response).
-function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat: Encounter }) {
+// Under a live foe's line, its Cast a spell… list; a pick keeps the combat page (loka-x6t.109.5).
+function Fight(
+  p: Pick<Screen, 'view' | 'text' | 'buttons' | 'pending'> & {
+    combat: Encounter;
+    press: (b: Button) => void;
+  },
+) {
   const c = usePalette();
   const t = useType();
+  const { view, text, combat } = p;
   const { opponent_id: id, name, band, words } = combat;
+  const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
+  const casts = p.buttons.filter((b) => commandOf(b) === 'cast');
   return (
     <View>
       {(combat.active_opponents ?? [{ id, name, band, words }]).map((opponent) => (
-        <Text key={opponent.id} style={prose(c, t)}>
-          {opponent.words
-            ? `${opponent.words.article ? `${LABEL.the} ` : ''}${text(opponent.words.bare)}`
-            : text(opponent.name)}
-          {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
-            ? ' (your target)'
-            : ''}
-          {/* a closed encounter's band is stale (a dead foe has none) */}
-          {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
-        </Text>
+        <View key={opponent.id}>
+          <Text style={prose(c, t)}>
+            {opponent.words
+              ? `${opponent.words.article ? `${LABEL.the} ` : ''}${text(opponent.words.bare)}`
+              : text(opponent.name)}
+            {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
+              ? ' (your target)'
+              : ''}
+            {/* a closed encounter's band is stale (a dead foe has none) */}
+            {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
+          </Text>
+          <PickLists
+            page={opponent.id}
+            view={view}
+            buttons={casts.filter((b) => b.detail_id === opponent.id)}
+            text={text}
+            press={p.press}
+            pending={p.pending}
+            state={shown}
+          />
+        </View>
       ))}
     </View>
   );
@@ -65,7 +87,7 @@ export function Combat(p: {
     <View style={{ backgroundColor: c.bg, flex: 1 }}>
       <RunningHead view={view} text={text} />
       <Page title="Combat" foot={foot}>
-        <Fight view={view} text={text} combat={combat} />
+        <Fight {...p.screen} combat={combat} press={p.press} />
         <LogLines lines={combatLog} />
         {view.combat && (
           <Cards>

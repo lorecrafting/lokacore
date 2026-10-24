@@ -118,6 +118,7 @@ function sectionPage(p: BodyProps, page: Page) {
         world={p.world}
         buttons={p.screen.buttons}
         press={p.press}
+        pending={p.screen.pending}
       />
     );
   if (page.kind === 'map')

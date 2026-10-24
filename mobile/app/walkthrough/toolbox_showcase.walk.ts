@@ -84,24 +84,22 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await moves('south');
   await take(/^(?:a )?red apple, open$/i, /^Take a red apple/);
   await held(/^a red apple/);
-  await tap(/^Give a red apple to the farmer/);
+  await tap(LABEL.giveTo);
+  await tap(/^The farmer, give a red apple/);
   await tap(/^(?:the )?farmer, open$/i);
   await tap('Trade two pelts for a knife');
   await tap(LABEL.leave);
 };
 
-const pondAndStew = async (
-  screen: Screen,
-  { tap, take, held, putAway, position, moves }: Steps,
-) => {
+const pondAndStew = async (screen: Screen, { tap, take, held, position, moves }: Steps) => {
   await moves('east');
   await take(/^(?:a )?fishing rod, open$/i, /^Take a fishing rod/);
   const fish = /^(?:an? )?(trout|salmon|eel), open$/i;
   let landed = 0;
   for (let i = 0; landed < 2 && i < 12; i++) {
     await held(/^a fishing rod/);
-    await tap(/^Fish in/);
-    await putAway();
+    await tap(LABEL.useOn); // the rod's Pick list; a pick returns to World (loka-x6t.109)
+    await tap(/, fish in the pond$/);
     if (await screen.getByRole('button', fish).first().isVisible()) {
       await take(fish, /^Take an? (trout|salmon|eel)/);
       landed++;
@@ -147,7 +145,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
   await tap('Hide');
   await moves('east', 'north');
   await tap(/^(?:the )?merchant, open$/i);
-  await take(/^The merchant's purse, open/, /^Lift$/);
+  await take(/^(?:the )?merchant's purse, open/i, /^Lift$/);
   await moves('south', 'west');
   await npc(/^(?:the )?fence, open$/i, /^Sell the merchant's purse/);
   await moves('east', 'east');
@@ -159,7 +157,7 @@ const law = async (screen: Screen, { tap, take, moves }: Steps) => {
   await tap(/^Open the strongroom door/);
   await tap('Go south');
   await take(/^(?:a )?strongroom chest, open$/i, /^Put a tallow candle/);
-  await take(/^A tallow candle, open/, /^Take a tallow candle/);
+  await take(/^(?:a )?tallow candle, open/i, /^Take a tallow candle/);
   await settle();
 };
 
@@ -180,7 +178,9 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await wizard('Fetch the second word');
   await tap('Gather ash');
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
-  await speak('lux', LABEL.cast);
+  await held(/^the lantern/);
+  await tap(LABEL.castASpell); // the aimed spell's Pick list on the held lamp (loka-x6t.109)
+  await tap(/^Lux, cast lux on/); // a pick returns to World
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
   await take(/^(?:the )?grimoire, open$/i, /^Take the grimoire/);
@@ -197,14 +197,14 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
 
 const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
-  const { tap, take, held, putAway, moves, speak } = steps;
+  const { tap, take, held, moves, speak } = steps;
   await loft(r, steps);
   await take(/^(?:the )?oilcan, open$/i, /^Take the oilcan/);
   await take(/^(?:the )?loft bucket, open$/i, /^Take the loft bucket/);
   await moves('east');
   await held(/^the oilcan/); // a use recipe is offered on the held tool
-  await tap(/^Oil/);
-  await putAway();
+  await tap(LABEL.useOn); // the oilcan's Pick list; a pick returns to World
+  await tap(/, oil the winch$/);
   await tap('Map');
   await tap(/^Open/);
   await held(/^the lantern/);
@@ -214,12 +214,17 @@ const magic = async (r: Walk, steps: Steps) => {
   await moves('up');
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await moves('down');
-  await speak('flamma', LABEL.cast);
+  const flamma = async () => {
+    await tap(/^(?:an? )?wight, open$/i);
+    await tap(LABEL.castASpell); // the aimed spell's Pick list on the wight's page (loka-x6t.109)
+    await tap(/^Flamma, cast flamma on/);
+  };
+  await flamma();
   await tap(/^Flee/);
   await tap(LABEL.backToWorld);
   await moves('down');
-  await speak('flamma', LABEL.cast); // the second bolt kills the wight (magic 7)
-  // No Quench: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
+  await flamma(); // the second bolt kills the wight (magic 7)
+  // No Douse: the bier burns 180 game s, about 3.6 s of wall time at rate 50, a race the walk
   // cannot win reliably; kernel test magic 8 pins the quench. The bucket stays held.
   await moves('up', 'west', 'west');
   await r.note('The golem yard');
