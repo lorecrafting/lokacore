@@ -242,3 +242,19 @@ Change these passages so they match the placement rule:
   batch (PM ruling).
 - Combat lines also land in the room event log: the log is the full record (owner chose "Yes, full record").
 - A plain move starts the new room's log with "You go north." (owner chose "Yes").
+
+## Display table and squelch (owner 2026-10-24, quoted: "Yes i like your idea if still logging to the room but compacted and yes go with all your recs")
+
+- The engine always emits every event (key + params; first person for the actor, third person for others). Nothing is
+  squelched in the engine, so a telnet client prints the full stream.
+- Slice 3 adds ONE Book display table keyed by event key, choosing per context: `in place` (shown on the open page),
+  `log` (room event log) or `quiet` (no text on screen).
+- First quiet rules: your own buy and sell on the shop pages, and your own take/put on an open container's page. The
+  page's own change (purse, stock or contents list; later the coin sound, loka-x6t.123) is the feedback.
+- Quiet lines still go to the room event log, compacted: consecutive same-key lines for the same item and visit merge
+  ("You buy 2 cobs of bread."). Define the merge rule narrowly (same key, same item, same visit, no other line between)
+  and test it.
+- Quiet is visual only: every quiet line is still announced to screen readers (loka-x6t.124).
+- Other people's actions are always shown in the room log.
+- Later, not this batch: a player "verbose / brief" setting that turns quiet lines back on (file it).
+- The designer records the display-table rule in docs/design/interaction-patterns.md (Feedback) and book-ui.md.
