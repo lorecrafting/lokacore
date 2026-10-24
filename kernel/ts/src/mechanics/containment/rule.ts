@@ -91,10 +91,10 @@ const transfer: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) =
 
 // Each accepted take, drop, give and put narrates one engine line (loka-kgd.185, shared.ts
 // itemLine). A line already there (a stolen take's theft narration) stands alone.
-export const decide: Rule<'containment'> = (world, command, mint, steps) => {
+export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const d = transfer(world, command, mint, steps);
   if (d.kind !== 'accepted' || d.narration?.length) return d;
-  const line = itemLine(world, command.payload);
+  const line = itemLine(world, command.payload, steps);
   return line ? { ...d, narration: [line] } : d;
 };
 

@@ -16,6 +16,7 @@ import { actorOf, bodyOf, has, refString, values } from '../../runtime/decision.
 import { living } from '../death/shared.ts';
 import { movable } from '../../runtime/created.ts';
 import { derived } from '../attributes/shared.ts';
+import { describeEntity } from '../description_variant/rule.ts';
 
 type Failure =
   'too_heavy' | 'over_load' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
@@ -303,24 +304,29 @@ function effective(world: World, id: string, grams: number): number | Failure {
 }
 
 /** The engine line of a take, drop, give or put (loka-kgd.185): `item.<outcome>` binding the item's
- * short (and the recipient's or container's), the actor as a participant; words: mobile/packages/game-view/line_words.ts. */
-export function itemLine(world: World, p: CommandPayload) {
-  const short = (id: EntityId) => world.entities[id].short;
+ * short as the actor sees it (and the recipient's or container's), the actor as a participant; words: mobile/packages/game-view/line_words.ts. */
+export function itemLine(world: World, p: CommandPayload, steps: Steps) {
+  // Each named entity's short as the actor sees it: a status variant ("a notched sword") as on the page.
   const line = (
     q: { actor_id: CharacterId; item_id: EntityId },
     key: string,
-    other = {},
+    named: Record<string, EntityId> = {},
     role = {},
   ) => ({
     key: key as TextKey,
-    bindings: { item: short(q.item_id), ...other },
+    bindings: Object.fromEntries(
+      Object.entries({ item: q.item_id, ...named }).map(([slot, id]) => [
+        slot,
+        describeEntity(world, q.actor_id, id, 'short', steps),
+      ]),
+    ),
     participants: { actor: bodyOf(world, q.actor_id)!, ...role },
   });
   if (p.type === 'take') return line(p, 'item.taken');
   if (p.type === 'drop') return line(p, 'item.dropped');
   if (p.type === 'give')
-    return line(p, 'item.given', { to: short(p.recipient_id) }, { recipient: p.recipient_id });
+    return line(p, 'item.given', { to: p.recipient_id }, { recipient: p.recipient_id });
   if (p.type === 'put')
-    return line(p, 'item.put', { container: short(p.container_id) }, { container: p.container_id });
+    return line(p, 'item.put', { container: p.container_id }, { container: p.container_id });
   return undefined;
 }
