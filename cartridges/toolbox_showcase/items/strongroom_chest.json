@@ -11,6 +11,7 @@
     "room": "strongroom"
   },
   "container": true,
+  "barrier": "strongroom_chest_lid",
   "immune": [
     "growing",
     "growing_croft"

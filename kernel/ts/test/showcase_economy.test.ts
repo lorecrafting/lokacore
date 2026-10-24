@@ -1,4 +1,4 @@
-// size: allow 585, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 587, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -522,6 +522,7 @@ test('economy 8: buy the strongroom, unlock, enter, use the chest, lock behind',
   assert.equal(where(s, s.body), room(s, 'strongroom'));
   const chest = id(s, 'item', 'strongroom_chest');
   const key_ = id(s, 'item', 'strongroom_key');
+  s = play(s, { type: 'open', target_id: chest }).world;
   const put = { type: 'put', item_id: key_, container_id: chest };
   assert.equal(refused(forge(s, 'owns_strongroom', false), put), 'permission_denied');
   s = play(s, put).world;
@@ -567,8 +568,9 @@ test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () =>
   const held = (x: World) =>
     ['yard_candle_01', 'yard_candle_02'].filter((c) => where(x, id(x, 'item', c)) === seller);
   assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 3);
+  const opened = play(y, { type: 'open', target_id: id(y, 'item', 'yard_crate') }).world;
   assert.equal(
-    refused(y, { type: 'take', item_id: id(y, 'item', 'yard_candle_02') }),
+    refused(opened, { type: 'take', item_id: id(y, 'item', 'yard_candle_02') }),
     'permission_denied',
   );
   y = play(y, trade(y, 'buy', 'yard_candle_01', 3, 'yard_chandler')).world;

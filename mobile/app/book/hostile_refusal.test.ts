@@ -39,7 +39,8 @@ test('Nell at standing -2 shows her refusal line, no Talk or Trade; at 0 she tra
 });
 
 // Breaks: a buy leaves the buy page, its line misses the page's history, the purse does not
-// redraw, Sell does not open the sell page, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought).
+// redraw, Sell does not open the sell page, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought);
+// a sale leaves the sell page, does not redraw the purse, or keeps the sold row.
 test('a buy keeps the buy page: its line, the new purse, the row refused in words', () => {
   const b = book(showcase as never);
   b.map();
@@ -56,6 +57,12 @@ test('a buy keeps the buy page: its line, the new purse, the row refused in word
   b.tap(LABEL.sell); // the sell page lists the bought cob with its price (owner pick mvlynyikyw57)
   assert.equal(b.text()[0], 'Nell, the baker will buy…', JSON.stringify(b.text()));
   assert.ok(b.labels().includes('Cob of bread — 1p'), JSON.stringify(b.labels()));
+  const held = purse(b.text());
+  b.tap('Cob of bread — 1p'); // a sale keeps the sell page, redraws the purse, drops the row (owner 2026-10-23)
+  const sold = b.text();
+  assert.equal(sold[0], 'Nell, the baker will buy…', JSON.stringify(sold));
+  assert.ok(held && purse(sold) && purse(sold) !== held, JSON.stringify([held, sold]));
+  assert.ok(!b.labels().includes('Cob of bread — 1p'), JSON.stringify(b.labels()));
   b.tap(LABEL.leave);
   assert.equal(b.text()[0], 'Nell, the baker can sell you…');
   b.tap(LABEL.leave);

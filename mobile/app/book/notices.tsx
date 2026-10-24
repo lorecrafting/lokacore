@@ -123,6 +123,7 @@ function NoticeLink(p: Props & { notice: Notice }) {
 /**
  * A room's notices and boards: an Entity line when Read is offered, else the Action card's
  * unavailable form; a notice the description links (proseLinks) draws in the prose instead.
+ *   Superseded by book-ui.md Room page anatomy: every one becomes a prose link (loka-x6t.127).
  * - Use: the room page.
  * - Story: RoomPage.stories.tsx
  */

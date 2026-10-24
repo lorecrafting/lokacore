@@ -11,6 +11,7 @@
     "room": "vault_yard"
   },
   "container": true,
+  "barrier": "hoard_chest_lid",
   "immune": [
     "growing",
     "growing_croft"

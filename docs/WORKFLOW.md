@@ -21,7 +21,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 |---|---|---|
 | Lookup or broad search; a brief drafter's search, citation re-anchoring and consumer inventories | [`Explore`](../.claude/agents/Explore.md) agent, Haiku (project override; the built-in inherits Opus); the drafter keeps only decisions | never for judgment |
 | PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); bounded copy, content or docs edit from a fixed brief | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
-| Brief drafting | Opus or Sonnet for a row that follows an existing pattern, an S row or content (owner, 2026-10-14) | Fable drafts the brief for a new module, a contract change (save, protocol, world graph), a Realm-sensitive row or a new interaction pattern: one Fable run per batch |
+| Brief drafting | Opus for a row that follows an existing pattern, an S row or content (owner, 2026-10-14; never Sonnet since 2026-10-23) | Opus drafts every other brief too (a new module, a Realm-sensitive row, a new interaction pattern); Fable drafts a save, protocol or core engine contract brief while weekly usage is under about 80%, else Opus; Sonnet never drafts a brief (owner 2026-10-23 accepted the PM recommendation, quoted: "okay lets go with your rec") |
 | Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as single writer). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to the Opus designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
@@ -223,7 +223,8 @@ Chapter closure follows the [browser E2E loop](decisions/owner-decision-chapter-
 ### Book interaction delivery
 
 For every mechanic that changes what the player sees or can choose, the brief
-names its existing [Book component pattern](BOOK-UI-COMPONENTS.md), exact
+names its existing [Book component pattern](BOOK-UI-COMPONENTS.md), its page template and
+patterns from [interaction patterns](design/interaction-patterns.md) (its checklist), exact
 action/result owner, detail history, nested return and one browser interaction.
 Amend the canonical [Book UI rules](system/book-ui.md) in the **same slice** as
 the mechanic whenever the interaction contract changes. Reuse current pages and

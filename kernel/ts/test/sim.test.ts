@@ -1,4 +1,4 @@
-// size: allow 579, the toolbox showcase pass joins the corpus run and the red controls (notice cards: loka-x6t.120)
+// size: allow 584, the toolbox showcase pass joins the corpus run and the red controls (notice cards: loka-x6t.120)
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
 // (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every
@@ -243,6 +243,11 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     .filter((l) => l && !l.startsWith('#'));
   assert.ok(pinned.length <= 13, 'baseline over cap 13'); // 13: put joined take/drop/give, loka-kgd.185
   assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
+  // SILENT.close is justified only by item lids (a door's close is narrated): the showcase has them.
+  const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.items ?? {}).some(
+    (i) => i.barrier,
+  );
+  assert.ok(lidded || !silent.has('close'), 'close is silent in a cartridge with no item lids');
   assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
   for (const seed of PINNED)

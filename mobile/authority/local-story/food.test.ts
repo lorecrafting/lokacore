@@ -35,6 +35,8 @@ test('real SQLite carries the same apple through storage/drop/Take/give/Eat and 
     ada = entity(a.initial, 'npc', 'cook');
   a.invoke('take', [id]);
   a.reopen();
+  a.invoke('open', [chest]); // the crate's lid starts closed; the reopen proves the open lid is saved
+  a.reopen();
   a.invoke('put', [id, chest]);
   a.reopen();
   assert.equal(a.story.world().state.containers[id], chest);

@@ -76,9 +76,10 @@ function ShopCards(p: { view: GameView; rows: Row[]; press: (b: Button) => void 
  *   (`Cob of bread — 4p`, refused as its Note form with a words.ts reason, `… — 4p: can't
  *   afford`), the purse Note, this visit's history, then the Sell card, drawn only with a row.
  *   The sell page, titled `<Name> will buy…`, draws one card per thing the player may sell with
- *   its price, then the purse and history. A buy or sale keeps its page: its line joins the
- *   person's visit history (shared with the NPC page) and the purse redraws; a row that goes moves
- *   focus to the page title. No status line (a detail page).
+ *   its price, then the purse and history. A buy or sale keeps its page, no page turn (owner,
+ *   2026-10-23): its line joins the person's visit history (shared with the NPC page), the purse
+ *   and the list redraw (sold out takes the refused form; a thing sold leaves the sell list), and
+ *   a row that goes moves focus to the page title. No status line (a detail page).
  * - States: buyable; refused; sell page; nothing to sell.
  * - Story: NpcPage.stories.tsx
  */

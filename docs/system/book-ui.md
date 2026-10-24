@@ -22,7 +22,33 @@ are listed in the generated [review index](../reviews/README.md). The per-mechan
 sections of retired chapters were removed on 2026-10-22; the rules they shared are stated below,
 and their text is at [the last commit that held them](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md).
 
+## Room page anatomy
+
+The rule every World-page passage obeys ([owner decision](../decisions/owner-decision-room-page-anatomy-2026-10-23.md)).
+The scrolling World page is, top to bottom, and nothing else:
+
+1. The room title.
+2. The description paragraph. Its only pressables are fixture and furniture links in the prose,
+   each opening its own detail page, where that thing's actions live.
+3. The people paragraph (players and NPCs), each name opening its detail page.
+4. The items paragraph, each name opening its detail page.
+5. The room event log. Everything ambient is a log line here: sounds from the next room, weather
+   changes, room events, NPCs acting or emoting, arrivals and departures.
+
+No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
+fixture, person or item detail page. On hold: a skill check (perception, lore) may add a sentence,
+fixture or furniture to the description paragraph itself, never a block of its own. The minimap
+and joystick, the status line and the say field sit outside the scrolling page and keep their own
+rules below. A passage below that draws anything else on the World page is superseded; where the
+Book still draws it, the passage names the Beads item that removes it.
+
 ## World and status entry
+
+Superseded where it differs by the [room page anatomy](#room-page-anatomy): the place verbs, unavailable
+verb lines and aimed World verb lines below are removed by `loka-x6t.120`; the storylet card
+(storylets are to be retired, owner 2026-10-23), the unlinked notice, board, bed, transport and
+harvest entries, the exit warning notes and the sense cues block are still drawn and are removed by
+`loka-x6t.127`.
 
 World is one current-room page. Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
 description, projected interactibles, offered place actions and, last, the event log, so a
@@ -250,7 +276,7 @@ Give to…), then asks, Trade and services (a person's page orders its own cards
 [rule](#npc-dialogue-and-action-details)); the thing's own pick options (Use an item…, Use on…, Cast a
 spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
-combat details follow this order; World retains its [room-page order](#world-and-status-entry).
+combat details follow this order; World follows the [room page anatomy](#room-page-anatomy).
 A page's local returns (Leave, Back to World, Back to board, Back to map,
 Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
 control ends the page; offered actions never do. Item, notice, board, NPC and shop pages draw
@@ -323,8 +349,11 @@ only while the player holds something the person will buy. Sell opens the child 
 **<Name> will buy…** (owner pick mvlynyikyw57): one card per thing the GameView offers to sell
 to this person, with its price ("Cob of bread — 1p"), then the purse and history; Leave
 returns to the buy page. It lists only what the engine marks sellable (wider sale lists are
-loka-x6t.117). A buy or sale keeps its page open: its line joins the person's visit history,
-drawn there and again on the person's page, and the purse redraws. Shop stock is not listed
+loka-x6t.117). A buy or sale keeps its page open, with no page turn and no return to the person (owner,
+2026-10-23): its line joins the person's visit history, drawn there and again on the person's
+page, the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
+"Cob of bread — 4p: sold out"; a thing sold leaves the sell list). A row that goes moves focus to
+the page title. Shop stock is not listed
 under the person's Held. Each service is its own Action card
 with its authored label; the claim and cancel of an order sit under a **Your order** Section
 title after the order card, and show only while an order is open (either is offered, or either
@@ -413,6 +442,8 @@ When Take removes an item from a corpse's Contents, the confirmed result returns
 that corpse detail, puts the named pickup line in its local history once, and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
 closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps **Inside** and Take.
+
+A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Inside: Open is one of its own cards (first group), an accepted Open keeps the page, logs **Opened.** and the next GameView adds the Inside list; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**; one refused because the load is full reads
@@ -705,9 +736,13 @@ When GameView carries actor_name, the Character page's first line is its authore
 
 ## Sense cues details
 
+Superseded by the [room page anatomy](#room-page-anatomy): a cue is an ambient log line, not a block after the entity lines; the Book still draws the block (removed by `loka-x6t.127`).
+
 GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block. The presenter never walks exits or decides what reaches the player.
 
 ## Aside details
+
+Being removed entirely by `loka-x6t.125` (owner 2026-10-23); until then a room's or person's aside is a World log line, as the [room page anatomy](#room-page-anatomy) allows.
 
 GameView `place.asides`, a present NPC's `asides` and a notice's `asides` are the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)) or a present person's remark ([companion remarks](mechanics.md#companion-remarks-npc-asides-toolbox-row-fd10)). They draw no block of their own on any page (owner pick mvlrbpi8u4ai). A room's and a present person's aside is one plain line in the World log, drawn in ink as narration is (never a dim Note), logged when it first shows in the GameView during the room visit (on entering, on a cold open, or later when it starts to hold: a skill rises, a person arrives, the room is lit), after that update's narration and arrivals, room asides first, then the people's in listed then authored order. It logs once per room visit, keyed by owner and text key: a re-render, an aside that stops and starts holding again, or a person who leaves and returns does not log it again; a room change starts a new visit and logs it anew. Asides are present tense and never join the [away recap](#away-recap): while a settlement's lines are held, an aside waits and logs once the settlement settles, after its lines. An NPC's page shows none (its asides are in the World log). A notice's asides lead that notice's history, plain lines in projected order before its read lines, for as long as the page is open. The skill or speaker is in the authored words, never a label, icon or colour; link markup shows as plain words. Darkness is the engine's omission: a dark room carries no `place.asides`, while a perceived NPC's asides arrive and log; the presenter never decides which aside holds.
 
@@ -756,6 +791,8 @@ a receipt with narration draws that instead. Beyond this echo the Book never wri
 word anywhere; only its writer sees it.
 
 ## Storylet card details
+
+Superseded by the [room page anatomy](#room-page-anatomy): the World page draws no card; the Book still draws it (removed by `loka-x6t.127`; storylets are to be retired, owner 2026-10-23).
 
 GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never among them, so the hour's one pick is told from the place's standing verbs; available or unavailable it keeps that block (pass-1 R2). The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
 

@@ -109,7 +109,10 @@ export function changeKey(command: Command, d: DecisionResult): string | undefin
 }
 
 // Action keys meant to commit a change with no narration line, each with its reason (pass-1 check 4).
-export const SILENT: Record<string, string> = {};
+export const SILENT: Record<string, string> = {
+  close:
+    'the closed lid is its own line on the page; same as pinned open (loka-kgd.185, loka-x6t.121)',
+};
 
 /** Check 4's findings: a new silent key, and a pinned one now narrated (remove its pin). */
 export function unnarrated(s: Pick<Summary, 'changed' | 'silent'>, pinned: string[]): string[] {

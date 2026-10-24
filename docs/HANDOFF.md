@@ -92,10 +92,16 @@ Douse), branch `toolbox/batch-aimed-spells`, five slices in order.
 Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),
 branch `toolbox/batch-room-words`, five slices in order.
 
-## Room fixtures batch (brief drafted 2026-10-23, owner go pending)
+## Container open batch (owner go 2026-10-23)
+
+Briefs: [docs/briefs/container-open/README.md](briefs/container-open/README.md) (loka-x6t.121 containers need Open
+first: the showcase seed sack gets a lid, no engine change), branch `toolbox/batch-container-open`, one slice plus a
+conditional second on the owner's answer.
+
+## Room fixtures batch (draft PR #464)
 
 Briefs: [docs/briefs/room-fixtures/README.md](briefs/room-fixtures/README.md) (loka-x6t.120 fixture actions off World,
-loka-x6t.125 asides removed, loka-x6t.127 room anatomy), branch `toolbox/batch-room-fixtures`, five slices in order.
+loka-x6t.125 asides removed, loka-x6t.127 room anatomy), branch `toolbox/batch-room-fixtures`.
 
 ## Overnight results (2026-10-23)
 

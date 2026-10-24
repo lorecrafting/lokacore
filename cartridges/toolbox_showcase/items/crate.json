@@ -11,6 +11,7 @@
     "room": "storeroom"
   },
   "container": true,
+  "barrier": "crate_lid",
   "immune": [
     "growing",
     "growing_croft"
