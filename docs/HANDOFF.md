@@ -92,6 +92,12 @@ Douse), branch `toolbox/batch-aimed-spells`, five slices in order.
 Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),
 branch `toolbox/batch-room-words`, five slices in order.
 
+## Container open batch (owner go 2026-10-23)
+
+Briefs: [docs/briefs/container-open/README.md](briefs/container-open/README.md) (loka-x6t.121 containers need Open
+first: the showcase seed sack gets a lid, no engine change), branch `toolbox/batch-container-open`, one slice plus a
+conditional second on the owner's answer.
+
 ## Overnight results (2026-10-23)
 
 - MERGED #455 loka-3w3q + x6t.26 death lines outside combat (kernel_api 1.117; "You fall.", "You wake at the inn.";

@@ -707,7 +707,20 @@
     },
     "description": "item.sack.description",
     "kind": "item",
+    "state": "open",
     "actions": [
+     {
+      "available": true,
+      "action_key": "close",
+      "label": "action.close",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": []
+     },
      {
       "available": false,
       "action_key": "take",

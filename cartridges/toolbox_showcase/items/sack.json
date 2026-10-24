@@ -11,6 +11,7 @@
     "room": "farm_yard"
   },
   "container": true,
+  "barrier": "sack_tie",
   "immune": [
     "growing",
     "growing_croft"

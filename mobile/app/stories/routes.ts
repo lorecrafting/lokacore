@@ -85,6 +85,7 @@ export const routes: Record<string, Step[]> = {
   'item-fuel': [go('up'), 'lantern, open'],
   'item-container': [
     ...sack,
+    'Open a seed sack',
     'A turnip seed, open',
     'Take a turnip seed',
     'seed sack, open',
@@ -131,6 +132,6 @@ export const checkpoints: Record<string, Step[]> = {
   'nell-shop': [...nell],
   'goblin-combat': [...goblins],
   'loft-map': [go('up'), (b) => b.map()],
-  'sack-contents': [...sack],
+  'sack-contents': [...sack, 'Open a seed sack'],
   'night-inn': [night],
 };
