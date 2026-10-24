@@ -86,15 +86,24 @@ test('W1, W2: causes, fired and the leaf at the kernel evaluation point', () => 
 test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () => {
   const quest = { op: 'quest_state', quest: ref('quest', 'lantern'), state: 'active' };
   const broken = load((c) => {
-    c.reactions[BELL].when.root = { op: 'all', items: [rung(-1), quest] };
+    c.reactions[BELL].when.root = {
+      op: 'all',
+      items: [rung(-1), quest, { op: 'not', item: quest }],
+    };
   });
   const w3 = row(broken, 7);
   assert.equal(w3.fired, 0);
   assert.deepEqual(
-    (w3.when as any).items.map((x: { held: number }) => x.held),
-    [1, 0],
+    (w3.when as any).items.map((x: any) => (x.item ?? x).held),
+    [1, 0, 0], // under `not`, the leaf's own value
   );
   const heard = load((c) => {
+    const { when: _, ...bell } = c.reactions[BELL];
+    c.reactions[`${S}reaction/never`] = {
+      ...bell,
+      key: 'never',
+      on: { event: 'custom_event', custom: 'rope_coiled' },
+    };
     c.reactions[`${S}reaction/a_heard`] = {
       ...c.reactions[BELL],
       key: 'a_heard',
@@ -108,6 +117,12 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
   assert.equal(a.fired, 0);
   assert.equal((a.when as any).held, 0);
   assert.equal(row(heard, 7).fired, 1);
+  // A rule with no `when` whose event never happens.
+  assert.deepEqual(row(heard, 7, `${S}reaction/never`), {
+    rule: `${S}reaction/never`,
+    causes: [],
+    fired: 0,
+  });
 });
 
 // Break: an on-demand policy read on the world after the step (at 1 the quest is active after
@@ -134,6 +149,25 @@ test('W7: a prefix that no longer replays throws', () => {
   assert.throws(() => why(c, trace, 7), /^Error: replay differs at ordinal 4$/);
 });
 
+// Break: markers past the kernel's 64-line narration cut read as rules that did not run.
+test('W10: a step at the narration cap throws', () => {
+  const base = load(); // set after the loader, as marked() does: a reaction narrate needs a newer kernel_api
+  const bell = base.reactions![BELL]!;
+  const apply = [...bell.apply, ...Array(64).fill({ op: 'narrate', text: 'scene.bell' })];
+  const c = { ...base, reactions: { ...base.reactions, [BELL]: { ...bell, apply } } } as Cartridge;
+  assert.throws(() => why(c, trace, 7), /^Error: narration cap reached at ordinal 7$/);
+});
+
+// Break: a refused step read as accepted (no events or outcome: crash, or a wrong outcome). With
+// bram's policy unmet at 3, talk finds no dialogue (dialogue/selection.ts:93); 3 is not compared.
+test('W9: a refused step has no causes and its decision kind', () => {
+  const c = load((c) => {
+    c.dialogues[`${S}dialogue/bram`].policy.root.state = 'resolved';
+  });
+  const { outcome, reactions } = why(c, trace, 3);
+  assert.deepEqual([outcome, reactions[0]!.causes, reactions[0]!.fired], ['rejected', [], 0]);
+});
+
 // Break: CLI wiring (exit 2 arguments, exit 1 a replay that differs, named repo-relative).
 test('W8: the CLI prints the explanation and refuses bad arguments', () => {
   const dir = mkdtempSync(join(tmpdir(), 'why-'));
@@ -152,6 +186,7 @@ test('W8: the CLI prints the explanation and refuses bad arguments', () => {
     );
     for (const args of [
       ['0'],
+      ['1.5'],
       ['8'],
       ['7', '--recipe', 'nope'],
       ['7', '--recipe', 'coil_rope', '--dialogue', 'bram'],

@@ -2,12 +2,13 @@
 // (docs/system/cartridge.md#rule-explainer-loka-kgd1943): replays a transcript up to one step,
 // decides that step and prints, per reaction rule, its trigger match, deliveries and `when`
 // leaves; on demand one recipe's or dialogue's policy. A report for authors, not a check.
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import type { Command, DecisionResult, Policy, ReactionRule } from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { primaryTarget } from '../src/commands/action_input.ts';
+import { cmp } from '../src/foundation/validate.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { FILTERS } from '../src/mechanics/reaction.ts';
 import { refString } from '../src/runtime/decision.ts';
@@ -17,7 +18,7 @@ import { replayRecords } from './replay.ts';
 import { decideReplay, start, type Run } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
-const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+type Asked = { recipe?: string; dialogue?: string };
 const leaves = (p: Policy): Policy[] =>
   p.op === 'all' || p.op === 'any'
     ? p.items.flatMap(leaves)
@@ -33,31 +34,26 @@ const annotate = (p: Policy, at: (i: number) => object, n = { i: 0 }): Json =>
       : { ...p, ...at(n.i++) }) as unknown as Json;
 const said = (d: DecisionResult, is: (key: string) => boolean) =>
   d.kind === 'accepted' ? (d.narration ?? []).filter((x) => is(x.key)).length : 0;
+/** Wrong arguments: the CLI exits 2. */
+class Usage extends Error {}
 
 /** The explanation of step `ordinal` of `trace` (cartridge.md Rule explainer lists the evidence). */
-export function why(
-  c: Cartridge,
-  trace: Trace,
-  ordinal: number,
-  on: { recipe?: string; dialogue?: string } = {},
-) {
+export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {}) {
   const { entries } = trace;
   if (!Number.isInteger(ordinal) || ordinal < 1 || ordinal > entries.length)
-    throw new RangeError(`ordinal ${ordinal} is not in 1..${entries.length}`);
+    throw new Usage(`ordinal ${ordinal} is not in 1..${entries.length}`);
   const { cartridge, ruleOf } = marked(c);
   const r = prefix(cartridge, trace, ordinal);
   const command: Command = entries[ordinal - 1]!.data.command;
   const before = r.world;
-  // decideReplay advances the Run it is given (play/run.ts), so each decision gets a copy.
-  const decide = (cart: Cartridge) =>
-    decideReplay({ ...r, world: { ...before, cartridge: cart } } as Run, command).decision;
+  const decide = (cart: Cartridge) => step(r, cart, command, ordinal);
   const d = decide(cartridge);
   const rules = cartridge.reactions ?? {};
   const probe = `coverage.m${Object.keys(rules).length}`; // no rule's, and never authored (marked)
   // The deliveries at which leaf `i` of `ref` held: `ref` replaced, under its own key, by that leaf.
   const held = (ref: string, i: number) => {
     const { key, on, when } = rules[ref]!;
-    const leaf = { policy_version: 1, root: leaves(when!.root)[i] };
+    const leaf = { ...when!, root: leaves(when!.root)[i]! };
     const probed = { key, on, when: leaf, apply: [{ op: 'narrate', text: probe }] };
     const reactions = { ...rules, [ref]: probed };
     return said(decide({ ...cartridge, reactions } as Cartridge), (k) => k === probe);
@@ -74,19 +70,17 @@ export function why(
         fired: said(d, (key) => ruleOf(key) === ref),
         ...(rule.when && { when: annotate(rule.when.root, (i) => ({ held: held(ref, i) })) }),
       })),
-    ...(on.recipe !== undefined && {
-      recipe: policy(c.recipes, on.recipe, before, command, () => primaryTarget(command.payload)),
-    }),
-    ...(on.dialogue !== undefined && {
-      dialogue: policy(
-        c.dialogues,
-        on.dialogue,
-        before,
-        command,
-        (x) => before.entityIds[refString(x.npc)],
-      ),
-    }),
+    ...asked(c, on, before, command),
   };
+}
+
+// Step `ordinal` decided on a copy of `r` (decideReplay advances the Run it is given) with `cart`.
+function step(r: Run, cart: Cartridge, command: Command, ordinal: number) {
+  const d = decideReplay({ ...r, world: { ...r.world, cartridge: cart } }, command).decision;
+  // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
+  if (d.kind === 'accepted' && (d.narration?.length ?? 0) >= 64)
+    throw new Error(`narration cap reached at ordinal ${ordinal}`);
+  return d;
 }
 
 // The marked Run before step `ordinal`, once ordinals 1..ordinal-1 replay byte for byte.
@@ -120,6 +114,23 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
       ),
     }));
 
+// The policies asked for, on the world before the step: a recipe's target is the command's,
+// a dialogue's its speaker (dialogue/selection.ts:93).
+const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
+  ...(on.recipe !== undefined && {
+    recipe: policy(c.recipes, on.recipe, before, command, () => primaryTarget(command.payload)),
+  }),
+  ...(on.dialogue !== undefined && {
+    dialogue: policy(
+      c.dialogues,
+      on.dialogue,
+      before,
+      command,
+      (x) => before.entityIds[refString(x.npc)],
+    ),
+  }),
+});
+
 // The definition keyed `key`, its policy's leaves read on `world` as admission reads them.
 function policy<D extends { key: string; policy: { root: Policy } }>(
   defs: Readonly<Record<string, D>> | undefined,
@@ -129,7 +140,7 @@ function policy<D extends { key: string; policy: { root: Policy } }>(
   target: (d: D) => string | undefined,
 ) {
   const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
-  if (!d) throw new RangeError(`no definition keyed ${key}`);
+  if (!d) throw new Usage(`no definition keyed ${key}`);
   const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
   const at = (i: number) => ({
     holds: holds(world, command.payload.actor_id, leaves(d.policy.root)[i]!, ctx()),
@@ -140,7 +151,7 @@ function policy<D extends { key: string; policy: { root: Policy } }>(
 if (import.meta.main) {
   const [file, path, n, ...rest] = process.argv.slice(2);
   const flag = rest.length === 2 ? /^--(recipe|dialogue)$/.exec(rest[0]!)?.[1] : undefined;
-  if (!file || !path || !n || !existsSync(file) || (rest.length && !flag)) {
+  if (!n || (rest.length && !flag)) {
     console.error(
       'usage: node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]',
     );
@@ -159,7 +170,8 @@ if (import.meta.main) {
       encode(why(loaded.cartridge as Cartridge, trace, Number(n), on) as unknown as Json),
     );
   } catch (e) {
-    console.error(`${relative(ROOT, path)}: ${(e as Error).message}`.replaceAll(ROOT, ''));
-    process.exit(e instanceof RangeError ? 2 : 1);
+    const at = e instanceof Usage ? '' : `${relative(ROOT, path)}: `; // the replay error has no path
+    console.error(`${at}${(e as Error).message}`.replaceAll(ROOT, ''));
+    process.exit(e instanceof Usage ? 2 : 1);
   }
 }
