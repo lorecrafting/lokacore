@@ -5,15 +5,22 @@ defmodule Loka.Content.Extends do
   once its children resolve (docs/system/cartridge.md, Source shortcuts).
   """
 
+  alias Loka.Content.Source
+
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
-  @typedoc "A refusal at `<rel>.extends`; Source builds the diagnostic, `from` is a relative path."
-  @type fault :: {code :: String.t(), rel :: String.t(), data :: map(), from :: String.t() | nil}
+  @typedoc "A refusal at `<at>.extends`; Source builds the diagnostic, `from` is a location too."
+  @type fault ::
+          {code :: String.t(), at :: Source.location(), data :: map(),
+           from :: Source.location() | nil}
 
   @doc "The files with every `extends` resolved and every abstract definition removed."
   @spec flatten([entry()]) :: {[entry()], [fault()]}
   def flatten(files) do
-    index = for {rel, {kind, key}, value} <- files, into: %{}, do: {{kind, key}, {rel, value}}
+    index =
+      for {rel, {kind, key, steps}, value} <- files,
+          into: %{},
+          do: {{kind, key}, {{rel, steps}, value}}
 
     {memo, faults} =
       Enum.reduce(Map.keys(index), {%{}, []}, &elem(resolve(&1, [], {index, files}, &2), 1))
@@ -21,8 +28,8 @@ defmodule Loka.Content.Extends do
     {Enum.flat_map(files, &output(&1, memo)), faults}
   end
 
-  defp output({rel, {_, _} = id, _}, memo) do
-    case memo[id] do
+  defp output({rel, {kind, key, _} = id, _}, memo) do
+    case memo[{kind, key}] do
       {:ok, %{"abstract" => true}} -> []
       {:ok, value} -> [{rel, id, value}]
       :invalid -> [{rel, id, :invalid}]
@@ -49,9 +56,9 @@ defmodule Loka.Content.Extends do
        when is_map_key(index, {kind, parent}),
        do: inherit(value, resolve({kind, parent}, [id | stack], ctx, acc))
 
-  defp own({rel, %{"extends" => parent}}, _, _, {_, files}, acc) when is_binary(parent) do
-    data = %{"target" => Path.dirname(rel) <> "/" <> parent}
-    refuse(acc, [{"UNRESOLVED_REFERENCE", rel, data, other_kind(files, parent)}])
+  defp own({at, %{"extends" => parent}}, _, _, {_, files}, acc) when is_binary(parent) do
+    data = %{"target" => dir(at) <> "/" <> parent}
+    refuse(acc, [{"UNRESOLVED_REFERENCE", at, data, other_kind(files, parent)}])
   end
 
   defp own({rel, %{"extends" => _}}, _, _, _, acc),
@@ -64,8 +71,14 @@ defmodule Loka.Content.Extends do
 
   defp inherit(_, {_, acc}), do: {:invalid, acc}
 
+  defp dir({rel, []}), do: Path.dirname(rel)
+  defp dir({_, [dir, _]}), do: dir
+
   defp other_kind(files, key),
-    do: Enum.find_value(files, fn {rel, k, _} -> if match?({_, ^key}, k), do: rel end)
+    do:
+      Enum.find_value(files, fn {rel, k, _} ->
+        if match?({_, ^key, _}, k), do: {rel, elem(k, 2)}
+      end)
 
   defp refuse({memo, faults}, new), do: {:invalid, {memo, new ++ faults}}
 

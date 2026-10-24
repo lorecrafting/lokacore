@@ -6,12 +6,15 @@ defmodule Loka.Content.Source do
   The loaded view is already flattened (`Loka.Content.Extends`). A step list holds member
   names (strings) and array indexes (integers).
   """
-  alias Loka.Content.Extends
+  alias Loka.Content.{Bundles, Extends}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
+  @typedoc "A source file, or a definition inside an area bundle: `{bundle rel, [dir, key]}`."
+  @type location :: String.t() | {String.t(), steps()}
   @type file ::
           :manifest
+          | :bundle
           | :facts
           | :text
           | :resources
@@ -39,19 +42,26 @@ defmodule Loka.Content.Source do
              | :transport
              | :bleed
              | :status
-             | :blueprint, String.t()}
+             | :blueprint, String.t(), steps()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
-  decoded value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics and the
-  `extends` refusals.
+  decoded value}`, plus the INVALID_JSON, DUPLICATE_KEY and UNKNOWN_FIELD diagnostics, the
+  `extends` refusals and the area bundle refusals (`Loka.Content.Bundles`). A definition in a
+  bundle is `{bundle rel, {kind, key, [dir, key]}, value}`.
   A recognised file that fails to decode has the value `:invalid` (present, not absent);
   a file in an unrecognised place is left out.
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
+    {files, diags} = dir |> read() |> Bundles.split()
+    {files, faults} = Extends.flatten(files)
+    Bundles.unique({files, diags ++ Enum.map(faults, &extends_diag/1)})
+  end
+
+  defp read(dir) do
     # The directory name is literal, not glob syntax.
-    entries =
+    {files, diags} =
       String.replace(dir, ~r/[\[\]{}*?\\]/, "\\\\\\0")
       |> Path.join("**/*.json")
       |> Path.wildcard(match_dot: true)
@@ -59,12 +69,7 @@ defmodule Loka.Content.Source do
       |> Enum.map(&entry(Path.relative_to(&1, dir), dir))
       |> Enum.unzip()
 
-    flattened(entries)
-  end
-
-  defp flattened({files, diags}) do
-    {files, faults} = Extends.flatten(Enum.reject(files, &is_nil/1))
-    {files, List.flatten(diags) ++ Enum.map(faults, &extends_diag/1)}
+    {Enum.reject(files, &is_nil/1), List.flatten(diags)}
   end
 
   defp extends_diag({code, rel, data, from}) do
@@ -148,10 +153,23 @@ defmodule Loka.Content.Source do
 
   defp classify(rel) do
     case Path.split(rel) do
-      [dir, file] when is_map_key(@dirs, dir) -> {@dirs[dir], Path.rootname(file)}
+      ["areas", _] -> :bundle
+      [dir, file] when is_map_key(@dirs, dir) -> {@dirs[dir], Path.rootname(file), []}
       _ -> :unknown
     end
   end
+
+  @doc "The definition directories and their kinds."
+  @spec dirs() :: %{String.t() => atom()}
+  def dirs, do: @dirs
+
+  @doc "The `kind` definitions as `{key, location, value}`; a bundled one is located at `{rel, steps}`."
+  @spec of_kind([{String.t(), file(), term()}], atom()) :: [{String.t(), location(), term()}]
+  def of_kind(files, kind),
+    do: for({rel, {^kind, k, s}, v} <- files, do: {k, location(rel, s), v})
+
+  defp location(rel, []), do: rel
+  defp location(rel, steps), do: {rel, steps}
 
   @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json)."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()
@@ -179,7 +197,9 @@ defmodule Loka.Content.Source do
   def ref(r, _, _), do: r
 
   @doc "A diagnostic path: the source for `rel`, then `steps`."
-  @spec at(String.t(), steps()) :: String.t()
+  @spec at(location(), steps()) :: String.t()
+  def at({rel, prefix}, steps), do: at(rel, prefix ++ steps)
+
   def at(rel, steps) do
     stem = String.replace_suffix(rel, ".json", "")
     plain? = stem != rel and Enum.all?(String.split(stem, "/"), &name?/1)

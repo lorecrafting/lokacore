@@ -16,7 +16,7 @@ defmodule Loka.Content.Compiler do
 
   alias Loka.Content.{Combat, Derived, Entities, Levelling, Position, Resources, Scenes, Water}
   alias Loka.Core.Contracts
-  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
+  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3, of_kind: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
 
   # v2 manifest settings, beside entry, calendar and world
@@ -258,7 +258,7 @@ defmodule Loka.Content.Compiler do
   defp expand(:invalid, _), do: :invalid
 
   defp files(files, kind, contract),
-    do: collect(for {rel, {^kind, k}, v} <- files, do: {k, definition(rel, [], k, v, contract)})
+    do: collect(for {k, r, v} <- of_kind(files, kind), do: {k, definition(r, [], k, v, contract)})
 
   # {key => definition | :invalid, diagnostics}. An invalid definition stays known, so a
   # reference to it resolves instead of adding a second, false cause (08 §6); any

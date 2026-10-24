@@ -15,12 +15,14 @@ world's definitions and text:
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
 file outside these recognized root files and definition directories is `UNKNOWN_FIELD`. A
-definition file may name a parent of its own kind with `"extends"` and may be marked
-`"abstract": true`; the compiler flattens both away first ([Source shortcuts](#source-shortcuts)). A
+definition may sit in an area bundle, may name a parent of its own kind with `"extends"` and may
+be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
+([Source shortcuts](#source-shortcuts)). A
 source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
@@ -349,8 +351,31 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
-`lib/loka/content/extends.ex`), so `mix loka.compile` and `mix loka.lint` see the same
-flattened files. The artifact never carries `extends` or `abstract`; the loader is unchanged.
+`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`), so `mix loka.compile` and
+`mix loka.lint` see the same flattened definitions. The order is: open area bundles, flatten
+`extends`, refuse repeated definitions. The artifact never carries a bundle, `extends` or
+`abstract`; the loader is unchanged.
+
+**Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
+`{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
+of the [Source layout](#source-layout) table. `text` and `facts` stay in their root files.
+- A bundled definition is exactly the file `<dir>/<key>.json` would be: every stage checks it, and
+  its diagnostics carry the bundle path, `areas/<name>.<dir>.<key>.<field>` (for example
+  `areas/village.dialogues.elder_ward.keyword`).
+- A prototype may live in a bundle: bundles open before `extends` resolves.
+- `mix loka.lint` names a bundled definition by its definition address, `<dir>/<key>.json`
+  (`reactions/elder_hears.json: ...`), not by the bundle file.
+- A bundle that fails to decode adds nothing; its `INVALID_JSON` fails the build.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| The bundle is not an object | `SCHEMA_VIOLATION` | `areas/<name>` | `{"error": "invalid_type"}` |
+| A member that is not a definition directory | `UNKNOWN_FIELD` | `areas/<name>.<member>` | `{}` |
+| A member whose value is not an object | `SCHEMA_VIOLATION` | `areas/<name>.<member>` | `{"error": "invalid_type"}` |
+| Two definitions of one kind and key (a file and a bundle, or two bundles) | `DUPLICATE_DEFINITION` | each site | `{}` |
+
+[speech_sampler](../../cartridges/speech_sampler/areas/village.json) is the working example: its
+rooms, NPCs, dialogue and reactions are one file.
 
 **`extends`.** A file in a definition directory may hold `"extends": "<key>"`, the key of a
 definition of the same kind (the short-reference convention), in any file of that kind.
