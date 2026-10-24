@@ -309,8 +309,9 @@ mvlrlvappy4w, 2026-10-23): **Talk**, the [pick options](#item-details-and-takedr
 item… and Cast a spell…, Lift or Take, Give an item…, [Ask about](#fd7-ask-details), then
 **Buy or sell** and the services; on a page whose person keeps a shelf, Buy or sell comes
 first. The foot is Leave. Several Talk offers draw one Talk card, the first available one;
-with none available the page draws one Note **<Name> has nothing to say just now.** in its
-place, never "Talk: not now". **Buy or sell** shows while the person's shelf has a row; it
+with none available the page draws nothing in its place, no filler line and never "Talk: not
+now" (owner pick mvlyb5x2m9i3): a person with nothing to do shows title, description, then
+Leave. **Buy or sell** shows while the person's shelf has a row; it
 opens the child page **<Name>'s shelf**, as a notice opens from its board, and the shelf's Leave
 returns to the person. The shelf page holds the purse Note **You have <n>p.**, then one buy card
 per shelf row ("Cob of bread — 4p"; refused, "Cob of bread — 4p: can't afford"), then one

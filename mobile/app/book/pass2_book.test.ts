@@ -71,19 +71,15 @@ test('a fresh NPC visit after a reopen starts empty', () => {
 });
 
 // Breaks: an NPC page lists the shelf's rows (they live on the shelf page), draws "Nothing to do
-// here." or "Talk: not now" for a person with no talk, or keeps Buy or sell with the shelf emptied
-// (owner pick mvlrlvappy4w).
-test('a shop NPC with no talk: Buy or sell and the nothing-to-say Note', (t) => {
+// here.", "Talk: not now" or any filler line for a person with no talk, or keeps Buy or sell
+// with the shelf emptied (owner picks mvlrlvappy4w, mvlyb5x2m9i3).
+test('a shop NPC with no talk: Buy or sell, then Leave, no filler', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'down', 'west');
   b.tap('fence, open');
   const shown = b.text();
-  assert.deepEqual(shown.slice(2), [
-    LABEL.buyOrSell,
-    'The fence has nothing to say just now.',
-    LABEL.leave,
-  ]);
+  assert.deepEqual(shown.slice(2), [LABEL.buyOrSell, LABEL.leave]);
   const real = b.game.view.bind(b.game);
   b.game.view = () => {
     const r = real();

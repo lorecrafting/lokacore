@@ -110,7 +110,6 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
   assert.deepEqual(text, [
     'A merchant',
     'A merchant with a fat purse.',
-    'A merchant has nothing to say just now.',
     'Held',
     'A purse',
     'Leave',
@@ -151,6 +150,6 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
     )
       .filter((n) => n.type === 'Text')
       .map((n) => n.props.children);
-  assert.deepEqual(held(false).slice(2), ['Held', 'Box', 'Leave']);
+  assert.deepEqual(held(false).slice(1), ['Held', 'Box', 'Leave']);
   assert.ok(!held(true).includes('Held'));
 });

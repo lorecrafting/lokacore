@@ -162,8 +162,7 @@ export const sellReason = (
 export const holding = (name: string) => `${name} is holding it.`;
 export const balance = (pennies: number) => `You have ${pennies}p.`;
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
-// An NPC page with no Talk on offer (owner pick mvlrlvappy4w), and the title of its shelf page.
-export const silent = (name: string) => `${name} has nothing to say just now.`;
+// The title of a shopkeeper's shelf page (owner pick mvlrlvappy4w).
 export const shelfTitle = (name: string) => `${name}'s shelf`;
 
 type Say = (key: string) => string;

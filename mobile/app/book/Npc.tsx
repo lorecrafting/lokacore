@@ -18,7 +18,7 @@ import { picks } from './pick.ts';
 import { purse } from './Shelf.tsx';
 import { LABEL } from './labels.ts';
 import { offerLabel, serviceOrder, talkOf } from './offers.ts';
-import { balance, refused, silent } from './words.ts';
+import { balance, refused } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -85,12 +85,12 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  * - Use: an NPC route.
  * - Rules: the description, state notes and this visit's history, then one ordered list of Action
  *   cards (owner pick mvlrlvappy4w): Buy or sell (opens the shelf page), one Talk card (the
- *   first available talk; with none, the Note `<Name> has nothing to say just now.`), Use an
+ *   first available talk; with none, no card and no filler line), Use an
  *   item… and Cast a spell…, Take and other acts, Give an item…, Ask about, then services, an
  *   open order's claim and cancel under Your order with its commission hidden. Leave in the
  *   PageFoot. No Whisper (loka-x6t.115). The purse shows only beside a priced service; shelf
  *   stock is not Held. History restarts after Leave the conversation.
- * - States: choice; shop; services; open order; nothing to say; closed conversation.
+ * - States: choice; shop; services; open order; nothing to say (no line); closed conversation.
  * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
@@ -149,7 +149,7 @@ function Offered(
     <>
       <Cards>
         {shop && <ActionCard label={LABEL.buyOrSell} onPress={shop} />}
-        {talk ? card(talk) : !p.enemy && <Note>{silent(cap(p.text(p.npc.name)))}</Note>}
+        {talk && card(talk)}
       </Cards>
       {lists(false)}
       <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>
