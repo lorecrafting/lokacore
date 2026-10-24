@@ -92,6 +92,11 @@ Douse), branch `toolbox/batch-aimed-spells`, five slices in order.
 Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),
 branch `toolbox/batch-room-words`, five slices in order.
 
+## Room fixtures batch (brief drafted 2026-10-23, owner go pending)
+
+Briefs: [docs/briefs/room-fixtures/README.md](briefs/room-fixtures/README.md) (loka-x6t.120 fixture actions off World,
+loka-x6t.125 asides removed, loka-x6t.127 room anatomy), branch `toolbox/batch-room-fixtures`, five slices in order.
+
 ## Overnight results (2026-10-23)
 
 - MERGED #455 loka-3w3q + x6t.26 death lines outside combat (kernel_api 1.117; "You fall.", "You wake at the inn.";
