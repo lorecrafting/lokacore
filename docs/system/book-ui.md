@@ -27,8 +27,17 @@ pressed verb's result line sits within a screen of the verb (pass-1 UA; words go
 unavailable draws in the verb list, after the available verb lines, in the Action card's
 unavailable form `label: reason` (`Fish in: not yet`; `cooldown` reads **not yet**), never
 dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
-A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
-place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
+World keeps only the room's own place verbs, the storylet card, the exits and the untargeted
+say field (owner 2026-10-23, quoted: "all actions on targets [...] should be in the target detail
+page, or item detail page, and not in the main room page"). An action aimed at a thing (Talk, a
+use pair, an aimed skill or spell) draws on that thing's page instead, a pair through its
+[pick list](#item-details-and-takedrop). An aimed verb whose target
+has no page of its own (no room entity or notice) stays a World verb line, and a refused aimed
+verb keeps its World `label: reason` note.
+World draws no door card: Open and Unlock work from the Map and the
+[joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap: World
+draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
+would show in the minimap joystick thing, not in the main description or event log page").
 The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
@@ -90,9 +99,7 @@ save status/error UI remains accurate; NPC histories stay independently bounded.
 retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
 on World only (pass-1 UF1). An exit's door state line ("The hut door: open", the cartridge's door name capitalised) draws only when no
 exit card already carries that state as its reason; the door's action cards stay (pass-1 UF2).
-A closed or locked door's Open/Unlock cards draw on World as well, in the
-[World order](#world-and-status-entry) (pass-1 R4). The
-World minimap/joystick sits outside
+The World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
 A projected Read place action keeps its exact detail target and authored label and follows
@@ -174,7 +181,12 @@ barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging
 existing direction and releasing attempts that exit. Returning to center cancels; a short tap
 opens Map; a terminated gesture walks nowhere. Release keeps the action/context captured at
 drag start and follows [live action freshness](#live-action-freshness), never a new target after redraw. An unavailable exit announces its projected reason
-and logs the refusal without movement. Direction/reason appears opposite the finger. The existing
+and logs the refusal without movement. The barred-exit tick tells a closed door from a locked
+one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Release (or an arrow key)
+toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
+logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
+and walks nowhere. The reader actions name the reason too ("Go west, locked").
+Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; Go-direction actions use the
 same offered exits. Gesture/drawing details remain in
@@ -230,7 +242,8 @@ chronological event log only when entries exist, then currently offered options 
 scrolling content. Options list in one fixed order (pass-1 UR): first the verbs that act on the
 thing itself (Read, Eat, Drink, Wear, Light, Open, Talk, Attack, a recipe), then the verbs that
 move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into <container>,
-Give), then asks and services; a corpse's Take from it precedes Put into it. Within a group the
+Give an item…, Give to…), then asks and services; the thing's own pick options (Use an item…, Use on…, Cast a
+spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
 A page's local returns (Leave, Back to World, Back to board, Back to map,
@@ -284,7 +297,7 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as
-cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers; the foot is Leave. A page
+cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers, and the [pick options](#item-details-and-takedrop) Use an item…, Cast a spell… and Give an item…; the foot is Leave. A page
 with any priced offer (a shelf, a bank, a priced service) draws one Note **You have <n>p.**
 after the description, before the shelf rows, from the projected pennies; it is the only place
 the balance is written, and "can't afford" stays a bare reason (pass-1 E15). It shows
@@ -390,9 +403,20 @@ Put appears as a concrete pair button using projected source/destination names a
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
-A held tool's page shows one card per use pair (G4) the GameView lists available on it, in listed order, labelled with the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name; the target's page shows none. Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView does not list, or lists unavailable, shows no card: held pages list only available actions, the `too_heavy` note above and any item action refused with `cooldown` ("Fish in: not yet" on the rod resting between casts), one note per use whatever the order of its targets, beside any card the use still shows being the exceptions; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4))
+**Pick a second thing.** An action that needs a second object never draws one card per pair; its page draws one option that opens a list of the GameView's pairs, and a pick sends one (owner 2026-10-23, quoted: "you click that option and it opens a list and you pick an item and then the item detail closes with an echo the log"). There are five such options, each a `LABEL` word ending in an ellipsis:
+- **Use an item…** on a target's page (an item, a person, a notice or a fixture with a page): one row per carried tool the GameView lists in a use pair (G4) on this target, target_ids [target, tool], labelled with the tool's projected name.
+- **Use on…** on a held tool's page: one row per target the GameView lists in a use pair with this tool, labelled with the target's projected name.
+- **Cast a spell…** on a target's page: one row per aimed spell the GameView offers on it, labelled with the spell's word (`lux`), as the say field's chips name it. The cast-with-target command is engine row loka-x6t.109; until it lands no target lists one.
+- **Give an item…** on a person's page: one row per carried item the GameView lists in a Give pair with this person, target_ids [item, recipient], labelled with the item's projected name.
+- **Give to…** on a held item's page, its reverse (PM 2026-10-23, for symmetry with Use on…): one row per person the GameView lists in a Give pair with this item, labelled with the person's projected name.
 
-A held item's page shows one card per Give pair the GameView lists available, at Give's place among its actions, in GameView order, labelled "Give", the item's and the recipient's projected names ("Give an apple to the farmer"). Pressing it sends give with target_ids [item, recipient]. A refused pair, or no one present, shows no card and no note. A confirmed given returns to World and adds **You give an apple to the farmer.** once with the original names; authored narration takes precedence. Pending, refused or stale presses claim nothing. ([Give pairs](mechanics.md#give-pairs))
+Until loka-x6t.109.4 lands, the Book still draws one card per pair on both the tool's and the target's page; the list above is the target.
+
+Rows keep the GameView's order. When one list holds pairs of more than one recipe, each row reads the recipe's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one row in the Action card's unavailable form (`rod: not yet`; under Use on…, one row per recipe, `Fish in: not yet`, whatever its targets); a refused aimed spell reads `lux: need 1 ash`; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still counts as something to do (no "Nothing to do here." Note).
+
+The option is an Action card that sends nothing: a press opens its list in the page's flow directly beneath it, as the [Whisper field](#word-bar) does, and focus moves to the first row; the option reads as expanded while open. The option again, Escape from anywhere in the list, or the device's Back (Android back, browser back) closes it unsent and returns focus to the option; Back closes an open list before it leaves the page (PM 2026-10-23). One list is open at a time: opening another closes the first. Leaving the page by any route closes it, and a reopened page starts closed. A redraw keeps the list open with the latest rows; when it would be empty the option goes and focus moves to the page title.
+
+A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the recipe's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a Note in that page's history in the unavailable form; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
@@ -690,6 +714,9 @@ refused one); on the NPC page's Whisper, the phrases. A chip press only fills th
 clears the bad-word Note); it never sends. A refused spell word is no chip: the Character page
 lists it under a **Spells** section title in the Action card's unavailable form `word, cast: reason`
 (`lux, cast: need 1 ash`); no refused word, no Spells section.
+Cast in the say field is for untargeted words only: a spell aimed at a thing is a row of that
+thing's **Cast a spell…** [list](#item-details-and-takedrop) ([World](#world-and-status-entry), owner
+2026-10-23). The cast command names no target today, so aimed spells wait on loka-x6t.109.
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:

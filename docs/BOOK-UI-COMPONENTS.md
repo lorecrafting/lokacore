@@ -57,6 +57,7 @@ words remain in the cartridge; Book owns layout and navigation.
 | Accept a storylet | Room page Action card ([storylet rule](system/book-ui.md#storylet-card-details)) | Exact key, one card at most, unavailable note, stale refusal after an hour change, result in the World log. |
 | Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
 | Resume a bed dream | [`DreamPage.tsx`](../mobile/app/book/DreamPage.tsx), ordinary bed → dream detail route | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([rule](system/book-ui.md#chapters-scenes-and-recovery)). |
+| Use, give or cast with a second thing | Pick list on the target's or the held thing's page ([rule](system/book-ui.md#item-details-and-takedrop)) | Rows only from GameView pairs, option hidden when empty, pick returns to World, refused pick keeps the page. |
 | Show room travel or status | World/status shell | Confirmed room, legal exits, current time/status and no optimistic move. |
 
 Use the [Book UI rules](system/book-ui.md) for each pattern's exact behavior.
@@ -198,6 +199,20 @@ a new component needs a real consumer, its comment and its line here in the same
 | `RaiseCards` | `book/skills.tsx` | SectionPages |
 | `ItemDetails` | `book/skills.tsx` | ItemPage |
 | `SaveError` | `SaveError.tsx` | RecoveryPages |
+
+**Pick list** (owner 2026-10-23; no export yet, and until loka-x6t.109.4 lands the Book still draws one card per pair on both the tool's and the target's page: the Book developer adds it to `book/actions.tsx`
+with its doc comment, index line and story after the engine and content slices). Composed of
+existing pieces, no new token: the option is an available `ActionCard` that takes a local press
+instead of a `Button` and carries `accessibilityState.expanded`; while open, its rows render
+directly beneath it as a `Cards` stack of `ActionCard`s (available) and the `ActionCard`
+unavailable form (`label: reason`), inset `space.lg` from the option so they read as its
+children. No chevron or other glyph: the label's ellipsis says it opens. At phone width rows take
+the full inset width, a long name wraps and never truncates, and the open list stays in the
+page's scroll; opening scrolls the first row into view. Web keyboard: Tab and Shift-Tab move
+through the rows in order, Enter or Space picks, Escape or the device's Back closes; screen readers hear the option's
+name with its expanded state, then each row's name. Behaviour: [Book UI](system/book-ui.md#item-details-and-takedrop).
+States for its story: closed; open with available rows; open with an unavailable row; recipes
+mixed in one list; pending.
 
 **Fixture link** (no component until a projection consumer): inline in prose; ink colour with a
 dotted underline at the platform's thickness (solid where the platform has no dotted line; no

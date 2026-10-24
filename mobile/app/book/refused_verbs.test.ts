@@ -61,6 +61,34 @@ test('refused place verbs follow the available verb as label: reason notes', asy
   ]);
 });
 
+// Breaks: World draws a verb aimed at a thing that has its own page (owner 2026-10-23: aimed
+// actions live on the target's page), or drops one whose target has no page.
+test('a place verb aimed at a room thing draws on its page, not World', async () => {
+  const talk = {
+    label: 'Talk to Bram',
+    action_key: 'talk',
+    target_ids: ['bram'],
+    input: {},
+    place: true,
+  };
+  const wave = {
+    label: 'Wave at the sky',
+    action_key: 'wave',
+    target_ids: ['sky'],
+    input: {},
+    place: true,
+  };
+  const shown = lines(
+    await blocks([], [talk, wave], {
+      entities: [{ id: 'bram', name: 'Bram', kind: 'npc', actions: [] }],
+    }),
+  );
+  assert.deepEqual(
+    shown.filter((l) => /Talk|Wave/.test(l)),
+    ['button Wave at the sky', 'Wave at the sky'],
+  );
+});
+
 // Breaks: a refused action that belongs to another control (Sleep, the hold scan), takes typed input
 // (Inscribe), is the say field's (Shout), aims at an entity it does not name (Take), is the storylet
 // (its own block) or a notice's (its notice page) drawn as a World verb note.

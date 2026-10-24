@@ -110,7 +110,8 @@ const placeOffers = (view: View) => {
 
 // The room page against its GameView (pass-1 check 8; book-ui.md World and status entry): each
 // available place offer is a control with its label, each refused one a `label: reason` note
-// with a reason word, a shut door's Open or Unlock is a card, and no text is a raw key.
+// with a reason word, no shut door's Open or Unlock is a card (owner 2026-10-23: the Map and the
+// joystick open doors), and no text is a raw key.
 function roomDrawn({ view, text, buttons, lines, notes }: Live) {
   if (view.scene || view.combat || view.choice) return { problems: [], seen: 'not World' };
   // An untexted label shows its key's last word (words.ts sayers).
@@ -134,12 +135,12 @@ function roomDrawn({ view, text, buttons, lines, notes }: Live) {
         ? []
         : [`refusal "${line ?? label(a)}" for ${a.reason?.code}`];
     }),
-    // A door card reads `label door (direction)` (buttons.ts doorButtons).
+    // A door card would read `label door (direction)`; World draws none.
     ...doors
-      .filter(
-        ({ a, dir }) => !named.some((n) => n.startsWith(`${label(a)} `) && n.endsWith(` (${dir})`)),
+      .filter(({ a, dir }) =>
+        named.some((n) => n.startsWith(`${label(a)} `) && n.endsWith(` (${dir})`)),
       )
-      .map(({ a, dir }) => `no door card "${label(a)} (${dir})"`),
+      .map(({ a, dir }) => `door card "${label(a)} (${dir})" on World`),
     ...[...buttons, ...lines].filter((s) => KEY.test(s)).map((s) => `raw key in "${s}"`),
   ];
   return {

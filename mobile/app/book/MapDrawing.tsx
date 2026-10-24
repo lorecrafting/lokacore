@@ -63,8 +63,10 @@ function Path({ exit, on }: { exit: Exit; on: boolean }) {
   const at = (n: number) => [v[0] * n, v[1] * n];
   const w = on ? 1.8 : 0.9;
   // Colour roles (Footer's doc comment): a path at rest in `dim`, the lit one in `fg`,
-  // a barred way in `danger`, your dot in `action`; so at night the exits no longer read as a "+".
+  // a barred way in `danger` (a shut, unlocked door in the path ink), your dot in `action`; so at
+  // night the exits no longer read as a "+".
   const ink = on ? c.fg : c.dim;
+  const bar = barred(exit, ink, c.danger);
   if (exit.available)
     return (
       <>
@@ -75,15 +77,19 @@ function Path({ exit, on }: { exit: Exit; on: boolean }) {
   const [x, y] = at(STEP * 0.6);
   return (
     <>
-      <Line from={at(YOU)} to={[x, y]} color={c.danger} w={w} />
+      <Line from={at(YOU)} to={[x, y]} color={bar} w={w} />
       <Line
         from={[x - v[1] * 1.6, y + v[0] * 1.6]}
         to={[x + v[1] * 1.6, y - v[0] * 1.6]}
-        color={c.danger}
+        color={bar}
       />
     </>
   );
 }
+
+// A closed door you may open reads as a path; locked or otherwise barred, as danger.
+const barred = (exit: Exit, ink: string, danger: string) =>
+  exit.door?.state === 'closed' ? ink : danger;
 
 function Stair({ exit, on }: { exit: Exit; on: boolean }) {
   const c = usePalette();
@@ -96,7 +102,7 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
         y={y}
         r={NODE}
         fill={on ? c.fg : c.bg}
-        border={!exit.available ? c.danger : on ? c.fg : c.dim}
+        border={exit.available ? (on ? c.fg : c.dim) : barred(exit, on ? c.fg : c.dim, c.danger)}
         dashed={!exit.available}
       />
       {/* Part of the drawing, not the Map button's shown text (book-ui.md, Label in name). */}
@@ -121,7 +127,8 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
 
 /**
  * The footer minimap's drawing: you are the dot; each exit a path to an open ring, or a stub with
- * a `danger` tick when closed; stair nodes fade in with the zoom.
+ * a tick when barred: in the path ink for a closed door, `danger` when locked or otherwise barred
+ * (owner 2026-10-23: the door state shows here, not on World); stair nodes fade in with the zoom.
  * - Use: Footer only.
  * - Rules: a drawing, exempt from space tokens; real data only (the current room and its exits).
  * - Story: Footer.stories.tsx

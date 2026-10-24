@@ -110,6 +110,18 @@ const SENTENCE: Record<string, string> = {
   cursed: 'It will not come off.',
 };
 export type Refusal = { code: string; cause?: string };
+// A shut door's refusal ("The door to the south is locked.", owner 2026-10-23); none when open.
+const AT: Record<string, string> = { up: 'above', down: 'below' };
+export const doorSentence = ({
+  direction,
+  door,
+}: {
+  direction: string;
+  door?: { state: string };
+}) =>
+  door && door.state !== 'open'
+    ? `The door ${AT[direction] ?? `to the ${direction}`} is ${door.state}.`
+    : undefined;
 export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
 // The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
