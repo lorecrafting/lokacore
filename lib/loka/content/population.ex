@@ -127,8 +127,10 @@ defmodule Loka.Content.Population do
       home && Enum.uniq(p["area"]) == p["area"] && Enum.member?(p["area"], p["home"]) &&
         Enum.all?(rooms, &is_map/1) && reciprocal?(rooms, p["area"])
 
+    # nil: the bundle's NPC or corpse is missing or invalid, already reported at its own path.
     bundle_ok =
-      is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"], p["scavenge"] != nil)
+      is_map(bundle) and
+        bundle_valid?(bundle, manifest, defs, p["home"], p["scavenge"] != nil) != false
 
     []
     |> add(not targets, ["day_target"])

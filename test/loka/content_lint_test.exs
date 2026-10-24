@@ -333,6 +333,22 @@ defmodule Loka.ContentLintTest do
     assert {:ok, ^plain, _} = Loka.Content.compile(dir)
   end
 
+  # Breaks: lint reads the source before extends is flattened, so it blames the prototype.
+  @tag :tmp_dir
+  test "lint sees the flattened source: a write inherited from an abstract reaction", %{
+    tmp_dir: dir
+  } do
+    File.cp_r!("cartridges/build_sampler", dir)
+    before = Loka.Content.lint(dir)
+    write = %{"op" => "fact.assign", "fact" => "x", "value" => true}
+    base = %{"abstract" => true, "on" => %{"event" => "x"}, "apply" => [write]}
+    File.write!(Path.join(dir, "reactions/base.json"), Jason.encode!(base))
+    File.write!(Path.join(dir, "reactions/child.json"), Jason.encode!(%{"extends" => "base"}))
+
+    assert Loka.Content.lint(dir) -- before ==
+             [~s(reactions/child.json: writes state with no narrate step and no "silent": true)]
+  end
+
   test "a reaction's silent mark is true or absent (reaction.schema.json ReactionRule)" do
     # The source form fails other compiled-form rules; only the /silent errors matter here.
     rule = Jason.decode!(File.read!("cartridges/toolbox_showcase/reactions/attic_drench.json"))
