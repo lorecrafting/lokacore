@@ -53,6 +53,11 @@ export const LABEL = {
   readingStandard: 'Standard',
   readingLarge: 'Large',
   readingLarger: 'Larger',
+  // The Pick list options (book-ui.md, Pick a second thing; owner 2026-10-23).
+  useAnItem: 'Use an item…',
+  useOn: 'Use on…',
+  giveAnItem: 'Give an item…',
+  giveTo: 'Give to…',
   // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
   the: 'the',
 } as const;

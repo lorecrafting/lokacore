@@ -115,7 +115,7 @@ test('price rows keep the empty Note off an NPC page', (t) => {
 // Breaks: the rod's page drops its use once the rod rests between casts (R2), so the player
 // cannot tell the rod still fishes, or another target of the use refused for an unnoted reason
 // hides the note (loka-x6t.80).
-test('a resting rod keeps its use as a note', (t) => {
+test('a resting rod keeps its use as a Use on… note', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'north', 'west', 'south', 'east');
@@ -123,8 +123,10 @@ test('a resting rod keeps its use as a note', (t) => {
   b.tap('Take a fishing rod');
   const rod = () => (b.tap(/opens Contents$/), b.tap(LABEL.inventory), b.tap('a fishing rod'));
   rod();
-  b.tap('Fish in');
+  b.tap(LABEL.useOn);
+  b.tap(/, fish in /);
   rod();
+  b.tap(LABEL.useOn); // the resting use is its Pick list row
   const shown = b.text();
   assert.ok(shown.includes('Fish in: not yet.'), JSON.stringify(shown));
   // two targets of one resting use (controlled view): one note, not two under one key

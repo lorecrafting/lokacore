@@ -84,7 +84,8 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves }: Steps)
   await moves('south');
   await take(/^(?:a )?red apple, open$/i, /^Take a red apple/);
   await held(/^a red apple/);
-  await tap(/^Give a red apple to the farmer/);
+  await tap(LABEL.giveTo);
+  await tap(/^The farmer, give a red apple/);
   await tap(/^(?:the )?farmer, open$/i);
   await tap('Trade two pelts for a knife');
   await tap(LABEL.leave);

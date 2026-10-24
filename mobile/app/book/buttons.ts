@@ -6,6 +6,7 @@ import { things } from './item-pages.ts';
 import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import type { Button } from './presenter.ts';
 import { LABEL } from './labels.ts';
+import { NOTED } from './words.ts';
 
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -66,8 +67,7 @@ const toButton =
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['read', 'refuel', 'pour', 'drink', 'give'].includes(commandOf(a)) &&
-      id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -191,7 +191,22 @@ function placeButtons(v: GameView, button: ToButton) {
   return placed;
 }
 
-const JOIN: Record<string, string> = { refuel: 'from', pour: 'into', give: 'to' };
+const JOIN: Record<string, string> = { refuel: 'from', pour: 'into' };
+// The other object of a use pair (G4: [target, tool], on the tool) or a Give pair ([item, person]);
+// a use pair resting between uses (cooldown) stays a Pick list row (book-ui.md, Pick a second thing).
+const other = (
+  a: { action_key: string; command?: string; target_ids?: readonly string[] },
+  id: string,
+) =>
+  a.target_ids?.length === 2 &&
+  (a.target_ids[1] === id ? a.target_ids[0] : commandOf(a) === 'give' && a.target_ids[1]);
+// A use or Give pair is a Pick list row on both its pages (pick.ts), its label the recipe's.
+const pickRows = (row: Press, available: boolean, ids: string[]) =>
+  ids.map((id) => ({
+    ...row,
+    pick: available ? {} : { reason: `${NOTED.cooldown}.` },
+    detail_id: id,
+  }));
 
 function heldButtons(
   v: GameView,
@@ -202,19 +217,23 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && !['ask', 'whisper'].includes(a.action_key)) // whisper is wordButtons, ask is askButtons
+      .filter(
+        (a) =>
+          (a.available || (a.target_ids?.[1] === e.id && a.reason?.code === 'cooldown')) &&
+          !['ask', 'whisper'].includes(a.action_key),
+      ) // whisper is wordButtons, ask is askButtons
       // An unauthored Wear on a wield-slot item reads Wield (book-ui.md, Equipment and skills).
       .map((o) =>
         o.label === 'action.wear' && e.slot === 'wield' ? { ...o, label: 'action.wield' } : o,
       )
       .flatMap((a) => {
-        // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target;
-        // the same card draws on the tool's page and on the target's when it has one (owner 2026-10-23).
-        if (a.target_ids?.[1] === e.id) {
-          const pair = button(a, ` ${text(names.get(a.target_ids[0]!) ?? '')}`);
-          const target = names.has(a.target_ids[0]!) ? [a.target_ids[0]!] : [];
-          return [e.id, ...target].map((id) => ({ ...pair, detail_id: id }));
-        }
+        const two = other(a, e.id);
+        if (two)
+          return pickRows(
+            button(a, ''),
+            a.available,
+            [e.id, two].filter((id) => names.has(id)),
+          );
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(

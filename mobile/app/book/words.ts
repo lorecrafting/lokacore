@@ -131,6 +131,10 @@ const CAUSE: Record<string, string> = {
   cursed: 'it will not come off',
 };
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
+export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+// A use pair's line without narration: "You quench a cart with a bucket." (book-ui.md, Pick a second thing).
+export const used = (label: string, target: string, tool: string) =>
+  `You ${lower(label)} ${target} with ${tool}.`;
 export const reason = (code: string, cause?: string) =>
   (cause && CAUSE[cause]) ?? REASON[code] ?? code.replaceAll('_', ' ');
 export const reasonOf = (r: Refusal) => reason(r.code, r.cause);

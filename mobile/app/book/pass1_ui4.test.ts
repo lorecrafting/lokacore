@@ -121,7 +121,7 @@ test('detail options: act on it, then move it, then store it', async () => {
     entities: [
       ...v.entities,
       thing('coin', []),
-      thing('corpse', [action('put', { target_ids: [ID.coin, ID.corpse] }), action('take')]),
+      thing('corpse', [action('put'), action('take')]),
       thing('book', [action('take'), action('read')]),
     ],
   } as GameView;
