@@ -92,25 +92,25 @@ export function coverage(c: Cartridge, traces: Trace[]) {
     }
   });
   const unseen = (refs: string[]) => refs.filter((ref) => !seen.has(ref)).sort();
-  const recipes = Object.entries(c.recipes ?? {});
-  const choices = Object.entries(c.dialogues ?? {}).flatMap(([dialogue, d]) =>
-    Object.keys(d.choices).map((choice) => ({ dialogue, choice })),
-  );
   return {
     cartridge: `${c.manifest.id}@${c.manifest.version}`,
     transcripts: traces.length,
     never: {
       reactions: unseen(Object.keys(c.reactions ?? {})),
-      recipes: recipes.flatMap(([ref, r]) => (done.has(r.key) ? [] : [ref])).sort(),
-      choices: choices
-        .filter(({ dialogue, choice }) => !seen.has(`${dialogue}#${choice}`))
-        .sort((a, b) => cmp(a.dialogue, b.dialogue) || cmp(a.choice, b.choice)),
+      recipes: Object.entries(c.recipes ?? {})
+        .flatMap(([ref, r]) => (done.has(r.key) ? [] : [ref]))
+        .sort(),
+      choices: choices(c).filter(({ dialogue, choice }) => !seen.has(`${dialogue}#${choice}`)),
       quests: unseen(Object.keys(c.quests ?? {})),
     },
   };
 }
 
 const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+const choices = (c: Cartridge) =>
+  Object.entries(c.dialogues ?? {})
+    .flatMap(([dialogue, d]) => Object.keys(d.choices).map((choice) => ({ dialogue, choice })))
+    .sort((a, b) => cmp(a.dialogue, b.dialogue) || cmp(a.choice, b.choice));
 
 if (import.meta.main) {
   const [file, ...paths] = process.argv.slice(2);
