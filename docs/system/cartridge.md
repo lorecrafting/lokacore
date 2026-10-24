@@ -15,6 +15,7 @@ world's definitions and text:
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
@@ -351,10 +352,12 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
-`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`), so `mix loka.compile` and
+`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
+`lib/loka/content/signals.ex`, `lib/loka/content/zones.ex`), so `mix loka.compile` and
 `mix loka.lint` see the same flattened definitions. The order is: open area bundles, refuse
-repeated definitions, flatten `extends`, lower inline prose. The artifact never carries a bundle,
-`extends`, `abstract` or a prose marker; the loader is unchanged.
+repeated definitions, flatten `extends`, lower inline prose, lower signals, expand zone rules,
+refuse repeated definitions again. The artifact never carries a bundle, `extends`, `abstract`, a
+prose marker, a signal or a zone; the loader is unchanged.
 
 **Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
@@ -430,6 +433,66 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
 inline; its artifact equals the hand-keyed one byte for byte.
+
+**Signals.** A message from one reaction to others, lowered to a counter fact.
+1. In a reaction's `apply`, `{"op": "signal", "signal": "<name>"}` lowers to
+   `{"op": "fact.adjust", "fact": "signal_<name>", "amount": 1}` at the same index, so a check on
+   the lowered step (capability, floor) reports at the author's step (`reactions/ring.apply[0].op`).
+2. The trigger `"on": {"event": "signal", "signal": "<name>"}` lowers to
+   `{"event": "fact_changed", "fact": "signal_<name>"}`.
+3. Each name sent adds `signal_<name>` to `facts.json` (created when absent; an undecodable one
+   takes nothing, its `INVALID_JSON` fails the build): version 1, `int` 0 to 9007199254740990,
+   default 0, scope `player` (a listener runs for the sending character), meaning
+   `Signal <name> (compiler-generated).`
+4. The pass adds nothing to `cartridge.json`: the author declares `fact@1` and `reaction@1` and a
+   `kernel_api` floor of at least 1.47, and the existing checks report what is missing.
+5. Limits:
+   - After 9007199254740990 sends the counter is full: the adjust clamps, writes nothing new and
+     the listeners stay silent (`kernel/ts/src/mechanics/fact.ts:254`). The maximum is one below
+     the largest safe integer because `add` (`kernel/ts/src/foundation/int.ts:17`) overflows
+     before the clamp at 2^53-1 (loka-kgd.195).
+   - Each send writes the player's fact row.
+   - A rule that only sends is still a write for `mix loka.lint`; add `"silent": true`, which the
+     compiler drops.
+   - Senders are reaction steps only. Recipes keep `event.emit` / `custom_event`; dialogues keep
+     `fact.adjust`.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| An authored fact named exactly `signal_<name>` | `FACT_NAME_COLLISION` | `facts.facts.signal_<name>` | `{}` |
+| A listener whose name no sending step uses | `UNRESOLVED_REFERENCE` | `<src>.on.signal` | `{"target": "<name>"}` |
+
+The dotted `signal.<name>` collides through the ordinary fact-name check, and a name that makes
+an invalid Key reports at its fact. [signal_sugar](../../test/fixtures/signal_sugar/) is the
+working example; it compiles to the same artifact as its hand-expanded twin
+[signal_expanded](../../test/fixtures/signal_expanded/).
+
+**Zones.** One reaction for many rooms.
+- A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
+- A reaction with `"zone": "<Key>"` and no `on.room` is replaced by one copy per room listing
+  that zone, in room-key order. A copy has `on.room` set to its room, no `zone`, the key
+  `<rule>_<room>` (`wanderer` in `hall` is `wanderer_hall`), and the authored rule's location, so
+  every diagnostic of a copy reports once at the authored rule.
+- Copies sort by the bytes of `<rule>_<room>`: copies of one rule sort among themselves by room
+  key, and `_` (0x5F) sorts after digits and before lowercase letters, so `wanderer9` <
+  `wanderer_hall` < `wanderer_mill` < `wanderera` < `wandererx`. An entry or rest event matches
+  only the copy for its room, so the order that matters is between a copy and that room's own
+  rules; pick the zone rule's key for the order you want.
+- Prose lowers before zones, so all copies share the authored rule's generated text key. A zone
+  rule may use `extends`, because flattening runs first.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| `zones` is not a list of Keys | `SCHEMA_VIOLATION` | `rooms/<key>.zones` | `{"error": "invalid_type"}` |
+| `zone` together with `on.room` | `SCHEMA_VIOLATION` | `<src>.zone` | `{"error": "invalid_value"}` |
+| No room lists the zone | `UNRESOLVED_REFERENCE` | `<src>.zone` | `{"target": "<zone>"}` |
+
+Existing checks cover the rest: a trigger with no room filter is `UNKNOWN_FIELD` at
+`<src>.on.room`; a copy key over 64 characters is `SCHEMA_VIOLATION` at `<src>`; a copy key equal
+to an authored reaction or another copy (rule `a` in room `b_c` and rule `a_b` in room `c`) is
+`DUPLICATE_DEFINITION` at each site. [codex_sampler](../../cartridges/codex_sampler/reactions/wanderer.json)
+is the working example: one zone rule for its five rooms; its artifact equals the five hand-written
+rules byte for byte.
 
 ## Artifact and loader
 

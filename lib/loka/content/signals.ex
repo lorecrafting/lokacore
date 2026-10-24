@@ -11,14 +11,14 @@ defmodule Loka.Content.Signals do
   @typedoc "A refusal: code, `{rel, steps}` and diagnostic data."
   @type fault :: {String.t(), {String.t(), [String.t() | non_neg_integer()]}, map()}
 
-  # ponytail: after 9007199254740991 sends the counter is full, the adjust writes nothing new and
-  # the listeners stay silent (fact.ts:254); an engine event.emit step lifts it when a story needs it.
+  # ponytail: max 2^53-2, so a send into a full counter clamps and stays silent (fact.ts:254); at
+  # 2^53-1 int.ts add overflows before the clamp (loka-kgd.195). An event.emit step lifts the cap.
   @spec_of %{
     "version" => 1,
     "value_type" => %{
       "type" => "int",
       "minimum" => 0,
-      "maximum" => 9_007_199_254_740_991,
+      "maximum" => 9_007_199_254_740_990,
       "default" => 0
     },
     "scopes" => ["player"]

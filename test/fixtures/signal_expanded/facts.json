@@ -18,7 +18,7 @@
       "value_type": {
         "type": "int",
         "minimum": 0,
-        "maximum": 9007199254740991,
+        "maximum": 9007199254740990,
         "default": 0
       },
       "scopes": [

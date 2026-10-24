@@ -75,13 +75,14 @@ test('each entry into the hall sends bell once and is heard once', () => {
   assert.equal(fact(w, 'signal_bell'), 2);
 });
 
-// Breaks: a full counter that still wakes its listeners; documents the cap (cartridge.md, rule 6).
+// Breaks: a full counter that still wakes its listeners. The cap is 2^53-2: at 2^53-1, int.ts add
+// overflows before the clamp and the command faults (loka-kgd.195; cartridge.md, Source shortcuts).
 test('a send into a full counter is not heard', () => {
   const full = reload((c) => {
     const facts = c.facts as Record<string, { value_type: { default: number } }>;
-    facts['signal_sugar@0.0.1:fact/signal_bell'].value_type.default = 9007199254740990;
+    facts['signal_sugar@0.0.1:fact/signal_bell'].value_type.default = 9007199254740989;
   });
   const w = twice(full);
   assert.equal(fact(w, 'heard'), 1);
-  assert.equal(fact(w, 'signal_bell'), 9007199254740991);
+  assert.equal(fact(w, 'signal_bell'), 9007199254740990);
 });
