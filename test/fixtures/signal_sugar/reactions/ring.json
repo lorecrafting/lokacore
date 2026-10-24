@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "hall"
+  },
+  "apply": [
+    {
+      "op": "signal",
+      "signal": "bell"
+    }
+  ],
+  "silent": true
+}

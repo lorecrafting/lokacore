@@ -1,4 +1,5 @@
 {
+  "zones": ["priory"],
   "title": "room.mill.title",
   "description": "room.mill.description",
   "exits": { "south": { "to": "hall" } }

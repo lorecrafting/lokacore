@@ -1,7 +1,7 @@
 {
+  "zone": "priory",
   "on": {
-    "event": "entity_entered_room",
-    "room": "road"
+    "event": "entity_entered_room"
   },
   "when": {
     "policy_version": 1,

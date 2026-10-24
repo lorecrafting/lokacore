@@ -1,0 +1,17 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "signal_bell"
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "heard",
+      "amount": 1
+    },
+    {
+      "op": "narrate",
+      "text": "bell.heard"
+    }
+  ]
+}
