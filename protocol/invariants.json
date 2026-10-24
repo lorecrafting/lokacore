@@ -178,5 +178,14 @@
     },
     "statement": "Each opted item has an exact bounded liquid row matching immutable capacity and declared kinds.",
     "implemented_in": "elixir_and_typescript"
+  },
+  {
+    "id": "world_lists_no_fixture_action",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "## 19. Action availability"
+    },
+    "statement": "GameView actions list no recipe aimed at a room detail; it is offered on that detail's NoticeView only (docs/system/mechanics.md inspectable_detail@1; loka-x6t.120).",
+    "implemented_in": "typescript"
   }
 ]

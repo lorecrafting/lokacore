@@ -373,15 +373,6 @@
   "actions": [
    {
     "available": true,
-    "action_key": "gather_ash",
-    "label": "actions.gather_ash",
-    "target": {
-     "kind": "none"
-    },
-    "input": []
-   },
-   {
-    "available": true,
     "action_key": "cast",
     "label": "action.cast",
     "target": {
@@ -486,6 +477,23 @@
    }
   ],
   "notices": [
+   {
+    "id": "13e64759-6fc3-8b88-ade5-56dbaa5d940d",
+    "key": "hearth",
+    "title": "detail.hearth.description",
+    "description": "detail.hearth.description",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "gather_ash",
+      "label": "actions.gather_ash",
+      "target": {
+       "kind": "none"
+      },
+      "input": []
+     }
+    ]
+   },
    {
     "id": "c2dcc404-9fda-84ea-af86-4596e9beb2d6",
     "key": "sign_magic",

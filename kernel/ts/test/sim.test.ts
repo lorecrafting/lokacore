@@ -95,6 +95,7 @@ test('two fresh ranges and regression seeds retain all sequence counts and cover
   assert.deepEqual(lengths, [1, 1, 0, 1, 0, 0, 1, 4]);
   assert.deepEqual([...codes].sort(), [
     'accepted',
+    'cooldown', // seed 7 prays at the shrine twice (generator 18)
     'fault budget_exceeded',
     'insufficient_resource',
     'invalid_state',
@@ -350,7 +351,7 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 5 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 17, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 18, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
 });
@@ -492,7 +493,14 @@ test('red control: wear listed but refused, or remove accepted but unlisted, tri
 // reason-code clause is lost, and a view offering a recipe admission refuses goes unseen.
 test('red control: a recipe shown available, or refused for another code, trips gameview_agrees_with_admission', () => {
   const view = (f: (a: AdvertisedAction) => AdvertisedAction) =>
-    planted({ gameView: (w) => ({ ...gameView(w), actions: gameView(w).actions.map(f) }) });
+    planted({
+      gameView: (w) => {
+        const v = gameView(w);
+        // a recipe aimed at a detail is offered on its notice (loka-x6t.120), the rest in actions
+        const notices = v.notices?.map((n) => ({ ...n, actions: n.actions?.map(f) }));
+        return { ...v, actions: v.actions.map(f), ...(notices && { notices }) };
+      },
+    });
   const all = view((a) => ({ ...a, available: true }));
   const swapped = view((a) =>
     a.available

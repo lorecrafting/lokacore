@@ -13,6 +13,7 @@ import { check } from '../src/runtime/invariants.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
+import { noticeAction } from './notice_action.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CHARACTER = 'bd595711-ea5f-89a5-abb0-046cd349d2f9' as CharacterId; // ordinal 0
@@ -140,7 +141,7 @@ test('a recipe gated on mv at least 2 is offered and admitted at mv 2, refused a
       check('gameview_agrees_with_admission', { view, command: perform, decision: s.decision }),
       true,
     );
-    const entry = view.actions.find((a) => a.action_key === 'pray')!;
+    const entry = noticeAction(view, 'pray')!;
     if (available) {
       assert.equal(entry.available, true);
       assert.equal(s.decision.kind, 'accepted');

@@ -35,7 +35,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a CARTRIDGES entry included (begin
  * picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 17;
+export const GENERATOR = 18;
 /** Each registered invariant's world/observation check or reason for host-only proof. */
 export const CHECKED = {
   world: [
@@ -59,6 +59,7 @@ export const CHECKED = {
     'unknown_types_fail_closed',
     'gameview_agrees_with_admission',
     'job_complete_owned_by_run',
+    'world_lists_no_fixture_action',
   ],
   none: {
     no_proposed_event_escapes: 'publication after a host commit: R6 authority',
@@ -366,7 +367,8 @@ export function offers(world: World, view: GameView, g: Gen): Payload[] {
   });
   for (const n of view.notices ?? [])
     for (const a of n.actions ?? [])
-      if (set[a.action_key]?.command === 'fill' && a.target_ids?.length === 2)
+      if (set[a.action_key]?.recipe) options.push({ type: 'perform', action: a.action_key });
+      else if (set[a.action_key]?.command === 'fill' && a.target_ids?.length === 2)
         options.push(aimed('fill', a.target_ids[0], a.target_ids[1]));
   for (const e of view.entities)
     for (const s of e.services ?? [])

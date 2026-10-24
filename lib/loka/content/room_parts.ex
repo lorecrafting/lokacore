@@ -140,6 +140,7 @@ defmodule Loka.Content.RoomParts do
   defp detail_text(rel, key, detail, text) do
     fields =
       [{["description"], detail["description"]}] ++
+        for({field, value} <- Map.take(detail, ["title"]), do: {[field], value}) ++
         for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value}) ++
         board_text(detail) ++
         harvest_text(detail)

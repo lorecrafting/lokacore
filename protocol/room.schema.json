@@ -319,6 +319,10 @@
           ],
           "additionalProperties": false
         },
+        "title": {
+          "description": "Optional page title the Book shows for this detail (kernel_api at least 1.120 (loka-x6t.120); docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description.",
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "transport": {
           "type": "object",
           "properties": {
@@ -407,6 +411,13 @@
             "label": "action.read_notice",
             "text": "notice.text"
           }
+        },
+        {
+          "aliases": [
+            "hearth"
+          ],
+          "description": "detail.hearth",
+          "title": "detail.hearth.title"
         }
       ]
     },

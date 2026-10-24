@@ -182,7 +182,9 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await expect(screen.getByRole('button', /ma 5\/5/).first()).toBeVisible();
   await wizard('Learn the word lux');
   await wizard('Fetch the second word');
+  await tap('hearth, open');
   await tap('Gather ash');
+  await tap(LABEL.leave);
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await held(/^the lantern/);
   await tap(LABEL.castASpell); // the aimed spell's Pick list on the held lamp (loka-x6t.109)

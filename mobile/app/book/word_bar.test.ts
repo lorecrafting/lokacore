@@ -184,9 +184,13 @@ test('spell words: refused ones list their reason under Spells; lux casts once a
     [],
   );
   b.tap('Take up the apprenticeship');
+  b.tap('sigil, open');
   b.tap('Trace the sigil');
+  b.tap(LABEL.leave);
   assert.ok(spellsBlock().includes('ward, cast: Needs level 2 and wisdom 11'));
+  b.tap('hearth, open');
   b.tap('Gather ash');
+  b.tap(LABEL.leave);
   b.tap(LABEL.sayToRoom);
   assert.ok(!b.labels().includes('ward'), 'a refused word is no chip');
   b.tap('lux');

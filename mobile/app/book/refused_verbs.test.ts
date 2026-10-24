@@ -124,6 +124,7 @@ test('glade without an axe: the real Book says why Chop wood is refused', (t) =>
     b.map();
     b.tap(`Go ${d}`);
   }
+  b.tap('oak, open');
   assert.ok(
     b.text().includes('Chop wood: Needs an axe and woodcutting 1'),
     JSON.stringify(b.text().slice(-8)),

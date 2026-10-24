@@ -212,6 +212,12 @@ room description is the first variant whose `when` holds, else the base (`descri
 `not_found`, elsewhere `not_present`; accepted `examined`. A detail's own description is
 chosen the same way. Details are named through their aliases ([target resolution](protocol.md#target-resolution)).
 
+A recipe whose target is a detail is offered only on that detail's NoticeView `actions` (loka-x6t.120); `view.actions`
+never lists it. A detail some recipe of the actor's set targets is projected as a NoticeView while visible in the
+actor's room, titled by its authored `title` (room.schema.json, kernel_api 1.120) or, without one, its description.
+Engine verbs and quest offers stay in `view.actions` for the Book's chrome; the invariant
+`world_lists_no_fixture_action` holds it.
+
 ## readable@1 (`mechanics/readable/rule.ts`)
 
 A room detail may declare `readable {label, text}`, both catalog TextKeys.

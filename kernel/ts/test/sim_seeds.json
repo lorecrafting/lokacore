@@ -1,5 +1,5 @@
 {
-  "generator": 17,
+  "generator": 18,
   "seeds": [
     {
       "seed": 432,
@@ -17,9 +17,9 @@
       "found": "drained sampler setup lost required resource metadata: originally MV rate/remainder, then NPC HP rows; retain untouched resources when draining player pools"
     },
     {
-      "seed": 310,
+      "seed": 187,
       "type": "perform",
-      "found": "coverage, not a bug: about 2% of fresh sequences reach the cooldown refusal (resource_sampler, pray at the wayside shrine twice within its 3600 s cooldown), and fresh seeds 1791523923424 to 1791523923923 reached none, so this seed keeps 'cooldown' in REACHED deterministic (generator 17)"
+      "found": "coverage, not a bug: about 2% of fresh sequences reach the cooldown refusal (resource_sampler, pray at the wayside shrine twice within its 3600 s cooldown), and fresh seeds 1791523923424 to 1791523923923 reached none, so this seed keeps 'cooldown' in REACHED deterministic (generator 17 seed 310; generator 18, the shrine prayer offered on its notice page, seed 187)"
     }
   ]
 }

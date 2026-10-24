@@ -274,15 +274,6 @@
   "actions": [
    {
     "available": true,
-    "action_key": "hide",
-    "label": "actions.hide",
-    "target": {
-     "kind": "none"
-    },
-    "input": []
-   },
-   {
-    "available": true,
     "action_key": "cast",
     "label": "action.cast",
     "target": {
@@ -369,6 +360,25 @@
      "kind": "none"
     },
     "input": []
+   }
+  ],
+  "notices": [
+   {
+    "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
+    "key": "barrels",
+    "title": "detail.barrels",
+    "description": "detail.barrels",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "hide",
+      "label": "actions.hide",
+      "target": {
+       "kind": "none"
+      },
+      "input": []
+     }
+    ]
    }
   ],
   "entities": [

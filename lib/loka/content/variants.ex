@@ -34,7 +34,15 @@ defmodule Loka.Content.Variants do
     identity = is_map_key(settings["world"] || %{}, "identity")
     words = Enum.any?(Entities.all(defs), fn {_, _, e} -> is_map_key(e, "words") end)
 
+    titled =
+      Enum.any?(
+        for {_, {_, [], r}} <- Map.get(defs, "room", %{}),
+            {_, d} <- Map.get(r, "details", %{}),
+            do: is_map_key(d, "title")
+      )
+
     ladder = [
+      {titled, [1, 120]},
       {words, [1, 118]},
       {remarks?(defs), [1, 107]},
       {furnish?([defs, settings]), [1, 102]},
@@ -44,7 +52,7 @@ defmodule Loka.Content.Variants do
       {reader?(defs) or reader?(settings), [1, 53]}
     ]
 
-    {Enum.any?([words, identity, voices, relative]) or used?(defs, settings),
+    {Enum.any?([titled, words, identity, voices, relative]) or used?(defs, settings),
      Enum.find_value(ladder, [1, 46], fn {on, floor} -> on && floor end)}
   end
 

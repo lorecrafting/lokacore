@@ -317,7 +317,7 @@ function noticeOffer(world: World, a: Offered, id: string) {
     (a.command === 'harvest' &&
       !!world.details[id]?.harvest &&
       (!a.input.includes('method') || world.details[id]?.harvest?.careful?.action === a.key)) ||
-    (detailAt(world, a) === id && !!(world.details[id]?.readable || world.details[id]?.perception))
+    detailAt(world, a) === id
   );
 }
 
@@ -342,8 +342,5 @@ function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
     : undefined;
 }
 
-const detailRecipe = (world: World, a: Offered) => {
-  const d = detailAt(world, a);
-  const detail = d !== undefined && world.details[d];
-  return !!detail && !!(detail.readable || detail.perception);
-};
+// A recipe aimed at a detail is its NoticeView's card only (loka-x6t.120).
+const detailRecipe = (world: World, a: Offered) => detailAt(world, a) !== undefined;

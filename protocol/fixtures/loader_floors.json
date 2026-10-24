@@ -2311,6 +2311,16 @@
       "without": [["items/rod.json", ["tags"], ["metal"]]],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.120",
+      "below": "1.119",
+      "source": "cartridges/spells_sampler",
+      "feature": "a room detail's title (loka-x6t.120)",
+      "edits": [["rooms/tower.json", ["details", "hearth", "title"], "detail.hearth"]],
+      "without": [["rooms/tower.json", ["details", "hearth", "title"], null]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]
 }

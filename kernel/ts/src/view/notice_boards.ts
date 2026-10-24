@@ -32,7 +32,7 @@ export function noticeViews(
       detail.perception ||
       detail.bed ||
       detail.transport ||
-      actions(id).some((a) => a.command === 'expedition')) &&
+      actions(id).some((a) => !a.command || a.command === 'expedition')) &&
     !grouped.has(id as EntityId)
       ? [
           {
@@ -126,6 +126,7 @@ function transportActions(
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});
 
 const detailTitle = (detail: World['details'][string]) =>
+  detail.title ??
   detail.transport?.title ??
   detail.bed?.title ??
   detail.harvest?.title ??

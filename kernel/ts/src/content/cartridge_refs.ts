@@ -195,6 +195,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
   blueprint: ['title', 'description'],
+  detail: ['title', 'description'], // title: loka-x6t.120
   readable: ['label', 'text', 'title'],
   cue: ['text'],
 };
