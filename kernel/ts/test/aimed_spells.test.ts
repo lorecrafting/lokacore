@@ -120,7 +120,7 @@ test('flamma is offered on the wight, not in spell_words; lux lists only on the 
   });
   assert.deepEqual(view.spell_words ?? [], []);
   const keys = (key: string) =>
-    entry(w, w.entityIds[`${P}:${key}`]!)!.actions.map((a) => a.action_key);
+    entry(w, w.entityIds[`${P}:${key}`]!)!.actions.map((a): string => a.action_key);
   const orb = entry(w, w.entityIds[`${P}:item/orb`]!)!.actions.find((a) => a.action_key === 'lux');
   assert.equal(orb?.available, true); // its policy read with the orb as target
   assert.ok(!keys('item/glowdust').includes('lux')); // 7: untagged: not listed
@@ -249,7 +249,7 @@ test('an unlearned or unknown word is invalid_state before any target check', ()
   const h = hall(unlearned.cartridge);
   assert.equal(code(at(h, 'flamma', 'item/glowdust')), 'invalid_state');
   const offers = gameView(crypt(unlearned.cartridge)).entities.flatMap((e) =>
-    e.actions.map((a) => a.action_key),
+    e.actions.map((a): string => a.action_key),
   );
   assert.ok(!offers.includes('flamma')); // not even on the wight
   const dark = crypt(unlearned.cartridge);
@@ -367,7 +367,7 @@ test('a dead wight is no aimed target: invalid_target, no mana paid, not listed'
   const r = at(w, 'flamma', 'npc/wight');
   assert.equal(code(r), 'invalid_target');
   assert.equal(r.decision.kind === 'rejected' && mana(r.world), mana(w));
-  const offers = gameView(w).entities.flatMap((e) => e.actions.map((a) => a.action_key));
+  const offers = gameView(w).entities.flatMap((e) => e.actions.map((a): string => a.action_key));
   assert.ok(!offers.includes('flamma'));
 });
 

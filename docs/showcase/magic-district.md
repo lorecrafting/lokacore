@@ -156,9 +156,8 @@ sit on world entities, so one character's drop or quench holds for all.
 - Book e2e `mobile/app/tests/showcase_magic.e2e.ts`, the happy path at phone width: the Talk
   card, the lantern's "lux" card after Gather, the hushed chips, Read, Accept,
   Raise, "ward", the use card "Oil the winch", Open, down, the wight's "flamma" card, Flee, down, the wight's "flamma" card, "Douse
-  the bier", the three Drops in the yard. The Word bar hides every chip while a fight is open
-  (`mobile/app/book/buttons.ts` `wordless`), so the Flee-and-return is how the Book casts twice;
-  the kernel pin also casts the second bolt inside the fight (29b: a bolt is cast between rounds).
+  the bier", the three Drops in the yard. The Book casts the second bolt after Flee-and-return
+  (`toolbox_showcase.walk.ts`, `mobile/app/book/cast_death.test.ts`); the kernel pin also casts the second bolt inside the fight (29b: a bolt is cast between rounds).
 
 ## Blind AI playtest focus
 
