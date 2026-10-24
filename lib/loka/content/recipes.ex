@@ -1,4 +1,4 @@
-# size: allow 322, craft checks (hs-10), storylet targets (row FD3) and recipe reasons (loka-j64e) check their floor and rooms beside the other recipe targets
+# size: allow 322, craft checks (hs-10) and recipe reasons (loka-j64e) check their floor and rooms beside the other recipe targets
 defmodule Loka.Content.Recipes do
   @moduledoc """
   Action recipes and rooms' action contributions (action.schema.json ActionRecipe,
@@ -54,17 +54,8 @@ defmodule Loka.Content.Recipes do
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++
       contributions(defs, actions) ++
       uses(defs, m) ++
-      storylets(defs, m) ++
       RecipeTips.reasons(all(defs), ctx, api(m) < [1, 100]) ++
       Loka.Content.Replenish.craft(m, defs, text)
-  end
-
-  # Toolbox row FD3: a storylet target needs kernel_api 1.92 (one diagnostic).
-  defp storylets(defs, m) do
-    if Enum.any?(all(defs), fn {_, r} -> r["target"]["kind"] == "storylet" end) and
-         api(m) < [1, 92],
-       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-       else: []
   end
 
   # Toolbox row G4: a use target needs kernel_api 1.49 (one diagnostic), and a status.cure step
@@ -165,9 +156,9 @@ defmodule Loka.Content.Recipes do
     end
   end
 
-  # An unresolved room or detail is the target's own diagnostic; a use, spell or storylet target
-  # (rows G4, 29a, FD3) has no detail and so no rating.
-  defp rated?(%{"kind" => kind}, _, _) when kind in ~w(use spell storylet), do: false
+  # An unresolved room or detail is the target's own diagnostic; a use or spell target
+  # (rows G4, 29a) has no detail and so no rating.
+  defp rated?(%{"kind" => kind}, _, _) when kind in ~w(use spell), do: false
 
   defp rated?(t, m, defs) do
     case resolve(t["room"], "room", m, defs) do
@@ -262,15 +253,6 @@ defmodule Loka.Content.Recipes do
 
   # Toolbox row 29a: a spell names no definition.
   defp target(_, %{"kind" => "spell"}, _, _), do: []
-
-  # Toolbox row FD3: each of a storylet's rooms names a room of this cartridge.
-  defp target(rel, %{"kind" => "storylet"} = t, m, defs),
-    do:
-      for(
-        {r, i} <- Enum.with_index(Map.get(t, "rooms", [])),
-        d <- reference(rel, ["target", "rooms"], {i, "room"}, %{i => r}, m, defs),
-        do: d
-      )
 
   # The room resolves (reference/6), then the detail is one of its details.
   defp target(rel, t, m, defs) do

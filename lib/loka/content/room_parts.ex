@@ -12,7 +12,7 @@ defmodule Loka.Content.RoomParts do
 
   def variant_texts(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
-        {steps, t} <- description_keys(r) ++ climb_keys(r) ++ aside_keys(r),
+        {steps, t} <- description_keys(r) ++ climb_keys(r),
         not is_map_key(text, t),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => t})
   end
@@ -31,9 +31,6 @@ defmodule Loka.Content.RoomParts do
       else: variants ++ knock
   end
 
-  # Toolbox row FD2: each aside's text.
-  defp aside_keys(r), do: for({s, a} <- asides(r), do: {s ++ ["text"], a["text"]})
-
   # Toolbox row 30: each climb face's fall narration.
   defp climb_keys(r),
     do:
@@ -47,16 +44,6 @@ defmodule Loka.Content.RoomParts do
         ],
         {v, i} <- Enum.with_index(Map.get(d, "variants", [])),
         do: {steps ++ ["variants", i], v}
-  end
-
-  @doc "Toolbox row FD2: each aside of room `r` and of its details, with its steps in the room file."
-  @spec asides(map()) :: [{list(), map()}]
-  def asides(r) do
-    for {steps, d} <- [
-          {[], r} | for({k, d} <- Map.get(r, "details", %{}), do: {["details", k], d})
-        ],
-        {a, i} <- Enum.with_index(Map.get(d, "asides", [])),
-        do: {steps ++ ["asides", i], a}
   end
 
   @doc """
@@ -103,7 +90,7 @@ defmodule Loka.Content.RoomParts do
   def conditions(defs) do
     for {_, {rel, [], r}} <- Enum.concat(defs["room"], defs["blueprint"]),
         {steps, root} <-
-          for({s, v} <- variants(r) ++ asides(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
+          for({s, v} <- variants(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
             locks(r),
         do: {rel, steps, root}
   end
@@ -139,8 +126,7 @@ defmodule Loka.Content.RoomParts do
 
   defp detail_text(rel, key, detail, text) do
     fields =
-      [{["description"], detail["description"]}] ++
-        for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value}) ++
+      own_text(detail) ++
         board_text(detail) ++
         harvest_text(detail)
 
@@ -148,6 +134,11 @@ defmodule Loka.Content.RoomParts do
         not is_map_key(text, value),
         do: diag("UNRESOLVED_REFERENCE", at(rel, ["details", key] ++ steps), %{"target" => value})
   end
+
+  defp own_text(detail),
+    do:
+      for({field, value} <- Map.take(detail, ["description", "title"]), do: {[field], value}) ++
+        for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value})
 
   defp harvest_text(detail),
     do:

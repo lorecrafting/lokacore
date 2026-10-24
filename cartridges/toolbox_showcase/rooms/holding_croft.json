@@ -12,13 +12,15 @@
         "pool",
         "water"
       ],
-      "description": "detail.croft_pool"
+      "description": "detail.croft_pool",
+      "title": "detail.croft_pool.title"
     },
     "croft_hearth": {
       "aliases": [
         "hearth"
       ],
       "description": "detail.croft_hearth",
+      "title": "detail.croft_hearth.title",
       "rating": 1
     }
   },

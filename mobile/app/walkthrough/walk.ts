@@ -44,7 +44,6 @@ type View = {
   scene?: JsonValue;
   combat?: JsonValue;
   choice?: JsonValue;
-  storylet?: string;
   notices?: { id: string }[];
   notice_boards?: { notices: { id: string }[] }[];
 };
@@ -91,35 +90,24 @@ const OWN =
   'say whisper shout cast look flee choose close_choice continue stand sit rest sleep raise_attribute scan';
 const KEY = /\b[a-z][a-z0-9_]+\.[a-z][a-z0-9_]+/;
 
-// The offers World draws as place cards (model.ts group.place).
-const placeOffers = (view: View) => {
-  const notices = [
-    ...(view.notices ?? []),
-    ...(view.notice_boards ?? []).flatMap((b) => b.notices),
-  ];
-  return view.actions.filter(
+// The place offers World once drew as cards and refused notes (owner 2026-10-23: no longer).
+const placeOffers = (view: View) =>
+  view.actions.filter(
     (a) =>
       !a.input.length &&
-      // The untargeted ones and those aimed at someone here.
       (a.target.kind === 'none' || (a.target.kind === 'entity' && a.target_ids?.length)) &&
-      a.action_key !== view.storylet &&
-      !OWN.split(' ').includes(a.action_key) &&
-      !notices.some((n) => a.target_ids?.includes(n.id)),
+      !OWN.split(' ').includes(a.action_key),
   );
-};
 
-// The room page against its GameView (pass-1 check 8; book-ui.md World and status entry): each
-// available place offer is a control with its label, each refused one a `label: reason` note
-// with a reason word, no shut door's Open or Unlock is a card (owner 2026-10-23: the Map and the
-// joystick open doors), and no text is a raw key.
+// The room page against its GameView (pass-1 check 8; book-ui.md Room page anatomy): no place
+// offer is a control or a `label: reason` note, no shut door's Open or Unlock is a card (owner
+// 2026-10-23: the Map and the joystick open doors), and no text is a raw key.
 function roomDrawn({ view, text, buttons, lines, notes }: Live) {
   if (view.scene || view.combat || view.choice) return { problems: [], seen: 'not World' };
   // An untexted label shows its key's last word (words.ts sayers).
   const label = (a: Offer) =>
     (text[a.label] || a.label.split('.').at(-1)!.replaceAll('_', ' ')).toLowerCase();
   const place = placeOffers(view);
-  const offered = place.filter((a) => a.available);
-  const refused = place.filter((a) => !a.available);
   const doors = view.exits.flatMap(({ door, direction }) =>
     (door && door.state !== 'open' ? door.actions : [])
       .filter((a) => a.available && ['open', 'unlock'].includes(a.command ?? a.action_key))
@@ -127,14 +115,10 @@ function roomDrawn({ view, text, buttons, lines, notes }: Live) {
   );
   const named = buttons.map((b) => b.toLowerCase());
   const problems = [
-    ...offered.filter((a) => !named.includes(label(a))).map((a) => `no control "${label(a)}"`),
-    ...refused.flatMap((a) => {
-      const line = notes.find((l) => l.toLowerCase().startsWith(`${label(a)}: `));
-      const why = line?.slice(label(a).length + 2) ?? '';
-      return why && why !== a.reason?.code && !/_|\w\.\w/.test(why)
-        ? []
-        : [`refusal "${line ?? label(a)}" for ${a.reason?.code}`];
-    }),
+    ...place.filter((a) => named.includes(label(a))).map((a) => `World verb "${label(a)}"`),
+    ...place
+      .filter((a) => notes.some((l) => l.toLowerCase().startsWith(`${label(a)}: `)))
+      .map((a) => `refused note "${label(a)}" on World`),
     // A door card would read `label door (direction)`; World draws none.
     ...doors
       .filter(({ a, dir }) =>
@@ -145,7 +129,7 @@ function roomDrawn({ view, text, buttons, lines, notes }: Live) {
   ];
   return {
     problems,
-    seen: `${offered.length} offered, ${refused.length} refused, ${doors.length} door`,
+    seen: `${place.length} place offers, ${doors.length} door`,
   };
 }
 

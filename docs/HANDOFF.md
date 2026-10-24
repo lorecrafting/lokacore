@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Rewritten 2026-10-23 ~19:30 local by Claude Code (Opus 5.5), PM session 661e816a, before /clear (see "Open polish batch" first). Earlier header: written 2026-10-23 ~01:30 local, AS OF
+Rewritten 2026-10-24 ~01:00 local by Claude Code (Opus 5.5), PM session 661e816a, overnight while the owner slept (see "Start here" first). Previous header: 2026-10-23 ~19:30 local, before /clear. Earlier header: written 2026-10-23 ~01:30 local, AS OF
 main after #453 plus the overnight batches below. Owner (2026-10-22, quoted): "Please work on the engine stuff, and the
 followups from todays reviews ... the polish phase will be ready for me tomorrow right?"
 Open objective: the owner's Storybook polish pass. Owner hold (2026-10-22, paraphrased): only polish and the bugs it
@@ -32,22 +32,31 @@ PLease set things up so that its easy for me to do my ui polish there".
 - "Close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR comments, green hosted CI, merge with
   `--match-head-commit`, `bin/after_merge.sh`, `bin/preview_update.sh` (it refuses while a session is served).
 
-## Open polish batch (start here after /clear)
+## Start here (2026-10-24)
 
-- Session `polish/session-2026-10-23` in ~/dev/lokacore-session, served on Storybook 6006, NOT pushed. It holds the
-  NPC/item detail-page redesign (owner pick mvlrlvappy4w; owner 2026-10-23, quoted: "Go wtih all your leans and
-  recommendations"): commits a5857ed40..68d264952 (spec; no status line on detail pages, Leave last; one card order;
-  "Buy or sell" opens the shopkeeper's shelf page with purse, buy cards and Sell…; "Your order" group; one Talk card
-  or "<Name> has nothing to say just now."; Whisper hidden). Book suite 737/0, tsc, size, sg clean; walk edited, not run.
-- Next: owner looks in Storybook; then "close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR
-  comments, green hosted CI, merge with `--match-head-commit`, `bin/after_merge.sh`, restart the session.
-- Designer's open should-fixes for that review: offers.ts:87 serviceOrder reads any non-no_order refusal as an open
-  order (real fix needs loka-x6t.118); Shelf.tsx:83 selling the last item drops screen-reader focus. Flags: whisper
-  and old shelf-row tests removed; speech can't be aimed at a person until loka-x6t.115; NPC pages lost their Contents
-  opener; the OpenOrder story uses a shaped view.
-- Filed today from owner leans: x6t.115 whisper listeners, x6t.116 repair service, x6t.117 sell non-shelf items,
-  x6t.118 order state projection, x6t.119 steal from shelf, kgd.193 canned emotes (P2), loka-9ch9 after_merge flush
-  conflict (housekeeping). Owner's cut-off note ("And sometimes…"): owner doesn't remember; dropped.
+- Owner, going to sleep (2026-10-23, quoted): "ok keep going until all tasks are done, and use your best
+  recommendation and judgement for things because i will be going to sleep". Stopped at weekly usage 93% (cache
+  written 2026-10-24 ~00:40) after merging #464; the PM had said it would stop near 95%.
+- Merged tonight: #462 (x6t.122 batch d: detail pages, Talk then Trade, "<Name> can sell you…"/"will buy…", no Give,
+  refusal lines without chips), #465 (x6t.128 batch e: room page anatomy decision, docs/design/interaction-patterns.md,
+  brief-model rule in WORKFLOW), #463 (x6t.121 container lids: seed sack, hoard/strongroom chests, chandler crate,
+  yard_crate), #464 (x6t.120 + x6t.125 room fixtures: every fixture with actions has its own page and optional title,
+  kernel_api 1.120; World draws only the five anatomy parts; asides and storylets retired; flee narrated; lever hall
+  logs its solve line; `put` pinned under kgd.185).
+- Another session merged #466-#471 (kgd.194 abilities/bundles) on main tonight; #464 needed a merge (system graph
+  regenerated, pages lint split into lib/loka/content/lint_pages.ex).
+- Polish session `polish/session-2026-10-23` is open in ~/dev/lokacore-session on main (all of the above), Storybook
+  6006. The picks Monitor is NOT armed (owner asleep): re-arm on return.
+- Next, in order (owner-approved, not started for usage):
+  1. loka-x6t.127 remainder: away recap -> a new entry at the bottom of the event log (owner, quoted: "It should be a
+     new entry in the event log, meaning at the very bottom"); NPC carried-item note -> NPC page; exit warning notes and
+     the Continue conversation button under the anatomy rule.
+  2. loka-x6t.124 screen readers hear nothing on detail pages (presenter.ts `heard`); designer ruling first.
+- Owner rules set tonight (repo now states them): room page anatomy
+  (docs/decisions/owner-decision-room-page-anatomy-2026-10-23.md); interaction patterns doc is the pattern layer UI
+  briefs cite; brief models: Opus default, Fable for save/protocol/contract briefs under ~80% weekly usage, never Sonnet.
+- Filed, later: x6t.123 purse chink sound and swell, ikch.1 Chop wood as a woodcutting skill (needs an axe), x6t.126
+  skill-gated room depth (deferred, owner "hold on that for now").
 
 ## Today 2026-10-23 (owner live in Storybook), all merged
 
@@ -92,11 +101,10 @@ Douse), branch `toolbox/batch-aimed-spells`, five slices in order.
 Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),
 branch `toolbox/batch-room-words`, five slices in order.
 
-## Container open batch (owner go 2026-10-23)
+## Container open batch: MERGED #463 (2026-10-23)
 
-Briefs: [docs/briefs/container-open/README.md](briefs/container-open/README.md) (loka-x6t.121 containers need Open
-first: the showcase seed sack gets a lid, no engine change), branch `toolbox/batch-container-open`, one slice plus a
-conditional second on the owner's answer.
+Brief: [docs/briefs/container-open/README.md](briefs/container-open/README.md). Room fixtures brief:
+[docs/briefs/room-fixtures/README.md](briefs/room-fixtures/README.md), MERGED #464.
 
 ## Overnight results (2026-10-23)
 

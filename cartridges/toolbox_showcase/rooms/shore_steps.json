@@ -22,7 +22,8 @@
         "horizon",
         "sea"
       ],
-      "description": "detail.horizon"
+      "description": "detail.horizon",
+      "title": "detail.horizon.title"
     },
     "sign_world": {
       "aliases": [

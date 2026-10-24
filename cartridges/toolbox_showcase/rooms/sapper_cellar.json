@@ -13,6 +13,7 @@
         "plate"
       ],
       "description": "detail.cellar_flags",
+      "title": "detail.cellar_flags.title",
       "rating": 1,
       "variants": [
         {

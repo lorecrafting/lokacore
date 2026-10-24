@@ -6,7 +6,10 @@ import { deltaPreconditions } from './invariants_delta.ts';
 import type { Json } from '../foundation/canonical.ts';
 import { key, same, target, type Result } from '../foundation/compose.ts';
 import { CAPABILITY_OWNERS, EVALUATION_FAULTS, type DeltaOp } from '../contracts.gen.ts';
-import { gameview_agrees_with_admission } from '../view/invariants_view.ts';
+import {
+  gameview_agrees_with_admission,
+  world_lists_no_fixture_action,
+} from '../view/invariants_view.ts';
 import { validate } from '../foundation/validate.ts';
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
@@ -121,6 +124,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     (Object.hasOwn(CAPABILITY_OWNERS.command, command.payload.type) &&
       validate('DecisionResult', decision).length === 0),
   gameview_agrees_with_admission, // invariants_view.ts
+  world_lists_no_fixture_action, // invariants_view.ts
 };
 
 /** True when the invariant holds; throws for an unknown id. */

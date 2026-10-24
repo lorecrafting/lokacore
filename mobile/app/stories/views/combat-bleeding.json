@@ -523,8 +523,10 @@
   }
  ],
  "log": [
+  "a boar grunting",
   "The tusk opens a wound; you are bleeding.",
-  "The tusk leaves a scar that will not fade."
+  "The tusk leaves a scar that will not fade.",
+  "the iron smell of your own blood"
  ],
  "combatLog": [
   "You miss.",

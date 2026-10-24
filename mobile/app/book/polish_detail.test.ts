@@ -387,8 +387,8 @@ test('actual trunk detail explains refused Take and restores its button after Re
 test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
   const h = book(glowBundle());
   try {
-    assert.ok(h.labels().includes('Glow, open'));
-    h.tap('Glow');
+    assert.ok(h.labels().includes('glows, open'));
+    h.tap('glows, open');
     h.tap('Search');
     assert.ok(h.text().includes('You search.')); // narration.search
     assert.equal(h.p.screen().log.includes('You search.'), false);
@@ -407,7 +407,7 @@ test('a notice page shows its description once and every other read line as read
   const shown = nodes(
     NoticePage({
       screen: {
-        view: { notices: [{ id: 'well', title: 'The well', description: well }] },
+        view: { actions: [], notices: [{ id: 'well', title: 'The well', description: well }] },
         text: (key: string) => key,
         detail: () => [well, 'You read it twice.', 'You read it twice.'],
       },

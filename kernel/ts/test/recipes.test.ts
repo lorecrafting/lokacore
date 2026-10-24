@@ -204,19 +204,27 @@ const shown = (key: string, label: string, available = true) => ({
   input: key === 'move' ? ['direction'] : key === 'wait' ? ['until'] : [],
   ...(available ? {} : { reason: { code: 'invalid_state' } }),
 });
-const places = (w: World) => gameView(w).actions.map((a) => a.action_key);
+// A recipe aimed at a detail is offered on that detail's page (loka-x6t.120), so its notice's
+// cards come first, then the World list.
+const places = (w: World) => {
+  const v = gameView(w);
+  return [...(v.notices ?? []).flatMap((n) => n.actions ?? []), ...v.actions].map(
+    (a) => a.action_key,
+  );
+};
+const bellPage = (w: World) => plain(gameView(w).notices?.find((n) => n.key === 'bell')?.actions);
 
-// Breaks: a recipe listed away from its detail or not greyed once its policy fails, the lists
-// not by priority then key, or engine verbs of capabilities the cartridge does not lock (take).
-test("the place's actions: the recipe first while its detail is here, then the verbs", () => {
+// Breaks: a recipe listed away from its detail's page or not greyed once its policy fails, the
+// lists not by priority then key, or engine verbs of capabilities the cartridge does not lock (take).
+test("the place's actions: the recipe on its detail's page while here, the verbs on the World", () => {
   const w = world();
-  const ringBell = shown('ring_bell', 'actions.ring_bell');
   // wait: the compiler adds schedule@1 with the pools (review #49 A1).
   const verbs = ['look', 'move', 'scan', 'wait'].map((v) => shown(v, `action.${v}`));
-  assert.deepEqual(plain(gameView(w).actions), [ringBell, ...verbs]);
+  assert.deepEqual(plain(gameView(w).actions), verbs);
+  assert.deepEqual(bellPage(w), [shown('ring_bell', 'actions.ring_bell')]);
   const rung = step(w, ring(), 0).world;
-  const greyed = shown('ring_bell', 'actions.ring_bell', false);
-  assert.deepEqual(plain(gameView(rung).actions), [greyed, ...verbs]);
+  assert.deepEqual(plain(gameView(rung).actions), verbs);
+  assert.deepEqual(bellPage(rung), [shown('ring_bell', 'actions.ring_bell', false)]);
   assert.deepEqual(places(step(w, cmd({ type: 'move', direction: 'down' }), 0).world), [
     'look',
     'move',

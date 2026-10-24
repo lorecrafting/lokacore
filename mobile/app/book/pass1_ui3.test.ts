@@ -2,12 +2,8 @@
 // line only when no exit card already carries it (UF2), and a shut door's Open also on World (R4).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Game, GameView } from '../../packages/game-view/session.ts';
-import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
-import { book, nodes, words } from './__tests__/polish-book.test.ts';
-import { group } from './model.ts';
-import { presenter } from './presenter.ts';
+import { book } from './__tests__/polish-book.test.ts';
 
 // Breaks: the Map draws the log again (UF1); the door line repeats the exit card's "closed" or
 // "locked", or drops while the door is open (UF2); World draws a door card again (owner 2026-10-23
@@ -44,47 +40,4 @@ test('doors sampler lane: Map door lines, none on World, after closing the hut d
     input: { direction: 'north' },
     view_freshness_token: undefined,
   });
-});
-
-// Breaks: a refused place offer resolves its label with `text` (the raw key) while the offered one
-// uses `label` (a readable word), against book-ui.md's one resolver (UI2 review nit).
-test('a label key with no text reads the same fallback word offered and refused', async (t) => {
-  const { RoomPage } = await import('./pages.tsx');
-  const b = book(compiled('cartridges/doors_sampler') as never);
-  t.after(() => b.sql.close());
-  const offer = {
-    action_key: 'fish',
-    label: 'action.fish_in',
-    target: { kind: 'none' },
-    input: [],
-  };
-  const view = {
-    ...b.game.view().view,
-    actions: [
-      { ...offer, available: true },
-      { ...offer, action_key: 'net', available: false, reason: { code: 'cooldown' } },
-    ],
-  } as GameView;
-  assert.deepEqual(validate('GameView', view), []);
-  const game = {
-    view: () => ({ view, token: 'view:t' }),
-    pending: () => false,
-    subscribe: () => () => {},
-    text: () => undefined,
-    lastNarration: () => undefined,
-  } as unknown as Game;
-  const s = presenter(game).screen();
-  const drawn = nodes(
-    RoomPage({
-      ...s,
-      g: group(s.buttons),
-      press: () => {},
-      open: () => {},
-      openChoice: () => {},
-      details: null,
-    } as never),
-  );
-  const shown = drawn.filter((n) => n.type === 'Text').map(words);
-  assert.ok(shown.includes('Fish in'), JSON.stringify(shown));
-  assert.ok(shown.includes('Fish in: not yet'), JSON.stringify(shown));
 });

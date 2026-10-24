@@ -16,7 +16,6 @@ const room = (description: string) => ({
   press: () => {},
   open: () => {},
   openChoice: () => {},
-  details: null,
 });
 
 // Breaks: a blank line in the authored description is shown as one run of text (the split dropped),
@@ -38,147 +37,12 @@ test('a blank line in the room description starts a new paragraph; a line break 
   ]);
 });
 
-// Breaks (rows FD2/FD10, book-ui.md Aside details; owner pick mvlrbpi8u4ai): an aside is not
-// logged, keeps link markup, logs again while the visit lasts (a re-render, a vanish and return, a
-// person's same line twice), is not logged anew on the next visit, or a lit room's aside is lost.
-test('each aside is one plain World log line, once per room visit', async () => {
-  const { presenter } = await import('./presenter.ts');
-  const hal = (asides: object[]) => ({ id: 'hal', name: 'Hal', kind: 'npc', actions: [], asides });
-  const at = (id: string, asides?: object[], entities: object[] = []) => ({
-    place: { id, title: { key: 'T' }, description: { key: 'D' }, ...(asides && { asides }) },
-    entities,
-    exits: [],
-    actions: [],
-    inventory: [],
-    journal: [],
-    time: 0,
-  });
-  const runes = { key: 'You know these [runes](runes).' };
-  let n = 0;
-  let view: object = at('hall', [runes], [hal([])]);
-  const game = {
-    view: () => ({ view, token: `t${n}` }),
-    text: () => undefined,
-    lastNarration: () => undefined,
-    pending: () => false,
-  } as any;
-  const p = presenter(game);
-  const show = (next: object) => {
-    view = next;
-    p.update({ kind: 'state', projection: game.view(), status: { kind: 'ready' } } as any);
-    n++;
-    return [...p.screen().log];
-  };
-  n++;
-  assert.deepEqual(show(at('hall', [runes], [hal([])])), ['You know these runes.']);
-  assert.deepEqual(show(at('hall', [], [hal([{ key: 'Hal mutters.' }])])), [
-    'You know these runes.',
-    'Hal mutters.',
-  ]);
-  assert.deepEqual(show(at('hall', [runes], [hal([{ key: 'Hal mutters.' }])])).length, 2);
-  assert.deepEqual(show(at('cellar')), []); // dark: the engine sends no place asides
-  assert.deepEqual(show(at('cellar', [runes])), ['You know these runes.']); // lit
-  assert.deepEqual(show(at('hall', [runes])), ['You know these runes.']);
-});
-
-// Breaks: a cold open, a tap into a room or a tick's narration logs no aside or logs it twice; an
-// aside comes before the narration or arrivals, or a person's before the room's; or an open away
-// settlement holds an aside for its recap instead of logging it once the recap settles.
-test('asides log after narration and arrivals on open, tap and tick, never in the recap', async () => {
-  const { presenter } = await import('./presenter.ts');
-  const at = (id: string, more: object = {}) => ({
-    place: { id, title: { key: 'T' }, asides: [{ key: `${id} lore.` }] },
-    entities: [
-      { id: 'hal', name: 'Hal', kind: 'npc', actions: [], asides: [{ key: 'Hal mutters.' }] },
-    ],
-    ...{ exits: [], actions: [], inventory: [], journal: [], time: 0 },
-    ...more,
-  });
-  let view: object = at('hall');
-  let n = 0;
-  let last: object | undefined = { command_id: 'c0', lines: [{ key: 'T' }, { key: 'You wake.' }] };
-  const game = {
-    view: () => ({ view, token: `t${n}` }),
-    text: () => undefined,
-    lastNarration: () => last,
-    pending: () => false,
-    pendingInvocation: () => undefined,
-    invoke: () => {
-      view = { ...at('yard'), entities: [] };
-      n++;
-      const narration = [{ key: 'The gate closes.' }];
-      last = { command_id: 'move', lines: narration };
-      return {
-        kind: 'saved',
-        decision: { kind: 'accepted', events: [], outcome: 'moved', narration },
-      };
-    },
-  } as any;
-  const p = presenter(game);
-  assert.deepEqual(p.screen().log, ['You wake.', 'hall lore.', 'Hal mutters.']);
-  p.press({ label: 'Go north', action_key: 'move', target_ids: [], input: {} });
-  assert.deepEqual(p.screen().log, ['The gate closes.', 'yard lore.']);
-  const tick = (next: object, status: string, narration?: string) => {
-    view = next;
-    n++;
-    if (narration) last = { command_id: `c${n}`, lines: [{ key: narration }] };
-    p.update({ kind: 'state', projection: game.view(), status: { kind: status } } as any);
-    return p.screen();
-  };
-  assert.deepEqual(tick(at('yard'), 'ready', 'Rain falls.').log.slice(2), [
-    'Hal arrives.',
-    'Rain falls.',
-    'Hal mutters.',
-  ]);
-  const away = { recap_after: 1, entities: [] };
-  tick({ ...at('cellar', away), place: { id: 'cellar', title: { key: 'T' } } }, 'ready');
-  assert.deepEqual(tick(at('cellar', { ...away, time: 5 }), 'catching_up', 'Hours pass.').log, []);
-  const settled = tick(
-    at('cellar', {
-      ...away,
-      time: 9,
-      place: { id: 'cellar', title: { key: 'T' }, asides: [{ key: 'Damp.' }] },
-    }),
-    'ready',
-  );
-  assert.deepEqual([settled.recap, settled.log], [[{ line: 'Hours pass.', count: 1 }], ['Damp.']]);
-});
-
-// Breaks: an aside draws as its own block on World (a place's or a person's), or a notice's asides do not
-// lead its history as plain lines.
-test('asides draw no block; a notice leads its history with them', async () => {
-  const { RoomPage } = await import('./pages.tsx');
-  const { NoticePage } = await import('./notices.tsx');
-  const asides = [{ key: 'You know these [runes](runes).' }];
-  const r = room('The hall is cold.');
-  const npc = { id: 'hal', name: 'Hal', kind: 'npc', actions: [], asides };
-  const view = { ...r.view, place: { ...r.view.place, asides }, entities: [npc] };
-  const world = nodes(RoomPage({ ...r, view } as any)).map(words);
-  assert.ok(!world.some((w) => w.includes('runes')));
-  const notice = nodes(
-    NoticePage({
-      screen: {
-        view: { notices: [{ id: 'd', title: 'Door', description: 'A door.', asides }] },
-        text: (key: string) => key,
-        detail: () => ['It creaks.'],
-      },
-      page: { kind: 'notice', id: 'd' },
-      open: () => {},
-      press: () => {},
-      world: () => {},
-    } as any),
-  )
-    .filter((n) => n.type === 'Text')
-    .map(words);
-  assert.deepEqual(notice.slice(0, 4), ['Door', 'A door.', 'You know these runes.', 'It creaks.']);
-});
-
-// Breaks (loka-x6t.105, book-ui.md fixture rule): a description's link to a readable notice stays
-// plain words, keeps its World line too, or reads without opening the page; or the prose links an
-// unmatched key, a counted harvest or an unavailable Read, or drops the World line of an unlinked notice.
+// Breaks (loka-x6t.105; book-ui.md Room page anatomy): a description's link to a readable notice
+// stays plain words, draws a World line too, or reads without opening the page; the prose links an
+// unmatched key; or a refused Read leaves the linked notice unreachable or presses the Read.
 test('a readable notice the description links is a prose link and no World line', async () => {
   const { RoomPage } = await import('./pages.tsx');
-  const { NoticeEntries, proseLinks } = await import('./notices.tsx');
+  const { proseLinks } = await import('./notices.tsx');
   const draw = (description: string, notice: object, available = true) => {
     const done: unknown[] = [];
     const read = {
@@ -209,7 +73,6 @@ test('a readable notice the description links is a prose link and no World line'
       RoomPage({
         ...room(description),
         view,
-        details: NoticeEntries(p),
         links: proseLinks(p),
       } as any),
     );
@@ -225,20 +88,17 @@ test('a readable notice the description links is a prose link and no World line'
   );
   yes.link.props.onKeyDown({ key: 'Enter', preventDefault: () => {} });
   assert.deepEqual(yes.done, [{ kind: 'notice', id: 'n1' }, 'n1']);
-  for (const [description, notice, available, line] of [
-    [linked, { key: 'sign_hub' }, true, 'The sign'], // no notice with the link's key
-    ['A green.', {}, true, 'The sign'], // the description does not link it
-    [linked, { remaining: 2 }, true, 'The sign (2)'], // a counted harvest
-    [linked, {}, false, 'Too dark to read.'], // Read unavailable: the card and its reason
-  ] as const) {
-    const no = draw(description, notice, available);
-    assert.equal(no.link, undefined, `${description} ${JSON.stringify(notice)} linked`);
-    assert.ok(no.text.includes(description.replace('[signpost](sign_social)', 'signpost')));
-    assert.ok(
-      no.text.some((t) => t.includes(line)),
-      `${line} missing: ${no.text}`,
+  for (const description of [linked.replace('sign_social', 'sign_hub'), 'A green.']) {
+    const no = draw(description, {});
+    assert.equal(no.link, undefined, `${description} linked`);
+    assert.equal(
+      no.text.some((t) => t.includes('The sign')),
+      false,
     );
   }
+  const refused = draw(linked, {}, false);
+  refused.link.props.onKeyDown({ key: 'Enter', preventDefault: () => {} });
+  assert.deepEqual(refused.done, [{ kind: 'notice', id: 'n1' }]);
 });
 
 // Room sentences from cartridge name words (book-ui.md "Below the description", loka-6qi). Breaks:

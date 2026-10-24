@@ -8,7 +8,7 @@ import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
 import { ShelfPage } from './Shelf.tsx';
-import { NoticeEntries, NoticePage, proseLinks } from './notices.tsx';
+import { NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
 import { note, usePalette, useType } from './palette.ts';
@@ -142,14 +142,12 @@ function WorldPage(p: BodyProps) {
     <RoomPage
       view={view}
       text={text}
-      label={p.screen.label}
       log={log}
       recap={p.screen.recap}
       g={p.g}
       press={p.press}
       open={openThing}
       openChoice={() => p.open(conversation(view))}
-      details={<NoticeEntries {...p} />}
       links={proseLinks(p)}
     />
   );

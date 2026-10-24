@@ -17,6 +17,7 @@
         "grate"
       ],
       "description": "detail.grate_lock",
+      "title": "detail.grate_lock.title",
       "rating": 0
     }
   }

@@ -12,6 +12,7 @@
         "barrels"
       ],
       "description": "detail.yard_barrels",
+      "title": "detail.yard_barrels.title",
       "rating": 0
     }
   }

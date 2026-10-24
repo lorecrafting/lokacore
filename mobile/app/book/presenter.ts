@@ -37,7 +37,7 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
-  asideLines,
+  cueLines,
   closedLog,
   closing,
   detailLines,
@@ -117,7 +117,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
           : undefined;
   closedLog(s, reply.kind === 'saved' && reply.decision.kind === 'accepted');
   const line = s.fault ? '' : received(game, reply, was, s, text);
-  if (!s.fault) s.log.push(...asideLines(s, game.view().view, text));
+  if (!s.fault) s.log.push(...cueLines(s, game.view().view, text));
   if (s.fault) {
     s.returnWorld = false;
     s.returnDetail = undefined;
@@ -194,8 +194,8 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   if (update.kind === 'state') {
     background(game, update, s, text);
     settle(s);
-    // Asides are present tense: never held for the away recap; they log once it settles.
-    if (!s.away) s.log.push(...asideLines(s, s.projection.view, text));
+    // Cues are present tense: never held for the away recap; they log once it settles.
+    if (!s.away) s.log.push(...cueLines(s, s.projection.view, text));
     return false;
   }
   if (!s.retry || update.invocation_id !== s.retry.invocation) return false;

@@ -352,7 +352,8 @@ carries `door` (the barrier's short name, its state and the door verbs the actor
 now: those admission and barrier@1's check accept, all available), also when passable; an exit
 whose barrier does not bar the way carries `sight` (the destination room id and title and the
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
-(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`,
+(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`
+or any recipe aimed at a room detail (those are its NoticeView's `actions`, mechanics.md inspectable_detail@1),
 nor the current position's verb; `position`, the actor's position, present exactly when the
 cartridge locks `position@1` (04 §15 as amended by c1-position);
 `entities` in the room and `inventory` of the body, each with its short name, explicit

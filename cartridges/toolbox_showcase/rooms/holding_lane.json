@@ -34,6 +34,7 @@
         "plot"
       ],
       "description": "detail.plot_stakes",
+      "title": "detail.plot_stakes.title",
       "rating": 1
     }
   },

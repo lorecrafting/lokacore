@@ -44,26 +44,14 @@ Book still draws it, the passage names the Beads item that removes it.
 
 ## World and status entry
 
-Superseded where it differs by the [room page anatomy](#room-page-anatomy): the place verbs, unavailable
-verb lines and aimed World verb lines below are removed by `loka-x6t.120`; the storylet card
-(storylets are to be retired, owner 2026-10-23), the unlinked notice, board, bed, transport and
-harvest entries, the exit warning notes and the sense cues block are still drawn and are removed by
-`loka-x6t.127`.
-
-World is one current-room page. Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
-description, projected interactibles, offered place actions and, last, the event log, so a
-pressed verb's result line sits within a screen of the verb (pass-1 UA; words go through the
-[say field](#word-bar)). A place action the GameView advertises
-unavailable draws in the verb list, after the available verb lines, in the Action card's
-unavailable form `label: reason` (`Fish in: not yet`; `cooldown` reads **not yet**), never
-dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
-World keeps only the room's own place verbs, the storylet card, the exits and the untargeted
-say field (owner 2026-10-23, quoted: "all actions on targets [...] should be in the target detail
-page, or item detail page, and not in the main room page"). An action aimed at a thing (Talk, a
-use pair, an aimed skill or spell) draws on that thing's page instead, a pair through its
-[pick list](#item-details-and-takedrop). An aimed verb whose target
-has no page of its own (no room entity or notice) stays a World verb line, and a refused aimed
-verb keeps its World `label: reason` note.
+World is one current-room page ([room page anatomy](#room-page-anatomy)). Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
+description, the people and items sentences and, last, the event log (words go through the
+[say field](#word-bar)). World draws no verb line, refused `label: reason` note or
+notice entry: every action, available or refused, draws on its target's fixture, person or item
+page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
+actions on targets [...] should be in the target detail page, or item detail page, and not in the
+main room page"). The exit warning notes and the Continue conversation control still draw until
+the `loka-x6t.127` follow-ups close.
 World draws no door card: Open and Unlock work from the Map and the
 [joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
@@ -77,14 +65,12 @@ immovable room content: it cannot be taken, dropped, stored or otherwise removed
 from the room. A removable object is a loose item in the item group instead.
 The link opens a detail only when the current GameView supplies a visible,
 current-room identity and detail route (a notice whose `key` is the
-link's target, with its captured Read offer). The Book does not infer visibility, identity,
+link's target); the link opens that detail's page, and a readable one also invokes its captured Read (Notice-board details). The Book does not infer visibility, identity,
 detail or an action from bracketed prose alone. If that projection is absent,
 the words remain ordinary prose until a mechanic adds the required projection
-and admission contract. A readable detail the selected description links, whose
-`key` the GameView projects with an offered Read, is a fixture link in the prose
-and draws no separate World line; a notice the description does not link, a
-board, a bed, a transport or a counted harvest keeps its World entry
-(loka-x6t.105). The selected room-description variant itself must omit
+and admission contract. A notice, board, bed, transport or counted harvest reaches its page only
+through its link in the selected description; one the description does not link
+draws nothing on World. The selected room-description variant itself must omit
 concealed fixture or exit text until the game reveals it; the Book cannot hide
 an authored phrase after receiving it.
 
@@ -268,7 +254,7 @@ shows it. A control whose shown text is its whole name (Leave, Got it, an action
 ## Detail-page order
 
 Detail pages show title/identity, authored description, projected item state, then their
-chronological event log (a notice's [asides](#aside-details) first) only when entries exist, then currently offered options in the same
+chronological event log only when entries exist, then currently offered options in the same
 scrolling content. Options list in one fixed order (pass-1 UR): first the verbs that act on the
 thing itself (Read, Eat, Drink, Wear, Light, Open, Talk, Attack, a recipe), then the verbs that
 move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into <container>,
@@ -288,13 +274,12 @@ foot. A control that opens a child (Resume dream, Continue conversation) stays i
 
 ## Notice-board details
 
-Every readable notice opens its own detail page. A standalone notice opens from its prose link, or from its World line when the selected description does not link it, and invokes its captured Read offer. Its Leave
+Every projected detail opens its own page from its prose link; a readable one invokes its captured Read on entry, a plain fixture shows its description and its offered cards. Every readable notice opens its own detail page. A notice, board, bed, transport or harvest opens only from its prose link; a standalone readable notice also invokes its captured Read offer. Its Leave
 option returns to World. Its page title is an authored noun distinct from the action label.
 Read text never enters the room event log.
 
-A projected notice board opens locally from World, with its title and selected description,
-nonempty chronological detail log, then its ordered notice options. Notice Read offers are
-shown through their detail entry rather than repeated as World actions. A notice option uses the
+A projected notice board opens locally from its prose link, with its title and selected description,
+nonempty chronological detail log, then its ordered notice options. A notice option uses the
 current available place offer with exactly that notice ID and inspectable-details target
 scope, including an authored Read alias. Unavailable offers show their reason; absent offers
 are not actionable. Neither English labels nor cartridge internals determine membership.
@@ -736,15 +721,7 @@ When GameView carries actor_name, the Character page's first line is its authore
 
 ## Sense cues details
 
-Superseded by the [room page anatomy](#room-page-anatomy): a cue is an ambient log line, not a block after the entity lines; the Book still draws the block (removed by `loka-x6t.127`).
-
-GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block. The presenter never walks exits or decides what reaches the player.
-
-## Aside details
-
-Being removed entirely by `loka-x6t.125` (owner 2026-10-23); until then a room's or person's aside is a World log line, as the [room page anatomy](#room-page-anatomy) allows.
-
-GameView `place.asides`, a present NPC's `asides` and a notice's `asides` are the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)) or a present person's remark ([companion remarks](mechanics.md#companion-remarks-npc-asides-toolbox-row-fd10)). They draw no block of their own on any page (owner pick mvlrbpi8u4ai). A room's and a present person's aside is one plain line in the World log, drawn in ink as narration is (never a dim Note), logged when it first shows in the GameView during the room visit (on entering, on a cold open, or later when it starts to hold: a skill rises, a person arrives, the room is lit), after that update's narration and arrivals, room asides first, then the people's in listed then authored order. It logs once per room visit, keyed by owner and text key: a re-render, an aside that stops and starts holding again, or a person who leaves and returns does not log it again; a room change starts a new visit and logs it anew. Asides are present tense and never join the [away recap](#away-recap): while a settlement's lines are held, an aside waits and logs once the settlement settles, after its lines. An NPC's page shows none (its asides are in the World log). A notice's asides lead that notice's history, plain lines in projected order before its read lines, for as long as the page is open. The skill or speaker is in the authored words, never a label, icon or colour; link markup shows as plain words. Darkness is the engine's omission: a dark room carries no `place.asides`, while a perceived NPC's asides arrive and log; the presenter never decides which aside holds.
+GameView `cues` reach the player as log lines ([room page anatomy](#room-page-anatomy), part 5): one plain line per cue, the authored text, then ' from the ' and the direction when it comes from another room, logged once the first time it shows during a room visit, after that update's narration and arrivals, in projected order; a room change starts a new visit. The sense is in the words, never an icon or colour.
 
 ## Lore details
 
@@ -792,9 +769,8 @@ word anywhere; only its writer sees it.
 
 ## Storylet card details
 
-Superseded by the [room page anatomy](#room-page-anatomy): the World page draws no card; the Book still draws it (removed by `loka-x6t.127`; storylets are to be retired, owner 2026-10-23).
+Removed: storylets are retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)), so there is no storylet card and no pick to show.
 
-GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never among them, so the hour's one pick is told from the place's standing verbs; available or unavailable it keeps that block (pass-1 R2). The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
 
 ## Skill tree details
 

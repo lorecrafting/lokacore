@@ -5,6 +5,7 @@ import type { Intent } from '../../packages/game-view/session.ts';
 import { BookView, color, game, nodes, view, words } from './__tests__/combat-book.test.ts';
 import { group, type Page } from './model.ts';
 import { presenter } from './presenter.ts';
+import { lineWords } from './words.ts';
 
 const { Combat } = await import('./Combat.tsx'); // after the harness's .tsx hooks
 
@@ -244,4 +245,10 @@ test('a status-skipped blow reads "<Name> is too <status> to do anything."', () 
     'combat.result',
   ])
     assert.ok(said.includes(line), `${line} in ${JSON.stringify(said)}`);
+});
+
+// Breaks: a flight shows its engine key combat.fled (or drops the way) instead of one plain line.
+test('a flight reads "You flee <direction>."', () => {
+  const line = lineWords({ key: 'combat.fled', bindings: { direction: 'west' } }, (k) => k, view());
+  assert.equal(line, 'You flee west.');
 });

@@ -1,4 +1,4 @@
-import type { CharacterId, Command, Key } from '../../contracts.gen.ts';
+import type { CharacterId, Command, Key, TextKey } from '../../contracts.gen.ts';
 import {
   bodyOf,
   COMPASS,
@@ -41,12 +41,20 @@ export function flee(
   if (!directions.length) return rejected('invalid_state');
   const [index, rng] =
     directions.length === 1 ? [0, world.state.rng] : uniform(world.state.rng, directions.length, 8);
+  const direction = directions[index];
   const moved = moveSequence(
     world,
-    { ...command, payload: { ...command.payload, direction: directions[index] } },
+    { ...command, payload: { ...command.payload, direction } },
     mint,
     'fled',
     steps,
   );
-  return moved.kind === 'accepted' ? { ...moved, rng } : moved;
+  // The engine line combat.fled names the way taken; the Book words it "You flee west.".
+  const fled = {
+    key: 'combat.fled' as TextKey,
+    bindings: { direction: String(direction) as TextKey },
+  };
+  return moved.kind === 'accepted'
+    ? { ...moved, rng, narration: [fled, ...(moved.narration ?? [])] }
+    : moved;
 }

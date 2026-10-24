@@ -138,9 +138,6 @@ defmodule Loka.Content.Checks do
   def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),
     do: put_in(target, ["tool", "liquid"], ref(l, "liquid", m))
 
-  def expand(%{"kind" => "storylet", "rooms" => rs} = target, m) when is_list(rs),
-    do: Map.put(target, "rooms", Enum.map(rs, &ref(&1, "room", m)))
-
   def expand(%{"offers" => offers, "resource" => r} = shop, m),
     do:
       shop
@@ -238,7 +235,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
     do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
-  # A scene's action trigger; one a storylet starts names no room (row FD3).
+  # A scene's action trigger.
   def expand(%{"action" => a, "outcome" => _} = t, m) when is_binary(a),
     do: Map.replace_lazy(%{t | "action" => ref(a, "recipe", m)}, "room", &ref(&1, "room", m))
 

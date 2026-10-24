@@ -102,31 +102,42 @@ defmodule Loka.ContentShowcaseTest do
        &update_in(&1, ["narration"], fn n -> Map.delete(n, "observed") end)}
 
   # The traps district's lever, wheel and needle lines need API 1.103 (a narrate op or
-  # a whole wheel readout reaction); the lever hall's asides need 1.91. The Loft's errand
-  # handover line is a narrate op too.
+  # a whole wheel readout reaction). The Loft's errand handover line is a narrate op too.
   @trap_lines ~w(lever_a_step lever_a_reset lever_b_step lever_b_reset lever_c_step lever_c_reset plate_springs plate_bites
                  cellar_springs cellar_bites errand_reward)
 
   defp unnarrated,
     do:
-      [{"rooms/lever_hall.json", &Map.delete(&1, "asides")}] ++
-        for(
-          r <- @trap_lines,
-          do:
-            {"reactions/#{r}.json",
-             &update_in(&1, ["apply"], fn a ->
-               Enum.reject(a, fn op -> op["op"] == "narrate" end)
-             end)}
-        ) ++
+      for(
+        r <- @trap_lines,
+        do:
+          {"reactions/#{r}.json",
+           &update_in(&1, ["apply"], fn a ->
+             Enum.reject(a, fn op -> op["op"] == "narrate" end)
+           end)}
+      ) ++
         for(w <- 1..3, k <- 0..9, do: {"reactions/wheel_#{w}_x_shows_#{k}.json", nil})
 
-  # Name words need API 1.118 (loka-6qi): the low-API rows drop them from every NPC and item.
+  # Name words need API 1.118 (loka-6qi): the low-API rows drop them from every NPC and item,
+  # and the room detail titles with them.
   defp unworded,
     do:
       for(
         d <- ~w(npcs items),
         f <- File.ls!("cartridges/toolbox_showcase/#{d}"),
         do: {"#{d}/#{f}", &Map.delete(&1, "words")}
+      ) ++ untitled()
+
+  # Detail titles need API 1.120 (loka-x6t.120): the low-API rows drop them from every room.
+  defp untitled,
+    do:
+      for(
+        f <- File.ls!("cartridges/toolbox_showcase/rooms"),
+        do:
+          {"rooms/#{f}",
+           &Map.update(&1, "details", %{}, fn ds ->
+             Map.new(ds, fn {k, d} -> {k, Map.delete(d, "title")} end)
+           end)}
       )
 
   defp homestead,

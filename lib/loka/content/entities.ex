@@ -85,19 +85,16 @@ defmodule Loka.Content.Entities do
   end
 
   # Variant and (row W10) schedule case conditions, (row G11) disposition conditions, (row G7)
-  # access locks, (row FD7) ask answer conditions and (row FD10) aside conditions.
+  # access locks and (row FD7) ask answer conditions.
   defp roots(e) do
     for(
-      {steps, %{"when" => w}} <- variants(e) ++ cases(e) ++ asides(e),
+      {steps, %{"when" => w}} <- variants(e) ++ cases(e),
       do: {steps ++ ["when", "root"], w["root"]}
     ) ++
       policies(e, "disposition", ~w(hostile friendly)) ++
       policies(e, "locks", ~w(get put)) ++
       answers(e)
   end
-
-  # Toolbox row FD10: an NPC's asides (read with the NPC as the target).
-  defp asides(e), do: for({a, i} <- Enum.with_index(e["asides"] || []), do: {["asides", i], a})
 
   # Toolbox row FD7: each ask answer's condition (read with the NPC as the target).
   defp answers(e) do
@@ -191,8 +188,6 @@ defmodule Loka.Content.Entities do
 
   defp ask_texts(_), do: []
 
-  defp aside_texts(e), do: for({s, a} <- asides(e), do: {s ++ ["text"], a["text"]})
-
   defp variant_texts(e),
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
@@ -217,7 +212,6 @@ defmodule Loka.Content.Entities do
         goal_texts(e) ++
         disposition_texts(e) ++
         ask_texts(e) ++
-        aside_texts(e) ++
         equip_texts(e) ++
         words_texts(e)
 

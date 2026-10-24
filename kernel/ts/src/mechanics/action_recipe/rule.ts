@@ -63,7 +63,6 @@ import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
 import { crafted, spellOf, useRefused, type Transfer } from './shared.ts';
-import { pick } from '../storylet/shared.ts';
 import { effect, fightBack, type Effected } from './spell.ts';
 import { fresh, trailLead } from '../trail.ts';
 import { created } from '../service/build.ts';
@@ -122,11 +121,10 @@ const recipeOf = (world: World, p: Command['payload']) =>
 
 // The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
 // item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach
-// fault faults the decision); or (row 29a) a spell's caster's body, an aimed one's target_id; or (row FD3) a storylet's
-// performer's body, while the deck draws it (storylet/shared.ts pick; no target_id or item_id).
+// fault faults the decision); or (row 29a) a spell's caster's body, an aimed one's target_id.
 function subjectOf(
   world: World,
-  { key, target }: ActionRecipe,
+  { target }: ActionRecipe,
   p: Command['payload'],
   body: EntityId,
   steps: Steps,
@@ -135,10 +133,6 @@ function subjectOf(
   if (target.kind === 'spell')
     return (p.type === 'cast' && p.target_id) || rejected('invalid_target');
   if (p.type === 'cast') return rejected('invalid_state'); // spellOf names only spells
-  if (target.kind === 'storylet') {
-    if (p.item_id !== undefined || p.target_id !== undefined) return rejected('invalid_target');
-    return pick(world, p.actor_id, steps)?.key === key ? body : rejected('invalid_state');
-  }
   if (target.kind === 'use') {
     const code = useRefused(world, target, body, p.item_id, p.target_id, steps);
     if (code === 'budget_exceeded' || code === 'containment_cycle')

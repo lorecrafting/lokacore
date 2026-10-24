@@ -59,12 +59,9 @@ function legacyStarts(world: World, e: DomainEvent): ReactionRule[] {
         ('action' in s.on && p.type === 'action_completed'
           ? s.on.action!.key === p.action &&
             e.actor_id !== undefined &&
-            // row FD3: a storylet start names no detail; the completed action alone starts it
-            (s.on.detail === undefined ||
-              (world.details[p.subject_id]?.key === s.on.detail &&
-                world.details[p.subject_id]?.room === world.roomIds[refString(s.on.room!)] &&
-                world.state.containers[bodyOf(world, e.actor_id)!] ===
-                  world.details[p.subject_id]?.room))
+            world.details[p.subject_id]?.key === s.on.detail &&
+            world.details[p.subject_id]?.room === world.roomIds[refString(s.on.room!)] &&
+            world.state.containers[bodyOf(world, e.actor_id)!] === world.details[p.subject_id]?.room
           : 'story_point' in s.on && p.type === 'story_point_reached'
             ? refString(s.on.story_point!) === refString(p.story_point)
             : 'quest' in s.on &&

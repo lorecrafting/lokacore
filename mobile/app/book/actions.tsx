@@ -13,7 +13,7 @@ import { radius, size, space, type } from './tokens.ts';
 
 /**
  * An offered action as a card.
- * - Use: a detail page's offered action or dialogue choice, the World page's drawn storylet, the
+ * - Use: a detail page's offered action or dialogue choice, the
  *   Raise cards, a Pick list's option and rows; never an accent text link.
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form: a
  *   Note reading `label: reason` (a service's price and benefit stay inside the label's

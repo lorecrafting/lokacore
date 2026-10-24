@@ -500,7 +500,9 @@
    "kind": "combat"
   }
  ],
- "log": [],
+ "log": [
+  "a boar grunting"
+ ],
  "combatLog": [],
  "details": {}
 }

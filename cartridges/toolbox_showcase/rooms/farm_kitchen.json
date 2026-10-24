@@ -13,6 +13,7 @@
         "fire"
       ],
       "description": "detail.hearth",
+      "title": "detail.hearth.title",
       "rating": 1
     }
   }

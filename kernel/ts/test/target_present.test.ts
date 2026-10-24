@@ -12,6 +12,7 @@ import { resolve } from '../src/commands/invocation.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { gameView } from '../src/runtime/world.ts';
 import { accept, after, at, chat, CID, F, PRESENT, shown, stepped, world } from './ferry_probe.ts';
+import { noticeAction } from './notice_action.ts';
 
 // The talk invocation of `action_key` on `target`, resolved (commands/invocation.ts) and stepped.
 const invoked = (w: World, action_key: string, target: EntityId) => {
@@ -63,7 +64,7 @@ test('the target reaches admission for a talk alias, a recipe and a take', () =>
     ],
     ['available', 'accepted', 'accepted'],
   );
-  const coil = gameView(w).actions.find((a) => a.action_key === 'coil_rope');
+  const coil = noticeAction(gameView(w), 'coil_rope');
   assert.deepEqual(
     [coil?.available, stepped(w, { type: 'perform', action: 'coil_rope' })],
     [true, 'accepted'],

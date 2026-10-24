@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: room words batch, signpost fixture link and entity name words (loka-x6t.105, loka-6qi, PR #458, kernel_api 1.118)](2026-10-23-room-words-batch-review.md): **CHANGES REQUIRED**
+- [Review: room fixtures batch slices 1-3, fixture pages, detail title, World guard (loka-x6t.120, PR #464, kernel_api 1.120)](2026-10-23-room-fixtures-review.md): **APPROVE**
 - [Review: containers start closed, Open reveals contents (loka-x6t.121 slices 1-2, PR #463)](2026-10-23-container-open-review.md): **APPROVE WITH NOTES**
 - [Review: aimed targets batch, Pick lists and Douse (loka-x6t.109, PR #460, kernel_api 1.119)](2026-10-23-aimed-spells-batch-review.md): **APPROVE WITH NOTES**
 - [Review: death lines outside a combat round, Book World page on death (loka-3w3q, loka-x6t.26, PR #455, kernel_api 1.117)](2026-10-23-3w3q-death-lines-review.md): **CHANGES REQUIRED**

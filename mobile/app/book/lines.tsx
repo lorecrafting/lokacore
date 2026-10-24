@@ -3,7 +3,7 @@ import { Fragment, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, cueLine, plain } from './model.ts';
+import { cap, plain } from './model.ts';
 import { COUNT, LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
@@ -175,13 +175,6 @@ export function Here(p: {
       </View>
     ),
     items.length > 0 && <Present key="items" group={items} text={p.text} open={p.open} />,
-    p.view.cues && (
-      <View key="cues">
-        {p.view.cues.map((cue, i) => (
-          <Note key={i /* two equal cues are two lines */}>{cueLine(cue, p.text)}</Note>
-        ))}
-      </View>
-    ),
   ];
 }
 

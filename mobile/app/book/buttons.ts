@@ -172,10 +172,9 @@ function wordButtons(v: GameView, text: Say): Press[] {
   ];
 }
 
-// A place offer: no typed input, and no target or a named one; refused ones draw as World notes.
+// A place offer: no typed input, and no target or a named one.
 const placeOffer = (a: GameView['actions'][number]) =>
   !a.input.length && (a.target.kind === 'none' || !!a.target_ids?.length);
-export const refusedPlace = (v: GameView) => v.actions.filter((a) => !a.available && placeOffer(a));
 
 // The place's own actions, then a scene's Continue.
 function placeButtons(v: GameView, button: ToButton) {

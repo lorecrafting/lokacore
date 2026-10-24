@@ -39,6 +39,7 @@ import {
   wait,
   where,
 } from './showcase_fixture.ts';
+import { noticeAction } from './notice_action.ts';
 
 const WET = '5ca5e000-0000-4000-8000-000000000306';
 const AT_SEVEN = 7 * HOUR;
@@ -200,7 +201,7 @@ test('social 6: the strongbox pick fails, then passes; the ledger reads "The mil
 // Breaks: has_tag ignores the barrier's tags (the iron door is forced), or the force check does not
 // read str, or the wooden door ignores the forced fact.
 test('social 7: the iron door is unavailable and refused; the wooden door gives to str', () => {
-  const iron = gameView(w).actions.find((a) => a.action_key === 'force_iron_door');
+  const iron = noticeAction(gameView(w), 'force_iron_door');
   assert.equal(iron?.available, false);
   assert.equal(refused(w, { type: 'perform', action: 'force_iron_door' }), 'invalid_state');
   const forced = perform(w, 'force_tollhouse_door');

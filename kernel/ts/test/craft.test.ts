@@ -184,7 +184,7 @@ test('reopening between the two carves gives the same ids', () => {
 });
 
 // Breaks: the loader admits a template or non-container holder, an unresolved item, holder or
-// reason, a duplicate item, or a craft on a storylet or spell (twin of test/loka/content_craft_test.exs;
+// reason, a duplicate item, or a craft on a spell (twin of test/loka/content_craft_test.exs;
 // the floor is loader_floors.json's "a craft" case).
 const reload = (edit: (c: any) => void) => {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
@@ -235,14 +235,6 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
     ],
     [(r) => (r.craft.consume.reason = 'craft.unknown'), 'UNRESOLVED_REFERENCE', '.consume.reason'],
     [
-      (r) => {
-        delete r.check; // a storylet takes no check; the craft is what this case refuses
-        r.target = { kind: 'storylet', rooms: [R('room', 'workshop')] };
-      },
-      'SCHEMA_VIOLATION',
-      '',
-    ],
-    [
       (r, c) => {
         const known = { ...c.facts[`${P}fact/spoon_carved`], key: 'known', scopes: ['player'] };
         c.facts[`${P}fact/known`] = known; // a valid learned fact, so only the craft refuses
@@ -258,6 +250,14 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
     'loaded',
   );
   for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
+});
+
+// Breaks: the loader admits a storylet target again (FD3 retired by the owner, 2026-10-23).
+test('loader: a storylet target is refused', () => {
+  const key = `${P}recipe/carve_spoon`;
+  const edit = (c: any) => (c.recipes[key].target = { kind: 'storylet' });
+  const at = `.cartridge.recipes["${key}"].target.kind`;
+  assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
 });
 
 // Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill, or an

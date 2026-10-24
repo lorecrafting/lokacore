@@ -19,7 +19,8 @@
         "store_bar",
         "bar"
       ],
-      "description": "detail.store_bar"
+      "description": "detail.store_bar",
+      "title": "detail.store_bar.title"
     }
   }
 }

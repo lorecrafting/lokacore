@@ -20,6 +20,7 @@
         "lock"
       ],
       "description": "detail.hall_strongbox_lock",
+      "title": "detail.hall_strongbox_lock.title",
       "rating": 1
     },
     "hall_cupboard": {
@@ -28,6 +29,7 @@
         "hall_cupboard"
       ],
       "description": "detail.hall_cupboard",
+      "title": "detail.hall_cupboard.title",
       "rating": 5
     },
     "hall_lectern": {
@@ -35,7 +37,8 @@
         "lectern",
         "hall_lectern"
       ],
-      "description": "detail.hall_lectern"
+      "description": "detail.hall_lectern",
+      "title": "detail.hall_lectern.title"
     }
   }
 }
