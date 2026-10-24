@@ -1,9 +1,0 @@
-{
-  "title": "room.mill.title",
-  "description": "room.mill.description",
-  "exits": {
-    "east": {
-      "to": "lane"
-    }
-  }
-}

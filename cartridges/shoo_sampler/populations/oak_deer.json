@@ -1,17 +1,11 @@
 {
+  "extends": "herd",
   "bundle": "oak_deer",
   "home": "drowned_oak",
   "area": [
     "drowned_oak",
     "willow_shade"
   ],
-  "cap": 1,
-  "day_target": 1,
-  "night_target": 1,
-  "night_start": 20,
-  "night_end": 6,
-  "wander_interval": 3600,
-  "replacement_delay": 172800,
   "sight": {
     "delay": 300,
     "narration": {

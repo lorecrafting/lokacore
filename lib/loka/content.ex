@@ -15,7 +15,9 @@ defmodule Loka.Content do
   S6b `resources.json` (`Loka.Content.Resources`: overrides of the default pools every v2
   cartridge gets, and further resources). A reference is a full DefinitionRef object naming
   this cartridge, or short: the key alone, of the kind its field takes (owner decision
-  2026-09-25, `Loka.Content.Checks.expand/2`). Other files are ignored, except that a `.json`
+  2026-09-25, `Loka.Content.Checks.expand/2`). A definition may `extends` another of its kind,
+  flattened before any stage reads it, and an area bundle `areas/<name>.json` may hold
+  definitions of several kinds (docs/system/cartridge.md, Source shortcuts). Other files are ignored, except that a `.json`
   file anywhere else is UNKNOWN_FIELD.
   """
   use Boundary, deps: [Loka.Core], exports: []

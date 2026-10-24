@@ -15,10 +15,14 @@ world's definitions and text:
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
 file outside these recognized root files and definition directories is `UNKNOWN_FIELD`. A
+definition may sit in an area bundle, may name a parent of its own kind with `"extends"` and may
+be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
+([Source shortcuts](#source-shortcuts)). A
 source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
@@ -344,6 +348,64 @@ there is no per-feature minimum-version detector for legacy quest-resolving rece
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
 single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
 
+### Source shortcuts
+
+The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
+`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`), so `mix loka.compile` and
+`mix loka.lint` see the same flattened definitions. The order is: open area bundles, refuse
+repeated definitions, flatten `extends`. The artifact never carries a bundle, `extends` or
+`abstract`; the loader is unchanged.
+
+**Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
+`{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
+of the [Source layout](#source-layout) table. `text` and `facts` stay in their root files.
+- A bundled definition is exactly the file `<dir>/<key>.json` would be: every stage checks it, and
+  its diagnostics carry the bundle path, `areas/<name>.<dir>.<key>.<field>` (for example
+  `areas/village.dialogues.elder_ward.keyword`).
+- A prototype may live in a bundle: bundles open before `extends` resolves.
+- `mix loka.lint` names a bundled definition by its definition address, `<dir>/<key>.json`
+  (`reactions/elder_hears.json: ...`), not by the bundle file.
+- A bundle that fails to decode adds nothing; its `INVALID_JSON` fails the build.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| The bundle is not an object | `SCHEMA_VIOLATION` | `areas/<name>` | `{"error": "invalid_type"}` |
+| A member that is not a definition directory | `UNKNOWN_FIELD` | `areas/<name>.<member>` | `{}` |
+| A member whose value is not an object | `SCHEMA_VIOLATION` | `areas/<name>.<member>` | `{"error": "invalid_type"}` |
+| Two definitions of one kind and key (a file and a bundle, or two bundles) | `DUPLICATE_DEFINITION` | each site | `{}` |
+
+[speech_sampler](../../cartridges/speech_sampler/areas/village.json) is the working example: its
+rooms, NPCs, dialogue and reactions are one file.
+
+**`extends`.** A file in a definition directory may hold `"extends": "<key>"`, the key of a
+definition of the same kind (the short-reference convention), in any file of that kind.
+- One parent, any depth; resolution stops on a cycle.
+- Objects merge key by key, recursively; everything else (strings, numbers, lists, `null`)
+  replaces. There is no append, and a child cannot delete an inherited key, so a field whose
+  maps differ between children (shoo's deer `sight.narration`) stays out of the parent.
+- A child never inherits `extends` or `abstract`.
+- A schema error inside an inherited field reports at the child's path.
+
+**`abstract`.** A definition with `"abstract": true` is removed after its children resolve. It
+is never validated (an abstract NPC needs no `room`), and a reference to it is an ordinary
+`UNRESOLVED_REFERENCE`. Any other `abstract` value stays and is `UNKNOWN_FIELD`.
+
+Root files are not flattened: `extends` in `cartridge.json`, `facts.json`, `resources.json`,
+`attributes.json` or `map_positions.json` is `UNKNOWN_FIELD` (for example `cartridge.extends`);
+in `text.json` it is an ordinary TextKey. A child whose parent failed to decode, or whose parent
+chain reaches a cycle it is not in, is dropped without a diagnostic of its own; the parent's
+diagnostic fails the build. The refusals, with `<src>` the file's source path:
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| No definition of the child's kind has the key | `UNRESOLVED_REFERENCE` | `<src>.extends` | `{"target": "<dir>/<key>"}` |
+| The key exists only in another kind | `UNRESOLVED_REFERENCE` | `<src>.extends` | `{"target": "<dir>/<key>", "from": "<other src>"}` |
+| A cycle, including a file that extends itself | `SCHEMA_VIOLATION` | `<src>.extends` of each member | `{"error": "invalid_value", "from": "<its parent's src>"}` |
+| `extends` is not a string | `SCHEMA_VIOLATION` | `<src>.extends` | `{"error": "invalid_type"}` |
+
+[shoo_sampler](../../cartridges/shoo_sampler/) is the working example: `npcs/wild.json`,
+`items/corpse.json` and `populations/herd.json` are abstract prototypes.
+
 ## Artifact and loader
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:48`) returns the decoded
@@ -594,6 +656,81 @@ committed or checked in CI (gating is `loka-kgd.107.3`).
 - **Output** `{cartridge, policy, seeds, days, commands, refused, per_100, by_code, by_room,
   by_command, drift, revisits, moves, backtracks, new_facts}`, summed over seeds. ponytail: one
   policy; no heat map image (the by-room table is the map); no gate.
+
+### Transcript coverage (loka-kgd.194.2)
+
+Beads `loka-kgd.194.2` ([design audit](../rnd/design-audit-abilities-authoring-2026-10-23.md)
+findings 16 and 23, approach F, plan phase 4) lists the definitions that no example transcript
+exercises. `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]` replays each
+transcript (by default `cartridges/<manifest id>/transcripts/*.jsonl`, sorted) against the
+artifact. It loads and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
+1 when a transcript does not replay byte for byte (`<transcript>: replay differs at ordinal <n>`,
+the path relative to the repository) or when a replayed decision reaches the 64-line narration cap
+(`<transcript>: narration cap reached at ordinal <n>`: a cut marker would report a fired rule as
+never fired), exits 2 on bad arguments (none, or an artifact path that does not exist), and
+otherwise prints one canonical
+JSON document. Nothing is committed or checked in CI; only its unit test runs.
+
+- **The replay.** A `Run` starts with the trace header's own ids (its `content_hash` too, so an
+  edited cartridge still writes the recorded header) and decides each entry as
+  `transcripts.test.ts` does. Each produced line is compared with the recorded line at its
+  ordinal; the first difference stops the tool.
+- **Reactions.** No committed event names the rule that produced it, so the replay runs a copy of
+  the cartridge in which each reaction's `apply` ends with one more `narrate` step whose text is a
+  key unique to that rule ([reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts)).
+  Narration is neither a trace field nor state, so the marked replay must still equal the
+  recording, and the byte check above proves it on every transcript. A rule is exercised when its
+  key is in an accepted decision's narration: its `when` held and (for `after`) its job ran.
+- **Recipes.** Exercised by a committed `action_completed` whose `action` is the recipe's key (a
+  cast too); a `failure` outcome emits none.
+- **Dialogue choices.** Exercised by a committed `choice_resolved {continuation_id, choice_id}`,
+  attributed to the dialogue named by the `source` of that continuation in the world before the
+  step; rows whose source is a scene are not dialogue choices.
+- **Quests.** Exercised by a committed `quest_resolved`; `quest_failed` does not count.
+- **Output** `{cartridge: "<id>@<version>", transcripts, never: {reactions, recipes, choices,
+  quests}}`: sorted DefinitionRefStrings, and `choices` as `[{dialogue, choice}]` sorted by
+  dialogue, then choice. ponytail: firing means steps ran, so a delayed rule whose job never ran
+  in a transcript shows unfired; scene choices and cartridge `actions` are out of scope;
+  transcripts only, not browser walks.
+
+### Rule explainer (loka-kgd.194.3)
+
+Beads `loka-kgd.194.3` ([design audit](../rnd/design-audit-abilities-authoring-2026-10-23.md)
+finding 22, approach E, plan phase 4) says why a rule did or did not run at one transcript step.
+`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+loads and refuses as `reach.ts` above (exit 1). It reads the transcript with its own pinned
+`content_hash`, so an edited, recompiled artifact still runs. It replays ordinals `1..ordinal-1`
+on the marked copy of Transcript coverage above, comparing each line with the recording; a
+difference exits 1 (`<transcript>: replay differs at ordinal <n>`, the path relative to the
+repository). Step `<ordinal>` itself is decided, never compared, so an edited rule can be
+explained. Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
+1..entries, or a `--recipe`/`--dialogue` key no definition has. Otherwise it prints one canonical
+JSON document. Nothing is committed or checked in CI; only its unit test runs.
+
+- **Output** `{ordinal, command: <payload type>, outcome: <accepted outcome, else the decision
+  kind>, reactions: [{rule, causes: [{event, position, filters: {<name>: bool}}], fired, when?}],
+  recipe?: {rule, policy}, dialogue?: {rule, policy}}`. `reactions` holds every rule in rule-key
+  order; `rule` is the DefinitionRefString.
+- **Causes.** Each committed event of the step whose type is the rule's `on.event`, with every
+  declared filter evaluated on the world before the step, as the proposal matches triggers
+  ([reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts)). No such event: `[]`.
+- **Fired.** The number of the rule's markers in the step's narration: deliveries whose `when`
+  held and whose steps ran.
+- **When.** Each leaf gets `held`: the deliveries at which it held. The step is decided again
+  from the same world, once per leaf, with the rule replaced under its own key by one whose
+  `when` is that leaf alone and whose only step narrates a probe key. The kernel then evaluates
+  the leaf at the rule's own place in rule-key order, reading the writes of the rules and
+  deliveries before it in the same command (reaction@1). `all`, `any` and `not` keep their
+  shape; every leaf is evaluated, with no short-circuit.
+- **Policy** (on demand). A recipe's or dialogue's `policy`, each leaf with `holds`, read on the
+  world before the step, where admission reads it: the recipe for the command's primary target,
+  the dialogue for its NPC.
+- ponytail: a leaf's value is its truth (`held`, `holds`), not the fact or stat it read, which
+  needs a kernel hook. For a rule delivered more than once in a step, only the first delivery is
+  exact. A delayed rule's `fired` shows at its job's step, and a job run's narration can be
+  deduplicated. The recipe target is the payload's primary target, not a detail resolved
+  through `detailAt`; the dialogue target is the authored NPC, not a `choose` row's bound
+  speaker (`speakerOf`), which differs only when the binding is not the npc's entity.
 
 ## Installed capabilities
 
