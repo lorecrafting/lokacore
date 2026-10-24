@@ -39,3 +39,15 @@ No finding:
 - Mutants, each regenerated and each killed (economy and homestead tests red): `hoard_chest_lid` initial open, `crate_lid` initial open, sack barrier removed.
 - Hosted CI on the head: `ci` failure (mobile, finding 3), `book-e2e` failure (findings 1 and 2), graph-diff success, sim (showcase) and sim (fresh) success.
 - The PR body reports `/code-review medium`. It lists the row 7 screenshots (390 px) as not done.
+
+## Fix re-check at `088d3daea` (commits after `7117731b2` only)
+
+Verdict: **APPROVE WITH NOTES**. This is conditional on hosted CI going green. At the time of this check, `ci` and `book-e2e` were still in progress on `088d3daea` and graph-diff had passed.
+
+- Finding 1, fixed: `toolbox_showcase.walk.ts:165` now opens the chest before Put.
+- Finding 2, fixed: `Live.stories.tsx` drops the Open tap. The route checkpoint opens the sack.
+- Finding 3, fixed: `food.test.ts:38-39` opens the crate, reopens the store, then puts. This also settles finding 6. If the open lid were not saved, the put after the reopen would be refused with `exit_closed`.
+- Finding 4, fixed: the lid tests are moved to `showcase_lids.test.ts`. The economy allowance of 587 instead of 585 is acceptable: the two extra lines are the Open steps that steps 8 and the yard shelf now need in place, not new tests.
+- Finding 5, fixed: both district docs now name the Open step.
+- Finding 7, open (nit): the check moved unchanged to `showcase_lids.test.ts:66`.
+- New, **should-fix**, `kernel/ts/test/sim.test.ts:246-249`. The scoped SILENT `close` check cannot go red. `lidded` is true when any barrier starts closed, and the showcase has 14 door barriers that start closed (for example `cell_door`, `grate`, `iron_door`). So removing every item lid still passes the check. Fix: test for lids, for example `Object.values(cartridge.items).some((i) => i.barrier)`.
