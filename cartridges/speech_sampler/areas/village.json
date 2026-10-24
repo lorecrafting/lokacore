@@ -1,0 +1,153 @@
+{
+  "rooms": {
+    "lane": {
+      "title": "room.lane.title",
+      "description": "room.lane.description",
+      "exits": {
+        "east": {
+          "to": "square"
+        },
+        "west": {
+          "to": "mill"
+        }
+      }
+    },
+    "mill": {
+      "title": "room.mill.title",
+      "description": "room.mill.description",
+      "exits": {
+        "east": {
+          "to": "lane"
+        }
+      }
+    },
+    "square": {
+      "title": "room.square.title",
+      "description": "room.square.description",
+      "exits": {
+        "east": {
+          "to": "watchhouse"
+        },
+        "west": {
+          "to": "lane"
+        }
+      }
+    },
+    "watchhouse": {
+      "title": "room.watchhouse.title",
+      "description": "room.watchhouse.description",
+      "exits": {
+        "west": {
+          "to": "square"
+        }
+      }
+    }
+  },
+  "npcs": {
+    "elder": {
+      "keywords": [
+        "elder"
+      ],
+      "short": "npc.elder.short",
+      "room_line": "npc.elder.room",
+      "description": "npc.elder.description",
+      "room": "square"
+    },
+    "miller": {
+      "keywords": [
+        "miller"
+      ],
+      "short": "npc.miller.short",
+      "room_line": "npc.miller.room",
+      "description": "npc.miller.description",
+      "room": "mill"
+    },
+    "smith": {
+      "keywords": [
+        "smith"
+      ],
+      "short": "npc.smith.short",
+      "room_line": "npc.smith.room",
+      "description": "npc.smith.description",
+      "room": "square"
+    },
+    "watchman": {
+      "keywords": [
+        "watchman"
+      ],
+      "short": "npc.watchman.short",
+      "room_line": "npc.watchman.room",
+      "description": "npc.watchman.description",
+      "room": "watchhouse"
+    }
+  },
+  "dialogues": {
+    "elder_ward": {
+      "npc": "elder",
+      "keyword": "ward",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.elder_ward.prompt",
+      "roles": {
+        "elder": {
+          "role": "npc",
+          "npc": "elder"
+        }
+      },
+      "choices": {
+        "thank": {
+          "label": "dialogue.elder_ward.thank",
+          "narration": "narration.elder_ward.thank"
+        }
+      }
+    }
+  },
+  "reactions": {
+    "elder_hears": {
+      "on": {
+        "event": "spoken",
+        "npc": "elder"
+      },
+      "apply": [
+        {
+          "op": "fact.assign",
+          "fact": "elder_heard",
+          "value": true
+        }
+      ]
+    },
+    "miller_hears": {
+      "on": {
+        "event": "spoken",
+        "npc": "miller"
+      },
+      "apply": [
+        {
+          "op": "fact.assign",
+          "fact": "miller_heard",
+          "value": true
+        }
+      ]
+    },
+    "watchman_alarm": {
+      "on": {
+        "event": "spoken",
+        "npc": "watchman",
+        "word": "help",
+        "loudness": "shout"
+      },
+      "apply": [
+        {
+          "op": "fact.assign",
+          "fact": "watchman_alerted",
+          "value": true
+        }
+      ]
+    }
+  }
+}

@@ -26,8 +26,13 @@ defmodule Loka.Content.Lint do
     if !Enum.any?(files, &match?({"cartridge.json", _, %{}}, &1)),
       do: raise(ArgumentError, "#{dir}: no cartridge.json loaded; give a cartridge source folder")
 
-    Map.new(for {rel, _, value} <- files, is_map(value), do: {rel, value})
+    # ponytail: a bundled definition is linted under its definition address `<dir>/<key>.json`,
+    # not its file; dispatch on kind and print Source.at/2 paths if a builder needs file lines.
+    Map.new(for {rel, kind, value} <- files, is_map(value), do: {lint_rel(rel, kind), value})
   end
+
+  defp lint_rel(_, {_, key, [dir, _]}), do: dir <> "/" <> key <> ".json"
+  defp lint_rel(rel, _), do: rel
 
   @doc "The findings for decoded source files, keyed by their path relative to the cartridge."
   @spec findings(%{String.t() => map()}) :: [String.t()]

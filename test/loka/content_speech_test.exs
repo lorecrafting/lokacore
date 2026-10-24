@@ -19,11 +19,16 @@ defmodule Loka.ContentSpeechTest do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.47")}
     floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
-    unkeyed = {"dialogues/elder_ward.json", &Map.delete(&1, "keyword")}
+
+    unkeyed =
+      {"areas/village.json",
+       &update_in(&1, ["dialogues", "elder_ward"], fn d -> Map.delete(d, "keyword") end)}
 
     no_reactions =
       for f <- ~w(elder_hears watchman_alarm miller_hears),
-          do: {"reactions/#{f}.json", &Map.put(&1, "on", %{"event" => "check_failed"})}
+          do:
+            {"areas/village.json",
+             &put_in(&1, ["reactions", f, "on"], %{"event" => "check_failed"})}
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [api, unkeyed])
     assert floor in pairs(diags), inspect(diags)
@@ -37,7 +42,7 @@ defmodule Loka.ContentSpeechTest do
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [unowned])
 
-    assert {"UNDECLARED_CAPABILITY", "dialogues/elder_ward.keyword"} in pairs(diags),
+    assert {"UNDECLARED_CAPABILITY", "areas/village.dialogues.elder_ward.keyword"} in pairs(diags),
            inspect(diags)
 
     riddle = %{
@@ -47,9 +52,11 @@ defmodule Loka.ContentSpeechTest do
       "wrong" => "narration.elder_ward.thank"
     }
 
-    riddled = {"dialogues/elder_ward.json", &Map.put(&1, "riddle", riddle)}
+    riddled = {"areas/village.json", &put_in(&1, ["dialogues", "elder_ward", "riddle"], riddle)}
     assert {:error, diags} = Loka.ContentSource.compile(dir, [riddled])
-    assert {"OUTCOME_MISMATCH", "dialogues/elder_ward.keyword"} in pairs(diags), inspect(diags)
+
+    assert {"OUTCOME_MISMATCH", "areas/village.dialogues.elder_ward.keyword"} in pairs(diags),
+           inspect(diags)
   end
 
   # Breaks (word bar S2): the compiler accepts a speech.phrases entry that is not a Word, an empty

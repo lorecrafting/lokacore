@@ -151,7 +151,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   `npc_present` is what keeps the raider's and the goblins' blows clean (they never share a room
   with the boar).
 - Reaction `gil_hears`: `on {event: spoken, npc: gil, word: "ware", loudness: "shout"}`, `apply
-  fact.assign gil_warned true` (`speech_sampler/reactions/watchman_alarm.json`).
+  fact.assign gil_warned true` (`speech_sampler/areas/village.json`, `reactions.watchman_alarm`).
 - Quest `bounty` (`levelling_sampler/quests/cull.json` shape; no `offer`, dialogue accept only):
   objective `current_state fact_compare raider_slain true`; journal texts; outcome `done`.
   Reactions `bounty_done` `on fact_changed raider_slain` `when quest_state {bounty, active}`
