@@ -75,10 +75,20 @@ defmodule Loka.ContentExtendsTest do
 
   # Breaks: a home room left invalid by its extends crashes the population check (`not nil`).
   test "a population whose home room is refused reports, not crashes", %{dir: dir} do
-    assert {"UNRESOLVED_REFERENCE", "rooms/orchard.extends", %{"target" => "rooms/ghost"}} in diags(
-             dir,
-             [{"rooms/orchard.json", extends("ghost")}]
-           )
+    assert diags(dir, [{"rooms/orchard.json", extends("ghost")}]) ==
+             [{"UNRESOLVED_REFERENCE", "rooms/orchard.extends", %{"target" => "rooms/ghost"}}]
+  end
+
+  # Breaks: a bundle item refused at its own path is reported again at the bundle.
+  test "a bundle item refused by its extends is reported once", %{dir: dir} do
+    assert diags(dir, [{"items/deer_hide.json", extends("ghost")}]) ==
+             [{"UNRESOLVED_REFERENCE", "items/deer_hide.extends", %{"target" => "items/ghost"}}]
+  end
+
+  # Breaks: any `abstract` value is taken as abstract, so `false` silently drops the definition.
+  test "abstract other than true is an unknown field", %{dir: dir} do
+    assert diags(dir, [{"npcs/crow.json", &Map.put(&1, "abstract", false)}]) ==
+             [{"UNKNOWN_FIELD", "npcs/crow.abstract", %{}}]
   end
 
   # Breaks: root files are flattened too, so a manifest extends is silently dropped.
