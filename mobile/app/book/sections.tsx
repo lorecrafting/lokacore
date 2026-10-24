@@ -40,12 +40,15 @@ const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired
 /**
  * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
  * spell word refused here in ActionCard's unavailable form `<word>, cast: <reason>`, none when
- * none is (book-ui.md, Skill tree details; Word bar).
+ * none is, and each aimed spell's Cast on… list (book-ui.md, Skill tree details; Word bar).
  * - Use: Contents, and the status pools when only pennies show.
  * - Story: SectionPages.stories.tsx
  */
 export function CharacterPage(
-  p: { view?: GameView; text: Say; world: () => void } & Pick<GameView, 'resources' | 'position'> &
+  p: { view?: GameView; text: Say; world: () => void; pending?: boolean } & Pick<
+    GameView,
+    'resources' | 'position'
+  > &
     Parameters<typeof RaiseCards>[0],
 ) {
   const c = usePalette();
@@ -80,7 +83,7 @@ export function CharacterPage(
       {levelling && <Text style={prose(c, t)}>{xpLine(levelling)}</Text>}
       <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
-      {spells(p.view, p.text)}
+      {spells(p)}
     </Page>
   );
 }

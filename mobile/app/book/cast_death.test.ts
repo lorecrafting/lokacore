@@ -44,7 +44,8 @@ test('cast-opened fight: rounds drained by a press still print every round and t
   b.map();
   b.tap('Go east');
   b.tap('A wight, open');
-  b.tap('Flamma a wight'); // the aimed spell's card on the wight's page
+  b.tap('Cast a spell…');
+  b.tap('Flamma, cast flamma on a wight'); // the aimed spell's row on the wight's page
   b.clock.wall += 6000; // two rounds at rate 50, no frame in between
   b.clock.mono += 6000;
   b.tap('Flee');

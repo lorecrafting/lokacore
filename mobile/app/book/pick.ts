@@ -17,9 +17,11 @@ const OPTION = { use: [LABEL.useAnItem, LABEL.useOn], give: [LABEL.giveTo, LABEL
 
 /** The pair as words: "quench a cart" (after "You ", the fallback line adds "with" and the tool). */
 export const phrase = (b: Button, name: (id: string) => string) =>
-  commandOf(b) === 'give'
-    ? `give ${name(b.target_ids[0]!)} to ${name(b.target_ids[1]!)}`
-    : `${lower(b.label)} ${name(b.target_ids[0]!)}`;
+  commandOf(b) === 'cast'
+    ? `cast ${lower(b.label)} on ${name(b.target_ids[0]!)}`
+    : commandOf(b) === 'give'
+      ? `give ${name(b.target_ids[0]!)} to ${name(b.target_ids[1]!)}`
+      : `${lower(b.label)} ${name(b.target_ids[0]!)}`;
 
 // A twin row's quiet note: the item's projected state, as its detail page shows it (skills.tsx).
 const state = (e: Thing | undefined, text: (key: string) => string) =>
@@ -33,7 +35,13 @@ export function picks(v: GameView, buttons: Button[], id: string, text: (key: st
   const name = (i: string) => text(all.get(i)?.name ?? '');
   const lists = new Map<string, Button[]>();
   for (const b of buttons.filter((b) => b.pick)) {
-    const label = OPTION[commandOf(b) === 'give' ? 'give' : 'use'][b.target_ids.indexOf(id)]!;
+    const label =
+      commandOf(b) === 'cast'
+        ? // on the target's page one list of spells; elsewhere (Character) one list per spell
+          b.target_ids.includes(id)
+          ? LABEL.castASpell
+          : `${b.label}, ${lower(LABEL.castOn)}`
+        : OPTION[commandOf(b) === 'give' ? 'give' : 'use'][b.target_ids.indexOf(id)]!;
     lists.set(label, [...(lists.get(label) ?? []), b]);
   }
   return [...lists].map(([label, pairs]): Pick => {
@@ -41,9 +49,11 @@ export function picks(v: GameView, buttons: Button[], id: string, text: (key: st
     const end = (b: Button) => b.target_ids[b.target_ids[0] === id ? 1 : 0]!;
     const mixed = new Set(pairs.map((b) => b.action_key)).size > 1;
     const shown = (b: Button) =>
-      mixed
-        ? `${b.label} ${label === LABEL.useAnItem ? 'with ' : ''}${name(end(b))}`
-        : cap(name(end(b)));
+      label === LABEL.castASpell
+        ? b.label
+        : mixed
+          ? `${b.label} ${label === LABEL.useAnItem ? 'with ' : ''}${name(end(b))}`
+          : cap(name(end(b)));
     const rows = pairs.flatMap((b): Row[] => {
       const reason = b.pick!.reason;
       if (reason) return [{ label: tool ? b.label : shown(b), reason }];

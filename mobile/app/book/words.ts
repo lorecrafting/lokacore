@@ -135,6 +135,8 @@ export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 // A use pair's line without narration: "You quench a cart with a bucket." (book-ui.md, Pick a second thing).
 export const used = (label: string, target: string, tool: string) =>
   `You ${lower(label)} ${target} with ${tool}.`;
+// An aimed spell's line without narration: "You cast lux on a lantern." (same section).
+export const cast = (label: string, target: string) => `You cast ${lower(label)} on ${target}.`;
 export const reason = (code: string, cause?: string) =>
   (cause && CAUSE[cause]) ?? REASON[code] ?? code.replaceAll('_', ' ');
 export const reasonOf = (r: Refusal) => reason(r.code, r.cause);

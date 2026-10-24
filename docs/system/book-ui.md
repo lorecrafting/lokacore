@@ -416,6 +416,8 @@ The option is an Action card that sends nothing: a press opens its list in the p
 
 A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the recipe's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a Note in that page's history in the unavailable form; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
+**Aimed spells off the target's page** (proposed, designer to confirm; owner 2026-10-23, loka-x6t.109.5). The Character page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one in the unavailable form (`The lantern: need 1 ash`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
+
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
@@ -714,7 +716,7 @@ lists it under a **Spells** section title in the Action card's unavailable form 
 (`lux, cast: need 1 ash`); no refused word, no Spells section.
 Cast in the say field is for untargeted words only: a spell aimed at a thing is a row of that
 thing's **Cast a spell…** [list](#item-details-and-takedrop) ([World](#world-and-status-entry), owner
-2026-10-23). The cast command names no target today, so aimed spells wait on loka-x6t.109.
+2026-10-23). An aimed spell (cartridge `aimed`, loka-x6t.109) is never a chip or a Spells-section line: the GameView offers it on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in that page's Cast a spell… pick list.
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:

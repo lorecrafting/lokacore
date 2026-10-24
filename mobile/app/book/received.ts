@@ -1,7 +1,7 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { comings, given, lineText, replyLine, spoken, used, WIELD } from './words.ts';
+import { cast, comings, given, lineText, replyLine, spoken, used, WIELD } from './words.ts';
 import { things } from './item-pages.ts';
 import {
   closing,
@@ -14,6 +14,7 @@ import {
   type Logs,
 } from './logs.ts';
 import type { Button } from './presenter.ts';
+import { commandOf } from './buttons.ts';
 
 type Say = (key: string) => string;
 
@@ -72,7 +73,9 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   if (s.fault && combatResult(accepted)) return '';
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
-  const routed = retained ? narrationLines(closing(retained, was, now), now, text) : undefined;
+  const routed = retained
+    ? narrationLines(closing(retained, was, now, commandOf(attempt.button) === 'cast'), now, text)
+    : undefined;
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
   const fallback = fallbackLine(itemChanged, accepted, attempt, now);
@@ -117,7 +120,7 @@ const fallbackLine = (
     : accepted?.outcome === 'spoken'
       ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
       : button.pick
-        ? item && to && used(button.label, item, to)
+        ? item && (to ? used(button.label, item, to) : cast(button.label, item))
         : itemChanged && accepted?.outcome !== 'eaten' && item
           ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${item}.`
           : accepted?.outcome === 'choice_closed'

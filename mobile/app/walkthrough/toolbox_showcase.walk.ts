@@ -182,7 +182,8 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak }: Steps) 
   await tap('Gather ash');
   await take(/^(?:the )?lantern, open$/i, /^Take the lantern/);
   await held(/^the lantern/);
-  await tap('Lux the lantern'); // the aimed spell's card on the held lamp (loka-x6t.109)
+  await tap(LABEL.castASpell); // the aimed spell's Pick list on the held lamp (loka-x6t.109)
+  await tap(/^Lux, cast lux on/);
   await putAway();
   await moves('north');
   await pause(4_000); // the 120 s hush at rate 50
@@ -219,7 +220,8 @@ const magic = async (r: Walk, steps: Steps) => {
   await moves('down');
   const flamma = async () => {
     await tap(/^A wight, open$/);
-    await tap('Flamma a wight'); // the aimed spell's card on the wight's page (loka-x6t.109)
+    await tap(LABEL.castASpell); // the aimed spell's Pick list on the wight's page (loka-x6t.109)
+    await tap(/^Flamma, cast flamma on/);
   };
   await flamma();
   await tap(/^Flee/);

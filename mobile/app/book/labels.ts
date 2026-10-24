@@ -58,6 +58,8 @@ export const LABEL = {
   useOn: 'Use on…',
   giveAnItem: 'Give an item…',
   giveTo: 'Give to…',
+  castASpell: 'Cast a spell…',
+  castOn: 'Cast on…', // a Character Spells line's list of the aimed spell's targets (loka-x6t.109.5)
   // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
   the: 'the',
 } as const;

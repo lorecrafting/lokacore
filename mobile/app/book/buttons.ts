@@ -6,7 +6,7 @@ import { things } from './item-pages.ts';
 import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import type { Button } from './presenter.ts';
 import { LABEL } from './labels.ts';
-import { NOTED } from './words.ts';
+import { message, NOTED, reasonOf } from './words.ts';
 
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -223,7 +223,9 @@ function heldButtons(
     e.actions
       .filter(
         (a) =>
-          (a.available || (!!other(a, e.id) && a.reason?.code === 'cooldown')) &&
+          (a.available ||
+            commandOf(a) === 'cast' ||
+            (!!other(a, e.id) && a.reason?.code === 'cooldown')) &&
           !['ask', 'whisper'].includes(a.action_key),
       ) // whisper is wordButtons, ask is askButtons
       // An unauthored Wear on a wield-slot item reads Wield (book-ui.md, Equipment and skills).
@@ -231,6 +233,15 @@ function heldButtons(
         o.label === 'action.wear' && e.slot === 'wield' ? { ...o, label: 'action.wield' } : o,
       )
       .flatMap((a) => {
+        // An aimed spell is a Cast a spell… row on its target, refused as `Lux: need 1 ash` (pick.ts).
+        if (commandOf(a) === 'cast')
+          return {
+            ...button(a, ''),
+            pick: a.available
+              ? {}
+              : { reason: a.reason.message ? message(a.reason.message, text) : reasonOf(a.reason) },
+            detail_id: e.id,
+          };
         const two = other(a, e.id);
         // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)
         if (two) return names.has(two) ? pickRows(button(a, ''), a.available, [e.id, two]) : [];
