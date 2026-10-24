@@ -1,7 +1,7 @@
+// size: allow 305, the terminal client: session, turn projection, lookups, answers and replay
 import { locationLine } from './text.ts';
 import { replayRecords } from './replay.ts';
-// `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4).
-// Replay requires a byte-identical transcript.
+// `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4); byte-identical.
 import { randomUUID, getRandomValues } from 'node:crypto';
 import { createReadStream, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
@@ -138,14 +138,14 @@ function turn(r: Run, cmd: Command, measured = true): string {
 }
 
 type Turn = ReturnType<typeof decide>;
+// A line's words: an engine key from the shared table (game-view/line_words.ts), else cartridge text.
+const spoken = (t: { key: string; bindings?: Readonly<Record<string, unknown>> }) =>
+  lineSentence(t, (v) => say(cartridge, String(v))) ?? say(cartridge, t.key);
 // size: allow 45, terminal outcome projection retains ordinary command and located output
 function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
   const { trace, latency, decision } = result;
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
-  // A line's words: an engine key from the shared table (mobile/packages/game-view/line_words.ts), else cartridge text.
-  const spoken = (t: { key: string; bindings?: Readonly<Record<string, unknown>> }) =>
-    lineSentence(t, (v) => say(cartridge, String(v))) ?? say(cartridge, t.key);
   const dir = (p as { direction?: string }).direction ?? '';
   const it = door(cartridge, r.world, dir);
   // A door without a key_item has no lock: lock and unlock say so, not that a key is missing.
@@ -168,8 +168,7 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     decision.kind !== 'accepted'
       ? `${reason(decision, lockless ? 'lockless' : p.type)}\n`
       : narrated
-        ? // Every action narrates now: the lines, then the room or the options they lead to.
-          narrated.map((t) => `${spoken(t)}\n${pinned(t)}`).join('') +
+        ? narrated.map((t) => `${spoken(t)}\n${pinned(t)}`).join('') +
           (decision.outcome === 'moved'
             ? arrived(r)
             : decision.outcome === 'choice_opened'

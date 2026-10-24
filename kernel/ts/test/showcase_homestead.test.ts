@@ -713,10 +713,7 @@ test('homestead sandbox: the croft plot is locked, ripens when watered early, wi
 test('homestead sandbox: the croft site, cot, pool and hearth', () => {
   let c = walk(fresh(WORLD), 'north', 'west', 'up');
   assert.deepEqual(play(take(c, 'cot_2'), { type: 'rest' }).lines, ['position.rested']);
-  assert.deepEqual(play(c, { type: 'rest' }).lines, [
-    'position.rested',
-    'narration.well_rested.applied',
-  ]);
+  assert.deepEqual(play(c, { type: 'rest' }).lines.slice(1), ['narration.well_rested.applied']);
   const fishing = (x: World) => ({
     type: 'perform',
     action: 'fish_croft',

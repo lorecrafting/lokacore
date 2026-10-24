@@ -184,8 +184,7 @@ export function inventory(cartridge: Cartridge, world: World): string {
   return items.length ? `You are carrying:\n${items.join('')}` : 'You are carrying nothing.\n';
 }
 
-/** The pending choice (GameView choice): its prompt and each option, with why it is unavailable;
- * without the prompt after a talk, whose own line already said it. */
+/** The pending choice (GameView choice): its prompt (not after a talk, which said it) and each option. */
 export function choice(cartridge: Cartridge, world: World, prompt = true): string {
   const c = gameView(world).choice;
   if (!c) return 'You have nothing to choose.\n';

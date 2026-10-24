@@ -13,9 +13,7 @@ import { actorLine } from '../../../kernel/ts/src/mechanics/line.ts';
 import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 import { acquiredOnce } from './shop-event.ts';
-
-// The line commerce/rule.ts narrates for each command type.
-const SAID = { buy: 'commerce.bought', sell: 'commerce.sold' } as const;
+const SAID = { buy: 'commerce.bought', sell: 'commerce.sold' } as const; // commerce/rule.ts's lines
 type Row = {
   command_id: string;
   actor_id: string;
