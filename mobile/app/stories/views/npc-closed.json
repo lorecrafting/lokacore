@@ -644,7 +644,9 @@
    "id": "6b2b9c4f-6781-82f4-a079-908def5908f6"
   }
  ],
- "log": [],
+ "log": [
+  "You go east."
+ ],
  "combatLog": [],
  "details": {}
 }

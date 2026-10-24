@@ -46,7 +46,7 @@ test('Book sends the projected Put pair and original freshness through normal to
     false,
   );
   assert.ok(after.view.entities.find((e) => e.id === chest)!.contents!.some((i) => i.id === item));
-  assert.equal(after.log.at(-1), 'Stored.');
+  assert.equal(after.log.at(-1), 'You put a brass key in Test chest.');
   const revision = p.sql.prepare('SELECT revision FROM head').get()!.revision;
   book.press(put);
   assert.equal(p.sql.prepare('SELECT revision FROM head').get()!.revision, revision);

@@ -14,6 +14,7 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
+import { actorLine } from '../line.ts';
 import { settleMaxima } from '../resource.ts';
 import { statusAllows } from '../status/bars.ts';
 
@@ -24,7 +25,7 @@ export const VERBS: readonly string[] = ['wear', 'remove'];
 export const wornIn = (world: World, at: EntityId | undefined, body: EntityId | undefined) =>
   values(world.slots).some((h) => h === at && world.state.containers[h] === body);
 
-export const decide: Rule<'equipment'> = (world, command) => {
+export const decide: Rule<'equipment'> = (world, command, _mint, steps = { n: 0 }) => {
   const { type, actor_id, item_id } = command.payload;
   const t = transfer(world, actor_id, type, item_id);
   if (!Array.isArray(t)) return rejected(t);
@@ -35,9 +36,15 @@ export const decide: Rule<'equipment'> = (world, command) => {
   ] as const;
   const outcome = type === 'wear' ? 'worn' : 'removed';
   const e = world.entities[item_id];
-  // Row 6a: an item's authored worn or removed line; without one the Book words the outcome.
-  const said = e.kind === 'item' && e.equip ? [{ key: e.equip[outcome] }] : [];
-  return accepted(world, outcome, ops, [], said);
+  // Row 6a: an item's authored worn or removed line, else the engine's (the item a participant for
+  // the Book's wield-slot words).
+  const said =
+    e.kind === 'item' && e.equip
+      ? { key: e.equip[outcome] }
+      : actorLine(world, actor_id, `equipment.${outcome}`, { item: item_id }, steps, {
+          item: item_id,
+        });
+  return accepted(world, outcome, ops, [], [said]);
 };
 
 /** An item with affects moves its wearer's attributes, so a derived maximum settles first (resource@1). */

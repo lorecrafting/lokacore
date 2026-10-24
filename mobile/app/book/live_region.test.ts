@@ -1,7 +1,11 @@
 // Book live region (loka-x6t.43): a screen reader hears each new batch of World, combat and refused
 // lines once, politely, and never the history a page or a reopen draws again.
 import assert from 'node:assert/strict';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { game, view } from './__tests__/combat-book.test.ts';
@@ -37,7 +41,7 @@ test("the Book reads each press's new line politely", () => {
 });
 
 // Breaks: the restored log read at open, a redraw counted as a new batch, a repeat not read again, the trim at 200 lines losing a
-// line, a refused line read without its reason, combat lines left out, or a room or encounter change
+// line, a refused line read without its reason, combat lines read twice, or a room or encounter change
 // (which empties its log) hiding the new log's first lines.
 test('each batch holds only the lines new since the last screen', () => {
   let current: GameView = view({ combat: undefined });
@@ -57,20 +61,40 @@ test('each batch holds only the lines new since the last screen', () => {
   assert.equal(said().text, 'The bell rings.');
   assert.notEqual(said().key, first.key);
   s.log.push(...Array(200).fill('-'), 'A door creaks.');
-  s.combatLog.push(...Array(201).fill('-'));
-  assert.equal(
-    said().text,
-    [...Array(200).fill('-'), 'A door creaks.', ...Array(201).fill('-')].join(' '),
-  );
+  s.combatLog.push(...Array(201).fill('-')); // never read: the room log is the one source
+  assert.equal(said().text, [...Array(200).fill('-'), 'A door creaks.'].join(' '));
   s.log.push({ kind: 'refused', reason: 'closed', text: 'The way north is closed.' });
-  s.combatLog.push('The marsh rat bites.');
+  // A combat line lands in both logs (Line placement) and is read once.
+  for (const l of [s.log, s.combatLog]) l.push('The marsh rat bites.');
   assert.equal(said().text, 'closed, The way north is closed. The marsh rat bites.');
   current = view();
   s.combatLog.length = 0;
-  s.combatLog.push('A marsh rat attacks.');
+  for (const l of [s.log, s.combatLog]) l.push('A marsh rat attacks.');
   assert.equal(said().text, 'A marsh rat attacks.');
   current = { ...view({ combat: undefined }), place: { ...current.place, id: 'yard' } };
   s.log.length = 0;
   s.log.push('The yard is wet.', { text: 'A crow lands.', event: true });
   assert.equal(said().text, 'The yard is wet. A crow lands.');
+});
+
+// Breaks (loka-x6t.124): an own buy merged into "(2 times)" adds no log line, so the second buy on
+// the chandler's page is never read; quiet is visual only. The showcase's two tallow candles have
+// their own shorts, so they never merge; this copy gives both the same one.
+test('two equal buys on a shop page are each read in full', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-shared-short-'));
+  const item = join(dir, 'items/candle_02.json');
+  cpSync(fileURLToPath(new URL('../../../cartridges/toolbox_showcase', import.meta.url)), dir, {
+    recursive: true,
+  });
+  writeFileSync(item, readFileSync(item, 'utf8').replace('candle_02.short', 'candle_03.short'));
+  const b = book(compiled(dir) as never);
+  rmSync(dir, { recursive: true });
+  for (const c of ['Go down', 'Go north']) (b.map(), b.tap(c));
+  for (const c of ['chandler, open', LABEL.trade]) b.tap(c);
+  const batches = [0, 1].map(() => {
+    b.tap(/^Tallow candle — /);
+    assert.deepEqual(live(b), ['polite', 'You buy a tallow candle.']);
+    return b.draw().find((n) => n.type?.name === 'Heard')!.props.said.key;
+  });
+  assert.notEqual(batches[0], batches[1], 'the second buy is a new batch, so it is read again');
 });

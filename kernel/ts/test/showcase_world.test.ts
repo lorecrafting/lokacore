@@ -72,12 +72,12 @@ test('world 2: at 07:00 the tide is high: the gate refuses, the room says why, n
 test('world 3-4: the drop without the rope hurts 3 and lands on the stair; with it, nothing', () => {
   w = go(go(w, 'north').world, 'north').world;
   const fall = go(w, 'down');
-  assert.deepEqual(fall.lines, ['narration.fell']);
+  assert.deepEqual(fall.lines, ['movement.moved', 'narration.fell']);
   assert.equal(pool(fall.world, 'hp'), 7);
   assert.equal(here(fall.world), w.roomIds[ref('room', 'smugglers_stair')]);
   w = take(go(fall.world, 'up').world, 'rope');
   const safe = go(w, 'down');
-  assert.deepEqual([safe.lines, pool(safe.world, 'hp')], [[], 7]);
+  assert.deepEqual([safe.lines, pool(safe.world, 'hp')], [['movement.moved'], 7]);
   w = safe.world;
 });
 

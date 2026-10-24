@@ -341,7 +341,7 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
   const guard = npc(s, 'guard');
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room_wanted');
   const back = go(walk(s, 'south'), 'north');
-  assert.deepEqual(back.lines, ['npc.guard.arrest', 'trial.charge']);
+  assert.deepEqual(back.lines, ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
   s = back.world;
   assert.equal(where(s, s.body), room(s, 'cell'));
   assert.equal(engaged(s, s.body), undefined);
@@ -418,7 +418,7 @@ test('economy 9 escape: force the grate, leave by the drain still wanted; the gu
   assert.deepEqual([labels(s), labels(fined)], [['condition.wanted'], []]);
   s = go(s, 'west').world;
   const again = go(s, 'north');
-  assert.deepEqual(again.lines, ['npc.guard.arrest', 'trial.charge']);
+  assert.deepEqual(again.lines, ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
   s = again.world;
   assert.equal(where(s, s.body), room(s, 'cell'));
   assert.equal(shut(s, 'down'), 'closed');

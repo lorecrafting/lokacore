@@ -863,7 +863,9 @@
    "id": "a6579cfe-0b81-8c71-af34-20947857b1f0"
   }
  ],
- "log": [],
+ "log": [
+  "You go up."
+ ],
  "combatLog": [],
  "details": {}
 }

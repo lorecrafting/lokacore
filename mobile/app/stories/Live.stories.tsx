@@ -86,7 +86,8 @@ export const NellShop: StoryObj = {
     await tap('Nell, open'); // a checkpoint restores the save, not the open page
     await tap(LABEL.trade);
     await tap('Cob of bread — 4p');
-    await page.findByText('You buy it.'); // the buy page stays open, its purse redrawn
+    // the buy page stays open, the row sold out and the purse redrawn; the own buy line is quiet here
+    await page.findByText('Cob of bread — 4p: sold out');
     await page.findByText('You have 6p.');
     await tap(LABEL.leave);
     await tap(LABEL.leave);
@@ -110,7 +111,7 @@ export const SackContents: StoryObj = {
     await tap('A turnip seed, open'); // its Inside row
     await tap('Take a turnip seed');
     // book-ui.md (Take from a container): the pickup line shows, then the sack reopens with Put and Leave
-    await page.findByText('You pick up a turnip seed.');
+    await page.findByText('You take a turnip seed.');
     await tap('seed sack, open');
     await page.findByLabelText('Put a turnip seed in a seed sack');
     await page.findByLabelText('Leave');

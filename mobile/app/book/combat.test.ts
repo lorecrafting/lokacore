@@ -252,3 +252,50 @@ test('a flight reads "You flee <direction>."', () => {
   const line = lineWords({ key: 'combat.fled', bindings: { direction: 'west' } }, (k) => k, view());
   assert.equal(line, 'You flee west.');
 });
+
+// Breaks: an engine item line worded only in the first person (an NPC's take reads "You pick
+// up"), or the viewer's own take named as a third person (the shared table, loka-kgd.185).
+test('item.taken reads "You take" for the viewer and "<Name> takes" for a named NPC', () => {
+  const rope = { key: 'item.taken', bindings: { item: 'the rope' } };
+  const said = (actor: string) => lineWords({ ...rope, participants: { actor } }, (k) => k, view());
+  assert.equal(said('body'), 'You take the rope.');
+  assert.equal(said('rat'), 'npc.rat takes the rope.');
+});
+
+// Breaks: a door, wear, position or move line missing from the shared table (the Book shows its
+// raw key), worded only in the first person, or a wield-slot item read as "put it on" instead of
+// "take it up" (book-ui.md, Equipment and skills; loka-kgd.185).
+test('door, wear, position and move lines read in the first and the third person', () => {
+  const v = view({
+    inventory: [{ id: 'sword', kind: 'item', name: 'the sword', slot: 'wield', actions: [] }],
+  } as never);
+  const rows: [string, Record<string, string>, string, string, string?][] = [
+    ['barrier.opened', { barrier: 'the gate' }, 'You open the gate.', 'npc.rat opens the gate.'],
+    [
+      'equipment.worn',
+      { item: 'the cap' },
+      'You put on the cap.',
+      'npc.rat puts on the cap.',
+      'cap',
+    ],
+    [
+      'equipment.worn',
+      { item: 'the sword' },
+      'You take up the sword.',
+      'npc.rat takes up the sword.',
+      'sword',
+    ],
+    ['position.sat', {}, 'You sit down.', 'npc.rat sits down.'],
+    ['movement.moved', { direction: 'north' }, 'You go north.', 'npc.rat goes north.'],
+    ['movement.moved', {}, 'movement.moved', 'movement.moved'], // a missing binding: the key, not "undefined"
+  ];
+  for (const [key, bindings, mine, theirs, item] of rows)
+    for (const [actor, words] of [
+      ['body', mine],
+      ['rat', theirs],
+    ])
+      assert.equal(
+        lineWords({ key, bindings, participants: { actor, item } }, (k) => k, v),
+        words,
+      );
+});

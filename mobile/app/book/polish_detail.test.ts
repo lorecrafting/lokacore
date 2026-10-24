@@ -29,7 +29,7 @@ test('only confirmed pickup returns World, including a retry from another page',
   assert.ok(h.labels().includes('Leave'));
   assert.deepEqual(h.game.view().view.inventory, []);
   assert.equal(
-    h.p.screen().log.some((s: string) => s === 'You pick up a brass lantern.'),
+    h.p.screen().log.some((s: string) => s === 'You take a brass lantern.'),
     false,
   );
   assert.match(h.p.screen().fault!, /readonly/);
@@ -40,16 +40,13 @@ test('only confirmed pickup returns World, including a retry from another page',
   assert.equal(h.game.view().view.place.title.key, 'room.well_lane.title');
   assert.ok(h.text().includes('Well Lane'));
   assert.equal(h.labels().includes('Take a brass lantern'), false);
-  assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
+  assert.equal(h.p.screen().log.at(-1), 'You take a brass lantern.');
   h.draw();
-  assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
+  assert.equal(h.p.screen().log.at(-1), 'You take a brass lantern.');
   drawnTake.props.onPress();
   assert.ok(h.labels().includes('standing, change position'));
   assert.equal(h.labels().includes('Leave'), false);
-  assert.equal(
-    h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
-    1,
-  );
+  assert.equal(h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length, 1);
   h.tap(CONTENTS);
   h.tap(LABEL.inventory);
   assert.ok(h.text().includes('Held'));
@@ -172,16 +169,20 @@ test('other item actions retain their detail and show their consequences there',
   h.tap('Open a sewing box');
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
-  assert.ok(h.text().includes('Opened.'));
-  assert.equal(h.p.screen().log.includes('Opened.'), false);
+  assert.ok(h.text().includes("You open the sewing box's lid."));
+  assert.equal(h.p.screen().log.filter((l) => l === "You open the sewing box's lid.").length, 1);
   h.tap('Leave');
   assert.ok(h.labels().includes('A sewing box, open'));
   h.tap('A sewing box, open');
-  assert.equal(h.text().includes('Opened.'), false); // a reopened item starts a new visit (loka-x6t.19)
+  assert.equal(h.text().includes("You open the sewing box's lid."), false); // a reopened item starts a new visit (loka-x6t.19)
   h.unmount();
   const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
   r.tap('A sewing box, open');
-  assert.equal(r.text().includes('Opened.'), false, JSON.stringify(r.text()));
+  assert.equal(
+    r.text().includes("You open the sewing box's lid."),
+    false,
+    JSON.stringify(r.text()),
+  );
   r.unmount();
   h.sql.close();
 });
@@ -205,13 +206,17 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     assert.ok(h.labels().includes('Leave the conversation'));
     assert.ok(h.text().includes('They are not here to answer. Find them, or close this.'));
     assert.deepEqual(h.p.screen().detail(speaker), before);
-    assert.deepEqual(h.p.screen().log, ['Old Bram leaves.']);
+    // The talk prompt lands in the room log too (book-ui.md Line placement).
+    const prompt = h.p.screen().log[0];
+    assert.match(prompt, /^Bram keeps his eyes on the reeds\./);
+    assert.deepEqual(h.p.screen().log, [prompt, 'Old Bram leaves.']);
     assert.equal(turn(), opened);
     // Consecutive committed boundaries in one host pulse must each be consumed, despite batching.
     h.clock.wall = 1810000;
     h.clock.mono = 1800000;
     assert.equal(h.game.pulse().kind, 'ready');
     assert.deepEqual(h.p.screen().log, [
+      prompt,
       'Old Bram leaves.',
       'Old Bram arrives.',
       'Old Bram leaves.',
@@ -274,13 +279,12 @@ test('delayed Take returns once with its original item name after a conflicting 
     assert.equal(h.game.pulse().kind, 'ready');
     assert.ok(h.text().includes('Ferry Landing'));
     assert.equal(
-      h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
+      h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length,
       1,
     );
-    assert.equal(h.p.screen().log.includes('Taken.'), false);
     assert.equal(h.p.update(completed[0]), false);
     assert.equal(
-      h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
+      h.p.screen().log.filter((s: string) => s === 'You take a brass lantern.').length,
       1,
     );
     h.tap(CONTENTS);
@@ -391,7 +395,7 @@ test('self-luminous Notice invokes its projected targetless recipe and retains t
     h.tap('glows, open');
     h.tap('Search');
     assert.ok(h.text().includes('You search.')); // narration.search
-    assert.equal(h.p.screen().log.includes('You search.'), false);
+    assert.equal(h.p.screen().log.filter((l) => l === 'You search.').length, 1); // in place
     assert.ok(h.labels().includes('Leave'));
   } finally {
     h.unmount();

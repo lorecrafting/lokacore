@@ -818,11 +818,15 @@
    "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9"
   }
  ],
- "log": [],
+ "log": [
+  "You go south.",
+  {
+   "quiet": "[\"commerce.bought\",{\"item\":\"item.bread.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"f0e76c82-d099-811e-a6ba-caef3f2615e9\",\"b8ae5599-3dd8-86ef-968d-8c22d9b3fe56\"],5]",
+   "plain": "You buy a cob of bread.",
+   "times": 1,
+   "text": "You buy a cob of bread."
+  }
+ ],
  "combatLog": [],
- "details": {
-  "f0e76c82-d099-811e-a6ba-caef3f2615e9": [
-   "You buy it."
-  ]
- }
+ "details": {}
 }

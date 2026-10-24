@@ -64,13 +64,16 @@ test('without the rope the climber falls to the ledge for 4 HP, never below 1; w
   const { send, world, at, hp } = session(content);
 
   for (const after of [6, 2, 1, 1]) {
-    assert.deepEqual(send({ type: 'move', direction: 'down' }), ['narration.fell']);
+    assert.deepEqual(send({ type: 'move', direction: 'down' }), [
+      'movement.moved',
+      'narration.fell',
+    ]);
     assert.deepEqual([at(), hp()], ['room.ledge.title', after]);
-    assert.equal(send({ type: 'move', direction: 'up' }), undefined);
+    assert.deepEqual(send({ type: 'move', direction: 'up' }), ['movement.moved']);
     assert.deepEqual([at(), hp()], ['room.clifftop.title', after]);
   }
   send({ type: 'take', item_id: world().entityIds[`${P}:item/rope`] });
-  assert.equal(send({ type: 'move', direction: 'down' }), undefined);
+  assert.deepEqual(send({ type: 'move', direction: 'down' }), ['movement.moved']);
   assert.deepEqual([at(), hp()], ['room.ledge.title', 1]);
 });
 
@@ -83,7 +86,7 @@ test('a rope inside a carried pack counts as held', () => {
     ...w,
     state: { ...w.state, containers: { ...w.state.containers, [pack]: w.body, [rope]: pack } },
   }));
-  assert.equal(send({ type: 'move', direction: 'down' }), undefined);
+  assert.deepEqual(send({ type: 'move', direction: 'down' }), ['movement.moved']);
   assert.deepEqual([at(), hp()], ['room.ledge.title', 10]);
 });
 
@@ -102,7 +105,7 @@ test('the fall lands after the move cost', () => {
     },
   } as Cartridge;
   const { send, at, hp } = session(costly);
-  assert.deepEqual(send({ type: 'move', direction: 'down' }), ['narration.fell']);
+  assert.deepEqual(send({ type: 'move', direction: 'down' }), ['movement.moved', 'narration.fell']);
   assert.deepEqual([at(), hp()], ['room.ledge.title', 5]);
 });
 

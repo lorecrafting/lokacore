@@ -158,7 +158,7 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
   for (const label of ['E, tile 2', 'D, tile 4', 'I, tile 3', 'T, tile 1']) tap(label);
   tap('Submit');
   assert.ok(text().includes(wrong));
-  assert.ok(!book.screen().log.includes(wrong));
+  assert.equal(book.screen().log.filter((l) => l === wrong).length, 1); // in place
   assert.ok(text().indexOf(wrong) < text().indexOf('Choose letters to answer.'));
   for (const label of ['T, tile 1', 'I, tile 3', 'D, tile 4', 'E, tile 5']) tap(label);
   tap('Submit');

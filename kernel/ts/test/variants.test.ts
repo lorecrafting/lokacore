@@ -103,6 +103,21 @@ test('Maud is bruised and the sword notched after the 07:00 raid; the guard slee
     'item.sword.short_notched',
     'item.sword.description',
   ]);
+  // Breaks: the take line binding the plain short while the page shows the notched one.
+  n += 1;
+  const took = step(
+    w,
+    {
+      id: `dddddddd-6666-4666-8666-${String(n).padStart(12, '0')}` as never,
+      world_context_id: w.context,
+      payload: { actor_id: w.character, type: 'take', item_id: id(w, 'item', 'sword') },
+    } as never,
+    n,
+  ).decision;
+  assert.equal(
+    took.kind === 'accepted' && took.narration?.[0]?.bindings?.item,
+    'item.sword.short_notched',
+  );
 });
 
 // Breaks: npc_present ignoring the NPC's room (absent guard), its life (dead guard) or the actor's

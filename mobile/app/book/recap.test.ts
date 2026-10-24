@@ -82,6 +82,7 @@ test('a two-minute absence shows no recap: its log is as without the field', () 
     shown.indexOf('The poison fades from your blood.'),
   );
   assert.deepEqual(log, [
+    'You go west.',
     TICK,
     'You shiver.',
     TICK,
@@ -146,7 +147,7 @@ test('a press in place during catch-up logs the held lines, in order, before its
     'Maud arrives.',
     'Maud leaves.',
   ]);
-  assert.ok(log.lastIndexOf('Maud arrives.') < log.indexOf('You pick up a pebble.'));
+  assert.ok(log.lastIndexOf('Maud arrives.') < log.indexOf('You take a pebble.'));
 });
 
 // Breaks: the player moved without a press keeps the old room's held lines or recap.

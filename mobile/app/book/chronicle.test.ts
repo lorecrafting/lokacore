@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
+import { days } from './chronicle.ts';
 import { LABEL } from './labels.ts';
 import { type } from './tokens.ts';
 
@@ -102,4 +103,26 @@ test('a fresh story has no Chronicle and still says Nothing written yet', () => 
   const shown = b.text();
   assert.ok(shown.includes('Nothing written yet.'));
   assert.ok(!shown.includes(LABEL.chronicle));
+});
+
+// Breaks: a routine engine line (a take) or a talk prompt enters the Chronicle beside the story's
+// own line (PM ruling, loka-kgd.185: the Chronicle stays as before the narration log batch), or
+// the filter shifts the combat indexes so a combat line shows and a story line goes.
+test('a take and a talk prompt stay out of the Chronicle; the story line beside it stays in', () => {
+  const view = { place: { title: { key: 't' } } } as never;
+  const record = {
+    command_id: 'c',
+    lines: [
+      { key: 'item.taken', bindings: { item: 'item.key.short' } },
+      { key: 'dialogue.bram.prompt' },
+      { key: 'narration.x' },
+      { key: 'combat.hit' },
+    ],
+    combat_lines: [3],
+  };
+  const shown = days([{ day: 1, record, milestone: false } as never], view, (k) => k);
+  assert.deepEqual(
+    shown.map((d) => d.lines),
+    [[{ line: 'narration.x', count: 1 }]],
+  );
 });

@@ -40,11 +40,9 @@ test('homestead sandbox: the seed sack starts tied, opens once, stays open and r
     }),
     'exit_closed',
   );
-  const open = walk(
-    play(closed, { type: 'open', target_id: id(closed, 'item', 'sack') }).world,
-    'north',
-    'south',
-  );
+  const opened = play(closed, { type: 'open', target_id: id(closed, 'item', 'sack') });
+  assert.deepEqual(opened.lines, ['barrier.opened']); // the lid tells the door's line
+  const open = walk(opened.world, 'north', 'south');
   assert.equal(sack(open).state, 'open');
   assert.deepEqual(
     sack(open).contents?.map((c) => [c.id, c.container_id]),

@@ -135,6 +135,28 @@ test('open proposes one barrier.transition and barrier_changed', () => {
   ]);
 });
 
+// Breaks: a door verb or a plain move that commits with no line, a line keyed by the wrong verb,
+// or one not naming the actor's body, the door's own short or the direction (loka-kgd.185).
+test('each door verb and a move tell their line, naming the actor', () => {
+  const line = (w: World, p: object) => {
+    const d = step(w, cmd(w, p), 0).decision;
+    return JSON.parse(JSON.stringify(d.kind === 'accepted' ? d.narration : d));
+  };
+  let w = withKey();
+  const verbs = { unlock: 'unlocked', open: 'opened', close: 'closed', lock: 'locked' };
+  for (const [type, outcome] of Object.entries(verbs)) {
+    const want = { key: `barrier.${outcome}`, bindings: { barrier: CELL_SHORT } };
+    assert.deepEqual(line(w, door(type, 'east')), [{ ...want, participants: { actor: w.body } }]);
+    w = run(w, door(type, 'east'));
+  }
+  const opened = run(world(), door('open', 'north'));
+  const moved = { key: 'movement.moved', bindings: { direction: 'north' } };
+  assert.deepEqual(line(opened, move('north'))[0], {
+    ...moved,
+    participants: { actor: opened.body },
+  });
+});
+
 // Breaks: lock or unlock without the key, the key not found inside a carried bag (has_item is
 // transitive), or found while it lies in the room.
 test('lock and unlock need the key, held directly or in a carried bag', () => {

@@ -799,7 +799,11 @@
    "kind": "journal"
   }
  ],
- "log": [],
+ "log": [
+  "You go south.",
+  "\"Well, stranger?\"",
+  "The Reeve jerks his chin at the letter. \"To Wat, up the fell. Don't let it sit.\""
+ ],
  "combatLog": [],
  "details": {}
 }

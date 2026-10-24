@@ -1,16 +1,18 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { cast, comings, given, lineText, replyLine, spoken, used, WIELD } from './words.ts';
+import { cast, comings, lineText, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
 import {
   closing,
   combatResult,
   detailLines,
+  logLines,
   narrationLines,
-  pickupLine,
+  quietOf,
   resetLogs,
   savedNarration,
+  type DetailLine,
   type Logs,
 } from './logs.ts';
 import type { Button } from './presenter.ts';
@@ -62,37 +64,55 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
     itemChanged,
     now,
   );
-  const lines =
+  // Every line goes to the room log; a fight or detail page also keeps its own (book-ui.md).
+  const page =
     (was.combat || now.combat) && !accepted?.narration?.length
       ? s.combatLog
       : detail &&
           (!itemChanged || !!pickup) &&
           (!moved || accepted?.outcome === 'read' || readableDetail)
         ? detailLines(s, detail)
-        : s.log;
+        : undefined;
   if (s.fault && combatResult(accepted)) return '';
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
   const routed = retained ? routedLines(retained, was, now, attempt.button, text) : undefined;
-  const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
-  const fallback = fallbackLine(itemChanged, accepted, attempt, now);
-  const said = taken ? [taken] : (routed?.[0] ?? replyLine(reply, text, now, fallback));
-  if (!repeated) lines.push(...said);
-  if (!repeated && routed) s.combatLog.push(...routed[1]);
+  const fallback = fallbackLine(accepted, attempt);
+  const said = routed?.[0] ?? replyLine(reply, text, now, fallback, was);
+  if (!repeated) place(s, said, page, accepted, attempt.button.target_ids, detail);
+  if (!repeated && routed) logLines(s, routed[1], s.combatLog);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
   return repeated ? '' : said.map(lineText).join(' ');
 }
 
 // The narration routed to its logs; a cast in a fight sends its lines to the combat log.
+// Read text stays on its page, never in the room log (book-ui.md Notice-board details).
+const place = (
+  s: Logs,
+  said: DetailLine[],
+  page: DetailLine[] | undefined,
+  accepted: Accepted | undefined,
+  target: unknown,
+  detail?: string,
+) =>
+  accepted?.outcome === 'read' && page
+    ? page.push(...said)
+    : logLines(
+        s,
+        said,
+        page,
+        page === s.combatLog ? undefined : quietOf(s, accepted?.narration, target, detail),
+      );
+
 const routedLines = (
   retained: Parameters<typeof closing>[0],
   was: GameView,
   now: GameView,
   b: Button,
   text: Say,
-) => narrationLines(closing(retained, was, now, commandOf(b) === 'cast'), now, text);
+) => narrationLines(closing(retained, was, now, commandOf(b) === 'cast'), now, text, false, was);
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 
@@ -100,8 +120,7 @@ type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: '
 function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
   const command_id =
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
-  return (accepted?.narration?.length || accepted?.outcome === 'taken') &&
-    (command_id || accepted.outcome !== 'riddle_wrong')
+  return accepted?.narration?.length && (command_id || accepted.outcome !== 'riddle_wrong')
     ? savedNarration(game, s, command_id)
     : undefined;
 }
@@ -109,7 +128,7 @@ function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepte
 // A press's item and listener names, for its fallback line (fallbackLine below).
 export function named(b: Button, was: GameView) {
   const name = (id?: string) => things(was).find((t) => t.id === id)?.name;
-  return ['take', 'drop', 'give'].includes(b.action_key) || b.pick
+  return b.pick
     ? b.target_ids.map(name)
     : b.action_key === 'whisper'
       ? [undefined, name(b.target_ids[0])] // the speech echo's listener
@@ -117,24 +136,16 @@ export function named(b: Button, was: GameView) {
 }
 
 const fallbackLine = (
-  itemChanged: boolean,
   accepted: Accepted | undefined,
   { item, to, button }: NonNullable<Logs['retry']>,
-  now: GameView,
 ) =>
-  accepted?.outcome === 'given'
-    ? item && to && given(item, to)
-    : accepted?.outcome === 'spoken'
-      ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
-      : button.pick
-        ? item && (to ? used(button.label, item, to) : cast(button.label, item))
-        : itemChanged && accepted?.outcome !== 'eaten' && item
-          ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${item}.`
-          : accepted?.outcome === 'choice_closed'
-            ? ''
-            : things(now).find((t) => t.id === button.target_ids[0])?.slot === 'wield'
-              ? WIELD[accepted?.outcome ?? '']
-              : undefined;
+  accepted?.outcome === 'spoken'
+    ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
+    : button.pick
+      ? item && (to ? used(button.label, item, to) : cast(button.label, item))
+      : accepted?.outcome === 'choice_closed'
+        ? ''
+        : undefined;
 
 // A changed journal notes itself on the speaker's page; a new choice prompt joins its speaker's.
 function conversationLines(

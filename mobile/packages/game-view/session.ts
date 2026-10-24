@@ -20,6 +20,7 @@ export type NarrationRecord = CommittedNarration & {
   combat_lines?: readonly number[];
   detail_id?: string;
   pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
+  read?: true; // Read text: its page's only, never the room log (book-ui.md)
 };
 /** One Chronicle entry (mechanics.md, Chronicle): a host projection, not a kernel contract. */
 export type ChronicleEntry = { day: number; record: NarrationRecord; milestone: boolean };

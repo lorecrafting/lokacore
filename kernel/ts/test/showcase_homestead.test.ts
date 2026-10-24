@@ -272,7 +272,7 @@ test('homestead 7: the rug variant in the hut; resting there with the cot applie
   );
   w = drop(w, 'cot');
   const rest = play(w, { type: 'rest' });
-  assert.deepEqual(rest.lines, []);
+  assert.deepEqual(rest.lines, ['position.rested']);
   assert.deepEqual(labels(wait(rest.world, w.state.clock + 3600).world), []);
   w = play(rest.world, { type: 'stand' }).world;
   assert.equal(here(w), hut);
@@ -314,9 +314,9 @@ test('homestead 8: raze for 2 pennies; the cot and rug land in the lane', () => 
 // or well_rested not ticking five times in its hour.
 test('homestead 7 lane branch: rest with the cot on the lane floor', () => {
   const held = take(w, 'cot');
-  assert.deepEqual(play(held, { type: 'rest' }).lines, []);
+  assert.deepEqual(play(held, { type: 'rest' }).lines, ['position.rested']);
   const r = play(w, { type: 'rest' });
-  assert.deepEqual(r.lines, ['narration.well_rested.applied']);
+  assert.deepEqual(r.lines, ['position.rested', 'narration.well_rested.applied']);
   assert.deepEqual(labels(r.world), ['condition.well_rested']);
   const after = wait(r.world, w.state.clock + 3600);
   // Five ticks in the hour; one elapsed decision's narration folds them into one line.
@@ -712,8 +712,8 @@ test('homestead sandbox: the croft plot is locked, ripens when watered early, wi
 // item_present, fish_croft not taking the second rod, or the croft hearth off Cooking 1.
 test('homestead sandbox: the croft site, cot, pool and hearth', () => {
   let c = walk(fresh(WORLD), 'north', 'west', 'up');
-  assert.deepEqual(play(take(c, 'cot_2'), { type: 'rest' }).lines, []);
-  assert.deepEqual(play(c, { type: 'rest' }).lines, ['narration.well_rested.applied']);
+  assert.deepEqual(play(take(c, 'cot_2'), { type: 'rest' }).lines, ['position.rested']);
+  assert.deepEqual(play(c, { type: 'rest' }).lines.slice(1), ['narration.well_rested.applied']);
   const fishing = (x: World) => ({
     type: 'perform',
     action: 'fish_croft',

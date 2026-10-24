@@ -10,6 +10,8 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
+import { lineSentence } from '../../packages/game-view/line_words.ts';
+import { things } from './item-pages.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -54,29 +56,16 @@ export const dur = (s: number) =>
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).
 export const OUTCOME: Record<string, string> = {
-  put: 'Stored.',
-  taken: 'Taken.',
-  dropped: 'Dropped.',
-  opened: 'Opened.',
-  closed: 'Closed.',
-  locked: 'Locked.',
-  unlocked: 'Unlocked.',
-  worn: 'You put it on.',
-  removed: 'You take it off.',
   activated: 'You take on the task. It is in your journal.',
   activated_with_possession: 'You take on the task. It is in your journal.',
   choice_closed: 'You leave the question for now.',
   waited: 'Time passes.',
-  stood: 'You stand up.',
-  sat: 'You sit down.',
-  rested: 'You settle down to rest.',
-  slept: 'You lie down to sleep.',
 };
 
 // A wield-slot item with no authored equip words (book-ui.md, Equipment and skills).
-export const WIELD: Record<string, string> = {
-  worn: 'You take it up.',
-  removed: 'You put it away.',
+const WIELD: Record<string, readonly [string, string]> = {
+  'equipment.worn': ['You take up {item}.', '{actor} takes up {item}.'],
+  'equipment.removed': ['You put away {item}.', '{actor} puts away {item}.'],
 };
 
 // The refusal codes an offer can carry (book/reasons.test.ts).
@@ -130,7 +119,6 @@ const CAUSE: Record<string, string> = {
   not_standing: 'not standing',
   cursed: 'it will not come off',
 };
-export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 // A use pair's line without narration: "You quench a cart with a bucket." (book-ui.md, Pick a second thing).
 export const used = (label: string, target: string, tool: string) =>
@@ -179,19 +167,27 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
   return name && text(name);
 };
 
-// One narration line's words. A skipped combat turn (loka-x6t.30) names its status from the
-// engine line combat.skipped; it has no actor when the player skipped. A flight (combat.fled)
-// names the way taken.
+// One narration line's words: an engine key from the shared table (packages/game-view/line_words.ts), in the
+// third person when its actor is a person the view, or the view before the step (one who left),
+// names. A skipped combat turn (loka-x6t.30)
+// names its status from the engine line combat.skipped; it has no actor when the player skipped.
+// A flight (combat.fled) names the way taken.
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
   view: GameView,
+  was?: GameView,
 ) => {
+  const wield =
+    t.key in WIELD && things(view).find((x) => x.id === t.participants?.item)?.slot === 'wield';
+  const id = t.participants?.actor;
+  const actor =
+    id === undefined ? undefined : nameOf(view, id, text) || (was && nameOf(was, id, text));
+  const told = lineSentence(t, (v) => text(String(v)), actor, wield ? WIELD[t.key] : undefined);
+  if (told) return told;
   if (t.key === 'combat.fled') return `You flee ${String(t.bindings?.direction)}.`;
   if (t.key !== 'combat.skipped') return text(t.key);
-  const actor = t.participants?.actor;
-  const name = actor === undefined ? undefined : nameOf(view, actor, text);
-  const who = actor === undefined ? 'You are' : name ? `${name} is` : 'They are';
+  const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
   return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);
 };
 
@@ -204,11 +200,22 @@ const UNDONE: Partial<Record<Reply['kind'], string>> = {
 
 // What one press answers: the narration, one line per record, or the outcome's words (words.ts;
 // none: no line) of an accepted command, else the refusal in words. Never a raw outcome code.
-export const replyLine = (r: Reply, text: Say, view: GameView, fallback?: string): DetailLine[] =>
-  [answer(r, text, view, fallback)].flat().filter(Boolean);
+export const replyLine = (
+  r: Reply,
+  text: Say,
+  view: GameView,
+  fallback?: string,
+  was?: GameView,
+): DetailLine[] => [answer(r, text, view, fallback, was)].flat().filter(Boolean);
 export const lineText = (l: DetailLine) => (typeof l === 'string' ? l : l.text);
 
-function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailLine | string[] {
+function answer(
+  r: Reply,
+  text: Say,
+  view: GameView,
+  fallback?: string,
+  was?: GameView,
+): DetailLine | string[] {
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
@@ -232,7 +239,7 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): DetailL
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  const said = shown.map((t) => lineWords(t, text, view)).filter(Boolean);
+  const said = shown.map((t) => lineWords(t, text, view, was)).filter(Boolean);
   return said.length ? said : (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 

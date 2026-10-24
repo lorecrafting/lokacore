@@ -1,4 +1,4 @@
-// size: allow 581, containment and carrying behavior share the same minimal custody fixture
+// size: allow 618, containment and carrying behavior share the same minimal custody fixture
 // Containment: take, drop, give, has_item, items and NPCs in the world, target resolution and
 // examine over them (R5 S4; 21 §7, §8; 03 §23; 04 §5.3). The world is built from the items
 // known answer (protocol/fixtures/containers_cartridge_items_hash.json). Ids and the state hash are
@@ -132,6 +132,14 @@ test('take proposes one transfer to the body and item_acquired, at the Python st
     ],
     effects: [],
     rng: SEED,
+    // One engine line, outside the delta (loka-kgd.185); the Book words it from the shared table.
+    narration: [
+      {
+        key: 'item.taken',
+        bindings: { item: 'item.satchel.short' },
+        participants: { actor: BODY },
+      },
+    ],
   });
   assert.equal(
     hash(world.state as never),
@@ -174,6 +182,35 @@ test('drop leaves the item in the room with item_dropped; give hands it to the N
     item_id: SATCHEL,
     holder_id: BRAM,
   });
+});
+
+// Breaks: an accepted drop, give or put with no line, a line with the wrong key, a missing
+// recipient or container binding, or the actor's character id where its body belongs.
+test('each accepted drop, give and put narrates exactly one line with its item and actor', () => {
+  const held = run(fresh(), take(SATCHEL));
+  const said = (w: World, c: Command) => {
+    const d = step(w, c, 0).decision;
+    return d.kind === 'accepted' ? d.narration : d;
+  };
+  const satchel = 'item.satchel.short';
+  assert.deepEqual(said(held, drop(SATCHEL)), [
+    { key: 'item.dropped', bindings: { item: satchel }, participants: { actor: BODY } },
+  ]);
+  assert.deepEqual(said(held, give(SATCHEL, BRAM)), [
+    {
+      key: 'item.given',
+      bindings: { item: satchel, to: 'npc.bram.short' },
+      participants: { actor: BODY, recipient: BRAM },
+    },
+  ]);
+  const oil = run(held, take(OIL));
+  assert.deepEqual(said(oil, cmd({ type: 'put', item_id: OIL, container_id: SATCHEL })), [
+    {
+      key: 'item.put',
+      bindings: { item: 'item.lamp_oil.short', container: satchel },
+      participants: { actor: BODY, container: SATCHEL },
+    },
+  ]);
 });
 
 // Breaks: a missing or wrong check, a rejection that changes the world (04 §5.0), or an

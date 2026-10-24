@@ -72,6 +72,7 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
         view: () => ({ view, token: 'view:r:0' }),
         pending: () => pending,
       });
+      p.screen(); // mounted: the live region reads only what comes after
       p.press(
         {
           label: action,
@@ -85,16 +86,14 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
       assert.equal(p.screen().returnWorld, false);
       assert.equal(p.screen().view, view);
       assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
-      assert.deepEqual(p.screen().log, []);
+      const refused = { kind: 'refused', reason: 'not here', text: "You can't do that: not here." };
+      // A detail-page refusal is in place and in the room log (book-ui.md Line placement), read once.
+      assert.deepEqual(p.screen().log, pending ? [] : [refused]);
       assert.equal(p.screen().pending, pending);
-      assert.deepEqual(
-        p.screen().detail(context).slice(-1),
-        pending
-          ? action === 'close_choice'
-            ? ['choice.prompt']
-            : []
-          : [{ kind: 'refused', reason: 'not here', text: "You can't do that: not here." }],
-      );
+      const placed = pending ? (action === 'close_choice' ? ['choice.prompt'] : []) : [refused];
+      assert.deepEqual(p.screen().detail(context).slice(-1), placed);
+      const said = { log: 1, place: VIEW.place.id, key: 1, text: `not here, ${refused.text}` };
+      if (!pending) assert.deepEqual(p.screen().said, said);
     }
   }
 });
@@ -107,7 +106,7 @@ test('journal cues belong only to changed NPC histories', () => {
       entities: [{ id: 'target', kind, name: 'target', actions: [] }],
     } as never;
     const p = presenter({
-      ...game(() => accepted('opened')),
+      ...game(() => accepted('waited')),
       view: () => ({ view, token: 'view:r:0' }),
       invoke: () => {
         view = {
@@ -121,7 +120,7 @@ test('journal cues belong only to changed NPC histories', () => {
             },
           ],
         } as never;
-        return accepted('opened');
+        return accepted('waited');
       },
     });
     const button = { label: 'Open', action_key: 'open', target_ids: ['target'], input: {} };
@@ -130,8 +129,8 @@ test('journal cues belong only to changed NPC histories', () => {
     assert.deepEqual(
       p.screen().detail('target'),
       kind === 'npc'
-        ? ['Opened.', { text: 'Journal updated', event: true }, 'Opened.']
-        : ['Opened.', 'Opened.'],
+        ? ['Time passes.', { text: 'Journal updated', event: true }, 'Time passes.']
+        : ['Time passes.', 'Time passes.'],
     );
   }
 });
@@ -337,13 +336,14 @@ test('a remove refused by a curse says it will not come off', () => {
 
 // Breaks (R6P-A04): a log that keeps every press while the process lives (memory, redraws).
 test('the log stops growing in one room, its last line the latest answer', () => {
-  const p = presenter(game((n) => accepted(n % 2 ? 'dropped' : 'taken')));
+  const p = presenter(game((n) => accepted(n % 2 ? 'waited' : 'activated')));
   const cycles = () => {
     for (let i = 0; i < 150; i++) [north, north].map((b) => p.press(b));
     return p.screen().log;
   };
   const [once, log] = [cycles().length, cycles()];
-  assert.deepEqual([log.length, ...log.slice(-2)], [once, 'Taken.', 'Dropped.']);
+  const last = ['You take on the task. It is in your journal.', 'Time passes.'];
+  assert.deepEqual([log.length, ...log.slice(-2)], [once, ...last]);
 });
 
 // Breaks (review N-1): a Start over that is not confirmed shown as its empty message, or a failed
@@ -432,7 +432,8 @@ test('combat receipt history is once-only when completion follows an already dis
     });
   }
   assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'The marsh rat falls.']);
-  assert.deepEqual(p.screen().log, []);
+  // The room log holds each combat line once too; the road's starts empty, so only the flee's shows.
+  assert.deepEqual(p.screen().log, ['The marsh rat falls.']);
 });
 
 // Breaks: an NPC whose cartridge name starts lower case ("a crow") leaves or arrives mid-sentence.

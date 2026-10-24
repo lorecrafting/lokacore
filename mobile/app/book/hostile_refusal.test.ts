@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
+import { lineText } from './words.ts';
 
 const showcase = compiled('cartridges/toolbox_showcase');
 // Nell's page on the Low Wardle green, after calling the Reeve a cheat (standing 0 to -2) or not.
@@ -38,7 +39,7 @@ test('Nell at standing -2 shows her refusal line, no Talk or Trade; at 0 she tra
   assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
 });
 
-// Breaks: a buy leaves the buy page, its line misses the page's history, the purse does not
+// Breaks: a buy leaves the buy page, its line shows on the page or misses the room log, the purse does not
 // redraw, Sell does not open the sell page, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought);
 // a sale leaves the sell page, does not redraw the purse, or keeps the sold row.
 test('a buy keeps the buy page: its line, the new purse, the row refused in words', () => {
@@ -53,7 +54,9 @@ test('a buy keeps the buy page: its line, the new purse, the row refused in word
   assert.equal(shown[0], 'Nell, the baker can sell you…', JSON.stringify(shown));
   assert.ok(shown.includes('Cob of bread — 4p: sold out'), JSON.stringify(shown));
   assert.ok(before && purse(shown) && purse(shown) !== before, JSON.stringify([before, shown]));
-  assert.ok(shown.includes('You buy it.'), 'the buy line joins the page history');
+  assert.ok(!shown.some((l) => l.startsWith('You buy')), 'the own buy is quiet on the buy page');
+  const bought = b.p.screen().log.filter((l) => lineText(l) === 'You buy a cob of bread.');
+  assert.equal(bought.length, 1, 'the buy line lands in the room log once, naming the item');
   b.tap(LABEL.sell); // the sell page lists the bought cob with its price (owner pick mvlynyikyw57)
   assert.equal(b.text()[0], 'Nell, the baker will buy…', JSON.stringify(b.text()));
   assert.ok(b.labels().includes('Cob of bread — 1p'), JSON.stringify(b.labels()));

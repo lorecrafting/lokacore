@@ -167,6 +167,18 @@ The table below describes the files as imported. Later amendments are in git his
   ABI tests): the `lantern` cases the same way (prefixes `to` 10; early-possession replays steps 2
   to 8, then the offer talk and accept, its `activated_with_possession` gone with the offer); the
   `uniform`, `tiny` and `composition` suites are unchanged.
+- 2026-10-24, owner go for the narration log batch (loka-kgd.185,
+  [brief](../briefs/narration-log/README.md); paraphrased): every action narrates, so each
+  accepted take, drop, give, put, move and talk now carries an engine line. Rewritten by hand:
+  [conformance/lantern-traces.json](conformance/lantern-traces.json) (`fixture_version` 3,
+  SHA-256 now `59b18dea6b10266eca0d5035333c0f21c8169564e628cf92792d205160803e51`): each step's
+  `narration` list gains that step's line in order (`dialogue.bram_offer.prompt` for the offer
+  talk, `movement.moved` per move, `item.taken` for the take, `dialogue.bram.prompt` for the
+  final talk); no other field changes.
+  [conformance/adverse-cases.json](conformance/adverse-cases.json) (`fixture_version` 4, SHA-256
+  now `e008bd4be56e63c2277a2e593217fcce3c5dbfbfe2437f8896f71a9066fc424d`, pinned by the portable
+  ABI tests): the `lantern` cases the same way (`item.dropped` for a drop); the `uniform`,
+  `tiny` and `composition` suites are unchanged.
 
 ## Link rewrites (the only byte changes at import)
 

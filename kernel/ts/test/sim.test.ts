@@ -6,7 +6,7 @@
 // planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -237,17 +237,8 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],
     [],
   );
-  // Pass-1 check 4: a committed change the Book shows without a narration line (sim_batch.ts SILENT).
-  const pinned = readFileSync(new URL('sim_narration_baseline.txt', import.meta.url), 'utf8')
-    .split('\n')
-    .filter((l) => l && !l.startsWith('#'));
-  assert.ok(pinned.length <= 13, 'baseline over cap 13'); // 13: put joined take/drop/give, loka-kgd.185
-  assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
-  // SILENT.close is justified only by item lids (a door's close is narrated): the showcase has them.
-  const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.items ?? {}).some(
-    (i) => i.barrier,
-  );
-  assert.ok(lidded || !silent.has('close'), 'close is silent in a cartridge with no item lids');
+  // Pass-1 check 4: a committed change the Book shows without a narration line.
+  assert.deepEqual(unnarrated({ silent }), []);
   assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
   for (const seed of PINNED)

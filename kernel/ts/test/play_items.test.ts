@@ -28,7 +28,8 @@ function play(lines: string[], art = artifact) {
   return r.stdout
     .split(/^> /m)
     .slice(1)
-    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''));
+    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''))
+    .map((s) => s.replace(/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/g, 'ID')); // a script run mints fresh ids
 }
 
 // Breaks: a verb mapped to the wrong command or words, room lines or plain words missing,
@@ -55,18 +56,19 @@ test('take, drop, give, inventory and examine read as a player expects', () => {
     'look\nFerry Landing\nReeds crowd a slick wooden landing. A mooring post leans into the current.\n' +
       'Bram the ferryman stands here, one boot on the ferry.\nA leather satchel leans against a crate.\n' +
       'Exits: north\n',
-    'get satchel\nYou take a leather satchel.\n',
+    'get satchel\nYou take a leather satchel.\n[item.taken: actor ID]\n',
     'take satchel\nYou already have that.\n',
     'inventory\nYou are carrying:\n  a leather satchel\n',
-    'n\nVillage Green\nAn old elm shades a patch of trodden grass.\n' +
+    'n\nYou go north.\n[movement.moved: actor ID]\nVillage Green\nAn old elm shades a patch of trodden grass.\n' +
       'A brass lantern lies in the weeds, dry. The oil you carry would fill it.\nExits: south\n',
     'x lantern\nDented brass, its reservoir dry. It would light a fen path.\n',
-    'take lantern\nYou take a brass lantern.\n',
+    'take lantern\nYou take a brass lantern.\n[item.taken: actor ID]\n',
     // Brief mode (R5 S7): back at a visited room, its title and contents only.
-    's\nFerry Landing\nBram the ferryman stands here, one boot on the ferry.\nExits: north\n',
-    'give lantern to ferryman\nYou give a brass lantern to Bram the ferryman.\n',
+    's\nYou go south.\n[movement.moved: actor ID]\nFerry Landing\nBram the ferryman stands here, one boot on the ferry.\nExits: north\n',
+    'give lantern to ferryman\nYou give a brass lantern to Bram the ferryman.\n' +
+      '[item.given: actor ID, recipient ID]\n',
     "give satchel to bram\nThey can't carry any more.\n",
-    'drop satchel\nYou drop a leather satchel.\n',
+    'drop satchel\nYou drop a leather satchel.\n[item.dropped: actor ID]\n',
     'i\nYou are carrying nothing.\n',
     "drop lantern\nYou don't see that here.\n", // Bram holds it: out of reach
     "give satchel to nobody\nYou don't see that here.\n",

@@ -721,9 +721,9 @@
  },
  "stack": [],
  "log": [
-  "You pick up a loaf.",
+  "You take a loaf.",
   "You drop a loaf.",
-  "You pick up a loaf."
+  "You take a loaf."
  ],
  "combatLog": [],
  "details": {}

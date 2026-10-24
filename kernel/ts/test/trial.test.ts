@@ -63,6 +63,8 @@ const reload = (change: (c: any) => void) => {
 const guardOf = (c: any) => c.npcs[`${S}npc/guard`];
 
 let n = 0;
+// A decision's line keys; a move's own line (movement.moved) comes first.
+const keys = (lines?: readonly { key: string }[]) => lines?.map((l) => l.key);
 const play = (w: World, p: object) =>
   step(
     w,
@@ -121,7 +123,7 @@ test('a wanted walk-in is arrested to the cell', () => {
   assert.equal(at(w), room(w, 'cell'));
   assert.equal(w.state.containers[npc(w, 'guard')], room(w, 'market'));
   assert.equal(engaged(w, body(w)), undefined);
-  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
+  assert.deepEqual(keys(d.narration), ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
   assert.equal(exit(w, 'west').door?.state, 'closed');
   assert.deepEqual(entered(d), [
     [{ type: 'entity_entered_room', entity_id: body(w), room_id: room(w, 'market') }, 1],
@@ -139,7 +141,7 @@ test('a wanted walk-in is arrested to the cell', () => {
 test('an innocent walk-in is not arrested', () => {
   const { w, d } = north(fresh());
   assert.equal(at(w), room(w, 'market'));
-  assert.equal(d.narration, undefined);
+  assert.deepEqual(keys(d.narration), ['movement.moved']);
   assert.deepEqual(entered(d), [
     [{ type: 'entity_entered_room', entity_id: body(w), room_id: room(w, 'market') }, 1],
   ]);
@@ -159,7 +161,7 @@ test('an arrest to the room just entered is an ordinary move', () => {
   assert.ok(r.ok, JSON.stringify(r));
   const { w, d } = north(chat(fresh(r.cartridge as Cartridge), 'crier', 'confess'));
   assert.equal(at(w), room(w, 'market'));
-  assert.equal(d.narration, undefined);
+  assert.deepEqual(keys(d.narration), ['movement.moved']);
   assert.equal(d.events.length, 1);
 });
 
@@ -290,7 +292,7 @@ test('a visitor who is not wanted walks in and out through the door', () => {
   const r = ok(play(opened, { type: 'move', direction: 'east' }));
   if (r.decision.kind !== 'accepted') throw new Error('unreachable');
   assert.equal(at(r.world), room(r.world, 'cell'));
-  assert.equal(r.decision.narration, undefined);
+  assert.deepEqual(keys(r.decision.narration), ['movement.moved']);
   assert.equal(exit(r.world, 'west').door?.state, 'open');
   assert.equal(at(act(r.world, { type: 'move', direction: 'west' })), room(r.world, 'square'));
 });
@@ -306,7 +308,7 @@ test('an arrest shuts a door a visitor left open and reads the charge again', ()
   assert.equal(exit(left, 'east').door?.state, 'open');
   const { w, d } = north(chat(left, 'crier', 'confess'));
   assert.equal(at(w), room(w, 'cell'));
-  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
+  assert.deepEqual(keys(d.narration), ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
   assert.equal(exit(w, 'west').door?.state, 'closed');
 });
 
@@ -391,7 +393,7 @@ test('a broke prisoner forces the grate and leaves by the drain, still wanted', 
 test('an escapee walking into the market is arrested again behind a shut grate', () => {
   const { w, d } = north(escaped().out);
   assert.equal(at(w), room(w, 'cell'));
-  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
+  assert.deepEqual(keys(d.narration), ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
   assert.equal(exit(w, 'down').door?.state, 'closed');
   assert.equal(exit(w, 'west').door?.state, 'closed');
   assert.equal(forced(w), false);
@@ -405,7 +407,7 @@ test('a wanted escapee who climbs back up is charged again behind a shut grate',
   const d = ok(play(escaped().drain, { type: 'move', direction: 'up' }));
   if (d.decision.kind !== 'accepted') throw new Error('unreachable');
   assert.equal(at(d.world), room(d.world, 'cell'));
-  assert.deepEqual(d.decision.narration, [{ key: 'trial.charge' }]);
+  assert.deepEqual(keys(d.decision.narration), ['movement.moved', 'trial.charge']);
   assert.equal(exit(d.world, 'down').door?.state, 'closed');
   assert.equal(forced(d.world), false);
   assert.equal(force(d.world)?.available, true);

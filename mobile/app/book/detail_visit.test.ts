@@ -62,8 +62,8 @@ test('lines after Leave the conversation survive the history trim', () => {
   h.sql.close();
 });
 
-// Breaks: a restored corpse pickup line stays past the corpse's next visit, or is not on it.
-test('a restored pickup shows on the corpse visit after reopen, then only once', () => {
+// Breaks: a restored corpse pickup line leaves the room log, or draws on the corpse page.
+test('a restored pickup stays in the room log after reopen, never on the corpse page', () => {
   const cart = goblins(unpacked);
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, cart);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) =>
@@ -80,11 +80,9 @@ test('a restored pickup shows on the corpse visit after reopen, then only once',
   b.tap('Take a goblin ear');
   b.unmount();
   const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
-  const PICKUP = 'You pick up a goblin ear.';
-  assert.equal(r.text().includes(PICKUP), false); // the world, not the corpse, opens
-  r.tap('corpse, open');
+  const PICKUP = 'You take a goblin ear.';
+  // A corpse take is quiet: the room log keeps it, the corpse page never draws it (Line placement).
   assert.ok(r.text().includes(PICKUP));
-  r.tap(LABEL.leave);
   r.tap('corpse, open');
   assert.equal(r.text().includes(PICKUP), false);
   r.unmount();

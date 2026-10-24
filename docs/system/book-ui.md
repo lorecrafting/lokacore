@@ -32,8 +32,10 @@ The scrolling World page is, top to bottom, and nothing else:
    each opening its own detail page, where that thing's actions live.
 3. The people paragraph (players and NPCs), each name opening its detail page.
 4. The items paragraph, each name opening its detail page.
-5. The room event log. Everything ambient is a log line here: sounds from the next room, weather
-   changes, room events, NPCs acting or emoting, arrivals and departures.
+5. The room event log, the full record: every line lands here ([line placement](#line-placement)).
+   Ambient lines (sounds from the next room, weather changes, room events, NPCs acting or emoting,
+   arrivals and departures), the player's own lines and refusals, combat lines and the lines a
+   detail page also shows.
 
 No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
 fixture, person or item detail page. On hold: a skill check (perception, lore) may add a sentence,
@@ -108,7 +110,7 @@ committed receipt places the player in, never the exit's destination: an arrest 
 walking in on an arresting guard) turns the World page to the cell, and its log carries the move's
 lines in receipt order (arrest line, then the reaction's charge). A death outside a combat round (a bleed or drain tick, in a press or an elapsed settlement) is the same: the World page turns to the recovery room and its cleared log opens with the death receipt's lines in receipt order (the tick, `world.death.narration.player_died`, the penalty line, `world.death.narration.woke`), never dropped by the room change; such a settlement ends any away-recap holding, its earlier held lines go with the old room's log, and its own lines never enter a recap (Beads `loka-3w3q`, `loka-x6t.26`). Each narration record of a
 receipt is its own log line, in record order; the Book never joins records into one line, and
-the `words.ts` outcome word ("Opened.") draws only for a receipt with no narration at all
+the `words.ts` outcome word ("Time passes.") draws only for a receipt with no narration at all
 (pass-1 UO). No card, note or banner. Attempts, pending/refused/stale
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
 save status/error UI remains accurate; NPC histories stay independently bounded. Map
@@ -165,7 +167,7 @@ Only World's current-position label is a distinct position tap target. Each tap 
 the next currently offered legal action in standing → sitting → resting → sleeping → standing
 order, skipping unavailable/absent actions. If none is offered, position stays informational.
 The button follows [live action freshness](#live-action-freshness); pending/refused/stale results never advance the
-shown position optimistically. A confirmed change writes one World log line: its authored narration, else "You stand up.", "You sit down.", "You settle down to rest." or "You lie down to sleep.". This opens no detail page or Contents and does not turn the
+shown position optimistically. A confirmed change writes one World log line: its authored narration, else the engine's position line ([line placement](#line-placement)). This opens no detail page or Contents and does not turn the
 ordinary World page. Position in all details is informational; modal scenes expose no position
 shortcut. Movement and position admission remain kernel-owned.
 
@@ -270,7 +272,40 @@ no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pen
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
 fault show there as on every page. Combat, Character, Contents, the map and World keep the
 [status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
-foot. A control that opens a child (Resume dream, Continue conversation) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); no line shows twice for one receipt. Combat closure and the notice-board readable restore are the exceptions in their sections.
+foot. A control that opens a child (Resume dream, Continue conversation) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
+
+## Line placement
+
+Owner and PM rulings 2026-10-24 ([narration log brief](../briefs/narration-log/README.md)). The
+engine emits every line; the Book only words and places it. An engine line's sentence comes from
+`mobile/packages/game-view/line_words.ts`, first person when the player acted, third person
+otherwise; an authored line keeps its own text.
+
+- Every line lands in the room event log: narration, refusals, arrivals and departures, combat
+  lines and a detail page's lines. Read text is the one exception ([Notice-board details](#notice-board-details)).
+- One display table, keyed by event key and the open page, gives each line one treatment:
+  **in place** (the open page's history and the room log), **log** (the room log only) or
+  **quiet** (the room log only, compacted; no text on the open page). Quiet so far: the player's
+  own buy and sale on the buy and sell pages, and the player's own take and put on an open
+  container's page (a corpse included). Any other line whose receipt routes to the open page is
+in place; every other line is log. The page's own redraw (purse, list, contents) is the
+  feedback. Another person's action is never quiet.
+- A page never draws the room log, so no line shows twice on one page.
+- Compaction: a quiet line merges into the room log's last line when both have the same key, the
+  same bindings and actor, the same pressed card target (the stock row or item), the same page
+  visit, and no other line lies between. The merged line is the sentence once with " (N times)"
+  after it, as the [away recap](#away-recap) groups ("You buy it. (3 times)"). The merge reads
+  structured fields, never rendered words. A new visit or any other line ends the run.
+- Quiet is visual only. The live region reads each quiet line in full on every press
+  ([Announcements](#announcements)).
+- A refusal on a detail page draws in that page's history and in the room log, and is read once.
+  A refusal is never quiet.
+- A room change clears the old room's log; the receipt's lines then open the new room's log in
+  receipt order. A plain move's log opens with "You go north."; a Flee or a death in combat opens
+  the arrival room's log with the closing receipt's lines. Room text the World page already draws
+(the title and description) is not repeated in its log.
+
+Later, not this batch: a verbose or brief setting that shows quiet lines in place.
 
 ## Notice-board details
 
@@ -335,8 +370,8 @@ only while the player holds something the person will buy. Sell opens the child 
 to this person, with its price ("Cob of bread — 1p"), then the purse and history; Leave
 returns to the buy page. It lists only what the engine marks sellable (wider sale lists are
 loka-x6t.117). A buy or sale keeps its page open, with no page turn and no return to the person (owner,
-2026-10-23): its line joins the person's visit history, drawn there and again on the person's
-page, the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
+2026-10-23): its own line is quiet ([line placement](#line-placement)), drawn on neither page and kept in
+the room log; the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
 "Cob of bread — 4p: sold out"; a thing sold leaves the sell list). A row that goes moves focus to
 the page title. Shop stock is not listed
 under the person's Held. Each service is its own Action card
@@ -415,16 +450,15 @@ A shop reason from the cartridge is a lowercase fragment with no period.
 Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
-and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
-pickup event using the original projected item name: **You pick up <name>.** Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
-returns to World with the original projected name: **You drop <name>.** Held items
+and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World with the engine's take line ([line placement](#line-placement)),
+the item named as the player saw it. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
+returns to World with the engine's drop line. Held items
 open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
-These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
-meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
+Authored narration takes precedence and meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
 Retry retains original action/target context and appends each confirmed Take/Drop event only once.
 When Take removes an item from a corpse's Contents, the confirmed result returns to
-that corpse detail, puts the named pickup line in its local history once, and keeps
+that corpse detail, where the take line is quiet ([line placement](#line-placement)), and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
 closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps **Inside** and Take.
 
@@ -500,7 +534,7 @@ the stack. There is no Back to container: it went to the same page (loka-x6t.94)
 Read to its original history, opening a route only when custody still reaches it.
 
 **Consumed items.** An action that consumes the item (Eat, a bandage) removes it from Carrying,
-closes its page and routes its confirmed line to the World log, or to Combat while an encounter
+closes its page and routes its confirmed line to the World log, and also to Combat while an encounter
 is open, matched by the reply's exact command ID even when it carries no event, appended once
 across lost replies and replay. Cold reopen restores that line where it went and never reopens
 the consumed item's page. Pending, refused or faulted attempts add no line and force no return.
@@ -565,8 +599,10 @@ need later native before/after proof; no unsupported prop, native plugin or depe
 
 ## Announcements
 
-Proposed for designer approval (loka-x6t.43). One polite live region, outside the page turn, reads
-each new batch of World, combat and refused lines once, as shown and in log order. A refused line
+One polite live region, outside the page turn, reads each new batch of room-log lines once, in
+log order. The room log is its one source: it already holds detail-page, combat, refused and quiet
+lines, so a page history or the combat log is never read as well. A quiet line is read in its plain
+form on every press; its " (N times)" count is visual only ([line placement](#line-placement)). A refused line
 reads "<reason>, <sentence>". History, redraws, page turns and a reopen are never read again. A
 repeated line is read again. Condition changes arrive as log narration, so they are read the same
 way. The region is text only, so motion settings do not apply to it.
@@ -651,7 +687,7 @@ while the combat page is open.
 
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
-routes all of its narration to the combat log, so the page opens with the engage line as its
+draws all of its narration in the combat log (and the World log), so the page opens with the engage line as its
 first log line; the opponent block always shows, so the page is never blank. The opponent block
 leads with the opponent lines, each the name and its hp band phrase joined by " — " ("the
 raider — hurt", the cartridge's `band.<key>` words the status line uses; no number, the hp
@@ -671,13 +707,14 @@ the World log. A new encounter replaces the ended page; nothing is stored, so re
 after a closure shows the World. A pending save keeps the confirmed
 encounter and existing retry behavior; a refusal remains visible on the combat page. The UI
 never presents an unconfirmed hit, death, escape or encounter end as committed. Results
-narrate once through the existing subscription and cartridge text. Combat narration belongs
-only to the combat page and its retained history, never the World room event log, including
-the engage line, closure, death, Flee and reopening a save after any of them. Routing uses
+narrate once through the existing subscription and cartridge text. Combat narration draws on the
+combat page and its retained history and also lands in the World room event log, the full record
+(owner 2026-10-24), including the engage line, closure, death and Flee; a closure that changes room
+opens the new room's log with its lines ([line placement](#line-placement)). Routing to the combat page uses
 structured committed receipt metadata (an encounter present after the receipt that the settled
-pre-command view lacked, or gone after it), never rendered prose; ordinary room events remain
-in the World log even when delivered in the same receipt as combat, except the closing receipt,
-whose lines all stay on the ended page (the arrival room's description after a Flee or inn
+pre-command view lacked, or gone after it), never rendered prose; ordinary room events draw
+only in the World log even when delivered in the same receipt as combat, except the closing receipt,
+whose lines all draw on the ended page too (the arrival room's description after a Flee or inn
 return reads there, once). This replaces the earlier
 persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
 
@@ -729,7 +766,10 @@ The Journal page says "Nothing written yet." only when it has no quests, no know
 
 ## Chronicle details
 
-The Journal's last section, **Chronicle**, shown when at least one entry exists ([Chronicle](mechanics.md#chronicle-toolbox-row-fd6)): one block per day in ascending order, headed "Day N" as the Away recap's Tap heading (name adds ", show" or ", hide"); the latest day open, earlier days collapsed; open, each distinct line once in first-seen order with " (N times)" after a repeated line (the recap's grouping), ordinary lines in the ordinary log look, a milestone's line in the page's prose look, one step larger, its accessible name the line followed by ", story point" (a line is a milestone when any of its occurrences that day is one). Lines are the receipts' authored narration; the Book adds no words but the heading, the count and the accessible name. Opening the Journal reads the receipts once; the page is not live-updated while open (a press returns to World anyway). A Chronicle day counts as written for "Nothing written yet." ([Lore details](#lore-details)).
+The Journal's last section, **Chronicle**, shown when at least one entry exists ([Chronicle](mechanics.md#chronicle-toolbox-row-fd6)): one block per day in ascending order, headed "Day N" as the Away recap's Tap heading (name adds ", show" or ", hide"); the latest day open, earlier days collapsed; open, each distinct line once in first-seen order with " (N times)" after a repeated line (the recap's grouping), ordinary lines in the ordinary log look, a milestone's line in the page's prose look, one step larger, its accessible name the line followed by ", story point" (a line is a milestone when any of its occurrences that day is one). Lines are the receipts' narration less the engine's routine lines (the keys of
+`mobile/packages/game-view/line_words.ts`) and a talk's opening prompt (`dialogue.<npc>.prompt`,
+which the conversation page and the room log show; the Chronicle stays as before the narration
+batch); the Book adds no words but the heading, the count and the accessible name. Opening the Journal reads the receipts once; the page is not live-updated while open (a press returns to World anyway). A Chronicle day counts as written for "Nothing written yet." ([Lore details](#lore-details)).
 
 ## FD7 ask details
 

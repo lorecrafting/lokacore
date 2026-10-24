@@ -559,7 +559,10 @@
    "kind": "combat"
   }
  ],
- "log": [],
+ "log": [
+  "You go south.",
+  "Another goblin joins the fight."
+ ],
  "combatLog": [
   "Another goblin joins the fight."
  ],

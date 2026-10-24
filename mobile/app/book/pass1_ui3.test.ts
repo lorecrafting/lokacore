@@ -24,10 +24,10 @@ test('doors sampler lane: Map door lines, none on World, after closing the hut d
   const map = b.text();
   assert.ok(map.includes('North: closed'));
   assert.ok(!map.includes('The hut door: closed'));
-  assert.ok(!map.includes('Closed.'), JSON.stringify(map));
+  assert.ok(!map.includes('You close the hut door.'), JSON.stringify(map));
   b.tap('Back to World');
   const world = b.text();
-  assert.ok(world.includes('Closed.'));
+  assert.ok(world.includes('You close the hut door.'));
   assert.ok(!world.includes('Open the hut door (north)'), JSON.stringify(world));
   b.map();
   b.tap('Open the hut door (north)');

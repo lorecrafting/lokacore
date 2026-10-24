@@ -849,7 +849,9 @@
    "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1"
   }
  ],
- "log": [],
+ "log": [
+  "You go north."
+ ],
  "combatLog": [],
  "details": {}
 }

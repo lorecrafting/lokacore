@@ -24,6 +24,7 @@ import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
 import { carrying, giveRefused, putRefused, recipient } from './shared.ts';
+import { itemLine } from './line.ts';
 import { stolen, theftRefused } from './theft.ts';
 import { movable } from '../../runtime/created.ts';
 
@@ -31,7 +32,7 @@ import { movable } from '../../runtime/created.ts';
 const REFUSED: readonly string[] = ['not_present', 'permission_denied', 'too_heavy', 'over_load'];
 
 // size: allow 58, finite Harvest, the G7 get-lock walk and row 33 theft join the conserved-transfer decision
-export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
+const transfer: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
   if (p.type === 'recover_corpse') return recover(world, p, steps);
   if (p.type === 'harvest') return decideHarvest(world, { ...command, payload: p }, mint, steps);
@@ -87,6 +88,15 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
       ? { kind: 'fault', code }
       : rejected(code);
   return accepted(world, 'given', move(p.recipient_id), acquired(p.recipient_id));
+};
+
+// Each accepted take, drop, give and put narrates one engine line (loka-kgd.185, line.ts
+// itemLine). A line already there (a stolen take's theft narration) stands alone.
+export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
+  const d = transfer(world, command, mint, steps);
+  if (d.kind !== 'accepted' || d.narration?.length) return d;
+  const line = itemLine(world, command.payload, steps);
+  return line ? { ...d, narration: [line] } : d;
 };
 
 /** Registered invariants of containment (protocol/invariants.json), pure checks of a world. */

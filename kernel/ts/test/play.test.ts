@@ -415,7 +415,35 @@ test('the terminal shows the description variant the fresh facts select', () => 
   writeFileSync(walk, 'n\ns\ns\nlook mud\n');
   const r = play([file, walk]);
   assert.equal(r.status, 0, r.err);
-  assert.match(r.out, new RegExp(`> n\nVillage Green\n${c.text['room.village_green.worried']}\n`));
-  assert.match(r.out, new RegExp(`> s\nReed Path\n${c.text['room.reed_path.description']}\n`));
+  assert.match(
+    r.out,
+    new RegExp(
+      `> n\nYou go north.\n\\[movement\\.moved: [^\\]]+\\]\nVillage Green\n${c.text['room.village_green.worried']}\n`,
+    ),
+  );
+  assert.match(
+    r.out,
+    new RegExp(
+      `> s\nYou go south.\n\\[movement\\.moved: [^\\]]+\\]\nReed Path\n${c.text['room.reed_path.description']}\n`,
+    ),
+  );
   assert.match(r.out, new RegExp(`> look mud\n${c.text['detail.mud.tracks']}\n`));
+});
+
+// Breaks: a talk prints its prompt line but not the options, or prints the prompt twice (the
+// talk's own line, then the choice's prompt).
+test('talk says the prompt once, then the options', () => {
+  const lantern = read('protocol/fixtures/cartridge_lantern_hash.json');
+  const file = join(dir, 'lantern.json');
+  writeFileSync(file, `{"cartridge":${lantern.canonical},"content_hash":"${lantern.sha256}"}`);
+  const walk = join(dir, 'talk.txt');
+  writeFileSync(walk, 'talk bram\n');
+  const r = play([file, walk]);
+  assert.equal(r.status, 0, r.err);
+  const said = r.out.split('> talk bram\n')[1]!.replace(/^\[.*\n/gm, '');
+  assert.equal(
+    said.split('\nhp ')[0],
+    `Bram keeps his eyes on the reeds. "My lantern's out at the shelter past the reed bank, and I can't leave the ferry. The search party won't go out without it."\n` +
+      "  accept: Offer to fetch Bram's lantern\n(choose <option>, or bye)",
+  );
 });

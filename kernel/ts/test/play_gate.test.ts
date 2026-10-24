@@ -25,7 +25,8 @@ function play(lines: string[]) {
   assert.equal(r.status, 0, r.stderr);
   return r.stdout
     .split(/^> /m)
-    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''));
+    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''))
+    .map((s) => s.replace(/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/g, 'ID')); // a script run mints fresh ids
 }
 
 const GATEHOUSE =
@@ -40,15 +41,15 @@ const COURTYARD =
 test('brief mode: a revisited room shows its title and contents; look shows all', () => {
   assert.deepEqual(play(['open north', 'n', 's', 'look', 'n', 'brief', 's', 'brief', 'n']), [
     `${GATEHOUSE}Exits: east (locked), north (closed)\n`,
-    'open north\nYou open the oak door.\n',
-    `n\n${COURTYARD}`,
-    's\nGatehouse\nExits: east (locked), north\n',
+    'open north\nYou open the oak door.\n[barrier.opened: actor ID]\n',
+    `n\nYou go north.\n[movement.moved: actor ID]\n${COURTYARD}`,
+    's\nYou go south.\n[movement.moved: actor ID]\nGatehouse\nExits: east (locked), north\n',
     `look\n${GATEHOUSE}Exits: east (locked), north\n`,
-    'n\nCourtyard\nAn iron key lies among the weeds.\nExits: south\n',
+    'n\nYou go north.\n[movement.moved: actor ID]\nCourtyard\nAn iron key lies among the weeds.\nExits: south\n',
     'brief\nBrief mode off.\n',
-    `s\n${GATEHOUSE}Exits: east (locked), north\n`,
+    `s\nYou go south.\n[movement.moved: actor ID]\n${GATEHOUSE}Exits: east (locked), north\n`,
     'brief\nBrief mode on.\n',
-    'n\nCourtyard\nAn iron key lies among the weeds.\nExits: south\n',
+    'n\nYou go north.\n[movement.moved: actor ID]\nCourtyard\nAn iron key lies among the weeds.\nExits: south\n',
   ]);
 });
 
@@ -80,15 +81,15 @@ test('doors are named by direction or keywords, and refusals read as words', () 
       'open\nOpen what?\n',
       "unlock e\nYou don't have the key.\n",
       'lock north\nIt has no lock.\n', // review #50 N3: the oak door has no key_item
-      'open oak door\nYou open the oak door.\n',
+      'open oak door\nYou open the oak door.\n[barrier.opened: actor ID]\n',
       'open north\nIt is already open.\n',
       'close west\nThere is no exit that way.\n',
       'open up\nThere is no exit that way.\n',
-      `n\n${COURTYARD}`,
-      'take key\nYou take an iron key.\n',
-      's\nGatehouse\nExits: east (locked), north\n',
-      'unlock cell door\nYou unlock the cell door.\n',
-      'lock e\nYou lock the cell door.\n',
+      `n\nYou go north.\n[movement.moved: actor ID]\n${COURTYARD}`,
+      'take key\nYou take an iron key.\n[item.taken: actor ID]\n',
+      's\nYou go south.\n[movement.moved: actor ID]\nGatehouse\nExits: east (locked), north\n',
+      'unlock cell door\nYou unlock the cell door.\n[barrier.unlocked: actor ID]\n',
+      'lock e\nYou lock the cell door.\n[barrier.locked: actor ID]\n',
     ],
   );
 });
@@ -98,10 +99,10 @@ test('doors are named by direction or keywords, and refusals read as words', () 
 test('scan shows each door that bars the way, else the room beyond and what is in it', () => {
   assert.deepEqual(play(['scan', 'open north', 'scan', 'n', 'take key', 'scan']).slice(1), [
     'scan\neast: the cell door (locked).\nnorth: the oak door (closed).\n',
-    'open north\nYou open the oak door.\n',
+    'open north\nYou open the oak door.\n[barrier.opened: actor ID]\n',
     'scan\neast: the cell door (locked).\nnorth (Courtyard): an iron key.\n',
-    `n\n${COURTYARD}`,
-    'take key\nYou take an iron key.\n',
+    `n\nYou go north.\n[movement.moved: actor ID]\n${COURTYARD}`,
+    'take key\nYou take an iron key.\n[item.taken: actor ID]\n',
     'scan\nsouth (Gatehouse).\n',
   ]);
 });

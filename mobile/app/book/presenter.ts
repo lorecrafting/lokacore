@@ -43,8 +43,9 @@ import {
   detailLines,
   visit,
   leaveLog,
+  logLines,
   narrationLines,
-  pickupLine,
+  quietOf,
   resetLogs,
   restoredLogs,
   type Logs,
@@ -80,7 +81,7 @@ function background(
     return;
   }
   if (last && last.command_id !== s.narrationId)
-    narrate(s, closing(last, was, now), now, away, text);
+    narrate(s, closing(last, was, now), was, now, away, text);
 }
 
 // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
@@ -88,19 +89,24 @@ function world(s: Logs, away: Logs['away'], lines: string[]) {
   (away?.log ?? s.log).push(...lines);
 }
 
-// A new receipt's lines: its detail or conversation, else World (or the open settlement's lines).
-function narrate(s: Logs, last: NarrationRecord, now: GameView, away: Logs['away'], text: Say) {
-  const [narrated, combat] = narrationLines(last, now, text);
-  const pickup = pickupLine(last, text);
-  const lines = pickup ? [pickup] : narrated;
+// A new receipt's lines: World (or the open settlement's lines), and its detail or conversation.
+function narrate(
+  s: Logs,
+  last: NarrationRecord,
+  was: GameView,
+  now: GameView,
+  away: Logs['away'],
+  text: Say,
+) {
+  const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
-  if (!lines.length) return;
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  if (to) to.push(...lines);
-  else world(s, away, lines);
+  if (!last.read) world(s, away, [...lines, ...combat]); // Read text: its page only
+  // A quiet receipt settled in the background is the room log's only, as when restored.
+  if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }
 
 const confirmed = (reply: Reply) =>
@@ -173,8 +179,8 @@ function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, tex
     return '';
   }
   if (game.pending() && reply.kind !== 'pending' && reply.kind !== 'catching_up') {
-    const lines = replyLine(reply, text, game.view().view);
-    (was.combat ? s.combatLog : detail ? detailLines(s, detail) : s.log).push(...lines);
+    const lines = replyLine(reply, text, game.view().view, undefined, was);
+    logLines(s, lines, was.combat ? s.combatLog : detail ? detailLines(s, detail) : undefined);
     return lines.map(lineText).join(' ');
   }
   if (reply.kind === 'pending' || reply.kind === 'catching_up') {
@@ -203,29 +209,25 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   return true;
 }
 
-// What the live region reads (loka-x6t.43): the World and combat lines new since the last screen,
-// never history; `key` changes per batch, so a repeated line is read again.
-type Said = {
-  log: number;
-  combat: number;
-  place: string;
-  fight?: string;
-  key: number;
-  text: string;
-};
+// What the live region reads (loka-x6t.43, book-ui.md Announcements): the room log's lines new
+// since the last screen, never history or another log; `key` changes per batch, so a repeated
+// line is read again, and a quiet line merged into the last one is read in full each time.
+type Said = { log: number; place: string; key: number; text: string };
 function heard(s: Logs, view: GameView, was: Said | undefined): Said {
-  const now = {
-    log: s.log.length,
-    combat: s.combatLog.length,
-    place: view.place.id,
-    fight: view.combat?.encounter_id,
-  };
+  const now = { log: s.log.length, place: view.place.id };
   was ??= { ...now, key: 0, text: '' };
-  // A room or encounter change empties its log first (resetLogs), so all of it is new.
-  const fresh = [
-    ...s.log.slice(now.place === was.place ? was.log : 0),
-    ...s.combatLog.slice(!now.fight || now.fight === was.fight ? was.combat : 0),
-  ].map((l) => (typeof l === 'string' ? l : 'reason' in l ? `${l.reason}, ${l.text}` : l.text));
+  // A room change empties its log first (resetLogs), so all of it is new.
+  const fresh = [...(s.merged ?? []), ...s.log.slice(now.place === was.place ? was.log : 0)].map(
+    (l) =>
+      typeof l === 'string'
+        ? l
+        : 'reason' in l
+          ? `${l.reason}, ${l.text}`
+          : 'plain' in l
+            ? l.plain
+            : l.text,
+  );
+  s.merged = undefined;
   return fresh.length ? { ...now, key: was.key + 1, text: fresh.join(' ') } : { ...was, ...now };
 }
 
@@ -236,7 +238,6 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
   s.combatLog.splice(0, s.combatLog.length - 200);
   for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
   said.log = s.log.length;
-  said.combat = s.combatLog.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,
     token,

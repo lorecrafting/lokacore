@@ -169,6 +169,13 @@ test('wear and remove by invocation, with their refusals', () => {
     delta: { ops: transfer(CAP, BODY, HEAD) },
     events: [],
     effects: [],
+    narration: [
+      {
+        key: 'equipment.worn',
+        bindings: { item: 'item.leather_cap.short' },
+        participants: { actor: BODY, item: CAP },
+      },
+    ],
     rng: [1, 2, 3, 4],
   });
   w = worn.world;
@@ -417,10 +424,19 @@ test('an item with equip words offers its own Wear and Remove labels and tells i
   assert.deepEqual(plain(accepted(w, 'remove', CAP).decision).narration, [{ key: 'cap.removed' }]);
 });
 
-test('an item without equip words keeps the engine labels and tells no line', () => {
+// Breaks: wear or remove with no engine line, or the line not naming the wearer and the item.
+test('an item without equip words keeps the engine labels and tells the engine line', () => {
   const w = accepted(wear(), 'take', CAP).world;
   assert.equal(label(w, 'wear'), 'action.wear');
-  assert.equal(plain(accepted(w, 'wear', CAP).decision).narration, undefined);
+  const worn = accepted(w, 'wear', CAP);
+  const line = (key: string) => [
+    { key, bindings: { item: 'item.leather_cap.short' }, participants: { actor: BODY, item: CAP } },
+  ];
+  assert.deepEqual(plain(worn.decision).narration, line('equipment.worn'));
+  assert.deepEqual(
+    plain(accepted(worn.world, 'remove', CAP).decision).narration,
+    line('equipment.removed'),
+  );
 });
 
 test('the loader refuses equip words below 1.116, outside the catalog, or without a slot', () => {

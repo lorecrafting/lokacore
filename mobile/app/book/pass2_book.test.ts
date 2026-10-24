@@ -70,6 +70,28 @@ test('a fresh NPC visit after a reopen starts empty', () => {
   a.sql.close();
 });
 
+// Breaks: a cold reopen mid-conversation adds the open question to the NPC page beside the talk
+// receipt's own prompt line, so the question shows twice.
+test('a reopen during a talk shows its question once', () => {
+  const cart = compiled('cartridges/toolbox_showcase') as never;
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, cart);
+  const b = book(cart, a);
+  go(b, 'north', 'west', 'west');
+  b.tap('carpenter, open');
+  b.tap('Talk to the carpenter');
+  const ask = b.text().filter((x) => x.startsWith('"Knife, axe or saw?'));
+  assert.equal(ask.length, 1, JSON.stringify(b.text()));
+  b.unmount();
+  const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
+  assert.deepEqual(
+    r.text().filter((x) => x === ask[0]),
+    ask,
+    JSON.stringify(r.text()),
+  );
+  r.unmount();
+  a.sql.close();
+});
+
 // Breaks: an NPC page lists the shop's rows (they live on the buy page), draws "Nothing to do
 // here.", "Talk: not now" or any filler line for a person with no talk, or keeps Trade
 // with the stock emptied (owner picks mvlrlvappy4w, mvlyb5x2m9i3, mvlymuams73l).

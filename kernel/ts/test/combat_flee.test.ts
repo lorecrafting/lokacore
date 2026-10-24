@@ -69,6 +69,10 @@ test('two-exit Flee selects canonical north/west using independent seeded answer
       key: 'combat.fled',
       bindings: { direction: c.way },
     });
+    const keys = (result.decision as { narration: readonly { key: string }[] }).narration.map(
+      (l) => l.key,
+    );
+    assert.ok(!keys.includes('movement.moved'), 'a flight is no plain move');
     assert.deepEqual(flee(w).decision, result.decision);
   }
 });

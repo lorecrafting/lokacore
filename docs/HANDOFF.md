@@ -114,6 +114,11 @@ Douse), branch `toolbox/batch-aimed-spells`, five slices in order.
 Briefs: [docs/briefs/room-words/README.md](briefs/room-words/README.md) (loka-x6t.105 signpost fixture, loka-6qi name words),
 branch `toolbox/batch-room-words`, five slices in order.
 
+## Narration log batch: brief drafted (2026-10-24)
+
+Brief: [docs/briefs/narration-log/README.md](briefs/narration-log/README.md) (loka-kgd.185, loka-x6t.129,
+loka-x6t.124), branch `toolbox/batch-narration-log`, three slices in order; build after the weekly usage reset.
+
 ## Container open batch: MERGED #463 (2026-10-23)
 
 Brief: [docs/briefs/container-open/README.md](briefs/container-open/README.md). Room fixtures brief:
