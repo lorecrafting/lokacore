@@ -32,6 +32,25 @@ PLease set things up so that its easy for me to do my ui polish there".
 - "Close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR comments, green hosted CI, merge with
   `--match-head-commit`, `bin/after_merge.sh`, `bin/preview_update.sh` (it refuses while a session is served).
 
+## Today 2026-10-23 (owner live in Storybook), all merged
+
+- #457 say icon, Word block removed, room sentences, centred room title (x6t.106).
+- #458 room words: signpost as an in-prose fixture link (x6t.105), entity name words with per-run shared articles,
+  appositive names show the name alone, plurals collapse (6qi); kernel_api 1.118; record 2026-10-23-room-words-batch-review.
+- #459 targeted actions only on detail pages, doors via minimap/joystick ("The door to the south is locked."), targeting
+  spec "Pick a second thing" + "Pick list" component (x6t.112).
+- #460 aimed targets: Douse, aimed spells (cast {word, target_id}, kernel_api 1.119, new `lamp` tag), Pick lists for
+  use/give, Cast a spell… on targets and combat foe lines, Cast on… from Character (x6t.109.1-.5); record
+  2026-10-23-aimed-spells-batch-review.
+- #461 asides become one World log line per visit, tighter room spacing (x6t.114).
+- Open next: NPC/item detail page redesign (designer proposal given to the owner 2026-10-23: one card list, Leave at the
+  bottom, no status line on detail pages, "Buy or sell" shop page, explicit service cards, Whisper hidden; 7 owner
+  questions pending). Filed: x6t.109.6 aimed skills, .7-.9, x6t.110/.111 spell bar/hotbar, x6t.113 device Back,
+  x6t.107, x6t.108, kgd.192. Owner asked whether to file canned emotes (pending). Brainstorm prompt for
+  professions/skills/spells given to the owner for another session.
+- Retro item to file at handoff: after_merge's br flush conflicts when issues are created in the main checkout
+  without a prior import (hit twice today).
+
 ## Done this session (2026-10-22/23, all merged unless marked)
 
 - Before the reboot: #428-#432 (signpost, retired-chapter spec cleanup, Reading size, component specs in JSDoc, solar
