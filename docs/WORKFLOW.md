@@ -223,7 +223,8 @@ Chapter closure follows the [browser E2E loop](decisions/owner-decision-chapter-
 ### Book interaction delivery
 
 For every mechanic that changes what the player sees or can choose, the brief
-names its existing [Book component pattern](BOOK-UI-COMPONENTS.md), exact
+names its existing [Book component pattern](BOOK-UI-COMPONENTS.md), its page template and
+patterns from [interaction patterns](design/interaction-patterns.md) (its checklist), exact
 action/result owner, detail history, nested return and one browser interaction.
 Amend the canonical [Book UI rules](system/book-ui.md) in the **same slice** as
 the mechanic whenever the interaction contract changes. Reuse current pages and
