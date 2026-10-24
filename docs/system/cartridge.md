@@ -699,13 +699,13 @@ JSON document. Nothing is committed or checked in CI; only its unit test runs.
   shape; every leaf is evaluated, with no short-circuit.
 - **Policy** (on demand). A recipe's or dialogue's `policy`, each leaf with `holds`, read on the
   world before the step, where admission reads it: the recipe for the command's primary target,
-  the dialogue for its speaker: on `choose`, the continuation row's bound speaker (`speakerOf`),
-  else the authored NPC.
+  the dialogue for its NPC.
 - ponytail: a leaf's value is its truth (`held`, `holds`), not the fact or stat it read, which
   needs a kernel hook. For a rule delivered more than once in a step, only the first delivery is
   exact. A delayed rule's `fired` shows at its job's step, and a job run's narration can be
   deduplicated. The recipe target is the payload's primary target, not a detail resolved
-  through `detailAt`.
+  through `detailAt`; the dialogue target is the authored NPC, not a `choose` row's bound
+  speaker (`speakerOf`), which differs only when the binding is not the npc's entity.
 
 ## Installed capabilities
 

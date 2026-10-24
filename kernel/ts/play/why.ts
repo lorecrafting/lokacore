@@ -15,7 +15,6 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { primaryTarget } from '../src/commands/action_input.ts';
 import { cmp } from '../src/foundation/validate.ts';
-import { speakerOf } from '../src/mechanics/dialogue/shared.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { FILTERS } from '../src/mechanics/reaction.ts';
 import { refString } from '../src/runtime/decision.ts';
@@ -122,18 +121,20 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
     }));
 
 // The policies asked for, on the world before the step: a recipe's target is the command's,
-// a dialogue's its speaker: a choose row's bound one (dialogue/shared.ts:93), else the authored
-// NPC (dialogue/selection.ts:93).
+// a dialogue's its authored NPC (dialogue/selection.ts:93; ponytail: not a choose row's bound
+// speaker, dialogue/shared.ts:93; read speakerOf once a fixture binds a speaker other than the npc).
 const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
   ...(on.recipe !== undefined && {
     recipe: policy(c.recipes, on.recipe, before, command, () => primaryTarget(command.payload)),
   }),
   ...(on.dialogue !== undefined && {
-    dialogue: policy(c.dialogues, on.dialogue, before, command, (x) => {
-      const p = command.payload;
-      const row = p.type === 'choose' ? before.state.choices?.[p.continuation_id] : undefined;
-      return row ? speakerOf(x, row) : before.entityIds[refString(x.npc)];
-    }),
+    dialogue: policy(
+      c.dialogues,
+      on.dialogue,
+      before,
+      command,
+      (x) => before.entityIds[refString(x.npc)],
+    ),
   }),
 });
 

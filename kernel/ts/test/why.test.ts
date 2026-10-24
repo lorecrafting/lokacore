@@ -118,7 +118,12 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
   assert.equal((a.when as any).held, 0);
   assert.equal(row(heard, 7).fired, 1);
   assert.deepEqual(
-    why(heard, trace, 7).reactions.map((x) => x.rule),
+    // reversed: the loader's canonical order is already the key order
+    why(
+      { ...heard, reactions: Object.fromEntries(Object.entries(heard.reactions!).reverse()) },
+      trace,
+      7,
+    ).reactions.map((x) => x.rule),
     ['a_heard', 'bell_after', 'never'].map((k) => `${S}reaction/${k}`), // by rule key
   );
   // A rule with no `when` whose event never happens.
