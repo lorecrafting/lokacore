@@ -4,7 +4,13 @@
 // leaves; on demand one recipe's or dialogue's policy. A report for authors, not a check.
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
-import type { Command, DecisionResult, Policy, ReactionRule } from '../src/contracts.gen.ts';
+import type {
+  CharacterId,
+  Command,
+  DecisionResult,
+  Policy,
+  ReactionRule,
+} from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { primaryTarget } from '../src/commands/action_input.ts';
@@ -142,8 +148,9 @@ function policy<D extends { key: string; policy: { root: Policy } }>(
   const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
   if (!d) throw new Usage(`no definition keyed ${key}`);
   const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
+  const actor = (command.payload as { actor_id: CharacterId }).actor_id; // recipes' and talk's commands carry one
   const at = (i: number) => ({
-    holds: holds(world, command.payload.actor_id, leaves(d.policy.root)[i]!, ctx()),
+    holds: holds(world, actor, leaves(d.policy.root)[i]!, ctx()),
   });
   return { rule, policy: annotate(d.policy.root, at) };
 }
