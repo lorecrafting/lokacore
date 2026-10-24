@@ -59,7 +59,12 @@ function play(w: World, p: object): World {
     n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  narration.push(...(r.decision.narration ?? []).map((t) => t.key as string));
+  // These cases pin the NPC's lines; the player's own move line is not one of them.
+  narration.push(
+    ...(r.decision.narration ?? [])
+      .map((t) => t.key as string)
+      .filter((k) => k !== 'movement.moved'),
+  );
   for (const e of r.decision.events)
     if (e.payload.type === 'entity_entered_room')
       arrivals.push([e.logical_time, e.payload.room_id]);

@@ -168,7 +168,13 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     decision.kind !== 'accepted'
       ? `${reason(decision, lockless ? 'lockless' : p.type)}\n`
       : narrated
-        ? narrated.map((t) => `${spoken(t)}\n${pinned(t)}`).join('')
+        ? // Every action narrates now: the lines, then the room or the options they lead to.
+          narrated.map((t) => `${spoken(t)}\n${pinned(t)}`).join('') +
+          (decision.outcome === 'moved'
+            ? arrived(r)
+            : decision.outcome === 'choice_opened'
+              ? choice(cartridge, r.world, false)
+              : '')
         : (done[decision.outcome] ??
           (p.target_id
             ? detail(cartridge, r.world, p.target_id)

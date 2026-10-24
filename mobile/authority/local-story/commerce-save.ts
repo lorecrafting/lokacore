@@ -9,6 +9,7 @@ import type {
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { actorLine } from '../../../kernel/ts/src/mechanics/line.ts';
 import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 import { acquiredOnce } from './shop-event.ts';
@@ -159,8 +160,15 @@ function shopReceipt(
       destination_id: destination,
     }) ||
     d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
-    d.narration?.length !== 1 ||
-    d.narration[0].key !== (p.type === 'buy' ? 'commerce.bought' : 'commerce.sold')
+    !same(d.narration, [
+      actorLine(
+        world,
+        world.character,
+        p.type === 'buy' ? 'commerce.bought' : 'commerce.sold',
+        { item: moved },
+        { n: 0 },
+      ),
+    ])
   )
     invalid();
   if (!acquiredOnce(world, command, d, moved, destination)) invalid();

@@ -28,7 +28,14 @@ export function days(
   return out.map((d): ChronicleDay => ({ ...d, lines: grouped(d.lines) }));
 }
 
+// Combat lines go by their original index, so they leave before the filter shifts the indexes.
 const story = (r: ChronicleEntry['record']) => ({
   ...r,
-  lines: r.lines.filter((l) => !LINE_WORDS.has(l.key) && !/^dialogue\.[^.]+\.prompt$/.test(l.key)),
+  combat_lines: undefined,
+  lines: r.lines.filter(
+    (l, i) =>
+      !r.combat_lines?.includes(i) &&
+      !LINE_WORDS.has(l.key) &&
+      !/^dialogue\.[^.]+\.prompt$/.test(l.key),
+  ),
 });

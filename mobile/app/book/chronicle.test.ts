@@ -106,7 +106,8 @@ test('a fresh story has no Chronicle and still says Nothing written yet', () => 
 });
 
 // Breaks: a routine engine line (a take) or a talk prompt enters the Chronicle beside the story's
-// own line (PM ruling, loka-kgd.185: the Chronicle stays as before the narration log batch).
+// own line (PM ruling, loka-kgd.185: the Chronicle stays as before the narration log batch), or
+// the filter shifts the combat indexes so a combat line shows and a story line goes.
 test('a take and a talk prompt stay out of the Chronicle; the story line beside it stays in', () => {
   const view = { place: { title: { key: 't' } } } as never;
   const record = {
@@ -115,7 +116,9 @@ test('a take and a talk prompt stay out of the Chronicle; the story line beside 
       { key: 'item.taken', bindings: { item: 'item.key.short' } },
       { key: 'dialogue.bram.prompt' },
       { key: 'narration.x' },
+      { key: 'combat.hit' },
     ],
+    combat_lines: [3],
   };
   const shown = days([{ day: 1, record, milestone: false } as never], view, (k) => k);
   assert.deepEqual(

@@ -27,7 +27,7 @@ function play(lines: string[], file = artifact) {
   return r.stdout
     .split(/^> /m)
     .slice(1)
-    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''));
+    .map((s) => s.replace(/^(\[state|\[movement\.moved:|transcript:|hp \d+\/\d+) .*\n/gm, ''));
 }
 
 // Breaks: a recipe alias not recognized (alone or before target words), the words after it not
@@ -40,7 +40,7 @@ test('ring bell rings once, narrates, and the rooms and bell read differently af
     'Ring the bell\nYou haul on the rope. The bell swings, and its voice rolls out over the fen.\n',
     'x bell\nGreen bronze, warm now, still humming under your hand.\n',
     "ring\nYou can't do that now.\n",
-    "d\nBell Tower\nA narrow stair climbs through the dark. The walls still tremble with the bell's voice.\nExits: up\n",
+    "d\nYou go down.\nBell Tower\nA narrow stair climbs through the dark. The walls still tremble with the bell's voice.\nExits: up\n",
     "ring bell\nYou don't see that here.\n", // the bell is in the belfry
     "ring gong\nYou don't see that here.\n",
   ]);
@@ -106,9 +106,9 @@ test('an alias shared by recipes picks the one whose target the words name', () 
     assert.deepEqual(
       play(['d', 'ring gong', 'u', 'ring bell', 'ring rope'], file),
       [
-        'd\nBell Tower\nA narrow stair climbs through the dark. Pigeon feathers drift on the steps.\nExits: up\n',
+        'd\nYou go down.\nBell Tower\nA narrow stair climbs through the dark. Pigeon feathers drift on the steps.\nExits: up\n',
         'ring gong\nYou haul on the rope. The bell swings, and its voice rolls out over the fen.\n',
-        'u\nBelfry\nExits: down\n', // brief mode (R5 S7): the entry room, visited
+        'u\nYou go up.\nBelfry\nExits: down\n', // brief mode (R5 S7): the entry room, visited
         'ring bell\nWhich do you mean: Ring the bell or Toll the bell?\n',
         "ring rope\nYou can't do that to that.\n",
       ],

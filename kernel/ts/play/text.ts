@@ -184,15 +184,17 @@ export function inventory(cartridge: Cartridge, world: World): string {
   return items.length ? `You are carrying:\n${items.join('')}` : 'You are carrying nothing.\n';
 }
 
-/** The pending choice (GameView choice): its prompt and each option, with why it is unavailable. */
-export function choice(cartridge: Cartridge, world: World): string {
+/** The pending choice (GameView choice): its prompt and each option, with why it is unavailable;
+ * without the prompt after a talk, whose own line already said it. */
+export function choice(cartridge: Cartridge, world: World, prompt = true): string {
   const c = gameView(world).choice;
   if (!c) return 'You have nothing to choose.\n';
   const options = c.choices.map(
     (o) =>
       `  ${o.choice_id}: ${say(cartridge, o.label)}${o.available ? '' : ` (${o.reason.code})`}\n`,
   );
-  return `${say(cartridge, c.prompt.key)}\n${options.join('')}(choose <option>, or bye)\n`;
+  const asked = prompt ? `${say(cartridge, c.prompt.key)}\n` : '';
+  return `${asked}${options.join('')}(choose <option>, or bye)\n`;
 }
 
 /** The journal (GameView journal): each quest's title and lifecycle state. */

@@ -164,7 +164,7 @@ test('one buy at each of two shops survives cold reopen', (t) => {
 });
 
 // Breaks: a receipt is checked only under a shop it does not name, so its narration is never bound
-// to that shop's bought line; or a receipt naming a provider that is not a shop, with no money ops
+// to that shop's bought line, or its line names another item or actor; or a receipt naming a provider that is not a shop, with no money ops
 // and penny rows that agree with that, is never bound to any shop (a free basket).
 test('a forged receipt at either shop, or naming no shop, is save_corrupt', (t) => {
   const { monger, fisher, fish, basket, initial, bundle, play, forge } = basketShop;
@@ -172,6 +172,8 @@ test('a forged receipt at either shop, or naming no shop, is save_corrupt', (t) 
   const forgeries: [number, (command: any, response: any) => void][] = [
     [1, (_, response) => (response.narration = [{ key: 'shop.sold' }])],
     [2, (_, response) => (response.narration = [{ key: 'shop.sold' }])],
+    [1, (_, response) => (response.narration[0].bindings.item = 'item.forged.short')],
+    [2, (_, response) => (response.narration[0].participants.actor = fisher)],
   ];
   for (const [i, [n, change]] of forgeries.entries()) {
     const path = join(dir, `forged-${i}.db`);

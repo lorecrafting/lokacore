@@ -67,16 +67,16 @@ function wait(w: World, until: number) {
 }
 
 // Breaks: the narrate branch dropped (or lowered to an op), so the move's receipt says nothing, or
-// says the line twice. A move's own text is view-side; its receipt carries only this line.
+// says the line twice. The move's own line (movement.moved) comes first.
 test('S3-1: entering the road says the authored line once in the move receipt', () => {
-  assert.deepEqual(lines(west(world()).decision as never), [LINE]);
+  assert.deepEqual(lines(west(world()).decision as never), ['movement.moved', LINE]);
 });
 
 // Breaks: a line goes before the lines of the steps before it (unshift, not push).
 test('S3-1: a rule says its lines in step order', () => {
   const first = { op: 'narrate', text: 'room.road.title' };
   const w = world((c) => c.reactions[RULE].apply.unshift(first));
-  assert.deepEqual(lines(west(w).decision as never), ['room.road.title', LINE]);
+  assert.deepEqual(lines(west(w).decision as never), ['movement.moved', 'room.road.title', LINE]);
 });
 
 // Breaks: a fired (after) rule skips the step, or says it when scheduled instead of when due.
