@@ -352,8 +352,8 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`), so `mix loka.compile` and
-`mix loka.lint` see the same flattened definitions. The order is: open area bundles, flatten
-`extends`, refuse repeated definitions. The artifact never carries a bundle, `extends` or
+`mix loka.lint` see the same flattened definitions. The order is: open area bundles, refuse
+repeated definitions, flatten `extends`. The artifact never carries a bundle, `extends` or
 `abstract`; the loader is unchanged.
 
 **Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
