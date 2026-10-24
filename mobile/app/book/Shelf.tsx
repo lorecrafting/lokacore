@@ -31,6 +31,26 @@ const sales = (v: GameView, shop: readonly Stock[], sells: Button[], text: Say):
     return o.sell.message ? [{ label, reason: sellReason(o.sell, text) }] : [];
   });
 
+// One buy-page row per stock row; a refused one keeps its words.ts reason.
+const buys = (v: GameView, shop: readonly Stock[], offered: Button[], text: Say): Row[] =>
+  shop.map((o) => {
+    const label = `${bare(v, o, text)} — ${o.buy.price}p`;
+    const b = offered.find((b) => b.action_key === 'buy' && b.target_ids[1] === o.item_id);
+    return b ? { b, label, name: label } : { label, reason: buyReason(o.buy.reason ?? '') };
+  });
+
+const ShopCards = ({ rows, press }: { rows: Row[]; press: (b: Button) => void }) => (
+  <Cards>
+    {rows.map((r) =>
+      'b' in r ? (
+        <ActionCard key={r.label} b={r.b} label={r.label} press={press} />
+      ) : (
+        <ActionCard key={r.label} label={r.label} reason={r.reason} />
+      ),
+    )}
+  </Cards>
+);
+
 /**
  * A shopkeeper's shop, two child pages of their NPC page (owner picks mvlrlvappy4w, mvlymuams73l,
  * mvlynyikyw57, 2026-10-23).
@@ -69,27 +89,13 @@ export function ShelfPage(p: {
   );
   const money = purse(view);
   const name = cap(text(npc?.name ?? ''));
-  const rows: Row[] = p.sale
-    ? sell
-    : shop.map((o) => {
-        const label = `${bare(view, o, text)} — ${o.buy.price}p`;
-        const b = offered.find((b) => b.action_key === 'buy' && b.target_ids[1] === o.item_id);
-        return b ? { b, label, name: label } : { label, reason: buyReason(o.buy.reason ?? '') };
-      });
+  const rows = p.sale ? sell : buys(view, shop, offered, text);
   return (
     <Page
       title={p.sale ? buysTitle(name) : sellsTitle(name)}
       foot={<Control label={LABEL.leave} onPress={p.back} />}
     >
-      <Cards>
-        {rows.map((r) =>
-          'b' in r ? (
-            <ActionCard key={r.label} b={r.b} label={r.label} press={press} />
-          ) : (
-            <ActionCard key={r.label} label={r.label} reason={r.reason} />
-          ),
-        )}
-      </Cards>
+      <ShopCards rows={rows} press={press} />
       {money !== undefined && <Note>{balance(money)}</Note>}
       <LogLines lines={p.screen.detail(p.id)} />
       {!p.sale && sell.length > 0 && (

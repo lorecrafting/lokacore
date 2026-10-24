@@ -33,15 +33,6 @@ export const statusTip = (c: Condition, time: number, text: Say) =>
 // Book UI Sense cues details (wording proposed; designer to approve): the direction key, none here.
 export const cueLine = (c: NonNullable<GameView['cues']>[number], text: Say) =>
   `${text(c.text)}${c.direction ? ` from the ${c.direction}` : ''}`;
-export const expeditionLine = (
-  e: NonNullable<GameView['journal'][number]['expedition']>,
-  text: Say,
-) =>
-  e.status === 'active' && e.next_title
-    ? e.direction
-      ? `Next: ${e.direction} to ${text(e.next_title)}.`
-      : `Next checkpoint: ${text(e.next_title)}.`
-    : '';
 
 export type Exit = { direction: string; button: Button };
 export type Thing =
@@ -87,11 +78,11 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  // A shop's pages go with their keeper (Shelf.tsx).
+  // A person's pages, shop pages included, go with them (Shelf.tsx).
   const gone = stack.findIndex(
     (p) =>
-      ['thing', 'shelf', 'sale'].includes(p.kind) &&
       'id' in p &&
+      ['thing', 'shelf', 'sale'].includes(p.kind) &&
       !visible.some((e) => e.id === p.id),
   );
   if (gone < 0) return stack;

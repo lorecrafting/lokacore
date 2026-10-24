@@ -266,3 +266,12 @@ type Offered =
 // An offer's refusal as the Book says it: the cartridge's sentence, else the code's word; '' when offered.
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? message(e.reason.message, text) : reasonOf(e.reason);
+export const expeditionLine = (
+  e: NonNullable<GameView['journal'][number]['expedition']>,
+  text: Say,
+) =>
+  e.status === 'active' && e.next_title
+    ? e.direction
+      ? `Next: ${e.direction} to ${text(e.next_title)}.`
+      : `Next checkpoint: ${text(e.next_title)}.`
+    : '';
