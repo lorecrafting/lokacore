@@ -1,4 +1,4 @@
-// size: allow 790, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
+// size: allow 750, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
 // The showcase Homestead district walked step by step (docs/showcase/homestead-district.md,
 // guided loop steps 1 to 8). Each test continues the world the one before it left.
 import assert from 'node:assert/strict';
@@ -549,47 +549,8 @@ const croftTouched = (w: World) =>
     (k) => where(w, id(w, 'item', k)) === id(w, 'item', 'croft_plot'),
   );
 
-// Breaks: the sack losing its tie (seed visible or takeable while closed), a keyless tie listing
-// Unlock, Put skipping the lid, the open state not persisting across rooms.
-test('homestead sandbox: the seed sack starts tied, opens once, stays open and refuses behind its tie', () => {
-  const sack = (x: World) =>
-    gameView(valid(x)).entities.find((e) => e.id === id(x, 'item', 'sack'))!;
-  const keys = (x: World) => sack(x).actions.map((a) => String(a.action_key));
-  const closed = yard();
-  assert.equal(sack(closed).state, 'closed');
-  assert.equal(sack(closed).contents, undefined);
-  assert.deepEqual(
-    keys(closed)
-      .filter((k) => ['open', 'take', 'close', 'unlock'].includes(k))
-      .sort(),
-    ['open', 'take'],
-  );
-  assert.equal(
-    refused(closed, { type: 'take', item_id: id(closed, 'item', 'seed_01') }),
-    'not_present',
-  );
-  assert.equal(refused(closed, { type: 'take', item_id: id(closed, 'item', 'sack') }), 'too_heavy');
-  const held = take(closed, 'holding_apple');
-  assert.equal(
-    refused(held, {
-      type: 'put',
-      item_id: id(held, 'item', 'holding_apple'),
-      container_id: id(held, 'item', 'sack'),
-    }),
-    'exit_closed',
-  );
-  const open = walk(untie(closed), 'north', 'south');
-  assert.equal(sack(open).state, 'open');
-  assert.deepEqual(
-    sack(open).contents?.map((c) => [c.id, c.container_id]),
-    [[id(open, 'item', 'seed_01'), id(open, 'item', 'sack')]],
-  );
-  assert.ok(keys(open).includes('close'));
-});
-
-// Breaks: the plot lock, the sow rule (status, stamp, spent seed), the description thresholds,
-// the water midpoint (43200 is late), the seed return, the cure on resowing, the winter guard,
-// a seed given away (sow would start the plot's clock on the farmer).
+// Breaks: the plot lock, the sow rule (status, stamp, spent seed), description thresholds, the water
+// midpoint (43200 is late), seed return, cure on resowing, winter guard, a seed given away.
 test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harvest', () => {
   const seed = take(untie(yard()), 'seed_01');
   const gift = {

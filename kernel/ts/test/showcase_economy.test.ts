@@ -1,4 +1,4 @@
-// size: allow 600, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 650, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -559,6 +559,48 @@ test('economy 8 branch: without the purchase the key, the door and the room refu
     },
   };
   assert.equal(refused(forced, { type: 'move', direction: 'south' }), 'permission_denied');
+});
+
+// Breaks: the sack losing its tie (seed visible or takeable while closed), a keyless tie listing
+// Unlock, Put skipping the lid, the open state not persisting across rooms.
+test('homestead sandbox: the seed sack starts tied, opens once, stays open and refuses behind its tie', () => {
+  const sack = (x: World) =>
+    gameView(valid(x)).entities.find((e) => e.id === id(x, 'item', 'sack'))!;
+  const keys = (x: World) => sack(x).actions.map((a) => String(a.action_key));
+  const closed = walk(fresh(WORLD), 'north', 'west', 'south');
+  assert.equal(sack(closed).state, 'closed');
+  assert.equal(sack(closed).contents, undefined);
+  assert.deepEqual(
+    keys(closed)
+      .filter((k) => ['open', 'take', 'close', 'unlock'].includes(k))
+      .sort(),
+    ['open', 'take'],
+  );
+  assert.equal(
+    refused(closed, { type: 'take', item_id: id(closed, 'item', 'seed_01') }),
+    'not_present',
+  );
+  assert.equal(refused(closed, { type: 'take', item_id: id(closed, 'item', 'sack') }), 'too_heavy');
+  const held = take(closed, 'holding_apple');
+  assert.equal(
+    refused(held, {
+      type: 'put',
+      item_id: id(held, 'item', 'holding_apple'),
+      container_id: id(held, 'item', 'sack'),
+    }),
+    'exit_closed',
+  );
+  const open = walk(
+    play(closed, { type: 'open', target_id: id(closed, 'item', 'sack') }).world,
+    'north',
+    'south',
+  );
+  assert.equal(sack(open).state, 'open');
+  assert.deepEqual(
+    sack(open).contents?.map((c) => [c.id, c.container_id]),
+    [[id(open, 'item', 'seed_01'), id(open, 'item', 'sack')]],
+  );
+  assert.ok(keys(open).includes('close'));
 });
 
 // Breaks: a lid missing on a chest or crate (contents shown before Open). The shelf restock from
