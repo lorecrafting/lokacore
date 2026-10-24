@@ -50,7 +50,8 @@ words remain in the cartridge; Book owns layout and navigation.
 
 | Player interaction | Start with | Check in the mechanic brief |
 |---|---|---|
-| Talk, quest choice or shop offer | NPC detail and offered action list | Exact speaker, available/refused choice, detail-local result, Leave and reopen. |
+| Talk, quest choice or service | NPC detail and offered action list | Exact speaker, available/refused choice, detail-local result, Leave and reopen. |
+| Buy or sell | The NPC's Buy or sell card and its shelf page ([rule](system/book-ui.md#npc-dialogue-and-action-details)) | Exact row and price, refused reason, the page stays after a trade, Leave back to the person. |
 | Inspect, take, equip or use an item/container | Item detail and nested `Page` route | Exact item/custody, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
@@ -158,6 +159,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `NightSky` | `book/NightSky.tsx` | NightSky |
 | `NpcPage` | `book/Npc.tsx` | NpcPage |
 | `NpcDetail` | `book/Npc.tsx` | NpcPage |
+| `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
@@ -220,8 +222,8 @@ thickness token, since no platform's `Text` sets one); linked, or plain prose wh
 projected.
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
-chips and scene pick cards. The mock's shop price rows are not adopted either: the live shop row
-(`Npc.tsx` ShopOptions) is a plain `dim` `type.body` line until a component here replaces it.
+chips and scene pick cards. The mock's shop price rows are not adopted either: a shelf row is an
+`ActionCard` on `ShelfPage` and a sale a `PickLists` row (owner pick mvlrlvappy4w, 2026-10-23).
 
 ## Page turn
 
