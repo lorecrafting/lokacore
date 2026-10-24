@@ -18,7 +18,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 - Order: room title; description paragraph (only fixture and furniture links interactive); people
   paragraph (PCs and NPCs as links); items paragraph (items as links); event log, where every
-  ambient line appends.
+  line appends: ambient, your own, refusals, combat and a detail page's ([line placement](../system/book-ui.md#line-placement)).
 - Never appears: action cards, chips, boxed tags, verb lists, warnings, notes,
   filler lines. Minimap, joystick, status line and the say field sit outside the scrolling page.
 - Source: owner, quoted: "no random one off things"; the rest of the anatomy is his list in the
@@ -46,7 +46,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
   nonempty); options: self verbs (Read, Eat, Wield, Remove…), then the pick options (Use an item…,
   Use on…, Cast a spell…), move verbs (Take, Lift, Drop), store and hand-over (Put in…, Give
   to…); Leave last.
-- Never appears: a second copy of a World line, an empty history heading.
+- Never appears: a line twice on the page, an empty history heading.
 - Source: [Item details and Take/Drop](../system/book-ui.md#item-details-and-takedrop),
   [detail-page order decision](../decisions/owner-decision-detail-page-order-2026-10-05.md),
   [corpse Take decision](../decisions/owner-decision-corpse-loot-take-detail-2026-10-06.md).
@@ -57,7 +57,8 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 - Order: as Item detail; a closed container shows Open and no contents; an open one lists contents
   as item links, then Close.
-- Never appears: contents or Take links while closed; a lid state the engine does not hold.
+- Never appears: contents or Take links while closed; a lid state the engine does not hold; your
+  own take or put line (quiet: the contents list is the feedback).
 - Source: owner, quoted: "Yeah make they need to open it first" (loka-x6t.121 notes); engine
   lids exist; Book half in progress.
 - Enforcement: none yet (slice loka-x6t.121 adds its test).
@@ -67,7 +68,8 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Order: Trade on the person page opens "<Name> can sell you…": buy cards ("Cob of bread — 4p";
   refused rows read "…: can't afford" or "…: sold out"), purse Note "You have <n>p.", history,
   Sell card last → "<Name> will buy…" with the same shape.
-- Never appears: a page turn on a buy or sale; a price table; a confirm dialog.
+- Never appears: a page turn on a buy or sale; a price table; a confirm dialog; your own buy or
+  sale line (quiet: purse and list are the feedback).
 - Source: [NPC dialogue and action details](../system/book-ui.md#npc-dialogue-and-action-details)
   (shop subsection), [pegs shop decision](../decisions/pm-decision-b3-pegs-shop-2026-10-05.md),
   owner 2026-10-23 (paraphrased): a sale keeps the page, purse and list redraw (commit f136a6531).
@@ -94,9 +96,9 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Combat
 
-- Order: own page; opponent block "name — band"; combat log; vertical action list (Stand, Flee,
+- Order: own page; opponent block "name — band"; combat log (each line also in the World log); vertical action list (Stand, Flee,
   Look, item combat uses, Cast a spell… per foe); on closure the page stays with Back to World.
-- Never appears: combat narration in the World log; a minimap or say field; horizontal buttons.
+- Never appears: a minimap or say field; horizontal buttons.
 - Source: [Combat interaction](../system/book-ui.md#combat-interaction),
   [Live combat response](../system/book-ui.md#live-combat-response-m6-a), owner decisions
   [actions](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md),
@@ -191,13 +193,27 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### After an action you stay where you are; the result shows in place
 
-- Rule: a buy redraws purse and list on the shop page; a retained item action appends to the
+- Rule: a buy redraws purse and list on the shop page (its line is quiet); a retained item action appends to the
   item's history; Take, Drop and a confirmed pick return to World with one named log line.
 - Why: the reader sees cause and effect on the same page, or one turn back with one line.
 - Do: "You have 12p." updates under the cards. Don't: a toast, a modal, a second confirming line.
 - Source: [Item details](../system/book-ui.md#item-details-and-takedrop),
   [Live action freshness](../system/book-ui.md#live-action-freshness).
 - Enforcement: `polish_detail.test.ts:16`, `:123`, `:162`, `:241`; `hostile_refusal.test.ts:43`.
+
+### Every line logs; some are quiet
+
+- Rule: every line lands in the room event log. A display table gives each line, per event key and
+  open page, one treatment: in place (page history and room log), log (room log only) or quiet
+  (room log only, compacted as "<line> (N times)"). Quiet so far: your own buy and sale on the shop
+  pages, your own take and put on an open container. Quiet is visual only: every quiet line is
+  still announced. Other people's actions are never quiet.
+- Why: owner, quoted: "Yes i like your idea if still logging to the room but compacted"; the log
+  is the full record, and the page's own redraw is the feedback.
+- Do: "You buy it. (3 times)" in the room log after three buys. Don't: the buy line on the shop
+  page, or three equal lines in the log.
+- Source: [Line placement](../system/book-ui.md#line-placement).
+- Enforcement: none yet (narration log slice 3 adds the merge test).
 
 ### Refusals are plain prose lines
 
@@ -212,11 +228,11 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Screen-reader announcements
 
-- Rule: one polite live region reads each press's new World, combat and refused lines, only the
-  lines new since the last screen. Detail-page results must also be announced.
+- Rule: one polite live region reads each press's new room-log lines (detail-page, combat,
+  refused and quiet lines included), only the lines new since the last screen.
 - Why: a sighted reader sees the line appear; a blind reader must hear the same line, once.
 - Source: [Announcements](../system/book-ui.md#announcements).
-- Enforcement: `live_region.test.ts:30`, `:42`. Gap: detail-page lines are silent (loka-x6t.124).
+- Enforcement: `live_region.test.ts:30`, `:42`.
 
 ### Label-in-name
 
@@ -307,7 +323,6 @@ Conflicts (code or spec contradicts a pattern above):
 - Exit warning notes and the Continue conversation button still draw on the World page outside
   the five parts: loka-x6t.127 follow-ups.
 - Containers show contents without Open: loka-x6t.121 (in progress).
-- Detail-page result lines are not announced: loka-x6t.124.
 
 Gaps (no pattern or no check yet):
 
