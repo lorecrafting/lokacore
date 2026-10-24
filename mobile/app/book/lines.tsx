@@ -1,4 +1,4 @@
-// Entity lines, the room's Here lines and log lines (EntityLine and LogLines doc comments).
+// Entity lines, Here lines, log lines and a press's fault (their doc comments).
 import { Fragment, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -7,7 +7,7 @@ import { cap, cueLine, plain } from './model.ts';
 import { COUNT, LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
-import { Tap } from './pages.tsx';
+import { Control, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
 
@@ -274,3 +274,16 @@ const unseen = {
   height: size.unseen,
   overflow: 'hidden',
 } as const;
+
+// A press that threw (a damaged page, a full disk): its message, and Start over beside the retry
+// that any press still sends (03 §14).
+// The message sits outside the button: its accessibilityLabel replaces the children it reads.
+export function Fault(p: { fault: string; startOver: () => void }) {
+  const c = usePalette();
+  return (
+    <View style={{ alignItems: 'center' }}>
+      <Text style={{ ...useType().small, color: c.dim }}>{p.fault}</Text>
+      <Control label={LABEL.startOver} onPress={p.startOver} />
+    </View>
+  );
+}

@@ -98,9 +98,8 @@ export function Control(p: {
   onPress: () => void;
   disabled?: boolean;
   onInk?: true;
-  expanded?: boolean; // a Control that opens a field below it (the NPC page's Whisper)
 }) {
-  const { label, onPress, disabled, onInk, expanded } = p;
+  const { label, onPress, disabled, onInk } = p;
   const c = usePalette();
   const t = useType();
   return (
@@ -108,7 +107,6 @@ export function Control(p: {
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
-      accessibilityState={expanded === undefined ? undefined : { expanded }}
       onPress={() => onPress()} // no press event: the handler takes none
       style={{
         minHeight: size.touch,

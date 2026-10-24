@@ -43,14 +43,6 @@ const send = (b: Book, word: string, how: string) => (
   b.tap(word),
   b.tap(how)
 );
-// Whispers a word through the NPC page's Whisper field, then turns back to the World page.
-const whisper = (b: Book, npc: string, word: string) => (
-  b.tap(`${npc}, open`),
-  b.tap(LABEL.whisper),
-  type(b, word),
-  b.tap(LABEL.leave)
-);
-
 // Breaks: word chips drawn on the page (the removed Word block), the known phrases not offered as
 // chips under the open field, or a chip that sends instead of filling the field.
 test('the open say field lists the known phrases as chips that fill it', () => {
@@ -129,15 +121,6 @@ test('saying ward opens the elder conversation and hides the say icon', () => {
   assert.ok(!b.labels().includes(LABEL.sayToRoom));
 });
 
-// Breaks: a whisper sent as a say (everyone in the room hears), or to the wrong target.
-test('a word whispered to the smith is not heard by the elder', () => {
-  const b = book(speech as never);
-  whisper(b, 'the smith', 'ward');
-  assert.deepEqual(facts(b), {});
-  say(b, 'hello');
-  assert.deepEqual(facts(b), { elder_heard: true });
-});
-
 // Breaks: a shout sent as a say (the watchman next door would not hear it).
 test('shouting help in the square alerts the watchman next door', () => {
   const b = book(speech as never);
@@ -147,16 +130,12 @@ test('shouting help in the square alerts the watchman next door', () => {
 
 // Breaks (pass-1 R5): an accepted speech press with no narration leaving the page silent, echoed
 // twice, or echoed with the wrong verb, word or listener.
-test('a say, whisper or shout with no narration echoes once in ink', () => {
+test('a say or shout with no narration echoes once in ink', () => {
   const b = book(speech as never);
   const echoes = () => b.text().filter((t) => t.startsWith('You '));
   say(b, 'hello');
   send(b, 'help', LABEL.shout);
   assert.deepEqual(echoes(), ['You say "hello".', 'You shout "help".']);
-  b.tap('the smith, open');
-  b.tap(LABEL.whisper);
-  type(b, 'ward');
-  assert.deepEqual(echoes(), ['You whisper "ward" to the smith.'], 'on the smith page');
   assert.equal(spoken('say', undefined), undefined); // a wordless retry falls back to OUTCOME
 });
 

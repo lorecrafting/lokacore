@@ -58,7 +58,7 @@ export const Open: Story = {
     await open(canvas, userEvent);
     await expect(canvas.getByText('Full')).toBeVisible();
     await userEvent.click(canvas.getAllByRole('button', { name: /^Bucket/ })[0]!);
-    await expect(args.press).toHaveBeenCalledWith(args.buttons[0]);
+    await expect(args.press).toHaveBeenCalledWith(args.buttons![0]);
   },
 };
 

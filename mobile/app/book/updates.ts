@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
-import { conversation, pagesAfter, restoredItemPages, type Page } from './model.ts';
+import { conversation, initialPages, pagesAfter, restoredItemPages, type Page } from './model.ts';
+import { restoredNoticePages } from './notices.tsx';
 import type { presenter } from './presenter.ts';
 
 export type Presenter = ReturnType<typeof presenter>;
@@ -31,6 +32,12 @@ export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']
   const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
   return pagesAfter(corpse, screen.view, screen.view);
 }
+export const firstPages = (s: ReturnType<Presenter['screen']>): Page[] => [
+  ...restoredNoticePages(s),
+  ...restoredItemPages(s.view, s.detail),
+  ...initialPages(s.view),
+];
+
 const detailId = (page: Page) =>
   page.kind === 'thing' || page.kind === 'notice'
     ? page.id

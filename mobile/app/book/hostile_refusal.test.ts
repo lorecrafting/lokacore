@@ -30,26 +30,31 @@ test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she tra
   assert.ok(shown.includes('Nell turns her back on you.'), JSON.stringify(shown));
   assert.ok(!shown.some((l) => /invalid state|Buy \d|Nothing to do here/.test(l)));
   assert.ok(!labels.some((l) => l.startsWith('Talk')), JSON.stringify(labels));
+  assert.ok(!labels.includes(LABEL.buyOrSell), JSON.stringify(labels));
   assert.ok(labels.includes(LABEL.leave));
   const [calm, calmLabels] = nell(false);
   assert.ok(!calm.includes('Nell turns her back on you.'));
-  // Shelf reasons come from words.ts reason(), not the raw code ("not owned").
-  assert.ok(
-    calm.includes('a cob of bread: Buy 4p; Sell 1p (you are not holding it).'),
-    JSON.stringify(calm),
-  );
+  assert.ok(calmLabels.includes(LABEL.buyOrSell), JSON.stringify(calmLabels));
   assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
 });
 
-// Breaks: a refused buy shows its raw code ("invalid state"), not a word (Nell's one cob of bread, bought).
-test("a shelf row's buy reason is a word, never the code", () => {
+// Breaks: a buy leaves the shelf page, its line misses the shelf's history, the purse does not
+// redraw, or a refused buy shows its raw code ("not owned"), not a word (Nell's one cob, bought).
+test('a buy keeps the shelf page: its line, the new purse, the row refused in words', () => {
   const b = book(showcase as never);
   b.map();
   b.tap('Go south');
-  b.tap('Nell, open');
-  b.tap('Buy a cob of bread — 4p');
-  const row = 'a cob of bread: Buy 4p (sold out); Sell 1p.';
-  assert.ok(b.text().includes(row), JSON.stringify(b.text()));
+  for (const c of ['Nell, open', LABEL.buyOrSell]) b.tap(c);
+  const purse = (t: string[]) => t.find((l) => /^You have \d+p\.$/.test(l));
+  const before = purse(b.text());
+  b.tap('Cob of bread — 4p');
+  const shown = b.text();
+  assert.equal(shown[0], "Nell, the baker's shelf", JSON.stringify(shown));
+  assert.ok(shown.includes('Cob of bread — 4p: sold out'), JSON.stringify(shown));
+  assert.ok(before && purse(shown) && purse(shown) !== before, JSON.stringify([before, shown]));
+  assert.ok(shown.includes('You buy it.'), 'the buy line joins the shelf history');
+  b.tap(LABEL.leave);
+  assert.equal(b.text()[0], 'Nell, the baker');
 });
 
 // Breaks: a talk that turns its NPC hostile (Bess, insulted) shows the refusal Note over the open

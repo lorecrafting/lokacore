@@ -7,6 +7,7 @@ import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
+import { ShelfPage } from './Shelf.tsx';
 import { NoticeEntries, NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
@@ -98,6 +99,7 @@ function PageBody(p: BodyProps & Talk) {
         visit={page}
       />
     );
+  if (page.kind === 'shelf') return <ShelfPage {...p} id={page.id} />;
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;

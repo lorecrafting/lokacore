@@ -18,15 +18,16 @@ import { radius, size, space, type } from './tokens.ts';
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form: a
  *   Note reading `label: reason` (a service's price and benefit stay inside the label's
  *   parentheses), or the label alone with no reason (book-ui.md, Notice board details). Never a
- *   disabled card. With `onPress` and `expanded` it sends nothing: a Pick list's option. A row may
- *   show its own label, accessible name and quiet note in place of the Button's label.
+ *   disabled card. With `onPress` it sends nothing: a Pick list's option (with `expanded`) or a
+ *   card that opens a child page (the NPC page's Buy or sell). A row may show its own label,
+ *   accessible name and quiet note in place of the Button's label.
  * - States: available; unavailable.
  * - Story: ActionCard.stories.tsx
  */
 export function ActionCard(
   p: (
     | { b: Button; press: (b: Button) => void; label?: string; name?: string; note?: string }
-    | { label: string; onPress: () => void; expanded: boolean }
+    | { label: string; onPress: () => void; expanded?: boolean }
     | { label: string; reason?: string }
   ) & { ref?: Ref<View> },
 ) {
@@ -40,7 +41,7 @@ export function ActionCard(
       ref={p.ref}
       accessibilityRole="button"
       accessibilityLabel={('b' in p && p.name) || label}
-      aria-expanded={'expanded' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
+      aria-expanded={'onPress' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
       onPress={'b' in p ? () => p.press(p.b) : p.onPress}
       style={{
         backgroundColor: c.card,
@@ -99,7 +100,8 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
 /**
  * A page's Pick lists: per option, an Action card that opens its rows in the page's flow
  * (book-ui.md, Pick a second thing; BOOK-UI-COMPONENTS.md, Pick list).
- * - Use: a thing's or a person's page, after its offered actions; rows from pick.ts only.
+ * - Use: a thing's or a person's page among its offered actions, rows from pick.ts; a shelf
+ *   page's Sell…, rows from its shelf.
  * - Rules: one list open at a time, closed on another page; opening focuses the first row, and
  *   the option or Escape closes it with focus back on the option. A row press sends its pair and
  *   closes the list, unless an action is pending (nothing sends then, and the list stays); when
@@ -111,7 +113,9 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
 export function PickLists(p: {
   page: string;
   view: GameView;
-  buttons: Button[];
+  buttons?: Button[];
+  /** prebuilt lists (the shelf's Sell…), drawn in place of the buttons' pairs */
+  lists?: Pick[];
   text: (key: string) => string;
   press: (b: Button) => void;
   pending?: boolean;
@@ -122,7 +126,7 @@ export function PickLists(p: {
   const [shown, setShown] = p.state ?? own;
   const open = shown?.page === p.page ? shown.label : undefined;
   const option = useRef<View>(null);
-  const all = picks(p.view, p.buttons, p.page, p.text);
+  const all = p.lists ?? picks(p.view, p.buttons ?? [], p.page, p.text);
   const { first, sent } = useFocus(open, p.view, all);
   const close = () => {
     setShown(undefined);

@@ -74,3 +74,42 @@ export function corpseButtons(v: GameView, text: Say): Press[] {
     place: true,
   }));
 }
+
+// A claim's or cancel's commission key; another service has none.
+const follows = (s: Offer) =>
+  s.benefit.kind === 'claim' || s.benefit.kind === 'cancel' ? s.benefit.service.key : undefined;
+
+/**
+ * An NPC page's services (owner pick mvlrlvappy4w): while an order is open (its claim or cancel
+ * available, or refused for a reason other than service.no_order) its commission hides and its
+ * claim and cancel are `order`, drawn under Your order; with no order open they are hidden.
+ */
+export function serviceOrder(offers: readonly Offer[]) {
+  const open = new Set(
+    offers
+      .filter((s) => s.action.available || s.action.reason?.message?.key !== 'service.no_order')
+      .map(follows)
+      .filter(Boolean),
+  );
+  return {
+    plain: offers.filter((s) => !follows(s) && !open.has(s.service.key)),
+    order: offers.filter((s) => open.has(follows(s))),
+  };
+}
+
+// The talk offers' default labels (kernel dialogue/selection.ts; hello_sampler's action).
+// ponytail: GameView drops the talk command, so an authored-label talk stays its own card;
+// project `command: 'talk'` (view/action_lists.ts commanded) if that matters.
+const TALK = ['action.talk', 'actions.talk'];
+
+/** The NPC page's one Talk card, the first available talk offer, and the person's other buttons. */
+export function talkOf(
+  npc: { actions: readonly { action_key: string; label: string }[] },
+  buttons: Button[],
+) {
+  const keys = new Set(npc.actions.filter((a) => TALK.includes(a.label)).map((a) => a.action_key));
+  return {
+    talk: buttons.find((b) => keys.has(b.action_key)),
+    rest: buttons.filter((b) => !keys.has(b.action_key)),
+  };
+}

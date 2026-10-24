@@ -1,4 +1,4 @@
-// The one-word field: the status line's say field and the NPC page's Whisper.
+// The one-word field: the status line's say field.
 import { useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { Chip } from './Chip.tsx';
@@ -44,8 +44,7 @@ type SayProps = { pending: boolean; sends: Send[]; words?: readonly string[]; cl
  * to 32 characters, no autocorrect or autocapitalize), then one Control per send, then a Chip
  * per known word.
  * - Use: the status line's say field (Say, Shout, Cast, each only while offered; the known
- *   phrases and castable spell words) and the NPC page's Whisper (one Whisper button aimed at
- *   that person; the known phrases).
+ *   phrases and castable spell words). The NPC page has no Whisper until loka-x6t.115.
  * - Rules: a press sends the typed word with that button's action and closes; Enter sends the
  *   first. A word chip only fills the field (named by its word), never sends. A word that is not
  *   1 to 32 letters is not sent, keeps the field open and shows the Note "One word, letters
