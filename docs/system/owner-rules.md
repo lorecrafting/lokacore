@@ -8,6 +8,7 @@ and not repeated here.
 
 ## Product and scope
 
+- The prologue teaches every basic (Tending, Making, Guarding, Words) through quests of gifts or labour, no coin; houses and guilds open at the landing; Skills stay on Character, one collapsed line per profession, until the landing ([record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)).
 - Chapter 1 proof order: E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 - Book design foundation: the Chapter 1 mock's base look with only the page curl (one Skia shader for web and phone) and paper sound; day and night follow in-game time (no override for now) ([record](../decisions/owner-decision-design-foundation-2026-10-07.md)).
@@ -50,7 +51,7 @@ and not repeated here.
 - One development lane, the mechanics toolbox; the Storybook polish lane is paused until the owner reactivates it ([record](../decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
 - Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the parked polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
 - In Homestead the skill path replaces NPC cooking and building; a paid NPC reaches only a beginner tier, better results need the player's own crafting, and Star Wars Galaxies style skill trees are approved ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
-- Homestead professions: a failed craft loses its inputs; a skill box costs a trainer coin fee, XP is never spent, the novice box is free; several hidden elite professions are possible ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
+- Homestead professions: a failed craft loses its inputs; a skill box costs a trainer coin fee (after the prologue: [prologue record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)), XP is never spent, the novice box is free; several hidden elite professions are possible ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Product order: no Chapter 1 yet; finish all showcases, then UI polish, then worldbuilding, then the official Chapters 1-3; new content uses generic names ([record](../decisions/owner-decision-product-order-2026-10-15.md)).
 - Showcase comes before M14, UI polish after M15; settlements are tabled (Homestead first); chapter carry-over and the tabled writing, language, race and pet rows are deferred ([order](../decisions/owner-decision-showcase-before-m14-2026-10-15.md), [settlements](../decisions/owner-decision-settle-tabled-2026-10-15.md), [deferred](../decisions/owner-decision-carry-over-deferred-2026-10-15.md)).
 - Hidden elite professions are secret: a hidden skill shows nothing anywhere until the player qualifies ([record](../decisions/owner-decision-hidden-elites-secret-2026-10-15.md)).
@@ -109,6 +110,7 @@ and not repeated here.
 
 ## Architecture and engine
 
+- No custom authoring language or script interpreter: cartridge source stays JSON with compile-time shortcuts (`extends`, behaviours, zones, `signal`, `wait`) lowered to today's cartridge, YAML later; an AI-assisted visual builder sits on top ([record](../decisions/owner-decision-authoring-builder-2026-10-23.md)).
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
   [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
