@@ -119,7 +119,6 @@ export function ThingPage(p: {
       <LogLines lines={p.log} />
       {p.holder && <Note>{holding(cap(p.text(p.holder)))}</Note>}
       {refusals}
-      {!refusals && !p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
       <Cards>
         {p.actions
           .filter((b) => !b.pick)

@@ -51,9 +51,9 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
 
 /**
  * A dim body line that is not pressable and carries no action.
- * - Use: a sense cue, every empty state ("Nothing to do here."), a page's "save not
- *   confirmed", a priced page's balance, a held item's holder; never a Text the page styles.
- * - Rules: an empty-state Note never shares a page with an unavailable action line.
+ * - Use: a sense cue, a page's "save not confirmed", a priced page's balance, a held item's
+ *   holder; never a Text the page styles. A detail page with nothing to do draws no Note
+ *   (owner pick mvlyb5x2m9i3).
  * - Story: Note.stories.tsx
  */
 export function Note({ children }: { children: string }) {
