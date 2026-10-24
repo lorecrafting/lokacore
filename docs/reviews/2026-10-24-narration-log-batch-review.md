@@ -3,7 +3,7 @@
 - Branch `toolbox/batch-narration-log`, reviewed head `89959b620e62a1f991969c81a1b25ab11fc95a33` (base `b27893ba0`, 23 commits).
 - Governing: [docs/briefs/narration-log/README.md](../briefs/narration-log/README.md) (appended rulings), [book-ui.md Line placement](../system/book-ui.md), [interaction-patterns.md "Every line logs; some are quiet"](../design/interaction-patterns.md), [IMPORT.md 2026-10-24 amendment](../spec/IMPORT.md), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md).
 - Reviewer: anthropic/claude-opus-5-5, independent, authored none of the work.
-- Verdict: **CHANGES REQUIRED** (two blockers).
+- Verdict: **APPROVE WITH NOTES** at `14a795f20` (first pass at `89959b620`: CHANGES REQUIRED, two blockers now fixed).
 
 ## Must be true (written before reading the diff)
 
@@ -59,3 +59,23 @@ Conformance fixtures: `lantern-traces.json` and `adverse-cases.json` equal `orig
 `/code-review medium` result is reported in the PR body, with dispositions.
 
 Hosted CI at the reviewed head: graph-diff green; ci and book-e2e were still running at review time (the PM watches).
+
+## Fix re-check at `14a795f207076e7f670268f5118c6b6ff3dcd28a` (commits `e07c88412`, `14a795f20`)
+
+Verdict: **APPROVE WITH NOTES**. Both blockers are closed.
+
+- Finding 1 closed. `commerce-save.ts` `said` accepts exactly the main-era form `[{ key: shop[outcome] }]`, the same check main ran (`same(d.narration, [{ key: shop.bought|sold }])`). Otherwise it requires one line whose key is `commerce.bought|sold` and whose participants are exactly `{ actor: body }`. The old-key acceptance is no wider than main's. A buy cannot pass with the sold key, and another shop's key does not pass. `two_shops.test.ts:168` reopens an old-key receipt and a stale short; `:183` keeps the forged key and actor cases corrupt.
+- Should-fix (stale short) closed: the short is no longer rebuilt.
+- Finding 2 closed. `live_region.test.ts:83` buys two candles with the same short on the chandler page and checks both are heard as separate batches.
+- Finding 3 closed: `shop` is dropped from the `exchange` result (`commerce/shared.ts:94`).
+- Mutants (`bin/mutate.sh`, narrow, baseline green):
+
+| Mutant | Result |
+|---|---|
+| `presenter.ts:220` drop `...(s.merged ?? []),` | red-narrow (`live_region.test.ts`) |
+| `commerce-save.ts` remove the old-key branch | red-narrow (`two_shops.test.ts`) |
+| `commerce-save.ts` ignore the participants | red-narrow |
+| `commerce-save.ts` old-key branch → any one line | red-narrow |
+
+- Nit `commerce-save.ts:132`: the new-form line's `bindings` are no longer checked. A forged item binding shows wrong text in the log. Narration is outside the hash and the item id is checked by the moves, so this is display only.
+- Nit `commerce-save.ts:1`: the size allowance was raised to 308 (a second size deviation in this batch, after `main.ts` 305).
