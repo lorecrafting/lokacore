@@ -254,16 +254,10 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
 
 // Breaks: the loader admits a storylet target again (FD3 retired by the owner, 2026-10-23).
 test('loader: a storylet target is refused', () => {
-  const recipe = `.cartridge.recipes["${P}recipe/carve_spoon"]`;
-  assert.deepEqual(
-    loadEdited((c) => {
-      const r = c.recipes[`${P}recipe/carve_spoon`];
-      delete r.check;
-      delete r.craft;
-      r.target = { kind: 'storylet' };
-    }),
-    ['SCHEMA_VIOLATION', `${recipe}.target.kind`],
-  );
+  const key = `${P}recipe/carve_spoon`;
+  const edit = (c: any) => (c.recipes[key].target = { kind: 'storylet' });
+  const at = `.cartridge.recipes["${key}"].target.kind`;
+  assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
 });
 
 // Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill, or an
