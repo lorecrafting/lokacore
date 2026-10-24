@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-24 [Owner decision: each room speaks from its own point of view](owner-decision-room-point-of-view-2026-10-24.md)
 - 2026-10-23 [Owner decision: room page anatomy](owner-decision-room-page-anatomy-2026-10-23.md)
 - 2026-10-23 [Owner decision: the prologue teaches every basic through quests; houses and guilds at the landing](owner-decision-prologue-abilities-2026-10-23.md)
 - 2026-10-23 [Owner decision: no custom authoring language; JSON with shortcuts, then an AI-assisted builder](owner-decision-authoring-builder-2026-10-23.md)
