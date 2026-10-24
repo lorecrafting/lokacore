@@ -1,4 +1,3 @@
-// size: allow 510, the district walk shares one World threaded through its steps (loka-y6yg.50)
 // The showcase traps district (Sappers' Stair) walked step by step (docs/showcase/traps-district.md,
 // guided loop, steps 1 to 9; slices T1 to T3). Steps 1 to 6 and 8 continue one world; steps 7 and 9
 // branch from step 1's world and the sandbox starts fresh. Every attack is chance 100. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.

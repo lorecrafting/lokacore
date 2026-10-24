@@ -208,7 +208,9 @@ const shown = (key: string, label: string, available = true) => ({
 // cards come first, then the World list.
 const places = (w: World) => {
   const v = gameView(w);
-  return [...(v.notices ?? []).flatMap((n) => n.actions), ...v.actions].map((a) => a.action_key);
+  return [...(v.notices ?? []).flatMap((n) => n.actions ?? []), ...v.actions].map(
+    (a) => a.action_key,
+  );
 };
 const bellPage = (w: World) => plain(gameView(w).notices?.find((n) => n.key === 'bell')?.actions);
 
