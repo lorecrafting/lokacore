@@ -242,11 +242,11 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     .filter((l) => l && !l.startsWith('#'));
   assert.ok(pinned.length <= 12, 'sim_narration_baseline.txt grew past its cap of 12');
   assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
-  // SILENT.close is justified only by lids: this (the only unnarrated caller) cartridge declares them.
-  const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.barriers ?? {}).some(
-    (b) => b.initial === 'closed',
+  // SILENT.close is justified only by item lids (a door's close is narrated): the showcase has them.
+  const lidded = Object.values(cartridgeFile(ROOT + SHOWCASE).cartridge.items ?? {}).some(
+    (i) => i.barrier,
   );
-  assert.ok(lidded || !silent.has('close'), 'close is silent in a cartridge with no lids');
+  assert.ok(lidded || !silent.has('close'), 'close is silent in a cartridge with no item lids');
   assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
   for (const seed of PINNED)
