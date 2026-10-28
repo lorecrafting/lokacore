@@ -679,6 +679,8 @@ git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 # Two clones of a bare origin, the post-merge import hook on; a row edited locally, then on main.
 # Break: the step keeps one side's edit (the pull's hook import, or br sync --force/--force-db) instead of
 # refusing with the local edit and the export restored. Skipped where br is not installed (hosted lint job).
+# `VAR=x capped ...` leaks VAR in sh (capped is a function): drop the stub dirs from PATH and the stubs' BR_* here.
+P0=$PATH; PATH=$(printf %s "$PATH" | tr : '\n' | grep -v "^$tmp/" | paste -sd: -); unset BR_DB BR_LOG
 if command -v br > /dev/null; then
   B=$tmp/bs; mkdir "$B"; git init -q --bare -b main "$B/o.git"; git clone -q "$B/o.git" "$B/A" 2> /dev/null; cd "$B/A"
   br init --prefix t > /dev/null 2>&1; mkdir -p bin/lib .githooks; cp "$bin/../.githooks/post-merge" .githooks/
@@ -694,6 +696,7 @@ if command -v br > /dev/null; then
     || { bad "beads_sync same-row: exit $rc, want 1 with the local edit kept"; cat "$B/out"; }
   cd "$tmp"
 fi
+PATH=$P0
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
 # A main clone of a bare origin; stub br's merge replaces row a of the export with $BC_ROW. Break: a machine path,
