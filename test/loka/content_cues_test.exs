@@ -4,11 +4,10 @@ defmodule Loka.ContentCuesTest do
   @dir "cartridges/senses_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row G6): the compiler accepts a cue or a lone cue_perceived leaf below
-  # kernel_api 1.48, a cue (a room detail's included) without sense_cue@1, or a cue text key missing
+  # Breaks (toolbox row G6): the compiler accepts a cue (a room detail's included) without sense_cue@1, or a cue text key missing
   # from the catalog; or it fails to expand a short reference in a cue's condition (the sampler's
   # stew and rattle cues use one).
-  test "cues need 1.48, sense_cue@1 and catalog text" do
+  test "cues need sense_cue@1 and catalog text" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 

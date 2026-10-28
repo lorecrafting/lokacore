@@ -3,8 +3,7 @@ defmodule Loka.ContentNpcAttributesTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/npc_attr_sampler")}
 
   # Breaks: an opposed check naming no NPC, a guard without the checked attribute or a template
-  # NPC, or an NPC attribute list naming nothing or one attribute twice, or either G3 field under
-  # kernel_api 1.46, compiles (the compiler twin of the TypeScript loader's row G3 checks).
+  # NPC, or an NPC attribute list naming nothing or one attribute twice, compiles (the compiler twin of the TypeScript loader's row G3 checks).
   test "row G3 NPC attributes and opposed NPCs keep their boundaries", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     north = "actions/shove_north.json"

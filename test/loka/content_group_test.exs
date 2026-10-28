@@ -3,9 +3,9 @@ defmodule Loka.ContentGroupTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/group_sampler")}
 
   # Breaks (toolbox row G8; twin of the loader rows in kernel/ts/test/group.test.ts):
-  # world.group compiles under API 1.69, names an unknown fact, a fact that is not a bool pair
+  # world.group names an unknown fact, a fact that is not a bool pair
   # fact at the player, or lacks the ally narration beside world.combat.
-  test "the group keeps its API floor, a bool pair member fact and the ally narration", %{
+  test "the group keeps a bool pair member fact and the ally narration", %{
     dir: dir
   } do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -36,9 +36,9 @@ defmodule Loka.ContentGroupTest do
   end
 
   # Breaks (toolbox row 22a; twin of the loader rows in kernel/ts/test/hireling.test.ts):
-  # stay or fight compiles under API 1.72, stay names an unknown fact, or fight a fact that is
+  # stay names an unknown fact, or fight a fact that is
   # not a pair fact.
-  test "the hireling orders keep API 1.73 and bool pair facts" do
+  test "the hireling orders keep bool pair facts" do
     dir = Loka.ContentSource.copy("cartridges/hireling_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
@@ -54,9 +54,8 @@ defmodule Loka.ContentGroupTest do
   end
 
   # Breaks (toolbox row 22b; twin of the loader rows in kernel/ts/test/hireling.test.ts): the
-  # wage compiles with an unknown, gaining or regenerating resource or under API 1.74, or a skill-less
-  # hire fee compiles under API 1.74.
-  test "the wage keeps API 1.75 and a conserved resource; a skill-less fee 1.75" do
+  # wage compiles with an unknown, gaining or regenerating resource.
+  test "the wage keeps a conserved resource" do
     dir = Loka.ContentSource.copy("cartridges/hireling_sampler")
     at = "cartridge.world.group.wage.resource"
     resource = ["world", "group", "wage", "resource"]

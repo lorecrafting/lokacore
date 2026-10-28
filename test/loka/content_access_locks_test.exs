@@ -8,11 +8,10 @@ defmodule Loka.ContentAccessLocksTest do
     "key" => "ada"
   }
 
-  # Breaks (toolbox row G7): the compiler accepts a lock below kernel_api 1.78 (also an exit's
-  # alone) or a put lock on an item that is no container; a lock root is no condition (its
+  # Breaks (toolbox row G7): the compiler accepts a put lock on an item that is no container; a lock root is no condition (its
   # references go unchecked) or its short references stay unexpanded (the loader would reject
   # the artifact).
-  test "access locks need 1.78 and a container for put; their roots are checked conditions" do
+  test "access locks need a container for put; their roots are checked conditions" do
     dir = Loka.ContentSource.copy("cartridges/access_sampler")
     lock = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
     bad = %{"op" => "fact_compare", "fact" => "nope", "npc" => "ada", "equals" => "guest"}

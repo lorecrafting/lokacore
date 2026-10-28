@@ -4,10 +4,10 @@ defmodule Loka.ContentHiddenPassageTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/hidden_sampler")}
 
-  # Breaks: a hidden_until face under API 1.44, naming an unknown or mistyped fact, or carrying a
+  # Breaks: a hidden_until face naming an unknown or mistyped fact, or carrying a
   # barrier compiles, or its short fact reference is not expanded (toolbox row 11; twin of the
   # loader rows in kernel/ts/test/hidden_passage.test.ts).
-  test "a hidden face keeps its API floor, fact reference and no barrier", %{dir: dir} do
+  test "a hidden face keeps its fact reference and no barrier", %{dir: dir} do
     assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
 
     assert %{"kind" => "fact", "key" => "panel_found"} =

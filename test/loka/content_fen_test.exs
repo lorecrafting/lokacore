@@ -2,9 +2,9 @@ defmodule Loka.ContentFenTest do
   use ExUnit.Case, async: true
 
   # Breaks (toolbox row W12; twin of the loader test in kernel/ts/test/fen.test.ts): the plan gate's
-  # population_count compiles under API 1.85 or names no plan, the gate takes an actor leaf, or a
+  # population_count names no plan, the gate takes an actor leaf, or a
   # floor exceeds day_target.
-  test "a plan gate keeps API 1.86, resolves its plan, reads no actor; floor at most day_target" do
+  test "a plan gate resolves its plan, reads no actor; floor at most day_target" do
     dir = Loka.ContentSource.copy("cartridges/fen_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     deer = "populations/deer.json"

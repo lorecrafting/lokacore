@@ -3,7 +3,7 @@ defmodule Loka.ContentPropertyTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/property_sampler")}
 
   # Breaks (toolbox row 25; twin of the loader rows in kernel/ts/test/property.test.ts): a deposit
-  # or withdraw compiles under API 1.82, with an account that is not a bounded int player fact
+  # or withdraw compiles with an account that is not a bounded int player fact
   # from 0 or is no fact, a vault that is no NPC or holds no pennies, branches on one account with
   # different vaults or currencies, an entitlement or an authored dialogue write on the account, an
   # account or currency pool that cannot hold `amount`, an account another engine writer owns

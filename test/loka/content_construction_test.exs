@@ -16,9 +16,9 @@ defmodule Loka.ContentConstructionTest do
 
   # Breaks (Built rooms S1): the compiler accepts a site direction the room has an exit in, a site
   # blueprint the cartridge does not define, a blueprint text key, enter-lock fact or (S4)
-  # weathering or ruin status it does not define, or construction content below kernel_api 1.99 (the TS
+  # weathering or ruin status it does not define (the TS
   # loader refuses them too; construction.test.ts).
-  test "a site names no exit direction and only defined blueprints; construction needs 1.99" do
+  test "a site names no exit direction and only defined blueprints" do
     dir = Loka.ContentSource.copy(@dir)
     exit = {"rooms/lane.json", &put_in(&1, ["exits"], %{"north" => %{"to" => "lane"}})}
     missing = lane(&put_in(&1, ["blueprints"], ["hut", "shed"]))

@@ -3,7 +3,7 @@ defmodule Loka.ContentRangedTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ranged_sampler")}
 
   # Breaks (toolbox row 17; twin of the loader rows in kernel/ts/test/ranged.test.ts): a ranged
-  # weapon compiles under API 1.66, without shot_hit or shot_miss, or with an unknown ammo pool.
+  # weapon compiles without shot_hit or shot_miss, or with an unknown ammo pool.
   test "ranged weapons keep their narration and a known pool", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     narration = ["world", "combat", "narration"]

@@ -378,8 +378,8 @@ defmodule Loka.ContentFerryTest do
              %{"profile" => "real_elapsed", "rate" => 50}
   end
 
-  # Breaks: elapsed mechanics can be claimed by an API 1.0 release or without a schedule owner.
-  test "elapsed policy requires API 1.1 and schedule ownership", %{dir: dir} do
+  # Breaks: elapsed mechanics can be claimed without a schedule owner.
+  test "elapsed policy requires schedule ownership", %{dir: dir} do
     files = elapsed_files()
 
     missing =

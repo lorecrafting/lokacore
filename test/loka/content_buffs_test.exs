@@ -2,8 +2,7 @@ defmodule Loka.ContentBuffsTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/buffs_sampler")}
 
-  # Breaks: a status.apply naming an unknown NPC, a spawn template or an item too, or an npc step
-  # under kernel_api 1.46, compiles (the compiler twin of the TypeScript loader's row 42 checks);
+  # Breaks: a status.apply naming an unknown NPC, a spawn template or an item too, compiles (the compiler twin of the TypeScript loader's row 42 checks);
   # or the short `npc` reference is not expanded (the sampler fails to compile).
   test "row 42 status.apply npc keeps its boundaries", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])

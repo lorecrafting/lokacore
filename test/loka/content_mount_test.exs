@@ -15,7 +15,7 @@ defmodule Loka.ContentMountTest do
   end
 
   # Breaks (row 43b): the compiler admits a mount without world.mount or on a spawn template, a
-  # riding fact that is no bool pair fact or names nothing, or world.mount below kernel_api 1.108.
+  # riding fact that is no bool pair fact or names nothing.
   test "mount refusals match the TS loader" do
     dir = Loka.ContentSource.copy(@dir)
     horse = "npcs/horse.json"

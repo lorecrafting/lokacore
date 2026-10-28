@@ -4,10 +4,10 @@ defmodule Loka.ContentClimbTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/climb_sampler")}
 
-  # Breaks: a climb face under API 1.44 or naming an unknown item or fell text compiles, or its
+  # Breaks: a climb face naming an unknown item or fell text compiles, or its
   # short item reference is not expanded (toolbox row 30; twin of the loader rows in
   # kernel/ts/test/climb.test.ts; hp is a default pool in a source, so no pool row).
-  test "a climb face keeps its API floor and its item and text references", %{dir: dir} do
+  test "a climb face keeps its item and text references", %{dir: dir} do
     assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
 
     assert %{"kind" => "item", "key" => "rope"} =

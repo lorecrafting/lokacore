@@ -1,9 +1,9 @@
 defmodule Loka.ContentDecayTest do
   use ExUnit.Case, async: true
 
-  # Breaks (toolbox row 41; twin of the loader test in kernel/ts/test/decay.test.ts): item.move
-  # compiles under API 1.76, or its room is never resolved.
-  test "item.move keeps API 1.77 and a resolved room" do
+  # Breaks (toolbox row 41; twin of the loader test in kernel/ts/test/decay.test.ts): item.move's
+  # room is never resolved.
+  test "item.move keeps a resolved room" do
     dir = Loka.ContentSource.copy("cartridges/decay_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     room = &put_in(&1, ["apply", Access.at(0), "room"], "nowhere")

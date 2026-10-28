@@ -310,7 +310,7 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: name words outside the text catalog compile, the NPC's words go unchecked, or sound
-  # ones are dropped from the artifact (loka-6qi; the 1.118 floor is a loader_floors.json case).
+  # ones are dropped from the artifact (loka-6qi).
   test "name words keep their catalog keys", %{dir: dir} do
     api = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.118")
     lantern = %{"bare" => "item.lantern.short", "article" => "a", "plural" => "item.lantern.room"}

@@ -116,7 +116,7 @@ defmodule Loka.ContentDerivedTest do
   end
 
   # Breaks: equip words without a slot or outside the text catalog compile, or sound ones are
-  # dropped from the artifact (row 6a; the API floor is a loader_floors.json case).
+  # dropped from the artifact (row 6a).
   test "equip words keep their slot and catalog keys" do
     dir = Loka.ContentSource.copy("cartridges/wear_sampler")
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.116")}

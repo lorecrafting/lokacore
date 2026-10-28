@@ -11,7 +11,7 @@ defmodule Loka.ContentPrioryTest do
     assert Loka.Content.compile(@dir) == {:ok, expected, []}
   end
 
-  # Break: item-readable short refs, its text or API floor bypass the compiler boundary.
+  # Break: item-readable short refs, or its text bypass the compiler boundary.
   test "book authoring rejects malformed metadata and undeclared topic references" do
     dir = Loka.ContentSource.copy(@dir)
     fact = %{"cartridge_id" => "codex_sampler", "cartridge_version" => "0.0.1"}

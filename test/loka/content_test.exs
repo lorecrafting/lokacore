@@ -353,6 +353,14 @@ defmodule Loka.ContentTest do
                )
     end
 
+    # Break: a feature refuses content by kernel_api.at_least again (C1 removed every floor); the
+    # showcase declares nearly every feature.
+    test "the toolbox showcase compiles at kernel_api 1.0" do
+      dir = Loka.ContentSource.copy("cartridges/toolbox_showcase")
+      at_1_0 = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.0")
+      assert {:ok, _, []} = Loka.ContentSource.compile(dir, [{"cartridge.json", at_1_0}])
+    end
+
     test "UNDECLARED_CAPABILITY: an action's command and a policy op", %{tmp_dir: tmp} do
       caps = %{"fact" => 1, "policy" => 1}
 

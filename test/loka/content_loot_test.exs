@@ -2,10 +2,10 @@ defmodule Loka.ContentLootTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/loot_sampler")}
 
-  # Breaks: drops under API 1.42, without world.death or hp, with hp gain, on a spawn template, naming an item the NPC does not hold, a
+  # Breaks: drops without world.death or hp, with hp gain, on a spawn template, naming an item the NPC does not hold, a
   # repeated item or an unknown item compile (toolbox row 8; twin of the loader rows in
   # kernel/ts/test/loot.test.ts).
-  test "drops keep their API floor, death settings, held distinct items and references", %{
+  test "drops keep their death settings, held distinct items and references", %{
     dir: dir
   } do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])

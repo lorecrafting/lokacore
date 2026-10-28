@@ -2,10 +2,10 @@ defmodule Loka.ContentIdentityTest do
   use ExUnit.Case, async: true
 
   # Breaks (rows W15 and FD9; twin of the loader case in kernel/ts/test/identity.test.ts):
-  # world.identity under API 1.97 (also with no variant at all), a name variant naming an
+  # a name variant naming an
   # undeclared status or an unknown text key, a name variant without description_variant@1, a
   # time_since name variant on a non-clock fact, a fact_compare name variant on subject target, or an unknown name text key compiles.
-  test "world.identity keeps its floor and references" do
+  test "world.identity keeps its references" do
     dir = Loka.ContentSource.copy("cartridges/identity_sampler")
     id = &{"cartridge.json", fn c -> put_in(c, ["world", "identity" | &1], &2) end}
 

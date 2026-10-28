@@ -3,8 +3,8 @@ defmodule Loka.ContentHarvestToolTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/harvest_sampler")}
 
   # Break (toolbox row 19; twin of the loader row in kernel/ts/test/harvest_tool.test.ts): a
-  # harvest tool gate compiles under API 1.51 or without tags@1.
-  test "a harvest tool needs API 1.52 and tags@1", %{dir: dir} do
+  # harvest tool gate compiles without tags@1.
+  test "a harvest tool needs tags@1", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
     untagged = &Map.delete(&1, "tags")

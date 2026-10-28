@@ -3,7 +3,7 @@ defmodule Loka.ContentPricesTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/prices_sampler")}
 
   # Breaks (toolbox row W11; twin of the loader rows in kernel/ts/test/prices.test.ts): a stock
-  # table compiles under API 1.81, with a price per count that does not match its set, a set not
+  # table compiles with a price per count that does not match its set, a set not
   # led by the offer's item, a flat buy other than the first price, a repeated or unknown item, or a plain offer's item.
   test "a stock table keeps one price per item, the offer's item first", %{
     dir: dir
