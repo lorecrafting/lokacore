@@ -95,7 +95,7 @@ test('retained item results appear chronologically between description and optio
   assert.equal(book.screen().returnWorld, false);
   // A move starts the room's log; the item page's own lines land there too (Line placement).
   assert.deepEqual(book.screen().log, [
-    'You go up.',
+    'You arrive from below.',
     'You take a wool cloak.',
     'You put on a wool cloak.',
     'You take off a wool cloak.',

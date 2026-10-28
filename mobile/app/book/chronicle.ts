@@ -9,7 +9,7 @@ export type ChronicleDay = { day: number; lines: RecapLine[]; milestones: Set<st
 
 /** Days in entry order (ascending), each shown line once with its count; a line is a milestone
  * when any receipt that showed it on that day reached a story point. The engine's routine lines
- * (take, drop, give, put, doors, wear, position, move, buy, sell: LINE_WORDS) and the talk
+ * (take, drop, give, put, doors, wear, position, move, flight, buy, sell: LINE_WORDS) and the talk
  * prompt (`dialogue.<npc>.prompt`) stay out (PM ruling,
  * loka-kgd.185). */
 export function days(

@@ -37,6 +37,7 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
+  arrived,
   cueLines,
   closedLog,
   closing,
@@ -104,7 +105,8 @@ function narrate(
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  if (!last.read) world(s, away, [...lines, ...combat]); // Read text: its page only
+  // A room change's fight lines stay on the Combat page; the room log opens at the arrival.
+  if (!last.read) world(s, away, narrationLines(arrived(last), now, text, false, was).flat()); // Read text: its page only
   // A quiet receipt settled in the background is the room log's only, as when restored.
   if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }

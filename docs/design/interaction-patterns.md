@@ -300,7 +300,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Why: the log is the room's record, not the player's diary.
 - Do: "You arrive from the south." Don't: "You go north." in the new room.
 - Source: [Line placement](../system/book-ui.md#line-placement), [record](../decisions/owner-decision-room-point-of-view-2026-10-24.md).
-- Enforcement: none yet (not built: Beads `loka-glj8`).
+- Enforcement: `kernel/ts/test/barriers.test.ts` (the arrival direction), `kernel/ts/test/hidden_passage.test.ts` (a hidden way back gives "You arrive."), `mobile/authority/local-story/narration_routing.test.ts` and `mobile/app/book/combat_flow.test.ts` (flight and death lines stay with the fight). Other actors' lines: not built (Beads `loka-glj8` follow-up).
 
 ### Ellipsis
 

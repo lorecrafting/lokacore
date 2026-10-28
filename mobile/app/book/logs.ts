@@ -109,7 +109,7 @@ export function logLines(s: Logs, lines: DetailLine[], page?: DetailLine[], quie
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
-  const [narrated, combat] = narrationLines(last, view, text, true);
+  const [narrated, combat] = narrationLines(last && arrived(last), view, text, true);
   const s: Logs = {
     log: [],
     combatLog: [],
@@ -231,3 +231,9 @@ export function closedLog(s: Logs, accepted: boolean) {
   if (accepted) s.details.get(s.left)?.splice(0);
   s.left = undefined;
 }
+
+// A flight's or a death's lines stay with the fight; the room reached opens at its arrival line
+// (book-ui.md Line placement, loka-glj8), cut by record index before any line is worded.
+// No line from the arrival on belongs to the fight left behind.
+export const arrived = (last: NarrationRecord): NarrationRecord =>
+  last.arrival ? { ...last, lines: last.lines.slice(last.arrival), combat_lines: undefined } : last;

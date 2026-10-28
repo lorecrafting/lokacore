@@ -247,12 +247,6 @@ test('a status-skipped blow reads "<Name> is too <status> to do anything."', () 
     assert.ok(said.includes(line), `${line} in ${JSON.stringify(said)}`);
 });
 
-// Breaks: a flight shows its engine key combat.fled (or drops the way) instead of one plain line.
-test('a flight reads "You flee <direction>."', () => {
-  const line = lineWords({ key: 'combat.fled', bindings: { direction: 'west' } }, (k) => k, view());
-  assert.equal(line, 'You flee west.');
-});
-
 // Breaks: an engine item line worded only in the first person (an NPC's take reads "You pick
 // up"), or the viewer's own take named as a third person (the shared table, loka-kgd.185).
 test('item.taken reads "You take" for the viewer and "<Name> takes" for a named NPC', () => {
@@ -286,8 +280,19 @@ test('door, wear, position and move lines read in the first and the third person
       'sword',
     ],
     ['position.sat', {}, 'You sit down.', 'npc.rat sits down.'],
-    ['movement.moved', { direction: 'north' }, 'You go north.', 'npc.rat goes north.'],
-    ['movement.moved', {}, 'movement.moved', 'movement.moved'], // a missing binding: the key, not "undefined"
+    // The room reached speaks (loka-glj8): its exit back, below for a way down, bare with none.
+    [
+      'movement.moved',
+      { from: 'south' },
+      'You arrive from the south.',
+      'npc.rat arrives from the south.',
+    ],
+    ['movement.moved', { from: 'down' }, 'You arrive from below.', 'npc.rat arrives from below.'],
+    ['movement.moved', { direction: 'north' }, 'You arrive.', 'npc.rat arrives.'], // an old receipt
+    ['combat.fled', { direction: 'north' }, 'You flee north.', 'npc.rat flees north.'],
+    ['combat.ran_in', { from: 'up' }, 'You run in from above.', 'npc.rat runs in from above.'],
+    ['combat.ran_in', {}, 'You run in.', 'npc.rat runs in.'],
+    ['barrier.opened', {}, 'barrier.opened', 'barrier.opened'], // a missing binding: the key, not "undefined"
   ];
   for (const [key, bindings, mine, theirs, item] of rows)
     for (const [actor, words] of [

@@ -82,7 +82,7 @@ test('status tick and cure survive reopen, failed and lost COMMIT, and replay on
       const applied = [
         {
           key: 'movement.moved',
-          bindings: { direction: 'east' },
+          bindings: { from: 'west' },
           participants: { actor: story.world().body },
         },
         { key: 'narration.poison.applied' },

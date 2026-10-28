@@ -210,7 +210,7 @@ test('move north proposes one transfer and entity_entered_room, and commits it',
     ],
     effects: [],
     narration: [
-      { key: 'movement.moved', bindings: { direction: 'north' }, participants: { actor: BODY } },
+      { key: 'movement.moved', bindings: { from: 'south' }, participants: { actor: BODY } },
     ],
     rng: SEED,
   });

@@ -24,6 +24,7 @@ test('committed combat line indices come from pinned keys and structured receipt
         cartridge: {
           world: {
             combat: { narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' } },
+            death: { narration: { woke: 'authored.woke' } },
           },
         },
       },
@@ -121,6 +122,24 @@ test('committed combat line indices come from pinned keys and structured receipt
       lines: skips,
       combat_lines: [1, 2],
     });
+    // Break (loka-glj8): the room reached does not open at a flight's ran_in or a fight's death
+    // woke line, or a death off the fight (a bleed, no combat page) loses its lines before woke.
+    const cut = (outcome: string, d: object, keys: string[]) => {
+      sql
+        .prepare('UPDATE receipt SET response = ?')
+        .run(
+          JSON.stringify({ ...decision, outcome, ...d, narration: keys.map((key) => ({ key })) }),
+        );
+      const { arrival, combat_lines } = narration(story())!;
+      return [arrival, combat_lines];
+    };
+    const close = { events: [], delta: { ops: [{ op: 'encounter.close', writer_group: 0 }] } };
+    assert.deepEqual(cut('fled', close, ['combat.fled', 'combat.ran_in', 'crows']), [1, [0, 1, 2]]);
+    assert.deepEqual(cut('waited', {}, ['authored.strike', 'authored.woke']), [1, [0]]);
+    assert.deepEqual(cut('waited', { events: [] }, ['bleed', 'authored.woke']), [
+      undefined,
+      undefined,
+    ]);
   } finally {
     sql.close();
     rmSync(folder, { recursive: true, force: true });

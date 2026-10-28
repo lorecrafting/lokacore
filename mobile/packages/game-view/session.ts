@@ -18,6 +18,7 @@ export type { ActionInput, ActionInvocation, DecisionResult, EntityId, ErrorCode
 /** Local display routing derived from the committed receipt; omitted for ordinary narration. */
 export type NarrationRecord = CommittedNarration & {
   combat_lines?: readonly number[];
+  arrival?: number; // a room-changing closure's first line in the room reached (book-ui Line placement)
   detail_id?: string;
   pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
   read?: true; // Read text: its page's only, never the room log (book-ui.md)

@@ -7,7 +7,7 @@ import { units } from '../../../kernel/ts/src/mechanics/calendar.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { ChronicleEntry, NarrationRecord } from '../../packages/game-view/session.ts';
-import { defenseEvidence } from './combat-receipt.ts';
+import { arrival, defenseEvidence } from './combat-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
@@ -44,7 +44,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
       command_id: r.command_id,
       lines,
       ...(cue && { cue }),
-      ...(combat_lines.length && { combat_lines }),
+      ...(combat_lines.length && { combat_lines, ...arrival(s, lines) }),
       ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
       ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
     } as NarrationRecord;
