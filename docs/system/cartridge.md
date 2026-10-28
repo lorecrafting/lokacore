@@ -844,6 +844,40 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 source, a line may be written in place and lowered to a generated key
 ([inline prose](#source-shortcuts)).
 
+## Development cartridges
+
+`cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets),
+`cartridges/chapters_sampler` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts) and
+`cartridges/journal_sampler` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets).
+These are development proofs, not a retained-release or save migration requirement; forward-development
+policy is in the [owner decision](../decisions/owner-decision-forward-development-2026-10-05.md); preserve
+saved bytes and exact mismatch refusal.
+
+The slice samplers (`cartridges/<name>_sampler`) each exercise one slice; most carry replayable
+transcripts (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
+`kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
+Ferryman's Lantern" (its stats and gate: [owner rules](owner-rules.md#product-and-scope)); its
+known answer remains historical proof.
+
+## Skill and bleed declarations
+
+A skill source `skills/<key>.json` supplies `label`, `requirement` and `qualification`
+(`SkillDefinition`, capability `skills@1`, with `attributes@1`); its key comes from its file.
+The compiler creates the exact reserved player Boolean `skill_<key>`, default false, reserved
+to `skills@1`. No writable stat, progression or skill-percentage field is introduced. A teacher
+dialogue's typed acquisition step identifies the declared skill; its payment binds a live NPC
+role, penny resource and positive amount.
+
+A [bleed](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) attacker opts in with
+`on_positive_hit: {effect}`; the effect declares `{duration, tick_every, hp_loss, narration:
+{applied, refreshed, tick, expired}}`, each narration a required local TextKey; a bandage item
+declares `bandage: {effect, skill, action, narration}`. These are content values; the engine
+encodes no default. Compiler and loader validate the closed positive safe-integer duration,
+interval and loss, interval < duration, local HP pool, supported producer/effect reference,
+required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible
+opt-in; they reject unknown fields, an absent effect or an invalid skill qualification.
+`cartridges/bleed_sampler` exercises it.
+
 ## M1-A elapsed policy
 
 Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). The installed API follows the [current bundled chapter](#current-bundled-chapter); current requirement ranges are validated; obsolete development fixtures follow the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
