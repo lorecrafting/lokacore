@@ -1,5 +1,5 @@
 defmodule Loka.Core.FixtureContractsTest do
-  # One test per protocol/fixtures/<name>_contracts.json. A fixture is a flat case list, a
+  # One test per listed protocol/fixtures/<name>_contracts.json. A fixture is a flat case list, a
   # {"contracts": [...]} list, or {"bases", "cases"} where a case edits its base by path, set,
   # omit or replace. A case with "errors" must match them exactly; otherwise only "valid".
   use ExUnit.Case, async: true

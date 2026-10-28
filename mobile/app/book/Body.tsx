@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import { DreamPage } from './DreamPage.tsx';
 import { JournalPage } from './journal.tsx';
-// Page dispatch for the current Book view and local detail stack.
+// Page dispatch for the current Book view and local detail stack, and the room page it renders.
 import { group, LINK, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, type Section } from './Menu.tsx';

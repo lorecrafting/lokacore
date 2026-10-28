@@ -1,5 +1,5 @@
 defmodule Loka.Core.FixtureCompositionTest do
-  # Every protocol/fixtures composition case composes to its literal "expected" (and its
+  # Every case of the fixtures listed below composes to its literal "expected" (and its
   # "prefix_expected" without the closing checks), validates as a StateDelta, satisfies the
   # independent precondition guard, and the guard refuses its "counterfeit" or
   # "counterfeit_success". A string "state" names a fixture "states" row, which may extend another.
@@ -17,6 +17,8 @@ defmodule Loka.Core.FixtureCompositionTest do
   @suppression JSON.decode!(File.read!("protocol/fixtures/population_suppression.json"))["cases"]
   @population JSON.decode!(File.read!("protocol/fixtures/population_composition.json"))["cases"] ++
                 @suppression
+  @ids ~w(one_container_per_item containment_acyclic no_last_writer_wins delta_preconditions_hold
+          fault_discards_whole_proposal fault_codes_are_evaluation_faults)
   @encounter JSON.decode!(File.read!("protocol/fixtures/encounter_composition.json"))
 
   for {group, names} <- [
@@ -273,18 +275,14 @@ defmodule Loka.Core.FixtureCompositionTest do
         %{"state" => state(@c4, c["state"]), "delta" => %{"ops" => ops}}
       end
 
-    ids =
-      ~w(one_container_per_item containment_acyclic no_last_writer_wins
-             delta_preconditions_hold fault_discards_whole_proposal fault_codes_are_evaluation_faults)
-
     ours =
       for input <- cases do
         result = Compose.compose(input["state"], input["delta"])
-        assert Enum.all?(ids, &Invariants.check(&1, Map.put(input, "result", result)))
-        %{"result" => result, "invariants" => List.duplicate(true, length(ids))}
+        assert Enum.all?(@ids, &Invariants.check(&1, Map.put(input, "result", result)))
+        %{"result" => result, "invariants" => List.duplicate(true, length(@ids))}
       end
 
-    agree(dir, ids, cases, ours)
+    agree(dir, @ids, cases, ours)
 
     results = Enum.frequencies_by(ours, &(get_in(&1, ["result", "fault", "code"]) || :ok))
     assert Map.get(results, :ok, 0) >= 15 and map_size(results) >= 3, inspect(results)
@@ -376,7 +374,7 @@ defmodule Loka.Core.FixtureCompositionTest do
         end)
 
       refute Invariants.check("delta_preconditions_hold", %{
-               "state" => @encounter["states"][c["state"]],
+               "state" => state(@encounter, c["state"]),
                "delta" => %{"ops" => c["ops"]},
                "result" => %{"changes" => changes}
              }),
@@ -452,7 +450,7 @@ defmodule Loka.Core.FixtureCompositionTest do
     times = JSON.decode!(File.read!("protocol/fixtures/resource_delivery_time.json"))
 
     for c <- times["cases"] do
-      state = times["states"][c["state"]]
+      state = state(times, c["state"])
       delta = %{"ops" => c["ops"]}
       assert Compose.compose(state, delta) == c["expected"], c["id"]
       observation = %{"state" => state, "delta" => delta, "result" => c["expected"]}
@@ -470,17 +468,13 @@ defmodule Loka.Core.FixtureCompositionTest do
   # Break: portable encounter or delivery-time semantics diverge between kernels.
   @tag :tmp_dir
   test "encounter and resource delivery fixtures agree across kernels", %{tmp_dir: dir} do
-    ids =
-      ~w(one_container_per_item containment_acyclic no_last_writer_wins
-             delta_preconditions_hold fault_discards_whole_proposal fault_codes_are_evaluation_faults)
-
     for name <- ~w(encounter_composition resource_delivery_time) do
       fixture = JSON.decode!(File.read!("protocol/fixtures/#{name}.json"))
 
       cases =
         for c <- fixture["cases"],
             do: %{
-              "state" => fixture["states"][c["state"]],
+              "state" => state(fixture, c["state"]),
               "delta" => %{"ops" => c["ops"]}
             }
 
@@ -488,11 +482,11 @@ defmodule Loka.Core.FixtureCompositionTest do
         for {c, input} <- Enum.zip(fixture["cases"], cases) do
           assert Compose.compose(input["state"], input["delta"]) == c["expected"], c["id"]
           observation = Map.put(input, "result", c["expected"])
-          assert Enum.all?(ids, &Invariants.check(&1, observation)), c["id"]
-          %{"result" => c["expected"], "invariants" => List.duplicate(true, length(ids))}
+          assert Enum.all?(@ids, &Invariants.check(&1, observation)), c["id"]
+          %{"result" => c["expected"], "invariants" => List.duplicate(true, length(@ids))}
         end
 
-      agree(dir, ids, cases, expected)
+      agree(dir, @ids, cases, expected)
     end
   end
 end
