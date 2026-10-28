@@ -7,9 +7,9 @@ own sampler shows up here ([owner decision](decisions/owner-decision-showcase-20
 Integration rows such as W22 Fire live in it. It replaces Chapter 1 as the regression fixture once
 it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-1)).
 
-**Coverage** (2026-10-28, at 16fcf0fad, `node kernel/ts/play/coverage.ts <artifact>` over the 19
-showcase transcripts, `walk_*` included): 36 of 140 reactions fired, 17 of 49 recipes completed,
-14 of 34 choices taken, 2 of 3 quests done (`errand` never).
+**Coverage** (2026-10-28, at 0c83a22d0, `node kernel/ts/play/coverage.ts <artifact>` over the 31
+showcase transcripts, `walk_*` included): 127 of 140 reactions fired, 46 of 49 recipes completed,
+25 of 34 choices taken, 3 of 3 quests done.
 To re-record a `walk_*` transcript, drive `Rec` from `kernel/ts/play/record.ts` in a script (`new Rec(ctx)`, its moves, `r.save(out)`) and run `node <script> <out>`.
 
 ## Structure
