@@ -621,8 +621,8 @@ git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
 # A main clone of a bare origin; stub br's flush writes $BC_ROW as the export. Break: a machine path,
-# a non-main checkout, an unpushed local commit, another dirty tracked file or a dirty export that
-# main also changed is still committed or pushed; a rejected push exits 0; the happy path does not
+# a non-main checkout, an unpushed local commit, another dirty tracked file, a failed pull or an
+# export main changed is still committed or pushed; a rejected push exits 0; the happy path does not
 # reach origin.
 printf '#!/bin/sh\n[ "$*" = "sync --flush-only" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
@@ -639,9 +639,11 @@ bc machine-path '{"id":"a","title":"/Users/x/y"}' 1 -
 echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git reset -q; rm docs/x
 git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
 git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
-echo '{"id":"c","title":"bad"}' >> .beads/issues.jsonl; bc main-changed '{"id":"a","title":"bad"}' 1 -
+bc main-changed '{"id":"a","title":"bad"}' 1 '"main"'
 git pull -q --ff-only origin main; echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
 git --git-dir="$O" log main | grep -q local && bad 'beads_checkpoint ahead: pushed an unpushed local commit'; git reset -q --hard HEAD~1
+(cd "$R.o" && echo n > docs/n.md && git add docs/n.md && git commit -qm n && git push -q origin main); echo z > docs/n.md; h=$(git rev-parse HEAD)
+bc pull-fail '{"id":"a","title":"bad"}' 1 -; [ "$(git rev-parse HEAD)" = "$h" ] || bad 'beads_checkpoint pull-fail: committed after a failed pull'; rm docs/n.md
 printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
 bc push-rejected '{"id":"a","title":"three"}' 1 -
 grep -q 'br sync --merge' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'
