@@ -39,3 +39,12 @@
 - Cites rerun and matching: combat-receipt.ts:10, received.ts:121, logs.ts:238, presenter.ts:109, sequence.ts:89.
 - The PR body reports the `/code-review medium` result.
 - The Storybook fixtures differ only in narration bindings (`{"direction":"west"}` to `{"from":"east"}`).
+
+## Verification at `363e434a01bdbc78ad29955b0d4ed4bd618e8de5`
+
+Verdict: **APPROVE**.
+
+- Finding 2: fixed. `sequence.ts:98-99` binds no `from` when a later progress op transfers the body. `showcase_economy.test.ts:345-347` pins a cell line of `{key:'movement.moved'}` with no bindings. I ran two mutants and both were red-narrow: `moved` forced false, and `entity_id === body` changed to `!==`.
+- Finding 1: withdrawn by the PM. [book-ui.md:111](../system/book-ui.md) specifies the recovery-room log for a death outside a fight, and recap.test.ts:234 pins it. There is no leftover code: `mobile/authority` is unchanged since b022f880c.
+- Nits 5 and 6: fixed (the `received.ts:120` comment and the PR body table).
+- The developer's mutants 29/30 survived. I accept them as equivalent: every `entity.transfer` in a move's progress moves only the actor's body (`disposition.ts:101`).
