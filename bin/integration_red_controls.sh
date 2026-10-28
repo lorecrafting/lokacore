@@ -336,7 +336,8 @@ grep -q '^REGEN_DIRTY' "$R.j" && grep -qx '  a' "$R.j" && ! grep -q own.txt "$R.
 git checkout -q a; rm own.txt
 # --- regen.sh -------------------------------------------------------------------------------
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
-# into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them;
+# into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them
+# (the story views read the fixture this run rewrites; a lib/ change rebuilds every fixture);
 # a fixture other than the changed cartridge's 3-key one is rebuilt; the transcripts keep the old content hash; the
 # lint baseline is not rewritten from the findings.
 mkdir "$tmp/rg"; cat > "$tmp/rg/mise" <<'SH'
@@ -353,11 +354,13 @@ printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b
 echo '{"content_hash":"old"}' > cartridges/a/transcripts/t.jsonl; echo x > cartridges/b/x; echo '# header' > test/loka/lint_baseline.txt
 git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 rg() { RG_LOG=$R.$1 PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2>&1 || bad "regen.sh exited non-zero ($1)"; }
-echo y > cartridges/a/y; echo y > mobile/app/y; rg a
+echo y > cartridges/a/y; rg a
 grep -qx 'protocol/fixtures/a_hash.json' "$R.a" && ! grep -q 'protocol/fixtures/[bv]_' "$R.a" && grep -q stories:views "$R.a" && ! grep -q loka.lint "$R.a" \
-  || bad "regen: wrong generators for a cartridges/a and mobile/ change: $(tr '\n' ' ' < "$R.a")"
+  || bad "regen: wrong generators for a cartridges/a change: $(tr '\n' ' ' < "$R.a")"
 grep -q '"new"' cartridges/a/transcripts/t.jsonl || bad 'regen: the transcript kept the old content hash'
-git add . && git commit -qm a; git update-ref -d refs/remotes/origin/main; rg b
+git add . && git commit -qm a; git update-ref refs/remotes/origin/main HEAD; mkdir lib; echo x > lib/x; rg l
+grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b_hash.json' "$R.l" || bad "regen: a lib/ change did not rebuild every fixture: $(tr '\n' ' ' < "$R.l")"
+git add . && git commit -qm l; git update-ref -d refs/remotes/origin/main; rg b
 grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && ! grep -q v_hash "$R.b" || bad "regen: no diff did not rebuild every 3-key fixture, or rebuilt one with value: $(tr '\n' ' ' < "$R.b")"
 [ "$(cat test/loka/lint_baseline.txt)" = "$(printf '# header\ntoolbox_showcase lint: finding')" ] || bad "regen: lint baseline is: $(cat test/loka/lint_baseline.txt)"
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
@@ -733,6 +736,10 @@ for m in 'clean 0' 'see /Users/x/f 1' 'in worktrees.noindex/x 1'; do
   echo "refs/heads/x $(git rev-parse HEAD) refs/heads/x $z" | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
   [ "$rc" = "${m##* }" ] || bad "pre-push: message '${m% *}': exit $rc, want ${m##* }"; git reset -q --hard HEAD~1 2> /dev/null || git update-ref -d HEAD
 done
+# Break: a new branch first in the push ends the scan, so a later ref's path-naming message is pushed.
+git commit -qm clean --allow-empty; a=$(git rev-parse HEAD); git commit -qm 'see /Users/x/f' --allow-empty; rc=0
+printf 'refs/heads/a %s refs/heads/a %s\nrefs/heads/b %s refs/heads/b %s\n' "$a" $z "$(git rev-parse HEAD)" $z | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
+[ "$rc" = 1 ] || bad "pre-push: a second ref's path-naming message: exit $rc, want 1"
 # Break (loka-ivjq.27): an edited TypeScript file over the size limit passes the edit hook silently, the check gets
 # a path the size script cannot resolve from the repo root, or a non-TypeScript edit runs it.
 mkdir "$tmp/fe"; printf '#!/bin/sh\nshift 2; echo "$*" >> "$FE_LOG"; case $* in *check_ts_size*) echo too-long; exit 1 ;; esac\n' > "$tmp/fe/mise"

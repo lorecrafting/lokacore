@@ -4,7 +4,7 @@
 # docs/system/, docs/features.json, a cartridge, kernel/ts/src/, mobile/ or a review record, and
 # commit what it rewrites. The slow generators run only when their inputs differ from origin/main
 # (committed or not; every generator when that diff cannot be read):
-#   - a changed cartridge: its {description, canonical, sha256} fixture under protocol/fixtures/
+#   - a changed cartridge (or lib/): its {description, canonical, sha256} fixture under protocol/fixtures/
 #     (bin/regen_hash_fixture.sh), and the old content hash in its transcripts becomes the new one;
 #     fixtures that also carry `value` are rebuilt by hand;
 #   - mobile/, kernel/ts/src/, protocol/: the stories' views and saves (npm run stories:views);
@@ -14,9 +14,11 @@ set -eu
 cd "$(git rev-parse --show-toplevel)"
 export MIX_ENV=test
 m() { mise exec -- "$@"; }
-base=$(git merge-base origin/main HEAD 2>/dev/null) &&
-  changed=$(git diff --name-only "$base" && git ls-files -o --exclude-standard) || changed=ALL
-touched() { [ "$changed" = ALL ] || printf '%s\n' "$changed" | grep -qE "$1"; }
+# Read on each call, so a fixture this run rewrites under protocol/ also triggers the story views.
+touched() {
+  base=$(git merge-base origin/main HEAD 2>/dev/null) || return 0
+  { git diff --name-only "$base" && git ls-files -o --exclude-standard; } | grep -qE "$1"
+}
 
 m mix compile >/dev/null
 sha() { sed -n 's/^  "sha256": "\(.*\)",*$/\1/p' "$1"; }
@@ -28,7 +30,7 @@ for p in sys.argv[1:]:
     if list(d) == ["description", "canonical", "sha256"]:
         print(p, json.loads(d["canonical"])["manifest"]["id"])
 ' protocol/fixtures/*_hash.json | while read -r fix id; do
-  touched "^cartridges/$id/" || continue
+  touched "^(cartridges/$id/|lib/)" || continue
   old=$(sha "$fix")
   sh bin/regen_hash_fixture.sh "cartridges/$id" "$fix"
   new=$(sha "$fix")

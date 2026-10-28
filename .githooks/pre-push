@@ -9,9 +9,9 @@ while read -r _ local_sha _ remote_sha; do
   for c in $(git rev-list "$local_sha" --not --remotes); do
     git log -1 --format=%B "$c" | grep -qE '/Users/|worktrees\.noindex/' && { echo "pre-push: commit $c's message names a local path (/Users/ or worktrees.noindex/); reword it" >&2; exit 1; }
   done
-  [ "$remote_sha" = "$z" ] && { skip=0; break; }
-  files=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null) || { skip=0; break; }
-  [ -n "$(printf '%s\n' "$files" | grep -vE '^(\.beads/|docs/HANDOFF\.md$)')" ] && { skip=0; break; }
+  [ "$remote_sha" = "$z" ] && { skip=0; continue; }
+  files=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null) || { skip=0; continue; }
+  [ -n "$(printf '%s\n' "$files" | grep -vE '^(\.beads/|docs/HANDOFF\.md$)')" ] && { skip=0; continue; }
 done
 [ "$skip" = 1 ] && exit 0
 exec "$(git rev-parse --show-toplevel)/bin/prepush.sh"

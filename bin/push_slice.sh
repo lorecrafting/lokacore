@@ -15,7 +15,7 @@ echo "log: $log"
 [ $n = 0 ] || tail -n 5 "$log"
 # The pushed head's hosted runs (ci.yml, book-e2e.yml); one may start up to ~2 minutes late.
 if [ $n = 0 ]; then
-  runs=$(cd "$1" && gh run list --commit "$(git rev-parse "$2")" --json workflowName --jq '.[].workflowName' 2>/dev/null)
+  runs=$(cd "$1" && gh run list --commit "$(git rev-parse "$2")" --json workflowName --jq '.[].workflowName')
   for w in ci book-e2e; do printf '%s\n' "$runs" | grep -qx "$w" && echo "$w: started" || echo "$w: not started"; done
 fi
 exit $n
