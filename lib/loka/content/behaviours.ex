@@ -77,11 +77,11 @@ defmodule Loka.Content.Behaviours do
     attached = if is_list(names), do: Enum.map(names, &attachment/1)
 
     if attached && Enum.all?(attached) do
-      # A name listed twice counts once, at its first index.
+      # An attachment listed twice counts once, at its first index.
       attached
       |> Enum.with_index()
-      |> Enum.uniq_by(fn {{n, _}, _} -> n end)
-      |> Enum.map(&attach(&1, named[elem(elem(&1, 0), 0)], holder, at))
+      |> Enum.uniq_by(fn {a, _} -> a end)
+      |> Enum.map(fn {{n, _}, _} = a -> attach(a, named[n], holder, at) end)
       |> Enum.unzip()
     else
       {[], [invalid_type(at)]}

@@ -160,10 +160,45 @@ defmodule Loka.ContentParamsTest do
              [{"SCHEMA_VIOLATION", "items/trout_01.behaviours[0].with", type}]
   end
 
-  # Breaks: params dropped from a concrete definition, which then compiles silently.
+  # Breaks: params on a concrete definition dropped (it compiles silently) or checked as a
+  # declaration (invalid_type, and the definition's children dropped).
   test "params on a definition that is not abstract stays for the schema", %{showcase: s} do
-    assert diags(s, [{"reactions/wheel_1_turn.json", &Map.put(&1, "params", ["x"])}]) ==
-             [{"UNKNOWN_FIELD", "reactions/wheel_1_turn.params", %{}}]
+    for params <- [["x"], 5] do
+      assert diags(s, [{"reactions/wheel_1_turn.json", &Map.put(&1, "params", params)}]) ==
+               [{"UNKNOWN_FIELD", "reactions/wheel_1_turn.params", %{}}]
+    end
+  end
+
+  # Breaks: an object with a member besides `param` taken for a marker (reported as unresolved
+  # instead of left for the schema), or an attachment object with an extra member accepted.
+  test "only a one-member param object is a marker, and an attachment has only behaviour and with",
+       %{fishing: f} do
+    take = ["reactions", "take", "apply"]
+    loose = narrate(%{"param" => "colour", "x" => 1})
+
+    codes =
+      for {c, _, _} <- diags(f, [{@spoils, &update_in(&1, take, fn a -> a ++ [loose] end)}]),
+          do: c
+
+    refute "UNRESOLVED_REFERENCE" in codes
+
+    extra =
+      &Map.put(&1, "behaviours", [
+        %{"behaviour" => "spoils", "with" => %{"line" => "room.bank.title"}, "x" => 1}
+      ])
+
+    assert diags(f, [{@trout, extra}]) ==
+             [{"SCHEMA_VIOLATION", "items/trout_01.behaviours", %{"error" => "invalid_type"}}]
+  end
+
+  # Breaks: a second attachment of one behaviour with other arguments dropped without a word.
+  test "one behaviour attached twice with different arguments is a duplicate", %{fishing: f} do
+    twice =
+      for line <- ["room.bank.title", "room.bank.title.x"],
+          do: %{"behaviour" => "spoils", "with" => %{"line" => line}}
+
+    assert diags(f, [{@trout, &Map.put(&1, "behaviours", twice)}]) ==
+             [{"DUPLICATE_DEFINITION", "behaviours/spoils.reactions.take", %{}}]
   end
 
   # Breaks: one line shared by every holder, the line under the behaviour's key, or the argument

@@ -413,7 +413,7 @@ attachment (below). The refusals, with `<at>` the child's `<src>.with` or the at
 | A marker names no declared parameter (reported once, at the declaring site) | `UNRESOLVED_REFERENCE` | `<def>.<path to the marker>` | `{"target": "<name>"}` |
 | `params` is not a list of Keys | `SCHEMA_VIOLATION` | `<def>.params` | `{"error": "invalid_type"}` |
 
-`params` on a definition that is not abstract stays and is `UNKNOWN_FIELD`. A parent with a
+`params` on a definition that is not abstract is not read: it stays and is `UNKNOWN_FIELD`. A parent with a
 `params` fault, like a parent in a cycle, drops its children without diagnostics of their own.
 The [toolbox_showcase](../../cartridges/toolbox_showcase/reactions/wheel_shows.json) is the
 working example: its 30 `wheel_*_x_shows_*` reactions are one line each.
@@ -538,10 +538,13 @@ rules byte for byte.
   reserved parameter name, always bound.
 - A behaviour may declare `"params"` like a prototype; each holder then attaches it as
   `{"behaviour": "<name>", "with": {...}}` (a bare name or an object without `with` passes no
-  arguments) and its copies fill the markers from that `with`. An inline prose line in `with`
+  arguments) and its copies fill the markers from that `with` (an argument is inserted as is: a
+  marker inside it is not filled). An inline prose line in `with`
   gets the holder's key, `<item|npc>.<holder>.behaviours.<i>.with.<name>`, so each holder has
   its own words.
-- Each rule becomes one reaction per holder (once, however often the holder lists the name),
+- Each rule becomes one reaction per holder (once, however often the holder lists the same
+  attachment; two attachments of one behaviour with different `with` are `DUPLICATE_DEFINITION`
+  at the behaviour rule),
   keyed `<rule>_<holder>` (`take` on `trout_01` is `take_trout_01`). In the copy, every
   `{"param": "holder"}` (an object with that one member) becomes the holder's key, so the
   trigger names the holder; a marker naming no declared parameter is refused at the behaviour. A

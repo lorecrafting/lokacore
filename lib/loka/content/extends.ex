@@ -83,7 +83,7 @@ defmodule Loka.Content.Extends do
   defp own({_, value}, _, _, _, acc), do: {{:ok, value}, acc}
 
   # A refused `params` or a marker naming none of them refuses the declaring definition once.
-  defp declared({at, %{"params" => params} = value}) do
+  defp declared({at, %{"abstract" => true, "params" => params} = value}) do
     case Params.declared(params) do
       {:error, e} ->
         [{"SCHEMA_VIOLATION", under(at, ["params"]), %{"error" => e}, nil}]
