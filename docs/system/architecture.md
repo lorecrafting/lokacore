@@ -166,7 +166,7 @@ corpus run through the same generator and per-step invariant checks; its version
 release pin does not silently retarget the historical demo regression corpus.
 Simulator composition consumes the runtime's complete immutable world input projection.
 Its independent adoption check applies composed row changes, including removal of a
-retired quest's [null change](protocol.md#b5-harvest-and-exchange-composition).
+retired quest's [null change](protocol.md#harvest-and-exchange-composition).
 
 ## E1 exact candidate proof policy
 

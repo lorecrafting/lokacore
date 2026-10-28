@@ -23,8 +23,8 @@ nested item identity, explicit Read and local Back with confirmed receipt histor
 Ash/Hale retain separate identities and existing schedule machinery. Owner content
 decision 5's 19:00 Cloister ambiguity governs; Ash's 20:00–06:00 plus 06:00–12:00
 Scriptorium periods leave no unspecified morning. No novice attendance gates books.
-[Protocol](../system/protocol.md#d2-held-readable-composition) and
-[save](../system/save.md#d2-book-knowledge-and-read-recovery) retain sole writers,
+[Protocol](../system/protocol.md#held-readable-composition) and
+[save](../system/save.md#book-knowledge-and-read-recovery) retain sole writers,
 bounded shared queries, historical grant validation and actual custody recovery.
 
 Inspected local base is `4ec52632d510e45214e43a1fe5beca0ec5addbad`: A1 installed,

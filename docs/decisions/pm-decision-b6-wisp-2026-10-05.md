@@ -21,8 +21,8 @@ The [owner reward decision](owner-decision-chapter-one-content-2026-10-02.md)
 excludes the light spell word. No faction, attribute gain, resource reward, broad
 puzzle/dialogue framework, population or new time mechanism is adopted.
 
-The [composition](../system/protocol.md#b6-bounded-sitting-and-topic-composition),
-[save](../system/save.md#b6-discovery-sitting-and-ward-recovery) and
+The [composition](../system/protocol.md#bounded-sitting-and-topic-composition),
+[save](../system/save.md#discovery-sitting-and-ward-recovery) and
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b6-seek-retry-and-ward-details) clauses require an owned
 typed continuation counter, exact historical evidence and current-row reconciliation,
 shared projection/admission and real SQLite proof. Portable choice-operation changes

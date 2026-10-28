@@ -4,8 +4,8 @@ Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.
 the PM adopts S3: accompany Tobin on a finite patrol, with failure recovery and no
 nighttime wait. The selected behavior is in [mechanics](../system/mechanics.md#s3-finite-watch-patrol-c2-selected-contract),
 route/content in [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c2-watch-route-and-trust),
-[composition](../system/protocol.md#c2-patrol-composition-and-admission),
-[save recovery](../system/save.md#c2-patrol-attempt-recovery),
+[composition](../system/protocol.md#patrol-composition-and-admission),
+[save recovery](../system/save.md#patrol-attempt-recovery),
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c2-watch-patrol-details) and the
 [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
 At adoption this was a selected planning contract, pending independent approval
