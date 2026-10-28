@@ -41,4 +41,8 @@ if [ "$changed" != ALL ] && touched '^protocol/fixtures/.*_sampler_hash\.json$';
   run TRANSCRIPTS sh -c 'cd kernel/ts && node --test --test-reporter=dot test/transcripts.test.ts'
   run IMPACT_STORY sh bin/check_impact_fixtures.sh
 fi
+# worktree_setup.sh clones with macOS cp -c, so hosted CI (ubuntu) cannot run its red control.
+if touched '^bin/worktree_setup'; then
+  run WORKTREE_SETUP sh bin/worktree_setup_red_controls.sh
+fi
 exit $fail

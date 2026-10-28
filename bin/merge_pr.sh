@@ -1,6 +1,6 @@
 #!/bin/sh
 # Merge gate (docs/PM.md step 7, loka-fxeq): merge a reviewed PR only on the exact head that
-# bin/wait_ci.sh passed, then run bin/after_merge.sh with the same arguments. Run in the main checkout;
+# bin/wait_ci.sh passed (printing bin/ci_timing.sh on that head either way), then run bin/after_merge.sh with the same arguments. Run in the main checkout;
 # with a ROADMAP subject, make the ROADMAP status edit first (after_merge commits it).
 #   bin/merge_pr.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]
 # Refuses before merging when main is not checked out, a tracked file other than .beads/issues.jsonl
@@ -19,6 +19,8 @@ done
 info=$($GH pr view "$pr" --json state,headRefOid --jq '"\(.state) \(.headRefOid)"') || die "cannot read PR #$pr"
 [ "${info%% *}" = OPEN ] || die "PR #$pr is ${info%% *}, not OPEN"
 sha=${info#* }
-sh "$here/wait_ci.sh" "$sha" || die "CI on $sha is not green: no merge"
+sh "$here/wait_ci.sh" "$sha"; ci=$?
+sh "$here/ci_timing.sh" "$sha" # cancelled jobs and sim times, green or red (docs/PM.md step 7)
+[ "$ci" -eq 0 ] || die "CI on $sha is not green: no merge"
 $GH pr merge "$pr" --merge --match-head-commit "$sha" || die "gh pr merge failed on $sha"
 sh "$here/after_merge.sh" "$@" || die "merged; bookkeeping failed: rerun bin/after_merge.sh $*"

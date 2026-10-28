@@ -81,7 +81,7 @@ Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
-   a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. Judge a sim time against the median of the last 5 `main` runs of that leg, never one run (runners are two-speed: 280 s and 540 s on the same code, loka-9nd4). An E-gate closure or the
+   a superseded run is not: `bin/merge_pr.sh` prints `bin/ci_timing.sh <head>`: cancelled jobs (name, seconds) of that head and of the nightly runs, and the sim leg times and medians, so compare each with its `timeout-minutes`. Judge a sim time against the median of the last 5 `main` runs of that leg, never one run (runners are two-speed: 280 s and 540 s on the same code, loka-9nd4). An E-gate closure or the
    release candidate also needs E1 coverage complete for the real chapter, its harness rebuilt with that chapter ([owner rules](system/owner-rules.md)). Merge `main` into the
    branch once before marking the PR ready. A red nightly on `main` is the next session's first job.
    After the last of several close merges, run
