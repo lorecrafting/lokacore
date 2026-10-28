@@ -15,8 +15,12 @@ run() { # <name> <command...>
 run TS_SIZE node bin/check_ts_size.mjs
 run EX_SIZE elixir bin/check_size.exs
 run PRETTIER sh -c "git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 node_modules/.bin/prettier --check"
-run CONTRACTS elixir bin/contracts.exs --check
-run FEATURES elixir bin/features.exs --check
+# Generated files: bin/regen.sh must leave the tree as it found it (uncommitted edits keep their content).
+snap() { git status --porcelain --untracked-files=all | cut -c4- | while IFS= read -r f; do echo "$f $(git hash-object "$f" 2>/dev/null)"; done; }
+snap >"$logs/before"
+run REGEN sh bin/regen.sh
+stale=$(snap | grep -vxFf "$logs/before" | cut -d' ' -f1)
+if [ -n "$stale" ]; then echo "REGEN_DIRTY (bin/regen.sh rewrote these; commit them):"; printf '  %s\n' $stale; fail=1; fi
 run TYPECHECK sh -c 'cd kernel/ts && npm run -s typecheck'
 run MOBILE_TSC sh -c 'cd mobile/app && node_modules/.bin/tsc --noEmit -p .'
 run MIX_FORMAT mix format --check-formatted
