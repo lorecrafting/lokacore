@@ -133,8 +133,8 @@ they say something; the comment wraps at 100 columns and restates no style the c
 Behaviour stays in [Book UI](system/book-ui.md), which a comment links and never copies. Storybook
 renders the comment on the Docs page of the story whose meta names the component, and every comment
 on the Docs/Component specs page (`mobile/app/stories/Specs.mdx`). This index has one line per
-export, the file under `mobile/app/`; [`catalogue.test.ts`](../mobile/app/catalogue.test.ts)
-fails when a comment or a line is missing or the two disagree. A new mechanic reuses one of these;
+export, the file under `mobile/app/`, generated from the doc comments by `bin/regen.sh`;
+[`catalogue.test.ts`](../mobile/app/catalogue.test.ts) fails when a comment is missing or the table is stale. A new mechanic reuses one of these;
 a new component needs a real consumer, its comment and its line here in the same slice.
 
 | Component | File | Story |
@@ -159,17 +159,18 @@ a new component needs a real consumer, its comment and its line here in the same
 | `NightSky` | `book/NightSky.tsx` | NightSky |
 | `NpcPage` | `book/Npc.tsx` | NpcPage |
 | `NpcDetail` | `book/Npc.tsx` | NpcPage |
-| `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
 | `SayField` | `book/SayField.tsx` | SayField |
+| `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
+| `Text` | `book/Text.tsx` | Note |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
-| `Cards` | `book/actions.tsx` | ActionCard |
 | `PickLists` | `book/actions.tsx` | PickList |
+| `Cards` | `book/actions.tsx` | ActionCard |
 | `VerbLine` | `book/actions.tsx` | VerbLine |
 | `ContinueButton` | `book/actions.tsx` | ContinueButton |
 | `JournalPage` | `book/journal.tsx` | SectionPages |
@@ -177,11 +178,10 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Note` | `book/lines.tsx` | Note |
 | `LogLines` | `book/lines.tsx` | LogLines |
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
-| `Heard` | `book/lines.tsx` | Heard |
 | `Here` | `book/lines.tsx` | RoomPage |
+| `Heard` | `book/lines.tsx` | Heard |
 | `Fault` | `book/lines.tsx` | Live |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
-| `Text` | `book/Text.tsx` | Note |
 | `Tap` | `book/pages.tsx` | VerbLine |
 | `RunningHead` | `book/pages.tsx` | Page |
 | `Control` | `book/pages.tsx` | Control |
