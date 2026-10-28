@@ -3,11 +3,12 @@
 # database to .beads/issues.jsonl, refuse a machine path, commit the export and docs/HANDOFF.md, push.
 #   bin/beads_checkpoint.sh ["commit subject"]
 # Refuses before any change unless main is checked out, has no unpushed commit and no tracked file
-# other than those two is dirty, and when main changed the export since this checkout's HEAD (the
-# flush would overwrite it with an un-imported database). A rejected push prints the recovery lines.
+# other than those two is dirty. The pull and Beads merge are beads_sync (bin/lib/beads_sync.sh).
+# A rejected push prints the recovery lines.
 set -u
 die() { echo "beads_checkpoint: $*" >&2; exit 1; }
-subject=${1:-Beads: checkpoint} j=.beads/issues.jsonl here=$(cd "$(dirname "$0")" && pwd)
+subject=${1:-Beads: checkpoint} j=.beads/issues.jsonl
+. "$(dirname "$0")/lib/beads_sync.sh"
 cd "$(git rev-parse --show-toplevel)" || exit 2
 [ "$(git branch --show-current)" = main ] || die 'main is not checked out here'
 for f in $(git status --porcelain --untracked-files=no | cut -c4-); do
@@ -15,10 +16,7 @@ for f in $(git status --porcelain --untracked-files=no | cut -c4-); do
 done
 git fetch -q origin main || die 'fetch failed'
 [ -z "$(git rev-list origin/main..HEAD)" ] || die 'main has unpushed commits: push or drop them first'
-git diff --quiet HEAD origin/main -- $j || die 'main changed the Beads export: git pull --ff-only origin main; br sync --import-only; rerun'
-git pull -q --ff-only origin main || die 'pull failed'
-br sync --flush-only > /dev/null || die 'br sync --flush-only failed'
-python3 "$here/check_beads_export.py" $j || die 'export not committed: fix the issue text, rerun'
+beads_sync || die 'export not committed: fix the cause, rerun'
 git add $j docs/HANDOFF.md || die 'git add failed'
 git diff --cached --quiet || git commit -q -m "$subject" || die 'commit failed'
 git push -q origin main || die "push rejected: git pull --rebase origin main; br sync --merge; br sync --flush-only; commit $j; push"

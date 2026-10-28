@@ -126,27 +126,36 @@ commits each accepted tweak; the owner's approval in the session is the design r
 Bring `main` in with `bin/polish_session.sh update`, never a manual merge: it restarts Storybook when stories change.
 The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 
-## Token hygiene
+## Every agent
 
-- Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
-  and check runs; any agent sends a check, test or push run to a scratchpad file named for the
-  slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
-  reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
-- No agent runs the full `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1: hosted CI does ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md); load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
+PM, developer, reviewer and designer alike; the role files link here instead of restating it.
+
+- [`bin/bash_guard.py`](../bin/bash_guard.py) (a PreToolUse hook) refuses what these rules forbid: `--no-verify`, a force push and `git rebase` without the owner's OK (`LOKA_OWNER_OK_NO_VERIFY=1`); and, without the PM's `LOKA_PM=1` prefix, `pkill`/`killall`, `gh run watch`, `gh workflow run`, the full `npm test`, `test:e2e`, the Storybook smoke, `bin/check_all.sh` and `git worktree add` outside `worktrees.noindex`. If it or a hook blocks wrongly, report it; never work around it.
+- On the M1 run only the type checks and focused tests your diff touches, under `nice -n 10`; hosted CI runs the rest ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md); load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
 - Long commands (checks, tests, mutant runs) run with `run_in_background`; wait for the completion
   notice, no sleep or poll loops. Any agent that expects a run over ~10 minutes (full-suite
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
-- A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding; developers never wait on CI.
+- Only the PM waits on CI. A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and `book-e2e.yml` started, and hands back; a reviewer or designer reports the CI state it sees, once; the PM returns a red run as a finding.
+- Work in your own worktree under `worktrees.noindex` ([Git hygiene](#git-hygiene)); in a new one run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) first; in a shared one commit with `git commit -- <your own paths>`.
+- Stop only processes you started, by their PID, planted breaks and red controls included (a planted `pkill -f storybook` killed the owner's Storybook twice, loka-hg7, loka-rar); `bin/orphans.sh` lists orphaned busy ones. Red controls
+  that plant files run in a `git worktree add --detach` scratch copy, never in the worktree
+  serving the owner's [live preview](web-preview.md) (loka-4xl).
+- Check and push output goes to a scratchpad file with a name unique to the slice (a shared
+  `pr-body.md` once put one PR's description on another); read only the exit status, the failing lines and the tail.
+- No subagents or forks unless the brief allows them (a triage analyst forked four and spent 500k of a 150k budget, loka-u8ey). Returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
+  a reason, open items, no narrative. Past the [handoff threshold](#token-hygiene), commit and hand back a short state note.
+
+## Token hygiene
+
+- Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
+  and check runs. Diffs a developer or reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
 - Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
   same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
   caught?") run narrow first against the test files that import the mutated module, the full suite
   only for survivors; reviewers sample 2-3 narrow mutants. A test that reads a compiled hash fixture
   rebuilds it per mutant: `MUTATE_REBUILD="bin/regen_hash_fixture.sh cartridges/toolbox_showcase protocol/fixtures/toolbox_showcase_hash.json"`. Schema fixture sweeps
   ([contract lessons](lessons/contracts.md)) stay: they rerun fixtures only.
-- Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
-  a reason, open items, no narrative.
-- No agent spawns subagents or forks unless its brief allows them (a triage analyst forked four and spent 500k of a 150k budget, loka-u8ey).
 
 Claude Code specifics:
 
@@ -163,27 +172,20 @@ Claude Code specifics:
   Keep a single integration worktree for local `main`; keep the owner's checkout
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
   Place worktrees outside paths the checks scan, and preserve unfinished ones. Create worktrees
-  and scratch worktrees in a sibling folder named `worktrees.noindex` next to the repo checkout
+  and scratch worktrees (the guard refuses others) in a sibling folder named `worktrees.noindex` next to the repo checkout
   (`git worktree add -b <branch> ../worktrees.noindex/<name> origin/main`): Spotlight never indexes
   a `.noindex` folder, and each indexed worktree kept `mds_stores` at 150-230% CPU for minutes.
   `bin/new_batch.sh <branch>` makes a batch branch that way (worktree, `bin/worktree_setup.sh`, push with upstream).
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
-- Run `bin/orphans.sh` (also in `bin/session_status.sh`) to list orphaned busy processes; it never kills, check one, then stop it by PID.
-- Stop only processes you started, by their PID; never `pkill` by name (loka-hg7), planted breaks and red controls
-  included (a planted `pkill -f storybook` killed the owner's Storybook twice, loka-rar). Red controls
-  that plant files run in a `git worktree add --detach` scratch copy, never in the worktree
-  serving the owner's [live preview](web-preview.md) (loka-4xl).
-- Parallel agents share one scratchpad: use file names unique to the slice (a shared
-  `pr-body.md` once put one PR's description on another).
+- `bin/orphans.sh` (also in `bin/session_status.sh`) never kills: check one, then stop it by PID.
 - For a contract slice's record (save, protocol or kernel contracts), the reviewer commits only its record in a detached worktree
   at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
-- A new worktree has no `deps/`, `_build/` or `node_modules`: run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) there once, then `npm ci` only on a lockfile change. Never symlink `_build`, `deps` or `node_modules` from another checkout: it compiled into main's `_build` (loka-ail1).
+- A new worktree has no `deps/`, `_build/` or `node_modules`: `bin/worktree_setup.sh` fills them; then `npm ci` only on a lockfile change. Never symlink `_build`, `deps` or `node_modules` from another checkout: it compiled into main's `_build` (loka-ail1).
 - CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
-  the diff does not touch means check for a stale base (update the branch from `main` with a merge, never a rebase
-  or force-push) before anything else.
+  the diff does not touch means check for a stale base (update the branch from `main` with a merge) before anything else.
 - Git hooks are set once per clone ([AGENTS.md, Working rules](../AGENTS.md#working-rules));
   worktrees share that setting.
 - `developer` and `reviewer` list their tools in `tools:` (their definition files) to keep

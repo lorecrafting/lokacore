@@ -62,8 +62,9 @@ done
 # --- after_merge.sh ------------------------------------------------------------------------
 # Bare origin; branch pr (worktree, review-7 on its tip) is merged on origin/main by another clone,
 # local main is behind with a dirty Beads export. Stub gh reports $PR_STATE; stub br close appends
-# to the export. Break: the local export write is lost in the pull, the issue is not closed, the
-# worktree or refs survive, nothing is pushed, or a refusal still changes something.
+# to the export; stub br sync --merge adds the database rows ($R.db) main's export lacks. Break: the
+# local export write or main's is lost in the pull, the issue is not closed, the worktree or refs
+# survive, nothing is pushed, or a refusal still changes something.
 printf '#!/bin/sh\necho "$PR_STATE pr"\n' > "$tmp/brstub/gh"
 cat > "$tmp/brstub/br" <<'SH'
 #!/bin/sh
@@ -72,23 +73,25 @@ case $1 in
   close) [ -z "${BR_FAIL-}" ] || { echo 'some other error' >&2; exit 1; }
     if [ -n "${BR_BUSY-}" ] && [ ! -e "$BR_BUSY" ]; then : > "$BR_BUSY"; echo 'Database error: database is busy' >&2; exit 1; fi
     echo "closed $2" >> .beads/issues.jsonl ;;
+  sync) [ -z "${BR_MERGE_FAIL-}" ] || exit 1
+    j=.beads/issues.jsonl; { cat $j; grep -vxFf $j "$BR_DB"; } > $j.new; mv $j.new $j ;;
   show) echo "[{\"status\":\"${ISSUE_STATUS:-open}\"}]" ;;
 esac
 SH
 chmod +x "$tmp/brstub/gh"
 am() { # <case> <want-rc> [subject]
-  rc=0; BR_LOG=$R.br PR_STATE=${PR_STATE-MERGED} PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a ${3+"$3"} > "$R.out" 2>&1 || rc=$?
+  rc=0; BR_DB=$R.db BR_LOG=$R.br PR_STATE=${PR_STATE-MERGED} PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a ${3+"$3"} > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] || { bad "after_merge $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
 }
 amk() {
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-  git checkout -qb main; mkdir -p .beads docs/reviews bin; echo base > .beads/issues.jsonl; echo r > docs/ROADMAP.md
-  cp "$bin/review_index.sh" bin/; sh bin/review_index.sh; [ -z "${STALE-}" ] || sed 's/^info=/exit 9; info=/' "$bin/after_merge.sh" > bin/after_merge.sh
+  git checkout -qb main; mkdir -p .beads docs/reviews bin/lib; echo '{"id":"base"}' > .beads/issues.jsonl; echo r > docs/ROADMAP.md
+  cp "$bin/review_index.sh" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/; sh bin/review_index.sh; [ -z "${STALE-}" ] || sed 's/^info=/exit 9; info=/' "$bin/after_merge.sh" > bin/after_merge.sh
   git add . && git commit -qm base && git push -q origin main
   git checkout -qb pr; echo feature > f; git add f && git commit -qm pr && git push -q origin pr; git branch review-7
   git checkout -q main; git worktree add -q "$R.wt" pr 2>/dev/null
   M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git merge -q --no-ff origin/pr -m merge && { [ -z "${STALE-}" ] || { cp "$bin/after_merge.sh" bin/ && git commit -qam script; }; } && git push -q origin main)
-  echo local-write >> .beads/issues.jsonl; : > "$R.br"
+  echo '{"id":"local-write"}' >> .beads/issues.jsonl; cp .beads/issues.jsonl "$R.db"; : > "$R.br"
 }
 amk; head=$(git rev-parse HEAD); echo stray >> docs/ROADMAP.md; am dirty 1; git checkout -q docs/ROADMAP.md
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge dirty: changed something'
@@ -97,17 +100,15 @@ touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
 git branch -q -f review-7 HEAD~0 2>/dev/null; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; git checkout -q main
 am unmerged-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge unmerged-review: changed something'
 git branch -q -f review-7 pr
-(cd "$M" && echo m >> .beads/issues.jsonl && git commit -qam beads && git push -q origin main)
-am export-both 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge export-both: changed something'
-(cd "$M" && git revert --no-edit HEAD > /dev/null && git push -q origin main)
+(cd "$M" && echo '{"id":"m"}' >> .beads/issues.jsonl && git commit -qam beads && git push -q origin main)
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
 echo r2 > docs/ROADMAP.md; echo u > owner.cjs # an untracked owner file must not block (loka-jxwu)
 am success 0 'ROADMAP status: X merged (#7)'
 git fetch -q origin
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
   && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
-[ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf 'base\nlocal-write\nclosed loka-a')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
-grep -qx 'sync --flush-only' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
+[ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf '{"id":"base"}\n{"id":"m"}\n{"id":"local-write"}\nclosed loka-a')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
+grep -qx 'sync --merge --force' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
 [ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
   && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
 # Break: a commit pushed to the PR branch after the merge is deleted with the remote branch.
@@ -126,7 +127,7 @@ amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; 
 echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main
 am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge merge-in-review: changed something'
 # Break: a checkout whose own after_merge.sh is behind main runs the old copy (here it exits 9 before doing anything).
-STALE=1 amk; unset STALE; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
+STALE=1 amk; unset STALE; rc=0; BR_DB=$R.db BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
 git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
   || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
 # Break: a rerun (the failed first run already closed the issue) dies at br close, or closes it again.
@@ -136,6 +137,9 @@ amk; export ISSUE_STATUS=closed; am rerun-closed 0; unset ISSUE_STATUS; git fetc
 amk; export BR_BUSY=$R.busy; am busy-db 0; unset BR_BUSY
 [ "$(grep -E '^(close|doctor)' "$R.br" | cut -d' ' -f1 | tr '\n' ' ')" = 'close doctor close ' ] && grep -q 'closed loka-a' .beads/issues.jsonl \
   || { bad 'after_merge busy-db: not recover then one retry'; cat "$R.br"; }
+# Break: a failed Beads merge still closes the issue, commits or pushes.
+amk; export BR_MERGE_FAIL=1; am merge-fails 1; unset BR_MERGE_FAIL; git fetch -q origin
+! grep -q '^close' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ -d "$R.wt" ] || bad 'after_merge merge-fails: closed, committed or removed something'
 amk; export BR_FAIL=1; am other-br-error 1; unset BR_FAIL; ! grep -q '^doctor' "$R.br" || bad 'after_merge other-br-error: recovered on an unknown error'
 # Break: a br write that dirties the export after the commit (stand-in post-commit hook) is left
 # uncommitted or unpushed.
@@ -143,7 +147,7 @@ amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/iss
 am concurrent-write 0; git fetch -q origin
 [ "$(git show origin/main:.beads/issues.jsonl | tail -1)" = concurrent ] && git diff --quiet || bad 'after_merge concurrent-write: export not committed and pushed'
 # Break: an id after the first in a comma list is not closed (loka-4zvw).
-amk; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a,loka-b > "$R.out" 2>&1 || rc=$?
+amk; rc=0; BR_DB=$R.db BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a,loka-b > "$R.out" 2>&1 || rc=$?
 [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && grep -qx 'close loka-b --reason Merged #7' "$R.br" \
   || { bad "after_merge several-ids: exit $rc or an id not closed"; cat "$R.br"; }
 
@@ -347,6 +351,9 @@ lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- bash_guard.py, send_guard.py (Claude Code PreToolUse hooks) ------------------------------------
 # Break: a git hook skip (--no-verify, commit -n) or a bare br create passes, the owner marker does not let it through, or a
 # command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
+# Break: a force push, git rebase, pkill/killall, gh run watch, gh workflow run, the full npm test, test:e2e, storybook:smoke,
+# check_all.sh or a worktree outside worktrees.noindex passes; its marker (owner's, or LOKA_PM=1) does not let it through;
+# LOKA_PM=1 unlocks a rebase; or a near miss (pull --rebase, test:files, a file that names the script) is refused.
 bg() { # <want-rc> <command>
   rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.stdin.read()}}))' |
     python3 -I "$bin/bash_guard.py" 2> /dev/null || rc=$?
@@ -402,6 +409,34 @@ EOF
 git push --no-verify"
 bg 2 'cat <<< EOF
 git push --no-verify'
+bg 2 'git push --force-with-lease origin b'
+bg 2 'git push -fu origin b'
+bg 2 'git push origin +b'
+bg 0 'git push -u origin b'
+bg 0 'LOKA_OWNER_OK_NO_VERIFY=1 git push --force'
+bg 2 'git -C ../wt rebase main'
+bg 2 'LOKA_PM=1 git rebase main'
+bg 0 'git pull --rebase'
+bg 0 'git rebase --abort'
+bg 2 'pkill -f vitest'
+bg 2 'killall node'
+bg 0 'grep -rn pkill bin && kill 123'
+bg 2 'gh run watch 123'
+bg 0 'gh run list --commit abc'
+bg 2 'gh workflow run ci.yml --ref b'
+bg 0 'LOKA_PM=1 gh workflow run ci.yml --ref b'
+bg 2 'cd kernel/ts && nice -n 10 npm test'
+bg 0 'nice -n 10 npm run test:files -- test/a.test.ts'
+bg 0 'LOKA_PM=1 npm test'
+bg 2 'npm --prefix mobile/app run test:e2e'
+bg 2 'npm run storybook:smoke'
+bg 0 'npm run build'
+bg 2 'sh bin/check_all.sh'
+bg 0 'sed -n 1,20p bin/check_all.sh'
+bg 2 'git worktree add -b x ../x main'
+bg 0 'git worktree add -b x ../worktrees.noindex/x main'
+bg 0 'git worktree add "$W" b'
+bg 0 'LOKA_PM=1 git worktree add ../lokacore-session'
 # Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
 P=$(mktemp -d); mkdir -p "$P/s1/subagents"
 cb() { printf '{"type":"system","subtype":"compact_boundary","compactMetadata":{"durationMs":%s}}\n' "$1"; }
@@ -620,13 +655,13 @@ git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
 git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
-# A main clone of a bare origin; stub br's flush writes $BC_ROW as the export. Break: a machine path,
-# a non-main checkout, an unpushed local commit, another dirty tracked file, a failed pull or an
-# export main changed is still committed or pushed; a rejected push exits 0; the happy path does not
-# reach origin.
-printf '#!/bin/sh\n[ "$*" = "sync --flush-only" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
+# A main clone of a bare origin; stub br's merge writes $BC_ROW as the export. Break: a machine path,
+# a non-main checkout, an unpushed local commit, another dirty tracked file or a failed pull is still
+# committed or pushed; an export main changed is refused; a rejected push exits 0; the happy path does
+# not reach origin.
+printf '#!/bin/sh\n[ "$*" = "sync --merge --force" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
-mkdir bin docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; echo h > docs/HANDOFF.md
+mkdir -p bin/lib docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/; echo h > docs/HANDOFF.md
 echo '{"id":"a","title":"one"}' > .beads/issues.jsonl; git add . && git commit -qm base && git push -q origin main
 bc() { # <case> <row> <want-rc> <origin-must-hold or ->
   rc=0; BC_ROW=$2 PATH="$tmp/mp:$PATH" capped sh bin/beads_checkpoint.sh > "$tmp/mp/out" 2>&1 || rc=$?
@@ -639,10 +674,10 @@ bc machine-path '{"id":"a","title":"/Users/x/y"}' 1 -
 echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git reset -q; rm docs/x
 git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
 git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
-bc main-changed '{"id":"a","title":"bad"}' 1 '"main"'
-git pull -q --ff-only origin main; echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
+bc main-changed '{"id":"a","title":"merged"}' 0 '"merged"'
+echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
 git --git-dir="$O" log main | grep -q local && bad 'beads_checkpoint ahead: pushed an unpushed local commit'; git reset -q --hard HEAD~1
-(cd "$R.o" && echo n > docs/n.md && git add docs/n.md && git commit -qm n && git push -q origin main); echo z > docs/n.md; h=$(git rev-parse HEAD)
+(cd "$R.o" && git pull -q && echo n > docs/n.md && git add docs/n.md && git commit -qm n && git push -q origin main); echo z > docs/n.md; h=$(git rev-parse HEAD)
 bc pull-fail '{"id":"a","title":"bad"}' 1 -; [ "$(git rev-parse HEAD)" = "$h" ] || bad 'beads_checkpoint pull-fail: committed after a failed pull'; rm docs/n.md
 printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
 bc push-rejected '{"id":"a","title":"three"}' 1 -
