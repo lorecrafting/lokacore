@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Account, run and admission contracts",
-  "description": "Account/run binding, story point reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).",
+  "description": "Account and run ids, story point reports and acceptances (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).",
   "$defs": {
     "AccountId": {
       "description": "A platform account (23 §2, §5): server-owned, never reused. Lowercase hyphenated UUID, any version.",

@@ -89,7 +89,7 @@ responsibilities, which are never capabilities (05 §6). No fixtures: none bound
 
 ## Account, run and admission contracts (`protocol/account.schema.json`)
 
-Account/run binding, story point reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
+Account and run ids, story point reports and acceptances (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
 
 - **AccountId**: A platform account (23 §2, §5): server-owned, never reused. Lowercase hyphenated UUID, any version.
 - **EvidenceClass**: How a story point was evidenced (23 §6). A client cannot select or upgrade it.
@@ -570,7 +570,7 @@ B7 exact item contents and authored mass/serving metadata; no clock or resource 
 
 ## Manifest contracts (`protocol/manifest.schema.json`)
 
-Cartridge, deployment and campaign manifests and their version fields (05 §3, §20, §22; 07 §15 campaign manifest; 01 A5). Each version field owns one thing; none stands in for another (05 §3 'Version vocabulary').
+Cartridge manifests and releases and their version fields (05 §3, §20, §22; 01 A5). Each version field owns one thing; none stands in for another (05 §3 'Version vocabulary').
 
 - **ApiVersion**: api_version: the authored source document/schema family (05 §3).
 - **CampaignId**: A campaign identity (07 §15), lowercase snake_case, at most 64 characters.

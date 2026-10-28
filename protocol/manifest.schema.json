@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Manifest contracts",
-  "description": "Cartridge, deployment and campaign manifests and their version fields (05 §3, §20, §22; 07 §15 campaign manifest; 01 A5). Each version field owns one thing; none stands in for another (05 §3 'Version vocabulary').",
+  "description": "Cartridge manifests and releases and their version fields (05 §3, §20, §22; 01 A5). Each version field owns one thing; none stands in for another (05 §3 'Version vocabulary').",
   "$defs": {
     "ApiVersion": {
       "description": "api_version: the authored source document/schema family (05 §3).",
