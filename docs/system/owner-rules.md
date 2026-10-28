@@ -50,7 +50,7 @@ and not repeated here.
   World time starts at first entry (D11 selection); before it there is no world clock to pause
   ([2026-10-08](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md)).
 - Two lanes: the mechanics toolbox ([record](../decisions/owner-decision-one-lane-mechanics-2026-10-12.md)) and the Storybook polish lane, reactivated by the owner on 2026-10-22 ("set things up so that its easy for me to do my ui polish there").
-- Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the parked polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
+- Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
 - In Homestead the skill path replaces NPC cooking and building; a paid NPC reaches only a beginner tier, better results need the player's own crafting, and Star Wars Galaxies style skill trees are approved ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Homestead professions: a failed craft loses its inputs; a skill box costs a trainer coin fee (after the prologue: [prologue record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)), XP is never spent, the novice box is free; several hidden elite professions are possible ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Product order: no Chapter 1 yet; finish all showcases, then UI polish, then worldbuilding, then the official Chapters 1-3; new content uses generic names ([record](../decisions/owner-decision-product-order-2026-10-15.md)).
@@ -206,13 +206,13 @@ and not repeated here.
 - A blind playtest in the web Book (phone width, screenshots) runs before the owner plays each new district (owner 2026-10-10); at high weekly usage Opus builds and reviews, then one sweeping blind Fable playtest (owner 2026-10-16, paraphrased).
 - The all-models weekly limit binds before the Fable cap, so the PM may use Fable for high-stakes judgement (owner 2026-10-14, paraphrased).
 - In a live polish session, polish questions and results go to the Storybook panel with `bin/polish_status.sh log` (owner 2026-10-09).
-- Merge a reviewed PR once its exact head is green, without asking; no permission asks for normal workflow steps. Stop only for spending money, `--no-verify` or force pushes, destructive or outward-facing actions beyond PRs and merges, and product or spec conflicts. Owner-approved docs or tooling changes may be committed directly on `main` when the owner says so (2026-10-24: "just directly commit").
-- Status reports to the owner are in ASD-STE100; design choices and risks in plain English.
-- Beads: short reads (`| head -5`), quiet writes (`br -q`), notes of one or two lines; mark `in_progress` when work starts.
-- Browser automation uses the local `browser-use` skill (`bu.sh`); Claude in Chrome is denied in settings.
-- Budget: the weekly allowance resets Wednesdays 05:00 HST; near the cap, keep to 1 or 2 agents.
-- Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line, `[Pi · model · session]` on tracker comments).
-- Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency cap, worktree isolation and a usage reading before and after.
+- Merge a reviewed PR once its exact head is green, without asking; no permission asks for normal workflow steps. Stop only for spending money, `--no-verify` or force pushes, destructive or outward-facing actions beyond PRs and merges, and product or spec conflicts (owner 2026-09-30). Owner-approved docs or tooling changes may be committed directly on `main` when the owner says so (2026-10-24: "just directly commit").
+- Status reports to the owner are in ASD-STE100; design choices and risks in plain English (owner 2026-10-07).
+- Beads: short reads (`| head -5`), quiet writes (`br -q`), notes of one or two lines; mark `in_progress` when work starts (owner 2026-10-08).
+- Browser automation uses the local `browser-use` skill (`bu.sh`); Claude in Chrome is denied in settings (owner 2026-10-21).
+- Budget: the weekly allowance resets Wednesdays 05:00 HST; near the cap, keep to 1 or 2 agents (2026-10-13).
+- Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line, `[Pi · model · session]` on tracker comments) (2026-10-13).
+- Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency cap, worktree isolation and a usage reading before and after (PM recommendation recorded 2026-10-15).
 
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 

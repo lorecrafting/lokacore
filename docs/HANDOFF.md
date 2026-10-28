@@ -60,7 +60,7 @@ Standing owner rules live in [owner rules](system/owner-rules.md#process).
 
 ## Session procedure
 
-- Start: `mise install`, `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh auth status`; `br sync --import-only`;
+- Start: `mise install`, `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh auth status`; `git pull --ff-only origin main`, then `br sync --import-only`;
   read [WORKFLOW](WORKFLOW.md) (Loop) and this page; `bin/session_status.sh` prints the board.
 - Beads writes from the `main` checkout after `br sync --import-only`; each checkpoint is
   `bin/beads_checkpoint.sh` (pull, flush, machine-path check, commit the export and this page, push;

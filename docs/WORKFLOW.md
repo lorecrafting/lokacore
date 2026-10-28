@@ -20,7 +20,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Work | Claude Code default | Escalate when |
 |---|---|---|
 | Lookup or broad search; a brief drafter's search, citation re-anchoring and consumer inventories | [`Explore`](../.claude/agents/Explore.md) agent, Haiku (project override; the built-in inherits Opus); the drafter keeps only decisions | never for judgment |
-| PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); bounded copy, content or docs edit from a fixed brief | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
+| PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); a purely mechanical slice (owner 2026-10-21, see the implementation row) | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
 | Brief drafting | Opus for a row that follows an existing pattern, an S row or content (owner, 2026-10-14; never Sonnet since 2026-10-23) | Opus drafts every other brief too (a new module, a Realm-sensitive row, a new interaction pattern); Fable drafts a save, protocol or core engine contract brief while weekly usage is under about 80%, else Opus; Sonnet never drafts a brief (owner 2026-10-23 accepted the PM recommendation, quoted: "okay lets go with your rec") |
 | Slice implementation, tests, fix rounds | `developer`, Opus for save, protocol, new-content and judgement slices; Sonnet for purely mechanical slices (re-snapshots, transcript re-recording, moving tests onto existing content) ([owner rules](system/owner-rules.md#process), owner 2026-10-21) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
@@ -144,8 +144,8 @@ Report at the end of the slice, not at every step.
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    The owner, or the PM when the owner asks or for status-only commits (ROADMAP status lines,
-   Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly; never for unreviewed code or past a red check. Before `bin/merge_pr.sh` the PM writes the
-   ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
+   Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly; never for unreviewed code or past a red check. Before `bin/merge_pr.sh` the PM edits the
+   ROADMAP status-only lines (slice done, PR link, slice count) uncommitted and passes the subject; the script commits them on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    `bin/after_merge.sh` (run by `bin/merge_pr.sh`) does that bookkeeping after the PM's
    ROADMAP edit: pull, close the issue, remove the worktree, branch and `review-<N>`, commit, push. Then tell the owner:

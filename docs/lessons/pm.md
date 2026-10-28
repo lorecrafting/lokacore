@@ -42,7 +42,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 
 ## Cloud sessions
 
-- `gh` works over REST only (no `gh pr create`/`merge`; use the GitHub MCP tools); `gh auth status` misreports; branch deletion is blocked, so the owner deletes merged branches.
+- In a cloud container only: `gh` works over REST only (no `gh pr create`/`merge`; use the GitHub MCP tools); `gh auth status` misreports; branch deletion is blocked, so the owner deletes merged branches. Locally `gh pr merge` and `bin/merge_pr.sh` work.
 - `br` 0.7.4 has no reachable release asset; build it from the `v0.7.4` tag with cargo (13 minutes).
 - The disk fills after about seven worktrees (2.2 GB each); remove merged worktrees first.
 - Never run `git worktree prune` while another agent's worktree is in use.
