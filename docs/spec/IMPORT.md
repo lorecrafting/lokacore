@@ -168,7 +168,7 @@ The table below describes the files as imported. Later amendments are in git his
   to 8, then the offer talk and accept, its `activated_with_possession` gone with the offer); the
   `uniform`, `tiny` and `composition` suites are unchanged.
 - 2026-10-24, owner go for the narration log batch (loka-kgd.185,
-  [brief](../briefs/narration-log/README.md); paraphrased): every action narrates, so each
+  [brief](https://github.com/lorecrafting/lokacore/blob/3a0af6b75d34c7ee7fac55837038ab3833562dd0/docs/briefs/narration-log/README.md); paraphrased): every action narrates, so each
   accepted take, drop, give, put, move and talk now carries an engine line. Rewritten by hand:
   [conformance/lantern-traces.json](conformance/lantern-traces.json) (`fixture_version` 3,
   SHA-256 now `59b18dea6b10266eca0d5035333c0f21c8169564e628cf92792d205160803e51`): each step's

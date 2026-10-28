@@ -1,7 +1,7 @@
 # Review: room words batch, signpost fixture link and entity name words (loka-x6t.105, loka-6qi, PR #458, kernel_api 1.118)
 
 - Branch `toolbox/batch-room-words`, reviewed head `3e86973e84143c8d58252e89faaba5e12d90b327` (range `e57f99d1b..3e86973e8`, 27 commits, five slices plus one CI fix). First pass was on `df121dbe7`; the fix commit is judged below.
-- Governing: [docs/briefs/room-words/README.md](../briefs/room-words/README.md), [book-ui.md World and status entry](../system/book-ui.md#world-and-status-entry), [protocol.md](../system/protocol.md) (GameView `words`, Notice `key`), [cartridge.md name words](../system/cartridge.md#name-word-declarations), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md).
+- Governing: [docs/briefs/room-words/README.md](https://github.com/lorecrafting/lokacore/blob/3a0af6b75d34c7ee7fac55837038ab3833562dd0/docs/briefs/room-words/README.md), [book-ui.md World and status entry](../system/book-ui.md#world-and-status-entry), [protocol.md](../system/protocol.md) (GameView `words`, Notice `key`), [cartridge.md name words](../system/cartridge.md#name-word-declarations), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md).
 - Reviewer: anthropic/claude-fable-5-1, independent, authored none of the work.
 - Verdict: **APPROVE WITH NOTES** at `3e86973e8` (first pass at `df121dbe7`: CHANGES REQUIRED, two blockers now fixed; finding 3 open as should-fix).
 

@@ -1,7 +1,7 @@
 # Review: containers start closed, Open reveals contents (loka-x6t.121 slices 1-2, PR #463)
 
 - Branch `toolbox/batch-container-open`, reviewed head `7117731b241189da067aea102a47c0c6290131b3`. The announced follow-up (SILENT `close` scoped to lidded cartridges, open-lid save/load test) was not pushed when this review was done. It gets a check of its commits only.
-- Governing: [docs/briefs/container-open/README.md](../briefs/container-open/README.md), [book-ui.md](../system/book-ui.md) (lid paragraph), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md), [two-lane CI](../decisions/owner-decision-two-lane-ci-2026-10-09.md).
+- Governing: [docs/briefs/container-open/README.md](https://github.com/lorecrafting/lokacore/blob/3a0af6b75d34c7ee7fac55837038ab3833562dd0/docs/briefs/container-open/README.md), [book-ui.md](../system/book-ui.md) (lid paragraph), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md), [two-lane CI](../decisions/owner-decision-two-lane-ci-2026-10-09.md).
 - Reviewer: anthropic/claude-opus-5-5, independent, authored none of the work.
 - Verdict: **CHANGES REQUIRED**.
 

@@ -1,7 +1,7 @@
 # Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)
 
 - Branch `toolbox/batch-narration-log`, reviewed head `89959b620e62a1f991969c81a1b25ab11fc95a33` (base `b27893ba0`, 23 commits).
-- Governing: [docs/briefs/narration-log/README.md](../briefs/narration-log/README.md) (appended rulings), [book-ui.md Line placement](../system/book-ui.md), [interaction-patterns.md "Every line logs; some are quiet"](../design/interaction-patterns.md), [IMPORT.md 2026-10-24 amendment](../spec/IMPORT.md), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md).
+- Governing: [docs/briefs/narration-log/README.md](https://github.com/lorecrafting/lokacore/blob/3a0af6b75d34c7ee7fac55837038ab3833562dd0/docs/briefs/narration-log/README.md) (appended rulings), [book-ui.md Line placement](../system/book-ui.md), [interaction-patterns.md "Every line logs; some are quiet"](../design/interaction-patterns.md), [IMPORT.md 2026-10-24 amendment](../spec/IMPORT.md), AGENTS.md "Writing tests", [WORKFLOW review stance](../WORKFLOW.md).
 - Reviewer: anthropic/claude-opus-5-5, independent, authored none of the work.
 - Verdict: **APPROVE WITH NOTES** at `14a795f20` (first pass at `89959b620`: CHANGES REQUIRED, two blockers now fixed).
 
