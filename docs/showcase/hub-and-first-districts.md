@@ -217,7 +217,7 @@ their description why the door is shut (a `sky` variant).
 - Recipe `search_cleft` at `cleft`: policy `time_window {from: 20, to: 5}` (the window wraps at
   day end: 20:00 to 04:59), success
   `fact.assign stair_found true`, `tip`: "Searching costs nothing; some things only show in the
-  dark." (`hidden_sampler/recipes/search_panel.json`, `quest_sampler` tip). Sandbox twin
+  dark." (`hidden_sampler/actions/search_panel.json`, `quest_sampler` tip). Sandbox twin
   `search_pool_cleft` with an empty policy assigning the same fact.
 - Facts: `stair_found` (player bool).
 
@@ -333,7 +333,7 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   `tollhouse`, `mill`, `church`, each `when all(visited_count at_least 1 for the five rooms, not
   topic_walker_known)` `apply fact.assign topic_walker_known true` (`codex_sampler/reactions`).
 - Pick: recipe `pick_strongbox` at `strongbox_lock`, check opposed skill `pick`, policy
-  `strongbox_picked false`, success assigns it; no jam (`barrier_sampler/recipes/pick_lock.json`).
+  `strongbox_picked false`, success assigns it; no jam (`barrier_sampler/actions/pick_lock.json`).
 - Force: `force_tollhouse_door` at `tollhouse_door`, check opposed `str`, policy all(`has_tag
   {barrier: tollhouse_door, tag: fragile}`, `tollhouse_forced false`), success assigns
   `tollhouse_forced`; barrier `opens_when fact_compare tollhouse_forced true`.
@@ -342,7 +342,7 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   Sandbox twins on `hall_strongbox` and `hall_cupboard`.
 - Deduction: recipe `think_lectern` at `lectern`, policy all(`topic_parish_known`,
   `topic_fire_known`, not `topic_heir_known`), success assigns `topic_heir_known`
-  (`codex_sampler/recipes/deduce_smugglers.json`); sandbox twin at `hall_lectern`.
+  (`codex_sampler/actions/deduce_smugglers.json`); sandbox twin at `hall_lectern`.
 - Quest `carry_letter` (`quest_sampler/quests`): no `offer` (dialogue accept only); objective
   `current_state` `has_item letter`, so a letter taken before the accept counts (loka-y6yg.12);
   Wat's dialogue policy reads all(`quest_state active`, `has_item letter`), as a current_state

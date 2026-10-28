@@ -2,7 +2,7 @@
 
 Under [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects [D4 mechanics](../system/mechanics.md#d4-homes-finite-apples-and-eat-selected-contract),
-[chapter declarations](../system/cartridge.md#d4-homes-and-orchard-declarations),
+[chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d4-homes-and-orchard-declarations),
 [composition](../system/protocol.md#d4-held-food-composition),
 [save recovery](../system/save.md#d4-finite-food-and-terminal-custody-recovery) and
 [Book flow](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d4-home-details-and-carried-food-eat).

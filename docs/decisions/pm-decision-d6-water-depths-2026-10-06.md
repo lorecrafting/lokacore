@@ -9,7 +9,7 @@ published D1 and covers the old logical timer; it does not approve this replacem
 the replacement deadline, new source or publication.
 
 Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation),
-[cartridge](../system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation),
+[cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation),
 [protocol](../system/protocol.md#d6-water-movement-and-corpse-selection),
 [save](../system/save.md#d6-water-and-owned-corpse-recovery),
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d6-water-exits-and-chapel-recovery), and the

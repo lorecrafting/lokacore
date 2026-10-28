@@ -346,7 +346,7 @@ unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILIT
 
 ## D11 character choice (selected contract)
 
-The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#chapters-scenes-and-recovery) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
+The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#chapters-scenes-and-recovery) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
 
 Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal, after a zero-amount hp settle when the hp maximum is derived ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
 
@@ -549,7 +549,7 @@ The installed subset of archived 06 §33–§37 and 21 §3.6 has two closed cont
 A `modal` SceneDefinition starts from a declared story-point, quest outcome or bound
 accepted action, and has n≥1 `narrate {text}` steps followed by `await_ack`, then `end`.
 It is not skippable or restartable. Its optional validated `on_end` atomically assigns
-declared player facts and reaches one story point; [A3](cartridge.md#a3-green-finale)
+declared player facts and reaches one story point; [A3](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#a3-green-finale)
 consumes this completion. B9 adds the anchored, resumable `presentation_only` Rest dream,
 with its bounded choice/branch and final quest acknowledgement; its exact step and
 availability rules live in [S10](#s10-lantern-rest-and-dream-b9-selected-contract).
@@ -930,7 +930,7 @@ and existing due-before-input order; player Wait and clock skips remain unavaila
 ## Peg's immediate shop (B3 selected contract)
 
 At the chandler, the original living Peg offers the finite, authored
-[B3 shelf](cartridge.md#pegs-b3-shelf). Buy and Sell bind Peg, one exact item EntityId and
+[B3 shelf](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#pegs-b3-shelf). Buy and Sell bind Peg, one exact item EntityId and
 the displayed price. The offer is rechecked against current co-location, direct custody,
 catalog eligibility, price, balances and carrying load when executed; a stale view or
 forged command has no authority. Reading the shop does not pause the clock. No hours gate
@@ -960,7 +960,7 @@ participating balances must reopen as valid current-build truth.
 
 [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 adds the first skills and armed/defense consumer to the installed combat above.
-The [cartridge](cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
+The [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
 profile and chance. Qualification is current policy truth, never stored mastery.
 
 `skills@1` owns acquired membership by CharacterId and declared skill reference.
@@ -1019,7 +1019,7 @@ the authority remains the sole transaction/adoption owner.
 
 This consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
 It composes containment, carrying, dialogue, quest,
-bounded fact adjustment and receipts. [Cartridge stock](cartridge.md#b5-herb-and-bandage-stock)
+bounded fact adjustment and receipts. [Cartridge stock](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b5-herb-and-bandage-stock)
 contains the exact quantities; no engine literal identifies Wick, fenwort or S9.
 
 Chapel Nave north↔Cloister south and Cloister east↔Infirmary west are
@@ -1087,7 +1087,7 @@ Selected under the [B4 PM adoption](../decisions/pm-decision-b4-light-2026-10-05
 the first consumer is the optional Well Shaft detail,
 using the real B3 torch and oil; no chapter-required route gains a light gate.
 The torch is a reusable oil-soaked wick on a handle, with unchanged B3 identity,
-prices, mass and light slot. [Cartridge tuning](cartridge.md#b4-well-and-fuel)
+prices, mass and light slot. [Cartridge tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b4-well-and-fuel)
 owns every fuel value. Light adds only per-item fuel history and one effective
 illumination query; it composes equipment, custody, confirmed time and details.
 
@@ -1151,7 +1151,7 @@ shrine teleport or forced-overload recovery operation is added.
 
 B7 supplies the first `liquid@1` consumer:
 Fill at Well Lane's authored well detail, Pour between two real obtainable
-waterskins, and Drink water. [Tuning](cartridge.md#b7-water-and-vessels) supplies
+waterskins, and Drink water. [Tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b7-water-and-vessels) supplies
 units, capacity, density and drink amount. [Composition](protocol.md#b7-liquid-composition),
 [recovery](save.md#b7-liquid-recovery) and [Book](book-ui.md#item-details-and-takedrop)
 govern their shared boundary. No hunger/thirst clock, HP/MV benefit, spill, oil
@@ -1203,7 +1203,7 @@ Drop and recovery move the same contents without refilling them.
 
 [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
 selects an all-hours, player-started patrol led by the original noncombatant Tobin.
-The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
+The [cartridge route](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c2-watch-route-and-trust) supplies its finite
 walk and checkpoints. This is player-follow-leader behavior; it does not change
 [escort@1](#escort1)'s NPC-follow-player relation or occupy its actor-keyed row.
 
@@ -1261,7 +1261,7 @@ are outside this selected consumer.
 ## S4 all-hours wisp (B6 selected contract)
 
 Installed under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
-using the selected contract. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
+using the selected contract. [Cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b6-marsh-route-and-tuning)
 owns the route, attribute, answer, limit and topic. S4 is optional and one-shot;
 no night, tide, purchase, fuel, herb, bell, faction or Q2-completion gate applies.
 
@@ -1310,7 +1310,7 @@ conversation graph or a promise of all historical topics.
 ## C3 bounded living hounds (selected contract)
 
 [PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
-selects the first dynamic population consumer; [cartridge](cartridge.md#c3-hound-population-and-loot)
+selects the first dynamic population consumer; [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c3-hound-population-and-loot)
 owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
 Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and
 enemy flight; C5 owns actual bleeding. No hound is a required quest objective.
@@ -1621,7 +1621,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
 
 Installed under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
 D2 completes the ten public Priory rooms through the reciprocal
-[authored route](cartridge.md#d2-public-priory-and-book-authoring). Movement retains
+[authored route](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d2-public-priory-and-book-authoring). Movement retains
 its ordinary cost and position rules; no key, light, topic, bell/faction outcome,
 NPC schedule, fare, water skill or time window gates this extension. These are
 safe walking rooms, not a new hazard. Aldric remains public in Chapel Nave;
@@ -1719,7 +1719,7 @@ stale controls cannot skip a beat, change the branch or repeat the consequence.
 ## D4 homes, finite apples and Eat (selected contract)
 
 **D4 source contract.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
-selects the [chapter declarations](cartridge.md#d4-homes-and-orchard-declarations).
+selects the [chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d4-homes-and-orchard-declarations).
 The orchard detail reuses B5 Harvest over three actual authored item identities.
 Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
 resource node, random roll, regrowth job or seasonal availability gate is added.
@@ -1766,7 +1766,7 @@ keyed-action admission. Ordinary uneaten food custody and death remain unchanged
 
 Selected under the [D5 PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
 Five optional rooms reuse ordinary reciprocal movement, detail Read and Q2 escort.
-[Cartridge authoring](cartridge.md#d5-deep-fen-route-and-details) declares the exact
+[Cartridge authoring](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d5-deep-fen-route-and-details) declares the exact
 route. Every new room is dry traversable ground and naturally lit at all hours,
 including the shallow fox den; none declares `dark_description`. No swim, tide,
 light, time, topic, bell, faction or quest gate applies. The existing B4 dark-room
@@ -1802,7 +1802,7 @@ Living actors below surface for 0 MV regardless of current skill/load/MV/posture
 light. Both directions use existing `move` and normal room-entry evidence.
 
 One water occupancy generation binds one absolute submersion deadline and one
-due job. The selected chapter duration is in [cartridge](cartridge.md#d6-bottom-rooms-and-water-tuning-selected-contract).
+due job. The selected chapter duration is in [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-contract).
 There is no periodic drain: MV 0 alone never drowns, and ordinary fractional
 resource recovery remains unchanged. Surface and every death invalidate water
 occupancy; stale/canceled/re-entry jobs cannot affect a later occupancy.
@@ -1869,7 +1869,7 @@ Bell Tower, Belfry or any mandatory route. See the [D9 decision](../decisions/pm
 
 ## D12 practical skill consumers (selected contract)
 
-The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
+The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
 
 Original living, co-located Sedge and Peg teach their respective skills through bound Talk/Choose, typed `skill.acquire` and conserved `lesson_payment` in one proposal. Acquisition is independent of current qualification. Already acquired refuses before any new fee or grant; exact invocation replay returns the existing accepted receipt. Lessons are optional and all-hours; neither learning nor either benefit gates ferry, recovery, ordinary Harvest, S9 or chapter completion. Sedge's existing free swim choice remains separate and available.
 
@@ -1881,7 +1881,7 @@ Peg's opted Buy quote uses current usable haggle after normal elapsed settlement
 
 ## D7 bounded deer and delayed sight flight
 
-[D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](cartridge.md#d7-deer-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
+[D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d7-deer-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
 
 The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
 
@@ -1889,7 +1889,7 @@ The plan's ordinary wander still skips engaged members and the member transferre
 
 ## C5 hound bleeding and bandage (selected contract)
 
-[C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#live-combat-response-m6-a) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. The generic status interpreter of [toolbox row 1](#status-effects-over-time-toolbox-row-1) runs beside C5 and does not replace it.
+[C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#live-combat-response-m6-a) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. The generic status interpreter of [toolbox row 1](#status-effects-over-time-toolbox-row-1) runs beside C5 and does not replace it.
 
 Only an actual C3 hound's positive HP loss to the surviving player body during its combat opportunity applies bleeding. Miss, successful defense, clamped zero loss, fatal hit, other opponents and forged event/name matches do not. The existing combat writer group adds one typed body/effect instance with source hound identity, generation, `ends_at`, `next_tick_at` and current owned job. A second qualifying hit while active refreshes `ends_at = now + authored duration` but retains the generation and pending next tick; it neither stacks nor postpones that tick. A new application after cure/expiry uses a fresh generation. The hound's later death or flight does not cancel its already inflicted effect.
 
@@ -1950,7 +1950,7 @@ An absent Aldric yields the authored no-answer response, without asserting his l
 
 ## C6 S27 Night in the Marsh (selected contract)
 
-The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
+The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
 
 At any hour a standing living player at Hound Run deliberately starts S27 once. Starting binds an actor-owned quest occurrence and a five-entry ordered route attempt with cursor zero. Each later **accepted actual player Move or Flee** along the next authored edge advances that cursor exactly once. Starting co-location, NPC movement, replayed/refused movement, revisiting a room without the next edge, transport and pre-start visits earn nothing. The fifth accepted entry resolves the same quest and awards its selected consequences atomically. There is no idle survival timer, night boundary, arbitrary room-tag counter or new global objective interpreter.
 

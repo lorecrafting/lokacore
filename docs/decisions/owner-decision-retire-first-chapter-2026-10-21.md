@@ -19,7 +19,7 @@ Written 2026-10-21 in Claude Code by anthropic/claude-opus-5-5 (developer).
   admitted helpers, a Buy price unchanged after reload and a corpse Take kept across reload.
 - Later phases (epic `loka-4hik`) delete the Ashmere sources, fixtures and the tests that load them
   explicitly. Until then they stay, with the E1 recorder that certified the
-  [retired chapter](../system/cartridge.md#retired-first-chapter-e1-candidate).
+  [retired chapter](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#retired-first-chapter-e1-candidate).
 - Phase 2 (`loka-4hik.2`, lean option chosen by the owner the same day) follows the
   [phase-2 brief](../briefs/retire-ashmere-2/README.md).
 - The first release will bundle the real game's chapter, rebuilt from zero after UI polish.

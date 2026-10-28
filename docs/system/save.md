@@ -481,7 +481,7 @@ unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchange
 
 ## Green finale recovery (A3)
 
-The five [Green outcomes](cartridge.md#a3-green-finale) extend the same
+The five [Green outcomes](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#a3-green-finale) extend the same
 receipt-backed return proof. A begun epilogue requires its own committed Begin
 receipt with the selected recipe, actor at Green and exact `market_cross` event
 subject; an unrelated action cannot evidence its scene start. Load admits every

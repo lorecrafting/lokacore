@@ -109,7 +109,7 @@ Sealed: `storeroom` (the crate, lid closed at start, with `candle_04`, `candle_0
   `pay` with `lesson_payment` 3 pennies, sequence `fact.assign wanted false`; the D1 fee shape).
 - **The jailer** and the cell (row 36, `trial_sampler`): `reactions/charge.json` on
   `entity_entered_room` in `cell` when wanted narrates `trial.charge`, shuts `cell_door` and `grate`
-  and resets `grate_forced`; `recipes/force_grate.json` is an opposed `str` check against
+  and resets `grate_forced`; `actions/force_grate.json` is an opposed `str` check against
   `grate_lock`. Two dialogues, the first in key order whose policy holds opening: `jailer_broke`
   (wanted and not `resource_compare pennies at_least 3`) offers `pay` (shown unavailable,
   `insufficient_resource`) and `work_off` (sequence `fact.assign wanted false`, nothing paid or

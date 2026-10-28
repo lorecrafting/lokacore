@@ -1,6 +1,6 @@
 # E2 closing proof on `r9c_interactions@0.0.1` (S5)
 
-Governing: [E1 exact candidate proof policy](../../system/e1-certification.md#e1-exact-candidate-proof-policy),
+Governing: [E1 exact candidate proof policy](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/e1-certification.md#e1-exact-candidate-proof-policy),
 [Commit, fence, reconcile](../../system/save.md#commit-fence-reconcile), E2 brief acceptance 3, 4, 6 and 7
 ([brief](../../briefs/chapter-one/chapter-one-e2-r9c-interactions-brief-2026-10-05.md)), and
 [owner decision E2 plan](../../decisions/owner-decision-e2-plan-2026-10-07.md) (a) and (b). The claim is

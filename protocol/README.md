@@ -57,7 +57,7 @@ derived additions are in `test/loka/cartridge_containers_hash.py`. Original arti
 retain preproduction bytes; the current loader refuses unmarked receptacles. Current
 feature transcripts remain replayable. The retired first
 chapter's release, API, content hash and room count are recorded in
-[the retired chapter identity](../docs/system/cartridge.md#retired-first-chapter-e1-candidate).
+[the retired chapter identity](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#retired-first-chapter-e1-candidate).
 
 `fixtures/escort.json` pins the API1.11 relation, transition, target, dialogue effect
 and policy supplement, including both portable composers and independent preconditions

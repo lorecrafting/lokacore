@@ -2,7 +2,7 @@
 
 Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects [C4 behavior](../system/mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract),
-[pack/flight parameters](../system/cartridge.md#c4-pack-response-and-wounded-flight),
+[pack/flight parameters](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c4-pack-response-and-wounded-flight),
 [composition](../system/protocol.md#c4-pack-encounter-and-flight-composition),
 [save](../system/save.md#c4-pack-and-flight-recovery),
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c4-pack-response-and-enemy-flight-details) and the

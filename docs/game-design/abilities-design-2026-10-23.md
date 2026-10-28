@@ -433,7 +433,7 @@ Per **box** (`skills/<key>.json`): `label`, `requirement`, `qualification`, `pro
 dialogue choice with `skill.acquire` and `lesson_payment` (free for a novice), and at least one
 aside.
 
-Per **spell** (`recipes/<key>.json`): `target {kind: spell, word, learned, aimed?}`, `costs`,
+Per **spell** (`actions/<key>.json`): `target {kind: spell, word, learned, aimed?}`, `costs`,
 `cooldown`, `policy`, `reason`, `check` (new: fixed rating), `sequence`, `narration`.
 
 Per **elite**: the boxes (all `hidden`), stage facts, an `any` trial policy, the teacher, the

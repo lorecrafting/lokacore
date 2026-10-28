@@ -6,7 +6,7 @@ merged at `61f4200c`; the current planning base is main `f57f1a8c`,
 chapter v035/API1.30. Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects the narrow Chapter 1 consequence contract in
 [mechanics](../system/mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation),
-[cartridge](../system/cartridge.md#d9-village-reaction-content-selected-pending-implementation),
+[cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d9-village-reaction-content-selected-pending-implementation),
 [protocol](../system/protocol.md#d9-reaction-cue-and-study-admission-composition),
 [save](../system/save.md#d9-village-consequence-recovery),
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d9-village-reactions-and-bell-cue) and the

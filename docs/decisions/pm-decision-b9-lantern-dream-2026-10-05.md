@@ -2,7 +2,7 @@
 
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [S10 mechanics](../system/mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract),
-[chapter declarations](../system/cartridge.md#b9-lantern-dream-declarations),
+[chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b9-lantern-dream-declarations),
 [composition](../system/protocol.md#b9-rest-occurrence-and-dream-composition),
 [recovery](../system/save.md#b9-dream-recovery) and
 [Book nesting](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b9-bed-and-resumable-dream-details) for the

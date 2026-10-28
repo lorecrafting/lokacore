@@ -17,7 +17,7 @@ This record closes the focused documentation repairs against published main
 Each repository repair has its own retained independent review and normal
 publication checks. No historical audit, decision, review or frozen fixture was
 rewritten to suggest that the repair existed at the original audit date. The
-[roadmap](../ROADMAP.md#chapter-one-completion) remains at 30 of 33 slices:
+[roadmap](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/ROADMAP.md#chapter-one-completion) remains at 30 of 33 slices:
 E1 has 647 exact authored paths pending, final selected-candidate 10,000-sequence
 proof has not run, E2 has no source GO, and E3 still requires browser and human
 closure. Native mobile remains paused; the owner save and explicit mismatch

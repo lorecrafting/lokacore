@@ -1,6 +1,6 @@
 # E1 coverage complete: recorder pass
 
-Governing policy: [E1 exact candidate proof policy](../../system/e1-certification.md#e1-exact-candidate-proof-policy).
+Governing policy: [E1 exact candidate proof policy](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/e1-certification.md#e1-exact-candidate-proof-policy).
 Clean source `e2f56884a0a8154831d455a893aaca46af089e2f` (branch `e1/closure-prep`), selected v042
 artifact sha256 `1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115`, content hash
 `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`; check and policy digests are

@@ -3,14 +3,14 @@
 These are the active system contracts (audited claim by claim at `87a1246`; later mechanic
 clauses cite their governing records). A quoted name cites a test. The
 [current bundled chapter](cartridge.md#current-bundled-chapter) names the bundled release; the
-[retired first chapter](cartridge.md#retired-first-chapter-e1-candidate) is deleted; its section is history. [DIFFERENCES.md](DIFFERENCES.md) records remaining differences for the owner.
+[retired first chapter](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#retired-first-chapter-e1-candidate) is deleted; its section is history. [DIFFERENCES.md](DIFFERENCES.md) records remaining differences for the owner.
 History (the specification packet, ADRs, decisions and reviews) remains in its dated
 records and [docs/archive/](../archive/README.md).
 
 | File | Covers |
 |---|---|
 | [architecture.md](architecture.md) | repository layout, primitive composition and layer ownership, the compile-checked boundaries, hosts, checks, observability |
-| [e1-certification.md](e1-certification.md) | the E1 exact candidate proof policy: witness rules, dispositions, the recorder's pass result |
+| [e1-certification.md](e1-certification.md) | pointer: E1 certification is rebuilt with the real chapter |
 | [book-ui.md](book-ui.md) | book views, entries, actions/logs, destinations, scene/state rules |
 | [Book component guide](../BOOK-UI-COMPONENTS.md) | current shared-client pieces and the page pattern to reuse for a new mechanic; Book UI above remains normative |
 | [protocol.md](protocol.md) | contracts, the numeric profile, the decision loop, budgets, invariants, ActionSet, GameView |

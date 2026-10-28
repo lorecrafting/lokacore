@@ -2,7 +2,7 @@
 
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [B8 mechanics](../system/mechanics.md#b8-mauds-immediate-services-selected-contract),
-[chapter tuning](../system/cartridge.md#b8-mauds-service-declarations),
+[chapter tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b8-mauds-service-declarations),
 [composition](../system/protocol.md#b8-immediate-service-composition),
 [save recovery](../system/save.md#b8-service-recovery) and
 [Book flow](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b8-maud-and-bed-details) for the
