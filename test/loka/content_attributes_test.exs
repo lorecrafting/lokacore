@@ -28,7 +28,7 @@ defmodule Loka.ContentAttributesTest do
       update_in(src("cartridge.json"), ["requires", "capabilities"], &Map.merge(&1, caps))
     )
 
-    write.("recipes/pray.json", put_in(src("recipes/pray.json"), ["policy", "root"], root))
+    write.("actions/pray.json", put_in(src("actions/pray.json"), ["policy", "root"], root))
     if attributes, do: write.("attributes.json", %{"attributes" => attributes})
     Loka.Content.compile(dir)
   end
@@ -85,7 +85,7 @@ defmodule Loka.ContentAttributesTest do
   # reference unchecked, or a schema bound of a leaf or of attributes.json lost, each compiling
   # what the loader rejects.
   test "unlocked, unresolved and malformed attributes and leaves", %{tmp_dir: dir} do
-    root = "recipes/pray.policy.root"
+    root = "actions/pray.policy.root"
     str = %{"str" => %{"start" => 14}}
     {s, u} = {"SCHEMA_VIOLATION", "UNKNOWN_FIELD"}
 
@@ -101,7 +101,7 @@ defmodule Loka.ContentAttributesTest do
       pool_unlocked: {pool("mv", 2), false, nil, [undeclared.("#{root}.op")]},
       stat_unlocked:
         {stat("str", 14), false, str,
-         [undeclared.("attributes.attributes.str"), undeclared.("#{root}.op")]},
+         [undeclared.("#{root}.op"), undeclared.("attributes.attributes.str")]},
       attribute_unlocked:
         {%{"op" => "all", "items" => []}, false, str, [undeclared.("attributes.attributes.str")]},
       luck: {stat("luck", 1), true, str, [unresolved.("attribute", "luck")]},

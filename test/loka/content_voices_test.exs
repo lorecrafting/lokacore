@@ -10,7 +10,7 @@ defmodule Loka.ContentVoicesTest do
     dir = Loka.ContentSource.copy("cartridges/voices_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.90")}
-    no_recipe = {"recipes/read_glyphs.json", nil}
+    no_recipe = {"actions/read_glyphs.json", nil}
 
     unowned =
       {"cartridge.json",

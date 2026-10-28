@@ -12,9 +12,9 @@ defmodule Loka.ContentSpellEffectsTest do
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
 
     detail = %{"kind" => "detail", "room" => "hall", "detail" => "stand"}
-    misplaced = [{"recipes/ward.json", &Map.put(&1, "target", detail)}]
+    misplaced = [{"actions/ward.json", &Map.put(&1, "target", detail)}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, misplaced)
-    assert pairs(diags) == [{"SCHEMA_VIOLATION", "recipes/ward.outcomes.success.sequence[0].op"}]
+    assert pairs(diags) == [{"SCHEMA_VIOLATION", "actions/ward.outcomes.success.sequence[0].op"}]
 
     below = [{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.97")}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, below)
@@ -24,14 +24,14 @@ defmodule Loka.ContentSpellEffectsTest do
            ]
 
     ghoul = [
-      {"recipes/flamma.json",
+      {"actions/flamma.json",
        &put_in(&1, ["outcomes", "success", "sequence", Access.at(0), "npc"], "ghoul")}
     ]
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, ghoul)
 
     assert pairs(diags) == [
-             {"UNRESOLVED_REFERENCE", "recipes/flamma.outcomes.success.sequence[0].npc"}
+             {"UNRESOLVED_REFERENCE", "actions/flamma.outcomes.success.sequence[0].npc"}
            ]
 
     unlit =
@@ -45,7 +45,7 @@ defmodule Loka.ContentSpellEffectsTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, unlit)
 
     assert pairs(diags) == [
-             {"UNDECLARED_CAPABILITY", "recipes/lux.outcomes.success.sequence[0].op"}
+             {"UNDECLARED_CAPABILITY", "actions/lux.outcomes.success.sequence[0].op"}
            ]
   end
 
@@ -70,12 +70,12 @@ defmodule Loka.ContentSpellEffectsTest do
     }
 
     for {edits, want} <- [
-          {[{"recipes/flamma.json", bare}],
-           {"SCHEMA_VIOLATION", "recipes/flamma.outcomes.success.sequence[0].npc"}},
-          {[floor, {"recipes/flamma.json", details}],
-           {"SCHEMA_VIOLATION", "recipes/flamma.target.aimed.scopes[0]"}},
-          {[floor, {"recipes/ward.json", &Map.put(&1, "target", use)}],
-           {"UNKNOWN_FIELD", "recipes/ward.target.aimed"}}
+          {[{"actions/flamma.json", bare}],
+           {"SCHEMA_VIOLATION", "actions/flamma.outcomes.success.sequence[0].npc"}},
+          {[floor, {"actions/flamma.json", details}],
+           {"SCHEMA_VIOLATION", "actions/flamma.target.aimed.scopes[0]"}},
+          {[floor, {"actions/ward.json", &Map.put(&1, "target", use)}],
+           {"UNKNOWN_FIELD", "actions/ward.target.aimed"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == [want]
@@ -98,8 +98,8 @@ defmodule Loka.ContentSpellEffectsTest do
 
     edits = [
       floor,
-      {"recipes/flamma.json", aimed.("npc", ["room_occupants"])},
-      {"recipes/lux.json", aimed.("item", ["inventory"])}
+      {"actions/flamma.json", aimed.("npc", ["room_occupants"])},
+      {"actions/lux.json", aimed.("item", ["inventory"])}
     ]
 
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, edits)

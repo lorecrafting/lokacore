@@ -16,7 +16,7 @@ defmodule Loka.ContentD9Test do
        })},
       {"rooms/drill_yard.json",
        &put_in(&1, ["details", "bell"], %{"aliases" => ["bell"], "description" => "detail.bell"})},
-      {"recipes/ring_bell.json",
+      {"actions/ring_bell.json",
        %{
          "label" => "actions.ring_bell",
          "aliases" => ["ring"],

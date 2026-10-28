@@ -15,7 +15,7 @@ defmodule Loka.ContentDuskTest do
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
 
   defp pick(path, f),
-    do: %{"recipes/pick_lock.json" => update_in(src("recipes/pick_lock.json"), path, f)}
+    do: %{"actions/pick_lock.json" => update_in(src("actions/pick_lock.json"), path, f)}
 
   defp without(cap) do
     caps = Map.delete(src("cartridge.json")["requires"]["capabilities"], cap)
@@ -54,12 +54,12 @@ defmodule Loka.ContentDuskTest do
   # Breaks: a checked recipe without a failure outcome, or a failure outcome without a check,
   # compiles (the loader rejects both).
   test "a recipe has a failure outcome exactly when it has a check", %{dir: dir} do
-    mismatch = {:error, [d("OUTCOME_MISMATCH", "recipes/pick_lock.outcomes")]}
+    mismatch = {:error, [d("OUTCOME_MISMATCH", "actions/pick_lock.outcomes")]}
     drop = fn key -> fn r -> Map.delete(r, key) end end
     assert compile(dir, pick(["outcomes"], drop.("failure"))) == mismatch
 
     assert compile(dir, %{
-             "recipes/pick_lock.json" => Map.delete(src("recipes/pick_lock.json"), "check")
+             "actions/pick_lock.json" => Map.delete(src("actions/pick_lock.json"), "check")
            }) == mismatch
   end
 
@@ -72,7 +72,7 @@ defmodule Loka.ContentDuskTest do
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "recipes/pick_lock.outcomes.failure.sequence[0].fact",
+                  "actions/pick_lock.outcomes.failure.sequence[0].fact",
                   %{
                     "target" => "check_sampler@0.0.1:fact/gate_rusted"
                   }
@@ -85,7 +85,7 @@ defmodule Loka.ContentDuskTest do
            ) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "recipes/pick_lock.outcomes.failure.narration.actor", %{
+                d("UNRESOLVED_REFERENCE", "actions/pick_lock.outcomes.failure.narration.actor", %{
                   "target" => "narration.none"
                 })
               ]}
@@ -95,7 +95,7 @@ defmodule Loka.ContentDuskTest do
               [
                 d(
                   "UNDECLARED_CAPABILITY",
-                  "recipes/pick_lock.check",
+                  "actions/pick_lock.check",
                   %{"capability" => "check"},
                   [
                     "check@1"
@@ -115,7 +115,7 @@ defmodule Loka.ContentDuskTest do
 
     assert d(
              "UNDECLARED_CAPABILITY",
-             "recipes/pick_lock.outcomes.failure.sequence[1].op",
+             "actions/pick_lock.outcomes.failure.sequence[1].op",
              %{"capability" => "fact"},
              ["fact@1"]
            ) in diags
@@ -128,31 +128,31 @@ defmodule Loka.ContentDuskTest do
               [
                 d(
                   "UNDECLARED_CAPABILITY",
-                  "recipes/ring_bell.policy.root.op",
+                  "actions/ring_bell.policy.root.op",
                   %{"capability" => "schedule"},
                   ["schedule@1"]
                 )
               ]}
 
-    ring = put_in(src("recipes/ring_bell.json"), ["policy", "root", "to"], 18)
+    ring = put_in(src("actions/ring_bell.json"), ["policy", "root", "to"], 18)
 
-    assert compile(dir, %{"recipes/ring_bell.json" => ring}) ==
-             {:error, [d("EMPTY_TIME_WINDOW", "recipes/ring_bell.policy.root")]}
+    assert compile(dir, %{"actions/ring_bell.json" => ring}) ==
+             {:error, [d("EMPTY_TIME_WINDOW", "actions/ring_bell.policy.root")]}
   end
 
   # Review S2. Breaks: two recipes' checks with one key compile, so one check DefinitionRef names
   # two checks.
   test "two recipes' checks with one key are DUPLICATE_DEFINITION", %{dir: dir} do
-    ring = Map.put(src("recipes/ring_bell.json"), "check", src("recipes/pick_lock.json")["check"])
+    ring = Map.put(src("actions/ring_bell.json"), "check", src("actions/pick_lock.json")["check"])
 
     ring =
-      put_in(ring, ["outcomes", "failure"], src("recipes/pick_lock.json")["outcomes"]["failure"])
+      put_in(ring, ["outcomes", "failure"], src("actions/pick_lock.json")["outcomes"]["failure"])
 
-    assert compile(dir, %{"recipes/ring_bell.json" => ring}) ==
+    assert compile(dir, %{"actions/ring_bell.json" => ring}) ==
              {:error,
               [
-                d("DUPLICATE_DEFINITION", "recipes/pick_lock.check"),
-                d("DUPLICATE_DEFINITION", "recipes/ring_bell.check")
+                d("DUPLICATE_DEFINITION", "actions/pick_lock.check"),
+                d("DUPLICATE_DEFINITION", "actions/ring_bell.check")
               ]}
   end
 end

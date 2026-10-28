@@ -54,7 +54,7 @@ defmodule Loka.ContentChoiceChecksTest do
   # (one check DefinitionRef) both define one key and compile.
   test "check keys gather every recipe check and every dialogue choice check" do
     defs = %{
-      "recipe" => %{"a" => {"recipes/a.json", [], %{"check" => %{"key" => "k"}}}},
+      "recipe" => %{"a" => {"actions/a.json", [], %{"check" => %{"key" => "k"}}}},
       "dialogue" => %{
         "d" => {"dialogues/d.json", [], %{"choices" => %{"x" => %{"check" => %{"key" => "k"}}}}}
       }

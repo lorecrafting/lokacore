@@ -1,0 +1,35 @@
+{
+  "abstract": true,
+  "params": [
+    "action",
+    "fact",
+    "n",
+    "line"
+  ],
+  "on": {
+    "event": "action_completed",
+    "action": {
+      "param": "action"
+    }
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": {
+        "param": "fact"
+      },
+      "equals": {
+        "param": "n"
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "narrate",
+      "text": {
+        "param": "line"
+      }
+    }
+  ]
+}

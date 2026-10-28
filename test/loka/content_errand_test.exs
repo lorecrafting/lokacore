@@ -154,7 +154,7 @@ defmodule Loka.ContentErrandTest do
         ),
       "rooms/ferry_landing.json" =>
         put_in(src("rooms/ferry_landing.json"), ["details"], %{"post" => post}),
-      "recipes/lantern.json" => %{
+      "actions/lantern.json" => %{
         "label" => "quest.lantern.accept",
         "aliases" => ["lantern"],
         "target" => %{"kind" => "detail", "room" => "ferry_landing", "detail" => "post"},

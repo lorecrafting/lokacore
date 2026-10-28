@@ -158,7 +158,7 @@ defmodule Loka.CartridgeCrossKernelTest do
       "attributes.json" => %{
         "attributes" => Map.new(stats, fn {k, v} -> {k, %{"start" => v}} end)
       },
-      "recipes/pray.json" => put_in(src.("recipes/pray.json"), ["policy", "root"], root)
+      "actions/pray.json" => put_in(src.("actions/pray.json"), ["policy", "root"], root)
     }
 
     for {rel, v} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(v))

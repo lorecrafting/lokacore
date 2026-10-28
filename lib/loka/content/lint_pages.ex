@@ -22,7 +22,7 @@ defmodule Loka.Content.LintPages do
   # {room, detail} => the recipe keys aimed at that detail.
   defp aimed(files) do
     for(
-      {"recipes/" <> name, %{"target" => %{"kind" => "detail"} = t}} <- files,
+      {"actions/" <> name, %{"target" => %{"kind" => "detail"} = t}} <- files,
       do: {{t["room"], t["detail"]}, Path.rootname(name)}
     )
     |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))

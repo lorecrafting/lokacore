@@ -70,7 +70,8 @@ defmodule Loka.Content.Resources do
     end
   end
 
-  defp file_schema(name) do
+  @doc false
+  def file_schema(name) do
     entry = %{"type" => "object", "additionalProperties" => %{}}
 
     %{

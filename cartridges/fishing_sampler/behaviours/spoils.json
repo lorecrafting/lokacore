@@ -1,0 +1,21 @@
+{
+  "reactions": {
+    "take": {
+      "on": {
+        "event": "item_acquired",
+        "item": {
+          "param": "holder"
+        }
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": "spoiling",
+          "item": {
+            "param": "holder"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -6,6 +6,8 @@ defmodule Loka.Content.Prose do
   builds the diagnostics, so this module never calls Source (a call either way is an xref cycle).
   """
 
+  alias Loka.Core.Contracts
+
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
   @typedoc "A refusal: code, `{rel, steps}` and diagnostic data."
@@ -30,10 +32,24 @@ defmodule Loka.Content.Prose do
     {List.keystore(files, "text.json", 0, {"text.json", :text, text}), Enum.reverse(faults)}
   end
 
+  # A line the catalog refuses is reported at the marker too; its words are still added, so the
+  # marker resolves and the catalog reports at text["<key>"].
   defp add({key, words, at}, {text, faults}) do
     if Map.has_key?(text, key),
       do: {text, [{"DUPLICATE_KEY", at, %{"target" => key}} | faults]},
-      else: {Map.put(text, key, words), faults}
+      else: {Map.put(text, key, words), Enum.reverse(refused(words, at)) ++ faults}
+  end
+
+  # Only the words: a key that fails TextKey is already the definition schema's error here.
+  defp refused(words, at) do
+    case Contracts.validate("TextCatalog", %{"line" => words}) do
+      :ok ->
+        []
+
+      {:error, errors} ->
+        for code <- Enum.uniq(Enum.map(errors, & &1.code)),
+            do: {"SCHEMA_VIOLATION", at, %{"error" => Atom.to_string(code)}}
+    end
   end
 
   # Root files are not lowered: only definitions carry a `{kind, key, steps}` id.
