@@ -39,6 +39,9 @@ defmodule Loka.Content.Behaviours do
     end
   end
 
+  defp rules({_, {_, name, _}, :invalid}), do: {{name, {nil, []}}, []}
+  defp rules({rel, {_, name, steps}, _}), do: {{name, {nil, []}}, [invalid_type({rel, steps})]}
+
   defp unknown({rel, steps}, value),
     do:
       for(
@@ -46,9 +49,6 @@ defmodule Loka.Content.Behaviours do
         m not in ["reactions", "params"],
         do: {"UNKNOWN_FIELD", {rel, steps ++ [m]}, %{}}
       )
-
-  defp rules({_, {_, name, _}, :invalid}), do: {{name, {nil, []}}, []}
-  defp rules({rel, {_, name, steps}, _}), do: {{name, {nil, []}}, [invalid_type({rel, steps})]}
 
   defp params({rel, steps}, value) do
     params = Map.get(value, "params", [])
