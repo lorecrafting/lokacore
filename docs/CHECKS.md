@@ -154,4 +154,3 @@ their rules and red controls remain available for resumption.
   sets it, in its own `sim` job, two parallel legs `sim (fresh)` (`npm run test:sim:fresh`) and `sim (showcase)` (`npm run test:sim:showcase`); the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
-  No CI job runs an E1 recorder: the v042 chapter it recorded is deleted, and the real game's chapter has no recorder yet ([E1 certification](system/e1-certification.md)).

@@ -82,8 +82,7 @@ Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
    a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. Judge a sim time against the median of the last 5 `main` runs of that leg, never one run (runners are two-speed: 280 s and 540 s on the same code, loka-9nd4). An E-gate closure or the
-   release candidate also needs [E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy)
-   of the real game's chapter; no E1 recorder runs in CI until that chapter has one. Merge `main` into the
+   release candidate also needs E1 coverage complete for the real chapter, its harness rebuilt with that chapter ([owner rules](system/owner-rules.md)). Merge `main` into the
    branch once before marking the PR ready. A red nightly on `main` is the next session's first job.
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
