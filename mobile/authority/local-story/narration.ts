@@ -7,7 +7,7 @@ import { units } from '../../../kernel/ts/src/mechanics/calendar.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { ChronicleEntry, NarrationRecord } from '../../packages/game-view/session.ts';
-import { defenseEvidence } from './combat-receipt.ts';
+import { arrival, defenseEvidence } from './combat-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
@@ -40,15 +40,11 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     }
     const detail_id = pickup?.corpse_id ?? receiptDetail(s, r, d);
     const cue = receiptBellCue(s, r, d);
-    const woke = s.world.cartridge.world?.death?.narration?.woke;
-    const arrival = lines.findIndex((l) => l.key === 'combat.ran_in' || l.key === woke);
     return {
       command_id: r.command_id,
       lines,
       ...(cue && { cue }),
-      ...(combat_lines.length && { combat_lines }),
-      // Only a fight's page keeps the lines before; a death off the fight (a bleed) keeps them all.
-      ...(arrival > 0 && combat_lines.length && { arrival }),
+      ...(combat_lines.length && { combat_lines, ...arrival(s, lines) }),
       ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
       ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
     } as NarrationRecord;

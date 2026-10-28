@@ -1,3 +1,4 @@
+// size: allow 530, barrier and arrival cases share one gate world and its helpers (loka-glj8)
 // Barriers (R5 S7; 21 §5 Barrier; 04 §5.3 Lifecycle transition, §7, §19): open, close, lock and
 // unlock, moves through closed and locked exits, the GameView's exits, barrier_state, and the
 // loader's barrier references. Worlds are the gate known answer

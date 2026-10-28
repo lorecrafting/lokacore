@@ -78,10 +78,7 @@ export function moveSequence(
     outcome,
     [...ops, ...progress.ops],
     [entered, ...progress.events],
-    [
-      arrival(world, actor_id, body, here, there, direction, outcome),
-      ...(progress.narration ?? []),
-    ],
+    [arrival(world, command, body, here, there, outcome), ...(progress.narration ?? [])],
   );
 }
 
@@ -91,11 +88,10 @@ export function moveSequence(
  */
 function arrival(
   world: World,
-  actor_id: CharacterId,
+  { payload: { actor_id, direction } }: MoveCommand,
   body: EntityId,
   here: EntityId,
   there: EntityId,
-  direction: Key,
   outcome: string,
 ) {
   const room = world.rooms[there];

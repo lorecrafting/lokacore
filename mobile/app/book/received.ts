@@ -82,10 +82,8 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const fallback = fallbackLine(accepted, attempt);
   const said = routed?.[0] ?? replyLine(reply, text, now, fallback, was);
   if (!repeated) place(s, said, page, accepted, attempt.button.target_ids, detail);
-  if (!repeated && routed) {
-    s.combatLog.push(...routed[1]);
-    s.log.push(...routedLines(arrived(retained!), was, now, attempt.button, text)[1]);
-  }
+  if (!repeated && routed) s.combatLog.push(...routed[1]);
+  if (!repeated && routed) s.log.push(...routed[2]);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
   return repeated ? '' : said.map(lineText).join(' ');
@@ -116,7 +114,12 @@ const routedLines = (
   now: GameView,
   b: Button,
   text: Say,
-) => narrationLines(closing(retained, was, now, commandOf(b) === 'cast'), now, text, false, was);
+) => {
+  const lines = (r: typeof retained) =>
+    narrationLines(closing(r, was, now, commandOf(b) === 'cast'), now, text, false, was);
+  // The room log takes the fight's lines up to a room change only (loka-glj8).
+  return [...lines(retained), lines(arrived(retained))[1]] as const;
+};
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 
