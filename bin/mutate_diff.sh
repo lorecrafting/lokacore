@@ -1,19 +1,20 @@
 #!/bin/sh
 # Diff-derived mutants (developer.md step 2, reviewer.md step 3): one bin/mutate.sh mutant per change
 # on each line <base>...HEAD added to a TS (.ts .tsx .mjs) or Elixir (.ex) source file, run against
-# the test files that import the module (TS: a relative import that resolves to it; Elixir: a test/
-# .exs file naming the module). Prints the mutant count first, then one row per mutant: the result
+# the test files that reach the module one import hop away (TS: a test whose relative import resolves
+# to it or to a source importing it; Elixir: an .exs file naming it or a `mix xref callers` caller).
+# Prints the mutant count first, then one row per mutant: the result
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
 # and the first failing test line of a killed mutant.
-# Exits as bin/mutate.sh does (0 with survivors; the table is the report).
+# Exits 1 when a row is SURVIVED (NO-TESTS rows are the handback's to explain), else as bin/mutate.sh.
 #   bin/mutate_diff.sh <base>
 # Mutants: flip ` < `/` <= `, ` > `/` >= `, ` === `/` !== `, ` == `/` != `, ` && `/` || ` (and ` and `/
 # ` or ` in Elixir; spaces on both sides), drop a TS `return`/`throw` statement or a one-line guard
 # ending in one, negate a block guard (TS `if (...) {`, Elixir `if ... do`), add 1 to the first
 # number. Skipped: test, story and *.gen.* files, comment, import and @attribute lines, lines with
-# a tab, and a line carrying `mutate-skip: <reason>` (non-logic).
-# ponytail: direct importers only; a module tested through another one reads as NO-TESTS or SURVIVED.
+# a tab, Elixir lines inside a """ block (docs), and a line carrying `mutate-skip: <reason>` (non-logic).
+# ponytail: one hop only; a module tested two hops away reads as NO-TESTS or SURVIVED.
 [ $# -eq 1 ] || { echo "usage: $0 <base>" >&2; exit 2; }
 here=$(cd "$(dirname "$0")" && pwd)
 cd "$(git rev-parse --show-toplevel)" || exit 2
@@ -32,20 +33,31 @@ EX_OPS = {' and ': ' or ', ' or ': ' and '}
 DROP = re.compile(r'^\s*((if \(.*\) )?(return|throw)\b.*;)\s*$')
 COND = re.compile(r'^(\s*(?:\} else )?(?:if|while) \()(.*)(\) \{)$|^(\s*(?:if|unless) )(.*)( do)$')  # block guard: negate it
 NUM = re.compile(r'(?<![\w.$])\d+(?![\w.])')
+def docs(f):  # line numbers inside Elixir """ blocks (moduledoc, doc prose)
+    inside, out = False, set()
+    for i, line in enumerate(open(f, errors='replace').read().splitlines(), 1):
+        if inside:
+            out.add(i)
+        if line.count('"""') % 2:
+            inside = not inside
+    return out
 rows, f = [], None  # rows: (file, line, old, new, label)
 for l in d.stdout.splitlines():
     if l.startswith('+++ '):
         f = l[6:] if l.startswith('+++ b/') and not SKIP_FILE.search(l[6:]) else None
+        doc = docs(f) if f and f.endswith('.ex') else set()
     elif l.startswith('@@'):
         n = int(re.match(r'@@ -\S+ \+(\d+)', l).group(1))
     elif l.startswith('+') and f:
         t, n = l[1:], n + 1
-        if SKIP_LINE.search(t):
+        if SKIP_LINE.search(t) or n - 1 in doc:
             continue
         ops = dict(OPS, **EX_OPS) if f.endswith('.ex') else OPS
         for op, rep in ops.items():
-            for m in re.finditer(re.escape(op), t):
-                rows.append((f, n - 1, t, t[:m.start()] + rep + t[m.end():], op.strip() + ' -> ' + rep.strip()))
+            ms = list(re.finditer(re.escape(op), t))
+            for k, m in enumerate(ms):
+                rows.append((f, n - 1, t, t[:m.start()] + rep + t[m.end():],
+                             op.strip() + ' -> ' + rep.strip() + (' #%d' % (k + 1) if len(ms) > 1 else '')))
         if not f.endswith('.ex') and DROP.match(t):
             rows.append((f, n - 1, t, '', 'drop ' + DROP.match(t).group(1)[:40]))
         c = COND.match(t)
@@ -58,28 +70,41 @@ for l in d.stdout.splitlines():
 
 tests = subprocess.run(['git', 'ls-files', '*.test.ts', '*.test.tsx', '*.test.mjs', '*_test.exs'],
                        capture_output=True, text=True).stdout.split()
-text = {t: open(t, errors='replace').read() for t in tests if os.path.exists(t)}
+tests = [t for t in tests if os.path.exists(t)]
+text = {t: open(t, errors='replace').read() for t in tests}
+sources = [s for s in subprocess.run(['git', 'ls-files', '*.ts', '*.tsx', '*.mjs'], capture_output=True,
+                                     text=True).stdout.split() if not SKIP_FILE.search(s)]
 SPEC = re.compile(r"""(?:from|import)\s*\(?\s*['"](\.[^'"]+)['"]""")
 def home(path, marker):  # nearest directory holding marker (package.json, mix.exs)
     p = os.path.dirname(path)
     while p and not os.path.exists(os.path.join(p, marker)):
         p = os.path.dirname(p)
     return p or '.'
+def imports(path, stem):  # path has a relative import resolving to stem (or stem/index)
+    if path not in text:
+        text[path] = open(path, errors='replace').read()
+    for s in SPEC.findall(text[path]):
+        p = re.sub(r'\.(ts|tsx|mjs|js)$', '', os.path.normpath(os.path.join(os.path.dirname(path), s)))
+        if stem in (p, p + '/index'):
+            return True
+def modules(path):
+    return re.findall(r'defmodule\s+([\w.]+)', open(path, errors='replace').read())
 cmds = {}
 def narrow(mod, log):
     if mod not in cmds:
         if mod.endswith('.ex'):
-            name = re.search(r'defmodule\s+([\w.]+)', open(mod).read())
-            hit = [t for t in text if t.endswith('.exs') and name and re.search(r'\b%s\b' % re.escape(name.group(1)), text[t])]
+            root, names = home(mod, 'mix.exs'), modules(mod)
+            for name in modules(mod):
+                x = subprocess.run(['sh', '-c', 'nice -n 10 mise exec -- mix xref callers ' + name], cwd=root,
+                                   capture_output=True, text=True).stdout
+                for c in re.findall(r'^(\S+\.exs?) \(', x, re.M):
+                    names += modules(os.path.join(root, c))
+            hit = [t for t in tests if t.endswith('.exs') and any(re.search(r'\b%s\b' % re.escape(n), text[t]) for n in names)]
             cmds[mod] = ' '.join(['nice -n 10 mise exec -- mix test --force'] + hit) if hit else ''
         else:
-            stem = os.path.splitext(mod)[0]
-            def hits(t):
-                for s in SPEC.findall(text[t]):
-                    p = os.path.normpath(os.path.join(os.path.dirname(t), s))
-                    if re.sub(r'\.(ts|tsx|mjs|js)$', '', p) in (stem, stem[:-6] if stem.endswith('/index') else None):
-                        return True
-            hit = [t for t in text if not t.endswith('.exs') and hits(t)]
+            stems = [os.path.splitext(mod)[0]]
+            stems += [os.path.splitext(s)[0] for s in sources if imports(s, stems[0])]
+            hit = [t for t in tests if not t.endswith('.exs') and any(imports(t, s) for s in stems)]
             pkgs = {}
             for t in hit:
                 pkgs.setdefault(home(t, 'package.json'), []).append(t)
@@ -120,5 +145,5 @@ for kind, f, n, label, log in plan:
 print('mutate_diff: ' + ', '.join('%s %d' % kv for kv in sorted(count.items())))
 sys.stderr.write(r.stderr)
 shutil.rmtree(tmp)
-sys.exit(r.returncode)
+sys.exit(r.returncode or (1 if 'SURVIVED' in count else 0))
 PY
