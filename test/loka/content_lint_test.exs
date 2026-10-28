@@ -21,6 +21,8 @@ defmodule Loka.ContentLintTest do
              []
 
     assert lint(%{"actions/look.json" => %{"policy" => @always}}) == []
+    # Break: a built-in action (with command, no reason field to add) gets an unfixable finding.
+    assert lint(%{"actions/look.json" => %{"command" => "look", "policy" => @refuses}}) == []
   end
 
   test "check 3: a reaction that writes state narrates or says it is silent (T4, plate_springs)" do
