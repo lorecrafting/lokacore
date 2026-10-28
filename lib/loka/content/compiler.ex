@@ -76,7 +76,7 @@ defmodule Loka.Content.Compiler do
   defp held?(_, false, []), do: false
 
   defp held?(path, false, actions),
-    do: not Enum.any?(actions, &(path == &1 or String.starts_with?(path, [&1 <> ".", &1 <> "/"])))
+    do: not Enum.any?(actions, &String.starts_with?(path, &1 <> "."))
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
