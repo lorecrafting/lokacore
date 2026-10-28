@@ -213,6 +213,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Beads: short reads (`| head -5`), quiet writes (`br -q`), notes of one or two lines; mark `in_progress` when work starts.
 - Browser automation uses the local `browser-use` skill (`bu.sh`); Claude in Chrome is denied in settings.
 - Budget: the weekly allowance resets Wednesdays 05:00 HST; near the cap, keep to 1 or 2 agents.
+- Jev (TypeSafe): spend approved; briefs and cartridge text may leave the machine, redacted first, never saves or player words; Jev is advisory only, never a gate; Pi keeps its $2/day cap ([record](../decisions/owner-decision-jev-typesafe-2026-10-14.md)).
 - Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line, `[Pi · model · session]` on tracker comments).
 - Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency cap, worktree isolation and a usage reading before and after.
 

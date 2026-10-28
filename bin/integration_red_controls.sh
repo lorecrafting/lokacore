@@ -598,14 +598,14 @@ rc=0; WC_ARGS=$tmp/wc/args PATH="$tmp/wc:$PATH" capped sh "$W/bin/wait_ci.sh" fe
 # --- merge_pr.sh ---------------------------------------------------------------------------
 # Stub gh (pr view prints "$MP_STATE abc123", pr merge exits $MP_MERGE), stub wait_ci.sh (exits $MP_CI)
 # and after_merge.sh; every call is logged. Break: a red or unread CI head, a non-OPEN PR, a dirty
-# tracked file or a non-main checkout still merges; the merge drops --match-head-commit <head>; a
+# tracked file, a subject with ROADMAP unedited or a non-main checkout still merges; the merge drops --match-head-commit <head>; a
 # failed merge still runs the bookkeeping, or a good merge skips it or changes its arguments.
 mkdir "$tmp/mp"; L=$tmp/mp/log
 printf '#!/bin/sh\necho "gh $*" >> "$MP_LOG"\ncase $2 in view) echo "$MP_STATE abc123" ;; merge) exit "$MP_MERGE" ;; esac\n' > "$tmp/mp/gh"; chmod +x "$tmp/mp/gh"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/merge_pr.sh" bin/
 printf '#!/bin/sh\necho "wait_ci $*" >> "$MP_LOG"; exit "$MP_CI"\n' > bin/wait_ci.sh
 printf '#!/bin/sh\necho "after_merge $*" >> "$MP_LOG"\n' > bin/after_merge.sh
-echo a > a; git add . && git commit -qm base
+echo a > a; mkdir docs; echo r > docs/ROADMAP.md; git add . && git commit -qm base; echo edit >> docs/ROADMAP.md
 mp() { # <case> <state> <ci> <merge> <want-rc 0|1> <log-must-match or -> <log-must-not-match>
   : > "$L"; rc=0; MP_LOG=$L MP_STATE=$2 MP_CI=$3 MP_MERGE=$4 GH=$tmp/mp/gh capped sh bin/merge_pr.sh 7 loka-x 'ROADMAP: s' > "$tmp/mp/out" 2>&1 || rc=$?
   [ "$rc" = "$5" ] && { [ "$6" = - ] || grep -q -- "$6" "$L"; } && ! grep -q -- "$7" "$L" || { bad "merge_pr $1: exit $rc"; sed 's/^/  /' "$L" "$tmp/mp/out"; }
@@ -617,11 +617,13 @@ mp ok OPEN 0 0 0 'after_merge 7 loka-x ROADMAP: s' 'NEVER'
 grep -q 'gh pr merge 7 --merge --match-head-commit abc123' "$L" || bad 'merge_pr ok: merge not pinned to the head'
 echo b > a; mp dirty OPEN 0 0 1 - 'pr '; git checkout -q a
 git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
+git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
 # A main clone of a bare origin; stub br's flush writes $BC_ROW as the export. Break: a machine path,
-# a non-main checkout, another dirty tracked file, a failed pull or a dirty export that main also
-# changed is still committed or pushed; a rejected push exits 0; the happy path does not reach origin.
+# a non-main checkout, an unpushed local commit, another dirty tracked file or a dirty export that
+# main also changed is still committed or pushed; a rejected push exits 0; the happy path does not
+# reach origin.
 printf '#!/bin/sh\n[ "$*" = "sync --flush-only" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
 mkdir bin docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; echo h > docs/HANDOFF.md
@@ -638,8 +640,8 @@ echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git re
 git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
 git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
 echo '{"id":"c","title":"bad"}' >> .beads/issues.jsonl; bc main-changed '{"id":"a","title":"bad"}' 1 -
-echo y > docs/HANDOFF.md; git commit -qam local; h=$(git rev-parse HEAD); bc pull-fail '{"id":"a","title":"bad"}' 1 -
-[ "$(git rev-parse HEAD)" = "$h" ] || bad 'beads_checkpoint pull-fail: committed after a failed pull'; git reset -q --hard HEAD~1
+git pull -q --ff-only origin main; echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
+git --git-dir="$O" log main | grep -q local && bad 'beads_checkpoint ahead: pushed an unpushed local commit'; git reset -q --hard HEAD~1
 printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
 bc push-rejected '{"id":"a","title":"three"}' 1 -
 grep -q 'br sync --merge' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'

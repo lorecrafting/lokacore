@@ -4,7 +4,8 @@
 # with a ROADMAP subject, make the ROADMAP status edit first (after_merge commits it).
 #   bin/merge_pr.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]
 # Refuses before merging when main is not checked out, a tracked file other than .beads/issues.jsonl
-# (and docs/ROADMAP.md with a subject) is dirty, the PR is not OPEN, or wait_ci on its head is not green.
+# (and docs/ROADMAP.md with a subject) is dirty, a subject is given with ROADMAP unedited, the PR
+# is not OPEN, or wait_ci on its head is not green.
 set -u
 GH=${GH:-gh}
 die() { echo "merge_pr: $*" >&2; exit 1; }
@@ -14,6 +15,7 @@ pr=$1 subject=${3-} here=$(dirname "$0")
 for f in $(git status --porcelain --untracked-files=no | cut -c4-); do
   [ "$f" = .beads/issues.jsonl ] || { [ -n "$subject" ] && [ "$f" = docs/ROADMAP.md ]; } || die "uncommitted $f"
 done
+[ -z "$subject" ] || ! git diff --quiet -- docs/ROADMAP.md || die 'subject given but docs/ROADMAP.md is unchanged'
 info=$($GH pr view "$pr" --json state,headRefOid --jq '"\(.state) \(.headRefOid)"') || die "cannot read PR #$pr"
 [ "${info%% *}" = OPEN ] || die "PR #$pr is ${info%% *}, not OPEN"
 sha=${info#* }
