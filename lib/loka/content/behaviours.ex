@@ -29,11 +29,7 @@ defmodule Loka.Content.Behaviours do
   # name => {params, [{rel, steps, rule, value}]}; a refused or undecodable behaviour stays known,
   # with params nil and no rules, so its holders add no second cause.
   defp rules({rel, {_, name, steps}, %{} = value}) do
-    extra =
-      for m <- Map.keys(value),
-          m not in ["reactions", "params"],
-          do: {"UNKNOWN_FIELD", {rel, steps ++ [m]}, %{}}
-
+    extra = unknown({rel, steps}, value)
     {rs, bad} = reactions({rel, steps ++ ["reactions"]}, value["reactions"])
     {params, wrong} = params({rel, steps}, value)
 
@@ -42,6 +38,14 @@ defmodule Loka.Content.Behaviours do
       refused -> {{name, {nil, []}}, refused ++ extra}
     end
   end
+
+  defp unknown({rel, steps}, value),
+    do:
+      for(
+        m <- Map.keys(value),
+        m not in ["reactions", "params"],
+        do: {"UNKNOWN_FIELD", {rel, steps ++ [m]}, %{}}
+      )
 
   defp rules({_, {_, name, _}, :invalid}), do: {{name, {nil, []}}, []}
   defp rules({rel, {_, name, steps}, _}), do: {{name, {nil, []}}, [invalid_type({rel, steps})]}

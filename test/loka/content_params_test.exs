@@ -30,20 +30,7 @@ defmodule Loka.ContentParamsTest do
   # fishing_sampler with API 1.120 (narrate needs 1.103) and `spoils` taking a `line` it narrates.
   defp fishing do
     dir = Source.copy("cartridges/fishing_sampler")
-
-    for {rel, change} <- [
-          {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.120")},
-          {@spoils,
-           fn s ->
-             s
-             |> Map.put("params", ["line"])
-             |> update_in(
-               ["reactions", "take", "apply"],
-               &(&1 ++ [narrate(%{"param" => "line"})])
-             )
-           end}
-        ],
-        do: File.write!(Path.join(dir, rel), JSON.encode!(change.(read(dir, rel))))
+    spoils_line(dir)
 
     for {fish, line} <- [
           trout_01: %{"prose" => "The trout slaps the bank."},
@@ -57,6 +44,22 @@ defmodule Loka.ContentParamsTest do
     end
 
     dir
+  end
+
+  defp spoils_line(dir) do
+    for {rel, change} <- [
+          {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.120")},
+          {@spoils,
+           fn s ->
+             s
+             |> Map.put("params", ["line"])
+             |> update_in(
+               ["reactions", "take", "apply"],
+               &(&1 ++ [narrate(%{"param" => "line"})])
+             )
+           end}
+        ],
+        do: File.write!(Path.join(dir, rel), JSON.encode!(change.(read(dir, rel))))
   end
 
   defp read(dir, rel), do: JSON.decode!(File.read!(Path.join(dir, rel)))
