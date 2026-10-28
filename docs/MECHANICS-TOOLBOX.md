@@ -52,7 +52,7 @@ Answers to the plan's open questions ([record](decisions/owner-decision-mechanic
 1. **Levelling is class-free.** Experience grants attribute points; skills grow by use; classes may come later as starting packages.
 2. **Ranged combat** starts with a same-room first strike; shooting into adjacent rooms comes later.
 3. **Dev clock and unpinned preview** sit in a dev panel shown only with `?dev=1`; never in release.
-4. **The Chapter 1 E1 recorder stays in CI** as the engine regression net.
+4. **E1 recorder:** the Chapter 1 recorder is deleted; E1 certification is rebuilt with the real chapter ([owner rules](system/owner-rules.md)).
 5. **Spells use one engine** with per-spell requirements declared in the cartridge: spoken words (incantation text); an optional must-be-learned gate (existing learned facts, earned from quests or teachers); optional minimum level and attributes; optional reagents consumed (the crafting input consumption); a mana cost from a mana pool; optional secret words found in lore, checked like riddle answers. Intended mix: common spells open with reagents and mana, great spells are learned by quest with level and stat gates. Ranked as row 29, now split into 29a and 29b.
 
 ## Ranked toolbox

@@ -130,8 +130,8 @@ goes back to the batch as a finding, not into the showcase.
 Chapter 1 stays frozen (no story or content work; Book UI polish continues, see the
 [decision](decisions/owner-decision-showcase-2026-10-10.md)) until the showcase covers each of its play
 families: combat, death, commerce, quests, scenes and dialogue. Then Chapter 1 is retired and its
-Chapter-1-specific pins (end-to-end tests, hash fixtures, the E1 recorder) are replaced by
-showcase pins. Story-independent tests and fixtures stay.
+Chapter-1-specific pins (end-to-end tests, hash fixtures) are replaced by showcase pins; the E1 recorder is deleted and
+rebuilt with the real chapter ([owner rules](system/owner-rules.md)). Story-independent tests and fixtures stay.
 
 Death and commerce coverage is limited to what the toolbox has rows for. Row 47 (death penalty
 options) covers XP loss and item drop, not ghost-walk death, which needs a toolbox row before the
