@@ -62,21 +62,14 @@ defmodule Loka.Content.Compiler do
   # bundles), except an action's own: an action refused by its extends must not build.
   defp split(lists, files) do
     bundle? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
-    actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel)
+    actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel) <> "."
+    held? = &(bundle? or (actions != [] and not String.starts_with?(&1, actions)))
 
     lists
     |> Enum.concat()
-    |> Enum.reject(
-      &(&1["code"] == "UNRESOLVED_REFERENCE" and held?(&1["path"], bundle?, actions))
-    )
+    |> Enum.reject(&(&1["code"] == "UNRESOLVED_REFERENCE" and held?.(&1["path"])))
     |> Enum.split_with(&(&1["severity"] == "warning"))
   end
-
-  defp held?(_, true, _), do: true
-  defp held?(_, false, []), do: false
-
-  defp held?(path, false, actions),
-    do: not Enum.any?(actions, &String.starts_with?(path, &1 <> "."))
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
