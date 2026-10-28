@@ -15,7 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-exposure-sampler-'));
 let artifact: Uint8Array;
@@ -39,7 +39,7 @@ const CONTEXT = '7e1f0c2a-5d3b-4c8e-9a6f-000000000003';
 const HOUR = 3600;
 const stream = commands('dddddddd-5555-4333-8444');
 const { play } = stream;
-const fresh = () => newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
 // One elapsed command to `until`; returns the world and its committed events.
 function elapse(w: World, until: number) {
   stream.n += 1;
@@ -103,7 +103,7 @@ test('a long absence collapses clock_hour to one firing, and the next is the fol
   const quiet = structuredClone(content) as unknown as Obj;
   for (const k of Object.keys(quiet.reactions))
     if (quiet.reactions[k].on.event === 'clock_hour') delete quiet.reactions[k];
-  const other = newWorld(quiet as unknown as Cartridge, CONTEXT as never, [1, 2, 3, 4]);
+  const other = newWorld(quiet as unknown as Cartridge, ctx(CONTEXT), [1, 2, 3, 4]);
   assert.deepEqual(clockJobs(other), []);
 });
 

@@ -20,7 +20,7 @@ import { offerMaps } from '../src/view/invariants_view.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { dark } from '../src/mechanics/light/shared.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-aimed-spells-'));
 const file = join(scratch, 'artifact.json');
@@ -76,7 +76,7 @@ const at = (w: World, word: string, key?: string) =>
   play(w, { type: 'cast', word, ...(key && { target_id: w.entityIds[`${P}:${key}`] }) });
 const hall = (c = aimed) => {
   stream.n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29'), [1, 2, 3, 4]);
 };
 /** Orb (and glowdust) taken, east into the crypt, lit by aimed lux at the orb. */
 function crypt(c = aimed): World {

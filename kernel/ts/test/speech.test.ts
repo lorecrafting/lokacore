@@ -16,7 +16,7 @@ import { value } from '../src/mechanics/fact.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { parse } from '../play/text.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-speech-sampler-'));
 let artifact: Uint8Array;
@@ -40,7 +40,7 @@ const fact = (w: World, key: string) => value(w, w.character, ref('fact', key));
 
 let n = 0;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-000000000009' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('7e1f0c2a-5d3b-4c8e-9a6f-000000000009'), [1, 2, 3, 4]);
 function play(w: World, p: object) {
   n += 1;
   return step(

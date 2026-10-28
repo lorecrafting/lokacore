@@ -18,7 +18,7 @@ import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { level as skillLevel, practice } from '../src/mechanics/skill_level.ts';
 import { value as fact } from '../src/mechanics/fact.ts';
-import { cartridgeOf, commands, reload } from './harness.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-kitchen-sampler-'));
 let artifact: Uint8Array;
@@ -46,7 +46,7 @@ const { send, play } = stream;
 const wait = (w: World, seconds: number) => stream.elapsed(w, w.state.clock + seconds);
 const fresh = (c = content) => {
   stream.n = 0;
-  return newWorld(c, '4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d'), [1, 2, 3, 4]);
 };
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
 const cook = (w: World) => w.entityIds[`${S}:npc/cook`]!;

@@ -14,7 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-identity-sampler-'));
 let artifact: Uint8Array;
@@ -42,7 +42,7 @@ function fresh(edit?: (c: any) => void) {
   const r = reload(built, edit);
   assert.ok(r.ok, JSON.stringify(r));
   n = 0;
-  return newWorld(r.cartridge as Cartridge, '4e5f6a7b-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1]);
+  return newWorld(r.cartridge as Cartridge, ctx('4e5f6a7b-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1]);
 }
 function play(w: World, payload: object) {
   const id = `eeeeeeee-4444-4044-8044-${String(++n).padStart(12, '0')}`;

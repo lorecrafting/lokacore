@@ -13,7 +13,7 @@ import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { cartridgeOf, commands, reload } from './harness.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-escrow-sampler-'));
 let artifact: Uint8Array;
@@ -42,7 +42,7 @@ const stream = commands('eeeeeeee-2020-4020-8020', 'aaaaaaaa-2020-4020-8020');
 const { send, play } = stream;
 function fresh(content = sampler()) {
   stream.n = 0;
-  return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e20' as never, [1, 2, 3, 4]);
+  return newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e20'), [1, 2, 3, 4]);
 }
 const ore = (w: World, k: string) => w.entityIds[`${S}:item/ore_${k}`]!;
 const smith = (w: World) => w.entityIds[`${S}:npc/smith`]!;

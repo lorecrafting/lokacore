@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import { newWorld, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-encounter-sampler-'));
 let artifact: Uint8Array;
@@ -33,7 +33,7 @@ const base = cartridgeOf(artifact);
 function world(rng: number[], edit?: (c: any) => void) {
   const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
-  return newWorld(r.cartridge as Cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, rng);
+  return newWorld(r.cartridge as Cartridge, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), rng);
 }
 let n = 0;
 function elapsed(w: World, until: number): World {

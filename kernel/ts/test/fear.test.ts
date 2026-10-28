@@ -14,7 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
-import { cartridgeOf, verdict } from './harness.ts';
+import { cartridgeOf, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fear-sampler-'));
 let artifact: Uint8Array;
@@ -71,7 +71,7 @@ const slay = (w: World) => round(play(w, { type: 'attack', target_id: npc(w, 'ch
 /** A new game, moved into the den, and its two goblins in EntityId order. */
 function den(c: Cartridge) {
   n = 0;
-  const w = play(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]), {
+  const w = play(newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]), {
     type: 'move',
     direction: 'east',
   });

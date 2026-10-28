@@ -14,6 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { choiceView } from '../src/mechanics/dialogue/shared.ts';
 import { checkKeys } from '../src/content/cartridge_recipes.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-persuade-'));
 let artifact: Uint8Array;
@@ -44,7 +45,7 @@ function play(c: unknown) {
   assert.ok(loaded.ok, JSON.stringify(loaded));
   let w: World = newWorld(
     loaded.cartridge as Cartridge,
-    '4c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1e' as never,
+    ctx('4c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1e'),
     [1, 2, 3, 4],
   );
   let n = 0;

@@ -17,7 +17,7 @@ import { apply } from '../src/runtime/apply.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { positioned } from './combat_fixture.ts';
-import { cartridgeOf, commands, verdict } from './harness.ts';
+import { cartridgeOf, commands, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-targets-sampler-'));
 let artifact: Uint8Array;
@@ -45,7 +45,7 @@ function ok(r: ReturnType<typeof step>) {
 /** In the den, engaged with the lower-id goblin; returns [world, first, second]. */
 function engaged(cartridge = content): [World, string, string] {
   stream.n = 0;
-  let w = newWorld(cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(cartridge, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'move', direction: 'east' }));
   const den = w.state.containers[w.body];
   const [a, b] = Object.keys(w.state.created ?? {})
@@ -162,7 +162,7 @@ const guardOf = (w: World) => w.entityIds['targets_sampler@0.0.1:npc/guard']!;
 // party credit).
 test('the guard fights beside the player; its blow kills the raider and credits the player', () => {
   stream.n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'move', direction: 'south' }));
   const [guard, raider] = [guardOf(w), w.entityIds['targets_sampler@0.0.1:npc/raider']!];
   assert.deepEqual(offered(w), [[raider, true]], 'no Attack on the guard');
@@ -195,7 +195,7 @@ test('the guard fights beside the player; its blow kills the raider and credits 
 // and sorting first in the same advance, so the dead guard still strikes and kills the raider.
 test('a guard killed by a poison tick earlier in the advance does not strike', () => {
   stream.n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'move', direction: 'south' }));
   const [guard, raider] = [guardOf(w), w.entityIds['targets_sampler@0.0.1:npc/raider']!];
   w = ok(play(w, { type: 'attack', target_id: raider }));
@@ -348,7 +348,7 @@ test('a round with fewer than two of its eight draws left skips the guard; with 
     [[0, 889565275, 2048508316, 0], true],
   ] as const) {
     stream.n = 0;
-    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    let w = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
     const raider = w.entityIds['targets_sampler@0.0.1:npc/raider']!;
     w = ok(
       play(ok(play(w, { type: 'move', direction: 'south' })), {
@@ -373,7 +373,7 @@ test("the player's shield and sleep touch only the raider's blow, never the guar
     const c = structuredClone(content) as any;
     edit(c);
     stream.n = 0;
-    let w = fresh(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]));
+    let w = fresh(newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]));
     const raider = w.entityIds[`${K}npc/raider`]!;
     w = ok(play(w, { type: 'move', direction: 'south' }));
     w = ok(play(w, { type: 'attack', target_id: raider }));
@@ -417,7 +417,7 @@ test('a stunned guard takes no blow beside the player', () => {
     const c = structuredClone(content) as any;
     c.npcs[`${K}npc/raider`].attack.chance = 0;
     stream.n = 0;
-    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    let w = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
     const raider = w.entityIds[`${K}npc/raider`]!;
     w = ok(
       play(ok(play(w, { type: 'move', direction: 'south' })), {

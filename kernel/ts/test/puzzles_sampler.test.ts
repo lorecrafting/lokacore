@@ -12,6 +12,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-puzzles-sampler-'));
 let artifact: Uint8Array;
@@ -28,8 +29,7 @@ try {
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
-const fresh = () =>
-  newWorld(content, '5d1b7e2a-3c4f-4a6b-9d8e-1f2a3b4c5d6e' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('5d1b7e2a-3c4f-4a6b-9d8e-1f2a3b4c5d6e'), [1, 2, 3, 4]);
 const fact = (w: World, k: string) =>
   value(w, w.character, {
     cartridge_id: 'puzzles_sampler',

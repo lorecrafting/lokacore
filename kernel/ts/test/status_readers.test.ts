@@ -22,7 +22,7 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { cartridgeOf, commands, verdict } from './harness.ts';
+import { cartridgeOf, commands, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -69,7 +69,7 @@ const C = { cartridge_id: 'ward_sampler', cartridge_version: '0.0.1' };
 /** A new game on `c`, in the shrine (warded and hushed). */
 function shrine(c = content) {
   stream.n = 0;
-  const w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54' as never, [1, 2, 3, 4]);
+  const w = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54'), [1, 2, 3, 4]);
   return play(w, { type: 'move', direction: 'north' });
 }
 /** `c` with status `key`'s reader fields replaced by `fields`. */
@@ -85,7 +85,7 @@ function fight(w: World, before = (v: World) => v) {
 }
 const fresh = (c = content) => {
   stream.n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54'), [1, 2, 3, 4]);
 };
 const south = (w: World) => play(w, { type: 'move', direction: 'south' });
 

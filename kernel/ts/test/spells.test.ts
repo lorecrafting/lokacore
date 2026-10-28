@@ -14,7 +14,7 @@ import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { level } from '../src/mechanics/resource.ts';
 import { noticeAction } from './notice_action.ts';
-import { cartridgeOf, reload, verdict } from './harness.ts';
+import { cartridgeOf, ctx, reload, verdict } from './harness.ts';
 
 function compiled(dir: string): Uint8Array {
   const scratch = mkdtempSync(join(tmpdir(), 'loka-spells-sampler-'));
@@ -75,7 +75,7 @@ const base = cartridgeOf(artifact);
 
 function fresh(): World {
   n = 0;
-  return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1, 2, 3, 4]);
+  return newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55'), [1, 2, 3, 4]);
 }
 
 // Breaks: cast is offered in a cartridge without spells: the spells sampler minus its spell
@@ -88,7 +88,7 @@ test('cast is not offered once the spells sampler loses its spell recipes', () =
   });
   assert.ok(r.ok, JSON.stringify(!r.ok && r.diagnostic));
   const cast = (c: Cartridge) =>
-    gameView(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1])).actions.some(
+    gameView(newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55'), [1])).actions.some(
       (a) => a.action_key === 'cast',
     );
   assert.equal(cast(content), true);

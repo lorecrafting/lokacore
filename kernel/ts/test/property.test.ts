@@ -16,7 +16,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { skillSpec, usesSpec } from '../src/content/cartridge_skills.ts';
-import { cartridgeOf, commands, reload } from './harness.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-property-sampler-'));
 let artifact: Uint8Array;
@@ -39,7 +39,7 @@ function fresh(edit?: (c: any) => void) {
   const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   stream.n = 0;
-  return newWorld(r.cartridge as Cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e24' as never, [1]);
+  return newWorld(r.cartridge as Cartridge, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e24'), [1]);
 }
 
 const stream = commands('eeeeeeee-2424-4024-8024');

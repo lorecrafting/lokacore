@@ -13,7 +13,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { DEFS } from '../src/contracts.gen.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-damage-sampler-'));
 let artifact: Uint8Array;
@@ -46,7 +46,7 @@ function fight(
   ancestry = 'fighter',
 ) {
   n = 0;
-  let w: World = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, seed);
+  let w: World = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), seed);
   const play = (payload: object) =>
     accepted(
       step(

@@ -22,7 +22,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-farm-sampler-'));
 let artifact: Uint8Array;
@@ -40,7 +40,7 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const S = 'farm_sampler@0.0.1';
 const fresh = () =>
-  newWorld(loaded.cartridge as Cartridge, '3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c' as never, [1]);
+  newWorld(loaded.cartridge as Cartridge, ctx('3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c'), [1]);
 
 const stream = commands('eeeeeeee-1081-4081-8081');
 const { send, play } = stream;

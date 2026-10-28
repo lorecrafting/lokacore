@@ -18,7 +18,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { escapeDirections } from '../src/mechanics/combat/flee.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sleep-'));
 let artifact: Uint8Array;
@@ -55,7 +55,7 @@ const stone = (w: World) => w.entityIds[`${S}item/stone`] as EntityId;
 const hp = (w: World, e: EntityId) => level(w, e, resourceRef(w, 'hp'));
 const fresh = () => {
   stream.n = 0;
-  return newWorld(content, '6e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [1, 2, 3, 4]);
+  return newWorld(content, ctx('6e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20'), [1, 2, 3, 4]);
 };
 const round = (w: World) => {
   const run_id = `aaaaaaaa-1111-4000-8000-${String(++stream.n).padStart(12, '0')}`;

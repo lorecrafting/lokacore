@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { concealed, statusKey } from '../src/mechanics/status/shared.ts';
-import { cartridgeOf, verdict } from './harness.ts';
+import { cartridgeOf, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sneak-sampler-'));
 let artifact: Uint8Array;
@@ -49,7 +49,7 @@ function play(w: World, payload: object) {
 }
 const fresh = (c = content) => {
   n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e16' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e16'), [1, 2, 3, 4]);
 };
 const east = (w: World) => play(w, { type: 'move', direction: 'east' });
 const hide = (w: World) => play(w, { type: 'perform', action: 'hide' });

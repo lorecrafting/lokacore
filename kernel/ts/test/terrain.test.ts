@@ -8,7 +8,7 @@ import { gameView, newWorld, step } from '../src/index.ts';
 import { type Cartridge, type World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -32,7 +32,7 @@ function yard(edit?: (c: any) => void) {
   n = 0;
   return newWorld(
     r.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e43' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e43'),
     [1, 2, 3, 4],
   );
 }

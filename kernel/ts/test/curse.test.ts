@@ -11,7 +11,7 @@ import { INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { gameView } from '../src/view/view.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-curse-sampler-'));
 let artifact: Uint8Array;
@@ -31,8 +31,7 @@ const content = loaded.cartridge as Cartridge;
 
 const stream = commands('eeeeeeee-2828-4828-8828');
 const { send, play } = stream;
-const fresh = () =>
-  newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e28' as never, [2, 8, 2, 8]);
+const fresh = () => newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e28'), [2, 8, 2, 8]);
 const ring = (w: World) => w.entityIds['curse_sampler@0.0.1:item/ring']!;
 const worn = (w: World) => gameView(w).equipment!.find((s) => s.item?.id === ring(w))?.item;
 const carried = (w: World) => gameView(w).inventory.find((e) => e.id === ring(w));

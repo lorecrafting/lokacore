@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fishing-sampler-'));
@@ -54,7 +54,7 @@ const PASS = [2, 2, 2, 2];
 const FAIL = [1, 1, 1, 1];
 /** A fresh world with the rod in hand, waited to `clock`. */
 function holding(clock: number): World {
-  const w = newWorld(content, CONTEXT as never, PASS as never);
+  const w = newWorld(content, ctx(CONTEXT), PASS as never);
   const held = ok(w, { type: 'take', item_id: id(w, 'rod') });
   return clock > 0 ? ok(held, { type: 'wait', until: clock }) : held;
 }
@@ -155,7 +155,7 @@ test('the bank holds one trout at a time and the larder bounds the catch', () =>
 // (a held wooden item that is no rod fishes), or the held rod stops offering it.
 test('the cast card is listed with the rod in hand and unlisted without it', () => {
   const offers = (w: World) => JSON.stringify(gameView(w)).includes('"action_key":"fish"');
-  assert.equal(offers(newWorld(content, CONTEXT as never, PASS as never)), false);
+  assert.equal(offers(newWorld(content, ctx(CONTEXT), PASS as never)), false);
   const w = holding(0);
   const rod = id(w, 'rod');
   const stick = { ...w.entities[rod]!, tags: ['wooden'] } as never;

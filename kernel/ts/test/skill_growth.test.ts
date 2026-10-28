@@ -12,6 +12,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-skills-sampler-'));
 let artifact: Uint8Array;
@@ -41,7 +42,7 @@ const uses = (w: World) =>
 // event, or the attribute arm reading the skill.
 test('five pick attempts raise pick until the gate opens; level 5 beats 3, not 7; STR 8 beats 7', () => {
   n = 0;
-  let w = newWorld(content, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d'), [1, 2, 3, 4]);
   const perform = (action: string) => {
     const r = step(
       w,
@@ -78,7 +79,7 @@ test('five pick attempts raise pick until the gate opens; level 5 beats 3, not 7
 
 // Breaks: a taught skill's level omits its base 1 (the gate opens a try late).
 test('a taught pick opens the rating 5 gate on the fifth attempt', () => {
-  let w = newWorld(content, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d'), [1, 2, 3, 4]);
   const taught = key({
     kind: 'fact',
     fact: {

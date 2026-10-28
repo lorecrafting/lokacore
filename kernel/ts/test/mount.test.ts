@@ -9,7 +9,7 @@ import { type Cartridge, type World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
-import { commands, reload } from './harness.ts';
+import { commands, ctx, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -34,7 +34,7 @@ function yard(edit?: (c: any) => void) {
   stream.n = 0;
   return newWorld(
     r.cartridge as Cartridge,
-    '4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c43' as never,
+    ctx('4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c43'),
     [1, 2, 3, 4],
   );
 }

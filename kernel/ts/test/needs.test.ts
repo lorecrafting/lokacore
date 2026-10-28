@@ -16,7 +16,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-needs-sampler-'));
 let artifact: Uint8Array;
@@ -40,7 +40,7 @@ const CONTEXT = '7e1f0c2a-5d3b-4c8e-9a6f-000000000004';
 const HOUR = 3600;
 const stream = commands('dddddddd-5555-4333-8444');
 const { play } = stream;
-const fresh = () => newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
 // One elapsed command to `until`; returns the world and its committed events.
 function elapse(w: World, until: number) {
   stream.n += 1;
@@ -104,7 +104,7 @@ test('pouring the water out ends no status', () => {
     keywords: ['cup'],
     vessel: { ...skin.vessel, initial: { kind: null, quantity: 0 } },
   };
-  let w = newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(c, ctx(CONTEXT), [1, 2, 3, 4]);
   for (const item of ['waterskin', 'cup']) w = play(w, { type: 'take', item_id: id(w, item) });
   w = play(w, { type: 'move', direction: 'east' });
   w = play(w, { type: 'pour', source_id: id(w, 'waterskin'), receiver_id: id(w, 'cup') });

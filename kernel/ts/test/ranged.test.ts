@@ -14,7 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ranged-sampler-'));
 let artifact: Uint8Array;
@@ -52,7 +52,7 @@ function play(w: World, payload: object) {
 /** As `ancestry`, take and wield the bow, go `direction` and attack the lowest-id NPC there. */
 function engage(content: Cartridge, direction: string, ancestry = 'archer') {
   n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = play(w, { type: 'choose_ancestry', ancestry });
   w = play(w, { type: 'take', item_id: w.entityIds[BOW] });
   w = play(w, { type: 'wear', item_id: w.entityIds[BOW] });

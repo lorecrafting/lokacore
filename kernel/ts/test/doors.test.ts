@@ -14,7 +14,7 @@ import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
 import { fragment } from './fragment.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-doors-'));
 let artifact: Uint8Array;
@@ -39,7 +39,7 @@ const ref = (kind: string, key: string) => ({
 const fresh = (change?: (c: any) => void) => {
   const r = reload(source, change);
   assert.ok(r.ok, JSON.stringify(r));
-  return newWorld(r.cartridge as Cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1]);
+  return newWorld(r.cartridge as Cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1]);
 };
 let n = 0;
 let changes: [string, string, string][] = [];

@@ -18,7 +18,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-group-'));
 let artifact: Uint8Array;
@@ -60,7 +60,7 @@ const chat = (w: World, who: string, choice: string) => {
 };
 const fresh = () => {
   stream.n = 0;
-  return newWorld(content, '5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  return newWorld(content, ctx('5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 };
 const round = (w: World) => {
   const run_id = `aaaaaaaa-0000-4000-8000-${String(++stream.n).padStart(12, '0')}`;

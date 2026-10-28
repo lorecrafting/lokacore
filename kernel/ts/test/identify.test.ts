@@ -12,7 +12,7 @@ import { INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { gameView } from '../src/view/view.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-identify-sampler-'));
 let artifact: Uint8Array;
@@ -32,8 +32,7 @@ const content = loaded.cartridge as Cartridge;
 
 const stream = commands('eeeeeeee-2727-4727-8727');
 const { play } = stream;
-const fresh = () =>
-  newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e27' as never, [2, 7, 2, 7]);
+const fresh = () => newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e27'), [2, 7, 2, 7]);
 const ring = (w: World) => w.entityIds['identify_sampler@0.0.1:item/ring']!;
 const sage = (w: World) => w.entityIds['identify_sampler@0.0.1:npc/sage']!;
 const per = (w: World) => {

@@ -20,7 +20,7 @@ import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { runStatus } from '../src/mechanics/status/job.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { npcValue } from '../src/mechanics/attributes/shared.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-status-'));
 let artifact: Uint8Array;
@@ -41,7 +41,7 @@ const C = 'npc_status_sampler@0.0.1';
 const ref = (kind: string, k: string) =>
   ({ cartridge_id: C.split('@')[0], cartridge_version: '0.0.1', kind, key: k }) as never;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 const id = (w: World, kind: string, k: string) => w.entityIds[`${C}:${kind}/${k}`]!;
 const hp = (w: World, npc: string) => level(w, id(w, 'npc', npc), resourceRef(w, 'hp'));
 const row = (w: World, kind: string, k: string, status: string) =>

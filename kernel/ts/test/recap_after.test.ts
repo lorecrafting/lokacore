@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-recap-after-'));
 let source: any;
@@ -27,11 +27,7 @@ const view = (change?: (c: any) => void) => {
   const r = reload(source, change);
   if (!r.ok) throw new Error(JSON.stringify(r.diagnostic));
   return gameView(
-    newWorld(
-      r.cartridge as Cartridge,
-      '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-      [1, 2, 3, 4],
-    ),
+    newWorld(r.cartridge as Cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]),
   );
 };
 

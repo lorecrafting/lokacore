@@ -24,7 +24,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import type { DefinitionRef } from '../src/contracts.gen.ts';
 import { noticeAction } from './notice_action.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-trial-'));
 let artifact: Uint8Array;
@@ -84,7 +84,7 @@ const chat = (w: World, who: string, choice: string) => {
 };
 const fresh = (c = content) => {
   stream.n = 0;
-  return newWorld(c, '5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 };
 const north = (w: World) => {
   const r = ok(play(w, { type: 'move', direction: 'north' }));

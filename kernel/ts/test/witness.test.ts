@@ -15,7 +15,7 @@ import type { EntityId } from '../src/contracts.gen.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { triggered } from '../src/mechanics/reaction.ts';
-import { cartridgeOf, verdict } from './harness.ts';
+import { cartridgeOf, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-witness-'));
 let artifact: Uint8Array;
@@ -72,7 +72,7 @@ const id = (w: World, k: string) => w.entityIds[`${S}:${k}`] as EntityId;
 
 // A world with the baker in `room` (the sampler places him in the mill), edited by `edit`.
 const world = (room: string, edit: (w: World, baker: EntityId) => World = (w) => w) => {
-  const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   const baker = id(w, 'npc/baker');
   const containers = { ...w.state.containers, [baker]: w.roomIds[`${S}:room/${room}`]! };
   return edit({ ...w, state: { ...w.state, containers } } as World, baker);
@@ -153,7 +153,7 @@ test('an npc.move naming the baker and no room brings him to the taker', () => {
     ...content,
     reactions: { ...reactions, [rule]: { ...reactions[rule], on, apply } },
   };
-  let w = newWorld(moving as Cartridge, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(moving as Cartridge, ctx(CONTEXT), [1, 2, 3, 4]);
   w = take(w);
   assert.equal(w.state.containers[id(w, 'npc/baker')], w.roomIds[`${S}:room/square`]);
 });

@@ -18,6 +18,7 @@ import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { offerMaps } from '../src/view/invariants_view.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fixture-pages-'));
 const file = join(scratch, 'artifact.json');
@@ -48,7 +49,7 @@ const world = (change?: (c: Record<string, any>) => void): World => {
   assert.ok(loaded.ok, JSON.stringify(loaded));
   return newWorld(
     loaded.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29'),
     [1, 2, 3, 4],
   );
 };

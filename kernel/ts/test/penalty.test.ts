@@ -11,7 +11,7 @@ import { validate } from '../src/foundation/validate.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { levelUp, lose } from '../src/mechanics/levelling/shared.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -35,7 +35,7 @@ function hall(experience: number, edit?: (c: any) => void) {
   n = 0;
   const w = newWorld(
     r.cartridge as Cartridge,
-    '4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c47' as never,
+    ctx('4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c47'),
     [1, 2, 3, 4],
   );
   const row = { experience, allocated: {} };

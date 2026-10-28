@@ -16,7 +16,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-status-sampler-'));
 let artifact: Uint8Array;
@@ -34,7 +34,7 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 const poisonRef = 'status_sampler@0.0.1:status/poison';
 const antidoteRef = 'status_sampler@0.0.1:item/antidote';
 const antidote = (w: World) => w.entityIds['status_sampler@0.0.1:item/antidote'];

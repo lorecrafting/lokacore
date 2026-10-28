@@ -16,6 +16,7 @@ import { begun } from '../src/mechanics/quest/lifecycle.ts';
 import { value } from '../src/mechanics/fact.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx } from './harness.ts';
 
 const MINUTE = 3000;
 const scratch = mkdtempSync(join(tmpdir(), 'loka-quest-deadline-'));
@@ -54,7 +55,7 @@ const fresh = (change?: (c: Obj) => void) => {
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(
     r.cartridge as Cartridge,
-    '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f24' as never,
+    ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f24'),
     [4, 3, 2, 1],
   );
 };

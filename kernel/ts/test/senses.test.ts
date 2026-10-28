@@ -21,7 +21,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-senses-sampler-'));
 let artifact: Uint8Array;
@@ -46,7 +46,7 @@ const id = (w: World, kind: string, key: string) =>
 const stream = commands('dddddddd-6666-4333-8444');
 const { play } = stream;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-000000000006' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('7e1f0c2a-5d3b-4c8e-9a6f-000000000006'), [1, 2, 3, 4]);
 
 // Breaks: range ignored (the forge heat shows next door), the last exit taken as the direction
 // (stew "east" instead of "north"), unsorted cues, or a cue past its range listed (storeroom).

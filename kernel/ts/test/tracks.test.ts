@@ -13,7 +13,7 @@ import { newWorld, step, stepElapsed } from '../src/index.ts';
 import { holds } from '../src/runtime/world.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-tracks-sampler-'));
 let artifact: Uint8Array;
@@ -62,7 +62,7 @@ function to(w: World, until: number) {
 }
 const start = (c = content) => {
   n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 };
 const roomKey = (w: World, id: string) => w.rooms[id]?.title.split('.')[1];
 const where = (w: World, e: string) => roomKey(w, w.state.containers[e]!);

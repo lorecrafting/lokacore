@@ -22,7 +22,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { invariants } from '../src/mechanics/movement/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -46,7 +46,7 @@ const S = 'build_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'build_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 const fresh = (content = sampler()) =>
-  newWorld(content, '6a1c2e3d-4b5f-4a6e-8c7d-9e0f1a2b3c4d' as never, [1, 2, 3, 4]);
+  newWorld(content, ctx('6a1c2e3d-4b5f-4a6e-8c7d-9e0f1a2b3c4d'), [1, 2, 3, 4]);
 
 const stream = commands('eeeeeeee-1091-4091-8091', 'aaaaaaaa-1091-4091-8091');
 const { send, play } = stream;

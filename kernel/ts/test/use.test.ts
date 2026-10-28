@@ -18,7 +18,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-use-sampler-'));
 let artifact: Uint8Array;
@@ -52,7 +52,7 @@ const e = (w: World, key: string) => w.entityIds[`use_sampler@0.0.1:item/${key}`
 /** In the yard holding the bucket, the oilcan and the torch; with `fire`, the torch dropped. */
 function start(fire = true): World {
   stream.n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   for (const k of ['bucket', 'oilcan', 'torch'])
     w = ok(play(w, { type: 'take', item_id: e(w, k) }));
   return fire ? ok(play(w, { type: 'drop', item_id: e(w, 'torch') })) : w;
@@ -123,7 +123,7 @@ test('curing twice in one sequence ends the status once', () => {
   const success = twice.recipes['use_sampler@0.0.1:recipe/quench'].outcomes.success;
   success.sequence = [success.sequence[0], success.sequence[0]];
   stream.n = 0;
-  let w = newWorld(twice, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  let w = newWorld(twice, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   for (const k of ['bucket', 'torch']) w = ok(play(w, { type: 'take', item_id: e(w, k) }));
   w = ok(play(w, { type: 'drop', item_id: e(w, 'torch') }));
   const after = ok(invoke(w, 'quench', [e(w, 'cart'), e(w, 'bucket')]));
@@ -160,7 +160,7 @@ test('a cooling-down oil pair is listed unavailable with the code the step retur
   const cooled = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
   cooled.recipes['use_sampler@0.0.1:recipe/oil'].cooldown = 600;
   stream.n = 0;
-  let w = newWorld(cooled, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  let w = newWorld(cooled, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'take', item_id: e(w, 'oilcan') }));
   const ids = [e(w, 'winch'), e(w, 'oilcan')];
   w = ok(invoke(w, 'oil', ids));

@@ -17,6 +17,7 @@ import { decode, encode } from '../src/foundation/canonical.ts';
 import { pending, spokenBy } from '../src/mechanics/dialogue/shared.ts';
 import { shelf } from '../src/mechanics/commerce/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-standing-'));
 let artifact: Uint8Array;
@@ -52,7 +53,7 @@ const act = (w: World, p: object) => {
   assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
   return s.world;
 };
-const fresh = (c = content) => newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+const fresh = (c = content) => newWorld(c, ctx(CONTEXT), [1, 2, 3, 4]);
 // The sampler loaded with a test-local change to its compiled cartridge.
 const reload = (change: (c: any) => void) => {
   const c = structuredClone(source);

@@ -22,6 +22,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import * as patrol from './patrol_fixture.ts';
 import * as water from './water_fixture.ts';
+import { ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -149,7 +150,7 @@ for (const [file, bytes] of artifacts) {
   // hello_sampler is a text-only greeting with no entry room, so it has no world to advance.
   if (!c.entry) continue;
   test(`${file}: one long wait equals hourly steps`, () => {
-    let w0 = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    let w0 = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
     const ancestry = Object.keys(c.ancestries ?? {})[0];
     if (ancestry) {
       const r = step(

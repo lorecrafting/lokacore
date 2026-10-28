@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-codex-sampler-'));
 let artifact: Uint8Array;
@@ -25,8 +26,7 @@ try {
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
-const fresh = () =>
-  newWorld(content, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 let n = 0;
 const act = (w: World, p: object) => {
   n += 1;

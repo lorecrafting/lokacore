@@ -16,6 +16,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-affects-sampler-'));
 let artifact: Uint8Array;
@@ -51,8 +52,7 @@ function play(w: World, p: object): World {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-const fresh = () =>
-  newWorld(content, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [4, 3, 2, 1]);
+const fresh = () => newWorld(content, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20'), [4, 3, 2, 1]);
 const taken = (w: World, ...keys: string[]) =>
   keys.reduce((x, k) => play(x, { type: 'take', item_id: id(x, k) }), w);
 const stat = (w: World, k: string) => {
@@ -143,10 +143,7 @@ function regenerating(rate: number) {
   const by_position = { standing: rate, sitting: rate, resting: rate, sleeping: rate };
   regen.resources['affects_sampler@0.0.1:resource/hp'].gain = rate;
   regen.resources['affects_sampler@0.0.1:resource/hp'].regen = { every: 3600, by_position };
-  return taken(
-    newWorld(regen, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [4, 3, 2, 1]),
-    'belt',
-  );
+  return taken(newWorld(regen, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21'), [4, 3, 2, 1]), 'belt');
 }
 
 // Breaks (PM ruling loka-kgd.10): wear and remove do not settle hp first, so 4 h idle at the cap
@@ -190,7 +187,7 @@ test('removing the belt caps a stored hp 13 at the lowered maximum 10; the next 
 // extreme authored amount throws from base() and the GameView instead of saturating to ResourceInt.
 test('extreme affects saturate the attribute, the worn sum and the hp maximum; reads never throw', () => {
   const read = (c: Cartridge) => {
-    const t = taken(newWorld(c, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [4]), 'belt');
+    const t = taken(newWorld(c, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20'), [4]), 'belt');
     const w = play(t, { type: 'wear', item_id: id(t, 'belt') });
     const hp = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
     return [stat(w, 'str'), stat(w, 'con'), hp.maximum, 'world' in apply(w, [])];

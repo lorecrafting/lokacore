@@ -14,7 +14,7 @@ import { test } from 'node:test';
 import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { cartridgeOf, commands, reload } from './harness.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-prices-sampler-'));
 let artifact: Uint8Array;
@@ -39,7 +39,7 @@ function fresh(edit?: (c: any) => void) {
   stream.n = 0;
   return newWorld(
     r.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'),
     [1, 2, 3, 4],
   );
 }

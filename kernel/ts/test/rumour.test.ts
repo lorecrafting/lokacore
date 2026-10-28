@@ -13,7 +13,7 @@ import type { Policy } from '../src/contracts.gen.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { reactions } from '../src/content/cartridge_reactions.ts';
 import type { Checks } from '../src/content/cartridge_refs.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-rumour-'));
 let artifact: Uint8Array;
@@ -38,7 +38,7 @@ const ref = (kind: string, key: string) => ({
 const fresh = () => {
   const r = reload(source);
   assert.ok(r.ok, JSON.stringify(r));
-  return newWorld(r.cartridge as Cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1]);
+  return newWorld(r.cartridge as Cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1]);
 };
 let n = 0;
 function run(w: World, p: object) {
@@ -104,11 +104,7 @@ test('two NPCs firing one reaction in one wait commit', () => {
     c.npcs[`${C}:npc/innkeeper`].daily_schedule = { 16: room('square'), 17: room('inn') };
   });
   assert.ok(r.ok, JSON.stringify(r));
-  const w = newWorld(
-    r.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1],
-  );
+  const w = newWorld(r.cartridge as Cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1]);
   assert.equal(knows(play(w, until(17, 30)), 'innkeeper'), true);
 });
 

@@ -17,7 +17,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-furnish-sampler-'));
@@ -45,8 +45,7 @@ const ok = (w: World, payload: object) => {
 };
 const P = 'furnish_sampler@0.0.1:';
 const item = (w: World, k: string) => w.entityIds[`${P}item/${k}`]!;
-const fresh = () =>
-  newWorld(content, '7b2f4d3e-8c5a-4f6b-9d0e-3c1a2b4d5e6f' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('7b2f4d3e-8c5a-4f6b-9d0e-3c1a2b4d5e6f'), [1, 2, 3, 4]);
 const take = (w: World, k: string) => ok(w, { type: 'take', item_id: item(w, k) });
 const drop = (w: World, k: string) => ok(w, { type: 'drop', item_id: item(w, k) });
 const go = (w: World, direction: string) => ok(w, { type: 'move', direction });

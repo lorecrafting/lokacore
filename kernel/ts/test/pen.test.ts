@@ -23,7 +23,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { commands } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-pen-sampler-'));
 let artifact: Uint8Array;
@@ -44,7 +44,7 @@ const C0 = 28800;
 const fresh = () =>
   newWorld(
     loaded.cartridge as Cartridge,
-    '5b2c7e1a-4d3f-4a8b-9c6e-2f1d0a3b4c5d' as never,
+    ctx('5b2c7e1a-4d3f-4a8b-9c6e-2f1d0a3b4c5d'),
     [1, 2, 3, 4],
   );
 

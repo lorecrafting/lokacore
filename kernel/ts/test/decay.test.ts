@@ -16,7 +16,7 @@ import type { EntityId } from '../src/contracts.gen.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { moveItem } from '../src/mechanics/containment/react.ts';
 import { uses } from '../src/content/cartridge_reactions.ts';
-import { cartridgeOf, commands, reload } from './harness.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
 let artifact: Uint8Array;
@@ -52,7 +52,7 @@ const ok = (r: ReturnType<typeof play>) => {
 };
 const fresh = (edit?: (c: any) => void) => {
   stream.n = 0;
-  return newWorld(content(edit), '6a1c3e5f-2b4d-4f6a-8c1e-3d5f7a9b1c2e' as never, [1, 2, 3, 4]);
+  return newWorld(content(edit), ctx('6a1c3e5f-2b4d-4f6a-8c1e-3d5f7a9b1c2e'), [1, 2, 3, 4]);
 };
 const item = (w: World, k: string) => w.entityIds[`${S}item/${k}`] as EntityId;
 const room = (w: World, k: string) => w.roomIds[`${S}room/${k}`]!;

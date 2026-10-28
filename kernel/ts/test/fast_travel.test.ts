@@ -13,6 +13,7 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fast-travel-'));
 let artifact: Uint8Array, compiled: string;
@@ -80,7 +81,7 @@ const at = (w: World) =>
 const offer = (w: World) => gameView(w).notices!.find((x) => x.transport)!.transport!.action;
 const fresh = () => {
   n = 0;
-  return newWorld(content, '6e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [3, 2, 3, 2]);
+  return newWorld(content, ctx('6e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21'), [3, 2, 3, 2]);
 };
 
 // Breaks: the compiler warns VISITS_UNRECORDED (knowledge@1 dropped), so visits never count.

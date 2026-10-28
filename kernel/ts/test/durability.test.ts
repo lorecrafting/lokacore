@@ -13,7 +13,7 @@ import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { cartridgeOf, commands, reload } from './harness.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-durability-sampler-'));
 let artifact: Uint8Array;
@@ -60,7 +60,7 @@ const offer = (w: World) =>
 /** As `ancestry`, take and wield `item` and attack the dummy. */
 function armed(content = sampler(), item = 'sword', ancestry = 'smith') {
   stream.n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never, [2, 1, 2, 1]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'), [2, 1, 2, 1]);
   w = play(w, { type: 'choose_ancestry', ancestry });
   w = play(w, { type: 'take', item_id: e(w, 'item', item) });
   return play(w, { type: 'wear', item_id: e(w, 'item', item) });
@@ -68,7 +68,7 @@ function armed(content = sampler(), item = 'sword', ancestry = 'smith') {
 /** As `ancestry`, carry the sword and the hammer (a use target lies in the body, not a slot). */
 function forging(content: Cartridge, ancestry = 'smith') {
   stream.n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never, [2, 1, 2, 1]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'), [2, 1, 2, 1]);
   w = play(w, { type: 'choose_ancestry', ancestry });
   w = play(w, { type: 'take', item_id: e(w, 'item', 'sword') });
   return play(w, { type: 'take', item_id: e(w, 'item', 'hammer') });
@@ -175,7 +175,7 @@ test('only combat and the smith write the edge', () => {
       },
     };
   });
-  let x = newWorld(reaction, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never, [2, 1, 2, 1]);
+  let x = newWorld(reaction, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'), [2, 1, 2, 1]);
   x = play(x, { type: 'choose_ancestry', ancestry: 'smith' });
   assert.deepEqual(send(x, { type: 'take', item_id: sword(x) }).decision, {
     kind: 'fault',

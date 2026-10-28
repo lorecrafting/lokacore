@@ -14,7 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-boss-sampler-'));
 let artifact: Uint8Array;
@@ -36,7 +36,7 @@ function world(edit?: (c: any) => void) {
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(
     r.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'),
     [1, 2, 3, 4],
   );
 }

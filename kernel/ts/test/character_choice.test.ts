@@ -14,6 +14,7 @@ import { holds } from '../src/mechanics/policy.ts';
 import { status } from '../src/mechanics/skills.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { ancestrySource as source } from './derived_fixture.ts';
+import { ctx } from './harness.ts';
 
 const ref = (kind: string, name: string) =>
   ({ cartridge_id: 'derived_sampler', cartridge_version: '0.0.1', kind, key: name }) as never;
@@ -32,7 +33,7 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const fresh = () =>
   newWorld(
     loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'),
     [1, 2, 3, 4],
   );
 const command = (w: World, payload: object) =>

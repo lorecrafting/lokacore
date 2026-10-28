@@ -16,7 +16,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { knownTopics } from '../src/mechanics/topics/shared.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
-import { reload } from './harness.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ask-sampler-'));
 let artifact: Uint8Array;
@@ -59,7 +59,7 @@ const accepted = (w: World, p: object) => {
 };
 // A fresh game, walked into the square.
 const square = (c: Cartridge = content) =>
-  accepted(newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-00000000000a' as never, [1, 2, 3, 4]), {
+  accepted(newWorld(c, ctx('7e1f0c2a-5d3b-4c8e-9a6f-00000000000a'), [1, 2, 3, 4]), {
     type: 'move',
     direction: 'north',
   });
@@ -174,7 +174,7 @@ test('a topic the actor does not know is refused; the first answer whose when ho
 test('the miller cannot be asked; the guard turns hostile on smugglers; a conversation blocks ask', () => {
   const w = answer(square(), 'smith', 'mill').w;
   assert.equal(refused(w, 'miller', 'mill'), 'invalid_target');
-  const gate = newWorld(content, '7e1f0c2a-5d3b-4c8e-9a6f-00000000000a' as never, [1, 2, 3, 4]);
+  const gate = newWorld(content, ctx('7e1f0c2a-5d3b-4c8e-9a6f-00000000000a'), [1, 2, 3, 4]);
   assert.equal(refused(gate, 'smith', 'mill'), 'not_present');
   const room = {
     type: 'ask',

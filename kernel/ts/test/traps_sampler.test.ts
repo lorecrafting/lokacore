@@ -15,6 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-traps-sampler-'));
 let artifact: Uint8Array;
@@ -33,8 +34,7 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const ref = (kind: string, k: string) =>
   ({ cartridge_id: 'traps_sampler', cartridge_version: '0.0.1', kind, key: k }) as never;
-const fresh = () =>
-  newWorld(content, '2c6e1a9b-7d3f-4e5a-8b1c-0f2e4d6a8c1b' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('2c6e1a9b-7d3f-4e5a-8b1c-0f2e4d6a8c1b'), [1, 2, 3, 4]);
 const poison = (w: World) => {
   const r =
     w.state.statuses?.[key({ kind: 'status', body_id: w.body, status: ref('status', 'poison') })];

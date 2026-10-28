@@ -15,6 +15,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { fragment } from './fragment.ts';
 import * as patrol from './patrol_fixture.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-hidden-sampler-'));
 let artifact: Uint8Array;
@@ -38,7 +39,7 @@ const P = 'hidden_sampler@0.0.1';
 // hidden face also hides its unhidden reciprocal, or the search does not reveal it.
 test('a forged Move through the panel is not_found until the search; then the exit shows and opens', () => {
   let n = 0;
-  let w: World = newWorld(content, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1e' as never, [1, 2, 3, 4]);
+  let w: World = newWorld(content, ctx('3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1e'), [1, 2, 3, 4]);
   const send = (payload: object) => {
     const r = step(
       w,
