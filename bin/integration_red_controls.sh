@@ -740,6 +740,12 @@ done
 git commit -qm clean --allow-empty; a=$(git rev-parse HEAD); git commit -qm 'see /Users/x/f' --allow-empty; rc=0
 printf 'refs/heads/a %s refs/heads/a %s\nrefs/heads/b %s refs/heads/b %s\n' "$a" $z "$(git rev-parse HEAD)" $z | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
 [ "$rc" = 1 ] || bad "pre-push: a second ref's path-naming message: exit $rc, want 1"
+# Same break when the earlier refs change code against a known remote sha, or name an unknown one.
+git reset -q --hard "$a"; base=$a; echo g > g; git add g; git commit -qm code; c1=$(git rev-parse HEAD)
+git commit -qm 'see /Users/x/f' --allow-empty; rc=0
+printf 'refs/heads/a %s refs/heads/a %s\nrefs/heads/b %s refs/heads/b 1111111111111111111111111111111111111111\nrefs/heads/c %s refs/heads/c %s\n' "$c1" "$base" "$c1" "$(git rev-parse HEAD)" $z \
+  | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
+[ "$rc" = 1 ] || bad "pre-push: a path-naming message after code and unknown-sha refs: exit $rc, want 1"
 # Break (loka-ivjq.27): an edited TypeScript file over the size limit passes the edit hook silently, the check gets
 # a path the size script cannot resolve from the repo root, or a non-TypeScript edit runs it.
 mkdir "$tmp/fe"; printf '#!/bin/sh\nshift 2; echo "$*" >> "$FE_LOG"; case $* in *check_ts_size*) echo too-long; exit 1 ;; esac\n' > "$tmp/fe/mise"
