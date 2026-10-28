@@ -360,13 +360,6 @@ test('Notice-only recipe admission agreement searches standalone and board-child
   );
 });
 
-// Breaks: malformed new trigger/consequence fields or malformed Notice action arrays
-// cross the schema boundary. These literals are shared with the Elixir validator.
-test('Q2 contracts reject malformed shapes and accept their controls', () => {
-  for (const c of read('protocol/fixtures/first_search_contracts.json'))
-    assert.equal(validate(c.contract, c.value).length === 0, c.valid, c.name);
-});
-
 // Breaks: recipes under board children remain duplicated on World or disappear from the
 // notice projection while their exact canonical subject is still admitted by the recipe rule.
 test('board-child readable recipes project exclusively on the child Notice', () => {

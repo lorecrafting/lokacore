@@ -2,17 +2,16 @@
 // pinned artifact: thresholds [30, 100], rats grant 10, penalty 10% told as `death.penalty`; the
 // brute in the yard (south of the hall) kills in one blow; the tail lies in the pit (east).
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { levelUp, lose } from '../src/mechanics/levelling/shared.ts';
+import { ctx, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -23,31 +22,20 @@ const kat = JSON.parse(
 const P = 'penalty_sampler@0.0.1';
 const penalty = (c: any) => c.world.death.penalty;
 
-/** The pinned artifact, edited and re-hashed, loaded. */
-function load(edit: (c: any) => void = () => {}) {
-  const c = structuredClone(kat.value);
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const refused = (edit: (c: any) => void) => {
-  const r = load(edit);
+  const r = reload(kat.value, edit);
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
 let n = 0;
 /** A new game in the hall at `experience` (no row at 0) on the artifact edited by `edit`. */
 function hall(experience: number, edit?: (c: any) => void) {
-  const r = load(edit);
+  const r = reload(kat.value, edit);
   assert.ok(r.ok, JSON.stringify(r));
   n = 0;
   const w = newWorld(
     r.cartridge as Cartridge,
-    '4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c47' as never,
+    ctx('4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c47'),
     [1, 2, 3, 4],
   );
   const row = { experience, allocated: {} };

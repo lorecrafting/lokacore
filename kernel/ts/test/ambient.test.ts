@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ambient-sampler-'));
 let artifact: Uint8Array;
@@ -30,7 +31,7 @@ const content = loaded.cartridge as Cartridge;
 // and rain (first 4 bytes of SHA-256 of `weather:<id>:<d>` mod 5; see exposure.test.ts).
 const CONTEXT = '7e1f0c2a-5d3b-4c8e-9a6f-000000000003';
 const at = (day: number, hour: number) => {
-  const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   const clock = ((day - 1) * 24 + hour) * 3600;
   return gameView({ ...w, state: { ...w.state, clock } } as World).place.description.key;
 };

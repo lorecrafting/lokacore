@@ -15,6 +15,7 @@ import type { Policy } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { LEAF_REFS } from '../src/content/cartridge_leaf_refs.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-tags-sampler-'));
@@ -37,7 +38,7 @@ try {
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
-const world = newWorld(content, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [4, 3, 2, 1]);
+const world = newWorld(content, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21'), [4, 3, 2, 1]);
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'tags_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 const check = (p: object, target?: string) =>

@@ -11,6 +11,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-attr-'));
 let artifact: Uint8Array;
@@ -33,7 +34,7 @@ const P = 'npc_attr_sampler@0.0.1';
 // pass), or from the wrong guard (both fail or the outcomes swap).
 test('str 10 loses to the strong guard (str 15) and beats the weak guard (str 5)', () => {
   let n = 0;
-  let w = newWorld(content, '4c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('4c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d'), [1, 2, 3, 4]);
   const perform = (action: string) => {
     n += 1;
     const r = step(

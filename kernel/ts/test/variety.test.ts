@@ -14,6 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { visits } from '../src/mechanics/knowledge/shared.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-variety-sampler-'));
 let artifact: Uint8Array;
@@ -36,7 +37,7 @@ const ids = Array.from(
   (_, i) => `aaaaaaaa-0707-4007-8007-${String(i + 1).padStart(12, '0')}`,
 );
 const fresh = (c: Cartridge) =>
-  newWorld(c, '6c8e0a2b-4d6f-4b8c-8e0a-5b7d9f1a3c5e' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('6c8e0a2b-4d6f-4b8c-8e0a-5b7d9f1a3c5e'), [1, 2, 3, 4]);
 function run(w: World, id: string, payload: object) {
   const r = step(
     w,

@@ -4,20 +4,19 @@
 // "a narrate step" case. Twin of test/loka/content_settle_test.exs.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { living } from '../src/mechanics/death/shared.ts';
 import { livingCount } from '../src/mechanics/population/refs.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-settle-sampler-'));
 let artifact: Uint8Array;
@@ -34,18 +33,9 @@ try {
 const RULE = 'settle_sampler@0.0.1:reaction/arrival_line';
 const LINE = 'settle.arrival_line';
 
-function load(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function world(edit?: (c: any) => void, context = '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'): World {
-  const r = load(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(r.cartridge as Cartridge, context as never, [1, 2, 3, 4]);
 }
@@ -91,7 +81,7 @@ test('S3-1: a delayed line is said by the advance that reaches its due time, not
 
 // Breaks: the loader admits a line whose text key is not in the catalog.
 test('loader: a narrate text key resolves in the text catalog', () => {
-  const r = load((c) => (c.reactions[RULE].apply[0].text = 'settle.missing'));
+  const r = reload(base, (c) => (c.reactions[RULE].apply[0].text = 'settle.missing'));
   assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
     'UNRESOLVED_REFERENCE',
     `.cartridge.reactions["${RULE}"].apply[0].text`,
@@ -261,7 +251,7 @@ test('S4-1: a plan with no member moves nothing', () => {
 test('loader: a plan move names a known plan and a room, never an NPC', () => {
   const at = `.cartridge.reactions["${MOVE}"].apply[0]`;
   const refused = (edit: (s: any) => void) => {
-    const r = load((c) => {
+    const r = reload(base, (c) => {
       // A placed NPC (the raider is a spawn template, refused at .npc on its own).
       const { spawn_template, ...guard } = c.npcs['settle_sampler@0.0.1:npc/raider'];
       c.npcs['settle_sampler@0.0.1:npc/guard'] = { ...guard, key: 'guard' };

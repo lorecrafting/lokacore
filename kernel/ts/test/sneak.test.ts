@@ -4,7 +4,6 @@
 // encounter it opens cures the concealment (mechanics.md "Sneak and hide").
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,8 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { concealed, statusKey } from '../src/mechanics/status/shared.ts';
+import { cartridgeOf, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sneak-sampler-'));
 let artifact: Uint8Array;
@@ -50,7 +49,7 @@ function play(w: World, payload: object) {
 }
 const fresh = (c = content) => {
   n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e16' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e16'), [1, 2, 3, 4]);
 };
 const east = (w: World) => play(w, { type: 'move', direction: 'east' });
 const hide = (w: World) => play(w, { type: 'perform', action: 'hide' });
@@ -120,18 +119,7 @@ test('a hidden NPC stays concealed from an alert player', () => {
   assert.equal(concealed(w, sentry, w.body), true);
 });
 
-/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 
 // Breaks (twin of the row 16 case in test/loka/content_status_test.exs): pierced_by loading without
 // a concealment, naming no skill or attribute, or under API 1.92; an entry reaction applying a
@@ -140,24 +128,26 @@ test('loader: pierced_by needs a concealment, a real skill and attribute, API 1.
   const S = `${C.cartridge_id}@${C.cartridge_version}:status/hidden`;
   const at = `.cartridge.statuses["${S}"].pierced_by`;
   assert.equal(
-    reload(() => {}),
+    verdict(base, () => {}),
     'loaded',
   );
   assert.deepEqual(
-    reload((c) => {
+    verdict(base, (c) => {
       delete c.statuses[S].concealment;
       c.statuses[S].per_tick = -1;
     }),
     ['SCHEMA_VIOLATION', at],
   );
   assert.deepEqual(
-    reload(
+    verdict(
+      base,
       (c) => (c.statuses[S].pierced_by.skill = { ...c.statuses[S].pierced_by.skill, key: 'none' }),
     ),
     ['UNRESOLVED_REFERENCE', `${at}.skill`],
   );
   assert.deepEqual(
-    reload(
+    verdict(
+      base,
       (c) =>
         (c.statuses[S].pierced_by.attribute = {
           ...c.statuses[S].pierced_by.attribute,
@@ -169,11 +159,11 @@ test('loader: pierced_by needs a concealment, a real skill and attribute, API 1.
   const R = `${C.cartridge_id}@${C.cartridge_version}:reaction/hide`;
   const keep = { ...C, kind: 'room', key: 'keep' };
   assert.deepEqual(
-    reload((c) => (c.reactions[R].on = { event: 'entity_entered_room', room: keep })),
+    verdict(base, (c) => (c.reactions[R].on = { event: 'entity_entered_room', room: keep })),
     ['OUTCOME_MISMATCH', `.cartridge.reactions["${R}"].apply[0].op`],
   );
   assert.deepEqual(
-    reload((c) => (c.manifest.requires.kernel_api.at_least = '1.92')),
+    verdict(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.92')),
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
 });

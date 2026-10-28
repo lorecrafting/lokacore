@@ -61,6 +61,7 @@ jobs:
       - run: npm install --global @ast-grep/cli@0.45.3
       - run: ast-grep test --skip-snapshot-tests
       - run: ast-grep scan --error . mobile/app/.storybook # as bin/check_all.sh: whole tree, every rule
+      - run: sh bin/check_as_never.sh
       - run: bin/lint_red_controls.sh --core-only
       - run: bin/integration_red_controls.sh
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124

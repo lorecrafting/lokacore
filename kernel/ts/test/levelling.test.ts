@@ -17,6 +17,7 @@ import { derived } from '../src/mechanics/attributes/shared.ts';
 import { oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attributes/rule.ts';
 import { gameView } from '../src/view/view.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-levelling-sampler-'));
 let artifact: Uint8Array;
@@ -70,7 +71,7 @@ function wait(w: World, seconds: number) {
 const narration = (r: { decision: object }) =>
   ((r.decision as { narration?: { key: string }[] }).narration ?? []).map((t) => t.key);
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '2d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('2d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 /** One rat in the pit killed in one round; the step and the world after it. */
 function kill(w: World, rat: string) {
   const target_id = w.entityIds[`levelling_sampler@0.0.1:npc/${rat}`];

@@ -443,7 +443,7 @@ test('pending ancestry keeps its choices pressable and a later press retries the
 // Breaks: NPCs and loose items share one "are here" sentence, an NPC is listed among the items or
 // dropped, a group loses its comma form or "is"/"are", or an empty group leaves its own sentence (book-ui.md, World and status entry).
 test('the room lists NPCs first, then every other entity as items, empty groups omitted', async () => {
-  const { RoomPage } = await import('./pages.tsx');
+  const { RoomPage } = await import('./Body.tsx');
   const entity = (id: string, kind: string) => ({ id, kind, name: id });
   const groups = (entities: object[]) =>
     nodes(

@@ -2,14 +2,13 @@
 // terrain_sampler's pinned artifact: yard (no tags) north to road [road], east to ford
 // [road, marsh], east to fen [marsh]; a move costs 3 mv, road 50%, marsh 300%; mv starts at 10.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld, step } from '../src/index.ts';
 import { type Cartridge, type World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { ctx, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -19,19 +18,8 @@ const kat = JSON.parse(
 );
 const room = (k: string) => `terrain_sampler@0.0.1:room/${k}`;
 
-/** The pinned artifact, edited and re-hashed, loaded. */
-function load(edit: (c: any) => void = () => {}) {
-  const c = structuredClone(kat.value);
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const refused = (edit: (c: any) => void) => {
-  const r = load(edit);
+  const r = reload(kat.value, edit);
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
@@ -39,12 +27,12 @@ let n = 0;
 const id = () => `eeeeeeee-4343-4a4a-8a4a-${String(++n).padStart(12, '0')}` as never;
 /** A new game in the yard on the artifact edited by `edit`. */
 function yard(edit?: (c: any) => void) {
-  const r = load(edit);
+  const r = reload(kat.value, edit);
   assert.ok(r.ok, JSON.stringify(r));
   n = 0;
   return newWorld(
     r.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e43' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e43'),
     [1, 2, 3, 4],
   );
 }

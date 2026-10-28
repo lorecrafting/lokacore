@@ -14,6 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sky-sampler-'));
 let artifact: Uint8Array;
@@ -61,7 +62,7 @@ test('rain on a seeded day changes the yard and the status, and stops a torch in
     const v = gameView(w);
     seen.push([v.calendar_status?.weather, v.place.description.key, offered(w)]);
   };
-  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   const outs: unknown[] = [];
   const run = (p: object) => {
     const r = act(w, p);
@@ -102,7 +103,7 @@ test('rain on a seeded day changes the yard and the status, and stops a torch in
   ]);
   // Same world id and day, another authority seed: the same weather (no RNG draw).
   assert.equal(
-    gameView(newWorld(content, CONTEXT as never, [9, 9, 9, 9])).calendar_status?.weather,
+    gameView(newWorld(content, ctx(CONTEXT), [9, 9, 9, 9])).calendar_status?.weather,
     'rain',
   );
 });
@@ -111,7 +112,7 @@ test('rain on a seeded day changes the yard and the status, and stops a torch in
 // the leaf matching any field (season spring at 2000).
 test('season and tide follow their cycles in the status and the sky leaf', () => {
   const at = (clock: number) => {
-    const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+    const w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
     return { ...w, state: { ...w.state, clock } } as World;
   };
   const rows: [number, string, string][] = [

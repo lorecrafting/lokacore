@@ -17,6 +17,7 @@ import { key } from '../src/foundation/compose.ts';
 import { targetOf } from '../src/mechanics/fact.ts';
 import { chainRefused } from '../src/mechanics/locks.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-access-locks-'));
 let artifact: Uint8Array;
@@ -44,7 +45,7 @@ const ref = (kind: string, k: string) => ({
 });
 const id = (w: World, kind: string, k: string) => w.entityIds[`${S}:${kind}/${k}`] as EntityId;
 const resident = source.items[`${S}:item/chest`].locks.get;
-const fresh = () => newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
 let n = 0;
 const run = (w: World, p: object) => {
   n += 1;

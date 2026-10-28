@@ -3,15 +3,14 @@
 // player sees her leave; the loader's twin checks of schedule_cases.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-schedule-cases-'));
 let artifact: Uint8Array;
@@ -28,21 +27,10 @@ try {
 const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
 const C = 'schedule_sampler@0.0.1';
 const MAUD = `${C}:npc/maud`;
-// `change` applied to a copy of the compiled cartridge, then loaded: the cartridge or the diagnostic.
-function load(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const fresh = (change?: (c: any) => void) => {
-  const r = load(change);
+  const r = reload(source, change);
   assert.ok(r.ok, JSON.stringify(r));
-  return newWorld(r.cartridge as Cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1]);
+  return newWorld(r.cartridge as Cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1]);
 };
 let n = 0;
 const narration: string[] = [];
@@ -196,7 +184,7 @@ test('the loader checks schedule_cases rooms, goal texts, conditions, hours and 
     ],
   ];
   for (const [change, code, path, data] of rows) {
-    const r = load(change);
+    const r = reload(source, change);
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data], [
       code,
       path,

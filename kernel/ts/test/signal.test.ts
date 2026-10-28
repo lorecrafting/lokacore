@@ -14,6 +14,7 @@ import type { DefinitionRef } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-signal-sugar-'));
 let artifact: Uint8Array;
@@ -56,7 +57,7 @@ function reload(change: (c: Obj) => void) {
 let n = 0;
 // Start in the yard, then enter the hall, go back to the yard and enter the hall again.
 function twice(c: Cartridge) {
-  const start = newWorld(c, '5b2e7d1c-9a4f-4e3b-8c6d-000000000001' as never, [1, 2, 3, 4]);
+  const start = newWorld(c, ctx('5b2e7d1c-9a4f-4e3b-8c6d-000000000001'), [1, 2, 3, 4]);
   return ['east', 'west', 'east'].reduce((w, direction) => {
     n += 1;
     const id = `dddddddd-4194-4666-8444-${String(n).padStart(12, '0')}`;

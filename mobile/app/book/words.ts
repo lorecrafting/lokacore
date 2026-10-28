@@ -120,6 +120,7 @@ const CAUSE: Record<string, string> = {
   cursed: 'it will not come off',
 };
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 // A use pair's line without narration: "You quench a cart with a bucket." (book-ui.md, Pick a second thing).
 export const used = (label: string, target: string, tool: string) =>
   `You ${lower(label)} ${target} with ${tool}.`;
@@ -146,10 +147,11 @@ export const sellReason = (
   s: { reason?: string; message?: { key: string } },
   text: (key: string) => string,
 ) => (s.message ? text(s.message.key) : reason(s.reason ?? ''));
-// A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
-export const holding = (name: string) => `${name} is holding it.`;
+// A thing a living NPC holds (pass-1 E14).
+export const heldBy = (name: string) => `${name} is holding it.`;
 export const balance = (pennies: number) => `You have ${pennies}p.`;
-export const refused = (name: string) => `${name} will have nothing to do with you.`;
+// A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
+export const hostileRefusal = (name: string) => `${name} will have nothing to do with you.`;
 // The titles of a shopkeeper's buy and sell pages (owner picks mvlymuams73l, mvlynyikyw57).
 export const sellsTitle = (name: string) => `${name} can sell you…`;
 export const buysTitle = (name: string) => `${name} will buy…`;

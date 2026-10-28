@@ -6,16 +6,15 @@
 // then fish_a, and Sell gives back the lowest held. Expected values are hand-counted from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-prices-sampler-'));
 let artifact: Uint8Array;
@@ -33,38 +32,20 @@ const S = 'prices_sampler@0.0.1';
 const ref = (key: string) =>
   ({ cartridge_id: 'prices_sampler', cartridge_version: '0.0.1', kind: 'item', key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function fresh(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
-  n = 0;
+  stream.n = 0;
   return newWorld(
     r.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'),
     [1, 2, 3, 4],
   );
 }
 
-let n = 0;
-function send(w: World, payload: object) {
-  const id = `ffffffff-2020-4020-8020-${String(++n).padStart(12, '0')}`;
-  const command = { id, world_context_id: w.context, payload };
-  return step(w, { ...command, payload: { actor_id: w.character, ...payload } } as never, n);
-}
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('ffffffff-2020-4020-8020');
+const { send, play } = stream;
 const fish = (w: World, k: string) => w.entityIds[`${S}:item/fish_${k}`]!;
 const npc = (w: World, k: string) => w.entityIds[`${S}:npc/${k}`]!;
 const pennies = (w: World, who = w.body) => level(w, who, resourceRef(w, 'pennies'));
@@ -154,7 +135,7 @@ test('a trade job moves a fish from the fisher to the fishmonger and the price f
 test('the loader refuses a malformed stock table and a kernel_api below 1.82', () => {
   const offer = (c: any) => c.npcs[`${S}:npc/fishmonger`].shop.offers[0];
   const refused = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data?.error];
   };
   const at = `.cartridge.npcs["${S}:npc/fishmonger"].shop.offers[0].stock`;

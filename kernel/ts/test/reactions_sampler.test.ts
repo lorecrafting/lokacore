@@ -12,6 +12,7 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index
 import { allocator, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { sequence, triggered } from '../src/mechanics/reaction.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
+import { ctx } from './harness.ts';
 const ref = { cartridge_id: 'reactions_sampler', cartridge_version: '0.0.1', kind: 'status' };
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-reactions-sampler-'));
@@ -31,7 +32,7 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const R = 'reactions_sampler@0.0.1';
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 let n = 0;
 const act = (w: World, p: object) => {
   n += 1;

@@ -5,21 +5,38 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #481 (loka-x6t.127, room anatomy remainder); written 2026-10-28 by Claude Code (Opus 5.5), PM
-session 5b4498e4. Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of
+AS OF main after #480/#484; written 2026-10-28 by Claude Code (Opus 5.5), PM
+session 5e160e83. Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of
 weekly limit ... this will be my last week before a break so yeah make it right!" Owner is away from Storybook
 until all work is done; the picks Monitor is off. Storybook serves polish/session-2026-10-23 on 6006 (updated
 from main today, before #481).
 
 ## Now
 
-- Authoring batch A, draft #480, branch `toolbox/authoring-batch-a` in worktrees.noindex/toolbox-authoring-batch-a
-  (plan, rulings and briefs: Beads loka-kgd.194 notes and each item's notes). Integrated (reviewed, CI green):
-  A (.12 .13 .14), B (.16, Fable review), walks E1+E2 (.9, merged from `toolbox/authoring-batch-a-walks`,
-  coverage 128/140 reactions, 46/49 recipes, 25/34 choices, 3/3 quests). Building: C (.18, Opus dev; Fable
-  reviewer). Then .22 (recipes into actions, authoring-only; Fable brief in its notes), then D (.17 source
-  schema, ajv dev dependency approved), then mark ready, Fable final review, merge.
-- Open PR: draft #454 ON HOLD (P3 hold below).
+Merged 2026-10-28: #481 (loka-x6t.127), #482 (loka-ivjq.16 E1 harness), #483 (loka-ivjq.25/.27 regen and
+gates), #484 (loka-ivjq.18/.19/.21 role files, guard rules, stage labels dropped), #480 (Authoring batch A:
+loka-kgd.194.12/.13/.14/.16/.18/.22/.17/.9). In flight; each verdict lands as a PR comment, read those first:
+
+- #485 batch P (`housekeeping/batch-p`; loka-ivjq.26/.22/.13): fix round 2 at f261bd73 (SURVIVED rows clear
+  like NO-TESTS); scoped re-check by the same reviewer running. On APPROVE and green CI:
+  `bin/merge_pr.sh 485 loka-ivjq.26,loka-ivjq.22,loka-ivjq.13`.
+- #486 (`housekeeping/batch-t-ex`, loka-ivjq.24) at f7988690 and #487 (`housekeeping/batch-t-ts`, loka-ivjq.15;
+  both close loka-ivjq.14) at 906453e6: batch review APPROVE WITH NOTES, one should-fix each, fixed; scoped
+  re-check of both by the batch-T reviewer running (#487 open point: pre-commit no longer catches new
+  `as never`, CI lint does). Merge #485, #486, #487, then `bin/sync_pr.sh housekeeping/batch-docs`.
+  Pre-existing test gap filed: loka-83pq.
+- Batch Docs (`housekeeping/batch-docs`; loka-ivjq.1/.17/.23/.10/.9): developer building; brief "BRIEF
+  DOCS" in loka-ivjq.1 notes; the PR body is the record. One review on the final head.
+- Batch C1 (S7 loka-ivjq.20, F2 loka-ivjq.2): plan and briefs in loka-ivjq.20 notes ("C1 PLAN", PM
+  amendments at its top). Starts after #485-#487 merge: cut `simplify/c1-loader`, wave 1 = F2-Ex, B1, D1
+  (first developer also does slice 0 prep); wave 2 = B2, D2, F2-docs (F2-docs after batch Docs merges);
+  wave 3 = C1, C2; then F; per-slice reviews, Fable final-head review. Starred decisions D1 D2 D4 D5 D6
+  are PM defaults inside the owner's yes; owner ratifies on return.
+- B5 (loka-ivjq.28) reopened: Beads sync redesign (Fable brief); #484 review found three failure states
+  (AmbiguousBase after a mid-run death, br's --force-db hint reverting main rows, base rebuild dropping
+  rows). Old refuse-then-manual sync stays: on `after_merge` "Sync conflict", run `br sync --merge`, then
+  rerun `bin/after_merge.sh`; a "local path" refusal means a Beads note quotes a path: reword it.
+- Draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
 

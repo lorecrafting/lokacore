@@ -15,6 +15,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { replenish } from '../src/content/cartridge_replenish.ts';
+import { commands, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-replenish-sampler-'));
@@ -51,24 +52,15 @@ const ref = (kind: string, key: string) => ({
   key,
 });
 
-let n = 0;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-4444-4444-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-4444-4444-8444');
+const { send: play } = stream;
 function waitUntil(w: World, until: number): World {
   const r = play(w, { type: 'wait', until });
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
 const fresh = (cartridge = content) =>
-  newWorld(cartridge, '3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c' as never, [1, 2, 3, 4]);
+  newWorld(cartridge, ctx('3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c'), [1, 2, 3, 4]);
 const id = (w: World, kind: string, key: string) =>
   kind === 'room'
     ? w.roomIds[`replenish_sampler@0.0.1:room/${key}`]!

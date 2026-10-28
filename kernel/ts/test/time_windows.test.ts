@@ -13,6 +13,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-time-sampler-'));
 let artifact: Uint8Array;
@@ -35,7 +36,7 @@ const id = () => `aaaaaaaa-1010-4010-8010-${String(++n).padStart(12, '0')}` as n
 // Runs the commands in order from a fresh world; returns each decision's outcome or refusal code.
 const play = (...payloads: object[]) => playIn(content, ...payloads);
 function playIn(cartridge: Cartridge, ...payloads: object[]) {
-  let w: World = newWorld(cartridge, '5b7d9f1a-3c5e-4a7b-9d1f-4a6c8e0b2d4f' as never, [1, 2, 3, 4]);
+  let w: World = newWorld(cartridge, ctx('5b7d9f1a-3c5e-4a7b-9d1f-4a6c8e0b2d4f'), [1, 2, 3, 4]);
   return payloads.map((p) => {
     const r = step(
       w,

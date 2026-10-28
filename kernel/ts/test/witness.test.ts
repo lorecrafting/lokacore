@@ -4,7 +4,6 @@
 // Expected values hand-written.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,9 +12,10 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
-import { decode, encode } from '../src/foundation/canonical.ts';
+import { decode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { triggered } from '../src/mechanics/reaction.ts';
+import { cartridgeOf, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-witness-'));
 let artifact: Uint8Array;
@@ -72,7 +72,7 @@ const id = (w: World, k: string) => w.entityIds[`${S}:${k}`] as EntityId;
 
 // A world with the baker in `room` (the sampler places him in the mill), edited by `edit`.
 const world = (room: string, edit: (w: World, baker: EntityId) => World = (w) => w) => {
-  const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   const baker = id(w, 'npc/baker');
   const containers = { ...w.state.containers, [baker]: w.roomIds[`${S}:room/${room}`]! };
   return edit({ ...w, state: { ...w.state, containers } } as World, baker);
@@ -153,7 +153,7 @@ test('an npc.move naming the baker and no room brings him to the taker', () => {
     ...content,
     reactions: { ...reactions, [rule]: { ...reactions[rule], on, apply } },
   };
-  let w = newWorld(moving as Cartridge, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(moving as Cartridge, ctx(CONTEXT), [1, 2, 3, 4]);
   w = take(w);
   assert.equal(w.state.containers[id(w, 'npc/baker')], w.roomIds[`${S}:room/square`]);
 });
@@ -170,18 +170,7 @@ test('the baker is never his own witness', () => {
   assert.equal(got(id(w, 'npc/baker')), false);
 });
 
-/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 
 // Breaks: the loader's witness reference, spawn-template check, 1.95 floor or the npc.move step's
 // checks skipped (twin of test/loka/content_witness_test.exs).
@@ -191,27 +180,27 @@ test('the loader refuses a template witness, a pre-1.95 manifest and a bad npc.m
   const move = (s: object) => (c: any) =>
     (c.reactions[`${S}:reaction/witnessed`].apply = [{ op: 'npc.move', ...s }]);
   assert.equal(
-    reload(() => {}),
+    verdict(base, () => {}),
     'loaded',
   );
   assert.deepEqual(
-    reload((c) => (c.npcs[`${S}:npc/baker`].spawn_template = true)),
+    verdict(base, (c) => (c.npcs[`${S}:npc/baker`].spawn_template = true)),
     ['SCHEMA_VIOLATION', `${rule}.on.witness`],
   );
   assert.deepEqual(
-    reload((c) => (on(c).witness = { ...on(c).witness, key: 'ghost' })),
+    verdict(base, (c) => (on(c).witness = { ...on(c).witness, key: 'ghost' })),
     ['UNRESOLVED_REFERENCE', `${rule}.on.witness`],
   );
   assert.deepEqual(
-    reload((c) => (c.manifest.requires.kernel_api.at_least = '1.94')),
+    verdict(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.94')),
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
-  assert.deepEqual(reload(move({ npc: ref('npc', 'baker'), room: ref('room', 'attic') })), [
+  assert.deepEqual(verdict(base, move({ npc: ref('npc', 'baker'), room: ref('room', 'attic') })), [
     'UNRESOLVED_REFERENCE',
     `${rule}.apply[0].room`,
   ]);
   assert.deepEqual(
-    reload((c) => {
+    verdict(base, (c) => {
       move({ npc: ref('npc', 'baker') })(c);
       c.npcs[`${S}:npc/baker`].spawn_template = true;
       delete on(c).witness;

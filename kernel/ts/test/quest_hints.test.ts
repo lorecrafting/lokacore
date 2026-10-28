@@ -14,6 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-quest-sampler-'));
 let artifact: Uint8Array;
@@ -76,8 +77,7 @@ function wait(w: World, minutes: number): World {
   return r.world;
 }
 const hint = (w: World) => gameView(w).journal[0]?.hint;
-const fresh = () =>
-  newWorld(content, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23' as never, [4, 3, 2, 1]);
+const fresh = () => newWorld(content, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23'), [4, 3, 2, 1]);
 
 // Breaks: started_at not written at activation (no hint ever), the first hint instead of the last
 // passed one (the look hint at twenty), minutes read as logical units (a hint at once), the
@@ -103,7 +103,7 @@ test('the hint stage follows the instance, not the shown text key', () => {
   const same = structuredClone(content);
   const j = same.quests!['quest_sampler@0.0.1:quest/find_key']!.journal!;
   (j as { objectives_met: string }).objectives_met = j.active;
-  const w = newWorld(same, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23' as never, [4, 3, 2, 1]);
+  const w = newWorld(same, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23'), [4, 3, 2, 1]);
   assert.equal(
     hint(wait(play(w, { type: 'accept_quest', quest }), 10)),
     'quest.find_key.hint_look',
@@ -163,7 +163,7 @@ test('a failed checked perform still shows the tip once and assigns seen_tip_', 
   const recipe = checked.recipes!['quest_sampler@0.0.1:recipe/search_floor']! as Obj;
   recipe.check = { key: 'search_floor', kind: 'luck', chance: 1 };
   recipe.outcomes.failure = { sequence: [], narration: { actor: 'narration.search_floor' } };
-  const w = newWorld(checked, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23' as never, [4, 3, 2, 1]);
+  const w = newWorld(checked, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23'), [4, 3, 2, 1]);
   const r = run(w, { type: 'perform', action: 'search_floor' });
   assert.ok(r.decision.kind === 'accepted' && r.decision.outcome === 'failure');
   assert.deepEqual(

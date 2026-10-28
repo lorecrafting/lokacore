@@ -4,7 +4,6 @@
 // 6b: the yard's guard (world.combat.allies, a sure hit for 1) fights beside the player.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,11 +13,11 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from 
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { positioned } from './combat_fixture.ts';
+import { cartridgeOf, commands, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-targets-sampler-'));
 let artifact: Uint8Array;
@@ -37,27 +36,16 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const C = { cartridge_id: 'targets_sampler', cartridge_version: '0.0.1' };
 
-let n = 0;
-const id = () => `eeeeeeee-6666-4666-8666-${String(++n).padStart(12, '0')}` as never;
-function play(w: World, payload: object) {
-  return step(
-    w,
-    {
-      id: id(),
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
-}
+const stream = commands('eeeeeeee-6666-4666-8666');
+const { send: play } = stream;
 function ok(r: ReturnType<typeof step>) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
 /** In the den, engaged with the lower-id goblin; returns [world, first, second]. */
 function engaged(cartridge = content): [World, string, string] {
-  n = 0;
-  let w = newWorld(cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  let w = newWorld(cartridge, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'move', direction: 'east' }));
   const den = w.state.containers[w.body];
   const [a, b] = Object.keys(w.state.created ?? {})
@@ -67,11 +55,11 @@ function engaged(cartridge = content): [World, string, string] {
   return [ok(play(w, { type: 'attack', target_id: a })), a, b];
 }
 function advance(w: World) {
-  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++stream.n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + 150];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  return stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  return stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n);
 }
 const round = (w: World) => ok(advance(w));
 const offered = (v: World) =>
@@ -115,23 +103,12 @@ test('only another roster member is a choice, and only when the cartridge opts i
 });
 
 // Breaks: the loader admits target choice under API 1.47 (twin of content_targets_test.exs).
-/** The first load diagnostic of the compiled sampler after `edit`, re-hashed. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 const FLOOR = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
 
 test('the loader refuses target choice below API 1.48', () => {
   assert.deepEqual(
-    reload((c) => {
+    verdict(base, (c) => {
       c.manifest.requires.kernel_api.at_least = '1.47';
       delete c.world.combat.allies;
     }),
@@ -161,7 +138,7 @@ test('the loader keeps allies to API 1.48, authored fighters and their narration
       ['SCHEMA_VIOLATION', '.cartridge.world.combat.narration.ally_miss'],
     ],
   ];
-  for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);
+  for (const [edit, expected] of cases) assert.deepEqual(verdict(base, edit), expected);
 });
 
 // Toolbox row 6c (6a carry). Breaks: the ActionSet counts the roster row, not the members still
@@ -184,8 +161,8 @@ const guardOf = (w: World) => w.entityIds['targets_sampler@0.0.1:npc/guard']!;
 // a target, strikes while fallen, or its kill is not credited to the player (combat/credit.ts
 // party credit).
 test('the guard fights beside the player; its blow kills the raider and credits the player', () => {
-  n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'move', direction: 'south' }));
   const [guard, raider] = [guardOf(w), w.entityIds['targets_sampler@0.0.1:npc/raider']!];
   assert.deepEqual(offered(w), [[raider, true]], 'no Attack on the guard');
@@ -217,8 +194,8 @@ test('the guard fights beside the player; its blow kills the raider and credits 
 // loka-2s48. Breaks: the round reads its ally before the guard's poison tick, due at the same time
 // and sorting first in the same advance, so the dead guard still strikes and kills the raider.
 test('a guard killed by a poison tick earlier in the advance does not strike', () => {
-  n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'move', direction: 'south' }));
   const [guard, raider] = [guardOf(w), w.entityIds['targets_sampler@0.0.1:npc/raider']!];
   w = ok(play(w, { type: 'attack', target_id: raider }));
@@ -370,8 +347,8 @@ test('a round with fewer than two of its eight draws left skips the guard; with 
     [[0, 3291316952, 3775549605, 2703766232], false],
     [[0, 889565275, 2048508316, 0], true],
   ] as const) {
-    n = 0;
-    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    stream.n = 0;
+    let w = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
     const raider = w.entityIds['targets_sampler@0.0.1:npc/raider']!;
     w = ok(
       play(ok(play(w, { type: 'move', direction: 'south' })), {
@@ -395,8 +372,8 @@ test("the player's shield and sleep touch only the raider's blow, never the guar
   const yard = (edit: (c: any) => void, fresh = same, fighting = same) => {
     const c = structuredClone(content) as any;
     edit(c);
-    n = 0;
-    let w = fresh(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]));
+    stream.n = 0;
+    let w = fresh(newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]));
     const raider = w.entityIds[`${K}npc/raider`]!;
     w = ok(play(w, { type: 'move', direction: 'south' }));
     w = ok(play(w, { type: 'attack', target_id: raider }));
@@ -439,8 +416,8 @@ test('a stunned guard takes no blow beside the player', () => {
   const yard = (stunned: boolean) => {
     const c = structuredClone(content) as any;
     c.npcs[`${K}npc/raider`].attack.chance = 0;
-    n = 0;
-    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    stream.n = 0;
+    let w = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
     const raider = w.entityIds[`${K}npc/raider`]!;
     w = ok(
       play(ok(play(w, { type: 'move', direction: 'south' })), {

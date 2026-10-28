@@ -15,6 +15,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-voices-'));
 let artifact: Uint8Array;
@@ -59,8 +60,7 @@ const seen = (w: World) => {
     decipher: door?.actions?.find((a) => a.action_key === 'read_glyphs')?.available === true,
   };
 };
-const fresh = () =>
-  newWorld(content, '6f1c2b3a-4d5e-4f60-8a7b-9c0d1e2f3a4b' as never, [5, 6, 7, 8]);
+const fresh = () => newWorld(content, ctx('6f1c2b3a-4d5e-4f60-8a7b-9c0d1e2f3a4b'), [5, 6, 7, 8]);
 
 // Breaks: skill_compare reading the attribute, membership alone or a strict comparison; the
 // leaf not gating room_line_variants or a recipe policy.
