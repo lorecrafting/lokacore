@@ -18,7 +18,7 @@ import { picks } from './pick.ts';
 import { purse } from './Shelf.tsx';
 import { LABEL } from './labels.ts';
 import { offerLabel, serviceOrder, talkOf } from './offers.ts';
-import { balance, refused } from './words.ts';
+import { balance, hostileRefusal } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -113,7 +113,9 @@ export function NpcPage(p: NpcProps) {
       <LogLines lines={p.log} />
       {npcSkills(c, t, p)}
       {!talk && enemy && (
-        <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
+        <Note>
+          {enemy.refusal ? p.text(enemy.refusal) : hostileRefusal(cap(p.text(enemy.name)))}
+        </Note>
       )}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}

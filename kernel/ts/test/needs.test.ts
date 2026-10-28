@@ -16,6 +16,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-needs-sampler-'));
 let artifact: Uint8Array;
@@ -37,25 +38,12 @@ const content = loaded.cartridge as Cartridge;
 // `printf 'weather:<CONTEXT>:<d>' | shasum -a 256`, mod 2: 1, 0 (drought, clear).
 const CONTEXT = '7e1f0c2a-5d3b-4c8e-9a6f-000000000004';
 const HOUR = 3600;
-let n = 0;
-const fresh = () => newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
-function play(w: World, p: object): World {
-  n += 1;
-  const r = step(
-    w,
-    {
-      id: `dddddddd-5555-4333-8444-${String(n).padStart(12, '0')}` as never,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p } as never,
-    },
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('dddddddd-5555-4333-8444');
+const { play } = stream;
+const fresh = () => newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
 // One elapsed command to `until`; returns the world and its committed events.
 function elapse(w: World, until: number) {
-  n += 1;
+  stream.n += 1;
   const run_id = 'aaaaaaaa-0000-4000-8000-000000000025';
   const r = stepElapsed(
     w,
@@ -64,7 +52,7 @@ function elapse(w: World, until: number) {
       world_context_id: w.context,
       payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
     } as never,
-    n,
+    stream.n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return {
@@ -116,7 +104,7 @@ test('pouring the water out ends no status', () => {
     keywords: ['cup'],
     vessel: { ...skin.vessel, initial: { kind: null, quantity: 0 } },
   };
-  let w = newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(c, ctx(CONTEXT), [1, 2, 3, 4]);
   for (const item of ['waterskin', 'cup']) w = play(w, { type: 'take', item_id: id(w, item) });
   w = play(w, { type: 'move', direction: 'east' });
   w = play(w, { type: 'pour', source_id: id(w, 'waterskin'), receiver_id: id(w, 'cup') });

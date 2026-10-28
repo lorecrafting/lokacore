@@ -20,6 +20,7 @@ import { validate } from '../src/foundation/validate.ts';
 import { spokenBy } from '../src/mechanics/dialogue/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-gift-'));
 let artifact: Uint8Array;
@@ -69,7 +70,7 @@ const act = (w: World, p: object) => {
   return s.world;
 };
 const fresh = (c = sampler()) =>
-  newWorld(c, '2c4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e70' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('2c4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e70'), [1, 2, 3, 4]);
 const farmer = (w: World) => id(w, 'npc', 'farmer');
 const trust = (w: World) =>
   Object.entries(w.state.facts ?? {}).find(([k]) => {

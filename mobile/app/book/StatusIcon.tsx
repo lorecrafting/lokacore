@@ -11,12 +11,18 @@ import {
   useSharedValue,
   withTiming,
 } from './fade.ts';
-import { glyph } from './glyphs.ts';
 import { statusTip } from './model.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
 type Say = (key: string) => string;
+// Placeholder status icon glyphs (StatusIcons' doc comment) until the own icon set
+// (loka-x6t.63): one character per condition label TextKey, else one by polarity.
+// ponytail: text characters, not drawings; the icon set replaces this map.
+const byLabel: Record<string, string> = { 'condition.fed': '◡' };
+const byKind = { buff: '+', debuff: '−', neutral: '○' }; // signs, not arrows: they sit by the minimap
+const glyph = (label: string, kind?: 'buff' | 'debuff') =>
+  byLabel[label] ?? byKind[kind ?? 'neutral'];
 type Look = 'buff' | 'debuff' | 'neutral';
 type Condition = NonNullable<GameView['conditions']>[number];
 type Props = {

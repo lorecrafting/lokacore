@@ -5,22 +5,20 @@
 // literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/attributes/shared.ts';
 import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { level as skillLevel, practice } from '../src/mechanics/skill_level.ts';
 import { value as fact } from '../src/mechanics/fact.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-kitchen-sampler-'));
 let artifact: Uint8Array;
@@ -38,49 +36,17 @@ const S = 'kitchen_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'kitchen_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
-const loaded = reload();
+const base = cartridgeOf(artifact);
+const loaded = reload(base);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-const send = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `cccccccc-4545-4545-8545-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
-function wait(w: World, seconds: number) {
-  const run_id = `aaaaaaaa-4545-4545-8545-${String(++n).padStart(12, '0')}`;
-  const from = w.state.clock,
-    until = from + seconds;
-  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
-  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('cccccccc-4545-4545-8545', 'aaaaaaaa-4545-4545-8545');
+const { send, play } = stream;
+const wait = (w: World, seconds: number) => stream.elapsed(w, w.state.clock + seconds);
 const fresh = (c = content) => {
-  n = 0;
-  return newWorld(c, '4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  return newWorld(c, ctx('4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d'), [1, 2, 3, 4]);
 };
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
 const cook = (w: World) => w.entityIds[`${S}:npc/cook`]!;
@@ -167,7 +133,7 @@ test('eating the stew restores mv and makes the eater fed for an hour', () => {
 
 // Breaks: a meal that cures and applies one status writing both a cure and a refresh of the row.
 test('a meal that cures and applies the active fed writes it once: the cure wins', () => {
-  const r = reload((c) => {
+  const r = reload(base, (c) => {
     const stew = c.items[`${S}:item/stew_plain_01`].edible;
     c.items[`${S}:item/fish_03`].edible = { ...stew };
     stew.cures = [ref('status', 'fed')];
@@ -183,7 +149,7 @@ test('a meal that cures and applies the active fed writes it once: the cure wins
 // Breaks: Eat's writer composition missing `status` (`food: ['status']`, runtime/decision.ts), so
 // the first status_applied faults unowned_event once a reaction listens; or a refresh not silent.
 test('a reaction on status_applied hears the first fed, and a refresh stays silent', () => {
-  const r = reload((c) => {
+  const r = reload(base, (c) => {
     c.reactions[`${S}:reaction/fed_seen`] = {
       key: 'fed_seen',
       on: { event: 'status_applied', status: ref('status', 'fed') },
@@ -212,7 +178,7 @@ test('a reaction on status_applied hears the first fed, and a refresh stays sile
 // a plain meal, an immune eater, or fed already active (PM rulings: the buff applies, the restore
 // is capped; a meal that would land no new status is refused as a plain meal).
 test('at full mv the stew applies fed; a plain, immune or refresh-only meal is refused', () => {
-  const r = reload((c) => {
+  const r = reload(base, (c) => {
     const { applies: _, ...plain } = c.items[`${S}:item/stew_plain_01`].edible;
     c.items[`${S}:item/fish_03`].edible = plain;
     c.items[`${S}:item/fish_04`].edible = c.items[`${S}:item/stew_plain_01`].edible;
@@ -257,7 +223,7 @@ test('a claimed stew keeps until it is next acquired, then films and lands in th
 test('the loader refuses an unresolved applies and a meal that moves hp_max', () => {
   const at = `.cartridge.items["${S}:item/stew_plain_01"].edible.applies[0]`;
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     assert.equal(r.ok, false);
     return r.ok ? [] : [r.diagnostic.code, r.diagnostic.path];
   };
@@ -384,7 +350,7 @@ test('the cook teaches cooking free; stews and the feast are cooked at the heart
 
 // Breaks: a failed cook keeps the fish or still hands out a stew (the brief's "boils over").
 test('at a hearth rated 2 the level-1 cook boils the pot over: fish lost, no stew', () => {
-  const r = reload((c) => (c.rooms[`${S}:room/kitchen`].details.hearth.rating = 2));
+  const r = reload(base, (c) => (c.rooms[`${S}:room/kitchen`].details.hearth.rating = 2));
   assert.ok(r.ok, JSON.stringify(r));
   const w0 = gather(learn(fresh(r.cartridge as Cartridge)), 2);
   const d = cooked(w0, 'cook_stew');

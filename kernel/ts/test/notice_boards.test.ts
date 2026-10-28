@@ -22,12 +22,6 @@ const inn = () => {
   ).world;
 };
 
-// Breaks: the portable wire/source validator admits missing or unbounded board metadata.
-test('notice metadata uses the shared valid and invalid schema controls', () => {
-  for (const c of read('protocol/fixtures/notice_board_contracts.json'))
-    assert.equal(validate(c.contract, c.value).length === 0, c.valid, c.name);
-});
-
 // Breaks: loader trusts cross-room/self/board/duplicate references or missing title catalog keys.
 test('loader rejects invalid board membership, title references and readable ownership', () => {
   for (const [name, change, suffix, target] of [

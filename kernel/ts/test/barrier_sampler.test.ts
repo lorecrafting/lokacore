@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-barrier-sampler-'));
 let artifact: Uint8Array;
@@ -34,7 +35,7 @@ const content = loaded.cartridge as Cartridge;
 // has_tag ignoring the barrier's tags (the iron door is forced).
 test('a keyless chest opens on a pick; a jammed fragile door gives to STR; an iron door does not', () => {
   let n = 0;
-  let w = newWorld(content, '5d7f9b1c-3e5a-4c7e-9a1b-3d5f7b9d1e3f' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('5d7f9b1c-3e5a-4c7e-9a1b-3d5f7b9d1e3f'), [1, 2, 3, 4]);
   const chest = w.entityIds['barrier_sampler@0.0.1:item/chest'];
   const run = (payload: object) => {
     n += 1;

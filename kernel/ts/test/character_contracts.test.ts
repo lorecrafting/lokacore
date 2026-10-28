@@ -5,6 +5,7 @@ import { validate } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { createHash } from 'node:crypto';
 import { artifact } from './derived_fixture.ts';
+import { ctx } from './harness.ts';
 
 const actor = '11111111-2222-4333-8444-555555555555';
 const attribute = 'derived_sampler@0.0.1:attribute/str';
@@ -108,7 +109,7 @@ test('fresh ancestry choices keep their required projected shape', () => {
   assert.equal(loaded.cartridge.format, 'loka-cartridge-v2');
   if (loaded.cartridge.format !== 'loka-cartridge-v2') return;
   const view = gameView(
-    newWorld(loaded.cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]),
+    newWorld(loaded.cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]),
   );
   assert.deepEqual(validate('GameView', view), []);
   const at = (k: string) => view.ancestry_choices!.findIndex((choice) => choice.key === k);

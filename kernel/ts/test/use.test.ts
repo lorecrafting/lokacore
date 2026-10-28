@@ -18,6 +18,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-use-sampler-'));
 let artifact: Uint8Array;
@@ -38,18 +39,8 @@ const C = { cartridge_id: 'use_sampler', cartridge_version: '0.0.1' };
 const burning = { ...C, kind: 'status', key: 'burning' } as never;
 const oiled = { ...C, kind: 'fact', key: 'oiled' } as never;
 
-let n = 0;
-const id = () => `eeeeeeee-4444-4444-8444-${String(++n).padStart(12, '0')}` as never;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: id(),
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-4444-4444-8444');
+const { send: play } = stream;
 function ok(r: ReturnType<typeof step>) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
@@ -60,8 +51,8 @@ const e = (w: World, key: string) => w.entityIds[`use_sampler@0.0.1:item/${key}`
 
 /** In the yard holding the bucket, the oilcan and the torch; with `fire`, the torch dropped. */
 function start(fire = true): World {
-  n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   for (const k of ['bucket', 'oilcan', 'torch'])
     w = ok(play(w, { type: 'take', item_id: e(w, k) }));
   return fire ? ok(play(w, { type: 'drop', item_id: e(w, 'torch') })) : w;
@@ -84,7 +75,7 @@ function invoke(w: World, action_key: string, target_ids: readonly string[]) {
   assert.equal(i.kind, 'identified');
   const command = resolve(w, i as never);
   assert.ok('payload' in command, JSON.stringify(command));
-  return step(w, command, ++n);
+  return step(w, command, ++stream.n);
 }
 
 // Breaks: the view pairs the wrong ids or order, the step refuses the offered pair, or the cure
@@ -131,8 +122,8 @@ test('curing twice in one sequence ends the status once', () => {
   const twice = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
   const success = twice.recipes['use_sampler@0.0.1:recipe/quench'].outcomes.success;
   success.sequence = [success.sequence[0], success.sequence[0]];
-  n = 0;
-  let w = newWorld(twice, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  let w = newWorld(twice, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   for (const k of ['bucket', 'torch']) w = ok(play(w, { type: 'take', item_id: e(w, k) }));
   w = ok(play(w, { type: 'drop', item_id: e(w, 'torch') }));
   const after = ok(invoke(w, 'quench', [e(w, 'cart'), e(w, 'bucket')]));
@@ -168,8 +159,8 @@ test('a burning item in an open crate is neither offered nor quenched', () => {
 test('a cooling-down oil pair is listed unavailable with the code the step returns', () => {
   const cooled = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
   cooled.recipes['use_sampler@0.0.1:recipe/oil'].cooldown = 600;
-  n = 0;
-  let w = newWorld(cooled, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  let w = newWorld(cooled, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'take', item_id: e(w, 'oilcan') }));
   const ids = [e(w, 'winch'), e(w, 'oilcan')];
   w = ok(invoke(w, 'oil', ids));

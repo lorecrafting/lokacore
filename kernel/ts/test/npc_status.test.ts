@@ -20,6 +20,7 @@ import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { runStatus } from '../src/mechanics/status/job.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { npcValue } from '../src/mechanics/attributes/shared.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-status-'));
 let artifact: Uint8Array;
@@ -40,7 +41,7 @@ const C = 'npc_status_sampler@0.0.1';
 const ref = (kind: string, k: string) =>
   ({ cartridge_id: C.split('@')[0], cartridge_version: '0.0.1', kind, key: k }) as never;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 const id = (w: World, kind: string, k: string) => w.entityIds[`${C}:${kind}/${k}`]!;
 const hp = (w: World, npc: string) => level(w, id(w, 'npc', npc), resourceRef(w, 'hp'));
 const row = (w: World, kind: string, k: string, status: string) =>
@@ -57,27 +58,14 @@ const plus = (name: string, extra: object) => {
     reactions: { ...content.reactions, [k]: { ...r, apply: [...r.apply, extra] } },
   } as Cartridge;
 };
-let n = 0;
+const stream = commands('cccccccc-4444-4333-8444');
+const { play } = stream;
 const narration: string[] = [];
-function play(w: World, p: object): World {
-  n += 1;
-  const r = step(
-    w,
-    {
-      id: `cccccccc-4444-4333-8444-${String(n).padStart(12, '0')}` as never,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p } as never,
-    },
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
 // A chain of bounded elapsed commands, each to the earliest pending job (status.test.ts wait).
 function wait(w: World, seconds: number): World {
   const target = w.state.clock + seconds;
   while (w.state.clock < target) {
-    n += 1;
+    stream.n += 1;
     const until = Object.values(w.state.jobs ?? {})
       .filter((j) => j.status === 'pending')
       .reduce((t, j) => Math.min(t, j.due_time), target);
@@ -89,7 +77,7 @@ function wait(w: World, seconds: number): World {
         world_context_id: w.context,
         payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
       } as never,
-      n,
+      stream.n,
     );
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
     if (r.decision.kind === 'accepted')

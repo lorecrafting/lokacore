@@ -15,6 +15,7 @@ import { INSTALLED, loadCartridge, newWorld, step, type Cartridge } from '../src
 import { gameView } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 import { gen, loaded as artifactOf } from './sim.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-flows-'));
 after(() => rmSync(scratch, { recursive: true, force: true }));
@@ -75,7 +76,7 @@ test('a command already played this game hour is skipped until the next hour', (
 
 // Breaks: the worker's rank dropped or reordered, so a talk or a take is tried before a sale.
 test('the worker tries a sale before a take or a talk', () => {
-  const w0 = newWorld(content, '1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
+  const w0 = newWorld(content, ctx('1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a'), [1, 2, 3, 4]);
   const peg = gameView(w0).entities.find((e) => e.shop)!;
   const item_id = peg.shop![0]!.item_id;
   const buy = {

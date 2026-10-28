@@ -20,7 +20,7 @@ const room = (description: string) => ({
 // Breaks: a blank line in the authored description is shown as one run of text (the split dropped),
 // a single line break splits a paragraph in two, or a trailing line break draws a blank line.
 test('a blank line in the room description starts a new paragraph; a line break does not', async () => {
-  const { RoomPage } = await import('./pages.tsx');
+  const { RoomPage } = await import('./Body.tsx');
   const { Text } = await import('./Text.tsx');
   const paragraphs = (description: string) =>
     nodes(RoomPage(room(description) as any))
@@ -40,7 +40,7 @@ test('a blank line in the room description starts a new paragraph; a line break 
 // stays plain words, draws a World line too, or reads without opening the page; the prose links an
 // unmatched key; or a refused Read leaves the linked notice unreachable or presses the Read.
 test('a readable notice the description links is a prose link and no World line', async () => {
-  const { RoomPage } = await import('./pages.tsx');
+  const { RoomPage } = await import('./Body.tsx');
   const { proseLinks } = await import('./notices.tsx');
   const draw = (description: string, notice: object, available = true) => {
     const done: unknown[] = [];

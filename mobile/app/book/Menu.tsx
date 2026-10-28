@@ -8,7 +8,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
-import { holding, NOTED, reasonOf, type Refusal } from './words.ts';
+import { heldBy, NOTED, reasonOf, type Refusal } from './words.ts';
 import { commandOf, other } from './buttons.ts';
 import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
@@ -117,7 +117,7 @@ export function ThingPage(p: {
     >
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
-      {p.holder && <Note>{holding(cap(p.text(p.holder)))}</Note>}
+      {p.holder && <Note>{heldBy(cap(p.text(p.holder)))}</Note>}
       {refusals}
       <Cards>
         {p.actions

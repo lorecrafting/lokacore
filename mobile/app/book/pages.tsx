@@ -1,22 +1,19 @@
-// The book's page shell, the room page and their shared controls (the Contents sections:
+// The book's page shell and its shared controls (the room page: Body.tsx; the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { LINK, plain, type group, type Pool } from './model.ts';
-import type { Button, DetailLine } from './presenter.ts';
+import { plain, type Pool } from './model.ts';
 import { tapBleed } from './reading.ts';
-import { prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { usePalette, useType, type Palette } from './palette.ts';
 import { opacity, size, space } from './tokens.ts';
-import { Here, LogLines, nameLink } from './lines.tsx';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
 export { useTitleFocus };
 
 type Say = (key: string) => string;
-type Grouped = ReturnType<typeof group>;
 export type { Thing } from './model.ts';
 
 // Tones are projected by the kernel from the cartridge's band table.
@@ -116,68 +113,6 @@ export function Control(p: {
     </Pressable>
   );
 }
-
-/**
- * The place (book-ui.md Room page anatomy): fixed title, prose with fixture links, people and
- * items, then the log; sense cues, an exit's warning and the away recap are log entries. The page
- * scrolls to its end while the log has lines.
- * - Use: the World page.
- * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
- *   of the authored text; a touch link in `links` is a name link in the prose, any other its words;
- *   the prose, people and items sit `space.lg` apart, a step under the page's
- *   `space.xl` block gap.
- * - Story: RoomPage.stories.tsx
- */
-export function RoomPage(p: {
-  view: GameView;
-  text: Say;
-  log: DetailLine[];
-  g: Grouped;
-  press: (b: Button) => void;
-  open: (id: string) => void;
-  links?: ReadonlyMap<string, () => void>; // a linked fixture's press, by link target (proseLinks)
-}) {
-  const c = usePalette();
-  const t = useType();
-  const look = p.g.look;
-  return (
-    <Page
-      title={p.text(p.view.place.title.key)}
-      fixedTitle
-      onTitlePress={look && (() => p.press(look))}
-      scrollToEnd={p.log.length > 0}
-    >
-      <View style={{ gap: space.lg }}>
-        {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
-        <Here view={p.view} text={p.text} open={p.open} />
-      </View>
-      {p.log.length > 0 && <LogLines lines={p.log} />}
-    </Page>
-  );
-}
-
-// The room prose as one block; a blank line in the authored text is a paragraph break. A touch
-// link draws as a name link when `links` has its target, else as its words.
-const paragraphs = (
-  c: Palette,
-  t: Type,
-  description: string,
-  links: ReadonlyMap<string, () => void> = new Map(),
-) => (
-  <View style={{ gap: space.lg }}>
-    {description
-      .trim()
-      .split(/\s*\n\s*\n\s*/)
-      .map((paragraph, i) => (
-        <Text key={i} style={prose(c, t)}>
-          {paragraph.split(LINK).map((part, j, parts) => {
-            const press = j % 3 === 1 && links.get(parts[j + 1]);
-            return press ? nameLink(part, press, j) : j % 3 < 2 && part;
-          })}
-        </Text>
-      ))}
-  </View>
-);
 
 /**
  * One shell for every page: the title, the blocks, and the PageFoot.

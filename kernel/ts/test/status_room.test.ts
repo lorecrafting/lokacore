@@ -17,6 +17,7 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { dark, illuminated, unlit, visible } from '../src/mechanics/light/shared.ts';
 import { darkSight } from '../src/mechanics/attributes/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-room-status-'));
 let artifact: Uint8Array;
@@ -90,7 +91,7 @@ function wait(w: World, by: number) {
 }
 const hall = () => {
   n = 0;
-  const w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94' as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94'), [1, 2, 3, 4]);
   return play(play(w, { type: 'move', direction: 'north' }), { type: 'move', direction: 'south' });
 };
 const inDen = () => play(hall(), { type: 'move', direction: 'east' });
@@ -153,7 +154,7 @@ test('neither a held light nor dark sight sees in a darkened room', () => {
   n = 0;
   const start = newWorld(
     night.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94'),
     [1, 2, 3, 4],
   );
   const seer = play(
@@ -226,7 +227,7 @@ const told = (target: 'shrine' | 'den', observed = true) => {
   n = 0;
   return newWorld(
     c.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94' as never,
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94'),
     [1, 2, 3, 4],
   );
 };

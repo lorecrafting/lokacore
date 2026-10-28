@@ -19,6 +19,7 @@ import { resourceRef } from '../src/mechanics/resource.ts';
 import { variants } from '../src/content/cartridge_variants.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { noticeAction } from './notice_action.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-variants-'));
 let artifact: Uint8Array;
@@ -79,8 +80,7 @@ const shove = (w: World) => {
   ).decision;
 };
 const offered = (w: World) => noticeAction(gameView(w), 'shove')?.available === true;
-const fresh = () =>
-  newWorld(content, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 
 // Breaks: describe() not applied to an entity's name or description in the GameView, the
 // described entity not passed as the target (status_active then never holds), status_active
@@ -234,7 +234,7 @@ test('the guard carries its name words only while its base short holds', () => {
   const npcs = { ...content.npcs } as Record<string, object>;
   npcs[`${C}:npc/guard`] = { ...npcs[`${C}:npc/guard`], words };
   const worded = { ...content, npcs } as Cartridge;
-  let w = newWorld(worded, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(worded, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   const of = (k: string) => gameView(w).entities.find((x) => x.id === id(w, 'npc', k))!;
   assert.equal(of('guard').words, undefined); // 05:00: short_asleep holds
   w = wait(w, 3600); // 06:00: awake, the base short

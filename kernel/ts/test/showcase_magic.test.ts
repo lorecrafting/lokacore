@@ -35,6 +35,7 @@ import {
   talk,
   wait,
 } from './showcase_fixture.ts';
+import { ctx } from './harness.ts';
 
 const CTX = '5ca5e000-0000-4000-8000-00000000a61c';
 const C = { cartridge_id: 'toolbox_showcase', cartridge_version: '0.0.1' };
@@ -64,7 +65,7 @@ const raise = (w: World, key: string) =>
 
 /** Up the ladder, lux taught and the errand accepted. */
 function taught(c: Cartridge = content) {
-  let w = go(newWorld(c, CTX as never, [1, 2, 3, 4]), 'up').world;
+  let w = go(newWorld(c, ctx(CTX), [1, 2, 3, 4]), 'up').world;
   w = choose(talk(w, 'hedge_wizard').world, 'teach').world;
   w = choose(talk(w, 'hedge_wizard').world, 'accept').world;
   return w;
@@ -83,7 +84,7 @@ let w: World;
 // Breaks: the hub has no ladder up, the sign is not readable in the loft, or an unlearned spell
 // leaks into spell_words.
 test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
-  w = go(newWorld(content, CTX as never, [1, 2, 3, 4]), 'up').world;
+  w = go(newWorld(content, ctx(CTX), [1, 2, 3, 4]), 'up').world;
   const sign = play(w, { type: 'read', target_id: detail(w, 'sign_magic') });
   assert.deepEqual(sign.lines, ['readable.sign_magic']);
   assert.equal(words(w), undefined);
@@ -206,7 +207,7 @@ test('magic 4b: ward needs level 2 at the exact threshold', () => {
 // Journal says is read (the waiting line has no flamma_known gate), or the report choice does not
 // resolve the errand.
 test('magic 4c: the grimoire read first; the wizard takes the word and the errand resolves', () => {
-  let v = go(newWorld(content, CTX as never, [1, 2, 3, 4]), 'up').world;
+  let v = go(newWorld(content, ctx(CTX), [1, 2, 3, 4]), 'up').world;
   v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
   v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
   assert.equal(view(v).journal[0]?.state, 'active');

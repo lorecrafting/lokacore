@@ -4,7 +4,6 @@
 // (any word the elder hears), watchman_alerted (a shout of "help") and miller_heard.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,10 +13,10 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { parse } from '../play/text.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-speech-sampler-'));
 let artifact: Uint8Array;
@@ -39,21 +38,9 @@ const ref = (kind: string, key: string) =>
 const id = (w: World, key: string) => w.entityIds[`speech_sampler@0.0.1:npc/${key}`] as EntityId;
 const fact = (w: World, key: string) => value(w, w.character, ref('fact', key));
 
-// The sampler changed by `change`, loaded again.
-function reload(change: (c: Obj) => void) {
-  const c = structuredClone(content) as unknown as Obj;
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
-
 let n = 0;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-000000000009' as never, [1, 2, 3, 4]);
+  newWorld(c, ctx('7e1f0c2a-5d3b-4c8e-9a6f-000000000009'), [1, 2, 3, 4]);
 function play(w: World, p: object) {
   n += 1;
   return step(
@@ -153,7 +140,7 @@ test('a whisper reaches only its addressee', () => {
 // Breaks: a dead NPC whose body stays in the room still hearing a say (its spoken reaction
 // fires, its keyword dialogue opens) or taking a whisper.
 test('a dead NPC hears nothing', () => {
-  const r = reload((c) => {
+  const r = reload(content, (c) => {
     c.npcs['speech_sampler@0.0.1:npc/elder'].hp = { minimum: 0, maximum: 6, start: 0, gain: 0 };
   });
   assert.ok(r.ok, JSON.stringify(r));
@@ -199,7 +186,7 @@ test('a shout reaches the next room, not two rooms away, and its word filters re
 // Breaks: hearers' dialogues tried in EntityId order (the elder's id sorts before the smith's), so
 // which of two dialogues keyed by one word opens would not follow the authored keys.
 test('of two dialogues keyed by one word, a say opens the first by key', () => {
-  const r = reload((c) => {
+  const r = reload(content, (c) => {
     const d = structuredClone(c.dialogues['speech_sampler@0.0.1:dialogue/elder_ward']) as Obj;
     const smith = ref('npc', 'smith');
     Object.assign(d, {
@@ -219,7 +206,7 @@ test('of two dialogues keyed by one word, a say opens the first by key', () => {
 // Breaks: a talk that opens a keyword dialogue (the elder's elder_ward sorts before her plain
 // elder_yarn), or an unnamed reaction step not landing on the hearer (the spoken subject).
 test('talk opens the plain dialogue; an unnamed reaction step lands on each hearer', () => {
-  const r = reload((c) => {
+  const r = reload(content, (c) => {
     const d = structuredClone(c.dialogues['speech_sampler@0.0.1:dialogue/elder_ward']) as Obj;
     delete d.keyword;
     c.dialogues['speech_sampler@0.0.1:dialogue/elder_yarn'] = { ...d, key: 'elder_yarn' };
@@ -244,7 +231,7 @@ test('talk opens the plain dialogue; an unnamed reaction step lands on each hear
 // Breaks (loka-j2mo): a spoken reaction without an npc filter, heard by the elder and the smith,
 // writing one instance fact twice in one decision faults conflicting_write instead of committing.
 test('two hearers of one say write one shared fact and the step commits', () => {
-  const r = reload((c) => {
+  const r = reload(content, (c) => {
     c.reactions['speech_sampler@0.0.1:reaction/elder_hears'].on = { event: 'spoken' };
   });
   assert.ok(r.ok, JSON.stringify(r));
@@ -284,7 +271,7 @@ test('loka play makes a say or shout Command only from a word of letters', () =>
 // keyword without speech@1, or a keyword on a riddle (whose save proof needs a talk receipt).
 test('the loader refuses keywords and spoken reactions below 1.48, without speech or on a riddle', () => {
   const load = (change: (c: Obj) => void) => {
-    const r = reload(change);
+    const r = reload(content, change);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path.split('.').pop()];
   };
   const elder = (c: Obj) => Object.values(c.dialogues as Obj)[0] as Obj;
@@ -320,11 +307,11 @@ test('the loader refuses keywords and spoken reactions below 1.48, without speec
 // phrases below kernel_api 1.98 or without speech@1 (content_speech_test.exs).
 test('phrases: the authored speech.phrases, Words only, from 1.98 with speech@1', () => {
   assert.deepEqual(gameView(fresh()).phrases, ['ward', 'help', 'hello']);
-  const none = reload((c) => delete c.speech);
+  const none = reload(content, (c) => delete c.speech);
   assert.ok(none.ok, JSON.stringify(none));
   assert.equal(gameView(fresh(none.cartridge as Cartridge)).phrases, undefined);
   const refused = (change: (c: Obj) => void) => {
-    const r = reload(change);
+    const r = reload(content, change);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   assert.deepEqual(

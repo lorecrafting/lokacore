@@ -140,6 +140,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | Component | File | Story |
 |---|---|---|
 | `Body` | `book/Body.tsx` | RoomPage |
+| `RoomPage` | `book/Body.tsx` | RoomPage |
 | `Book` | `book/Book.tsx` | Live |
 | `BookView` | `book/Book.tsx` | RecoveryPages |
 | `Chip` | `book/Chip.tsx` | Chip |
@@ -184,7 +185,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Tap` | `book/pages.tsx` | VerbLine |
 | `RunningHead` | `book/pages.tsx` | Page |
 | `Control` | `book/pages.tsx` | Control |
-| `RoomPage` | `book/pages.tsx` | RoomPage |
 | `Page` | `book/pages.tsx` | Page |
 | `PageFoot` | `book/pages.tsx` | PageFoot |
 | `SectionTitle` | `book/pages.tsx` | Page |

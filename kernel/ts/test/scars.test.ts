@@ -17,6 +17,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { currentStatus, statusKey } from '../src/mechanics/status/shared.ts';
 import { key } from '../src/foundation/compose.ts';
 import { artifact as derived, MIGHT } from './derived_fixture.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-scars-sampler-'));
 let artifact: Uint8Array;
@@ -93,7 +94,7 @@ const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60, k
 // hit, is cleared by the same-body return, is not cured by `cures`, is not seen by W6's
 // status_active (room list or combat name), or opens silently (the applied line keyed on a job).
 test('a wolf bite leaves a scar that survives death and return, and the salve cures it', () => {
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   assert.deepEqual(bitten(w), [1, [{ key: 'narration.scar.applied' }]]);
   w = play(w, { type: 'move', direction: 'east' });
   w = play(w, { type: 'attack', target_id: w.entityIds['scars_sampler@0.0.1:npc/wolf'] });
@@ -165,7 +166,7 @@ test('the loader refuses each unsound permanent status', () => {
 // Breaks: an NPC's death keeps its permanent status, so status_active still holds on the dead wolf
 // (only the player's same-body return keeps one).
 test("the wolf's death clears its scar", () => {
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   const wolf = w.entityIds[WOLF]!;
   w = play(w, { type: 'move', direction: 'east' });
   w = play(w, { type: 'attack', target_id: wolf });

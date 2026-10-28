@@ -17,6 +17,7 @@ trap 'verdict $?' EXIT
 m() { step "$@"; mise exec -- "$@"; }
 # Every lint rule over the whole tree (pre-commit sees only staged files); first, as it needs no deps.
 m ast-grep scan --error . mobile/app/.storybook # hidden directories are skipped unless named
+m sh bin/check_as_never.sh
 m mix deps.get --check-locked
 m mix format --check-formatted
 m mix compile --warnings-as-errors

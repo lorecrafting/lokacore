@@ -21,6 +21,7 @@ import { check } from '../src/runtime/invariants.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
+import { ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-sampler-'));
@@ -61,7 +62,7 @@ const room = (w: World, k: string) => w.roomIds[`${P}room/${k}`]!;
 const at = (w: World, k: string) => w.state.containers[item(w, k)];
 // hs-12: the one ancestry (woodfolk) grants woodcutting at birth, so play starts by choosing it.
 const fresh = (c = content) =>
-  ok(newWorld(c, '6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f' as never, [1, 2, 3, 4]), {
+  ok(newWorld(c, ctx('6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f'), [1, 2, 3, 4]), {
     type: 'choose_ancestry',
     ancestry: 'woodfolk',
   });

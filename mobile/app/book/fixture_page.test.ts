@@ -19,7 +19,7 @@ const draw = async (
   actions: object[] = [],
 ) => {
   const text = (key: string) => (key === 'room.loft.description' ? prose : (TEXT[key] ?? key));
-  const { RoomPage } = await import('./pages.tsx');
+  const { RoomPage } = await import('./Body.tsx');
   const { NoticePage, proseLinks } = await import('./notices.tsx');
   const view = {
     place: { title: { key: 'room.loft.title' }, description: { key: 'room.loft.description' } },

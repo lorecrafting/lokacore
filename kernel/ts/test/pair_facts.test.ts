@@ -17,6 +17,7 @@ import { decode, encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { room } from '../play/text.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-pair-facts-'));
 let artifact: Uint8Array;
@@ -74,7 +75,7 @@ const act = (w: World, p: object) => {
   return s.world;
 };
 const gift = () => {
-  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   const apple = id(w, 'item/apple');
   w = act(w, { type: 'take', item_id: apple });
   return act(w, { type: 'give', item_id: apple, recipient_id: id(w, 'npc/smith') });
@@ -83,7 +84,7 @@ const gift = () => {
 // Breaks: the step drops `with` (one row per subject) or swaps the two NPCs, the reaction writes
 // at the body, fact_compare ignores `with`, or the room line variant does not read the pair.
 test('the smith given the apple before the miller gloats over him, one ordered row', () => {
-  const before = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const before = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   assert.doesNotMatch(room(content, before), /polishes her apple/);
   const w = gift();
   assert.equal(gloats(w, 'smith', 'miller'), true);
@@ -109,7 +110,7 @@ test('the smith given the apple before the miller gloats over him, one ordered r
 // Breaks: the step writes a pair row when its subject is its `with` NPC (the miller given the
 // apple is both), which facts_typed then refuses.
 test('the miller given the apple gloats over no one', () => {
-  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   const apple = id(w, 'item/apple');
   const miller = id(w, 'npc/miller');
   w = act(w, { type: 'take', item_id: apple });

@@ -4,17 +4,16 @@
 // fresh_for 300; the clock starts at 64800 and the first wander is due at 68400.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import { holds } from '../src/runtime/world.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-tracks-sampler-'));
 let artifact: Uint8Array;
@@ -29,17 +28,7 @@ try {
   rmSync(scratch, { recursive: true });
 }
 const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-function load(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
-const loaded = load();
+const loaded = reload(source);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const REF = 'tracks_sampler@0.0.1';
@@ -73,7 +62,7 @@ function to(w: World, until: number) {
 }
 const start = (c = content) => {
   n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 };
 const roomKey = (w: World, id: string) => w.rooms[id]?.title.split('.')[1];
 const where = (w: World, e: string) => roomKey(w, w.state.containers[e]!);
@@ -202,7 +191,7 @@ test("a hunter in the player's room holds even on a fresh trail", () => {
 
 // Breaks: trail ops written without the opt-in (a byte change for every older cartridge).
 test('without hunts the player leaves no trail; without trail a wander writes none', () => {
-  const r = load((c) => {
+  const r = reload(source, (c) => {
     for (const p of Object.values(c.populations) as any[]) (delete p.trail, delete p.hunts);
     for (const f of Object.keys(c.facts)) if (f.includes('/trail_')) delete c.facts[f];
     c.recipes = {};
@@ -218,7 +207,7 @@ const fact = (k: string) => `${REF}:fact/${k}`;
 const recipe = (k: string) => `${REF}:recipe/${k}`;
 /** The loader's first diagnostic for the sampler after `change`. */
 function refused(change: (c: any) => void) {
-  const r = load(change);
+  const r = reload(source, change);
   assert.equal(r.ok, false);
   const { code, path, data } = (r as { diagnostic: { code: string; path: string; data?: object } })
     .diagnostic;
