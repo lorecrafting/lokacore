@@ -1,10 +1,9 @@
 // C row Pages, Room (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, waitFor } from 'storybook/test';
-import { Body } from '../book/Body.tsx';
+import { Body, RoomPage } from '../book/Body.tsx';
 import { LABEL } from '../book/labels.ts';
 import { cueLine } from '../book/model.ts';
-import { RoomPage } from '../book/Body.tsx';
 import { pageStory } from './screen.tsx';
 import RoomFirstView from './views/room-first.json';
 import RoomNpcsItemsView from './views/room-npcs-items.json';

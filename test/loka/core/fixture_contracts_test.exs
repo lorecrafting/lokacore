@@ -1,12 +1,14 @@
 defmodule Loka.Core.FixtureContractsTest do
-  # One test per listed protocol/fixtures/<name>_contracts.json. A fixture is a flat case list, a
+  # One test per protocol/fixtures/<name>_contracts.json. A fixture is a flat case list, a
   # {"contracts": [...]} list, or {"bases", "cases"} where a case edits its base by path, set,
   # omit or replace. A case with "errors" must match them exactly; otherwise only "valid".
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts}
 
-  for name <- ~w(bell combat first_search light liquid notice_board reward_storage riddle
-                 service water wisp) do
+  # container_contracts.json names no contract; content_items_test.exs validates it as ItemDefinition.
+  for file <- Path.wildcard("protocol/fixtures/*_contracts.json"),
+      name = Path.basename(file, "_contracts.json"),
+      name != "container" do
     # Breaks: a wire contract admits a missing field, malformed ref, out-of-range value or open
     # variant the fixture refuses, or refuses a valid control.
     test "#{name} contract boundaries match the literal fixture answers" do
@@ -50,6 +52,7 @@ defmodule Loka.Core.FixtureContractsTest do
     if path = c["path"], do: changed(value, path, c), else: value
   end
 
+  defp changed(_v, [], c), do: c["value"]
   defp changed(v, [field], %{"omit" => true}), do: Map.delete(v, field)
   defp changed(v, [field], c) when is_integer(field), do: List.replace_at(v, field, c["value"])
   defp changed(v, [field], c), do: Map.put(v, field, c["value"])
