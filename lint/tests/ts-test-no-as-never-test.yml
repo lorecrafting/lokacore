@@ -1,9 +1,0 @@
-id: ts-test-no-as-never
-valid:
-  - "const w = newWorld(content, ctx('6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f'), [1, 2, 3, 4]);"
-  - "const id = 'x' as EntityId;"
-  - "type T = never;"
-invalid:
-  - "const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);"
-  - "step(w, { id, payload } as never, n);"
-  - "const x = y as unknown as never;"

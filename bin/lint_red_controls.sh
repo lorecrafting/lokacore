@@ -29,7 +29,7 @@ printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.sta
 echo 'export const z = world.character;' >> kernel/ts/src/mechanics/movement/rule.ts
 # Foundation must not import the runtime, even as types.
 printf "import type { World } from '../runtime/decision.ts';\n" > kernel/ts/src/foundation/red_control.ts
-# A kernel test cast outside test/harness.ts (ts-test-no-as-never).
+# A kernel test cast outside test/harness.ts, in a file with no baseline (bin/check_as_never.sh).
 echo 'export const c = x as never;' > kernel/ts/test/red_control.test.ts
 # Review F2: an inline rule registered in RULES.
 sed -i.bak 's/  movement: movement.decide,/  movement: (w) => w,/' kernel/ts/src/runtime/world.ts && rm kernel/ts/src/runtime/world.ts.bak
@@ -69,4 +69,5 @@ for rule in $(ls lint/rules lint/tests | sed -nE 's/(-test)?\.yml$//p' | sort -u
   [ "$core_only" -eq 0 ] || { case "$rule" in mobile-*) continue ;; esac; }
   if printf '%s' "$out" | grep -q "error\[$rule\]"; then echo "ok   $rule"; else echo "FAIL $rule not reported"; status=1; fi
 done
+if sh bin/check_as_never.sh >/dev/null; then echo "FAIL check_as_never passed the planted cast"; status=1; else echo "ok   check_as_never"; fi
 exit $status
