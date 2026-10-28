@@ -1101,6 +1101,10 @@ nothing. Effective `lit` requires stored lit and positive effective fuel.
 Ignite, Douse and Refuel first settle the old interval to now, then write the new
 row. There is no expiry job, per-second write, UI timer or automatic ignition.
 
+Compiler and loader require `light@1` for any fuel declaration. Initial charge never exceeds
+capacity, and a template item cannot carry fuel. A source's `supply` names a supply item with
+the same unit.
+
 Ignite requires a fueled source directly body-held or in the actor's light slot,
 and refuses an already effectively lit source. Douse requires that same custody
 and stored lit, including an exhausted source. Refuel binds such a source and an
@@ -1199,6 +1203,13 @@ ceiling. Pour within actor custody is neutral even when overloaded, and Drink
 reduces load. Take, Buy and incoming transfer must include current liquid mass;
 Drop and recovery move the same contents without refilling them.
 
+Any liquid declaration, vessel or source requires `liquid@1` and kernel API 1.20 or later.
+A vessel's initial row is empty (`kind` null, quantity 0) or names a declared liquid with
+positive quantity, and never exceeds capacity. A template item cannot be a vessel: no writer
+creates liquid rows for newly instantiated items. A vessel item declares an integer
+`mass_grams`. `liquid_source` exists only on a room detail and names a declared liquid. Liquid
+`label` and `unit_label` and a vessel's `unit_label` are declared text keys.
+
 ## S3 finite watch patrol (C2 selected contract)
 
 [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
@@ -1257,6 +1268,20 @@ pennies or item. C1 remains the sole swords/gift lesson consumer. Both resolved
 trust and nonterminal attempt failure have retained causal evidence, not room-count
 inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
 are outside this selected consumer.
+
+Compiler and loader validate a patrol quest. It requires `patrol@1`, `movement@1`, `quest@1`,
+`dialogue@1`, `fact@1` and `death@1`; its objective evidence is `patrol` (that evidence requires a
+`patrol` declaration), and it has no offer, repeat, deadline or exchange. The initial cursor lies
+within the route, and each leg, including the last back to the first, is an exit to a different
+room with no hidden or climb face. Checkpoints are unique route rooms, and the required count is
+at most their number. The leader has no HP, attack or daily schedule and starts in the initial
+cursor's room. The trust fact is a player-scoped Boolean defaulting to false, and the narration
+is a declared text key. Two patrols cannot share a leader or trust fact, and no escort choice
+binds the leader. No dialogue `quest`, reaction `apply` step or choice without a `start`
+transition may accept, activate or resolve the patrol quest. A patrol choice names a patrol quest
+led by its dialogue role's NPC, in a dialogue with no `quest` of its own; a `start` transition
+accepts exactly that quest, any other accepts nothing, and the choice carries no escort,
+sequence, payment, lesson payment, receive or hand-over.
 
 ## S4 all-hours wisp (B6 selected contract)
 
@@ -1340,7 +1365,8 @@ handles all slots, in slot order. Its successor is due at the earliest next wand
 boundary, day/night target boundary or eligible replacement time, strictly after
 this occurrence. Ignore past due times for night-only slots while ineligible;
 the next night boundary reconsideration prevents a zero-time loop. Require wander
-interval <= replacement delay. The current plan job is no later than the next
+interval <= replacement delay. The night window wraps midnight: `night_end < night_start`,
+and `night_start` falls within the day's hours. The current plan job is no later than the next
 wander boundary, hence no later than a newly fatal member's replacement due. Death
 writes only that slot's eligibility; it never reschedules or writes plan control.
 Existing due ordering, segmentation and shared command budgets apply; plan work
@@ -1716,6 +1742,18 @@ Boolean is the durable local memory `player.dream_seen`; no second export marker
 Exact accepted replay retains its receipt before current-state admission; new
 stale controls cannot skip a beat, change the branch or repeat the consequence.
 
+Compiler and loader validate the dream scene. It requires `position@1`, `scene@1`, `quest@1`,
+`dialogue@1`, `reaction@1`, `fact@1`, `resource@1`, `death@1` and `service@1`, and kernel API
+1.25 or later. Its Rest trigger names a room detail whose bed entitlement is the trigger's
+entitlement, which a service benefit produces; entitlement and credit are distinct player-scoped
+Booleans defaulting to false. Its steps are exactly three narrations, a choice of two distinct
+options, a branch, an acknowledgement and an end. The end resolves the trigger's quest and
+assigns exactly one player Boolean true, neither the credit nor the entitlement. The quest's
+objective is that fact's current state equal to true, and the quest has no offer, repeat,
+deadline, exchange or patrol. No other presentation-only scene owns the same credit, quest or
+memory fact, and no dialogue or reaction activates or resolves the quest. Its title,
+description, narrations, prompt and choice texts are declared text keys.
+
 ## D4 homes, finite apples and Eat (selected contract)
 
 **D4 source contract.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
@@ -1739,6 +1777,12 @@ clock, settle recovery and use checked arithmetic to cap the authored positive
 increment at the current maximum; atomically transfer the same item to terminal consumed custody and
 adjust the pool in one writer group. D4 adds no currency, time skip, RNG, hunger, HP
 healing, acquisition event or new consumable issuance.
+
+Compiler and loader require `food@1`, `containment@1` and `resource@1` for an edible item,
+and kernel API 1.27 or later (1.101 when any edible declares `applies`). Its recovery pool is
+the MV resource with a positive standing regeneration rate. An edible item is never a container
+and declares no capacity, slot, weapon, block chance, fuel or vessel. Its `label` and
+`narration` are declared text keys.
 
 Ordinary transfer alone cannot express consumption: existing destinations retain
 recoverable custody and permit a later transfer back. There is no installed item
@@ -1824,6 +1868,13 @@ identity, allow forced overload, never auto-equip/copy or restore rewards/
 deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings at Chapel.
 Ordinary physical corpse recovery remains available, including D1's fare-waived
 isle return. No general remote Take or replacement-gear system.
+
+Compiler and loader validate `world.water`. It requires `water@1`, `skills@1`, `resource@1`,
+`schedule@1`, `death@1`, `containment@1`, `movement@1` and `position@1`, the `real_elapsed`
+time policy and the world's death and carry settings. Each route's surface room has a down exit
+to its bottom and the bottom an up exit back, neither through a barrier, and a bottom has no
+other exit. No room belongs to two routes. The swim skill is a declared skill, and the warning
+and drowned texts are declared text keys.
 
 <a id="d9-village-consequences-and-prior-study-access-selected-pending-implementation"></a>
 

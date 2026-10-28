@@ -760,7 +760,7 @@ Proposed for [designer](../decisions/owner-decision-designer-role-2026-10-07.md)
 
 ## Mechanic renderings
 
-One row per mechanic whose Book rendering is a short rule.
+One row per mechanic whose Book rendering is a short rule: worn affects, displayed name, sense cues, Ask about a topic, storylet card and mount.
 
 | Mechanic | Rendering |
 |---|---|

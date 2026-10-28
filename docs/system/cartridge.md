@@ -1302,3 +1302,7 @@ Built rooms S2 adds a service benefit `{kind: "build", blueprint, site, directio
 ## Narrate declarations
 
 [Settle S3-1](mechanics.md#settle-s3-1-narrate-n1) adds a reaction step `{op: "narrate", text}` (`protocol/reaction.schema.json` `ReactionRule`), owned by reaction@1, needing `kernel_api` at least 1.103 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `text` is a key of the text catalog (UNRESOLVED_REFERENCE at the step's `text`: reactions/arrival_line.apply[0].text; in the loader .cartridge.reactions["..."].apply[0].text). A rule with `after` may carry it.
+
+## Map position declarations
+
+`map_positions.json` (optional) is a non-empty array of `MapPosition` rows `{room, x, y, z}` (`protocol/cartridge.schema.json`). It needs knowledge@1 (UNDECLARED_CAPABILITY at the file). Every room of the cartridge appears exactly once, at a unique `(x, y, z)` (SCHEMA_VIOLATION at the file). Each `room` resolves (UNRESOLVED_REFERENCE at `[i].room`). Coordinates are drawing data only: the map draws links from real exits, and positions never change movement, sight or reachability. Compiler `lib/loka/content/map_positions.ex`.
