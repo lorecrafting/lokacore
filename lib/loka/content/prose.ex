@@ -37,11 +37,12 @@ defmodule Loka.Content.Prose do
   defp add({key, words, at}, {text, faults}) do
     if Map.has_key?(text, key),
       do: {text, [{"DUPLICATE_KEY", at, %{"target" => key}} | faults]},
-      else: {Map.put(text, key, words), Enum.reverse(refused(key, words, at)) ++ faults}
+      else: {Map.put(text, key, words), Enum.reverse(refused(words, at)) ++ faults}
   end
 
-  defp refused(key, words, at) do
-    case Contracts.validate("TextCatalog", %{key => words}) do
+  # Only the words: a key that fails TextKey is already the definition schema's error here.
+  defp refused(words, at) do
+    case Contracts.validate("TextCatalog", %{"line" => words}) do
       :ok ->
         []
 

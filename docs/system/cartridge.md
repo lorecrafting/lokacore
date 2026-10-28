@@ -468,8 +468,8 @@ inline; its artifact equals the hand-keyed one byte for byte.
 | A trigger with its own `fact` | `SCHEMA_VIOLATION` | `<src>.on.event` | `{"error": "unknown_variant"}` |
 
 The dotted `signal.<name>` collides through the ordinary fact-name check. A refused step or
-trigger stays unlowered, so the schema reports it at the author's path. A name refused for not
-being a Key: its listeners report nothing of their own. [signal_sugar](../../test/fixtures/signal_sugar/) is the
+trigger stays unlowered, so the schema reports it at the author's path. When a name or its
+`signal_<name>` is refused for not being a Key, its listeners report nothing of their own. [signal_sugar](../../test/fixtures/signal_sugar/) is the
 working example; it compiles to the same artifact as its hand-expanded twin
 [signal_expanded](../../test/fixtures/signal_expanded/).
 
