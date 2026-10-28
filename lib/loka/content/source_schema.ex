@@ -69,7 +69,7 @@ defmodule Loka.Content.SourceSchema do
     all = Map.merge(base, members)
     changed = changed(all)
     partials = for n <- changed, into: all, do: {"partial." <> n, partial(all[n], changed)}
-    for {n, s} <- members, into: partials, do: {"partial." <> n, child(relax(s, changed))}
+    for {n, s} <- members, into: partials, do: {"partial." <> n, child(partial(s, changed))}
   end
 
   # The words of inline prose may stand wherever a text key goes (Loka.Content.Prose).
@@ -217,10 +217,6 @@ defmodule Loka.Content.SourceSchema do
     if next == ch, do: ch, else: changed(defs, next)
   end
 
-  # A child extends one whole member: a member of alternatives (SceneDefinition) relaxes each.
-  defp relax(%{"oneOf" => bs} = s, ch), do: %{s | "oneOf" => Enum.map(bs, &partial(&1, ch))}
-  defp relax(s, ch), do: partial(s, ch)
-
   # An extends child names its parent and may give it arguments (Loka.Content.Extends).
   defp child(%{"oneOf" => bs} = s), do: %{s | "oneOf" => Enum.map(bs, &child/1)}
   defp child(s), do: s |> put("extends", @key) |> put("with", @object)
@@ -228,13 +224,16 @@ defmodule Loka.Content.SourceSchema do
   defp partial(%{} = s, ch) do
     s
     |> Map.drop(@requires ++ ~w(if then else))
-    |> Map.new(fn
-      {"$ref", r} -> {"$ref", if(r in ch, do: "partial." <> r, else: r)}
-      {"properties", ps} -> {"properties", Map.new(ps, fn {n, p} -> {n, partial(p, ch)} end)}
-      {"additionalProperties", %{} = p} -> {"additionalProperties", partial(p, ch)}
-      other -> other
-    end)
+    |> Map.new(fn {k, v} -> {k, partial(k, v, ch)} end)
   end
+
+  defp partial(bs, ch) when is_list(bs), do: Enum.map(bs, &partial(&1, ch))
+  defp partial(v, _), do: v
+
+  defp partial("$ref", r, ch), do: if(r in ch, do: "partial." <> r, else: r)
+  defp partial("properties", ps, ch), do: Map.new(ps, fn {n, p} -> {n, partial(p, ch)} end)
+  defp partial(k, v, ch) when k in ~w(additionalProperties oneOf anyOf), do: partial(v, ch)
+  defp partial(_, v, _), do: v
 
   # cartridge.json, facts.json, resources.json, attributes.json and map_positions.json, as the
   # compiler checks them; root files take no shortcut (an area bundle opens into definitions).

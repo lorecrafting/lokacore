@@ -3791,7 +3791,7 @@
         "on_positive_hit": {
           "additionalProperties": false,
           "properties": {
-            "effect": { "$ref": "#/$defs/DefinitionRef" }
+            "effect": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         }
@@ -3802,7 +3802,7 @@
       "additionalProperties": false,
       "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction. barrier, optional (barrier@1), names the Barrier whose one shared state the exit passes through (21 §5 Barrier; 05 §25 coherent connections): move through it is refused while it is closed (exit_closed) or locked (exit_locked); an exit without one means what it always meant. A reciprocal exit is authored in the destination room (00a §2); faces pair by opposite direction: an exit's reciprocal face is its destination's exit in the opposite compass direction when that exit leads back to its room, and an exit with a barrier needs a reciprocal face naming the same barrier (BARRIER_MISMATCH at each face otherwise). One-way and bent barrier passages (no reciprocal face, or an opposite-direction exit that leads elsewhere) are rejected for now and may be allowed later; an exit without a barrier is BARRIER_MISMATCH only when its reciprocal face names one.",
       "properties": {
-        "barrier": { "$ref": "#/$defs/DefinitionRef" },
+        "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
         "climb": {
           "additionalProperties": false,
           "description": "Toolbox row 30 (docs/system/mechanics.md rope and climb; kernel_api at least 1.45): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face.",
@@ -3811,8 +3811,8 @@
               "minimum": 1,
               "type": "integer"
             },
-            "fell": { "$ref": "#/$defs/TextKey" },
-            "item": { "$ref": "#/$defs/DefinitionRef" }
+            "fell": { "$ref": "#/$defs/partial.TextKey" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -3821,7 +3821,7 @@
           "description": "Close this directed exit while the named global fact has the specified value, except for the living owner of a nonempty player corpse in its destination. The exception is rechecked at movement admission.",
           "properties": {
             "equals": { "$ref": "#/$defs/FactValue" },
-            "fact": { "$ref": "#/$defs/DefinitionRef" }
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -3830,7 +3830,7 @@
           "description": "Toolbox row 11 (docs/system/mechanics.md hidden passages; kernel_api at least 1.45): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH).",
           "properties": {
             "equals": { "$ref": "#/$defs/FactValue" },
-            "fact": { "$ref": "#/$defs/DefinitionRef" }
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -3843,21 +3843,45 @@
           },
           "type": "object"
         },
-        "to": { "$ref": "#/$defs/DefinitionRef" }
+        "to": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
+    },
+    "partial.DefinitionRef": {
+      "anyOf": [
+        { "$ref": "#/$defs/Key" },
+        {
+          "additionalProperties": false,
+          "description": "Globally stable, immutable reference to a content definition (03 §2; 05 §4: no global content-key namespace). cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+          "properties": {
+            "cartridge_id": { "$ref": "#/$defs/CartridgeId" },
+            "cartridge_version": { "$ref": "#/$defs/ReleaseVersion" },
+            "key": {
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            "kind": {
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      ]
     },
     "partial.DialogueCheck": {
       "additionalProperties": false,
       "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1; kernel_api at least 1.47): an opposed check as a recipe's (action.schema.json ActionRecipe check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no recipe's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
       "properties": {
-        "attribute": { "$ref": "#/$defs/DefinitionRef" },
-        "failure": { "$ref": "#/$defs/TextKey" },
+        "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "failure": { "$ref": "#/$defs/partial.TextKey" },
         "key": { "$ref": "#/$defs/Key" },
         "kind": { "const": "opposed" },
-        "npc": { "$ref": "#/$defs/DefinitionRef" },
+        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
         "rating": { "type": "integer" },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
     },
@@ -3865,7 +3889,7 @@
       "additionalProperties": false,
       "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14, kernel_api 1.47): check (DialogueCheck), an opposed check made when the choice is chosen; a checked choice carries only label, narration, sequence, availability and check, in a dialogue with no quest and no riddle, and its sequence grants no skill (else OUTCOME_MISMATCH at its check).",
       "properties": {
-        "accept": { "$ref": "#/$defs/DefinitionRef" },
+        "accept": { "$ref": "#/$defs/partial.DefinitionRef" },
         "availability": {
           "additionalProperties": false,
           "properties": {
@@ -3880,7 +3904,7 @@
           "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest.",
           "properties": {
             "npc": { "$ref": "#/$defs/Key" },
-            "quest": { "$ref": "#/$defs/DefinitionRef" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
             "transition": {
               "enum": [
                 "start",
@@ -3900,7 +3924,7 @@
           },
           "type": "object"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
         "lesson_payment": {
           "additionalProperties": false,
           "properties": {
@@ -3909,17 +3933,17 @@
               "minimum": 1,
               "type": "integer"
             },
-            "resource": { "$ref": "#/$defs/DefinitionRef" },
+            "resource": { "$ref": "#/$defs/partial.DefinitionRef" },
             "to": { "$ref": "#/$defs/Key" }
           },
           "type": "object"
         },
-        "narration": { "$ref": "#/$defs/TextKey" },
+        "narration": { "$ref": "#/$defs/partial.TextKey" },
         "patrol": {
           "additionalProperties": false,
           "properties": {
             "npc": { "$ref": "#/$defs/Key" },
-            "quest": { "$ref": "#/$defs/DefinitionRef" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
             "transition": {
               "enum": [
                 "start",
@@ -3940,7 +3964,7 @@
               "type": "integer"
             },
             "from": { "$ref": "#/$defs/Key" },
-            "resource": { "$ref": "#/$defs/DefinitionRef" }
+            "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -4014,6 +4038,81 @@
       },
       "type": "object"
     },
+    "partial.DialogueRole": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "role": { "const": "npc" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "role": { "const": "item" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE)."
+    },
+    "partial.FuelSpec": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "capacity": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "cues": {
+              "$ref": "#/$defs/Cues",
+              "description": "Cues active only while this source is lit (toolbox row G6)."
+            },
+            "doused": { "$ref": "#/$defs/partial.TextKey" },
+            "ignited": { "$ref": "#/$defs/partial.TextKey" },
+            "initial": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": { "const": "source" },
+            "rate": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "refueled": { "$ref": "#/$defs/partial.TextKey" },
+            "supply": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "unit": { "$ref": "#/$defs/Key" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "capacity": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "initial": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": { "const": "supply" },
+            "unit": { "$ref": "#/$defs/Key" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys."
+    },
     "partial.InspectableDetail": {
       "additionalProperties": false,
       "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Its variants (DescriptionVariant) select other prose by condition. Owned by inspectable_detail (a cartridge with details requires it). R5 freezes this v1 shape (14 §R5): perception, reveal facts and contextual actions join as optional fields.",
@@ -4027,13 +4126,13 @@
         "bed": {
           "additionalProperties": false,
           "properties": {
-            "entitlement": { "$ref": "#/$defs/DefinitionRef" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "entitlement": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "title": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
         "cues": { "$ref": "#/$defs/Cues" },
-        "description": { "$ref": "#/$defs/TextKey" },
+        "description": { "$ref": "#/$defs/partial.TextKey" },
         "harvest": {
           "additionalProperties": false,
           "properties": {
@@ -4046,8 +4145,8 @@
                   "minimum": 2,
                   "type": "integer"
                 },
-                "narration": { "$ref": "#/$defs/TextKey" },
-                "skill": { "$ref": "#/$defs/DefinitionRef" }
+                "narration": { "$ref": "#/$defs/partial.TextKey" },
+                "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
               "type": "object"
             },
@@ -4057,9 +4156,9 @@
               "minItems": 1,
               "type": "array"
             },
-            "label": { "$ref": "#/$defs/TextKey" },
-            "narration": { "$ref": "#/$defs/TextKey" },
-            "title": { "$ref": "#/$defs/TextKey" },
+            "label": { "$ref": "#/$defs/partial.TextKey" },
+            "narration": { "$ref": "#/$defs/partial.TextKey" },
+            "title": { "$ref": "#/$defs/partial.TextKey" },
             "tool": {
               "additionalProperties": false,
               "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
@@ -4071,7 +4170,7 @@
           },
           "type": "object"
         },
-        "liquid_source": { "$ref": "#/$defs/DefinitionRef" },
+        "liquid_source": { "$ref": "#/$defs/partial.DefinitionRef" },
         "notice_board": {
           "additionalProperties": false,
           "properties": {
@@ -4092,7 +4191,7 @@
               "minItems": 1,
               "type": "array"
             },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "title": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
@@ -4100,7 +4199,7 @@
           "additionalProperties": false,
           "properties": {
             "self_luminous": { "const": true },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "title": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
@@ -4112,21 +4211,21 @@
           "additionalProperties": false,
           "description": "Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog.",
           "properties": {
-            "label": { "$ref": "#/$defs/TextKey" },
-            "text": { "$ref": "#/$defs/TextKey" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "label": { "$ref": "#/$defs/partial.TextKey" },
+            "text": { "$ref": "#/$defs/partial.TextKey" },
+            "title": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
         "title": {
-          "$ref": "#/$defs/TextKey",
+          "$ref": "#/$defs/partial.TextKey",
           "description": "Optional page title the Book shows for this detail (kernel_api at least 1.120 (loka-x6t.120); docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description."
         },
         "transport": {
           "additionalProperties": false,
           "properties": {
-            "route": { "$ref": "#/$defs/DefinitionRef" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "route": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "title": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
@@ -4144,9 +4243,9 @@
       "description": "A directly held item opted into exact bleed treatment.",
       "properties": {
         "action": { "$ref": "#/$defs/Key" },
-        "effect": { "$ref": "#/$defs/DefinitionRef" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "effect": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
     },
@@ -4171,19 +4270,55 @@
           "minItems": 1,
           "type": "array"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "resource": { "$ref": "#/$defs/DefinitionRef" }
+        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
+    },
+    "partial.ItemLocation": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "in": { "const": "room" },
+            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "in": { "const": "npc" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "in": { "const": "item" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "in": { "const": "template" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED)."
     },
     "partial.ItemReadable": {
       "additionalProperties": false,
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "properties": {
-        "label": { "$ref": "#/$defs/TextKey" },
-        "text": { "$ref": "#/$defs/TextKey" },
-        "topic": { "$ref": "#/$defs/DefinitionRef" }
+        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "text": { "$ref": "#/$defs/partial.TextKey" },
+        "topic": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
     },
@@ -4191,10 +4326,10 @@
       "additionalProperties": false,
       "description": "A local barrier face’s authored answer when the named NPC is in the destination room, and its no-answer text.",
       "properties": {
-        "answered": { "$ref": "#/$defs/TextKey" },
-        "npc": { "$ref": "#/$defs/DefinitionRef" },
-        "room": { "$ref": "#/$defs/DefinitionRef" },
-        "unanswered": { "$ref": "#/$defs/TextKey" }
+        "answered": { "$ref": "#/$defs/partial.TextKey" },
+        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "unanswered": { "$ref": "#/$defs/partial.TextKey" }
       },
       "type": "object"
     },
@@ -4223,12 +4358,6 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "cartridge_id",
-                "cartridge_version",
-                "kind",
-                "key"
-              ],
               "type": "object"
             }
           ]
@@ -4252,10 +4381,38 @@
             "the"
           ]
         },
-        "bare": { "$ref": "#/$defs/TextKey" },
-        "plural": { "$ref": "#/$defs/TextKey" }
+        "bare": { "$ref": "#/$defs/partial.TextKey" },
+        "plural": { "$ref": "#/$defs/partial.TextKey" }
       },
       "type": "object"
+    },
+    "partial.NarrationParticipant": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "role": { "const": "npc" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "role": { "const": "item" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "role": { "const": "actor" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The loader reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
     },
     "partial.NpcHp": {
       "additionalProperties": false,
@@ -4272,12 +4429,342 @@
       },
       "type": "object"
     },
+    "partial.Policy": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "description": "Every item holds; an empty list is the policy with no condition.",
+          "properties": {
+            "items": {
+              "items": { "$ref": "#/$defs/Policy" },
+              "type": "array"
+            },
+            "op": { "const": "all" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "At least one item holds.",
+          "properties": {
+            "items": {
+              "items": { "$ref": "#/$defs/Policy" },
+              "minItems": 1,
+              "type": "array"
+            },
+            "op": { "const": "any" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The item does not hold.",
+          "properties": {
+            "item": { "$ref": "#/$defs/partial.Policy" },
+            "op": { "const": "not" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The resolved target is present to the actor.",
+          "properties": {
+            "op": { "const": "target_present" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The actor holds an item of this definition, directly or inside containers it holds, transitively.",
+          "properties": {
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "has_item" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The actor's instance of the quest is in this lifecycle state.",
+          "properties": {
+            "op": { "const": "quest_state" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "state": { "$ref": "#/$defs/QuestState" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact (toolbox row W2, kernel_api at least 1.47) is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
+          "properties": {
+            "equals": { "$ref": "#/$defs/FactValue" },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "fact_compare" },
+            "subject": {
+              "enum": [
+                "target"
+              ]
+            },
+            "with": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC, read at the pair (subject toward with)."
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler and loader reject endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "properties": {
+            "from": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": { "const": "time_window" },
+            "to": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The barrier's current state equals `equals` (room.schema.json BarrierState; closed means closed and unlocked). Owned by barrier@1.",
+          "properties": {
+            "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "equals": { "$ref": "#/$defs/BarrierState" },
+            "op": { "const": "barrier_state" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.",
+          "properties": {
+            "at_least": { "$ref": "#/$defs/ResourceInt" },
+            "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "stat_compare" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29a (kernel_api at least 1.51): the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "properties": {
+            "at_least": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "level_compare" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39 (kernel_api at least 1.87): subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
+          "properties": {
+            "at_least": { "$ref": "#/$defs/ResourceInt" },
+            "at_least_percent": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "resource_compare" },
+            "resource": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "subject": {
+              "enum": [
+                "subject"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "API1.11 escort@1: this actor’s typed escort for the named quest instance has this status.",
+          "properties": {
+            "op": { "const": "escort_state" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "state": { "$ref": "#/$defs/EscortStatus" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "light_off" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).",
+          "properties": {
+            "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "has_tag" },
+            "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "subject": {
+              "enum": [
+                "target",
+                "room"
+              ]
+            },
+            "tag": { "$ref": "#/$defs/Tag" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Needs kernel_api at least 1.45. Owned by calendar@1.",
+          "properties": {
+            "lunar": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            "op": { "const": "sky" },
+            "season": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            "tide": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            "weather": {
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The actor's body wears an item whose definition declares tag (toolbox row W25): an item in one of the body's slot holders (equipment@1). False without a body. Needs kernel_api at least 1.46. Owned by equipment@1.",
+          "properties": {
+            "op": { "const": "wearing" },
+            "tag": { "$ref": "#/$defs/Tag" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
+          "properties": {
+            "at_least": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "visited_count" },
+            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Needs kernel_api at least 1.91. Owned by skills@1.",
+          "properties": {
+            "at_least": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "skill_compare" },
+            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Needs kernel_api at least 1.86. Owned by population@1.",
+          "properties": {
+            "at_least": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "population_count" },
+            "plan": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Needs kernel_api at least 1.46, 1.53 for self or subject, and 1.99 for room. Owned by status@1.",
+          "properties": {
+            "op": { "const": "status_active" },
+            "status": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "subject": {
+              "enum": [
+                "target",
+                "self",
+                "subject",
+                "room"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Needs kernel_api at least 1.102. Owned by containment@1.",
+          "properties": {
+            "op": { "const": "item_present" },
+            "tag": { "$ref": "#/$defs/Tag" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.",
+          "properties": {
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "npc_present" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1. Needs kernel_api at least 1.48.",
+          "properties": {
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "cue_perceived" },
+            "sense": {
+              "enum": [
+                "sound",
+                "smell",
+                "heat"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1. Needs kernel_api at least 1.90.",
+          "properties": {
+            "at_least": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "time_since" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+    },
     "partial.QuestJournal": {
       "additionalProperties": false,
       "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a loader check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
       "properties": {
-        "abandoned": { "$ref": "#/$defs/TextKey" },
-        "active": { "$ref": "#/$defs/TextKey" },
+        "abandoned": { "$ref": "#/$defs/partial.TextKey" },
+        "active": { "$ref": "#/$defs/partial.TextKey" },
         "active_variants": {
           "items": {
             "additionalProperties": false,
@@ -4295,7 +4782,7 @@
           "minItems": 1,
           "type": "array"
         },
-        "failed": { "$ref": "#/$defs/TextKey" },
+        "failed": { "$ref": "#/$defs/partial.TextKey" },
         "hints": {
           "additionalProperties": false,
           "properties": {
@@ -4344,15 +4831,50 @@
           },
           "type": "object"
         },
-        "objectives_met": { "$ref": "#/$defs/TextKey" },
+        "objectives_met": { "$ref": "#/$defs/partial.TextKey" },
         "outcomes": {
-          "additionalProperties": { "$ref": "#/$defs/TextKey" },
+          "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
           "type": "object"
         },
-        "resolved": { "$ref": "#/$defs/TextKey" }
+        "resolved": { "$ref": "#/$defs/partial.TextKey" }
       },
       "type": "object"
+    },
+    "partial.QuestObjective": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "evidence": { "const": "current_state" },
+            "policy": { "$ref": "#/$defs/partial.VersionedPolicy" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "evidence": { "const": "post_activation_event" },
+            "item_acquired": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "evidence": { "const": "patrol" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "evidence": { "const": "expedition" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet)."
     },
     "partial.RecipeCraft": {
       "additionalProperties": false,
@@ -4372,15 +4894,15 @@
               "minimum": 1,
               "type": "integer"
             },
-            "reason": { "$ref": "#/$defs/TextKey" },
-            "to": { "$ref": "#/$defs/ItemLocation" }
+            "reason": { "$ref": "#/$defs/partial.TextKey" },
+            "to": { "$ref": "#/$defs/partial.ItemLocation" }
           },
           "type": "object"
         },
         "yield": {
           "additionalProperties": false,
           "properties": {
-            "from": { "$ref": "#/$defs/ItemLocation" },
+            "from": { "$ref": "#/$defs/partial.ItemLocation" },
             "items": {
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
@@ -4397,33 +4919,313 @@
       "additionalProperties": false,
       "description": "A recipe outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
       "properties": {
-        "actor": { "$ref": "#/$defs/TextKey" },
-        "observers": { "$ref": "#/$defs/TextKey" },
+        "actor": { "$ref": "#/$defs/partial.TextKey" },
+        "observers": { "$ref": "#/$defs/partial.TextKey" },
         "participants": {
-          "additionalProperties": { "$ref": "#/$defs/NarrationParticipant" },
+          "additionalProperties": { "$ref": "#/$defs/partial.NarrationParticipant" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         }
       },
       "type": "object"
     },
+    "partial.RecipeTarget": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "detail": { "$ref": "#/$defs/Key" },
+            "kind": { "const": "detail" },
+            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "use" },
+            "tool": { "$ref": "#/$defs/partial.UseTool" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29a (kernel_api at least 1.98; word bar S2): a spell, cast only by the cast command typing its word (no other spell recipe has it), never offered by key or performed; it acts on the caster's body. With aimed (kernel_api at least 1.119, loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
+          "properties": {
+            "aimed": {
+              "additionalProperties": false,
+              "properties": {
+                "scopes": {
+                  "items": {
+                    "enum": [
+                      "room_occupants",
+                      "room_contents",
+                      "inventory"
+                    ]
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "kind": { "const": "spell" },
+            "learned": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "word": { "$ref": "#/$defs/SpokenKeyword" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a, kernel_api at least 1.98) a spell named by its word, castable by an actor only while its learned fact reads true for them."
+    },
     "partial.RestBinding": {
       "additionalProperties": false,
       "description": "One exact paid Rest binding: authored bed, first-credit fact and sole quest.",
       "properties": {
-        "credit": { "$ref": "#/$defs/DefinitionRef" },
+        "credit": { "$ref": "#/$defs/partial.DefinitionRef" },
         "detail": { "$ref": "#/$defs/Key" },
-        "entitlement": { "$ref": "#/$defs/DefinitionRef" },
-        "quest": { "$ref": "#/$defs/DefinitionRef" },
-        "room": { "$ref": "#/$defs/DefinitionRef" }
+        "entitlement": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "room": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
+    },
+    "partial.ServiceBenefit": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "escrow": {
+              "additionalProperties": false,
+              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70 (kernel_api at least 1.102): output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
+              "properties": {
+                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "items": {
+                  "items": { "$ref": "#/$defs/DefinitionRef" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "output": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "quantity": {
+                  "maximum": 16,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "ready_after": {
+                  "maximum": 31536000,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "kind": { "const": "entitlement" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "debit": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": { "const": "meal" },
+            "recovery": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "stock": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": { "const": "drink" },
+            "liquid": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "recovery": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "vessel": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "kind": { "const": "repair" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "claim" },
+            "service": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "cancel" },
+            "service": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "account": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "amount": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": { "const": "deposit" },
+            "vault": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "account": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "amount": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": { "const": "withdraw" },
+            "vault": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "properties": {
+            "blueprint": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "escrow": {
+              "additionalProperties": false,
+              "description": "Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room.",
+              "properties": {
+                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "items": {
+                  "items": { "$ref": "#/$defs/DefinitionRef" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "quantity": {
+                  "maximum": 16,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "ready_after": {
+                  "maximum": 31536000,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "kind": { "const": "build" },
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "properties": {
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "escrow": {
+              "additionalProperties": false,
+              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
+              "properties": {
+                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "items": {
+                  "items": { "$ref": "#/$defs/DefinitionRef" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "quantity": {
+                  "maximum": 16,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "kind": { "const": "mend" },
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Built rooms S5 (construction@1, kernel_api 1.102): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
+          "properties": {
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "kind": { "const": "raze" },
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S4, a build or mend of a site's room."
     },
     "partial.Shop": {
       "additionalProperties": false,
       "description": "A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).",
       "properties": {
-        "bought": { "$ref": "#/$defs/TextKey" },
+        "bought": { "$ref": "#/$defs/partial.TextKey" },
         "buy_discount": {
           "additionalProperties": false,
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15, kernel_api at least 1.47) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
@@ -4444,7 +5246,7 @@
               "minimum": 1,
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -4454,8 +5256,71 @@
           "minItems": 1,
           "type": "array"
         },
-        "resource": { "$ref": "#/$defs/DefinitionRef" },
-        "sold": { "$ref": "#/$defs/TextKey" }
+        "resource": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "sold": { "$ref": "#/$defs/partial.TextKey" }
+      },
+      "type": "object"
+    },
+    "partial.TargetSpec": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "description": "The action takes no target.",
+          "properties": {
+            "kind": { "const": "none" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One entity from the listed scopes.",
+          "properties": {
+            "kind": { "const": "entity" },
+            "scopes": {
+              "items": {
+                "enum": [
+                  "self",
+                  "inventory",
+                  "room_contents",
+                  "room_occupants",
+                  "inspectable_details"
+                ]
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry."
+    },
+    "partial.TextKey": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "prose": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Text carries its interpolation bindings."
+    },
+    "partial.UseTool": {
+      "additionalProperties": false,
+      "description": "Toolbox row G4: what a use recipe's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
+      "properties": {
+        "liquid": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "tag": { "$ref": "#/$defs/Tag" }
       },
       "type": "object"
     },
@@ -4467,7 +5332,7 @@
           "const": 1,
           "type": "integer"
         },
-        "root": { "$ref": "#/$defs/Policy" }
+        "root": { "$ref": "#/$defs/partial.Policy" }
       },
       "type": "object"
     },
@@ -4481,7 +5346,7 @@
           "type": "integer"
         },
         "initial": { "$ref": "#/$defs/partial.LiquidRow" },
-        "unit_label": { "$ref": "#/$defs/TextKey" }
+        "unit_label": { "$ref": "#/$defs/partial.TextKey" }
       },
       "type": "object"
     },
@@ -4494,7 +5359,7 @@
           "additionalProperties": false,
           "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
             "wear": {
               "maximum": 2147483647,
               "minimum": 1,
@@ -4507,11 +5372,11 @@
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee.",
           "properties": {
-            "ammo": { "$ref": "#/$defs/DefinitionRef" }
+            "ammo": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
     },
@@ -4537,7 +5402,7 @@
         },
         "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
         "priority": { "type": "integer" },
-        "target": { "$ref": "#/$defs/TargetSpec" },
+        "target": { "$ref": "#/$defs/partial.TargetSpec" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -4566,11 +5431,6 @@
                 "key": { "$ref": "#/$defs/Key" },
                 "kind": { "const": "luck" }
               },
-              "required": [
-                "key",
-                "kind",
-                "chance"
-              ],
               "type": "object"
             },
             {
@@ -4580,67 +5440,30 @@
                 "difficulty": { "$ref": "#/$defs/ResourceInt" },
                 "key": { "$ref": "#/$defs/Key" },
                 "kind": { "const": "threshold" },
-                "resource": { "$ref": "#/$defs/DefinitionRef" }
+                "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "key",
-                "kind",
-                "resource",
-                "difficulty"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
-                "attribute": { "$ref": "#/$defs/DefinitionRef" },
+                "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "difficulty": { "type": "integer" },
                 "key": { "$ref": "#/$defs/Key" },
                 "kind": { "const": "attribute_threshold" }
               },
-              "required": [
-                "key",
-                "kind",
-                "attribute",
-                "difficulty"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
-              "allOf": [
-                {
-                  "oneOf": [
-                    {
-                      "required": [
-                        "skill"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "attribute"
-                      ]
-                    }
-                  ]
-                }
-              ],
-              "dependentRequired": {
-                "npc": [
-                  "attribute"
-                ]
-              },
               "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md; kernel_api at least 1.44): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3, kernel_api 1.46), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
               "properties": {
-                "attribute": { "$ref": "#/$defs/DefinitionRef" },
+                "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "key": { "$ref": "#/$defs/Key" },
                 "kind": { "const": "opposed" },
-                "npc": { "$ref": "#/$defs/DefinitionRef" },
-                "skill": { "$ref": "#/$defs/DefinitionRef" }
+                "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "key",
-                "kind"
-              ],
               "type": "object"
             },
             {
@@ -4651,11 +5474,6 @@
                 "kind": { "const": "track" },
                 "plan": { "$ref": "#/$defs/Key" }
               },
-              "required": [
-                "key",
-                "kind",
-                "plan"
-              ],
               "type": "object"
             }
           ]
@@ -4676,7 +5494,7 @@
           "type": "integer"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
         "outcomes": {
           "additionalProperties": false,
           "properties": {
@@ -4719,9 +5537,9 @@
         },
         "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
         "priority": { "type": "integer" },
-        "reason": { "$ref": "#/$defs/TextKey" },
-        "target": { "$ref": "#/$defs/RecipeTarget" },
-        "tip": { "$ref": "#/$defs/TextKey" },
+        "reason": { "$ref": "#/$defs/partial.TextKey" },
+        "target": { "$ref": "#/$defs/partial.RecipeTarget" },
+        "tip": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -4732,7 +5550,7 @@
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
         "initial": { "$ref": "#/$defs/BarrierState" },
-        "key_item": { "$ref": "#/$defs/DefinitionRef" },
+        "key_item": { "$ref": "#/$defs/partial.DefinitionRef" },
         "keywords": {
           "items": { "$ref": "#/$defs/Alias" },
           "maxItems": 16,
@@ -4743,7 +5561,7 @@
           "$ref": "#/$defs/partial.VersionedPolicy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. Needs kernel_api at least 1.45."
         },
-        "short": { "$ref": "#/$defs/TextKey" },
+        "short": { "$ref": "#/$defs/partial.TextKey" },
         "tags": {
           "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
           "items": { "$ref": "#/$defs/Tag" },
@@ -4773,10 +5591,10 @@
         "narration": {
           "additionalProperties": false,
           "properties": {
-            "applied": { "$ref": "#/$defs/TextKey" },
-            "expired": { "$ref": "#/$defs/TextKey" },
-            "refreshed": { "$ref": "#/$defs/TextKey" },
-            "tick": { "$ref": "#/$defs/TextKey" }
+            "applied": { "$ref": "#/$defs/partial.TextKey" },
+            "expired": { "$ref": "#/$defs/partial.TextKey" },
+            "refreshed": { "$ref": "#/$defs/partial.TextKey" },
+            "tick": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
@@ -4793,7 +5611,7 @@
       "additionalProperties": false,
       "description": "Built rooms S1 (kernel_api at least 1.99; construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
-        "description": { "$ref": "#/$defs/TextKey" },
+        "description": { "$ref": "#/$defs/partial.TextKey" },
         "extends": { "$ref": "#/$defs/Key" },
         "locks": {
           "additionalProperties": false,
@@ -4807,21 +5625,21 @@
           "minimum": 1,
           "type": "integer"
         },
-        "ruin": { "$ref": "#/$defs/DefinitionRef" },
+        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
         "tags": {
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
           "type": "array"
         },
-        "title": { "$ref": "#/$defs/TextKey" },
+        "title": { "$ref": "#/$defs/partial.TextKey" },
         "variants": {
           "items": { "$ref": "#/$defs/DescriptionVariant" },
           "maxItems": 16,
           "minItems": 1,
           "type": "array"
         },
-        "weathering": { "$ref": "#/$defs/DefinitionRef" },
+        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -4841,13 +5659,13 @@
           "description": "Toolbox row G9 (speech@1; kernel_api at least 1.48): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle."
         },
         "label": {
-          "$ref": "#/$defs/TextKey",
+          "$ref": "#/$defs/partial.TextKey",
           "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
         },
-        "npc": { "$ref": "#/$defs/DefinitionRef" },
+        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
         "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
-        "prompt": { "$ref": "#/$defs/TextKey" },
-        "quest": { "$ref": "#/$defs/DefinitionRef" },
+        "prompt": { "$ref": "#/$defs/partial.TextKey" },
+        "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
         "riddle": {
           "additionalProperties": false,
           "properties": {
@@ -4865,7 +5683,7 @@
               "type": "array"
             },
             "choice_id": { "$ref": "#/$defs/Key" },
-            "wrong": { "$ref": "#/$defs/TextKey" },
+            "wrong": { "$ref": "#/$defs/partial.TextKey" },
             "wrong_limit": {
               "minimum": 1,
               "type": "integer"
@@ -4874,7 +5692,7 @@
           "type": "object"
         },
         "roles": {
-          "additionalProperties": { "$ref": "#/$defs/DialogueRole" },
+          "additionalProperties": { "$ref": "#/$defs/partial.DialogueRole" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         },
@@ -4893,7 +5711,7 @@
           "type": "array"
         },
         "bandage": { "$ref": "#/$defs/partial.ItemBandage" },
-        "barrier": { "$ref": "#/$defs/DefinitionRef" },
+        "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
         "behaviours": {
           "items": {
             "anyOf": [
@@ -4928,28 +5746,28 @@
           "description": "Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field."
         },
         "cues": { "$ref": "#/$defs/Cues" },
-        "description": { "$ref": "#/$defs/TextKey" },
+        "description": { "$ref": "#/$defs/partial.TextKey" },
         "description_variants": { "$ref": "#/$defs/TextVariants" },
         "edible": { "$ref": "#/$defs/partial.ItemEdible" },
         "equip": {
           "additionalProperties": false,
           "description": "Authored wear and remove words (toolbox row 6a, loka-x6t.20; kernel_api at least 1.116): the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog.",
           "properties": {
-            "remove": { "$ref": "#/$defs/TextKey" },
-            "removed": { "$ref": "#/$defs/TextKey" },
-            "wear": { "$ref": "#/$defs/TextKey" },
-            "worn": { "$ref": "#/$defs/TextKey" }
+            "remove": { "$ref": "#/$defs/partial.TextKey" },
+            "removed": { "$ref": "#/$defs/partial.TextKey" },
+            "wear": { "$ref": "#/$defs/partial.TextKey" },
+            "worn": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "fuel": { "$ref": "#/$defs/FuelSpec" },
+        "fuel": { "$ref": "#/$defs/partial.FuelSpec" },
         "give_allowed": {
           "const": false,
           "description": "API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal."
         },
         "identified": {
-          "$ref": "#/$defs/DefinitionRef",
+          "$ref": "#/$defs/partial.DefinitionRef",
           "description": "Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects, kernel_api at least 1.68)."
         },
         "immune": {
@@ -4971,7 +5789,7 @@
           "minItems": 1,
           "type": "array"
         },
-        "location": { "$ref": "#/$defs/ItemLocation" },
+        "location": { "$ref": "#/$defs/partial.ItemLocation" },
         "locks": {
           "additionalProperties": false,
           "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
@@ -4988,9 +5806,9 @@
           "type": "integer"
         },
         "readable": { "$ref": "#/$defs/partial.ItemReadable" },
-        "room_line": { "$ref": "#/$defs/TextKey" },
+        "room_line": { "$ref": "#/$defs/partial.TextKey" },
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
-        "short": { "$ref": "#/$defs/TextKey" },
+        "short": { "$ref": "#/$defs/partial.TextKey" },
         "short_variants": { "$ref": "#/$defs/TextVariants" },
         "slot": { "$ref": "#/$defs/SlotKey" },
         "tags": {
@@ -5028,8 +5846,8 @@
           "minimum": 1,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
-        "unit_label": { "$ref": "#/$defs/TextKey" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "unit_label": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -5061,7 +5879,7 @@
               "minItems": 1,
               "type": "array"
             },
-            "unknown": { "$ref": "#/$defs/TextKey" }
+            "unknown": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
@@ -5116,17 +5934,13 @@
               {
                 "additionalProperties": false,
                 "properties": {
-                  "goal": { "$ref": "#/$defs/TextKey" },
-                  "room": { "$ref": "#/$defs/DefinitionRef" },
+                  "goal": { "$ref": "#/$defs/partial.TextKey" },
+                  "room": { "$ref": "#/$defs/partial.DefinitionRef" },
                   "walks": {
                     "const": true,
                     "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
                   }
                 },
-                "required": [
-                  "room",
-                  "walks"
-                ],
                 "type": "object"
               },
               {
@@ -5146,12 +5960,6 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "cartridge_id",
-                  "cartridge_version",
-                  "kind",
-                  "key"
-                ],
                 "type": "object"
               },
               {
@@ -5186,7 +5994,7 @@
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
-        "description": { "$ref": "#/$defs/TextKey" },
+        "description": { "$ref": "#/$defs/partial.TextKey" },
         "description_variants": { "$ref": "#/$defs/TextVariants" },
         "disposition": {
           "additionalProperties": false,
@@ -5195,16 +6003,16 @@
             "arrest": {
               "additionalProperties": false,
               "properties": {
-                "narration": { "$ref": "#/$defs/TextKey" },
-                "to": { "$ref": "#/$defs/DefinitionRef" }
+                "narration": { "$ref": "#/$defs/partial.TextKey" },
+                "to": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
               "type": "object"
             },
-            "engage": { "$ref": "#/$defs/TextKey" },
+            "engage": { "$ref": "#/$defs/partial.TextKey" },
             "friendly": { "$ref": "#/$defs/partial.VersionedPolicy" },
             "hostile": { "$ref": "#/$defs/partial.VersionedPolicy" },
             "refuse": {
-              "$ref": "#/$defs/TextKey",
+              "$ref": "#/$defs/partial.TextKey",
               "description": "Book hostile refusal (kernel_api at least 1.104): the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal."
             }
           },
@@ -5277,7 +6085,7 @@
         "perception": {
           "additionalProperties": false,
           "properties": {
-            "discovered": { "$ref": "#/$defs/DefinitionRef" }
+            "discovered": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -5287,8 +6095,8 @@
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
           "type": "object"
         },
-        "room": { "$ref": "#/$defs/DefinitionRef" },
-        "room_line": { "$ref": "#/$defs/TextKey" },
+        "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "room_line": { "$ref": "#/$defs/partial.TextKey" },
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "services": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
@@ -5297,7 +6105,7 @@
           "type": "array"
         },
         "shop": { "$ref": "#/$defs/partial.Shop" },
-        "short": { "$ref": "#/$defs/TextKey" },
+        "short": { "$ref": "#/$defs/partial.TextKey" },
         "short_variants": { "$ref": "#/$defs/TextVariants" },
         "spawn_template": { "const": true },
         "with": { "type": "object" },
@@ -5309,9 +6117,9 @@
       "additionalProperties": false,
       "description": "One NPC, directly held item and public NPC corpse template for a bounded population.",
       "properties": {
-        "corpse": { "$ref": "#/$defs/DefinitionRef" },
+        "corpse": { "$ref": "#/$defs/partial.DefinitionRef" },
         "extends": { "$ref": "#/$defs/Key" },
-        "item": { "$ref": "#/$defs/DefinitionRef" },
+        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
         "loot_role": {
           "enum": [
             "pelt",
@@ -5324,7 +6132,7 @@
             "deer"
           ]
         },
-        "npc": { "$ref": "#/$defs/DefinitionRef" },
+        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -5343,7 +6151,7 @@
           "$ref": "#/$defs/partial.VersionedPolicy",
           "description": "Toolbox row W12 (kernel_api at least 1.86): while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, both kernels)."
         },
-        "bundle": { "$ref": "#/$defs/DefinitionRef" },
+        "bundle": { "$ref": "#/$defs/partial.DefinitionRef" },
         "cap": {
           "maximum": 64,
           "minimum": 1,
@@ -5366,7 +6174,7 @@
           "minimum": 1,
           "type": "integer"
         },
-        "home": { "$ref": "#/$defs/DefinitionRef" },
+        "home": { "$ref": "#/$defs/partial.DefinitionRef" },
         "hunts": {
           "const": true,
           "description": "Toolbox row W13 (kernel_api at least 1.85): a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
@@ -5397,13 +6205,13 @@
               "additionalProperties": false,
               "properties": {
                 "enemy_fled": {
-                  "additionalProperties": { "$ref": "#/$defs/TextKey" },
+                  "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
                   "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
                   "type": "object"
                 },
-                "helper_joined": { "$ref": "#/$defs/TextKey" },
-                "pack_withdrew": { "$ref": "#/$defs/TextKey" },
-                "primary_changed": { "$ref": "#/$defs/TextKey" }
+                "helper_joined": { "$ref": "#/$defs/partial.TextKey" },
+                "pack_withdrew": { "$ref": "#/$defs/partial.TextKey" },
+                "primary_changed": { "$ref": "#/$defs/partial.TextKey" }
               },
               "type": "object"
             }
@@ -5442,15 +6250,15 @@
             "narration": {
               "additionalProperties": false,
               "properties": {
-                "acquired": { "$ref": "#/$defs/TextKey" },
-                "carrying": { "$ref": "#/$defs/TextKey" },
-                "delivered": { "$ref": "#/$defs/TextKey" },
-                "fallback": { "$ref": "#/$defs/TextKey" },
-                "shoo": { "$ref": "#/$defs/TextKey" }
+                "acquired": { "$ref": "#/$defs/partial.TextKey" },
+                "carrying": { "$ref": "#/$defs/partial.TextKey" },
+                "delivered": { "$ref": "#/$defs/partial.TextKey" },
+                "fallback": { "$ref": "#/$defs/partial.TextKey" },
+                "shoo": { "$ref": "#/$defs/partial.TextKey" }
               },
               "type": "object"
             },
-            "nest": { "$ref": "#/$defs/DefinitionRef" }
+            "nest": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -5462,7 +6270,7 @@
               "type": "integer"
             },
             "narration": {
-              "additionalProperties": { "$ref": "#/$defs/TextKey" },
+              "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
               "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
               "type": "object"
             }
@@ -5502,18 +6310,18 @@
               "type": "integer"
             },
             "at": { "$ref": "#/$defs/LogicalTime" },
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
             "outcome": { "$ref": "#/$defs/Key" },
             "trust_amount": { "type": "integer" },
-            "trust_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "trust_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
         "exchange": {
           "additionalProperties": false,
           "properties": {
-            "contribution": { "$ref": "#/$defs/DefinitionRef" },
-            "faction": { "$ref": "#/$defs/DefinitionRef" },
+            "contribution": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "faction": { "$ref": "#/$defs/partial.DefinitionRef" },
             "incoming": {
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
@@ -5525,7 +6333,7 @@
               "minimum": 1,
               "type": "integer"
             },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
             "outgoing": {
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
@@ -5552,7 +6360,7 @@
               },
               "type": "object"
             },
-            "faction": { "$ref": "#/$defs/DefinitionRef" },
+            "faction": { "$ref": "#/$defs/partial.DefinitionRef" },
             "faction_delta": {
               "maximum": -1,
               "minimum": -100,
@@ -5564,15 +6372,15 @@
               "minItems": 2,
               "type": "array"
             },
-            "hound_population": { "$ref": "#/$defs/DefinitionRef" },
+            "hound_population": { "$ref": "#/$defs/partial.DefinitionRef" },
             "narration": {
               "additionalProperties": false,
               "properties": {
-                "completed": { "$ref": "#/$defs/TextKey" },
-                "failed": { "$ref": "#/$defs/TextKey" },
-                "restart": { "$ref": "#/$defs/TextKey" },
-                "shelter": { "$ref": "#/$defs/TextKey" },
-                "start": { "$ref": "#/$defs/TextKey" }
+                "completed": { "$ref": "#/$defs/partial.TextKey" },
+                "failed": { "$ref": "#/$defs/partial.TextKey" },
+                "restart": { "$ref": "#/$defs/partial.TextKey" },
+                "shelter": { "$ref": "#/$defs/partial.TextKey" },
+                "start": { "$ref": "#/$defs/partial.TextKey" }
               },
               "type": "object"
             },
@@ -5596,20 +6404,20 @@
               "type": "array"
             },
             "shelter_detail": { "$ref": "#/$defs/Key" },
-            "shelter_room": { "$ref": "#/$defs/DefinitionRef" },
+            "shelter_room": { "$ref": "#/$defs/partial.DefinitionRef" },
             "start_detail": { "$ref": "#/$defs/Key" },
-            "start_room": { "$ref": "#/$defs/DefinitionRef" },
-            "survived_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "start_room": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "survived_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
         "extends": { "$ref": "#/$defs/Key" },
         "journal": { "$ref": "#/$defs/partial.QuestJournal" },
-        "objective": { "$ref": "#/$defs/QuestObjective" },
+        "objective": { "$ref": "#/$defs/partial.QuestObjective" },
         "offer": {
           "additionalProperties": false,
           "properties": {
-            "label": { "$ref": "#/$defs/TextKey" },
+            "label": { "$ref": "#/$defs/partial.TextKey" },
             "policy": { "$ref": "#/$defs/partial.VersionedPolicy" }
           },
           "type": "object"
@@ -5628,8 +6436,8 @@
               "minimum": 0,
               "type": "integer"
             },
-            "narration": { "$ref": "#/$defs/TextKey" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "narration": { "$ref": "#/$defs/partial.TextKey" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
             "required": {
               "maximum": 64,
               "minimum": 1,
@@ -5641,12 +6449,12 @@
               "minItems": 2,
               "type": "array"
             },
-            "trust_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "trust_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
         "repeatable": { "const": true },
-        "title": { "$ref": "#/$defs/TextKey" },
+        "title": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -5969,22 +6777,14 @@
                 "event": { "const": "signal" },
                 "signal": { "$ref": "#/$defs/Key" }
               },
-              "required": [
-                "event",
-                "signal"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "fact_changed" },
-                "fact": { "$ref": "#/$defs/DefinitionRef" }
+                "fact": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event",
-                "fact"
-              ],
               "type": "object"
             },
             {
@@ -5992,14 +6792,11 @@
               "properties": {
                 "event": { "const": "entity_entered_room" },
                 "npc": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "The entrant is this NPC's authored instance (toolbox row W3). Needs kernel_api at least 1.47."
                 },
-                "room": { "$ref": "#/$defs/DefinitionRef" }
+                "room": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6009,14 +6806,11 @@
                 "event": { "const": "spoken" },
                 "loudness": { "$ref": "#/$defs/Loudness" },
                 "npc": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "The hearer is this NPC's authored instance."
                 },
                 "word": { "$ref": "#/$defs/SpokenKeyword" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6026,14 +6820,11 @@
                 "answered": { "type": "boolean" },
                 "event": { "const": "asked" },
                 "npc": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "The asked NPC is this NPC's authored instance."
                 },
-                "topic": { "$ref": "#/$defs/DefinitionRef" }
+                "topic": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6041,78 +6832,58 @@
               "properties": {
                 "event": { "const": "quest_resolved" },
                 "outcome": { "$ref": "#/$defs/Key" },
-                "quest": { "$ref": "#/$defs/DefinitionRef" }
+                "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event",
-                "quest",
-                "outcome"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "rested" },
-                "room": { "$ref": "#/$defs/DefinitionRef" }
+                "room": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "item_acquired" },
-                "item": { "$ref": "#/$defs/DefinitionRef" },
+                "item": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "item_dropped" },
-                "item": { "$ref": "#/$defs/DefinitionRef" },
-                "room": { "$ref": "#/$defs/DefinitionRef" },
+                "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "room": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "shooed" },
-                "item": { "$ref": "#/$defs/DefinitionRef" },
-                "room": { "$ref": "#/$defs/DefinitionRef" }
+                "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "room": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "quest_activated" },
-                "quest": { "$ref": "#/$defs/DefinitionRef" }
+                "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6120,9 +6891,6 @@
               "properties": {
                 "event": { "const": "choice_opened" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6131,9 +6899,6 @@
                 "choice": { "$ref": "#/$defs/Key" },
                 "event": { "const": "choice_resolved" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6141,11 +6906,8 @@
               "properties": {
                 "event": { "const": "story_point_reached" },
                 "outcome": { "$ref": "#/$defs/Key" },
-                "story_point": { "$ref": "#/$defs/DefinitionRef" }
+                "story_point": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6154,9 +6916,6 @@
                 "custom": { "$ref": "#/$defs/Key" },
                 "event": { "const": "custom_event" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6165,13 +6924,10 @@
                 "action": { "$ref": "#/$defs/Key" },
                 "event": { "const": "action_completed" },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6180,13 +6936,10 @@
                 "check": { "$ref": "#/$defs/Key" },
                 "event": { "const": "check_passed" },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6195,108 +6948,84 @@
                 "check": { "$ref": "#/$defs/Key" },
                 "event": { "const": "check_failed" },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
-                "barrier": { "$ref": "#/$defs/DefinitionRef" },
+                "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "event": { "const": "barrier_changed" },
                 "to": { "$ref": "#/$defs/BarrierState" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "scene_ended" },
-                "scene": { "$ref": "#/$defs/DefinitionRef" }
+                "scene": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "entity_died" },
-                "room": { "$ref": "#/$defs/DefinitionRef" },
-                "victim": { "$ref": "#/$defs/DefinitionRef" },
+                "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "victim": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "attacker": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches. Needs kernel_api at least 1.58."
                 },
                 "event": { "const": "attack_result" },
                 "hit": { "type": "boolean" },
                 "target": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches. Needs kernel_api at least 1.87."
                 },
                 "witness": {
-                  "$ref": "#/$defs/DefinitionRef",
+                  "$ref": "#/$defs/partial.DefinitionRef",
                   "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "filled" },
-                "kind": { "$ref": "#/$defs/DefinitionRef" }
+                "kind": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "poured" },
-                "kind": { "$ref": "#/$defs/DefinitionRef" }
+                "kind": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "drank" },
-                "kind": { "$ref": "#/$defs/DefinitionRef" }
+                "kind": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6305,20 +7034,14 @@
               "properties": {
                 "event": { "const": "clock_hour" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "status_ticked" },
-                "status": { "$ref": "#/$defs/DefinitionRef" }
+                "status": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6326,22 +7049,16 @@
               "description": "Toolbox row G3 reader 2 (kernel_api at least 1.53).",
               "properties": {
                 "event": { "const": "status_applied" },
-                "status": { "$ref": "#/$defs/DefinitionRef" }
+                "status": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "event": { "const": "status_expired" },
-                "status": { "$ref": "#/$defs/DefinitionRef" }
+                "status": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             },
             {
@@ -6349,11 +7066,8 @@
               "properties": {
                 "event": { "const": "quest_failed" },
                 "outcome": { "$ref": "#/$defs/Key" },
-                "quest": { "$ref": "#/$defs/DefinitionRef" }
+                "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
-              "required": [
-                "event"
-              ],
               "type": "object"
             }
           ]
@@ -6387,14 +7101,14 @@
           "type": "integer"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "from": { "$ref": "#/$defs/ItemLocation" },
+        "from": { "$ref": "#/$defs/partial.ItemLocation" },
         "items": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
-        "to": { "$ref": "#/$defs/ItemLocation" },
+        "to": { "$ref": "#/$defs/partial.ItemLocation" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -6414,8 +7128,8 @@
           "const": true,
           "description": "The room is dark (light@1, kernel_api at least 1.114): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line."
         },
-        "dark_description": { "$ref": "#/$defs/TextKey" },
-        "description": { "$ref": "#/$defs/TextKey" },
+        "dark_description": { "$ref": "#/$defs/partial.TextKey" },
+        "description": { "$ref": "#/$defs/partial.TextKey" },
         "details": {
           "additionalProperties": { "$ref": "#/$defs/partial.InspectableDetail" },
           "maxProperties": 64,
@@ -6480,7 +7194,7 @@
           "type": "array",
           "uniqueItems": true
         },
-        "title": { "$ref": "#/$defs/TextKey" },
+        "title": { "$ref": "#/$defs/partial.TextKey" },
         "variants": {
           "items": { "$ref": "#/$defs/DescriptionVariant" },
           "maxItems": 16,
@@ -6506,12 +7220,12 @@
               "additionalProperties": false,
               "description": "What starts the scene: a story point reached, a quest outcome, or an action recipe's success; an action start names the recipe's room and detail.",
               "properties": {
-                "action": { "$ref": "#/$defs/DefinitionRef" },
+                "action": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "detail": { "$ref": "#/$defs/Key" },
                 "outcome": { "$ref": "#/$defs/Key" },
-                "quest": { "$ref": "#/$defs/DefinitionRef" },
-                "room": { "$ref": "#/$defs/DefinitionRef" },
-                "story_point": { "$ref": "#/$defs/DefinitionRef" }
+                "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "story_point": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
               "type": "object"
             },
@@ -6536,7 +7250,7 @@
                   "type": "array"
                 },
                 "outcome": { "$ref": "#/$defs/Key" },
-                "story_point": { "$ref": "#/$defs/DefinitionRef" }
+                "story_point": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
               "type": "object"
             },
@@ -6552,7 +7266,7 @@
           "additionalProperties": false,
           "properties": {
             "control": { "const": "presentation_only" },
-            "description": { "$ref": "#/$defs/TextKey" },
+            "description": { "$ref": "#/$defs/partial.TextKey" },
             "extends": { "$ref": "#/$defs/Key" },
             "on": {
               "additionalProperties": false,
@@ -6582,7 +7296,7 @@
                   "type": "array"
                 },
                 "outcome": { "$ref": "#/$defs/Key" },
-                "quest": { "$ref": "#/$defs/DefinitionRef" }
+                "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
               "type": "object"
             },
@@ -6590,7 +7304,7 @@
               "items": { "$ref": "#/$defs/SceneStep" },
               "type": "array"
             },
-            "title": { "$ref": "#/$defs/TextKey" },
+            "title": { "$ref": "#/$defs/partial.TextKey" },
             "with": { "type": "object" }
           },
           "type": "object"
@@ -6603,18 +7317,18 @@
       "description": "Exact original-provider action and conserved quote with one typed immediate benefit.",
       "properties": {
         "action": { "$ref": "#/$defs/Key" },
-        "benefit": { "$ref": "#/$defs/ServiceBenefit" },
-        "currency": { "$ref": "#/$defs/DefinitionRef" },
+        "benefit": { "$ref": "#/$defs/partial.ServiceBenefit" },
+        "currency": { "$ref": "#/$defs/partial.DefinitionRef" },
         "extends": { "$ref": "#/$defs/Key" },
-        "label": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "narration": { "$ref": "#/$defs/partial.TextKey" },
         "price": {
           "description": "Row kgd.70 (kernel_api at least 1.102): 0 only on an entitlement with escrow, a barter.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
         },
-        "provider": { "$ref": "#/$defs/DefinitionRef" },
+        "provider": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -6638,17 +7352,17 @@
           "const": true,
           "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees; kernel_api at least 1.102): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused."
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
         "prerequisite": {
           "$ref": "#/$defs/partial.VersionedPolicy",
           "description": "Homestead hs-11 (docs/system/mechanics.md Skill trees; kernel_api at least 1.101): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused."
         },
         "profession": {
-          "$ref": "#/$defs/TextKey",
+          "$ref": "#/$defs/partial.TextKey",
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details; kernel_api at least 1.102): the profession heading this skill is listed under on the Character page."
         },
         "qualification": { "$ref": "#/$defs/partial.VersionedPolicy" },
-        "requirement": { "$ref": "#/$defs/TextKey" },
+        "requirement": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -6708,7 +7422,7 @@
             "debuff"
           ]
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
         "modifies": {
           "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it (kernel_api at least 1.46).",
           "items": { "$ref": "#/$defs/ItemAffect" },
@@ -6745,17 +7459,17 @@
         "narration": {
           "additionalProperties": false,
           "properties": {
-            "applied": { "$ref": "#/$defs/TextKey" },
-            "expired": { "$ref": "#/$defs/TextKey" },
+            "applied": { "$ref": "#/$defs/partial.TextKey" },
+            "expired": { "$ref": "#/$defs/partial.TextKey" },
             "observed": {
-              "$ref": "#/$defs/TextKey",
+              "$ref": "#/$defs/partial.TextKey",
               "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent (kernel_api at least 1.110)."
             },
             "skipped": {
-              "$ref": "#/$defs/TextKey",
+              "$ref": "#/$defs/partial.TextKey",
               "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's label (kernel_api at least 1.115)."
             },
-            "tick": { "$ref": "#/$defs/TextKey" }
+            "tick": { "$ref": "#/$defs/partial.TextKey" }
           },
           "type": "object"
         },
@@ -6788,8 +7502,8 @@
           "additionalProperties": false,
           "description": "Toolbox row 16 (kernel_api at least 1.93), only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attributes@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/DefinitionRef" },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
@@ -6797,7 +7511,7 @@
           "$ref": "#/$defs/Resistances",
           "description": "Status reader 5 (kernel_api at least 1.54): while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick."
         },
-        "resource": { "$ref": "#/$defs/DefinitionRef" },
+        "resource": { "$ref": "#/$defs/partial.DefinitionRef" },
         "tick_every": {
           "maximum": 2147483647,
           "minimum": 1,
@@ -6817,8 +7531,8 @@
             "additionalProperties": false,
             "properties": {
               "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/DefinitionRef" },
-              "scene": { "$ref": "#/$defs/DefinitionRef" }
+              "dialogue": { "$ref": "#/$defs/partial.DefinitionRef" },
+              "scene": { "$ref": "#/$defs/partial.DefinitionRef" }
             },
             "type": "object"
           },
@@ -6834,8 +7548,8 @@
       "description": "A declared localized topic mapped to its player Boolean knowledge fact.",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
-        "fact": { "$ref": "#/$defs/DefinitionRef" },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -6845,8 +7559,8 @@
       "description": "Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.",
       "properties": {
         "action": { "$ref": "#/$defs/Key" },
-        "currency": { "$ref": "#/$defs/DefinitionRef" },
-        "destination": { "$ref": "#/$defs/DefinitionRef" },
+        "currency": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "destination": { "$ref": "#/$defs/partial.DefinitionRef" },
         "detail": { "$ref": "#/$defs/Key" },
         "extends": { "$ref": "#/$defs/Key" },
         "fare": {
@@ -6854,16 +7568,16 @@
           "minimum": 0,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "recipient": { "$ref": "#/$defs/DefinitionRef" },
+        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "recipient": { "$ref": "#/$defs/partial.DefinitionRef" },
         "recovery_rooms": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 64,
           "type": "array"
         },
-        "reverse": { "$ref": "#/$defs/DefinitionRef" },
-        "room": { "$ref": "#/$defs/DefinitionRef" },
+        "reverse": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "room": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -6877,7 +7591,7 @@
           "const": 1,
           "type": "integer"
         },
-        "root": { "$ref": "#/$defs/Policy" },
+        "root": { "$ref": "#/$defs/partial.Policy" },
         "with": { "type": "object" }
       },
       "type": "object"

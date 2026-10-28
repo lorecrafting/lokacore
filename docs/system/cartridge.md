@@ -395,6 +395,8 @@ of the [Source layout](#source-layout) table. `text` and `facts` stay in their r
   bundle is refused (undecodable, not an object, or with an unknown or non-object member), every
   `UNRESOLVED_REFERENCE` is held back, since its definitions are missing; the other diagnostics
   stand.
+- An `actions/` file refused at load or by its `extends` holds back every other file's
+  `UNRESOLVED_REFERENCE` the same way until it is fixed (its kind is unknown); its own stand.
 
 | Case | Code | Path | data |
 |---|---|---|---|
@@ -611,7 +613,8 @@ object), an `extends` child (no inherited member required), `with`, `{"prose": .
 text key goes (root files too), the signal step and trigger, `zone` and `zones`, and
 `behaviours`. They are a writing aid, not a gate: nothing reads them, the compiler remains the
 judge, and they do not check references, bundle-member keys against file stems, or the
-`resources` and `attributes` entries beyond being objects.
+`resources` and `attributes` entries beyond being objects, or a behaviour's rule bodies beyond
+being objects (they hold parameter markers).
 
 ## Artifact and loader
 
