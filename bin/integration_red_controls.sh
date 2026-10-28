@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run the PM and agent scripts (sync_pr, br_create, after_merge, mutate, session_status, pm_merge, prepush,
 # check_impact_fixtures, the agent_load_gate/bash_guard/send_guard hooks, pre-commit, preview_update,
-# polish_session, regen_hash_fixture, test_files, wait_ci, ci_fail, new_batch, push_slice) in throwaway repos
+# polish_session, regen_hash_fixture, test_files, wait_ci, merge_pr, beads_checkpoint, ci_fail, new_batch, push_slice) in throwaway repos
 # with stubs; each case names the break it catches.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
@@ -196,8 +196,9 @@ printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
-# issue is newer than the last merge, or stays silent when none is; closed issues counted as open.
-printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
+# issue is newer than the last merge, or stays silent when none is; closed issues counted as open;
+# the ready/blocked counts line misreads br's JSON.
+printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; "ready --json") echo "[{},{}]" ;; "blocked --json") echo "{\\"total\\":3}" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
 printf '#!/bin/sh\nexit 1\n' > "$tmp/stub/gh"; chmod +x "$tmp/stub/br" "$tmp/stub/gh"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/session_status.sh" bin/
 echo a > a; git add . && git commit -qm base; git checkout -qb x; echo b > a; git commit -qam x; git checkout -q main
@@ -214,6 +215,7 @@ old='{"id":"hk-2","title":"Old closed","status":"closed","created_at":"2026-10-0
 ss fresh-open "[$new,$old]" 'open housekeeping issues: 1' 'without a retro'
 ss stale "[$old]" 'open housekeeping issues: 0' 'hk-2 Old closed'
 ss stale-note "[$old]" 'ended without a retro' 'NEVER'
+grep -q 'ready: 2, blocked: 3' out || bad 'session_status: wrong ready/blocked counts'
 ss none "[]" 'ended without a retro' 'NEVER'
 printf 'x' > hk.json; rc=0; HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && grep -q 'queue unavailable' out || bad 'session_status bad-json: failed or no note'
@@ -592,6 +594,53 @@ tip=$(git -C "$M" rev-parse HEAD)
 printf '#!/bin/sh\necho "$*" >> "$WC_ARGS"\nprintf "ci:completed:success\\nbook-e2e:completed:success\\n"\n' > "$tmp/wc/gh"
 rc=0; WC_ARGS=$tmp/wc/args PATH="$tmp/wc:$PATH" capped sh "$W/bin/wait_ci.sh" feat/x > "$tmp/wc/out" 2>&1 || rc=$?
 [ "$rc" = 0 ] && grep -q -- "--commit $tip" "$tmp/wc/args" || { bad "wait_ci branch: exit $rc, did not poll the origin tip $tip"; cat "$tmp/wc/args" "$tmp/wc/out"; }
+
+# --- merge_pr.sh ---------------------------------------------------------------------------
+# Stub gh (pr view prints "$MP_STATE abc123", pr merge exits $MP_MERGE), stub wait_ci.sh (exits $MP_CI)
+# and after_merge.sh; every call is logged. Break: a red or unread CI head, a non-OPEN PR, a dirty
+# tracked file or a non-main checkout still merges; the merge drops --match-head-commit <head>; a
+# failed merge still runs the bookkeeping, or a good merge skips it or changes its arguments.
+mkdir "$tmp/mp"; L=$tmp/mp/log
+printf '#!/bin/sh\necho "gh $*" >> "$MP_LOG"\ncase $2 in view) echo "$MP_STATE abc123" ;; merge) exit "$MP_MERGE" ;; esac\n' > "$tmp/mp/gh"; chmod +x "$tmp/mp/gh"
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/merge_pr.sh" bin/
+printf '#!/bin/sh\necho "wait_ci $*" >> "$MP_LOG"; exit "$MP_CI"\n' > bin/wait_ci.sh
+printf '#!/bin/sh\necho "after_merge $*" >> "$MP_LOG"\n' > bin/after_merge.sh
+echo a > a; git add . && git commit -qm base
+mp() { # <case> <state> <ci> <merge> <want-rc 0|1> <log-must-match or -> <log-must-not-match>
+  : > "$L"; rc=0; MP_LOG=$L MP_STATE=$2 MP_CI=$3 MP_MERGE=$4 GH=$tmp/mp/gh capped sh bin/merge_pr.sh 7 loka-x 'ROADMAP: s' > "$tmp/mp/out" 2>&1 || rc=$?
+  [ "$rc" = "$5" ] && { [ "$6" = - ] || grep -q -- "$6" "$L"; } && ! grep -q -- "$7" "$L" || { bad "merge_pr $1: exit $rc"; sed 's/^/  /' "$L" "$tmp/mp/out"; }
+}
+mp ci-red OPEN 1 0 1 'wait_ci abc123' 'pr merge'
+mp merged MERGED 0 0 1 'pr view' 'wait_ci'
+mp merge-fails OPEN 0 1 1 'pr merge 7 --merge --match-head-commit abc123' 'after_merge'
+mp ok OPEN 0 0 0 'after_merge 7 loka-x ROADMAP: s' 'NEVER'
+grep -q 'gh pr merge 7 --merge --match-head-commit abc123' "$L" || bad 'merge_pr ok: merge not pinned to the head'
+echo b > a; mp dirty OPEN 0 0 1 - 'pr '; git checkout -q a
+git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
+
+# --- beads_checkpoint.sh -------------------------------------------------------------------
+# A main clone of a bare origin; stub br's flush writes $BC_ROW as the export. Break: a machine path,
+# a non-main checkout, another dirty tracked file or a dirty export that main also changed is still
+# committed or pushed; a rejected push exits 0; the happy path does not reach origin.
+printf '#!/bin/sh\n[ "$*" = "sync --flush-only" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
+O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
+mkdir bin docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; echo h > docs/HANDOFF.md
+echo '{"id":"a","title":"one"}' > .beads/issues.jsonl; git add . && git commit -qm base && git push -q origin main
+bc() { # <case> <row> <want-rc> <origin-must-hold or ->
+  rc=0; BC_ROW=$2 PATH="$tmp/mp:$PATH" capped sh bin/beads_checkpoint.sh > "$tmp/mp/out" 2>&1 || rc=$?
+  [ "$rc" = "$3" ] && { [ "$4" = - ] || git --git-dir="$O" show main:.beads/issues.jsonl | grep -q -- "$4"; } || { bad "beads_checkpoint $1: exit $rc"; sed 's/^/  /' "$tmp/mp/out"; }
+  git --git-dir="$O" show main:.beads/issues.jsonl | grep -q -e /Users/ -e '"bad"' && bad "beads_checkpoint $1: a refused export reached origin"
+  git checkout -q -- .beads/issues.jsonl
+}
+bc ok '{"id":"a","title":"two"}' 0 '"two"'
+bc machine-path '{"id":"a","title":"/Users/x/y"}' 1 -
+echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git reset -q; rm docs/x
+git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
+git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
+echo '{"id":"c","title":"bad"}' >> .beads/issues.jsonl; bc main-changed '{"id":"a","title":"bad"}' 1 -
+printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
+bc push-rejected '{"id":"a","title":"three"}' 1 -
+grep -q 'br sync --merge' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'
 
 # --- ci_fail.sh --------------------------------------------------------------------------------
 # Stub gh lists one failed run and serves a log with one failing line among noise. Break: the failing

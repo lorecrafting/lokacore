@@ -5,8 +5,9 @@ cd "$(dirname "$0")/.." || exit 0
 if command -v br >/dev/null 2>&1; then
   echo "## Beads ($(br where 2>/dev/null | head -1 | sed "s|$HOME|~|"))"
   br list --status in_progress 2>/dev/null
-  br ready 2>/dev/null | head -15
-  br blocked 2>/dev/null | head -15
+  r=$(br ready --json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)))' 2>/dev/null)
+  b=$(br blocked --json 2>/dev/null | python3 -c 'import json,sys;print(json.load(sys.stdin)["total"])' 2>/dev/null)
+  echo "ready: ${r:-?}, blocked: ${b:-?} (lists: br ready, br blocked)"
 else
   echo "br not installed: see docs/BEADS.md"
 fi
