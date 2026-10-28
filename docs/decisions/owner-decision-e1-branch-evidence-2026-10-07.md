@@ -15,7 +15,7 @@ Owner answer (paraphrased):
 > reviewed content disposition (for example an unreachable or always-false guard) in a defined
 > form, and the count stays honest.
 
-Accordingly, [E1 policy branch evidence](../system/architecture.md#e1-policy-branch-evidence)
+Accordingly, [E1 policy branch evidence](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/architecture.md#e1-policy-branch-evidence)
 defines the rule once by polarity (the number of `not` ancestors) and the four witness rules
 link to it. A PM proposal to credit a negative-polarity node from a recorded refusal in which
 it evaluated true was not adopted: the runtime refuses with a bare reason code and records no

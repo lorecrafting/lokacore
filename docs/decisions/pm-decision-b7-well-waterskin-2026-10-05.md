@@ -2,7 +2,7 @@
 
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [B7's selected mechanics](../system/mechanics.md#b7-well-and-waterskin-selected-contract)
-and [cartridge tuning](../system/cartridge.md#b7-water-and-vessels) for the
+and [cartridge tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b7-water-and-vessels) for the
 [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md).
 This is planned behavior, not implementation, review approval or release proof.
 
@@ -15,8 +15,8 @@ Reachable actor-owned nested vessels are usable; ground/corpse vessels require
 ordinary acquisition first. Empty skins persist. There is no passive need or
 resource benefit in B7; B8 must adopt its later benefit in its own slice.
 
-The [typed operation](../system/protocol.md#b7-liquid-composition),
-[receipt-backed recovery](../system/save.md#b7-liquid-recovery) and
+The [typed operation](../system/protocol.md#liquid-composition),
+[receipt-backed recovery](../system/save.md#liquid-recovery) and
 [Book boundary](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b7-water-details) are part of this adoption.
 One per-item row and exact replacement operation are necessary because item
 custody and current resources cannot express vessel kind/capacity; they do not

@@ -61,9 +61,9 @@ From the rest of M12 on, the batch order follows the [priority plan of 2026-10-1
 
 **Rank** is the batch, and table order within a batch is the order to build
 ([re-rank decision](decisions/owner-decision-toolbox-rerank-2026-10-09.md), from the
-[roadmap review](reviews/2026-10-09-mechanics-roadmap-review.md); [re-rank 2](decisions/pm-decision-toolbox-rerank-2-2026-10-09.md),
-from [review 2](reviews/2026-10-09-mechanics-review-2.md); re-rank 3 from
-[review 3](reviews/2026-10-10-mechanics-review-3.md), the player's seat): shared vocabulary and the two
+[roadmap review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-09-mechanics-roadmap-review.md); [re-rank 2](decisions/pm-decision-toolbox-rerank-2-2026-10-09.md),
+from [review 2](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-09-mechanics-review-2.md); re-rank 3 from
+[review 3](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-mechanics-review-3.md), the player's seat): shared vocabulary and the two
 foundation primitives before their consumers (property tags, damage kinds and reactions on every
 event in M3; statuses on NPCs and things in M5; entity and pair facts in M6), cheap atmosphere rows
 early (derived sky, narration variety, entity variants), then what a dungeon-crawl sampler needs, then
@@ -246,7 +246,7 @@ closes with cartridge content and no engine change.
 
 ### Traps
 
-From [review 2](reviews/2026-10-09-mechanics-review-2.md#4-traps-immersive-on-paper-costly-in-this-engine);
+From [review 2](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-09-mechanics-review-2.md#4-traps-immersive-on-paper-costly-in-this-engine);
 a brief or review that meets one names it:
 
 1. Derive environment (weather, season, tide, growth) from the clock; never store or tick it.

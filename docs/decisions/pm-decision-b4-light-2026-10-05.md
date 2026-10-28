@@ -2,7 +2,7 @@
 
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects the [B4 light contract](../system/mechanics.md#b4-light-and-darkness-selected-contract)
-and [cartridge tuning](../system/cartridge.md#b4-well-and-fuel). This replaces the
+and [cartridge tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b4-well-and-fuel). This replaces the
 candidate policies in the [B4 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b4-light-fuel-recovery-brief-2026-10-05.md).
 It is planned behavior, not source proof or a publication verdict.
 
@@ -15,8 +15,8 @@ Implementation must prove that route before delivery. No required search/bell/ce
 route is darkened. Finite exhausted supply is honest
 optional loss of light, never required waiting or a chapter/recovery softlock.
 
-The composition primitive and save boundary are in [protocol](../system/protocol.md#b4-fuel-composition)
-and [save](../system/save.md#b4-fuel-and-dark-recovery); Book behavior is in
+The composition primitive and save boundary are in [protocol](../system/protocol.md#fuel-composition)
+and [save](../system/save.md#fuel-and-dark-recovery); Book behavior is in
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b4-light-details). A single typed fuel history row earns
 its existence because current resources cannot condition elapsed burn on lit
 state. Generic liquids, new dangers and broad perception ancestry remain deferred.

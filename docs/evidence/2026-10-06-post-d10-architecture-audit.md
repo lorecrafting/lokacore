@@ -83,7 +83,7 @@ Minimal red control: route an authority/recovery source change away from its
 required lane and make the classifier test fail; reuse the existing SQLite
 forgery controls within that lane. Preserve the headless engine simulator,
 [native pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md)
-and [UI deferrals](../ROADMAP.md#c1-carry-checkpoints).
+and [UI deferrals](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/ROADMAP.md#c1-carry-checkpoints).
 
 ### ARCH-D10-05 — coordinated compiler/loader admission lists (fourth)
 

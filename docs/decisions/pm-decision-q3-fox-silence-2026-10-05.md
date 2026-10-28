@@ -1,7 +1,7 @@
 # PM adoption: Q3 fox through a silent bell
 
 2026-10-05. Under the owner's Chapter 1 mechanics and in-game copy delegation,
-adopt the terminal-only fox choice in the [Q3-F active contract](../system/cartridge.md#q3-f-fox-and-silent-bell).
+adopt the terminal-only fox choice in the [Q3-F active contract](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#q3-f-fox-and-silent-bell).
 After either completed Q2 return, an actor with active Q3 may leave the Belfry
 bell silent. The exact-detail recipe assigns fox allegiance without ringing.
 One fact-change reaction resolves Q3/fox, and the evidenced quest resolution

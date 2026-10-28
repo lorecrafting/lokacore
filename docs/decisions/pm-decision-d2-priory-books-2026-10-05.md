@@ -2,7 +2,7 @@
 
 Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [D2 mechanics](../system/mechanics.md#d2-held-books-and-public-priory-selected-contract),
-[authored route/books/schedules](../system/cartridge.md#d2-public-priory-and-book-authoring)
+[authored route/books/schedules](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d2-public-priory-and-book-authoring)
 and the [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d2-priory-books-brief-2026-10-05.md).
 This record is planning, not implementation, approval of source or gameplay proof.
 
@@ -23,8 +23,8 @@ nested item identity, explicit Read and local Back with confirmed receipt histor
 Ash/Hale retain separate identities and existing schedule machinery. Owner content
 decision 5's 19:00 Cloister ambiguity governs; Ash's 20:00–06:00 plus 06:00–12:00
 Scriptorium periods leave no unspecified morning. No novice attendance gates books.
-[Protocol](../system/protocol.md#d2-held-readable-composition) and
-[save](../system/save.md#d2-book-knowledge-and-read-recovery) retain sole writers,
+[Protocol](../system/protocol.md#held-readable-composition) and
+[save](../system/save.md#book-knowledge-and-read-recovery) retain sole writers,
 bounded shared queries, historical grant validation and actual custody recovery.
 
 Inspected local base is `4ec52632d510e45214e43a1fe5beca0ec5addbad`: A1 installed,

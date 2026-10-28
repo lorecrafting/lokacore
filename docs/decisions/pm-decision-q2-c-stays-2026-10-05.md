@@ -7,7 +7,7 @@ through Elspeth's stays terminal; C-rescue later completes bound Wren escort thr
 Elspeth's rescued terminal, including death separation and recovery. Never expose a
 selectable branch that cannot be finished. C-stays adds no escort option or follower.
 
-The governing [chapter contract](../system/cartridge.md#q2-c-stays-return) defines
+The governing [chapter contract](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#q2-c-stays-return) defines
 branch, original-item custody, terminal truth and journal behavior. Generic mechanics
 compose existing dialogue receive/hand_over, containment, facts, quests and receipts.
 API1.10 narrowly adds nonterminal receive and authored item Give restriction; no new

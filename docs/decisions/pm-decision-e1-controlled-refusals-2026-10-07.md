@@ -18,4 +18,4 @@ whose evidence is a recorder-run controlled refusal case:
 
 A guard that can never fire still needs an evidenced disposition (for example an unreachable or
 always-false guard), as the owner decided. The rule text is
-[E1 policy branch evidence](../system/architecture.md#e1-policy-branch-evidence).
+[E1 policy branch evidence](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/architecture.md#e1-policy-branch-evidence).
