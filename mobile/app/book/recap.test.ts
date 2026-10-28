@@ -111,9 +111,14 @@ test('an absence of exactly the threshold shows the recap; one second less does 
   assert.equal(count(away(30 * 60 * 1000 - 1000).text(), LABEL.awayRecap), 0);
 });
 
-// Break: a second absence before any press replaces the first one's recap, losing its lines.
+// Breaks: a second absence before any press replaces the first one's recap, losing its lines; or
+// joins it silently, so the live region does not read the heading again.
 test('a second long absence before a press adds its lines to the same recap', () => {
-  const b = wait(away(HOURS3), HOURS3); // to 19:00 on day 12: thirteen evenings, twelve mornings
+  const said = (b: Book) => b.draw().find((n) => n.type?.name === 'Heard').props.said;
+  const b = away(HOURS3),
+    first = said(b);
+  wait(b, HOURS3); // to 19:00 on day 12: thirteen evenings, twelve mornings
+  assert.deepEqual(said(b), { ...first, key: first.key + 1 });
   b.tap(`${LABEL.awayRecap}, show`);
   const shown = b.text();
   assert.equal(count(shown, LABEL.awayRecap), 1);

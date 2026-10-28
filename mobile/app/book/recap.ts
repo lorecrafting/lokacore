@@ -38,8 +38,10 @@ export function settle(s: Logs) {
   ) {
     const last = s.log.at(-1);
     // A second absence before any other line adds to the same entry.
-    if (typeof last === 'object' && 'recap' in last) last.recap.push(...away.log);
-    else s.log.push({ recap: [...away.log], text: LABEL.awayRecap });
+    if (typeof last === 'object' && 'recap' in last) {
+      last.recap.push(...away.log);
+      (s.merged ??= []).push(last.text); // no new entry, so the live region reads the heading again
+    } else s.log.push({ recap: [...away.log], text: LABEL.awayRecap });
   } else s.log.push(...away.log);
 }
 
