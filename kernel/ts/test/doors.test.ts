@@ -5,17 +5,16 @@
 // yard, then east). One wait call is one decision; its events are collected below.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
 import { fragment } from './fragment.ts';
+import { reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-doors-'));
 let artifact: Uint8Array;
@@ -37,18 +36,8 @@ const ref = (kind: string, key: string) => ({
   kind,
   key,
 });
-function load(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const fresh = (change?: (c: any) => void) => {
-  const r = load(change);
+  const r = reload(source, change);
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(r.cartridge as Cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1]);
 };
@@ -204,7 +193,7 @@ test('g. walks on a case or a plan below kernel_api 1.81 does not load', () => {
   const { id, version } = expedition.source.manifest;
   const at180 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.80');
   for (const r of [
-    load(at180),
+    reload(source, at180),
     expedition.load((c) => {
       at180(c);
       c.populations[`${id}@${version}:population/hounds`].walks = true;

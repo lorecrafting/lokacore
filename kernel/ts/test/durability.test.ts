@@ -4,18 +4,17 @@
 // player's 5 pennies and restores up to 2 edge. Expected numbers are hand-computed.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-durability-sampler-'));
 let artifact: Uint8Array;
@@ -33,18 +32,9 @@ const S = 'durability_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'durability_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function sampler(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return r.cartridge as Cartridge;
 }
@@ -239,7 +229,7 @@ test('the forge sets a fine or crude band by strength, once', () => {
 // weapon uses, or a repair service without its refusal text.
 test('the loader keeps durability to API 1.69, a bounded entity fact and its repair texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const MEND = `.cartridge.services["${S}:service/mend"]`;

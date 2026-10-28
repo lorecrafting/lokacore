@@ -4,20 +4,19 @@
 // sampler's literals (86400, 3600, 5000).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { moveItem } from '../src/mechanics/containment/react.ts';
 import { uses } from '../src/content/cartridge_reactions.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
 let artifact: Uint8Array;
@@ -38,19 +37,9 @@ const ref = (kind: string, key: string) => ({
   kind,
   key,
 });
-/** The sampler artifact with `edit` applied to its cartridge, rehashed and loaded. */
-function load(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 const content = (edit?: (c: any) => void) => {
-  const loaded = load(edit);
+  const loaded = reload(base, edit);
   assert.ok(loaded.ok, JSON.stringify(loaded));
   return loaded.cartridge as Cartridge;
 };
@@ -234,12 +223,12 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
 // Breaks: the loader's item.move floor is missing or low, or its room is never resolved.
 test('the loader refuses item.move below 1.77 or with an unknown room', () => {
   const spoil = `${S}reaction/spoil`;
-  const old = load((c) => (c.manifest.requires.kernel_api.at_least = '1.76'));
+  const old = reload(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.76'));
   assert.deepEqual(old.ok ? undefined : [old.diagnostic.code, old.diagnostic.path], [
     'KERNEL_API_RANGE_INVALID',
     '.cartridge.manifest.requires.kernel_api.at_least',
   ]);
-  const nowhere = load((c) => (c.reactions[spoil].apply[0].room = ref('room', 'nowhere')));
+  const nowhere = reload(base, (c) => (c.reactions[spoil].apply[0].room = ref('room', 'nowhere')));
   assert.deepEqual(nowhere.ok ? undefined : [nowhere.diagnostic.code, nowhere.diagnostic.path], [
     'UNRESOLVED_REFERENCE',
     `.cartridge.reactions["${spoil}"].apply[0].room`,

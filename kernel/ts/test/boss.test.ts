@@ -4,17 +4,17 @@
 // The player (hp 30) hits for 1.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-boss-sampler-'));
 let artifact: Uint8Array;
@@ -30,18 +30,9 @@ try {
 }
 const P = 'boss_sampler@0.0.1:';
 
-function load(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function world(edit?: (c: any) => void) {
-  const r = load(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(
     r.cartridge as Cartridge,
@@ -184,9 +175,9 @@ test('the loader refuses subject, at_least_percent or target below 1.87', () => 
     if (keep !== 'subject') delete c.reactions[R('summon')].when.root.items[1].subject;
   };
   const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-  assert.ok(load(old('none')).ok);
+  assert.ok(reload(base, old('none')).ok);
   for (const keep of ['subject', 'percent', 'target'] as const) {
-    const r = load(old(keep));
+    const r = reload(base, old(keep));
     assert.deepEqual(r.ok ? keep : [r.diagnostic.code, r.diagnostic.path], api);
   }
 });

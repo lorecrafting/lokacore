@@ -3,7 +3,6 @@
 // and the statuses `movement` declarations per test. The mv pool starts at 100.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,8 +10,8 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import { type Cartridge, type World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { cartridgeOf, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-movement-'));
 let artifact: Uint8Array;
@@ -145,18 +144,7 @@ test('an oversized scaled fare is refused, not thrown', () => {
   assert.equal(code(send(go(hall(c), 'north'), 'south')), 'insufficient_resource');
 });
 
-/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const built = cartridgeOf(artifact);
 
 // Breaks (twin of test/loka/content_status_movement_test.exs): a status movement, a room's air,
 // chasm or water tag, an item's water tag or a barrier's chasm tag loads under API 1.61, or a movement status without per_tick is refused.
@@ -191,16 +179,16 @@ test('loader: movement and terrain tags need API 1.62; movement stands in for pe
   };
   for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water'), item, barrier]) {
     assert.equal(
-      reload((c) => (api('1.62')(c), edit(c))),
+      verdict(built, (c) => (api('1.62')(c), edit(c))),
       'loaded',
     );
     assert.deepEqual(
-      reload((c) => (api('1.61')(c), edit(c))),
+      verdict(built, (c) => (api('1.61')(c), edit(c))),
       floor,
     );
   }
   assert.equal(
-    reload((c) => (api('1.61')(c), tagged('wooden')(c))),
+    verdict(built, (c) => (api('1.61')(c), tagged('wooden')(c))),
     'loaded',
   );
 });

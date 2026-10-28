@@ -3,16 +3,15 @@
 // hand-computed with an independent xoshiro128** uniform(100), not this kernel's sampler.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, stepElapsed } from '../src/index.ts';
+import { newWorld, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-encounter-sampler-'));
 let artifact: Uint8Array;
@@ -30,18 +29,9 @@ const PLAN = 'encounter_sampler@0.0.1:population/bandits';
 const HOUR = 3600;
 const START = 8 * HOUR;
 
-function load(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function world(rng: number[], edit?: (c: any) => void) {
-  const r = load(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(r.cartridge as Cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, rng);
 }
@@ -155,7 +145,7 @@ test('a suppression resume births nothing and draws nothing', () => {
 
 // Break: the loader admits an encounter plan below kernel_api 1.74.
 test('chance needs kernel_api 1.74', () => {
-  const r = load((c) => (c.manifest.requires.kernel_api.at_least = '1.73'));
+  const r = reload(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.73'));
   assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
     'KERNEL_API_RANGE_INVALID',
     '.cartridge.manifest.requires.kernel_api.at_least',

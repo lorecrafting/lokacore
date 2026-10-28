@@ -4,18 +4,17 @@
 // and a sure hit for 1; the player starts with 10 HP and 2 arrows.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ranged-sampler-'));
 let artifact: Uint8Array;
@@ -32,18 +31,9 @@ try {
 const S = 'ranged_sampler@0.0.1';
 const BOW = `${S}:item/bow`;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function sampler(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return r.cartridge as Cartridge;
 }
@@ -152,7 +142,7 @@ test('in a pack round the shot hits the primary and the selected goblin waits', 
 // a ranged weapon without shot_hit or shot_miss, or an unknown ammo pool.
 test('the loader keeps ranged weapons to API 1.67, their narration and a known pool', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const narration = '.cartridge.world.combat.narration';

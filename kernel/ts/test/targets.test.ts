@@ -4,7 +4,6 @@
 // 6b: the yard's guard (world.combat.allies, a sure hit for 1) fights beside the player.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,11 +13,11 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from 
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { positioned } from './combat_fixture.ts';
+import { cartridgeOf, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-targets-sampler-'));
 let artifact: Uint8Array;
@@ -115,23 +114,12 @@ test('only another roster member is a choice, and only when the cartridge opts i
 });
 
 // Breaks: the loader admits target choice under API 1.47 (twin of content_targets_test.exs).
-/** The first load diagnostic of the compiled sampler after `edit`, re-hashed. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 const FLOOR = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
 
 test('the loader refuses target choice below API 1.48', () => {
   assert.deepEqual(
-    reload((c) => {
+    verdict(base, (c) => {
       c.manifest.requires.kernel_api.at_least = '1.47';
       delete c.world.combat.allies;
     }),
@@ -161,7 +149,7 @@ test('the loader keeps allies to API 1.48, authored fighters and their narration
       ['SCHEMA_VIOLATION', '.cartridge.world.combat.narration.ally_miss'],
     ],
   ];
-  for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);
+  for (const [edit, expected] of cases) assert.deepEqual(verdict(base, edit), expected);
 });
 
 // Toolbox row 6c (6a carry). Breaks: the ActionSet counts the roster row, not the members still

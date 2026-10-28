@@ -4,18 +4,17 @@
 // are hand-counted from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-escrow-sampler-'));
 let artifact: Uint8Array;
@@ -33,18 +32,9 @@ const S = 'escrow_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'escrow_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function sampler(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return r.cartridge as Cartridge;
 }
@@ -165,7 +155,7 @@ test('a protected input is refused as Give would refuse it', () => {
 // offer as an input, or a repeated input, or an escrow without its refusal text.
 test('the loader keeps escrow to API 1.79, item inputs, a room custody and its texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = `.cartridge.services["${S}:service/commission"]`;
@@ -321,7 +311,7 @@ test('a new order after a cancel waits for its own job', () => {
 // fact (it would open an order with no ore and no job), or a claim or cancel without its texts.
 test('the loader keeps claim and cancel to API 1.80, a timed commission and its texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = (k: string) => `.cartridge.services["${S}:service/${k}"]`;

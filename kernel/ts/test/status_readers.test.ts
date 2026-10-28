@@ -4,7 +4,6 @@
 // (physical -100) by a spoken "drench". The player always hits for 2, physical.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,7 +12,6 @@ import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { permits } from '../src/mechanics/status/permits.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
@@ -24,6 +22,7 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { cartridgeOf, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -412,25 +411,14 @@ test('a hostile troll does not engage a concealed player unless it sees invisibl
   );
 });
 
-/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 
 // Breaks (twin of test/loka/content_status_readers_test.exs): one reader field (each alone) loads
 // under API 1.53, a blocks or allows entry naming no command (or the authority-internal elapsed)
 // loads, or a reader status without per_tick (the sampler's four) is refused.
 test('loader: reader fields need API 1.54 and name player commands', () => {
   assert.equal(
-    reload(() => {}),
+    verdict(base, () => {}),
     'loaded',
   );
   const keys = ['warded', 'hushed', 'soaked', 'stunned'];
@@ -440,7 +428,7 @@ test('loader: reader fields need API 1.54 and name player commands', () => {
     ['hushed', 'allows', ['look']],
   ] as const)
     assert.deepEqual(
-      reload((c) => {
+      verdict(base, (c) => {
         c.manifest.requires.kernel_api.at_least = '1.53';
         for (const k of keys) {
           const { blocks: _, allows: __, resistances: ___, ...plain } = c.statuses[S(k)];
@@ -456,7 +444,7 @@ test('loader: reader fields need API 1.54 and name player commands', () => {
     ['allows', 'elapsed'],
   ])
     assert.deepEqual(
-      reload((c) => (c.statuses[S('hushed')][field] = ['say', name])),
+      verdict(base, (c) => (c.statuses[S('hushed')][field] = ['say', name])),
       ['UNKNOWN_COMMAND', `.cartridge.statuses["${S('hushed')}"].${field}[1]`],
     );
 });
@@ -466,7 +454,7 @@ test('loader: reader fields need API 1.54 and name player commands', () => {
 // loads. `soaked`: no entry reaction applies it (row 16).
 test('loader: perception and concealment need API 1.61 and stand in for per_tick', () => {
   const at = (api: string, fields: object) =>
-    reload((c) => {
+    verdict(base, (c) => {
       c.manifest.requires.kernel_api.at_least = api;
       const { resistances: _, ...plain } = c.statuses[S('soaked')];
       c.statuses[S('soaked')] = { ...plain, ...fields };
@@ -488,7 +476,7 @@ test('loader: perception and concealment need API 1.61 and stand in for per_tick
 // Breaks (loka-x6t.30): a skipped key missing from the text catalog loads.
 test('loader: a status skipped line must be in the text catalog', () => {
   const skipped = (key: string) =>
-    reload((c) => {
+    verdict(base, (c) => {
       c.manifest.requires.kernel_api.at_least = '1.115';
       c.statuses[S('stunned')].narration.skipped = key;
     });

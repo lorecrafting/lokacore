@@ -1,16 +1,15 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import type { DeltaOp } from '../src/contracts.gen.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fen-sampler-'));
 let artifact: Uint8Array;
@@ -25,18 +24,9 @@ try {
   rmSync(scratch, { recursive: true });
 }
 
-function load(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function world(edit?: (c: any) => void, context = '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f') {
-  const r = load(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(r.cartridge as Cartridge, context as never, [1, 2, 3, 4]);
 }
@@ -220,7 +210,7 @@ test('the loader refuses an old API, an unknown plan, an actor leaf and a high f
     ],
     [(c: any) => (c.populations[DEER].floor = 4), 'SCHEMA_VIOLATION', `${at}.floor`],
   ] as const) {
-    const r = load(edit);
+    const r = reload(base, edit);
     assert.ok(!r.ok && r.diagnostic.code === code && r.diagnostic.path === path, JSON.stringify(r));
   }
 });

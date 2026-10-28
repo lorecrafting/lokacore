@@ -4,18 +4,17 @@
 // Houndbane title on entry; the gate guard engages a wanted, undisguised character.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-identity-sampler-'));
 let artifact: Uint8Array;
@@ -33,23 +32,14 @@ const S = 'identity_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'identity_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const built = cartridgeOf(artifact);
 const diagnostic = (edit: (c: any) => void) => {
-  const r = reload(edit);
+  const r = reload(built, edit);
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 let n = 0;
 function fresh(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(built, edit);
   assert.ok(r.ok, JSON.stringify(r));
   n = 0;
   return newWorld(r.cartridge as Cartridge, '4e5f6a7b-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1]);

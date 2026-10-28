@@ -6,18 +6,17 @@
 // from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { skillSpec, usesSpec } from '../src/content/cartridge_skills.ts';
+import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-property-sampler-'));
 let artifact: Uint8Array;
@@ -35,18 +34,9 @@ const S = 'property_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'property_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function fresh(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   n = 0;
   return newWorld(r.cartridge as Cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e24' as never, [1]);
@@ -213,7 +203,7 @@ test('h2. a purse of 11 deposits 10 and can still withdraw it, ending at 9', () 
 // authored dialogue write on the account, or a bank service without service.no_funds.
 test('g. the loader keeps the bank to API 1.83, a bounded account and one vault', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = (k: string) => `.cartridge.services["${S}:service/${k}"]`;

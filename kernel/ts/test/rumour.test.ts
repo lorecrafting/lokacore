@@ -2,19 +2,18 @@
 // cartridges/rumour_sampler, compiled by the Elixir compiler and loaded by the kernel.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { reactions } from '../src/content/cartridge_reactions.ts';
 import type { Checks } from '../src/content/cartridge_refs.ts';
+import { reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-rumour-'));
 let artifact: Uint8Array;
@@ -36,19 +35,8 @@ const ref = (kind: string, key: string) => ({
   kind,
   key,
 });
-// `change` applied to a copy of the compiled cartridge, then loaded: the cartridge or the diagnostic.
-function load(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const fresh = () => {
-  const r = load();
+  const r = reload(source);
   assert.ok(r.ok, JSON.stringify(r));
   return newWorld(r.cartridge as Cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1]);
 };
@@ -110,7 +98,7 @@ test('one wait over three days equals hour-by-hour play', () => {
 // Breaks: two NPCs firing one reaction in one advance write the innkeeper's row in two writer
 // groups (conflicting_write, loka-j2mo); any entrant tells, and both enter the inn at 17:00.
 test('two NPCs firing one reaction in one wait commit', () => {
-  const r = load((c) => {
+  const r = reload(source, (c) => {
     delete c.reactions[TELLS].on.npc;
     const room = (key: string) => ref('room', key);
     c.npcs[`${C}:npc/innkeeper`].daily_schedule = { 16: room('square'), 17: room('inn') };
@@ -144,7 +132,7 @@ const plain = (c: any) => {
 // content_rumour_test.exs).
 test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
   const verdict = (change: (c: any) => void) => {
-    const r = load(change);
+    const r = reload(source, change);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data];
   };
   assert.deepEqual(

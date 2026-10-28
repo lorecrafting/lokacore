@@ -2,15 +2,14 @@
 // in logical seconds; the loader's twin of the Elixir API floor (1.47).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { gameView, INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-recap-after-'));
 let source: any;
@@ -24,18 +23,8 @@ try {
 } finally {
   rmSync(scratch, { recursive: true });
 }
-function load(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const view = (change?: (c: any) => void) => {
-  const r = load(change);
+  const r = reload(source, change);
   if (!r.ok) throw new Error(JSON.stringify(r.diagnostic));
   return gameView(
     newWorld(
@@ -54,7 +43,7 @@ test('recap_after is the authored minutes in logical seconds, absent unless auth
     view((c) => delete c.manifest.time_policy.recap_after_minutes).recap_after,
     undefined,
   );
-  const r = load((c) => (c.manifest.requires.kernel_api.at_least = '1.46'));
+  const r = reload(source, (c) => (c.manifest.requires.kernel_api.at_least = '1.46'));
   assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
     'KERNEL_API_RANGE_INVALID',
     '.cartridge.manifest.requires.kernel_api.at_least',

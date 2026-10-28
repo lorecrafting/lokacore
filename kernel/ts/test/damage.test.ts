@@ -3,18 +3,17 @@
 // sword (metal, sharp), a silver sword (metal, sharp, silver) or no weapon (mechanics.md damage).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { DEFS } from '../src/contracts.gen.ts';
+import { reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-damage-sampler-'));
 let artifact: Uint8Array;
@@ -30,17 +29,6 @@ try {
 }
 const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
 const WIGHT = 'damage_sampler@0.0.1:npc/wight';
-
-function load(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 
 let n = 0;
 const id = () => `eeeeeeee-8888-4888-8888-${String(++n).padStart(12, '0')}` as never;
@@ -93,7 +81,7 @@ function fight(
 }
 
 const sampler = (change?: (c: any) => void) => {
-  const r = load(change);
+  const r = reload(source, change);
   assert.ok(r.ok, JSON.stringify(r));
   return r.cartridge as Cartridge;
 };
@@ -184,14 +172,14 @@ test('the loader refuses G2 fields below kernel_api 1.44', () => {
     ['weapon attack crit', (c) => (sword(c).crit = { chance: 10, multiplier: 2 })],
   ];
   for (const [name, change] of rows) {
-    const r = load((c) => (bare(c), change(c), old(c)));
+    const r = reload(source, (c) => (bare(c), change(c), old(c)));
     assert.deepEqual(
       r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path],
       ['KERNEL_API_RANGE_INVALID', api],
       name,
     );
   }
-  const none = load((c) => (bare(c), old(c)));
+  const none = reload(source, (c) => (bare(c), old(c)));
   assert.ok(none.ok, 'without G2 fields 1.43 still loads');
 });
 
