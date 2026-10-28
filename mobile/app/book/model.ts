@@ -9,7 +9,7 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { doorSentence, dur, message, reasonOf, refusedSentence, why } from './words.ts';
+import { cap, doorSentence, dur, message, reasonOf, refusedSentence, why } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
@@ -138,7 +138,7 @@ export function group(all: Button[]) {
 export const LINK = /\[([^\]]*)\]\(([^)]*)\)/g;
 export const plain = (s: string) => s.replace(LINK, '$1');
 
-export { why };
+export { cap, why };
 
 // A closed exit's log line: reason tag, then the cartridge's sentence, a shut door's, or the frame.
 export const refused = (
@@ -160,7 +160,6 @@ export const absent = (v: GameView) =>
     : v.choice.speaker_id
       ? 'They are not here to answer. Find them, or close this.'
       : 'No one is here to answer.';
-export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type Pool = NonNullable<GameView['resources']>[number];
 // The status line's banded pools; any other count draws bare in Character (book-ui.md#world-and-status-entry).

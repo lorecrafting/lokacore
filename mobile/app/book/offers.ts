@@ -1,7 +1,7 @@
 // Captured provider offers retain their exact target, quote and action alias.
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { cap } from './model.ts';
+import { cap } from './words.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 

@@ -4,7 +4,7 @@ import { expect, waitFor } from 'storybook/test';
 import { Body } from '../book/Body.tsx';
 import { LABEL } from '../book/labels.ts';
 import { cueLine } from '../book/model.ts';
-import { RoomPage } from '../book/pages.tsx';
+import { RoomPage } from '../book/Body.tsx';
 import { pageStory } from './screen.tsx';
 import RoomFirstView from './views/room-first.json';
 import RoomNpcsItemsView from './views/room-npcs-items.json';
