@@ -1,4 +1,3 @@
-// size: allow 350, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The book's page shell, the room page and their shared controls (the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.

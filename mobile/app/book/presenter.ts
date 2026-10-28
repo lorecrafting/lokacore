@@ -1,3 +1,4 @@
+// size: allow 310, a press's reply is read in one place: its faults, log lines, warned exit and status
 // The book's words and state over a Game (packages/game-view/session.ts): the offered actions as
 // buttons, the log of what each press said, and who came or went. The engine returns structured
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
