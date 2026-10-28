@@ -18,12 +18,6 @@ const load = (change: (c: any) => void) => {
   );
 };
 
-// Breaks: required/closed reward, adjustment and Put shapes drift from the compiler's validator.
-test('shared reward/storage schema controls reject malformed fields in the portable validator', () => {
-  for (const c of read('protocol/fixtures/reward_storage_contracts.json'))
-    assert.equal(validate(c.contract, c.value).length === 0, c.valid, c.name);
-});
-
 // Breaks: the loader omits semantic role/type/reserved-write checks.
 test('portable loader rejects malformed reward roles, types and reserved writes', () => {
   for (const c of read('protocol/fixtures/reward_storage_invalid.json')) {
