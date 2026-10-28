@@ -3,7 +3,7 @@
 Owner (live polish session 2026-10-23, quoted): "okay lets just do the engine work on that then", "ok go ahead".
 Drafted by Fable (contract change: GameView and content format), PM edits. One draft batch branch,
 `toolbox/batch-room-words`; slices run in order on it, each its own commits. Read the
-[brief kit](../brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
+[brief kit](../../guides/brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
 
 Run order: 1 (x6t.105 engine), 3 (6qi engine), 2 (x6t.105 Book), 4 (6qi content), 5 (6qi Book).
 Slices 2 and 5 both edit `mobile/app/book/lines.tsx` and are never in flight together.

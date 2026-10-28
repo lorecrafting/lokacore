@@ -71,7 +71,7 @@ Report at the end of the slice, not at every step.
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
    protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); an M engine row that adds both a new schema field and a sampler also gets two briefs, engine then content (loka-3jhb); a showcase slice holds at most about 2 plan steps or 3 rooms, and the PM merges `main` into the batch before briefing (loka-7m2u); every brief states the
-   handoff threshold up front ([Claude Code specifics](#token-hygiene)) and links the [brief kit](briefs/brief-kit.md) instead of copying it.
+   handoff threshold up front ([Claude Code specifics](#token-hygiene)) and links the [brief kit](guides/brief-kit.md) instead of copying it.
    The drafter of a plan or brief cites, for each acceptance row, the engine `file:line` that makes it possible (the long-wait rule names its delivery kind) and, for each Book-visible promise, the `docs/system` clause that allows it (loka-d89z, loka-3a96). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted, one home per kind, and before the spawn (the PM checks the Beads notes first; a developer lost to a limit left its brief only in a scratchpad, loka-ydy): a slice brief and its design input
@@ -349,8 +349,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   the retro. At each milestone gate (E3, release-candidate certification, release) a pattern retro: a
   Sonnet subagent reads the housekeeping issues, review records and `gh` CI timings since the last gate
   and proposes at most 5 cross-session items. The PM prompts it when a gate PR merges.
-- **Beads:** `bin/br_create.sh -l housekeeping --description-file <file>` (it clears
-  `source_repo_path`, [BEADS](BEADS.md)); `br list -l housekeeping` shows the queue. The owner approves: approved items go
+- **Beads:** `bin/br_create.sh -l housekeeping --description-file <file>`; `br list -l housekeeping` shows the queue. The owner approves: approved items go
   to the next housekeeping PR, rejected ones to `br close` with the reason.
 - **Reminders:** `bin/session_status.sh` lists open housekeeping issues, prints "Before you clear: ask the
   PM for handoff + retro", and notes a missed retro when no housekeeping issue is newer than the last

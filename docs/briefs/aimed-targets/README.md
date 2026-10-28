@@ -6,7 +6,7 @@ the item detail closes with an echo the log that you have used the item on targe
 targetting systmw and also codify that in the book ui doc". Rule in force (designer spec, polish session batch): an
 action aimed at a thing draws on that thing's page, never on World; Cast in the say field is for untargeted words only;
 the "Pick list" component (`docs/BOOK-UI-COMPONENTS.md`) and "Pick a second thing" (`docs/system/book-ui.md`).
-Drafted by Fable (contract change: command, recipe schema, GameView), PM edits. Read the [brief kit](../brief-kit.md)
+Drafted by Fable (contract change: command, recipe schema, GameView), PM edits. Read the [brief kit](../../guides/brief-kit.md)
 for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
 
 Beads: slice 1 loka-x6t.109.1, slice 2 .2, slice 3 .3, slice 4 .4, slice 5 .5.

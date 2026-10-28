@@ -5,7 +5,7 @@ first, becfause it can have other options like 'take' the whole sack, or 'cast' 
 work on the containers need open first issue". Container page: title, description, the container's own cards (Open,
 Take, Cast a spell…), Leave last; Open reveals the contents list (each entry opens its item page); no Unlock unless the
 container has a lock. Drafted by Fable (PM asked for a contract-level read: save, view, loaders), PM edits. Read the
-[brief kit](../brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
+[brief kit](../../guides/brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
 
 Batch branch `toolbox/batch-container-open`. Beads: slice 1 loka-x6t.121 (the issue itself); slice 2 only on the
 owner's answer to open question 1 (a child issue then).

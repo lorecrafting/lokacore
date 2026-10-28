@@ -5,7 +5,7 @@ words, the client owns placement, so a future telnet client and the Book show th
 The same comment says to narrate take, drop, give and put and to empty the pinned silent list. It overrides the
 older kgd.185 note that moved about 6 keys to `SILENT` with the reason "Book fallback line". Drafted by Opus. PM
 edits. One draft batch branch, `toolbox/batch-narration-log`. The slices run in order on it, and each slice has its
-own commits. Read the [brief kit](../brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
+own commits. Read the [brief kit](../../guides/brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
 
 Run order: 1 (engine, M) -> 2 (engine, M) -> 3 (Book, M). Slice 3 needs slices 1 and 2: until every change
 narrates, "every line in the room log" leaves holes. The PR is marked ready only after slice 3.
