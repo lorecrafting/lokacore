@@ -1,4 +1,3 @@
-# size: allow 322, craft checks (hs-10) and recipe reasons (loka-j64e) check their floor and rooms beside the other recipe targets
 defmodule Loka.Content.Recipes do
   @moduledoc """
   Action recipes and rooms' action contributions (action.schema.json ActionRecipe,
@@ -25,9 +24,8 @@ defmodule Loka.Content.Recipes do
   resource.adjust has none, like a cost: resource@1 comes with the default pools) is required;
   its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
-  of this cartridge and a detail of that room (a use target's tool liquid a liquid of it, and a
-  use target needs kernel_api 1.49; row G4), each fact.assign a fact with a value of its type, each
-  status.cure a status and only on a use recipe (SCHEMA_VIOLATION) (a spell's floor, word and
+  of this cartridge and a detail of that room (a use target's tool liquid a liquid of it; row G4), each fact.assign a fact with a value of its type, each
+  status.cure a status and only on a use recipe (SCHEMA_VIOLATION) (a spell's word and
   row 29b effect steps: `Loka.Content.Spells`),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
@@ -53,23 +51,17 @@ defmodule Loka.Content.Recipes do
 
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++
       contributions(defs, actions) ++
-      uses(defs, m) ++
-      RecipeTips.reasons(all(defs), ctx, api(m) < [1, 100]) ++
+      uses(defs) ++
+      RecipeTips.reasons(all(defs), ctx) ++
       Loka.Content.Replenish.craft(m, defs, text)
   end
 
-  # Toolbox row G4: a use target needs kernel_api 1.49 (one diagnostic), and a status.cure step
-  # sits on a use recipe (a detail holds no status).
-  defp uses(defs, m) do
-    misplaced =
-      for {rel, r} <- all(defs),
-          r["target"]["kind"] != "use",
-          {%{"op" => "status.cure"}, steps} <- steps(r),
-          do: diag("SCHEMA_VIOLATION", at(rel, steps ++ ["op"]), %{"error" => "invalid_value"})
-
-    if Enum.any?(all(defs), fn {_, r} -> r["target"]["kind"] == "use" end) and api(m) < [1, 49],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least") | misplaced],
-      else: misplaced
+  # Toolbox row G4: a status.cure step sits on a use recipe (a detail holds no status).
+  defp uses(defs) do
+    for {rel, r} <- all(defs),
+        r["target"]["kind"] != "use",
+        {%{"op" => "status.cure"}, steps} <- steps(r),
+        do: diag("SCHEMA_VIOLATION", at(rel, steps ++ ["op"]), %{"error" => "invalid_value"})
   end
 
   defp api(m),
@@ -94,7 +86,7 @@ defmodule Loka.Content.Recipes do
       duplicate(rel, r, ctx),
       mismatch(rel, r),
       duration(rel, r, ctx),
-      RecipeTips.check(rel, r, ctx, api(ctx.m) < [1, 46]),
+      RecipeTips.check(rel, r, ctx),
       shared(rel, r, ctx.shared)
     ])
   end

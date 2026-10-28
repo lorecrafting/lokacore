@@ -30,9 +30,7 @@ defmodule Loka.ContentPenaltyTest do
                ["world", "death", "penalty", "experience", "narration"],
                "death.nope"
              )
-           ], [{"UNRESOLVED_REFERENCE", path <> ".narration"}]},
-          {[edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.108")],
-           [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]}
+           ], [{"UNRESOLVED_REFERENCE", path <> ".narration"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

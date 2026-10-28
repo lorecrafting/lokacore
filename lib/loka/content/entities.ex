@@ -12,7 +12,7 @@ defmodule Loka.Content.Entities do
   @spec all(map()) :: [{String.t(), String.t(), map()}]
   def all(defs), do: for(k <- ~w(npc item), {_, {rel, [], e}} <- defs[k], do: {k, rel, e})
 
-  @doc "Authored carrying requires complete item masses, containment and API 1.3."
+  @doc "Authored carrying requires complete item masses and containment."
   @spec carry(map() | nil, map(), {term(), map()}) :: [map()]
   def carry(m, defs, {_, %{"world" => %{"carry" => _}}}) when m != nil do
     owner =
@@ -29,22 +29,12 @@ defmodule Loka.Content.Entities do
           )
         ]
 
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    api =
-      if version < [1, 3],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
     masses =
       for {"item", rel, e} <- all(defs),
           not is_map_key(e, "mass_grams"),
           do: diag("SCHEMA_VIOLATION", at(rel, ["mass_grams"]), %{"error" => "missing_property"})
 
-    masses ++ owner ++ api
+    masses ++ owner
   end
 
   def carry(_, _, _), do: []

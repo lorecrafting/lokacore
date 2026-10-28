@@ -9,10 +9,8 @@ defmodule Loka.ContentFenTest do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     deer = "populations/deer.json"
     leaf = ["birth_when", "root", "item"]
-    old = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.85")}
 
     for {edits, expected} <- [
-          {[old], {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[{deer, &put_in(&1, leaf ++ ["plan"], "nowhere")}],
            {"UNRESOLVED_REFERENCE", "populations/deer.birth_when.root.item.plan"}},
           {[{deer, &put_in(&1, leaf, %{"op" => "has_item", "item" => "tuft"})}],

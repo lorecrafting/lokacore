@@ -8,7 +8,7 @@ defmodule Loka.ContentPropertyTest do
   # different vaults or currencies, an entitlement or an authored dialogue write on the account, an
   # account or currency pool that cannot hold `amount`, an account another engine writer owns
   # (uses_pick), or without service.no_funds.
-  test "the bank keeps its API floor, a bounded account, one vault and its texts", %{dir: dir} do
+  test "the bank keeps a bounded account, one vault and its texts", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     at = "services/deposit_a.benefit"
     savings = &put_in(&1, ["facts", "savings", "value_type" | &2], &3)
@@ -35,8 +35,6 @@ defmodule Loka.ContentPropertyTest do
     }
 
     for {edits, expected} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.82")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[{"facts.json", &savings.(&1, ["minimum"], -5)}],
            {"SCHEMA_VIOLATION", "#{at}.account"}},
           {[{"facts.json", &savings.(&1, ["default"], 5)}],

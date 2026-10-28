@@ -11,8 +11,6 @@ defmodule Loka.ContentDurabilityTest do
     fact = "items/sword.weapon.durability.fact"
 
     for {edit, expected} <- [
-          {{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.68")},
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {{"facts.json", &(pop_in(&1, edge ++ ["per_subject"]) |> elem(1))},
            {"SCHEMA_VIOLATION", fact}},
           {{"facts.json", &(pop_in(&1, edge ++ ["value_type", "maximum"]) |> elem(1))},

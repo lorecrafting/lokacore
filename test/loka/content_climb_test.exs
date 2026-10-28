@@ -19,8 +19,6 @@ defmodule Loka.ContentClimbTest do
     climb = &put_in(&1, ["exits", "down", "climb", &2], &3)
 
     cases = [
-      {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.44")}],
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {[{"rooms/clifftop.json", &climb.(&1, "item", "vine")}],
        {"UNRESOLVED_REFERENCE", face <> ".item"}},
       {[{"rooms/clifftop.json", &climb.(&1, "fell", "narration.slip")}],

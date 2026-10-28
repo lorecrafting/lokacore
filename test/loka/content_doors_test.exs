@@ -21,10 +21,6 @@ defmodule Loka.ContentDoorsTest do
   # or its walks is not true.
   test "walks needs kernel_api 1.81 and a walking hour's room resolves" do
     dir = Loka.ContentSource.copy("cartridges/doors_sampler")
-    api = fn m -> put_in(m, ["requires", "kernel_api", "at_least"], "1.80") end
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"cartridge.json", api}])
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(diags)
-
     moor = &put_in(&1, ["daily_schedule", "8", "room"], "moor")
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", moor}])
     assert {"UNRESOLVED_REFERENCE", "npcs/thief.daily_schedule.8.room"} in codes(diags)
@@ -36,14 +32,6 @@ defmodule Loka.ContentDoorsTest do
     stays = &put_in(&1, ["daily_schedule", "8", "walks"], false)
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", stays}])
     assert {"SCHEMA_VIOLATION", "npcs/thief.daily_schedule.8.walks"} in codes(diags)
-
-    bandits = Loka.ContentSource.copy("cartridges/encounter_sampler")
-    walks = &Map.put(&1, "walks", true)
-
-    assert {:error, diags} =
-             Loka.ContentSource.compile(bandits, [{"populations/bandits.json", walks}])
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(diags)
   end
 
   # Breaks: the source walking case does not require walks (a lone {room} hour compiles to

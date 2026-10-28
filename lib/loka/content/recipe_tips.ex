@@ -30,10 +30,9 @@ defmodule Loka.Content.RecipeTips do
   end
 
   @doc """
-  A recipe's tip diagnostics: it resolves, needs fact@1 (its fact_changed), kernel_api 1.46
-  (`old` when below) and a key that leaves room for seen_tip_ in a 64-character Key.
+  A recipe's tip diagnostics: it resolves, needs fact@1 (its fact_changed) and a key that leaves room for seen_tip_ in a 64-character Key.
   """
-  def check(rel, %{"tip" => tip} = r, %{m: m, registry: registry, text: text}, old) do
+  def check(rel, %{"tip" => tip} = r, %{m: m, registry: registry, text: text}) do
     events = {m["requires"]["capabilities"], owners(registry, ["events"])}
     long = String.length(r["key"]) > 55
 
@@ -41,17 +40,16 @@ defmodule Loka.Content.RecipeTips do
       for(
         {true, d} <- [
           {text != :unknown and not is_map_key(text, tip), :text},
-          {long, :key},
-          {old, :api}
+          {long, :key}
         ],
         do: tip_diag(rel, tip, d)
       )
   end
 
-  def check(_, _, _, _), do: []
+  def check(_, _, _), do: []
 
-  @doc "loka-j64e: each recipe `reason` resolves; any reason needs kernel_api 1.100 (one diagnostic)."
-  def reasons(recipes, %{text: text}, old) do
+  @doc "loka-j64e: each recipe `reason` resolves."
+  def reasons(recipes, %{text: text}) do
     reasoned = for {rel, %{"reason" => reason}} <- recipes, do: {rel, reason}
 
     for(
@@ -59,11 +57,7 @@ defmodule Loka.Content.RecipeTips do
       text != :unknown,
       not is_map_key(text, key),
       do: diag("UNRESOLVED_REFERENCE", at(rel, ["reason"]), %{"target" => key})
-    ) ++
-      if(reasoned != [] and old,
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-      )
+    )
   end
 
   defp tip_diag(rel, tip, :text),
@@ -71,7 +65,4 @@ defmodule Loka.Content.RecipeTips do
 
   defp tip_diag(rel, _, :key),
     do: diag("SCHEMA_VIOLATION", at(rel, ["key"]), %{"error" => "invalid_value"})
-
-  defp tip_diag(_, _, :api),
-    do: diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")
 end

@@ -24,8 +24,6 @@ defmodule Loka.ContentEscrowTest do
     ]
 
     for {edits, expected} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.78")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[service.(&put_in(&1, escrow ++ ["items"], ["nowhere", "ore_b"]))],
            {"UNRESOLVED_REFERENCE", "#{at}.items[0]"}},
           {[service.(&put_in(&1, escrow ++ ["custody"], "ore_a"))],
@@ -53,8 +51,6 @@ defmodule Loka.ContentEscrowTest do
     output = "services/commission.benefit.escrow.output"
 
     for {edits, expected} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.79")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[{"services/claim.json", &put_in(&1, ["benefit", "service"], "cancel")}],
            {"SCHEMA_VIOLATION", "#{claim}.benefit.service"}},
           {[{"services/cancel.json", &put_in(&1, ["benefit", "service"], "nowhere")}],

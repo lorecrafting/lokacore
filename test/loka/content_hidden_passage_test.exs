@@ -19,8 +19,6 @@ defmodule Loka.ContentHiddenPassageTest do
     door = &put_in(&1, ["exits", &2, "barrier"], "panel")
 
     cases = [
-      {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.44")}],
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {[{"rooms/hall.json", &put_in(&1, ["exits", "east", "hidden_until", "fact"], "lost")}],
        {"UNRESOLVED_REFERENCE", face <> ".fact"}},
       {[{"rooms/hall.json", &put_in(&1, ["exits", "east", "hidden_until", "equals"], 1)}],

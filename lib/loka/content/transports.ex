@@ -26,20 +26,8 @@ defmodule Loka.Content.Transports do
   def check(m, defs, {_, text}) do
     routes = for {_, {rel, [], t}} <- defs["transport"], do: {rel, t}
 
-    api(m, routes) ++
-      Enum.flat_map(routes, fn {rel, t} -> endpoint(rel, t, m, defs, text) end) ++
+    Enum.flat_map(routes, fn {rel, t} -> endpoint(rel, t, m, defs, text) end) ++
       details(m, defs, text)
-  end
-
-  defp api(m, routes) do
-    minimum =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if routes != [] and minimum < [1, 26],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-      else: []
   end
 
   defp endpoint(rel, t, m, defs, text) do

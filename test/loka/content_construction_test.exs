@@ -5,9 +5,7 @@ defmodule Loka.ContentConstructionTest do
   @kat JSON.decode!(File.read!("protocol/fixtures/build_sampler_hash.json"))
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
   defp lane(f), do: {"rooms/lane.json", &update_in(&1, ["site"], f)}
-  defp api(v), do: {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], v)}
   defp hut(path, v), do: {"blueprints/hut.json", &put_in(&1, path, v)}
-  @floor {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
 
   # Breaks: a blueprint, its variant or enter lock, a site (its short blueprint ref expanded) or
   # world.construction dropped or reshaped in the artifact (protocol/fixtures/build_sampler_hash.json).
@@ -28,7 +26,6 @@ defmodule Loka.ContentConstructionTest do
     for {edits, expected} <- [
           {[exit], [{"SITE_EXIT_CONFLICT", "rooms/lane.site.directions[0]"}]},
           {[missing], [{"UNRESOLVED_REFERENCE", "rooms/lane.site.blueprints[1]"}]},
-          {[api("1.98")], [@floor]},
           {[hut(["title"], "blueprint.hut.nope")],
            [{"UNRESOLVED_REFERENCE", "blueprints/hut.title"}]},
           {[hut(["variants", Access.at(0), "description"], "blueprint.hut.nope")],
@@ -41,30 +38,6 @@ defmodule Loka.ContentConstructionTest do
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected
-    end
-
-    # Each trigger alone: world.construction, a blueprint or a site still needs 1.99.
-    only_world = [
-      api("1.98"),
-      {"blueprints/hut.json", nil},
-      {"rooms/lane.json", &Map.delete(&1, "site")}
-    ]
-
-    only_blueprint = [
-      api("1.98"),
-      {"cartridge.json", &Map.delete(&1, "world")},
-      {"rooms/lane.json", &Map.delete(&1, "site")}
-    ]
-
-    only_site = [
-      api("1.98"),
-      {"blueprints/hut.json", nil},
-      {"cartridge.json", &Map.delete(&1, "world")}
-    ]
-
-    for edits <- [only_world, only_blueprint, only_site] do
-      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
-      assert @floor in pairs(diags), inspect(diags)
     end
 
     unowned =

@@ -1,6 +1,6 @@
 defmodule Loka.Content.Liquids do
   @moduledoc "Liquid references, initial contents and checked maximum effective vessel mass."
-  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4]
+  import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4]
   import Loka.Content.Refs, only: [reference: 6]
 
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil) :: [map()]
@@ -87,25 +87,16 @@ defmodule Loka.Content.Liquids do
       )
 
   defp requirements(m) do
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if(version < [1, 20],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-    ) ++
-      if m["requires"]["capabilities"]["liquid"] == 1,
-        do: [],
-        else: [
-          diag(
-            "UNDECLARED_CAPABILITY",
-            "cartridge.requires.capabilities.liquid",
-            %{"capability" => "liquid"},
-            ["liquid@1"]
-          )
-        ]
+    if m["requires"]["capabilities"]["liquid"] == 1,
+      do: [],
+      else: [
+        diag(
+          "UNDECLARED_CAPABILITY",
+          "cartridge.requires.capabilities.liquid",
+          %{"capability" => "liquid"},
+          ["liquid@1"]
+        )
+      ]
   end
 
   defp bad(path), do: diag("SCHEMA_VIOLATION", path, %{"error" => "invalid_value"})

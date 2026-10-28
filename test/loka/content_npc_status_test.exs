@@ -17,8 +17,7 @@ defmodule Loka.ContentNpcStatusTest do
       {"items/torch.json", &Map.put(&1, "immune", ["missing"])},
       {"npcs/golem.json", &Map.put(&1, "immune", [])},
       {"reactions/kindle.json", &put_in(&1, ["apply", Access.at(0), "item"], "missing")},
-      {"reactions/groan.json", &put_in(&1, ["on", "status"], "missing")},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}
+      {"reactions/groan.json", &put_in(&1, ["on", "status"], "missing")}
     ]
 
     for {file, change} <- cases do
@@ -29,7 +28,7 @@ defmodule Loka.ContentNpcStatusTest do
   # Breaks (row 2c): a status modifier naming no attribute compiles, a status with neither
   # modifies nor per_tick compiles, or a modifier under kernel_api 1.46 compiles (the derived
   # sampler's might is its only 1.46 field).
-  test "status modifiers keep their attribute and API floor", %{dir: dir} do
+  test "status modifiers keep their attribute", %{dir: dir} do
     luck = &put_in(&1, ["modifies", Access.at(0), "attribute"], "luck")
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"statuses/fury.json", luck}])
 
@@ -47,11 +46,5 @@ defmodule Loka.ContentNpcStatusTest do
              diags,
              &{&1["code"], &1["path"]}
            )
-
-    derived = Loka.ContentSource.copy("cartridges/derived_sampler")
-    api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")
-
-    assert {:error, [%{"code" => "KERNEL_API_RANGE_INVALID"}]} =
-             Loka.ContentSource.compile(derived, [{"cartridge.json", api}])
   end
 end

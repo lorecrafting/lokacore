@@ -381,13 +381,6 @@ defmodule Loka.ContentFerryTest do
   # Breaks: elapsed mechanics can be claimed by an API 1.0 release or without a schedule owner.
   test "elapsed policy requires API 1.1 and schedule ownership", %{dir: dir} do
     files = elapsed_files()
-    low = put_in(files, ["cartridge.json", "requires", "kernel_api", "at_least"], "1.0")
-
-    assert compile(dir, low) ==
-             {:error,
-              [
-                d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})
-              ]}
 
     missing =
       files

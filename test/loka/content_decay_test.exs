@@ -9,8 +9,6 @@ defmodule Loka.ContentDecayTest do
     room = &put_in(&1, ["apply", Access.at(0), "room"], "nowhere")
 
     for {edit, expected} <- [
-          {{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.76")},
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {{"reactions/spoil.json", room},
            {"UNRESOLVED_REFERENCE", "reactions/spoil.apply[0].room"}}
         ] do

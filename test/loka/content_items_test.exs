@@ -293,11 +293,6 @@ defmodule Loka.ContentItemsTest do
 
   # Breaks: an older implementation can load carrying content without enforcing its admission.
   test "carrying source requires its API and containment owner", %{dir: dir} do
-    files = put_in(carry_files(), ["cartridge.json", "requires", "kernel_api", "at_least"], "1.2")
-
-    assert compile(dir, files) ==
-             {:error, [d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]}
-
     files =
       Map.update!(
         carry_files(),

@@ -9,13 +9,9 @@ defmodule Loka.ContentLevellingTest do
   test "levelling keeps its API floor, owner, rising thresholds and references", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     l = ["world", "levelling"]
-    api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.41")
     unlevelled = &update_in(&1, ["world"], fn w -> Map.delete(w, "levelling") end)
-    floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
 
     cases = [
-      {"cartridge.json", api, floor},
-      {"cartridge.json", &(&1 |> api.() |> unlevelled.()), floor},
       {"cartridge.json", unlevelled, {"SCHEMA_VIOLATION", "reactions/cull_reward.apply[0].op"}},
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end),

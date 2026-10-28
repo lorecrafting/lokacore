@@ -1,7 +1,6 @@
 defmodule Loka.ContentVariantsTest do
   use ExUnit.Case, async: true
 
-  @floor {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
   @variant [
     %{
       "when" => %{"policy_version" => 1, "root" => %{"op" => "has_item", "item" => "lamp_oil"}},
@@ -9,33 +8,18 @@ defmodule Loka.ContentVariantsTest do
     }
   ]
 
-  # Breaks (toolbox row W6): the compiler accepts a new entity variant list or leaf below
-  # kernel_api 1.46, refuses an item's room_line_variants (older than the row; items_sampler
-  # declares one at 1.0), or leaves an NPC variant's short reference unexpanded.
-  test "row W6 fields and leaves need 1.46; an item room-line variant does not" do
+  # Breaks (toolbox row W6): the compiler refuses a new entity variant list on an item or NPC.
+  test "row W6 variant lists compile" do
     dir = Loka.ContentSource.copy("cartridges/items_sampler")
-    api = &{"cartridge.json", fn m -> put_in(m, ["requires", "kernel_api", "at_least"], &1) end}
-    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.45")])
-    leaf = fn op -> &put_in(&1, ["room_line_variants", Access.at(0), "when", "root"], op) end
 
-    rows = [
-      {"items/lantern.json", &Map.put(&1, "short_variants", @variant)},
-      {"items/lantern.json", &Map.put(&1, "description_variants", @variant)},
-      {"npcs/bram.json", &Map.put(&1, "short_variants", @variant)},
-      {"npcs/bram.json", &Map.put(&1, "room_line_variants", @variant)},
-      {"npcs/bram.json", &Map.put(&1, "description_variants", @variant)},
-      {"items/lantern.json", leaf.(%{"op" => "npc_present", "npc" => "bram"})},
-      {"items/lantern.json",
-       leaf.(%{"op" => "status_active", "subject" => "target", "status" => "x"})}
-    ]
-
-    for change <- rows do
-      assert {:error, diags} = Loka.ContentSource.compile(dir, [api.("1.45"), change])
-      assert @floor in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
-    end
-
-    for change <- Enum.take(rows, 5),
-        do: assert({:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.46"), change]))
+    for change <- [
+          {"items/lantern.json", &Map.put(&1, "short_variants", @variant)},
+          {"items/lantern.json", &Map.put(&1, "description_variants", @variant)},
+          {"npcs/bram.json", &Map.put(&1, "short_variants", @variant)},
+          {"npcs/bram.json", &Map.put(&1, "room_line_variants", @variant)},
+          {"npcs/bram.json", &Map.put(&1, "description_variants", @variant)}
+        ],
+        do: assert({:ok, _, _} = Loka.ContentSource.compile(dir, [change]))
   end
 
   # Breaks: the compiler stops walking an NPC's or item's new variant lists, so a variant naming

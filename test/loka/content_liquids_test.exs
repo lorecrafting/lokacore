@@ -130,9 +130,6 @@ defmodule Loka.ContentLiquidsTest do
            "UNRESOLVED_REFERENCE"},
           {"item source", "items/lantern.json", &Map.put(&1, "liquid_source", "water"),
            "UNKNOWN_FIELD"},
-          {"old API", "cartridge.json",
-           &put_in(&1, ["requires", "kernel_api", "at_least"], "1.19"),
-           "KERNEL_API_RANGE_INVALID"},
           {"missing capability", "cartridge.json",
            &update_in(&1, ["requires", "capabilities"], fn caps -> Map.delete(caps, "liquid") end),
            "UNDECLARED_CAPABILITY"}

@@ -122,8 +122,6 @@ defmodule Loka.ContentCombatTest do
   test "combat requirements and attack bounds are enforced", %{tmp_dir: dir} do
     cases =
       [
-        {put_in(@manifest, ["requires", "kernel_api", "at_least"], "1.5"), @npc,
-         "KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"},
         {put_in(@manifest, ["world", "combat", "player_attack", "damage_min"], 4), @npc,
          "SCHEMA_VIOLATION", "cartridge.world.combat.player_attack.damage_max"},
         {@manifest, put_in(@npc, ["attack", "damage_min"], 4), "SCHEMA_VIOLATION",

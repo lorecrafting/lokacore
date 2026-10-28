@@ -11,27 +11,6 @@ defmodule Loka.ContentCuesTest do
   test "cues need 1.48, sense_cue@1 and catalog text" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-    api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.47")}
-    floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
-
-    no_cues =
-      for f <-
-            ~w(rooms/forge.json rooms/tower.json items/torch.json actions/pick_lock.json npcs/sentry.json),
-          do: {f, &drop_cues/1}
-
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [api])
-    assert floor in pairs(diags), inspect(diags)
-    # the reactions' cue_perceived leaves alone, nested under `all` and `not`, still need 1.48
-    hidden_leaf =
-      for f <- ~w(reactions/guard_hears.json reactions/sentry_hears.json),
-          do:
-            {f,
-             &update_in(&1, ["when", "root"], fn root ->
-               %{"op" => "all", "items" => [%{"op" => "not", "item" => root}]}
-             end)}
-
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [api | no_cues ++ hidden_leaf])
-    assert floor in pairs(diags), inspect(diags)
 
     unowned =
       {"cartridge.json",
@@ -51,9 +30,4 @@ defmodule Loka.ContentCuesTest do
            ),
            inspect(diags)
   end
-
-  defp drop_cues(d) when is_map(d),
-    do: Map.new(Map.delete(d, "cues"), fn {k, v} -> {k, drop_cues(v)} end)
-
-  defp drop_cues(d), do: d
 end

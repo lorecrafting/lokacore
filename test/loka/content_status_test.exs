@@ -3,7 +3,7 @@ defmodule Loka.ContentStatusTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/status_sampler")}
 
   # Breaks: a status with an unknown pool, a tick at or past its end, a zero amount or missing
-  # text, an applier or cure naming no status, or an old API floor compiles.
+  # text, or an applier or cure naming no status compiles.
   test "status, applier and cure declarations keep their boundaries", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
@@ -15,7 +15,6 @@ defmodule Loka.ContentStatusTest do
         {"statuses/poison.json", &put_in(&1, ["narration", "tick"], "missing.text")},
         {"reactions/dart.json", &put_in(&1, ["apply", Access.at(0), "status"], "missing")},
         {"items/antidote.json", &put_in(&1, ["edible", "cures"], ["missing"])},
-        {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.37")},
         {"cartridge.json",
          &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "status") end)},
         {"cartridge.json",
@@ -44,9 +43,9 @@ defmodule Loka.ContentStatusTest do
   end
 
   # Breaks (row 16; twin of the loader case in kernel/ts/test/sneak.test.ts): pierced_by compiles
-  # without a concealment, naming no skill or attribute, or under API 1.92; an entry reaction applying
+  # without a concealment, or naming no skill or attribute; an entry reaction applying
   # a concealment compiles (the engage cure then faults conflicting_write on that move).
-  test "pierced_by needs a concealment, a real skill and attribute, API 1.93, no entry concealment" do
+  test "pierced_by needs a concealment, a real skill and attribute, no entry concealment" do
     dir = Loka.ContentSource.copy("cartridges/sneak_sampler")
     hidden = &{"statuses/hidden.json", &1}
 
@@ -73,10 +72,6 @@ defmodule Loka.ContentStatusTest do
 
     assert {"OUTCOME_MISMATCH", "reactions/hide.apply[0].op"} in diags.([
              {"reactions/hide.json", &Map.put(&1, "on", entry)}
-           ])
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags.([
-             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.92")}
            ])
   end
 end

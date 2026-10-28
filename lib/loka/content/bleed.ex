@@ -29,13 +29,8 @@ defmodule Loka.Content.Bleed do
   defp gate(m) do
     caps = m["requires"]["capabilities"]
 
-    [major, minor] =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
     if caps["bleed"] == 1 and caps["combat"] == 1 and caps["skills"] == 1 and
-         caps["food"] == 1 and (major > 1 or (major == 1 and minor >= 30)),
+         caps["food"] == 1,
        do: [],
        else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
   end

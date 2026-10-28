@@ -12,8 +12,6 @@ defmodule Loka.ContentLootTest do
     coin = ["drops", Access.at(1), "item"]
 
     cases = [
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.42"),
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {"cartridge.json", &update_in(&1, ["world"], fn w -> Map.delete(w, "death") end),
        {"SCHEMA_VIOLATION", "npcs/rat.drops"}},
       {"npcs/rat.json", &Map.delete(&1, "hp"), {"SCHEMA_VIOLATION", "npcs/rat.drops"}},

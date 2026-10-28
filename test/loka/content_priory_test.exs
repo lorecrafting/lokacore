@@ -25,9 +25,7 @@ defmodule Loka.ContentPrioryTest do
           {"items/mill_ledger.json", ["readable"], %{"label" => "actions.read_book"},
            "SCHEMA_VIOLATION"},
           {"items/mill_ledger.json", ["readable"], %{"text" => "readable.mill_ledger"},
-           "SCHEMA_VIOLATION"},
-          {"cartridge.json", ["requires", "kernel_api", "at_least"], "1.23",
-           "KERNEL_API_RANGE_INVALID"}
+           "SCHEMA_VIOLATION"}
         ] do
       change = &put_in(&1, Enum.map(keys, fn k -> Access.key!(k) end), value)
       assert {:error, errors} = Loka.ContentSource.compile(dir, [{rel, change}])

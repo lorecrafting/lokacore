@@ -10,20 +10,11 @@ defmodule Loka.ContentBuffsTest do
     rule = "reactions/song_listener.json"
     at = "reactions/song_listener.apply[0].npc"
     step = fn f -> &update_in(&1, ["apply", Access.at(0)], f) end
-    # Leave the npc step as the only 1.46 field: no modifies, no npc_present.
-    tick = &(&1 |> Map.delete("modifies") |> Map.put("per_tick", 1))
 
     cases = [
       {[{rule, step.(&Map.put(&1, "npc", "ghost"))}], {"UNRESOLVED_REFERENCE", at}},
       {[{"npcs/listener.json", &Map.put(&1, "spawn_template", true)}], {"SCHEMA_VIOLATION", at}},
-      {[{rule, step.(&Map.put(&1, "item", "lute"))}], {"SCHEMA_VIOLATION", at}},
-      {[
-         {"statuses/might.json", tick},
-         {"statuses/inspired.json", tick},
-         {rule, &Map.delete(&1, "when")},
-         {"reactions/song_traveller.json", &Map.delete(&1, "when")},
-         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}
-       ], {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"}}
+      {[{rule, step.(&Map.put(&1, "item", "lute"))}], {"SCHEMA_VIOLATION", at}}
     ]
 
     for {changes, {code, path}} <- cases do

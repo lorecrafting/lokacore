@@ -21,9 +21,7 @@ defmodule Loka.ContentNpcAttributesTest do
       {strong, &put_in(&1, ["attributes"], [%{str | "attribute" => "dex"}]),
        {"UNRESOLVED_REFERENCE", "npcs/strong_guard.attributes[0].attribute"}},
       {strong, &Map.update!(&1, "attributes", fn a -> a ++ [str] end),
-       {"SCHEMA_VIOLATION", "npcs/strong_guard.attributes[1].attribute"}},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45"),
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}}
+       {"SCHEMA_VIOLATION", "npcs/strong_guard.attributes[1].attribute"}}
     ]
 
     for {file, change, {code, path}} <- cases do

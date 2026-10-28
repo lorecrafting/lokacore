@@ -16,20 +16,6 @@ defmodule Loka.ContentIdentityTest do
 
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
-    assert diags.([
-             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.96")}
-           ]) ==
-             [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]
-
-    assert diags.([
-             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.96")},
-             {"npcs/stranger.json", &Map.delete(&1, "short_variants")},
-             {"npcs/guard.json",
-              &update_in(&1, ["disposition", "hostile", "root"], fn r -> hd(r["items"]) end)},
-             {"cartridge.json", &(pop_in(&1, ["world", "identity", "name_variants"]) |> elem(1))}
-           ]) ==
-             [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]
-
     drop_cap = &(pop_in(&1, ["requires", "capabilities", "description_variant"]) |> elem(1))
 
     assert diags.([{"cartridge.json", drop_cap}]) == [

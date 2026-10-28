@@ -26,8 +26,6 @@ defmodule Loka.ContentGiftTest do
     ]
 
     for {edits, expected} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.101")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[
              service.(
                &put_in(&1, ["benefit"], %{"kind" => "entitlement", "fact" => "traded_knife"})
