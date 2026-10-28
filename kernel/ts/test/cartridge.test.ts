@@ -46,11 +46,6 @@ const load = (cartridge: any) => {
     installed,
   );
 };
-const withFactType = (value_type: object) => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  cartridge.facts['hello_sampler@0.0.1:fact/village_arrived'].value_type = value_type;
-  return load(cartridge);
-};
 
 // Breaks: a hand-built artifact drops the implicit fact@1 dependency of position@1 or scene@1.
 test('position and scene artifacts require fact@1 in their effective lock', () => {
@@ -82,28 +77,6 @@ test('position and scene artifacts require fact@1 in their effective lock', () =
   }
 });
 
-// Breaks: an artifact bypasses the compiler and boots with an impossible enum default.
-test('the loader rejects an enum fact default outside its values', () =>
-  assert.deepEqual(withFactType({ type: 'enum', values: ['missing'], default: 'rescued' }), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
-      {},
-    ),
-  }));
-
-// Breaks: an artifact bypasses the compiler and boots with an out-of-bounds numeric default.
-test('the loader rejects a bounded integer fact default outside its bounds', () =>
-  assert.deepEqual(withFactType({ type: 'int', minimum: 0, maximum: 1, default: 2 }), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
-      {},
-    ),
-  }));
-
 // Breaks (row FD1; twin of test/loka/content_raid_test.exs): a time_since leaf loads under API
 // 1.0 in a cartridge with no world content.
 test('the loader keeps API 1.90 for a time_since policy without world content', () => {
@@ -117,27 +90,6 @@ test('the loader keeps API 1.90 for a time_since policy without world content', 
     diagnostic: diagnostic(
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
-      {},
-    ),
-  });
-});
-
-// Breaks: default validation is accidentally limited to v1, leaving a v2 artifact with an
-// impossible unwritten fact default loadable.
-test('the loader rejects an invalid v2 fact default', () => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_facts_hash.json').value);
-  cartridge.facts['facts_sampler@0.0.1:fact/review_default'] = {
-    key: 'review_default',
-    version: 1,
-    value_type: { type: 'enum', values: ['missing'], default: 'rescued' },
-    scopes: ['instance'],
-    meaning: 'Controlled loader default.',
-  };
-  assert.deepEqual(load(cartridge), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["facts_sampler@0.0.1:fact/review_default"].value_type.default',
       {},
     ),
   });

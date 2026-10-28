@@ -60,14 +60,6 @@ test('loader refuses malformed patrol route, writer ownership and bare quest act
       'OUTCOME_MISMATCH',
       (c) => delete c.dialogues[`${prefix}:dialogue/tobin_watch`].choices.start.patrol,
     ],
-    [
-      'ordinary trust write',
-      'RESERVED_FACT',
-      (c) =>
-        (c.dialogues[`${prefix}:dialogue/bram`].choices.take_it.sequence = [
-          { op: 'fact.assign', fact: r('fact', 'watch_gate_trusts_player'), value: true },
-        ]),
-    ],
     ['reaction activation without a patrol', 'OUTCOME_MISMATCH', reaction('watch_rounds')],
     [
       'ordinary dialogue completion without patrol credit',

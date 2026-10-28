@@ -1,16 +1,10 @@
 import { skillSpec, usesSpec } from './cartridge_skills.ts';
 import { tipSpec } from './cartridge_recipes.ts';
 import { trailFacts } from './cartridge_trails.ts';
-// The loader's engine-fact check (cartridge.md Compiler; DiagnosticCode RESERVED_FACT), twin of
-// lib/loka/content/position.ex: under position@1 the fact position is the engine's, so the
-// scene@1 also reserves each scene_<key> fact. The artifact must carry exactly these FactSpecs,
-// and no recipe outcome, reaction apply or
-// dialogue choice or scene ending may assign it. Skill acquisition, story-point markers and
-// recipe tips (seen_tip_<key>) have the same ownership check. Reading it (fact_compare, on.fact) is allowed.
+// Engine-owned fact specs (position@1, scene, skill, marker and tip facts), kept for
+// cartridge_services.ts and play/reach.ts; the compiler checks RESERVED_FACT (position.ex).
 import { markerSpec, spec } from './cartridge_scenes.ts';
-import { encode } from '../foundation/canonical.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
+import type { Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 
 /** The FactSpec the compiler adds under position@1 (cartridge.md Compiler), byte for byte. */
@@ -25,53 +19,6 @@ const SPEC = {
   scopes: ['player'],
   meaning: "The character's position (position@1): only its rule writes it.",
 };
-
-export function reserved(c: Obj): Diagnostic[] {
-  const expected = expectedFacts(c);
-  const dreamRefs = dreams(c);
-  const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
-  // Row 33: containment alone writes the stolen fact.
-  const stolen = c.world?.theft ? [refString(c.world.theft.stolen)] : [];
-  const owned = [...refs, ...engineWrittenRefs(c), ...stolen];
-  const out: Diagnostic[] = [];
-  for (const [i, ref] of refs.entries())
-    if (!Object.hasOwn(c.facts, ref) || encode(c.facts[ref]) !== encode(Object.values(expected)[i]))
-      out.push(diag('RESERVED_FACT', `.cartridge.facts${step(ref)}`));
-  const write = (s: Obj, at: string, allowed?: string) => {
-    if (
-      ['fact.assign', 'fact.adjust', 'fact.stamp'].includes(s.op) &&
-      (owned.includes(refString(s.fact)) ||
-        (dreamRefs.includes(refString(s.fact)) && refString(s.fact) !== allowed))
-    )
-      out.push(diag('RESERVED_FACT', `${at}.fact`));
-  };
-  writes(c, write);
-  return out;
-}
-
-function writes(c: Obj, write: (s: Obj, at: string, allowed?: string) => void) {
-  const each = (map: string) => Object.entries((c[map] ?? {}) as Obj);
-  for (const [k, r] of each('recipes'))
-    for (const [name, o] of Object.entries(r.outcomes as Obj))
-      o.sequence.forEach((s: Obj, i: number) =>
-        write(s, `.cartridge.recipes${step(k)}.outcomes.${name}.sequence[${i}]`),
-      );
-  for (const [k, r] of each('reactions'))
-    r.apply.forEach((s: Obj, i: number) => write(s, `.cartridge.reactions${step(k)}.apply[${i}]`));
-  for (const [k, d] of each('dialogues'))
-    for (const [id, o] of Object.entries(d.choices as Obj))
-      (o.sequence ?? []).forEach((s: Obj, i: number) =>
-        write(s, `.cartridge.dialogues${step(k)}.choices${step(id)}.sequence[${i}]`),
-      );
-  for (const [k, s] of each('scenes'))
-    (s.on_end?.assign ?? []).forEach((a: Obj, i: number) =>
-      write(
-        { ...a, op: 'fact.assign' },
-        `.cartridge.scenes${step(k)}.on_end.assign[${i}]`,
-        s.control === 'presentation_only' ? refString(a.fact) : undefined,
-      ),
-    );
-}
 
 /** The facts a presentation_only scene credits or assigns (dream-owned). */
 const dreams = (c: Obj): string[] =>

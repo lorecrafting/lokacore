@@ -1,8 +1,6 @@
-// Toolbox row G7 at the cartridge trust boundary (twin of lib/loka/content/locks.ex): any access
-// lock needs kernel_api 1.78, and a put lock only a container item may carry.
-import type { Diagnostic } from '../contracts.gen.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
-import { apiCmp } from './cartridge_installed.ts';
+// Toolbox row G7 lock roots, kept for nodes() in cartridge_refs.ts; the compiler checks locks
+// (lib/loka/content/locks.ex).
+import { step, type Obj } from './cartridge_refs.ts';
 
 /** Each lock's policy root and its path: room and blueprint enter, exit traverse, item get and put. */
 export function lockRoots(c: Obj): [Obj, string][] {
@@ -22,22 +20,4 @@ export function lockRoots(c: Obj): [Obj, string][] {
     if (b.locks)
       out.push([b.locks.enter.root, `.cartridge.blueprints${step(ref)}.locks.enter.root`]);
   return out;
-}
-
-/** KERNEL_API_RANGE_INVALID for any lock below 1.78; SCHEMA_VIOLATION for a put lock on a non-container. */
-export function locks(c: Obj): Diagnostic[] {
-  const floor =
-    lockRoots(c).length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.78') < 0
-      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-      : [];
-  return [
-    ...floor,
-    ...Object.entries((c.items ?? {}) as Obj)
-      .filter(([, i]) => i.locks?.put && i.container !== true)
-      .map(([ref]) =>
-        diag('SCHEMA_VIOLATION', `.cartridge.items${step(ref)}.locks.put`, {
-          error: 'invalid_value',
-        }),
-      ),
-  ];
 }
