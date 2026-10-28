@@ -22,7 +22,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Lookup or broad search; a brief drafter's search, citation re-anchoring and consumer inventories | [`Explore`](../.claude/agents/Explore.md) agent, Haiku (project override; the built-in inherits Opus); the drafter keeps only decisions | never for judgment |
 | PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); bounded copy, content or docs edit from a fixed brief | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
 | Brief drafting | Opus for a row that follows an existing pattern, an S row or content (owner, 2026-10-14; never Sonnet since 2026-10-23) | Opus drafts every other brief too (a new module, a Realm-sensitive row, a new interaction pattern); Fable drafts a save, protocol or core engine contract brief while weekly usage is under about 80%, else Opus; Sonnet never drafts a brief (owner 2026-10-23 accepted the PM recommendation, quoted: "okay lets go with your rec") |
-| Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
+| Slice implementation, tests, fix rounds | `developer`, Opus for save, protocol, new-content and judgement slices; Sonnet for purely mechanical slices (re-snapshots, transcript re-recording, moving tests onto existing content) ([owner rules](system/owner-rules.md#process), owner 2026-10-21) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as main writer; decided small spec text may come from the PM, see the roles note below the table). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to the Opus designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
 
@@ -133,7 +133,7 @@ Report at the end of the slice, not at every step.
    fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
    diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
-7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
+7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
@@ -144,8 +144,7 @@ Report at the end of the slice, not at every step.
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    The owner, or the PM when the owner asks or for status-only commits (ROADMAP status lines,
-   Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly, or merge with `--admin`
-   while GitHub still requires checks; never for unreviewed code or past a red check. Right after the merge the PM writes the
+   Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly; never for unreviewed code or past a red check. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    `bin/after_merge.sh <PR> <beads-id[,beads-id...]> ["ROADMAP status: ..."]` does that bookkeeping after the PM's
@@ -272,12 +271,12 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
 ## Token hygiene
 
 - At each handback and review completion the PM appends a Beads note `COST <role> <model> <tokens>` from the completion notice; the batch merge note sums them.
-- At session start and before a fan-out of 3+ agents or a Fable run, it reads `~/.claude/usage-cache.json` (`five_hour` and `seven_day` `used_percentage`, `resets_at`, `written_at`; the owner's status line writes it) instead of asking the owner; the numbers are stale when `written_at` is old (loka-8zqg). Near the cap: see the Budget line in [HANDOFF](HANDOFF.md).
+- At session start and before a fan-out of 3+ agents or a Fable run, it reads `~/.claude/usage-cache.json` (`five_hour` and `seven_day` `used_percentage`, `resets_at`, `written_at`; the owner's status line writes it) instead of asking the owner; the numbers are stale when `written_at` is old (loka-8zqg). Near the cap: see the Budget line in [owner rules](system/owner-rules.md#process).
 - Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
-- The PM spawns a new agent only while `uptime`, run in its own call (the one exception to batching), shows load under 8, up to three or four at once; no agent
+- The PM spawns a new agent only while `uptime`, run in its own call (the one exception to batching), shows load under 8 (`bin/agent_load_gate.sh` enforces it), at most 5 agents with 3 running tests (owner 2026-10-10); no agent
   runs the full `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1: hosted
   CI does ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md); load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
 - Long commands (checks, tests, mutant runs) run with `run_in_background`; wait for the completion
