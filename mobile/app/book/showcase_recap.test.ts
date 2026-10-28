@@ -36,9 +36,13 @@ test('three real hours away (07:00 day 1 to 13:00 day 7): one recap of Tam on th
   const shown = b.text();
   const at = shown.indexOf(LABEL.awayRecap);
   assert.ok(at > shown.findIndex((l) => l.startsWith('A trodden green'))); // the log's last entry
-  const block = shown.slice(at + 1, at + 4).filter((l) => l.startsWith('Tam'));
-  // Arrivals at 11:00 on days 1 to 7 and leavings at 15:00 on days 1 to 6, less rainy day 6.
-  assert.deepEqual(block, ['Tam arrives. (6 times)', 'Tam leaves. (5 times)']);
+  // Arrivals at 11:00 on days 1 to 7 and leavings at 15:00 on days 1 to 6, less rainy day 6; then
+  // the status line's weather, where the log ends.
+  assert.deepEqual(shown.slice(at + 1, at + 4), [
+    'Tam arrives. (6 times)',
+    'Tam leaves. (5 times)',
+    '☀︎ drought',
+  ]);
 });
 
 // Breaks: the showcase authors a threshold of two real minutes or less, so a short absence collapses.

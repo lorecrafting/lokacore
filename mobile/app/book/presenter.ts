@@ -129,6 +129,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
   const now = game.view().view,
     direction = (s.retry?.button.input as { direction?: string } | undefined)?.direction,
     // The exit taken warns once, after the movement line (book-ui.md, Room page anatomy).
+    // ponytail: the place-change check (a refused press keeping a stale move retry) has no fixture test.
     warning =
       was.place.id !== now.place.id && was.exits.find((e) => e.direction === direction)?.warning;
   if (!s.fault) s.log.push(...(warning ? [text(warning)] : []), ...cueLines(s, now, text));

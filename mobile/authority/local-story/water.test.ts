@@ -321,14 +321,15 @@ test('malformed water and historical recovery rows refuse save_corrupt without r
   }
 });
 
-// Breaks: the warned exit's warning is not logged, logged before the movement line or twice, or
-// logged for an unwarned exit (book-ui.md, Room page anatomy: an exit warning is a log line).
+// Breaks: the warned exit's warning is not logged, logged before the movement line or twice, for
+// an unwarned exit or on arriving at the warned room (book-ui.md, Room page anatomy).
 test('the warned exit taken logs its warning once, after the movement line', (t) => {
-  // From the prepared well shaft: press the exit `direction` and return the room log.
-  const go = (direction: string) => {
+  // From the prepared well shaft (or the room `from` leads to): press the exit `direction`.
+  const go = (direction: string, from?: string) => {
     const a = setup();
     t.after(() => a.sql.close());
     a.prepared();
+    if (from) a.invoke('move', { direction: from });
     const game = openGame(a.db, a.b, a.host),
       book = presenter(game);
     game.subscribe(book.update);
@@ -341,6 +342,7 @@ test('the warned exit taken logs its warning once, after the movement line', (t)
   assert.equal(down.lastIndexOf('Your lungs burn.'), at);
   assert.equal(down[at - 1], 'You arrive from above.');
   assert.ok(!go('up').includes('Your lungs burn.')); // the shaft's other, unwarned exit
+  assert.ok(!go('down', 'up').includes('Your lungs burn.')); // arriving at the shaft from the lane
 });
 
 // Breaks: the Book loses captured free Surface on detail navigation or prints recovery before confirmed custody, repeats it, or loses it on reopen.

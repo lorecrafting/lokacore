@@ -35,7 +35,7 @@ export const Choice: StoryObj = {
   },
 };
 // A person's carried item is a note on their page, not on World (book-ui.md, NPC page).
-// Breaks: the note is dropped from the NPC page.
+// Breaks: the note is dropped from the NPC page or drawn before the description.
 const reeve = NpcChoiceView.view.entities[1]!;
 const carryingView = {
   ...NpcChoiceView,
@@ -46,14 +46,22 @@ const carryingView = {
     ),
   },
 };
+const NOTE = 'The Reeve has a sealed letter at her belt.',
+  ABOUT = 'The Reeve keeps the village rolls.';
 export const Carrying: StoryObj = {
   ...pageStory(carryingView),
-  args: { words: { 'npc.reeve.carrying': 'The Reeve has a sealed letter at her belt.' } },
+  args: {
+    words: { [carryingView.view.entities[1]!.description!]: ABOUT, 'npc.reeve.carrying': NOTE },
+  },
   name: 'Carrying',
   play: async ({ canvas }) => {
+    const note = await canvas.findByText(NOTE);
+    await expect(note).toBeVisible();
+    // The note follows the description.
     await expect(
-      await canvas.findByText('The Reeve has a sealed letter at her belt.'),
-    ).toBeVisible();
+      (await canvas.findByText(ABOUT)).compareDocumentPosition(note) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
