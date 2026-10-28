@@ -9,12 +9,22 @@ import { compose } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { read } from './read.ts';
+import type { StateDelta } from '../src/contracts.gen.ts';
 
 const DIR = 'protocol/fixtures';
 // character_composition.json is one object, not a case table; compose.test.ts owns it.
 const files = readdirSync(new URL(`../../../${DIR}`, import.meta.url))
   .filter((name) => name.endsWith('_composition.json') && name !== 'character_composition.json')
   .concat('population_suppression.json');
+
+// The refusal cases whose ops are malformed on purpose; every other delta must be wire-valid.
+const MALFORMED = new Set([
+  'fuel_composition.json negative-charge',
+  'fuel_composition.json malformed-lit',
+  'fuel_composition.json missing-lit',
+  'fuel_composition.json extra-row-field',
+  'status_composition.json permanent-partial-timing-refused',
+]);
 
 // A named state is a row of fixture.states; `extends` copies another row, then applies `edits`.
 function stateOf(states: any, name: string): any {
@@ -29,8 +39,7 @@ function runCase(fx: any, c: any, msg: string) {
   const state = typeof c.state === 'string' ? stateOf(fx.states, c.state) : (c.state ?? fx.state);
   const delta = { ops: c.ops };
   const result = compose(state, delta);
-  // Refusal cases may carry malformed ops on purpose; an accepted delta must be wire-valid.
-  if (!c.expected.fault) assert.deepEqual(validate('StateDelta', delta), [], msg);
+  assert.equal(validate('StateDelta', delta).length === 0, !MALFORMED.has(msg), msg);
   assert.deepEqual(result, c.expected, msg);
   if (c.prefix_expected) assert.deepEqual(compose(state, delta, false), c.prefix_expected, msg);
   const observed = c.observation ?? result;
@@ -229,7 +238,7 @@ for (const file of files)
         encounter_id: encounter,
       },
     ];
-    assert.deepEqual(compose({ clock: 10, jobs }, { ops } as never), {
+    assert.deepEqual(compose({ clock: 10, jobs }, { ops } as unknown as StateDelta), {
       changes: [
         {
           target: { kind: 'job', job_id: next },

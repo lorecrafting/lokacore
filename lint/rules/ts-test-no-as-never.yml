@@ -31,7 +31,6 @@ ignores:
   - kernel/ts/test/codex.test.ts
   - kernel/ts/test/combat_credit.test.ts
   - kernel/ts/test/compose.test.ts
-  - kernel/ts/test/composition.test.ts
   - kernel/ts/test/containment.test.ts
   - kernel/ts/test/craft.test.ts
   - kernel/ts/test/craft_raze.test.ts

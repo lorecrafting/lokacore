@@ -39,6 +39,7 @@ function build(b: any, c: any) {
 
 function runCase(fx: any, c: any, msg: string) {
   const b = c.base === undefined ? undefined : fx.bases[c.base];
+  assert.ok(c.base === undefined || b, `${msg}: unknown base ${c.base}`);
   const value = b ? build(b, c) : c.value;
   const verdict = (errors: unknown[]) =>
     Object.hasOwn(c, 'errors') ? errors : errors.length === 0;

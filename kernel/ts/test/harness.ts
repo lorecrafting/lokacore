@@ -77,6 +77,7 @@ export function commands(prefix: string, runPrefix = prefix) {
       const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until: to };
       const r = stepElapsed(w, cmd({ id, world_context_id: w.context, payload }), s.n);
       assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+      assert.equal(r.world.state.clock, to, 'elapsed must reach the window end');
       w = r.world;
     }
     return w;
