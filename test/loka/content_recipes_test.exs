@@ -10,7 +10,7 @@ defmodule Loka.ContentRecipesTest do
   @src "cartridges/recipe_sampler"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
-  # recipe_sampler's source with `files` merged over it (nil removes a file).
+  # recipe_sampler's source with `files` merged over it (nil removes a file, {:raw, text} is written as is).
   defp compile(dir, files) do
     base =
       for rel <- Path.wildcard("#{@src}/**/*.json"),
@@ -20,7 +20,11 @@ defmodule Loka.ContentRecipesTest do
 
     for {rel, v} <- Map.merge(base, files), v != nil do
       File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
+
+      File.write!(
+        Path.join(dir, rel),
+        with({:raw, text} <- v, do: text, else: (_ -> JSON.encode!(v)))
+      )
     end
 
     Loka.Content.compile(dir)
@@ -193,6 +197,31 @@ defmodule Loka.ContentRecipesTest do
 
     assert compile(Path.join(dir, "old"), %{"recipes/ring_bell.json" => bell}) ==
              {:error, [d("UNKNOWN_FIELD", "recipes/ring_bell")]}
+  end
+
+  # Break: an undecodable actions/ file without `command` drops out of the recipes, so a room
+  # naming it adds UNRESOLVED_REFERENCE beside the real error (the refused-bundle hold, ruling 3).
+  test "an undecodable actions/ file reports only its own error", %{tmp_dir: dir} do
+    room =
+      Map.put(src("rooms/belfry.json"), "actions", [
+        %{"op" => "subtract", "actions" => ["ring_bell"]}
+      ])
+
+    dup =
+      String.replace(
+        JSON.encode!(src("actions/ring_bell.json")),
+        ~s("label":),
+        ~s("label":"a","label":)
+      )
+
+    assert compile(dir, %{"rooms/belfry.json" => room, "actions/ring_bell.json" => {:raw, "{"}}) ==
+             {:error, [d("INVALID_JSON", "actions/ring_bell")]}
+
+    assert compile(Path.join(dir, "dup"), %{
+             "rooms/belfry.json" => room,
+             "actions/ring_bell.json" => {:raw, dup}
+           }) ==
+             {:error, [d("DUPLICATE_KEY", "actions/ring_bell.label")]}
   end
 
   # Breaks: a room's contribution naming nothing compiles (a typo that silently changes

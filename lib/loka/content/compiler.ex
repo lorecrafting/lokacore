@@ -58,16 +58,18 @@ defmodule Loka.Content.Compiler do
     {located, v2, d3 ++ d4}
   end
 
-  # {warnings, errors} of the lists of diagnostics. While a bundle refusal stands, its definitions
-  # are missing, so every UNRESOLVED_REFERENCE is held back (cartridge.md, Area bundles).
+  # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area bundles).
   defp split(lists, files) do
-    held? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+    held? = Enum.any?(files, &held?/1)
 
     lists
     |> Enum.concat()
     |> Enum.reject(&(held? and &1["code"] == "UNRESOLVED_REFERENCE"))
     |> Enum.split_with(&(&1["severity"] == "warning"))
   end
+
+  defp held?({_, kind, :invalid}), do: kind == :bundle or match?({:action, _, _}, kind)
+  defp held?(_), do: false
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do

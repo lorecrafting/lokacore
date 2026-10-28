@@ -63,8 +63,10 @@ defmodule Loka.Content.Extends do
   end
 
   defp own({at, %{"extends" => parent} = value}, {kind, _} = id, stack, {index, _} = ctx, acc)
-       when is_map_key(index, {kind, parent}),
-       do: inherit(at, value, resolve({kind, parent}, [id | stack], ctx, acc))
+       when is_map_key(index, {kind, parent}) do
+    {up_at, _} = index[{kind, parent}]
+    inherit(at, up_at, value, resolve({kind, parent}, [id | stack], ctx, acc))
+  end
 
   defp own({at, %{"extends" => parent}}, _, _, {_, files}, acc) when is_binary(parent) do
     data = %{"target" => dir(at) <> "/" <> parent}
@@ -97,7 +99,14 @@ defmodule Loka.Content.Extends do
   defp declared(_), do: []
 
   # The child's `with` fills the parent's markers before the child merges over it.
-  defp inherit(at, value, {{:ok, %{} = up}, acc}) do
+  # A concrete parent's `params` stays for the schema, but a child cannot be checked against a non-list.
+  defp inherit(_, up_at, _, {{:ok, %{"params" => p}}, acc}) when not is_list(p),
+    do:
+      refuse(acc, [
+        {"SCHEMA_VIOLATION", under(up_at, ["params"]), %{"error" => "invalid_type"}, nil}
+      ])
+
+  defp inherit(at, _, value, {{:ok, %{} = up}, acc}) do
     with = Map.get(value, "with", %{})
 
     case Params.check(with, up["params"] || []) do
@@ -110,7 +119,7 @@ defmodule Loka.Content.Extends do
     end
   end
 
-  defp inherit(_, _, {_, acc}), do: {:invalid, acc}
+  defp inherit(_, _, _, {_, acc}), do: {:invalid, acc}
 
   defp under({rel, steps}, more), do: {rel, steps ++ more}
 

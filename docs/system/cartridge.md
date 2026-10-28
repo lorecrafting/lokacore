@@ -435,7 +435,8 @@ attachment (below). The refusals, with `<at>` the child's `<src>.with` or the at
 
 `params` on a definition that is not abstract is not checked as a declaration (no `<def>.params` or
 marker diagnostic); it stays and is `UNKNOWN_FIELD` at `<def>.params`, while a child's `with` is
-still checked against it and fills its markers (`extends.ex`, `inherit/3`). A parent with a
+still checked against it and fills its markers (`extends.ex`, `inherit/4`); when it is not a list, each
+child is refused with `SCHEMA_VIOLATION` `invalid_type` at `<def>.params`. A parent with a
 `params` fault, like a parent in a cycle, drops its children without diagnostics of their own.
 The [toolbox_showcase](../../cartridges/toolbox_showcase/reactions/wheel_shows.json) is the
 working example: its 30 `wheel_*_x_shows_*` reactions are one line each.
@@ -2214,7 +2215,7 @@ Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-hal
 
 Toolbox row W23 ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). A quest journal may declare `hints {active?, objectives_met?}`, each 1 to 8 `{after, text}` with `after` whole real minutes (1 to 1440) strictly ascending (else `SCHEMA_VIOLATION` `invalid_value` at the stage list) and `text` a catalog key (`UNRESOLVED_REFERENCE`). Hints need `time_policy.profile = real_elapsed` (`INVALID_TIME_POLICY` at the `hints` member) and `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree.
 
-An action may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.tip`), shown once ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). The compiler adds the player bool fact `seen_tip_<key>` (default false; an authored fact of that name or a write of it is `RESERVED_FACT`), so a tip needs fact@1 (`UNDECLARED_CAPABILITY` at the `tip` member), `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`) and an action key of at most 55 characters (compiler `SCHEMA_VIOLATION` `invalid_value` at `recipes/<key>.key`; in the loader the fact's key fails the schema). Compiler (`lib/loka/content/recipes.ex`, `position.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`, `cartridge_position.ts`) agree.
+An action may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.tip`), shown once ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). The compiler adds the player bool fact `seen_tip_<key>` (default false; an authored fact of that name or a write of it is `RESERVED_FACT`), so a tip needs fact@1 (`UNDECLARED_CAPABILITY` at the `tip` member), `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`) and an action key of at most 55 characters (compiler `SCHEMA_VIOLATION` `invalid_value` at `actions/<key>.key`; in the loader the fact's key fails the schema). Compiler (`lib/loka/content/recipes.ex`, `position.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`, `cartridge_position.ts`) agree.
 
 An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.reason`), the refusal text when its policy fails ([rules](mechanics.md#spell-cast-admission-toolbox-row-29a)). It needs `requires.kernel_api.at_least >= 1.100` (`KERNEL_API_RANGE_INVALID`, once per cartridge). Compiler (`lib/loka/content/recipes.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`) agree.
 

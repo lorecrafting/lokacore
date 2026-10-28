@@ -172,6 +172,19 @@ defmodule Loka.ContentParamsTest do
     end
   end
 
+  # Break: a child of a concrete parent whose params is not a list crashes Params.check.
+  test "a child of a concrete parent with non-list params is refused at the parent's params", %{
+    showcase: s
+  } do
+    assert diags(s, [
+             {"items/apple.json", &Map.put(&1, "params", "x")},
+             {"items/kid.json", %{"extends" => "apple"}}
+           ]) == [
+             {"SCHEMA_VIOLATION", "items/apple.params", %{"error" => "invalid_type"}},
+             {"UNKNOWN_FIELD", "items/apple.params", %{}}
+           ]
+  end
+
   # Breaks: an object with a member besides `param` taken for a marker (reported as unresolved
   # instead of left for the schema), or an attachment object with an extra member accepted.
   test "only a one-member param object is a marker, and an attachment has only behaviour and with",
