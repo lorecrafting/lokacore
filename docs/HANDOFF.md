@@ -5,35 +5,35 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #479 (loka-40d4, WORKFLOW split); written 2026-10-28 by Claude Code (Opus 5.5), PM session
-661e816a. Merged today: #477 (loka-glj8, room point of view: "You arrive from the south.", "You run in from
-the south."), #478 (loka-40d4, docs audit pass A: owner rules from PM memory into owner-rules.md,
-`bin/merge_pr.sh`, `bin/beads_checkpoint.sh`), #479 (WORKFLOW core plus [PM.md](PM.md)). Weekly usage reset
-2026-10-28 05:00 HST.
+AS OF main after #481 (loka-x6t.127, room anatomy remainder); written 2026-10-28 by Claude Code (Opus 5.5), PM
+session 5b4498e4. Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of
+weekly limit ... this will be my last week before a break so yeah make it right!" Owner is away from Storybook
+until all work is done; the picks Monitor is off. Storybook serves polish/session-2026-10-23 on 6006 (updated
+from main today, before #481).
 
 ## Now
 
-- Nothing is building. Merge with `bin/merge_pr.sh <PR> <beads-id>`; on red, `bin/ci_fail.sh <branch>`. Open PR: draft #454 (E2 engine bugs, kgd.153 only) ON HOLD with the P3 hold below.
-- Polish session `polish/session-2026-10-23` in ~/dev/lokacore-session serves Storybook on 6006 (on main
-  after #475). The picks Monitor is off (owner 2026-10-24: "no need to arm monitor, just diarm for now");
-  re-arm only when the owner is back at Storybook. Loop: [PM, Live polish session](PM.md#live-polish-session).
-  Owner's screen-by-screen guide: [polish tour](design/polish-tour.md).
+- Authoring batch A, draft #480, branch `toolbox/authoring-batch-a` in worktrees.noindex/toolbox-authoring-batch-a
+  (plan, rulings and briefs: Beads loka-kgd.194 notes and each item's notes). Integrated (reviewed, CI green):
+  A (.12 .13 .14), B (.16, Fable review), walks E1+E2 (.9, merged from `toolbox/authoring-batch-a-walks`,
+  coverage 128/140 reactions, 46/49 recipes, 25/34 choices, 3/3 quests). Building: C (.18, Opus dev; Fable
+  reviewer). Then .22 (recipes into actions, authoring-only; Fable brief in its notes), then D (.17 source
+  schema, ajv dev dependency approved), then mark ready, Fable final review, merge.
+- Open PR: draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
 
-1. loka-x6t.127 remainder: away recap as a new entry at the bottom of the event log (owner, quoted: "It
-   should be a new entry in the event log, meaning at the very bottom"); NPC carried-item note on the NPC
-   page; exit warnings and the Continue conversation button under the
-   [room page anatomy](decisions/owner-decision-room-page-anatomy-2026-10-23.md). PM idea: an exit
-   warning becomes a movement log line.
-2. Authoring batch A (owner go 2026-10-24, queued for this reset): loka-kgd.194.12, .13, .14 (diagnostics
-   at the author's line), .16 behaviours, .18 prototype parameters, .17 source JSON Schema last, .9 showcase
-   walk transcripts. One draft branch, Opus developer and reviewer; the PM decides whether .17 is a Fable
-   contract brief. Groundwork for the visual builder (.8). Not in it: .15 .11 .19 .20; .7 waits on lore.
-3. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
+1. Finish batch A (above).
+2. Simplification batch, epic loka-ivjq (Fable audit 2026-10-28, report in its notes; owner rulings in its
+   description): F1 docs, F2 kernel_api floors, F3 policy wrapper, F4 one step/check vocabulary (L, Fable
+   brief), F5 single-use kinds, F6 display-name field, F7 delete signal shortcut, F11 story points onto the
+   choice; F9/F10/F12 after .17.
+3. Then polish: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is ready
+   (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide: [polish tour](design/polish-tour.md)).
+4. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
    loka-tjhk flee line on a second fight's page; loka-nw03 formal methods plan; audit leftovers loka-u9x8,
-   mz8m, yjuk, kovp (loka-u15o mechanics.md split deferred); approved before chapter work: loka-kgd.173 sim invariants, .174 Book
-   visibility check, .175 scale benchmark.
+   mz8m, yjuk, kovp; loka-kgd.194.21 population.ex crash on rejected text.json; approved before chapter work:
+   loka-kgd.173 sim invariants, .174 Book visibility check, .175 scale benchmark.
 
 Lane order (owner 2026-10-15/16): UI polish over the showcase (owner at Storybook), then measuring and
 balance tools (loka-kgd.107), worldbuilding (loka-ikch), Chapters 1-3.
