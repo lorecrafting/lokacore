@@ -675,10 +675,10 @@ rc=0; WC_ARGS=$tmp/wc/args PATH="$tmp/wc:$PATH" capped sh "$W/bin/wait_ci.sh" fe
 # Stub gh (pr view prints "$MP_STATE abc123", pr merge exits $MP_MERGE), stub wait_ci.sh (exits $MP_CI)
 # and after_merge.sh; every call is logged. Break: a red or unread CI head, a non-OPEN PR, a dirty
 # tracked file, a subject with ROADMAP unedited or a non-main checkout still merges; the merge drops --match-head-commit <head>; a
-# failed merge still runs the bookkeeping, or a good merge skips it or changes its arguments.
+# failed merge still runs the bookkeeping, or a good merge skips it, changes its arguments or skips ci_timing.sh.
 mkdir "$tmp/mp"; L=$tmp/mp/log
 printf '#!/bin/sh\necho "gh $*" >> "$MP_LOG"\ncase $2 in view) echo "$MP_STATE abc123" ;; merge) exit "$MP_MERGE" ;; esac\n' > "$tmp/mp/gh"; chmod +x "$tmp/mp/gh"
-R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/merge_pr.sh" bin/
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/merge_pr.sh" "$bin/ci_timing.sh" bin/
 printf '#!/bin/sh\necho "wait_ci $*" >> "$MP_LOG"; exit "$MP_CI"\n' > bin/wait_ci.sh
 printf '#!/bin/sh\necho "after_merge $*" >> "$MP_LOG"\n' > bin/after_merge.sh
 echo a > a; mkdir docs; echo r > docs/ROADMAP.md; git add . && git commit -qm base; echo edit >> docs/ROADMAP.md
@@ -691,6 +691,7 @@ mp merged MERGED 0 0 1 'pr view' 'wait_ci'
 mp merge-fails OPEN 0 1 1 'pr merge 7 --merge --match-head-commit abc123' 'after_merge'
 mp ok OPEN 0 0 0 'after_merge 7 loka-x ROADMAP: s' 'NEVER'
 grep -q 'gh pr merge 7 --merge --match-head-commit abc123' "$L" || bad 'merge_pr ok: merge not pinned to the head'
+grep -q 'gh run list' "$L" || bad 'merge_pr ok: ci_timing.sh not run through the stub gh'
 echo b > a; mp dirty OPEN 0 0 1 - 'pr '; git checkout -q a
 git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
 git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
