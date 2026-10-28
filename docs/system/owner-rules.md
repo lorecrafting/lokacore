@@ -203,8 +203,6 @@ and not repeated here.
 
 - The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Fable for gate-level audits and assign useful parallel work without waiting for owner input, records each call in Beads and starts the next row without asking (owner 2026-10-09); normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
 
-The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
-
 - A blind playtest in the web Book (phone width, screenshots) runs before the owner plays each new district (owner 2026-10-10); at high weekly usage Opus builds and reviews, then one sweeping blind Fable playtest (owner 2026-10-16, paraphrased).
 - The all-models weekly limit binds before the Fable cap, so the PM may use Fable for high-stakes judgement (owner 2026-10-14, paraphrased).
 - In a live polish session, polish questions and results go to the Storybook panel with `bin/polish_status.sh log` (owner 2026-10-09).
@@ -216,6 +214,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Jev (TypeSafe): spend approved; briefs and cartridge text may leave the machine, redacted first, never saves or player words; Jev is advisory only, never a gate; Pi keeps its $2/day cap ([record](../decisions/owner-decision-jev-typesafe-2026-10-14.md)).
 - Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line, `[Pi · model · session]` on tracker comments).
 - Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency cap, worktree isolation and a usage reading before and after.
+
+The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
