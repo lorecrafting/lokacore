@@ -17,6 +17,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
+import { commands } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-furnish-sampler-'));
@@ -35,17 +36,8 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-6666-4444-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-6666-4444-8444');
+const { send: play } = stream;
 const ok = (w: World, payload: object) => {
   const r = play(w, payload);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
@@ -69,11 +61,11 @@ const furnish = (...keys: string[]) => {
 const rested = (w: World) => activeStatuses(w, w.body).map((s) => s.spec.key);
 const mv = (w: World) => level(w, w.body, resourceRef(w, 'mv'));
 const elapse = (w: World, by: number) => {
-  const run_id = `aaaaaaaa-2222-4000-8000-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-2222-4000-8000-${String(++stream.n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + by];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  return stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  return stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n);
 };
 const said = (r: { decision: { kind: string } }) =>
   r.decision.kind === 'accepted'

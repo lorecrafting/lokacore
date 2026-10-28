@@ -8,10 +8,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { gameView } from '../src/view/view.ts';
+import { commands } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-identify-sampler-'));
 let artifact: Uint8Array;
@@ -29,20 +30,8 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-function play(w: World, payload: object) {
-  const r = step(
-    w,
-    {
-      id: `eeeeeeee-2727-4727-8727-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('eeeeeeee-2727-4727-8727');
+const { play } = stream;
 const fresh = () =>
   newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e27' as never, [2, 7, 2, 7]);
 const ring = (w: World) => w.entityIds['identify_sampler@0.0.1:item/ring']!;

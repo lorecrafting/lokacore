@@ -16,6 +16,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { commands } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-status-sampler-'));
 let artifact: Uint8Array;
@@ -37,27 +38,14 @@ const fresh = (c: Cartridge = content) =>
 const poisonRef = 'status_sampler@0.0.1:status/poison';
 const antidoteRef = 'status_sampler@0.0.1:item/antidote';
 const antidote = (w: World) => w.entityIds['status_sampler@0.0.1:item/antidote'];
-let n = 0;
-function play(w: World, p: object): World {
-  n += 1;
-  const r = step(
-    w,
-    {
-      id: `cccccccc-4444-4333-8444-${String(n).padStart(12, '0')}` as never,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p } as never,
-    },
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('cccccccc-4444-4333-8444');
+const { play } = stream;
 // The host advances to the earliest pending job first (mobile/authority/local-story/elapsed.ts
 // boundary), so a long wait is a chain of bounded elapsed commands.
 function wait(w: World, seconds: number): World {
   const target = w.state.clock + seconds;
   while (w.state.clock < target) {
-    n += 1;
+    stream.n += 1;
     const until = Object.values(w.state.jobs ?? {})
       .filter((j) => j.status === 'pending')
       .reduce((t, j) => Math.min(t, j.due_time), target);
@@ -75,7 +63,7 @@ function wait(w: World, seconds: number): World {
           until,
         } as never,
       },
-      n,
+      stream.n,
     );
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
     w = r.world;

@@ -19,6 +19,7 @@ import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
+import { commands } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-hireling-'));
 let artifact: Uint8Array;
@@ -39,17 +40,8 @@ const S = 'hireling_sampler@0.0.1:';
 const fact = (key: string) =>
   ({ cartridge_id: 'hireling_sampler', cartridge_version: '0.0.1', kind: 'fact', key }) as never;
 
-let n = 0;
-const play = (w: World, p: object) =>
-  step(
-    w,
-    {
-      id: `cccccccc-5555-4333-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p },
-    } as never,
-    n,
-  );
+const stream = commands('cccccccc-5555-4333-8444');
+const { send: play } = stream;
 const ok = (r: ReturnType<typeof step>) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
@@ -68,15 +60,15 @@ const chat = (w: World, who: string, choice: string) => {
   return left ? act(chosen, { type: 'close_choice', continuation_id: left[0] }) : chosen;
 };
 const fresh = () => {
-  n = 0;
+  stream.n = 0;
   return newWorld(content, '5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
 };
 const round = (w: World) => {
-  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++stream.n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + 150];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  return stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  return stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n);
 };
 const hp = (w: World, e: EntityId) => level(w, e, resourceRef(w, 'hp'));
 const offered = (w: World) =>
@@ -203,11 +195,11 @@ test('the loader keeps stay and fight to API 1.73 and bool pair facts', () => {
 const coins = (w: World, e: EntityId) => level(w, e, resourceRef(w, 'coins'));
 const hired = (w: World, who = 'hal') => value(w, w.character, fact('hired'), npc(w, who));
 const elapse = (w: World, until: number) => {
-  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++stream.n).padStart(12, '0')}`;
   const from = w.state.clock;
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
+  return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n));
 };
 const withRow = (w: World, e: EntityId, res: string, v: number): World => {
   const at = key({ kind: 'resource', entity_id: e, resource: resourceRef(w, res) });
@@ -295,7 +287,7 @@ test('two hirelings: a running balance pays an EntityId-order prefix', () => {
     c.dialogues[`${S}dialogue/ivy_talk`] = talk;
   });
   assert.ok(r.ok, JSON.stringify(r));
-  n = 0;
+  stream.n = 0;
   let w = newWorld(r.cartridge as Cartridge, fresh().context, [1, 2, 3, 4]);
   const C0 = w.state.clock;
   const [hal, ivyId] = [npc(w, 'hal'), npc(w, 'ivy')];

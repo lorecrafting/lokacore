@@ -18,6 +18,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { escapeDirections } from '../src/mechanics/combat/flee.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
+import { commands } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sleep-'));
 let artifact: Uint8Array;
@@ -38,17 +39,8 @@ const S = 'sleep_sampler@0.0.1:';
 const fact = (key: string) =>
   ({ cartridge_id: 'sleep_sampler', cartridge_version: '0.0.1', kind: 'fact', key }) as never;
 
-let n = 0;
-const play = (w: World, p: object) =>
-  step(
-    w,
-    {
-      id: `cccccccc-7777-4333-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p },
-    } as never,
-    n,
-  );
+const stream = commands('cccccccc-7777-4333-8444');
+const { send: play } = stream;
 const ok = (r: { decision: { kind: string }; world: World }) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
@@ -62,15 +54,15 @@ const hound = (w: World) => w.entityIds[`${S}npc/hound`] as EntityId;
 const stone = (w: World) => w.entityIds[`${S}item/stone`] as EntityId;
 const hp = (w: World, e: EntityId) => level(w, e, resourceRef(w, 'hp'));
 const fresh = () => {
-  n = 0;
+  stream.n = 0;
   return newWorld(content, '6e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [1, 2, 3, 4]);
 };
 const round = (w: World) => {
-  const run_id = `aaaaaaaa-1111-4000-8000-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-1111-4000-8000-${String(++stream.n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + 150];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  return stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  return stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n);
 };
 // The verbs the page offers the player, on itself and on the stone.
 const verbs = (w: World) => {

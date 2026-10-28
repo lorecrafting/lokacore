@@ -16,7 +16,7 @@ import type { EntityId } from '../src/contracts.gen.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { moveItem } from '../src/mechanics/containment/react.ts';
 import { uses } from '../src/content/cartridge_reactions.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, commands, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
 let artifact: Uint8Array;
@@ -44,23 +44,14 @@ const content = (edit?: (c: any) => void) => {
   return loaded.cartridge as Cartridge;
 };
 
-let n = 0;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `dddddddd-4444-4444-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('dddddddd-4444-4444-8444');
+const { send: play } = stream;
 const ok = (r: ReturnType<typeof play>) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 };
 const fresh = (edit?: (c: any) => void) => {
-  n = 0;
+  stream.n = 0;
   return newWorld(content(edit), '6a1c3e5f-2b4d-4f6a-8c1e-3d5f7a9b1c2e' as never, [1, 2, 3, 4]);
 };
 const item = (w: World, k: string) => w.entityIds[`${S}item/${k}`] as EntityId;
@@ -215,7 +206,7 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
   const [from, until] = [w.state.clock, w.state.clock + 86400];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  w = ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, ++n));
+  w = ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, ++stream.n));
   assert.deepEqual(activeStatuses(w, item(w, 'fish')), []);
   assert.equal(w.state.containers[item(w, 'fish')], w.consumed);
 });
