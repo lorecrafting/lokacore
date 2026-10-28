@@ -122,11 +122,19 @@ export class Rec {
 
 // Re-pin a walk after a content change: node kernel/ts/play/record.ts <transcript.jsonl>
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [head, ...entries] = readFileSync(process.argv[2], 'utf8')
+  const path = process.argv[2];
+  // The header names no cartridge, only a content hash that is stale after the change being re-pinned.
+  if (!/(^|\/)cartridges\/toolbox_showcase\/transcripts\/[^/]+\.jsonl$/.test(path))
+    throw new Error(`${path}: not a toolbox_showcase transcript`);
+  const [head, ...entries] = readFileSync(path, 'utf8')
     .split('\n')
     .filter(Boolean)
     .map((l) => JSON.parse(l));
   const r = new Rec(head.data.world_context_id);
-  for (const e of entries) r.run(e.data.command, 'any');
-  r.save(process.argv[2]);
+  entries.forEach((e, i) => {
+    const { kind } = r.run(e.data.command, 'any');
+    if (kind !== e.data.decision.kind)
+      throw new Error(`${path}:${i + 2}: recorded ${e.data.decision.kind}, now ${kind}`);
+  });
+  r.save(path);
 }
