@@ -41,12 +41,14 @@ export const rendered = (
   ).map((line) => liquidLine(line, text, view, was));
 
 // A refused line (a barred exit) leads with its reason tag (LogLines's doc comment); a quiet line
-// keeps its structured identity and count, `text` with " (N times)" once merged (logLines).
+// keeps its structured identity and count, `text` with " (N times)" once merged (logLines); an away
+// recap (recap.ts) holds its settlement's lines, `text` its heading.
 export type DetailLine =
   | string
   | { text: string; event: true }
   | { kind: 'refused'; reason: string; text: string }
-  | { quiet: string; plain: string; times: number; text: string };
+  | { quiet: string; plain: string; times: number; text: string }
+  | { recap: string[]; text: string };
 export type Logs = {
   log: DetailLine[];
   combatLog: DetailLine[];
@@ -66,7 +68,6 @@ export type Logs = {
   fault?: string;
   // An open elapsed settlement's held World entries, one per line.
   away?: { from: number; log: string[] };
-  recap?: string[]; // the away recap's lines, grouped when drawn
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
   noted?: Set<string>; // the cue lines logged this room visit
 };
@@ -160,7 +161,7 @@ export function resetLogs(s: Logs, now: GameView) {
   if (was.place.id !== now.place.id) {
     s.log.length = 0;
     s.noted = new Set();
-    s.away = s.recap = undefined; // held and shown recap lines belong to the room left, as its log
+    s.away = undefined; // held lines belong to the room left, as its log
   }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
   if (was.combat && !now.combat) s.ended = was.combat;

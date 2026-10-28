@@ -34,6 +34,28 @@ export const Choice: StoryObj = {
     await expect(canvas.queryByText(/^Ask where/)).toBeNull();
   },
 };
+// A person's carried item is a note on their page, not on World (book-ui.md, NPC page).
+// Breaks: the note is dropped from the NPC page.
+const reeve = NpcChoiceView.view.entities[1]!;
+const carryingView = {
+  ...NpcChoiceView,
+  view: {
+    ...NpcChoiceView.view,
+    entities: NpcChoiceView.view.entities.map((e) =>
+      e === reeve ? { ...e, carrying: 'npc.reeve.carrying' } : e,
+    ),
+  },
+};
+export const Carrying: StoryObj = {
+  ...pageStory(carryingView),
+  args: { words: { 'npc.reeve.carrying': 'The Reeve has a sealed letter at her belt.' } },
+  name: 'Carrying',
+  play: async ({ canvas }) => {
+    await expect(
+      await canvas.findByText('The Reeve has a sealed letter at her belt.'),
+    ).toBeVisible();
+  },
+};
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
 // Breaks: the buy page loses its Sell card while the player holds something the shop buys.
 export const Shelf: StoryObj = {

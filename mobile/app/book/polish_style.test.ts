@@ -15,7 +15,6 @@ const room = (description: string) => ({
   g: { place: [], door: () => [] },
   press: () => {},
   open: () => {},
-  openChoice: () => {},
 });
 
 // Breaks: a blank line in the authored description is shown as one run of text (the split dropped),

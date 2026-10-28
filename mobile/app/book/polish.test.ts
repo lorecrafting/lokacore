@@ -459,7 +459,6 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
         g: { place: [] },
         press: () => {},
         open: () => {},
-        openChoice: () => {},
       } as any),
     )
       .filter(

@@ -3,7 +3,7 @@ import { Text } from './Text.tsx';
 import { DreamPage } from './DreamPage.tsx';
 import { JournalPage } from './journal.tsx';
 // Page dispatch for the current Book view and local detail stack.
-import { group, conversation, npcPage, type Page } from './model.ts';
+import { group, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
@@ -143,11 +143,9 @@ function WorldPage(p: BodyProps) {
       view={view}
       text={text}
       log={log}
-      recap={p.screen.recap}
       g={p.g}
       press={p.press}
       open={openThing}
-      openChoice={() => p.open(conversation(view))}
       links={proseLinks(p)}
     />
   );

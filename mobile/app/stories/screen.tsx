@@ -52,7 +52,6 @@ export const screenFrom = (
     returnDetail: undefined,
     confirmedRead: undefined,
     ended: undefined,
-    recap: undefined,
     ...shell,
   };
 };

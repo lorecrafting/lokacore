@@ -53,7 +53,7 @@ import {
 } from './logs.ts';
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
-import { grouped, holding, pressedAway, settle } from './recap.ts';
+import { holding, pressedAway, settle } from './recap.ts';
 
 function background(
   game: Game,
@@ -125,7 +125,12 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
           : undefined;
   closedLog(s, reply.kind === 'saved' && reply.decision.kind === 'accepted');
   const line = s.fault ? '' : received(game, reply, was, s, text);
-  if (!s.fault) s.log.push(...cueLines(s, game.view().view, text));
+  const now = game.view().view,
+    direction = (s.retry?.button.input as { direction?: string } | undefined)?.direction,
+    // The exit taken warns once, after the movement line (book-ui.md, Room page anatomy).
+    warning =
+      was.place.id !== now.place.id && was.exits.find((e) => e.direction === direction)?.warning;
+  if (!s.fault) s.log.push(...(warning ? [text(warning)] : []), ...cueLines(s, now, text));
   if (s.fault) {
     s.returnWorld = false;
     s.returnDetail = undefined;
@@ -160,7 +165,7 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
-  pressedAway(s); // the recap opens the page after an absence and goes with the next press
+  pressedAway(s); // an open settlement's held lines log before the press's own
   s.returnDetail = s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
@@ -253,7 +258,6 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     log: s.log,
     combatLog: s.combatLog,
     said,
-    recap: s.recap && grouped(s.recap),
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
     leave: (id: string) => leaveLog(s, id, game.view().view.choice?.speaker_id === id),

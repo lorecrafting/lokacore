@@ -10,7 +10,6 @@ export const LABEL = {
   backToMap: 'Back to map',
   close: 'Close',
   resumeDream: 'Resume dream',
-  continueConversation: 'Continue conversation',
   gotIt: 'Got it',
   startOver: 'Start over',
   tryAgain: 'Try again',

@@ -321,6 +321,27 @@ test('malformed water and historical recovery rows refuse save_corrupt without r
   }
 });
 
+// Breaks: the warned exit's warning is not logged, logged before the movement line or twice, or
+// logged for an unwarned exit (book-ui.md, Room page anatomy: an exit warning is a log line).
+test('the warned exit taken logs its warning once, after the movement line', (t) => {
+  const a = setup();
+  t.after(() => a.sql.close());
+  a.prepared();
+  const game = openGame(a.db, a.b, a.host),
+    book = presenter(game);
+  game.subscribe(book.update);
+  const go = (direction: string) => {
+    book.press(group(book.screen().buttons).exits.find((e) => e.direction === direction)!.button!);
+    return book.screen().log.map((l) => (typeof l === 'string' ? l : l.text));
+  };
+  const down = go('down'),
+    at = down.indexOf('Your lungs burn.');
+  assert.ok(at > 0, JSON.stringify(down));
+  assert.equal(down.lastIndexOf('Your lungs burn.'), at);
+  assert.equal(down[at - 1], 'You arrive from above.');
+  assert.ok(!go('up').includes('Your lungs burn.'));
+});
+
 // Breaks: the Book loses captured free Surface on detail navigation or prints recovery before confirmed custody, repeats it, or loses it on reopen.
 test('Book projects warning, confirmed remaining time, free Surface and selected original recovery once', (t) => {
   const a = setup();

@@ -1,7 +1,8 @@
 // Toolbox row W27, the away recap (book-ui.md, Away recap): while the cartridge authors a threshold,
-// an elapsed settlement's World lines are held until it settles, then shown as one grouped block
-// when it spanned the threshold, else as the ordinary log. Nothing is stored.
+// an elapsed settlement's World lines are held until it settles, then logged as one recap entry
+// (grouped when drawn) when it spanned the threshold, else as ordinary lines. Nothing is stored.
 import type { GameView } from '../../packages/game-view/session.ts';
+import { LABEL } from './labels.ts';
 import type { Logs } from './logs.ts';
 
 export type RecapLine = { line: string; count: number };
@@ -23,7 +24,7 @@ export function holding(s: Logs, was: GameView, now: GameView) {
   return (s.away ??= { from: was.place.id === now.place.id ? was.time : Infinity, log: [] });
 }
 
-/** Once time stops catching up: the recap if the settlement spanned the threshold, else the log. */
+/** Once time stops catching up: a recap log entry if the settlement spanned the threshold, else lines. */
 export function settle(s: Logs) {
   const away = s.away;
   if (!away || s.status.kind === 'catching_up') return;
@@ -34,13 +35,16 @@ export function settle(s: Logs) {
     recap_after !== undefined &&
     away.log.length > 0 &&
     time - away.from >= recap_after
-  )
-    s.recap = [...(s.recap ?? []), ...away.log]; // a second absence before a press adds to it
-  else s.log.push(...away.log);
+  ) {
+    const last = s.log.at(-1);
+    // A second absence before any other line adds to the same entry.
+    if (typeof last === 'object' && 'recap' in last) last.recap.push(...away.log);
+    else s.log.push({ recap: [...away.log], text: LABEL.awayRecap });
+  } else s.log.push(...away.log);
 }
 
 /** A press ends an open settlement: its held lines go to the log before the press's own. */
 export function pressedAway(s: Logs) {
   if (s.away) s.log.push(...s.away.log);
-  s.away = s.recap = undefined;
+  s.away = undefined;
 }
