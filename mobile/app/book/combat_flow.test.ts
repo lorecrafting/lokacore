@@ -120,18 +120,20 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
     texts,
     footer: () => draw().some((n) => n.type?.name === 'Footer'),
     tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
-    publish: (next: GameView, line?: string) => {
+    // `fight`: a line told before `line`, the room reached's arrival (loka-glj8).
+    publish: (next: GameView, line?: string, fight?: string) => {
       current = next;
       revision++;
       if (line)
         last = {
           command_id: `commit-${revision}`,
-          lines: [{ key: line }],
-          combat_lines: [0],
+          lines: [...(fight ? [{ key: fight }] : []), { key: line }],
+          combat_lines: fight ? [0, 1] : [0],
+          ...(fight && { arrival: 1 }),
         } as never;
       listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } });
     },
-    answer: (reply: any, next = current, line?: string, ambient?: string) => {
+    answer: (reply: any, next = current, line?: string, ambient?: string, arrival?: number) => {
       respond = () => {
         current = next;
         revision++;
@@ -141,6 +143,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
             command_id: `commit-${revision}`,
             lines: [{ key: line }, ...(ambient ? [{ key: ambient }] : [])],
             combat_lines: [0],
+            ...(arrival && { arrival }),
           } as never;
         return reply;
       };
@@ -187,6 +190,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
           : ending === 'opponent_dead'
             ? 'combat.result'
             : undefined,
+        ending === 'player_dead' ? 'combat.hit' : undefined,
       );
       const ended = h.texts();
       assert.ok(ended.includes('Combat') && ended.includes('a marsh rat'), ending);
@@ -203,7 +207,8 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
         assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
       h.tap('Back to World');
       assert.equal(h.texts().includes('Combat'), false);
-      // The fight's lines stay in the room log; a death's room change clears the cellar's.
+      // The fight's lines stay in the room log; a death's room change clears the cellar's, and
+      // its own receipt's fight lines stay on the Combat page: the shrine opens at woke (loka-glj8).
       const kept = {
         closed: ['You strike the marsh rat.'],
         opponent_dead: ['You strike the marsh rat.', 'The marsh rat falls.'],
@@ -262,7 +267,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     });
     // Break (review of #406): a pressed closure's non-combat line (here an arrival room event)
     // lands in the World log instead of the ended Combat page (book-ui.md, Closure).
-    h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee', 'road.crows');
+    h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee', 'road.crows', 1);
     h.tap('Flee');
     assert.ok(h.texts().includes('Combat'));
     const shown = h.texts();
@@ -274,8 +279,9 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.tap('Back to World');
     assert.equal(h.texts().includes('Combat'), false);
     assert.ok(h.texts().includes('The road'));
-    // The flee's lines open the road's room log; the cellar's lines went with its room.
-    assert.equal(h.texts().filter((t) => t === 'You escape to the road.').length, 1);
+    // Break (loka-glj8): the flight's line leaves the fight room's page for the road; the road's
+    // room log opens at its arrival line (here the crows); the cellar's lines went with its room.
+    assert.equal(h.texts().includes('You escape to the road.'), false);
     assert.equal(h.texts().filter((t) => t.includes('Crows')).length, 1);
     assert.equal(h.texts().includes('You strike the marsh rat.'), false);
     assert.equal(h.texts().includes("You can't do that: locked."), false);
@@ -328,5 +334,23 @@ test('reopening after escape or either death never restores combat into the Worl
     } finally {
       h.close();
     }
+  }
+});
+
+// Break (loka-glj8): a reopened death or flight receipt restores its fight lines into the room
+// reached; the room log opens at the record's arrival line.
+test('reopening a receipt that changed room restores the room log from its arrival line', () => {
+  const h = mounted(view({ combat: undefined, actions: [] }), {
+    command_id: 'died',
+    lines: [{ key: 'combat.hit' }, { key: 'combat.death' }],
+    combat_lines: [0, 1],
+    arrival: 1,
+  } as never);
+  try {
+    const shown = h.texts();
+    assert.equal(shown.includes('You strike the marsh rat.'), false);
+    assert.equal(shown.filter((t) => t === 'You wake at the shrine.').length, 1);
+  } finally {
+    h.close();
   }
 });

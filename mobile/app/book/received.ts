@@ -4,6 +4,7 @@ import type { Game, GameView, Reply } from '../../packages/game-view/session.ts'
 import { cast, comings, lineText, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
 import {
+  arrived,
   closing,
   combatResult,
   detailLines,
@@ -81,7 +82,10 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const fallback = fallbackLine(accepted, attempt);
   const said = routed?.[0] ?? replyLine(reply, text, now, fallback, was);
   if (!repeated) place(s, said, page, accepted, attempt.button.target_ids, detail);
-  if (!repeated && routed) logLines(s, routed[1], s.combatLog);
+  if (!repeated && routed) {
+    s.combatLog.push(...routed[1]);
+    s.log.push(...routedLines(arrived(retained!), was, now, attempt.button, text)[1]);
+  }
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
   return repeated ? '' : said.map(lineText).join(' ');

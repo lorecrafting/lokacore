@@ -300,7 +300,7 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   ([Announcements](#announcements)).
 - A refusal on a detail page draws in that page's history and in the room log, and is read once.
   A refusal is never quiet.
-- Each room speaks from its own point of view ([record](../decisions/owner-decision-room-point-of-view-2026-10-24.md); target, not yet built: Beads `loka-glj8`).
+- Each room speaks from its own point of view ([record](../decisions/owner-decision-room-point-of-view-2026-10-24.md); the player's lines are built, the other-actor lines "<Name> leaves north." and "<Name> arrives from the south." are a target: Beads `loka-glj8` follow-up).
   A room change clears the old room's log; the arrival lines then open the new room's log in
   receipt order. A plain move logs nothing new for the player in the room left (others there see
   "<Name> leaves north."); the room reached opens with "You arrive from the south." (others:

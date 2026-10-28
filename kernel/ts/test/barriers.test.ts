@@ -150,11 +150,35 @@ test('each door verb and a move tell their line, naming the actor', () => {
     w = run(w, door(type, 'east'));
   }
   const opened = run(world(), door('open', 'north'));
-  const moved = { key: 'movement.moved', bindings: { direction: 'north' } };
+  const moved = { key: 'movement.moved', bindings: { from: 'south' } };
   assert.deepEqual(line(opened, move('north'))[0], {
     ...moved,
     participants: { actor: opened.body },
   });
+});
+
+// Breaks (loka-glj8): an arrival names an exit that leads elsewhere (no way back), misses a
+// non-reciprocal way back, or prefers another exit back over the opposite face.
+test('an arrival names the destination exit back to the origin, the opposite face first', () => {
+  const ref = (key: string) => ({ ...OAK, kind: 'room', key });
+  const open = (f: (yard: any) => void) => (c: any) => {
+    delete room(c, 'gatehouse').exits.north.barrier;
+    delete room(c, 'courtyard').exits.south.barrier;
+    f(room(c, 'courtyard').exits);
+  };
+  for (const [map, bindings] of [
+    [open((e) => (e.south.to = ref('cell'))), undefined],
+    [
+      open((e) => ((e.south.to = ref('cell')), (e.down = { to: ref('gatehouse') }))),
+      { from: 'down' },
+    ],
+    [open((e) => (e.east = { to: ref('gatehouse') })), { from: 'south' }],
+  ] as const) {
+    const w = world(map);
+    const d = step(w, cmd(w, move('north')), 0).decision;
+    assert.equal(d.kind, 'accepted');
+    if (d.kind === 'accepted') assert.deepEqual(d.narration?.[0].bindings, bindings);
+  }
 });
 
 // Breaks: lock or unlock without the key, the key not found inside a carried bag (has_item is

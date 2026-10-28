@@ -40,11 +40,15 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     }
     const detail_id = pickup?.corpse_id ?? receiptDetail(s, r, d);
     const cue = receiptBellCue(s, r, d);
+    const woke = s.world.cartridge.world?.death?.narration?.woke;
+    const arrival = lines.findIndex((l) => l.key === 'combat.ran_in' || l.key === woke);
     return {
       command_id: r.command_id,
       lines,
       ...(cue && { cue }),
       ...(combat_lines.length && { combat_lines }),
+      // Only a fight's page keeps the lines before; a death off the fight (a bleed) keeps them all.
+      ...(arrival > 0 && combat_lines.length && { arrival }),
       ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
       ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
     } as NarrationRecord;

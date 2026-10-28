@@ -1,6 +1,7 @@
 import type {
   CharacterId,
   CommandId,
+  EntityId,
   ErrorCode,
   GameError,
   Key,
@@ -30,6 +31,8 @@ import { entrySight } from '../population/behavior.ts';
 import { engage } from '../disposition.ts';
 import { crossable, fall, fare, passage } from './shared.ts';
 import { left } from '../trail.ts';
+import { engineLine } from '../line.ts';
+import { OPPOSITE } from '../../content/cartridge_barriers.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
 type MoveCommand = {
@@ -75,7 +78,35 @@ export function moveSequence(
     outcome,
     [...ops, ...progress.ops],
     [entered, ...progress.events],
-    progress.narration,
+    [
+      arrival(world, actor_id, body, here, there, direction, outcome),
+      ...(progress.narration ?? []),
+    ],
+  );
+}
+
+/**
+ * The room reached opens with its arrival line (book-ui Line placement; loka-glj8): `from` is the
+ * destination's exit back to `here` the actor can see, the opposite face first, else none ("You arrive.").
+ */
+function arrival(
+  world: World,
+  actor_id: CharacterId,
+  body: EntityId,
+  here: EntityId,
+  there: EntityId,
+  direction: Key,
+  outcome: string,
+) {
+  const room = world.rooms[there];
+  const from = [OPPOSITE[direction], ...COMPASS].find((d) => {
+    const to = d && exitTo(room, d);
+    return to && world.roomIds[refString(to)] === here && !hidden(world, room, d, actor_id);
+  });
+  return engineLine(
+    outcome === 'fled' ? 'combat.ran_in' : 'movement.moved',
+    { actor: body },
+    from ? { from } : undefined,
   );
 }
 

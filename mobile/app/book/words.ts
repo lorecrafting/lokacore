@@ -171,7 +171,6 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // third person when its actor is a person the view, or the view before the step (one who left),
 // names. A skipped combat turn (loka-x6t.30)
 // names its status from the engine line combat.skipped; it has no actor when the player skipped.
-// A flight (combat.fled) names the way taken.
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -185,7 +184,6 @@ export const lineWords = (
     id === undefined ? undefined : nameOf(view, id, text) || (was && nameOf(was, id, text));
   const told = lineSentence(t, (v) => text(String(v)), actor, wield ? WIELD[t.key] : undefined);
   if (told) return told;
-  if (t.key === 'combat.fled') return `You flee ${String(t.bindings?.direction)}.`;
   if (t.key !== 'combat.skipped') return text(t.key);
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
   return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);

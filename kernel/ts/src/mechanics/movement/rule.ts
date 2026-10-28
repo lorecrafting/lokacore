@@ -18,9 +18,7 @@ import {
   accepted,
   actorOf,
   admitted,
-  bodyOf,
   COMPASS,
-  type Decision,
   has,
   keys,
   refString,
@@ -29,8 +27,7 @@ import {
   type Steps,
   values,
 } from '../../runtime/decision.ts';
-import type { CharacterId, DefinitionRef, EntityId, Key } from '../../contracts.gen.ts';
-import { engineLine } from '../line.ts';
+import type { DefinitionRef, EntityId } from '../../contracts.gen.ts';
 import { exitTo, hidden } from '../lookups.ts';
 import { moveSequence } from './sequence.ts';
 import { passage } from './shared.ts';
@@ -39,31 +36,7 @@ export { passage, fare } from './shared.ts';
 export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 }) =>
   command.payload.type === 'scan'
     ? accepted(world, 'scanned', [], [])
-    : wentLine(
-        world,
-        command.payload,
-        moveSequence(world, { ...command, payload: command.payload }, mint, 'moved', steps),
-      );
-
-/** A plain move's line first (loka-kgd.185), only here: a flight's moveSequence narrates combat.fled. */
-const wentLine = <E>(
-  world: World,
-  p: { actor_id: CharacterId; direction: Key },
-  d: Decision<E>,
-): Decision<E> =>
-  d.kind === 'accepted'
-    ? {
-        ...d,
-        narration: [
-          engineLine(
-            'movement.moved',
-            { actor: bodyOf(world, p.actor_id)! },
-            { direction: String(p.direction) },
-          ),
-          ...(d.narration ?? []),
-        ],
-      }
-    : d;
+    : moveSequence(world, { ...command, payload: command.payload }, mint, 'moved', steps);
 
 /**
  * What `body` sees through each exit of its room, in compass order (00 §4.1 scan): the passage

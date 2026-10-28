@@ -49,7 +49,7 @@ export function flee(
     'fled',
     steps,
   );
-  // The engine line combat.fled names the way taken; the Book words it "You flee west.".
+  // combat.fled names the way taken, before moveSequence's combat.ran_in (loka-glj8).
   const fled = {
     key: 'combat.fled' as TextKey,
     bindings: { direction: String(direction) as TextKey },

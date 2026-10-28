@@ -418,13 +418,13 @@ test('the terminal shows the description variant the fresh facts select', () => 
   assert.match(
     r.out,
     new RegExp(
-      `> n\nYou go north.\n\\[movement\\.moved: [^\\]]+\\]\nVillage Green\n${c.text['room.village_green.worried']}\n`,
+      `> n\nYou arrive from the south.\n\\[movement\\.moved: [^\\]]+\\]\nVillage Green\n${c.text['room.village_green.worried']}\n`,
     ),
   );
   assert.match(
     r.out,
     new RegExp(
-      `> s\nYou go south.\n\\[movement\\.moved: [^\\]]+\\]\nReed Path\n${c.text['room.reed_path.description']}\n`,
+      `> s\nYou arrive from the north.\n\\[movement\\.moved: [^\\]]+\\]\nReed Path\n${c.text['room.reed_path.description']}\n`,
     ),
   );
   assert.match(r.out, new RegExp(`> look mud\n${c.text['detail.mud.tracks']}\n`));

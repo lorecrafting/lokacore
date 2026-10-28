@@ -260,10 +260,10 @@ test('a postcommit narration read fault preserves the saved result and clears re
     0, // the closed visit's history is dropped; a replayed choice would write it again
   );
   assert.equal(h.p.screen().fault, undefined);
-  assert.deepEqual(h.p.screen().log, ['You go north.']);
+  assert.deepEqual(h.p.screen().log, ['You arrive from the south.']);
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
-  assert.deepEqual(h.p.screen().log, ['You go north.', 'You take a brass lantern.']);
+  assert.deepEqual(h.p.screen().log, ['You arrive from the south.', 'You take a brass lantern.']);
   h.sql.close();
 });
 
