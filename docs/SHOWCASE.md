@@ -1,6 +1,6 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built, the magic district (plan 6) is built; the Homestead, economy and law districts and the traps district of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md) and [7](showcase/traps-district.md) are planned, to build in that order; compiled answer
+`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built, the magic district (plan 6) is built, and the Homestead, economy and law districts and the traps district of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md) and [7](showcase/traps-district.md) are built, each held by its `kernel/ts/test/showcase_<district>.test.ts`; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
@@ -10,6 +10,7 @@ it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-
 **Coverage** (2026-10-28, at 16fcf0fad, `node kernel/ts/play/coverage.ts <artifact>` over the 19
 showcase transcripts, `walk_*` included): 36 of 140 reactions fired, 17 of 49 recipes completed,
 14 of 34 choices taken, 2 of 3 quests done (`errand` never).
+To re-record a `walk_*` transcript, drive `Rec` from `kernel/ts/play/record.ts` in a script (`new Rec(ctx)`, its moves, `r.save(out)`) and run `node <script> <out>`.
 
 ## Structure
 
