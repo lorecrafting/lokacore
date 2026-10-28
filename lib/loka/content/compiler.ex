@@ -58,18 +58,25 @@ defmodule Loka.Content.Compiler do
     {located, v2, d3 ++ d4}
   end
 
-  # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area bundles).
+  # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
+  # bundles), except an action's own: an action refused by its extends must not build.
   defp split(lists, files) do
-    held? = Enum.any?(files, &held?/1)
+    bundle? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+    actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel)
 
     lists
     |> Enum.concat()
-    |> Enum.reject(&(held? and &1["code"] == "UNRESOLVED_REFERENCE"))
+    |> Enum.reject(
+      &(&1["code"] == "UNRESOLVED_REFERENCE" and held?(&1["path"], bundle?, actions))
+    )
     |> Enum.split_with(&(&1["severity"] == "warning"))
   end
 
-  defp held?({_, kind, :invalid}), do: kind == :bundle or match?({:action, _, _}, kind)
-  defp held?(_), do: false
+  defp held?(_, true, _), do: true
+  defp held?(_, false, []), do: false
+
+  defp held?(path, false, actions),
+    do: not Enum.any?(actions, &(path == &1 or String.starts_with?(path, [&1 <> ".", &1 <> "/"])))
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
