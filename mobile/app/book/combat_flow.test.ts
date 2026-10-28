@@ -340,17 +340,24 @@ test('reopening after escape or either death never restores combat into the Worl
 // Break (loka-glj8): a reopened death or flight receipt restores its fight lines into the room
 // reached; the room log opens at the record's arrival line.
 test('reopening a receipt that changed room restores the room log from its arrival line', () => {
-  const h = mounted(view({ combat: undefined, actions: [] }), {
-    command_id: 'died',
-    lines: [{ key: 'combat.hit' }, { key: 'combat.death' }],
-    combat_lines: [0, 1],
-    arrival: 1,
-  } as never);
-  try {
-    const shown = h.texts();
-    assert.equal(shown.includes('You strike the marsh rat.'), false);
-    assert.equal(shown.filter((t) => t === 'You wake at the shrine.').length, 1);
-  } finally {
-    h.close();
+  for (const [lines, after] of [
+    [[{ key: 'combat.hit' }, { key: 'combat.death' }], 'You wake at the shrine.'],
+    // A flight's lines are all fight lines (closing); the ones from the arrival are the room's.
+    [
+      [
+        { key: 'combat.fled', bindings: { direction: 'north' } },
+        { key: 'combat.ran_in', bindings: { from: 'south' } },
+      ],
+      'You run in from the south.',
+    ],
+  ] as const) {
+    const g = game(view({ combat: undefined, actions: [] }));
+    const record = { command_id: 'moved', lines, combat_lines: [0, 1], arrival: 1 };
+    const p = presenter({
+      ...g,
+      lastNarration: () => record as never,
+      text: (k) => (k === 'combat.death' ? 'You wake at the shrine.' : g.text(k)),
+    });
+    assert.deepEqual([p.screen().log, p.screen().combatLog], [[after], []]);
   }
 });

@@ -234,11 +234,6 @@ export function closedLog(s: Logs, accepted: boolean) {
 
 // A flight's or a death's lines stay with the fight; the room reached opens at its arrival line
 // (book-ui.md Line placement, loka-glj8), cut by record index before any line is worded.
-export const arrived = (last: NarrationRecord): NarrationRecord => {
-  const at = last.arrival ?? 0;
-  return {
-    ...last,
-    lines: last.lines.slice(at),
-    combat_lines: last.combat_lines?.flatMap((i) => (i < at ? [] : [i - at])),
-  };
-};
+// No line from the arrival on belongs to the fight left behind.
+export const arrived = (last: NarrationRecord): NarrationRecord =>
+  last.arrival ? { ...last, lines: last.lines.slice(last.arrival), combat_lines: undefined } : last;
