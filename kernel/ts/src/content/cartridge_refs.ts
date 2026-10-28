@@ -14,8 +14,8 @@ import { levelling } from './cartridge_levelling.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
 // The loader's reference stage and the definition walks it shares with the lock stage
-// (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
-// detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
+// (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode). References, text keys,
+// reachability and containment are the compiler's (lib/loka/content); the families below remain.
 import { encode } from '../foundation/canonical.ts';
 import {
   type DefinitionRef,
