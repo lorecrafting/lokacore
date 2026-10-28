@@ -32,6 +32,8 @@ defmodule Loka.Content.Lint do
   end
 
   defp lint_rel(_, {_, key, [dir, _]}), do: dir <> "/" <> key <> ".json"
+  # A copy of a bundled behaviour's rule sits at [behaviours, name, reactions, rule].
+  defp lint_rel(_, {:reaction, key, [_, _, _, _]}), do: "reactions/" <> key <> ".json"
   defp lint_rel(rel, _), do: rel
 
   @doc "The findings for decoded source files, keyed by their path relative to the cartridge."

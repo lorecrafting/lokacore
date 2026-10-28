@@ -17,8 +17,10 @@ defmodule Loka.Content.Extends do
   @doc "The files with every `extends` resolved and every abstract definition removed."
   @spec flatten([entry()]) :: {[entry()], [fault()]}
   def flatten(files) do
+    # A behaviour is not flattened: Behaviours.expand refuses `extends` and `abstract` on it.
     index =
       for {rel, {kind, key, steps}, value} <- files,
+          kind != :behaviour,
           into: %{},
           do: {{kind, key}, {{rel, steps}, value}}
 
@@ -27,6 +29,8 @@ defmodule Loka.Content.Extends do
 
     {Enum.flat_map(files, &output(&1, memo)), faults}
   end
+
+  defp output({_, {:behaviour, _, _}, _} = behaviour, _), do: [behaviour]
 
   defp output({rel, {kind, key, _} = id, _}, memo) do
     case memo[{kind, key}] do

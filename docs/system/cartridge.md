@@ -509,7 +509,8 @@ rules byte for byte.
   `{"reactions": {"<rule>": <ReactionRule without key>}}`. An NPC or item may carry
   `"behaviours": ["<Key>", ...]`; the compiler strips it from every NPC and item and drops every
   behaviour. `behaviours` on any other kind is `UNKNOWN_FIELD`; a behaviour no holder lists adds
-  no reaction (its inline prose lines, lowered first, stay in the text catalog).
+  no reaction, and its rule bodies are not checked (its inline prose lines, lowered first, stay in
+  the text catalog). `holder` is a reserved parameter name.
 - Each rule becomes one reaction per holder (once, however often the holder lists the name),
   keyed `<rule>_<holder>` (`take` on `trout_01` is `take_trout_01`). In the copy, every
   `{"param": "holder"}` (an object with that one member) becomes the holder's key, so the
@@ -528,12 +529,13 @@ rules byte for byte.
 | `behaviours` is not a list of Keys | `SCHEMA_VIOLATION` | `<src>.behaviours` | `{"error": "invalid_type"}` |
 | A name with no behaviour (reported at its first index) | `UNRESOLVED_REFERENCE` | `<src>.behaviours[<i>]` | `{"target": "behaviours/<name>"}` |
 | A behaviour that is not an object | `SCHEMA_VIOLATION` | `behaviours/<name>` | `{"error": "invalid_type"}` |
-| A behaviour member other than `reactions` | `UNKNOWN_FIELD` | `behaviours/<name>.<member>` | `{}` |
+| A behaviour member other than `reactions` (`extends` and `abstract` too) | `UNKNOWN_FIELD` | `behaviours/<name>.<member>` | `{}` |
 | `reactions` is missing or not an object | `SCHEMA_VIOLATION` | `behaviours/<name>.reactions` | `{"error": "invalid_type"}` |
 
 A behaviour that fails to decode, is not an object or has no `reactions` object gives its
 holders no copies and no diagnostic of their own. Existing checks cover the rest: a copy key over 64 characters is `SCHEMA_VIOLATION` at
-the behaviour rule; a copy key equal to another reaction's is `DUPLICATE_DEFINITION` at each site.
+the behaviour rule; a copy key equal to another reaction's is `DUPLICATE_DEFINITION` at each site,
+and an NPC and an item sharing a key give one `DUPLICATE_DEFINITION` at the behaviour rule.
 [fishing_sampler](../../cartridges/fishing_sampler/behaviours/spoils.json) is the working
 example: one behaviour on its four fish; its artifact equals the four hand-written `take_*`
 rules byte for byte.

@@ -48,6 +48,12 @@ defmodule Loka.ContentBehavioursTest do
     assert refused(dir, [{@spoils, &Map.put(&1, "extra", 1)}]) ==
              [{"UNKNOWN_FIELD", "behaviours/spoils.extra", %{}}]
 
+    # extends and abstract are refused on a behaviour, not flattened.
+    for {field, v} <- [{"extends", "spoils"}, {"abstract", true}] do
+      assert refused(dir, [{@spoils, &Map.put(&1, field, v)}]) ==
+               [{"UNKNOWN_FIELD", "behaviours/spoils.#{field}", %{}}]
+    end
+
     for spoils <- [%{"reactions" => []}, %{}] do
       assert refused(dir, [{@spoils, spoils}]) ==
                [{"SCHEMA_VIOLATION", "behaviours/spoils.reactions", %{"error" => "invalid_type"}}]
@@ -153,6 +159,23 @@ defmodule Loka.ContentBehavioursTest do
     assert at.("hears_elder") == at.("elder_hears")
     assert at.("hears_miller") == at.("miller_hears")
     refute at.("hears_elder") == at.("hears_miller")
+  end
+
+  # Breaks: a bundled behaviour's copies linted under the bundle file (one finding, or none).
+  test "each copy of a bundled behaviour is linted under its own reaction address" do
+    dir = Loka.ContentSource.copy(@fishing)
+    spoils = File.read!(Path.join(dir, @spoils))
+    File.rm!(Path.join(dir, @spoils))
+    File.mkdir_p!(Path.join(dir, "areas"))
+    File.write!(Path.join(dir, "areas/river.json"), ~s({"behaviours": {"spoils": #{spoils}}}))
+
+    narrate = ~s(: writes state with no narrate step and no "silent": true)
+
+    assert Enum.filter(Loka.Content.Lint.run(dir), &String.ends_with?(&1, narrate)) ==
+             Enum.map(
+               ~w(eel_01 salmon_01 trout_01 trout_02),
+               &"reactions/take_#{&1}.json#{narrate}"
+             )
   end
 
   defp status(key), do: %{"op" => "status.apply", "status" => key, "item" => "trout_01"}
