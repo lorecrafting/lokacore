@@ -457,7 +457,7 @@ bg 0 'git -C ../worktrees.noindex/a worktree add ../b'
 bg 0 'git worktree remove ../x'
 bg 0 'git worktree add "$W" b'
 bg 0 'LOKA_PM=1 git worktree add ../lokacore-session'
-mkdir -p "$tmp/ck/.git"; bg 2 'git worktree add worktrees.noindex/x' "$tmp/ck"
+mkdir -p "$tmp/ck/.git"; bg 2 'git worktree add worktrees.noindex/x' "$tmp/ck"; bg 0 'git worktree add ../worktrees.noindex/x' "$tmp/ck"
 # Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
 P=$(mktemp -d); mkdir -p "$P/s1/subagents"
 cb() { printf '{"type":"system","subtype":"compact_boundary","compactMetadata":{"durationMs":%s}}\n' "$1"; }
