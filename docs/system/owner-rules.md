@@ -9,7 +9,7 @@ and not repeated here.
 ## Product and scope
 
 - The prologue teaches every basic (Tending, Making, Guarding, Words) through quests of gifts or labour, no coin; houses and guilds open at the landing; Skills stay on Character, one collapsed line per profession, until the landing ([record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)).
-- Proof order for the real game's chapter (PM ruling loka-40d4, 2026-10-28; the rule was set for Chapter 1): E1 certification of the real chapter's candidate (its harness is rebuilt with that chapter), E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
+- Proof order for the real game's chapter (PM ruling loka-40d4, 2026-10-28; the rule was set for Chapter 1): E1 coverage complete (harness deleted 2026-10-28, loka-ivjq.16; rebuilt with that chapter), E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 - Book design foundation: the Chapter 1 mock's base look with only the page curl (one Skia shader for web and phone) and paper sound; day and night follow in-game time (no override for now) ([record](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 - Each Book component's spec is a doc comment on its export, the catalogue an index of them, both kept in step by `catalogue.test.ts` ([record](../decisions/owner-decision-component-docs-in-code-2026-10-22.md)).

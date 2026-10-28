@@ -87,7 +87,7 @@ responsibilities, which are never capabilities (05 §6). No fixtures: none bound
 | lab | authoring_certification |  |
 | evidence_production | authoring_certification |  |
 
-## Account, run and admission contracts (`protocol/account.schema.json`)
+## Account, run and story point contracts (`protocol/account.schema.json`)
 
 Account and run ids, story point reports and acceptances (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
 
