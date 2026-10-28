@@ -80,9 +80,9 @@ defmodule Loka.Content.Source do
 
   defp bundle_diag({code, location, data}), do: diag(code, at(location, []), data)
 
-  defp extends_diag({code, rel, data, from}) do
+  defp extends_diag({code, location, data, from}) do
     data = if from, do: Map.put(data, "from", at(from, [])), else: data
-    diag(code, at(rel, ["extends"]), data)
+    diag(code, at(location, []), data)
   end
 
   defp entry(rel, dir), do: entry(rel, classify(rel), dir)

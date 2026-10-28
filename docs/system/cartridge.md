@@ -16,7 +16,7 @@ world's definitions and text:
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
-| `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]`; the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
+| `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
@@ -354,7 +354,8 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
-`lib/loka/content/behaviours.ex`, `lib/loka/content/signals.ex`, `lib/loka/content/zones.ex`),
+`lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`, `lib/loka/content/signals.ex`,
+`lib/loka/content/zones.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
 behaviours, lower signals, expand zone rules, refuse repeated definitions again. The artifact
@@ -393,6 +394,29 @@ definition of the same kind (the short-reference convention), in any file of tha
   maps differ between children (shoo's deer `sight.narration`) stays out of the parent.
 - A child never inherits `extends` or `abstract`.
 - A schema error inside an inherited field reports at the child's path.
+
+**Parameters.** An abstract definition may declare `"params": ["<Key>", ...]` and hold a marker,
+`{"param": "<name>"}` (an object with that one member), in place of any value. Its direct
+child passes `"with": {"<name>": <value>, ...}`, one value per declared name: each marker is
+replaced whole by its value (no interpolation, no defaults), then the child merges over the
+filled parent, so the child's own fields still win. The child never inherits `params`, and the
+artifact carries neither `params` nor `with`. A grandchild sees the filled result: only the
+direct parent's markers are filled. Behaviours take the same `params` and `with`, per
+attachment (below). The refusals, with `<at>` the child's `<src>.with` or the attachment's
+`<src>.behaviours[<i>].with`, and `<def>` the declaring definition's or behaviour's path:
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| `with` names an undeclared parameter | `UNKNOWN_FIELD` | `<at>.<name>` | `{}` |
+| A declared parameter is missing from `with` (one diagnostic, however many) | `SCHEMA_VIOLATION` | `<at>` | `{"error": "missing_property"}` |
+| `with` is not an object | `SCHEMA_VIOLATION` | `<at>` | `{"error": "invalid_type"}` |
+| A marker names no declared parameter (reported once, at the declaring site) | `UNRESOLVED_REFERENCE` | `<def>.<path to the marker>` | `{"target": "<name>"}` |
+| `params` is not a list of Keys | `SCHEMA_VIOLATION` | `<def>.params` | `{"error": "invalid_type"}` |
+
+`params` on a definition that is not abstract stays and is `UNKNOWN_FIELD`. A parent with a
+`params` fault, like a parent in a cycle, drops its children without diagnostics of their own.
+The [toolbox_showcase](../../cartridges/toolbox_showcase/reactions/wheel_shows.json) is the
+working example: its 30 `wheel_*_x_shows_*` reactions are one line each.
 
 **`abstract`.** A definition with `"abstract": true` is removed after its children resolve. It
 is never validated (an abstract NPC needs no `room`), and a reference to it is an ordinary
@@ -509,12 +533,18 @@ rules byte for byte.
   `{"reactions": {"<rule>": <ReactionRule without key>}}`. An NPC or item may carry
   `"behaviours": ["<Key>", ...]`; the compiler strips it from every NPC and item and drops every
   behaviour. `behaviours` on any other kind is `UNKNOWN_FIELD`; a behaviour no holder lists adds
-  no reaction, and its rule bodies are not checked (its inline prose lines, lowered first, stay in
-  the text catalog). `holder` is a reserved parameter name.
+  no reaction, and its rule bodies are not checked beyond their [parameter](#source-shortcuts)
+  markers (its inline prose lines, lowered first, stay in the text catalog). `holder` is a
+  reserved parameter name, always bound.
+- A behaviour may declare `"params"` like a prototype; each holder then attaches it as
+  `{"behaviour": "<name>", "with": {...}}` (a bare name or an object without `with` passes no
+  arguments) and its copies fill the markers from that `with`. An inline prose line in `with`
+  gets the holder's key, `<item|npc>.<holder>.behaviours.<i>.with.<name>`, so each holder has
+  its own words.
 - Each rule becomes one reaction per holder (once, however often the holder lists the name),
   keyed `<rule>_<holder>` (`take` on `trout_01` is `take_trout_01`). In the copy, every
   `{"param": "holder"}` (an object with that one member) becomes the holder's key, so the
-  trigger names the holder; any other `param` object stays and the schema refuses it there. A
+  trigger names the holder; a marker naming no declared parameter is refused at the behaviour. A
   copy keeps the behaviour rule's location, so each of its diagnostics reports once at
   `behaviours/<name>.reactions.<rule>...`.
 - Copies sort by the bytes of `<rule>_<holder>`, as zone copies do: a holder's rules sort by rule
@@ -526,18 +556,19 @@ rules byte for byte.
 
 | Case | Code | Path | data |
 |---|---|---|---|
-| `behaviours` is not a list of Keys | `SCHEMA_VIOLATION` | `<src>.behaviours` | `{"error": "invalid_type"}` |
+| `behaviours` is not a list of Keys and `{"behaviour": "<Key>", "with": ...}` objects | `SCHEMA_VIOLATION` | `<src>.behaviours` | `{"error": "invalid_type"}` |
 | A name with no behaviour (reported at its first index) | `UNRESOLVED_REFERENCE` | `<src>.behaviours[<i>]` | `{"target": "behaviours/<name>"}` |
 | A behaviour that is not an object | `SCHEMA_VIOLATION` | `behaviours/<name>` | `{"error": "invalid_type"}` |
-| A behaviour member other than `reactions` (`extends` and `abstract` too) | `UNKNOWN_FIELD` | `behaviours/<name>.<member>` | `{}` |
+| A behaviour member other than `reactions` and `params` (`extends` and `abstract` too) | `UNKNOWN_FIELD` | `behaviours/<name>.<member>` | `{}` |
 | `reactions` is missing or not an object | `SCHEMA_VIOLATION` | `behaviours/<name>.reactions` | `{"error": "invalid_type"}` |
+| `params` names `holder` | `SCHEMA_VIOLATION` | `behaviours/<name>.params` | `{"error": "invalid_value"}` |
 
-A behaviour that fails to decode, is not an object or has no `reactions` object gives its
-holders no copies and no diagnostic of their own. Existing checks cover the rest: a copy key over 64 characters is `SCHEMA_VIOLATION` at
+A behaviour that fails to decode, is not an object, has no `reactions` object or has a
+`params` fault gives its holders no copies and no diagnostic of their own. Existing checks cover the rest: a copy key over 64 characters is `SCHEMA_VIOLATION` at
 the behaviour rule; a copy key equal to another reaction's is `DUPLICATE_DEFINITION` at each site,
 and an NPC and an item sharing a key give one `DUPLICATE_DEFINITION` at the behaviour rule.
 [fishing_sampler](../../cartridges/fishing_sampler/behaviours/spoils.json) is the working
-example: one behaviour on its four fish; its artifact equals the four hand-written `take_*`
+example: one behaviour on its four fish (without parameters); its artifact equals the four hand-written `take_*`
 rules byte for byte.
 
 ## Artifact and loader
