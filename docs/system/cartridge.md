@@ -368,7 +368,10 @@ of the [Source layout](#source-layout) table. `text` and `facts` stay in their r
 - A prototype may live in a bundle: bundles open before `extends` resolves.
 - `mix loka.lint` names a bundled definition by its definition address, `<dir>/<key>.json`
   (`reactions/elder_hears.json: ...`), not by the bundle file.
-- A bundle that fails to decode adds nothing; its `INVALID_JSON` fails the build.
+- A bundle that fails to decode adds nothing; its `INVALID_JSON` fails the build. While any
+  bundle is refused (undecodable, not an object, or with an unknown or non-object member), every
+  `UNRESOLVED_REFERENCE` is held back, since its definitions are missing; the other diagnostics
+  stand.
 
 | Case | Code | Path | data |
 |---|---|---|---|
@@ -422,7 +425,7 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 - The words join the one `text.json` catalog (created when absent; an undecodable one takes
   nothing, its `INVALID_JSON` fails the build). A generated key that fails TextKey is the
   schema's error at the marker and again at `text["<key>"]`; a word-length error is reported
-  only at `text["<key>"]`.
+  at the marker and again at `text["<key>"]`.
 - Prose runs after `extends`: an inherited marker gets a key per child, from the child's kind,
   key and path; the prototype owns no line.
 - A shared line (`shop.bought`) stays an authored key; there is no per-site key override.
@@ -461,11 +464,12 @@ inline; its artifact equals the hand-keyed one byte for byte.
 |---|---|---|---|
 | An authored fact named exactly `signal_<name>` | `FACT_NAME_COLLISION` | `facts.facts.signal_<name>` | `{}` |
 | A listener whose name no sending step uses | `UNRESOLVED_REFERENCE` | `<src>.on.signal` | `{"target": "<name>"}` |
-| A sending step whose name is not a Key, or with its own `fact` or `amount` | `SCHEMA_VIOLATION` | `<src>.apply[<i>].op` | `{"error": "unknown_variant"}` |
+| A sending step whose name is not a Key, or whose `signal_<name>` is not (a name over 57 characters), or with its own `fact` or `amount` | `SCHEMA_VIOLATION` | `<src>.apply[<i>].op` | `{"error": "unknown_variant"}` |
 | A trigger with its own `fact` | `SCHEMA_VIOLATION` | `<src>.on.event` | `{"error": "unknown_variant"}` |
 
 The dotted `signal.<name>` collides through the ordinary fact-name check. A refused step or
-trigger stays unlowered, so the schema reports it at the author's path. [signal_sugar](../../test/fixtures/signal_sugar/) is the
+trigger stays unlowered, so the schema reports it at the author's path. A name refused for not
+being a Key: its listeners report nothing of their own. [signal_sugar](../../test/fixtures/signal_sugar/) is the
 working example; it compiles to the same artifact as its hand-expanded twin
 [signal_expanded](../../test/fixtures/signal_expanded/).
 
@@ -481,7 +485,9 @@ working example; it compiles to the same artifact as its hand-expanded twin
   only the copy for its room, so the order that matters is between a copy and that room's own
   rules; pick the zone rule's key for the order you want.
 - Prose lowers before zones, so all copies share the authored rule's generated text key. A zone
-  rule may use `extends`, because flattening runs first.
+  rule may use `extends`, because flattening runs first. An abstract zone rule is never checked,
+  so its unknown zone compiles; a concrete child that inherits it is refused at its own
+  `<src>.zone`.
 
 | Case | Code | Path | data |
 |---|---|---|---|

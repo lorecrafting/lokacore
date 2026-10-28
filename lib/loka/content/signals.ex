@@ -29,40 +29,48 @@ defmodule Loka.Content.Signals do
   @doc "Every sending step and listener lowered, and one generated fact per name sent."
   @spec lower([entry()]) :: {[entry()], [fault()]}
   def lower(files) do
-    sent =
+    named =
       for {_, {:reaction, _, _}, %{"apply" => steps}} <- files,
           is_list(steps),
           %{"op" => "signal", "signal" => name} <- steps,
-          Contracts.validate("Key", name) == :ok,
           uniq: true,
           do: name
 
-    {files, unheard} = files |> Enum.map(&rule(&1, sent)) |> Enum.unzip()
+    # A name is lowered only when it and its generated fact are both Keys.
+    sent = Enum.filter(named, &(key?(&1) and key?(fact(&1))))
+    {files, unheard} = files |> Enum.map(&rule(&1, {sent, named})) |> Enum.unzip()
     {files, taken} = facts(files, Enum.sort(sent))
     {files, List.flatten(unheard) ++ taken}
   end
 
-  defp rule({rel, {:reaction, _, _} = id, %{"apply" => apply} = value}, sent) when is_list(apply),
-    do: listen({rel, id, %{value | "apply" => Enum.map(apply, &sending(&1, sent))}}, sent)
+  defp rule({rel, {:reaction, _, _} = id, %{"apply" => apply} = value}, {sent, _} = names)
+       when is_list(apply),
+       do: listen({rel, id, %{value | "apply" => Enum.map(apply, &sending(&1, sent))}}, names)
 
-  defp rule(file, sent), do: listen(file, sent)
+  defp rule(file, names), do: listen(file, names)
 
   defp listen(
          {rel, {:reaction, _, steps} = id,
           %{"on" => %{"event" => "signal", "signal" => name} = on} = value},
-         sent
+         {sent, named}
        )
        when is_binary(name) and not is_map_key(on, "fact") do
-    if name in sent do
-      on =
-        on
-        |> Map.delete("signal")
-        |> Map.merge(%{"event" => "fact_changed", "fact" => fact(name)})
+    cond do
+      name in sent ->
+        on =
+          on
+          |> Map.delete("signal")
+          |> Map.merge(%{"event" => "fact_changed", "fact" => fact(name)})
 
-      {{rel, id, %{value | "on" => on}}, []}
-    else
-      at = {rel, steps ++ ["on", "signal"]}
-      {{rel, id, :invalid}, [{"UNRESOLVED_REFERENCE", at, %{"target" => name}}]}
+        {{rel, id, %{value | "on" => on}}, []}
+
+      # Its sending step is refused at apply[i].op; the listener adds nothing of its own.
+      name in named ->
+        {{rel, id, :invalid}, []}
+
+      true ->
+        at = {rel, steps ++ ["on", "signal"]}
+        {{rel, id, :invalid}, [{"UNRESOLVED_REFERENCE", at, %{"target" => name}}]}
     end
   end
 
@@ -101,6 +109,7 @@ defmodule Loka.Content.Signals do
     end
   end
 
+  defp key?(name), do: Contracts.validate("Key", name) == :ok
   defp fact(name), do: "signal_" <> name
   defp meaning(name), do: "Signal #{name} (compiler-generated)."
 end

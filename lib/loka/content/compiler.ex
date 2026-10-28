@@ -40,7 +40,7 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = definitions(files, manifest)
     {located, v2, d3} = world_content(files, manifest, defs, located)
 
-    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)]) do
+    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)], files) do
       {warnings, []} ->
         {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
 
@@ -58,8 +58,16 @@ defmodule Loka.Content.Compiler do
     {located, v2, d3 ++ d4}
   end
 
-  # {warnings, errors} of the lists of diagnostics
-  defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
+  # {warnings, errors} of the lists of diagnostics. While a bundle refusal stands, its definitions
+  # are missing, so every UNRESOLVED_REFERENCE is held back (cartridge.md, Area bundles).
+  defp split(lists, files) do
+    held? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+
+    lists
+    |> Enum.concat()
+    |> Enum.reject(&(held? and &1["code"] == "UNRESOLVED_REFERENCE"))
+    |> Enum.split_with(&(&1["severity"] == "warning"))
+  end
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
