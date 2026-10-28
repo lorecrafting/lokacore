@@ -3,7 +3,7 @@
 - PR: [#311](https://github.com/lorecrafting/lokacore/pull/311), branch `chore/housekeeping-2026-10-08`
 - Reviewed: `b8cab27b7a2255c80514fa3dbdf740d16050418b` (hosted CI green), detached worktree
 - Reviewer: fresh independent Opus; authored none of the work
-- Governing: [WORKFLOW step 7](../WORKFLOW.md#loop), [Git hygiene](../WORKFLOW.md#git-hygiene), [CHECKS](../CHECKS.md), [owner-rules Process](../system/owner-rules.md), AGENTS.md Simplicity and Writing tests
+- Governing: [WORKFLOW step 7](../PM.md#loop), [Git hygiene](../WORKFLOW.md#git-hygiene), [CHECKS](../CHECKS.md), [owner-rules Process](../system/owner-rules.md), AGENTS.md Simplicity and Writing tests
 - Verdict: **CHANGES REQUIRED**
 
 ## Must be true

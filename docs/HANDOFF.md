@@ -13,7 +13,7 @@ AS OF main after #476 (loka-glj8 spec, room point of view) plus the 2026-10-28 h
 - Nothing is building. Open PR: draft #454 (E2 engine bugs, kgd.153 only) ON HOLD with the P3 hold below.
 - Polish session `polish/session-2026-10-23` in ~/dev/lokacore-session serves Storybook on 6006 (on main
   after #475). The picks Monitor is off (owner 2026-10-24: "no need to arm monitor, just diarm for now");
-  re-arm only when the owner is back at Storybook. Loop: [WORKFLOW, Live polish session](WORKFLOW.md#live-polish-session).
+  re-arm only when the owner is back at Storybook. Loop: [PM, Live polish session](PM.md#live-polish-session).
   Owner's screen-by-screen guide: [polish tour](design/polish-tour.md).
 
 ## Next, in order (owner-approved)
@@ -66,4 +66,4 @@ Standing owner rules live in [owner rules](system/owner-rules.md#process).
   `bin/beads_checkpoint.sh` (pull, flush, machine-path check, commit the export and this page, push;
   a rejected push prints the recovery steps). Never commit `beads.db`.
 - End: rewrite this page, push every branch with work, file the
-  [retro](WORKFLOW.md#retro-and-housekeeping-queue) items in Beads.
+  [retro](PM.md#retro-and-housekeeping-queue) items in Beads.

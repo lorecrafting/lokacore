@@ -1,6 +1,6 @@
 # E2 gate audit (Fable): `origin/main` at `deec9c68`
 
-Milestone-gate audit ([workflow](../WORKFLOW.md#milestone-gate)) of the E2 stage's riskiest code
+Milestone-gate audit ([workflow](../PM.md#milestone-gate)) of the E2 stage's riskiest code
 named in the [E2 slice plan](../briefs/chapter-one/chapter-one-e2-slice-plan-2026-10-07.md#risks-riskiest-code-named),
 on `origin/main` `deec9c68b1a4e0fd4a33ceed59b2668965e7170a` (S0–S4: #309 #312 #314 #316 #319).
 Record committed on draft S5 `e2/s5-closing-and-gate` at `266fa6b2`; S5's own code is not audited here.

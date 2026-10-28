@@ -15,7 +15,7 @@ decision is hard, it escalates to a higher model, first with the `advisor` tool 
 does not work, manually. Only if that also fails does it stop for a human. The design goal is
 to be as autonomous as possible, with human intervention only when absolutely needed.
 
-Effect ([workflow, Keep going](../../WORKFLOW.md#loop)):
+Effect ([workflow, Keep going](../../PM.md#loop)):
 
 - The PM runs a slice to its merge without asking at each step.
 - Hard decisions go up a ladder: the `advisor` tool, then a higher model by hand (Fable, or

@@ -1,6 +1,6 @@
 # E2 gate checklist
 
-Milestone gate ([workflow](../../WORKFLOW.md#milestone-gate)) for E2, [slice plan](chapter-one-e2-slice-plan-2026-10-07.md) "Gate" and G.
+Milestone gate ([workflow](../../PM.md#milestone-gate)) for E2, [slice plan](chapter-one-e2-slice-plan-2026-10-07.md) "Gate" and G.
 Checked by one reviewer. Proof is in the merged slices, the [S5 evidence](../../evidence/2026-10-08-e2-r9c/README.md)
 and the review records. Slices: S1 [#309](https://github.com/lorecrafting/lokacore/pull/309), S0
 [#312](https://github.com/lorecrafting/lokacore/pull/312), S2 [#314](https://github.com/lorecrafting/lokacore/pull/314), S3

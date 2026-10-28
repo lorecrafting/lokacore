@@ -1,7 +1,7 @@
 # Review: WORKFLOW and Beads housekeeping
 
 - PR #301, branch `docs/housekeeping-2026-10-07`, head reviewed `c910e337629fb2feae565f857a783c644103ac40`.
-- Governing: owner-approved content 2026-10-07 (PM brief), [AGENTS.md Simplicity](../../AGENTS.md), [WORKFLOW Token hygiene](../WORKFLOW.md#token-hygiene), [WORKFLOW Beads Rust](../WORKFLOW.md#beads-rust).
+- Governing: owner-approved content 2026-10-07 (PM brief), [AGENTS.md Simplicity](../../AGENTS.md), [WORKFLOW Token hygiene](../WORKFLOW.md#token-hygiene), [WORKFLOW Beads Rust](../PM.md#beads-rust).
 - Scope: docs and tracker only; no mutation testing.
 - Verdict: **APPROVE WITH NOTES**.
 

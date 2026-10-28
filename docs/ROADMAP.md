@@ -6,7 +6,7 @@ Slice counts and estimates are the PM's planning, not owner decisions.
 
 The [Missing Child completion plan](archive/MISSING-CHILD-PLAN.md) ([#192](https://github.com/lorecrafting/lokacore/pull/192))
 maps 33 PRs through the remaining player outcomes; the [slice briefs](briefs/chapter-one/README.md)
-give candidate assignment detail; [Beads Rust](WORKFLOW.md#beads-rust) mirrors the slices, and this
+give candidate assignment detail; [Beads Rust](PM.md#beads-rust) mirrors the slices, and this
 roadmap remains the published completion record. The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
 sets the active development source and save; the [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-decision-no-wait-opening-2026-10-05.md).

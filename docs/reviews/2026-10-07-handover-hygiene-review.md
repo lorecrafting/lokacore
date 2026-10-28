@@ -3,7 +3,7 @@
 - PR: [#292](https://github.com/lorecrafting/lokacore/pull/292), branch `chore/handover-hygiene`
 - Reviewed: `983d3292` (paraphrase commit on top of `74126853`); independent Opus reviewer
 - Governing: [owner decision](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md),
-  [WORKFLOW merge step and review count](../WORKFLOW.md#loop), [owner rules](../system/owner-rules.md),
+  [WORKFLOW merge step and review count](../PM.md#loop), [owner rules](../system/owner-rules.md),
   [decisions README](../decisions/README.md) (verbatim or marked paraphrased)
 - **Verdict: CHANGES REQUIRED** (two small should-fix items; merge needs nothing open)
 

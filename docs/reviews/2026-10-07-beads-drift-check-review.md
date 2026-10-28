@@ -5,7 +5,7 @@ base `origin/main`. Independent reviewer; authored none of it.
 
 **Verdict: APPROVE WITH NOTES**
 
-## Must be true (from the owner-approved brief, AGENTS.md Simplicity/Writing tests, WORKFLOW.md#beads-rust, CHECKS.md)
+## Must be true (from the owner-approved brief, AGENTS.md Simplicity/Writing tests, PM.md#beads-rust, CHECKS.md)
 
 1. Report-only: no tracker writes, hook exits 0, note when br/gh/network is missing.
 2. PR number from `/pull/(\d+)` only, `#fragment` ignored; several issues may share one PR.

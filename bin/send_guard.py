@@ -1,6 +1,6 @@
 """PreToolUse hook on SendMessage (.claude/settings.json): refuse to resume a subagent whose newest
 compaction was a hook compaction (durationMs < 1000, the rule of bin/session_status.sh; resuming one
-returned a 400, loka-2ti3). Built-in compaction may be resumed (docs/WORKFLOW.md). Exit 2 blocks the
+returned a 400, loka-2ti3). Built-in compaction may be resumed (docs/PM.md, Token hygiene). Exit 2 blocks the
 call; a missing or unreadable transcript lets it through.
   python3 -I bin/send_guard.py < hook-input.json"""
 import glob

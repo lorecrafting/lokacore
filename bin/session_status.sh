@@ -30,7 +30,7 @@ print("compaction: built-in (%d s, %d min ago)" % (d / 1000, age) if d >= 1000 e
 fi
 echo "## Open PRs"
 gh pr list --limit 10 2>/dev/null || echo "gh unavailable"
-# A job cancelled at its timeout is red (docs/WORKFLOW.md, Loop step 7); cancelled jobs of the open PR heads (all runs) and the nightly runs print as "name duration".
+# A job cancelled at its timeout is red (docs/PM.md, Loop step 7); cancelled jobs of the open PR heads (all runs) and the nightly runs print as "name duration".
 cancelled() { # <label> <gh run list args...>
   l=$1; shift
   for id in $(gh run list "$@" --json databaseId,conclusion --jq '.[]|select(.conclusion=="cancelled")|.databaseId' 2>/dev/null); do

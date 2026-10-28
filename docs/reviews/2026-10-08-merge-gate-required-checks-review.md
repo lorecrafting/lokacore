@@ -2,7 +2,7 @@
 
 - PR #315, branch `chore/merge-via-required-checks`, head `24f195d559c38d5777fc6f38e8ec8a2fcf8d0fe8`, base `81fc17c2`.
 - Reviewer: fresh independent Opus. Process/CI slice, proportionate review, no app-code mutation sweep.
-- Governing: [WORKFLOW step 7](../WORKFLOW.md#loop), [CHECKS](../CHECKS.md), the brief, owner decision 2026-10-08 (paraphrased): branch protection with required checks and auto-merge, admin backdoor for quick pre-production work.
+- Governing: [WORKFLOW step 7](../PM.md#loop), [CHECKS](../CHECKS.md), the brief, owner decision 2026-10-08 (paraphrased): branch protection with required checks and auto-merge, admin backdoor for quick pre-production work.
 
 ## Must be true (written before the diff)
 
