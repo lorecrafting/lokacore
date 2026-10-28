@@ -30,7 +30,7 @@ Effect:
   rationing on cost (the subscription is prepaid).
 - Codex is a normal, everyday cross-vendor reviewer: the PM may add it to any slice beyond
   docs-only or trivial ones. There is no foundational-freezes-only limit any more. Our own
-  independent Opus review stays required ([workflow](../../WORKFLOW.md#loop) loop step 4: a fresh
+  independent Opus review stays required ([workflow](../../PM.md#loop) loop step 4: a fresh
   `reviewer` for every slice); codex is a second opinion, never a substitute.
 - The PM runs it itself with `codex exec` (read-only, `-m` Sol, or Astra for a hard review), giving it
   the PR, head SHA, spec sections, focus and the output format: verdict, then findings with
