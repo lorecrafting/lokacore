@@ -2,7 +2,7 @@
 // A walk script does `const r = new Rec(ctx); r.go('west'); ...; r.save(out)`, run as `node <script> <out>`.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { gameView, INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
+import { gameView, INSTALLED, KERNEL_ID, loadCartridge, type Cartridge } from '../src/index.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { ROOT, line } from './obs.ts';
 import { decideReplay, header, start } from './run.ts';
@@ -26,14 +26,7 @@ export class Rec {
   n = 2;
   log: string[] = [];
   constructor(ctx = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f') {
-    this.r = start(
-      cartridge,
-      hash,
-      RUN,
-      ctx,
-      [1, 2, 3, 4],
-      'loka-kernel@0000000000000000000000000000000000000000',
-    );
+    this.r = start(cartridge, hash, RUN, ctx, [1, 2, 3, 4], `${KERNEL_ID}@${'0'.repeat(40)}`);
     this.out = header(this.r);
   }
   get w(): any {
@@ -98,6 +91,7 @@ export class Rec {
   view = () => gameView(this.w);
   wait(target: number) {
     while (this.w.state.clock < target) {
+      const from = this.w.state.clock;
       const until = Object.values(this.w.state.jobs ?? {})
         .filter(
           (j: any) =>
@@ -115,6 +109,7 @@ export class Rec {
           until,
         },
       });
+      if (this.w.state.clock === from) throw new Error(`elapsed stalled at ${this.w.state.clock}`);
     }
   }
   save(path: string) {
