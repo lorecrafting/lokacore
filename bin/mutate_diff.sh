@@ -7,14 +7,15 @@
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
 # and the first failing test line of a killed mutant.
-# Exits 1 when a row is SURVIVED (NO-TESTS rows are the handback's to explain), else as bin/mutate.sh.
+# Exits 1 when a row is SURVIVED, else as bin/mutate.sh. A SURVIVED or NO-TESTS row clears with the
+# same change as a hand-written bin/mutate.sh mutant shown red by a named test (developer.md step 2).
 #   bin/mutate_diff.sh <base>
 # Mutants: flip ` < `/` <= `, ` > `/` >= `, ` === `/` !== `, ` == `/` != `, ` && `/` || ` (and ` and `/
 # ` or ` in Elixir; spaces on both sides), drop a TS `return`/`throw` statement or a one-line guard
 # ending in one, negate a block guard (TS `if (...) {`, Elixir `if ... do`), add 1 to the first
 # number. Skipped: test, story and *.gen.* files, comment, import and @attribute lines, lines with
 # a tab, Elixir lines inside a """ block (docs), and a line carrying `mutate-skip: <reason>` (non-logic).
-# ponytail: one hop only; a module tested two hops away reads as NO-TESTS or SURVIVED.
+# ponytail: one hop only; a module tested two hops away reads as NO-TESTS or SURVIVED (cleared by hand as above).
 [ $# -eq 1 ] || { echo "usage: $0 <base>" >&2; exit 2; }
 here=$(cd "$(dirname "$0")" && pwd)
 cd "$(git rev-parse --show-toplevel)" || exit 2
@@ -144,6 +145,8 @@ for kind, f, n, label, log in plan:
     print('%s\t%s:%d\t%s\t%s' % (kind, f, n, label, first_fail(log) if kind.startswith('red') else '-'))
 print('mutate_diff: ' + ', '.join('%s %d' % kv for kv in sorted(count.items())))
 sys.stderr.write(r.stderr)
+if 'SURVIVED' in count or 'NO-TESTS' in count:
+    sys.stderr.write('mutate_diff: clear each SURVIVED/NO-TESTS row with a red hand-written bin/mutate.sh mutant against a named test\n')
 shutil.rmtree(tmp)
 sys.exit(r.returncode or (1 if 'SURVIVED' in count else 0))
 PY
