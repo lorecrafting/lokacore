@@ -30,17 +30,17 @@ defmodule Loka.ContentSkillGrowthTest do
        {"SCHEMA_VIOLATION", "skills/pick.growth"}},
       {"rooms/vault_room.json",
        &update_in(&1, ["details", "gate"], fn g -> Map.delete(g, "rating") end),
-       {"SCHEMA_VIOLATION", "recipes/pick_gate.check"}},
-      {"recipes/pick_gate.json", &put_in(&1, ["check", "skill"], "climb"),
-       {"UNRESOLVED_REFERENCE", "recipes/pick_gate.check.skill"}},
-      {"recipes/force_vault.json", &put_in(&1, ["check", "attribute"], "dex"),
-       {"UNRESOLVED_REFERENCE", "recipes/force_vault.check.attribute"}},
-      {"recipes/pick_gate.json",
+       {"SCHEMA_VIOLATION", "actions/pick_gate.check"}},
+      {"actions/pick_gate.json", &put_in(&1, ["check", "skill"], "climb"),
+       {"UNRESOLVED_REFERENCE", "actions/pick_gate.check.skill"}},
+      {"actions/force_vault.json", &put_in(&1, ["check", "attribute"], "dex"),
+       {"UNRESOLVED_REFERENCE", "actions/force_vault.check.attribute"}},
+      {"actions/pick_gate.json",
        &put_in(&1, ["outcomes", "success", "sequence", Access.at(0)], %{
          "op" => "fact.assign",
          "fact" => "uses_pick",
          "value" => 5
-       }), {"RESERVED_FACT", "recipes/pick_gate.outcomes.success.sequence[0].fact"}},
+       }), {"RESERVED_FACT", "actions/pick_gate.outcomes.success.sequence[0].fact"}},
       {"facts.json", &put_in(&1, ["facts", "uses_pick"], uses),
        {"RESERVED_FACT", "facts.facts.uses_pick"}}
     ]
@@ -53,7 +53,7 @@ defmodule Loka.ContentSkillGrowthTest do
         for(
           k <- ~w(pick_chest pick_gate pick_vault force_vault),
           do:
-            {"recipes/#{k}.json",
+            {"actions/#{k}.json",
              &put_in(&1, ["check"], %{"key" => k, "kind" => "luck", "chance" => 50})}
         )
 

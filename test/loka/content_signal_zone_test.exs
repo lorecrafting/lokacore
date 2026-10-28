@@ -99,6 +99,42 @@ defmodule Loka.ContentSignalZoneTest do
            ]
   end
 
+  # Breaks: a sending step whose generated signal_<name> is over the Key limit lowers, so the
+  # schema refuses generated paths the author never wrote; a 57-character name is refused; or a
+  # listener of a refused name gets a false "no sender" UNRESOLVED_REFERENCE.
+  test "a name too long for its fact or not a Key is refused once, at the sending step" do
+    name = fn n -> String.duplicate("s", n) end
+
+    named = fn signal ->
+      [
+        {"reactions/ring.json", &put_in(&1, ["apply", Access.at(0), "signal"], signal)},
+        {"reactions/hear.json", &put_in(&1, ["on", "signal"], signal)}
+      ]
+    end
+
+    op = {"SCHEMA_VIOLATION", "reactions/ring.apply[0].op", %{"error" => "unknown_variant"}}
+    assert refused(@sugar, named.(name.(58))) == [op]
+    assert refused(@sugar, named.("Bell")) == [op]
+
+    assert {:ok, _, []} =
+             Loka.ContentSource.compile(Loka.ContentSource.copy(@sugar), named.(name.(57)))
+  end
+
+  # Breaks: an abstract rule's unknown zone is refused (it is never validated), or a concrete
+  # child that inherits it compiles or reports at the abstract parent.
+  test "an abstract zone rule is not checked; a child that inherits its zone is" do
+    rule = "reactions/wanderer.json"
+    parent = fn dir -> JSON.decode!(File.read!(Path.join(dir, rule))) end
+    dir = Loka.ContentSource.copy(@codex)
+    proto = parent.(dir) |> Map.merge(%{"abstract" => true, "zone" => "nowhere"})
+    assert {:ok, _, []} = Loka.ContentSource.compile(dir, [{"reactions/proto.json", proto}])
+
+    child = %{"extends" => "proto"}
+
+    assert refused(@codex, [{"reactions/proto.json", proto}, {rule, child}]) ==
+             [{"UNRESOLVED_REFERENCE", "reactions/wanderer.zone", %{"target" => "nowhere"}}]
+  end
+
   # Breaks: zone together with on.room accepted, an unknown zone dropped, a copy key that repeats
   # an authored rule kept once, or a malformed `zones` accepted or crashing.
   test "a zone rule refuses on.room, an unknown zone, a repeated copy key and malformed zones" do

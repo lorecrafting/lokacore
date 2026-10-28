@@ -123,7 +123,7 @@ and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
 At review approval the PM collapses a row's notes to a two-line current state (head, record, open follow-ups); the history stays in the review record.
 A batch's run order lives in a `batch-order` label and a notes line, never `br dep add`: a blocked issue cannot be marked `in_progress`, so the owner's PROG view would miss it (loka-gfgr).
-Active issues carry one `stage:` label (building, review, fixing, recheck, integrated, gate), which the PM moves at each step; status stays `in_progress` until the reviewed merge to `main`.
+An active issue's status stays `in_progress` until the reviewed merge to `main`; its notes say where the slice is (no stage labels).
 Keep one PM writer across worktrees/clones; `br` run from any worktree uses the integration
 checkout's database and JSONL, so commit tracker changes from that checkout, not a slice branch.
 A Claude Code session starts with `bin/session_status.sh`, so Beads, not a memory file, holds current status.

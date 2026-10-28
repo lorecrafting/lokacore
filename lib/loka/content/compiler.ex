@@ -1,4 +1,4 @@
-# size: allow 360, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction and mounts wiring join the existing compiler boundary
+# size: allow 376, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -40,7 +40,7 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = definitions(files, manifest)
     {located, v2, d3} = world_content(files, manifest, defs, located)
 
-    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)]) do
+    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)], files) do
       {warnings, []} ->
         {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
 
@@ -58,8 +58,18 @@ defmodule Loka.Content.Compiler do
     {located, v2, d3 ++ d4}
   end
 
-  # {warnings, errors} of the lists of diagnostics
-  defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
+  # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
+  # bundles), except an action's own: an action refused by its extends must not build.
+  defp split(lists, files) do
+    bundle? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+    actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel) <> "."
+    held? = &(bundle? or (actions != [] and not String.starts_with?(&1, actions)))
+
+    lists
+    |> Enum.concat()
+    |> Enum.reject(&(&1["code"] == "UNRESOLVED_REFERENCE" and held?.(&1["path"])))
+    |> Enum.split_with(&(&1["severity"] == "warning"))
+  end
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
@@ -159,7 +169,8 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  defp manifest_file(defs) do
+  @doc false
+  def manifest_file(defs) do
     v2 = get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties"])
 
     defs["CartridgeManifest"]
@@ -218,6 +229,11 @@ defmodule Loka.Content.Compiler do
     {"status", :status, "StatusDefinition"},
     {"blueprint", :blueprint, "BlueprintDefinition"}
   ]
+
+  @doc false
+  def kind_contracts, do: @kinds
+  @doc false
+  def facts_file, do: @facts_file
 
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))

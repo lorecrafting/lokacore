@@ -51,7 +51,7 @@ defmodule Loka.ContentRestTest do
   defp writes(read \\ false) do
     recipe =
       update_in(
-        src("recipes/coil_rope.json"),
+        src("actions/coil_rope.json"),
         ["outcomes", "success", "sequence"],
         &[@write | &1]
       )
@@ -77,7 +77,7 @@ defmodule Loka.ContentRestTest do
     if read,
       do: %{"reactions/settle.json" => reaction},
       else: %{
-        "recipes/coil_rope.json" => recipe,
+        "actions/coil_rope.json" => recipe,
         "dialogues/bram.json" => dialogue,
         "reactions/settle.json" => reaction,
         "facts.json" => facts
@@ -101,10 +101,10 @@ defmodule Loka.ContentRestTest do
     assert {:error, ds} = compile(Path.join(dir, "writes"), true, writes())
 
     assert Enum.sort_by(ds, & &1["path"]) == [
+             d("actions/coil_rope.outcomes.success.sequence[0].fact"),
              d("dialogues/bram.choices.carry.sequence[0].fact"),
              d("facts.facts.position"),
-             d("reactions/settle.apply[0].fact"),
-             d("recipes/coil_rope.outcomes.success.sequence[0].fact")
+             d("reactions/settle.apply[0].fact")
            ]
 
     assert {:ok, _, _} = compile(Path.join(dir, "reads"), true, writes(true))

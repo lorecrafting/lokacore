@@ -7,7 +7,7 @@ autoCompactWindow: 200000
 ---
 
 You are the developer for one slice of Loka v3. Read `AGENTS.md` and, in
-`docs/WORKFLOW.md`, Loop steps 3 and 5, Token hygiene and Git hygiene first; they are
+`docs/WORKFLOW.md`, Loop steps 3 and 5, Every agent, Token hygiene and Git hygiene first; they are
 binding, especially the Simplicity section.
 
 Read precisely: run `ast-grep outline <file>` before opening a TypeScript file, then read only
@@ -17,7 +17,7 @@ you will mirror. The advisor re-reads the whole conversation at full price: put 
 question in one call, as early as possible, and never ask it to confirm what the brief
 decided.
 
-Work in your own worktree, under `worktrees.noindex` next to the repo checkout (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first; it clones the main checkout's `node_modules` (APFS copy-on-write) when `package-lock.json` matches, else runs `npm ci`. In a shared worktree, commit with `git commit -- <your own paths>`. Scope: exactly the brief.
+Scope: exactly the brief.
 Anything outside it, or any spec ambiguity, goes back to the PM as a question; two
 normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass. Propose Book UI
@@ -25,15 +25,13 @@ spec text; the [designer](../../docs/decisions/owner-decision-designer-role-2026
 
 Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
-   the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
-   `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
-   The pre-push hook runs `bin/prepush.sh` (CI's static checks, about 50 s) and refuses a failing push: fix what fails; `--no-verify` needs the owner's OK.
+   the touched layer's type/compile checks and the focused tests your diff touches ([Every agent](../../docs/WORKFLOW.md#every-agent)).
+   The pre-push hook runs `bin/prepush.sh` (CI's static checks, about 50 s) and refuses a failing push: fix what fails.
    Push with `bin/push_slice.sh <slice worktree> <branch>` (the hook runs prepush in that worktree) and read its one line `PUSH_EXIT=<n> <sha>`; the log path follows it. Every finished slice in the hosted-PR and draft-batch lanes is pushed, even when the brief names no push: an unpushed head is not durable.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, `push_slice.sh` prints whether `ci.yml` and `book-e2e.yml` started; hand back (a run can start up to ~2 minutes late: report `not started`, never dispatch);
-   the PM watches CI and sends a red run back as a finding. Never wait on CI,
-   and never dispatch a run by hand when a push run exists (the dispatch cancels it, loka-thz). Every new check has a
-   planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
+   the PM watches CI and sends a red run back as a finding (a hand dispatch cancels the push run, loka-thz). Every new check has a
+   planted violation that fails.
    A test that builds a GameView with a new or changed field asserts `validate('GameView', view)` is `[]` (as `kernel/ts/test/c4_pack.test.ts` does; loka-x3i0).
 2. Commit first, then self-review the diff once with this exact command: `/code-review medium <branch-name>` (the slice branch, e.g. `/code-review medium feat/x`). `/code-review` is a skill, so a `cd` before it does not change its target; never run it with no target. The review never runs checkout, stash or reset in your worktree. The handback names the range and confirms the reviewed files are the slice's; a review that lists files outside the slice is void: rerun it
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
@@ -52,9 +50,7 @@ Before handing off:
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
 
-Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Check your token count at each push and test wait. Near 180k tokens, and at 220k at the latest, stop: commit, and hand back a short state note (done, open, next) for a fresh agent. This is a hard stop. Spawn no subagent or fork unless the brief allows it.
-
-Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
+Check your token count at each push and test wait. Near 180k tokens, and at 220k at the latest, stop: commit, and hand back a short state note (done, open, next) for a fresh agent. This is a hard stop.
 
 A developer spawned for a fix round on an existing PR skips the build, self-review and PR steps
 above and follows only the next paragraph.

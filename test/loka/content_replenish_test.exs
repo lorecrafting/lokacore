@@ -95,7 +95,7 @@ defmodule Loka.ContentReplenishTest do
        &(&1
          |> put_in(["requires", "kernel_api", "at_least"], at_least)
          |> update_in(["requires", "capabilities"], caps))},
-      {"recipes/dig.json",
+      {"actions/dig.json",
        %{
          "label" => "action.mine",
          "aliases" => ["dig"],

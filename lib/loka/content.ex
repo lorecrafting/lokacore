@@ -11,7 +11,7 @@ defmodule Loka.Content do
   R5 adds `rooms/<key>.json` (RoomDefinition without `key`), `text.json` (the TextCatalog)
   and an optional `entry` room in `cartridge.json`; a source with any of them compiles to
   loka-cartridge-v2. R5 S4 adds `items/<key>.json` and `npcs/<key>.json` (ItemDefinition and
-  NpcDefinition without `key`); R5 S5 `recipes/<key>.json` (ActionRecipe without `key`); R5
+  NpcDefinition without `key`); R5 S5 `actions/<key>.json` without `command` (ActionRecipe without `key`); R5
   S6b `resources.json` (`Loka.Content.Resources`: overrides of the default pools every v2
   cartridge gets, and further resources). A reference is a full DefinitionRef object naming
   this cartridge, or short: the key alone, of the kind its field takes (owner decision
@@ -55,6 +55,10 @@ defmodule Loka.Content do
   @doc "The author-time lint findings for a story cartridge source (Loka.Content.Lint)."
   @spec lint(Path.t()) :: [String.t()]
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
+
+  @doc "The source JSON Schema files, name => text (Loka.Content.SourceSchema)."
+  @spec source_schema() :: %{String.t() => binary()}
+  defdelegate source_schema(), to: Loka.Content.SourceSchema, as: :files
 
   # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
   defp artifact(cartridge) do
