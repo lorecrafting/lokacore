@@ -7,10 +7,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { gameView } from '../src/view/view.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { commands } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-curse-sampler-'));
 let artifact: Uint8Array;
@@ -28,22 +29,8 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-const send = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-2828-4828-8828-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('eeeeeeee-2828-4828-8828');
+const { send, play } = stream;
 const fresh = () =>
   newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e28' as never, [2, 8, 2, 8]);
 const ring = (w: World) => w.entityIds['curse_sampler@0.0.1:item/ring']!;

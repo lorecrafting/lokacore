@@ -9,7 +9,7 @@ import { type Cartridge, type World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
-import { reload } from './harness.ts';
+import { commands, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -25,22 +25,18 @@ const refused = (edit: (c: any) => void) => {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
-let n = 0;
+const stream = commands('eeeeeeee-4343-4b4b-8b4b');
+const { send, play } = stream;
 /** A new game in the yard on the artifact edited by `edit`. */
 function yard(edit?: (c: any) => void) {
   const r = reload(kat.value, edit);
   assert.ok(r.ok, JSON.stringify(r));
-  n = 0;
+  stream.n = 0;
   return newWorld(
     r.cartridge as Cartridge,
     '4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c43' as never,
     [1, 2, 3, 4],
   );
-}
-function send(w: World, p: object) {
-  const id = `eeeeeeee-4343-4b4b-8b4b-${String(++n).padStart(12, '0')}`;
-  const payload = { actor_id: w.character, ...p };
-  return step(w, { id, world_context_id: w.context, payload } as never, n);
 }
 const code = (r: ReturnType<typeof step>) =>
   r.decision.kind === 'rejected' ? r.decision.error.code : r.decision.kind;

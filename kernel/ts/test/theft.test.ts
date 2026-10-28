@@ -11,12 +11,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
-import { gameView, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, commands, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-theft-sampler-'));
 let artifact: Uint8Array;
@@ -42,20 +42,12 @@ const diagnostic = (edit: (c: any) => void) => {
 function fresh(edit?: (c: any) => void) {
   const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
-  n = 0;
+  stream.n = 0;
   return newWorld(r.cartridge as Cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e33' as never, [1]);
 }
 
-let n = 0;
-function send(w: World, payload: object) {
-  const id = `eeeeeeee-3333-4033-8033-${String(++n).padStart(12, '0')}`;
-  const command = {
-    id,
-    world_context_id: w.context,
-    payload: { actor_id: w.character, ...payload },
-  };
-  return step(w, command as never, n);
-}
+const stream = commands('eeeeeeee-3333-4033-8033');
+const { send } = stream;
 function play(w: World, payload: object) {
   const r = send(w, payload);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));

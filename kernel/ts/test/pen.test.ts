@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { fatal } from './death_fixture.ts';
@@ -23,6 +23,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { commands } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-pen-sampler-'));
 let artifact: Uint8Array;
@@ -47,42 +48,9 @@ const fresh = () =>
     [1, 2, 3, 4],
   );
 
-let n = 0;
-const send = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-1082-4082-8082-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
-// Advances to `until` in steps of at most `size` units (one hour by default).
-function elapsed(w: World, until: number, size = 3600): World {
-  while (w.state.clock < until) {
-    const run_id = `aaaaaaaa-1082-4082-8082-${String(++n).padStart(12, '0')}` as never;
-    const from = w.state.clock;
-    const to = Math.min(until, from - (from % size) + size);
-    const r = stepElapsed(
-      w,
-      {
-        id: elapsedCommandId(run_id, w.context, from, to) as never,
-        world_context_id: w.context,
-        payload: { type: 'elapsed', actor_id: w.character, run_id, from, until: to },
-      },
-      n,
-    );
-    assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-    w = r.world;
-  }
-  return w;
-}
+const stream = commands('eeeeeeee-1082-4082-8082', 'aaaaaaaa-1082-4082-8082');
+const { send, play } = stream;
+const elapsed = (w: World, until: number, size = 3600) => stream.elapsed(w, until, size);
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
 const inside = (w: World, holder: string) =>
   Object.entries(w.entityIds)

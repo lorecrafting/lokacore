@@ -22,6 +22,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { invariants } from '../src/mechanics/movement/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { commands } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -47,20 +48,8 @@ const ref = (kind: string, key: string) =>
 const fresh = (content = sampler()) =>
   newWorld(content, '6a1c2e3d-4b5f-4a6e-8c7d-9e0f1a2b3c4d' as never, [1, 2, 3, 4]);
 
-let n = 0;
-function send(w: World, payload: object) {
-  const id = `eeeeeeee-1091-4091-8091-${String(++n).padStart(12, '0')}`;
-  return step(
-    w,
-    { id, world_context_id: w.context, payload: { actor_id: w.character, ...payload } } as never,
-    n,
-  );
-}
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('eeeeeeee-1091-4091-8091', 'aaaaaaaa-1091-4091-8091');
+const { send, play } = stream;
 const npc = (w: World, k: string) => w.entityIds[`${S}:npc/${k}`]!;
 const use = (provider: string, service: string, quoted_price: number) => (w: World) => ({
   type: 'use_service',
@@ -76,15 +65,7 @@ const raze = use('carpenter', 'raze_hut', 2);
 const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
 const take = (w: World, ...ks: string[]) =>
   ks.reduce((x, k) => play(x, { type: 'take', item_id: x.entityIds[`${S}:item/timber_${k}`] }), w);
-const elapse = (w: World, until: number) => {
-  const run_id = `aaaaaaaa-1091-4091-8091-${String(++n).padStart(12, '0')}`;
-  const from = w.state.clock;
-  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
-  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-};
+const elapse = (w: World, until: number) => stream.elapsed(w, until);
 // The shipped flow: two timber taken, the hut ordered, and the order's 7200 s elapsed.
 const raised = (w: World) => {
   w = play(take(w, 'a', 'b'), raise(w));
@@ -117,7 +98,7 @@ function refused(
 // room's title not the blueprint's, the way back missing, a second build on the same site taken,
 // the minted id not deterministic, or the room lost on reopen.
 test('buy the plot, raise the hut, walk north into it and back; the room survives reopen', () => {
-  n = 0;
+  stream.n = 0;
   let w = fresh();
   const lane = w.state.containers[w.body];
   refused(w, 'invalid_state'); // owns_plot policy fails (actions.ts refusal: invalid_state)
@@ -149,7 +130,7 @@ test('buy the plot, raise the hut, walk north into it and back; the room survive
     { south: { to: ref('room', 'lane') } },
   ]);
   assert.deepEqual({ ...reopened.rooms[lane].exits }, { north: { to: ref('room', key) } });
-  n = 1; // the same command ids as above: the refused raise was command 1
+  stream.n = 1; // the same command ids as above: the refused raise was command 1
   let again = fresh();
   again = raised(play(again, buy(again)));
   assert.deepEqual(built(again), [hut], 'replay mints the same id');
@@ -166,7 +147,7 @@ test('a second structure past max_total, or past max_per_owner, is refused', () 
       c.world.construction.max_total = max_total;
       if (!cap) delete c.blueprints[`${S}:blueprint/hut`].max_per_owner;
     });
-  n = 0;
+  stream.n = 0;
   let w = fresh();
   w = raised(play(w, buy(w)));
   refused(hydrate(fresh(wider(1)), w.state, true)!, 'invalid_state', 'service.construction_full');
@@ -182,7 +163,7 @@ test('a second structure past max_total, or past max_per_owner, is refused', () 
 // body has, an id other than its row key, an unknown blueprint, a
 // blueprint the site does not list, or an unknown site.
 test('a forged built row refuses the load', () => {
-  n = 0;
+  stream.n = 0;
   let w = fresh();
   w = raised(play(w, buy(w)));
   const [hut] = built(w);
@@ -230,7 +211,7 @@ test('the map places the hut one step north of the lane and links both ways', ()
     c.lock.capabilities.knowledge = 1;
     c.manifest.requires.capabilities.knowledge = 1;
   });
-  n = 0;
+  stream.n = 0;
   let w = fresh(mapped);
   const lane = w.state.containers[w.body];
   w = raised(play(w, buy(w)));
@@ -258,7 +239,7 @@ test('the map places the hut one step north of the lane and links both ways', ()
 // read while ordered, the order left open after completion, or a reopen between order and
 // completion minting a different room id (the job's owner or id lost in the save).
 test('two timber and 7200 s raise the hut; a reopen between order and completion mints the same id', () => {
-  n = 0;
+  stream.n = 0;
   let w = play(fresh(), buy(fresh()));
   w = take(w, 'a');
   refused(w, 'not_owned', 'service.missing_inputs');
@@ -268,13 +249,13 @@ test('two timber and 7200 s raise the hut; a reopen between order and completion
   assert.equal(gameView(w).place.description.key, 'room.lane.framing');
   const t0 = w.state.clock;
   const reopened = hydrate(fresh(), JSON.parse(JSON.stringify(w.state)), true)!;
-  const mark = n;
+  const mark = stream.n;
   w = elapse(w, t0 + 7199);
   assert.deepEqual(built(w), []);
   w = elapse(w, t0 + 7200);
   assert.deepEqual([held(w, yard), ordered(w), built(w).length], [2, false, 1]);
   assert.equal(gameView(w).place.description.key, 'room.lane.description');
-  n = mark;
+  stream.n = mark;
   const again = elapse(elapse(reopened, t0 + 7199), t0 + 7200);
   assert.deepEqual(built(again), built(w));
 });
@@ -282,7 +263,7 @@ test('two timber and 7200 s raise the hut; a reopen between order and completion
 // Breaks (20b cancel on a build commission): cancel not returning the timber or refunding the
 // fee, the order left open, or the cancelled order's job still raising the hut.
 test('cancel before due returns the timber, keeps the fee, and raises nothing', () => {
-  n = 0;
+  stream.n = 0;
   let w = play(fresh(), buy(fresh()));
   w = play(take(w, 'a', 'b'), raise(w));
   w = play(w, cancel(w));
@@ -294,7 +275,7 @@ test('cancel before due returns the timber, keeps the fee, and raises nothing', 
 // Break: the cancelled order's job raising the hut at its own due time (before the reorder's),
 // or neither job raising it.
 test('order, cancel, reorder: only the reorder raises the hut, at its own due time', () => {
-  n = 0;
+  stream.n = 0;
   let w = play(fresh(), buy(fresh()));
   w = play(take(w, 'a', 'b'), raise(w));
   const t0 = w.state.clock;
@@ -321,7 +302,7 @@ test('a second commission due on a taken site returns its timber instead', () =>
     for (const k of ['', '_2']) c.services[`${s}${k}`].benefit.escrow.quantity = 1;
     c.npcs[`${S}:npc/carpenter`].services.push(ref('service', 'raise_hut_2'));
   });
-  n = 0;
+  stream.n = 0;
   let w = fresh(both);
   w = play(take(play(w, buy(w)), 'a', 'b'), raise(w));
   const t0 = w.state.clock;
@@ -340,7 +321,7 @@ test('a second commission due on a taken site returns its timber instead', () =>
 // rows, a refund to an owner with no body here closing the order with the timber lost, or a
 // refund past the query budget closing it with the timber stranded (both must fault instead).
 test('a commission raises for its job owner, caps per owner, and an unrefundable one faults', () => {
-  n = 0;
+  stream.n = 0;
   let w = play(take(play(fresh(), buy(fresh())), 'a', 'b'), raise(fresh()));
   const [id, row] = Object.entries(w.state.jobs ?? {}).find(([, r]) => r.job.kind === 'order')!;
   const other = '0000000f-0000-4000-8000-000000000000' as never;
@@ -404,7 +385,7 @@ test('a commission raises for its job owner, caps per owner, and an unrefundable
 // actor's body rather than the room (policy status_active subject room), or ruin changing the
 // hut's exits or trapping the player inside.
 test('600 s after completion the hut reads in ruin, its exits unchanged, and the player can leave', () => {
-  n = 0;
+  stream.n = 0;
   let w = fresh();
   w = raised(play(w, buy(w)));
   const lane = w.state.containers[w.body];
@@ -429,7 +410,7 @@ test('600 s after completion the hut reads in ruin, its exits unchanged, and the
 // Built rooms S4 mend (mechanics.md Built rooms, S4). Breaks: a mend admitted on a sound hut, the
 // mend not curing ruin, the timber or price not taken, or weathering not applied again from the mend.
 test('mend is refused on a sound hut; on a ruin it cures it for 3 pennies and a timber, and weathering restarts', () => {
-  n = 0;
+  stream.n = 0;
   let w = take(raised(play(fresh(), buy(fresh()))), 'c');
   const yard = w.roomIds[`${S}:room/yard`]!;
   refused(w, 'invalid_state', 'service.nothing_to_mend', [mend, 2]);
@@ -458,7 +439,7 @@ const seeded = (w: World, f: (s: any) => void) => {
 // active (its job then expiring or ruining a razed room), a second raze or a mend admitted on the
 // tombstone, or the razed row still counted against max_total 1 (no second hut).
 test('raze puts the floor in the lane, takes north away, ends weathering; a new hut can be raised', () => {
-  n = 0;
+  stream.n = 0;
   let w = take(raised(play(fresh(), buy(fresh()))), 'c');
   const lane = w.state.containers[w.body];
   const [hut] = built(w);
@@ -482,11 +463,11 @@ test('raze puts the floor in the lane, takes north away, ends weathering; a new 
   assert.deepEqual(active(w), []);
   refused(w, 'invalid_state', 'service.nothing_to_raze', [raze, 3]);
   refused(w, 'invalid_state', 'service.nothing_to_mend', [mend, 2]);
-  const run_id = `aaaaaaaa-1091-4091-8091-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-1091-4091-8091-${String(++stream.n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + 700];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n);
   assert.equal(r.decision.kind, 'accepted');
   const events = (r.decision as unknown as { events: { payload: { type: string } }[] }).events;
   assert.ok(!events.some((e) => e.payload.type === 'status_expired'), JSON.stringify(events));
@@ -520,7 +501,7 @@ test('raze puts the floor in the lane, takes north away, ends weathering; a new 
 // holder (only the floor's direct contents move), or the moves not in EntityId order (the order
 // would follow key insertion, which a reopen changes).
 test("raze moves an NPC in the hut to the lane; a holder's contents ride along", () => {
-  n = 0;
+  stream.n = 0;
   let w = raised(play(fresh(), buy(fresh())));
   const lane = w.state.containers[w.body];
   const [hut] = built(w);
@@ -547,7 +528,7 @@ test("raze moves an NPC in the hut to the lane; a holder's contents ride along",
 // moved or destroyed by a raze rather than refusing it, or the owner check after the occupancy
 // check (the refusal order is nothing_to_raze, permission_denied, occupied).
 test('raze is refused for a non-owner, and while a corpse lies in the hut', () => {
-  n = 0;
+  stream.n = 0;
   const w = raised(play(fresh(), buy(fresh())));
   const [hut] = built(w);
   const b = w.cartridge.services![`${S}:service/raze_hut`]!.benefit as never;
@@ -594,7 +575,7 @@ test('a razed hut leaves the map', () => {
     c.lock.capabilities.knowledge = 1;
     c.manifest.requires.capabilities.knowledge = 1;
   });
-  n = 0;
+  stream.n = 0;
   let w = fresh(mapped);
   const lane = w.state.containers[w.body];
   w = raised(play(w, buy(w)));
@@ -612,7 +593,7 @@ test('a razed hut leaves the map', () => {
 // loads), one keyed by an entity that is not a built room, one off the BuiltRow shape, or an
 // entity left inside a razed room.
 test('a forged tombstone refuses the load', () => {
-  n = 0;
+  stream.n = 0;
   let w = raised(play(fresh(), buy(fresh())));
   const [hut] = built(w);
   w = play(w, raze(w));

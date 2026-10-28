@@ -9,12 +9,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, commands, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-escrow-sampler-'));
 let artifact: Uint8Array;
@@ -39,19 +38,10 @@ function sampler(edit?: (c: any) => void) {
   return r.cartridge as Cartridge;
 }
 
-let n = 0;
-function send(w: World, payload: object) {
-  const id = `eeeeeeee-2020-4020-8020-${String(++n).padStart(12, '0')}`;
-  const command = { id, world_context_id: w.context, payload };
-  return step(w, { ...command, payload: { actor_id: w.character, ...payload } } as never, n);
-}
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('eeeeeeee-2020-4020-8020', 'aaaaaaaa-2020-4020-8020');
+const { send, play } = stream;
 function fresh(content = sampler()) {
-  n = 0;
+  stream.n = 0;
   return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e20' as never, [1, 2, 3, 4]);
 }
 const ore = (w: World, k: string) => w.entityIds[`${S}:item/ore_${k}`]!;
@@ -213,15 +203,7 @@ const offers = (w: World) =>
   gameView(w)
     .entities.find((x) => x.id === smith(w))!
     .services!.map((s) => s.action);
-const elapse = (w: World, until: number) => {
-  const run_id = `aaaaaaaa-2020-4020-8020-${String(++n).padStart(12, '0')}`;
-  const from = w.state.clock;
-  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
-  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-};
+const elapse = (w: World, until: number) => stream.elapsed(w, until);
 const ordering = (content = sampler()) => {
   const w = take(fresh(content), 'a', 'b');
   return used(w, 'commission', 3);

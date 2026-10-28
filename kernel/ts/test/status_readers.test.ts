@@ -22,7 +22,7 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { cartridgeOf, verdict } from './harness.ts';
+import { cartridgeOf, commands, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -41,18 +41,8 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const S = (key: string) => `ward_sampler@0.0.1:status/${key}`;
 
-let n = 0;
-const id = () => `eeeeeeee-5454-4545-8545-${String(++n).padStart(12, '0')}` as never;
-const send = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: id(),
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-5454-4545-8545');
+const { send } = stream;
 const code = (r: ReturnType<typeof step>) =>
   r.decision.kind === 'rejected' ? r.decision.error.code : r.decision.kind;
 function play(w: World, payload: object) {
@@ -64,11 +54,11 @@ function round(w: World, by = 150) {
   return elapsed(w, by).world;
 }
 function elapsed(w: World, by = 150) {
-  const run_id = `aaaaaaaa-5454-4545-8545-${String(++n).padStart(12, '0')}`;
+  const run_id = `aaaaaaaa-5454-4545-8545-${String(++stream.n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + by];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, stream.n);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r;
 }
@@ -78,7 +68,7 @@ const C = { cartridge_id: 'ward_sampler', cartridge_version: '0.0.1' };
 
 /** A new game on `c`, in the shrine (warded and hushed). */
 function shrine(c = content) {
-  n = 0;
+  stream.n = 0;
   const w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54' as never, [1, 2, 3, 4]);
   return play(w, { type: 'move', direction: 'north' });
 }
@@ -94,7 +84,7 @@ function fight(w: World, before = (v: World) => v) {
   return [hp(after, after.body), hp(after, troll(after))];
 }
 const fresh = (c = content) => {
-  n = 0;
+  stream.n = 0;
   return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54' as never, [1, 2, 3, 4]);
 };
 const south = (w: World) => play(w, { type: 'move', direction: 'south' });

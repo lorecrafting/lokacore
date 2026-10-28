@@ -10,16 +10,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/attributes/shared.ts';
 import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { level as skillLevel, practice } from '../src/mechanics/skill_level.ts';
 import { value as fact } from '../src/mechanics/fact.ts';
-import { cartridgeOf, reload } from './harness.ts';
+import { cartridgeOf, commands, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-kitchen-sampler-'));
 let artifact: Uint8Array;
@@ -42,34 +41,11 @@ const loaded = reload(base);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-const send = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `cccccccc-4545-4545-8545-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
-function wait(w: World, seconds: number) {
-  const run_id = `aaaaaaaa-4545-4545-8545-${String(++n).padStart(12, '0')}`;
-  const from = w.state.clock,
-    until = from + seconds;
-  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
-  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('cccccccc-4545-4545-8545', 'aaaaaaaa-4545-4545-8545');
+const { send, play } = stream;
+const wait = (w: World, seconds: number) => stream.elapsed(w, w.state.clock + seconds);
 const fresh = (c = content) => {
-  n = 0;
+  stream.n = 0;
   return newWorld(c, '4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d' as never, [1, 2, 3, 4]);
 };
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
