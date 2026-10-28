@@ -139,16 +139,15 @@ or `bin/check_all.sh`; hosted CI on the pushed head is the gate ([two-lane CI](d
 
 ## Working rules
 
-- Follow [the delivery workflow](docs/WORKFLOW.md) for slice reviews and the
-  [Beads Rust](docs/WORKFLOW.md#beads-rust) for PM task status.
-- A PM session starts and ends with [the PM handoff](docs/HANDOFF.md): next steps, owner rules, open questions.
+- First reads per role:
+  - developer, reviewer, designer: its `.claude/agents/` file and the [workflow core](docs/WORKFLOW.md) sections it names;
+  - PM: the workflow, [PM.md](docs/PM.md) (Beads, merge per step 7) and [the PM handoff](docs/HANDOFF.md), which each PM session starts and ends with: next steps, owner rules, open questions.
 - Book UI code follows the [agent rules](docs/BOOK-UI-COMPONENTS.md#agent-rules-for-book-ui-code).
 - The World page holds only the [room page anatomy](docs/system/book-ui.md#room-page-anatomy): title, description, people, items, log.
 - A new screen or action names its template and patterns from the [interaction patterns](docs/design/interaction-patterns.md) first; what fits none goes to the owner.
 - Update [Book UI](docs/system/book-ui.md) per mechanic ([designer](docs/decisions/owner-decision-designer-role-2026-10-07.md)-approved); fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
-- Merge per [workflow step 7](docs/WORKFLOW.md#loop).
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored
   none of the work ([owner ruling](docs/system/owner-rules.md#process));
   who reviews what: [the workflow](docs/WORKFLOW.md).

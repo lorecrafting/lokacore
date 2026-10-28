@@ -30,5 +30,5 @@ recommendation below:
    may push to `main` or merge directly, never for unreviewed code or past a red check.
 
 Supersedes the [required-checks merge decision](owner-decision-required-checks-merge-2026-10-08.md)
-and the CI-green-before-review part of [workflow step 4](../WORKFLOW.md#loop). Review, exact-head
+and the CI-green-before-review part of [workflow step 4](../PM.md#loop). Review, exact-head
 and owner-reserved rules are unchanged.

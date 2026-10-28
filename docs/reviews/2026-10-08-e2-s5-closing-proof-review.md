@@ -64,7 +64,7 @@ Scope: `31a85fe7` (S5 fixes) and `4845cbbf` and `aa87cd04` (gate PR G, docs only
   - The paired-job paragraph names six kernel tests, and all six exist. Their red status is taken from the [Fable audit](2026-10-08-e2-gate-fable-audit.md); I did not rerun it.
 - Hashes: `shasum -a 256 -c SHA256SUMS` exits 0. The local-path grep finds nothing beyond `redaction-grep.log`'s own command line. `SHA256SUMS.verify` needed no change, because the file names are the same.
 
-**B. Gate checklist (`docs/briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md`): APPROVE WITH NOTES.** Governing: [WORKFLOW Milestone gate](../WORKFLOW.md#milestone-gate).
+**B. Gate checklist (`docs/briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md`): APPROVE WITH NOTES.** Governing: [WORKFLOW Milestone gate](../PM.md#milestone-gate).
 - Criteria 1-8 each link a slice PR, a review record or an evidence section. For criterion 8, exact-head CI is honestly stated as still to come.
 - Criterion 5: I checked each cited line against the S2 review M1, M2 and M3 rows. `r9c_custody_terminal.test.ts` authority `:323` and `:308`, kernel `:288`, and `missing_child_bell.test.ts:136` all match. The S3 M2 row for `service/shared.ts:105` and the provenance row ("known untested", loka-zfq) are correct.
 - Every carry has a row: the 11 commands, browser and native rows, the pending gates, the crow guard, forged deadlines, the paired-job invariant, loka-8mm and the recorder scope. The owner touch is a short report (owner answer (b)).

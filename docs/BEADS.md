@@ -1,6 +1,6 @@
 # Beads Rust operations
 
-Policy (who writes, labels, closure) is in the [workflow](WORKFLOW.md#beads-rust); this page is
+Policy (who writes, labels, closure) is in the [workflow](PM.md#beads-rust); this page is
 the operations manual.
 
 Install `br` (version 0.7.4) with

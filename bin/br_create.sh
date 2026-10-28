@@ -13,5 +13,5 @@ import json, sys
 sys.path.insert(0, sys.argv[1])
 from check_beads_export import LOCAL_PATH
 if any(isinstance(v, str) and LOCAL_PATH.search(v) for v in json.load(sys.stdin)[0].values()):
-    print(f"br_create: warning: {sys.argv[2]} text has an absolute or home-relative path; use repo-relative paths and worktree names (docs/WORKFLOW.md step 2)", file=sys.stderr)
+    print(f"br_create: warning: {sys.argv[2]} text has an absolute or home-relative path; use repo-relative paths and worktree names (docs/PM.md step 2)", file=sys.stderr)
 ' "$(dirname "$0")" "$id" || true

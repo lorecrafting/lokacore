@@ -325,7 +325,7 @@ For a brief that adds or changes anything the player sees or taps
    sentence, and what the live region reads.
 5. Name the empty state ([section 5](#5-empty-and-edge-states)) and confirm nothing is boxed.
 6. Add every new label to LABEL and cite the [wording pattern](#6-wording-conventions).
-7. Cite the `book-ui.md` clause for each Book-visible promise ([brief rules](../WORKFLOW.md#loop)).
+7. Cite the `book-ui.md` clause for each Book-visible promise ([brief rules](../PM.md#loop)).
 8. Add or name the test that catches a break of each pattern used; a pattern marked "none yet"
    gets its check in the same slice when the slice touches it.
 

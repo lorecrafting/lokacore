@@ -4,7 +4,7 @@
   `589db5360dcdf570f50465571702367cb911fe6a` (includes the merge of `main` `4c47ab19`).
 - Reviewer: fresh independent Opus reviewer; authored none of the work.
 - Governing: [AGENTS.md](../../AGENTS.md) "Each fact lives in one place";
-  [WORKFLOW](../WORKFLOW.md#review-stance), [milestone gate tidy checklist](../WORKFLOW.md#milestone-gate);
+  [WORKFLOW](../WORKFLOW.md#review-stance), [milestone gate tidy checklist](../PM.md#milestone-gate);
   [move forward](../decisions/owner-decision-move-forward-2026-10-07.md);
   [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
 - Verdict: **APPROVE WITH NOTES**

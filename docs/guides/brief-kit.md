@@ -1,6 +1,6 @@
 # Brief kit
 
-Every slice brief links this file and does not copy it ([WORKFLOW step 2](../WORKFLOW.md#loop)).
+Every slice brief links this file and does not copy it ([PM step 2](../PM.md#loop)).
 The developer reads it once. A brief adds only the slice's own rules.
 
 ## Common rules

@@ -12,7 +12,7 @@ pre-production work.
   `main` requires both. A gate fails unless its `changes` job succeeded and no job failed or was
   cancelled, so skipped scoped jobs pass and a draft run fails ([CHECKS](../CHECKS.md)).
 - Only the PM arms auto-merge, and only after the final approving verdict on the exact head
-  ([workflow step 7](../WORKFLOW.md#loop)). GitHub keeps it armed after a later push, so after
+  ([workflow step 7](../PM.md#loop)). GitHub keeps it armed after a later push, so after
   arming only the PM's own post-verdict commits may land; any other push first disarms it and
   goes back to the reviewer. A cancelled run fails the gate and needs a manual rerun.
 - One-time setup by the PM right after this lands and before the next merge: branch protection

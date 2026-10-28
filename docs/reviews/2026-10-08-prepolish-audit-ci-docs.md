@@ -4,7 +4,7 @@
 - Scope: `bin/`, `.githooks/`, `.github/workflows/`, `AGENTS.md`, `docs/WORKFLOW.md`,
   `docs/BEADS.md`, `docs/ROADMAP.md`, `docs/lessons/`, `docs/CHECKS.md` (as the gate owner).
 - Governing: [CHECKS](../CHECKS.md), [CI scope decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md),
-  [workflow step 7](../WORKFLOW.md#loop), [check lessons](../lessons/checks.md).
+  [workflow step 7](../PM.md#loop), [check lessons](../lessons/checks.md).
 - Not refiled: loka-occ items (mutate.sh nits, sync_pr keepalive, review index retirement,
   pre-push Elixir-half skip, shared lock, source_repo_path, session_status additions).
 

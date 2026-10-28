@@ -2,7 +2,7 @@
 
 - PR: [#295](https://github.com/lorecrafting/lokacore/pull/295), branch `chore/e1-child-issues`, exact head `888f7b40a082e9297ae5175edc22ca19060665b7`; CI green.
 - Scope: tracker-only (`.beads/issues.jsonl`, +6 rows); no mutation testing.
-- Governing: [WORKFLOW Beads Rust](../WORKFLOW.md#beads-rust), [audit follow-ups decision](../decisions/owner-decision-beads-audit-followups-2026-10-06.md).
+- Governing: [WORKFLOW Beads Rust](../PM.md#beads-rust), [audit follow-ups decision](../decisions/owner-decision-beads-audit-followups-2026-10-06.md).
 
 ## Must be true
 

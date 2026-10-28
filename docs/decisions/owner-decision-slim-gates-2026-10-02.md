@@ -11,4 +11,4 @@ from Gate R6P on.
 - No separate Opus-plus-Astra double review of docs-only gate PRs.
 - The docs tidy pass stays inside the checklist.
 
-How the workflow applies it: [WORKFLOW, Milestone gate](../WORKFLOW.md#milestone-gate).
+How the workflow applies it: [WORKFLOW, Milestone gate](../PM.md#milestone-gate).

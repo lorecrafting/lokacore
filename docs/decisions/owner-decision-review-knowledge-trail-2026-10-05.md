@@ -16,5 +16,5 @@ unfinished work with a link to the originating record, whether the task tracker 
 the current roadmap or a later adopted tool. Do not duplicate full review text in
 the task tracker or turn every one-off finding into a general rule.
 
-The [delivery workflow](../WORKFLOW.md#review-knowledge-trail) owns the handoff step;
+The [delivery workflow](../PM.md#review-knowledge-trail) owns the handoff step;
 review records and their [index](../reviews/README.md) remain the historical source.

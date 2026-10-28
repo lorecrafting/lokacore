@@ -1,5 +1,5 @@
 #!/bin/sh
-# Merge gate (docs/WORKFLOW.md step 7, loka-fxeq): merge a reviewed PR only on the exact head that
+# Merge gate (docs/PM.md step 7, loka-fxeq): merge a reviewed PR only on the exact head that
 # bin/wait_ci.sh passed, then run bin/after_merge.sh with the same arguments. Run in the main checkout;
 # with a ROADMAP subject, make the ROADMAP status edit first (after_merge commits it).
 #   bin/merge_pr.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]

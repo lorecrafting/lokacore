@@ -1,7 +1,7 @@
 # Review: E1 re-split issues (PR #299)
 
 - Branch `chore/e1-resplit-issues`, commit `013f0a6615734395362551321440763653b556bc`; tracker-only (`.beads/issues.jsonl`), no mutation testing per brief.
-- Governing: [WORKFLOW.md Beads Rust](../WORKFLOW.md#beads-rust), [audit follow-ups](../decisions/owner-decision-beads-audit-followups-2026-10-06.md).
+- Governing: [WORKFLOW.md Beads Rust](../PM.md#beads-rust), [audit follow-ups](../decisions/owner-decision-beads-audit-followups-2026-10-06.md).
 - Verdict: **APPROVE WITH NOTES**
 
 ## Must be true

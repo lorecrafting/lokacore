@@ -13,7 +13,7 @@ directly commit".
    History lives in git, Beads and the review records; no dated session sections pile up (it had reached 502 lines).
 2. **Rulings edit briefs in place.** A ruling made after a brief is drafted rewrites that part of the brief and
    deletes the old text; no appended "rulings override the body" sections
-   ([WORKFLOW, Brief](../WORKFLOW.md#loop)).
+   ([WORKFLOW, Brief](../PM.md#loop)).
 3. **Tools, not repeated commands.** `bin/wait_ci.sh` takes a branch and waits on its fetched origin head (a stale
    sha watched the wrong head on #475); `bin/ci_fail.sh <sha|branch>` prints only a red run's failing lines;
    `bin/after_merge.sh` closes several comma-separated Beads ids (loka-4zvw). Each has a case in

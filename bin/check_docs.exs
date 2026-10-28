@@ -116,7 +116,7 @@ tracked = String.split(tracked, "\n", trim: true)
 by_base = Enum.group_by(tracked, &Path.basename/1)
 
 live_re =
-  ~r{\A(AGENTS\.md|docs/(system/[^/]+|ROADMAP|world-parameters|CHECKS|WORKFLOW|lessons/[^/]+)\.md)\z}
+  ~r{\A(AGENTS\.md|docs/(system/[^/]+|ROADMAP|world-parameters|CHECKS|WORKFLOW|PM|lessons/[^/]+)\.md)\z}
 
 live = Enum.filter(docs, &String.match?(&1, live_re)) ++ extra
 

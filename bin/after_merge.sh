@@ -1,5 +1,5 @@
 #!/bin/sh
-# PM bookkeeping after a reviewed PR merged (docs/WORKFLOW.md step 7), in the integration checkout:
+# PM bookkeeping after a reviewed PR merged (docs/PM.md step 7), in the integration checkout:
 # pull main, close the Beads issue, remove the PR branch's worktree, delete the branch (local and
 # remote) and review-<PR>, commit the Beads export (plus a ROADMAP edit already made) and push main.
 #   bin/after_merge.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]

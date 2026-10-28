@@ -36,7 +36,7 @@ labeled `housekeeping`. No scheduled weekly routine (the owner's weekly limits v
 at each milestone gate instead (E3, release-candidate certification, release). The retro process and
 the reminders go in the workflow and run automatically: `bin/session_status.sh` prints the open queue,
 a "before you clear" reminder and a missed-retro note. Effect:
-[Retro and housekeeping queue](../WORKFLOW.md#retro-and-housekeeping-queue).
+[Retro and housekeeping queue](../PM.md#retro-and-housekeeping-queue).
 
 ## Claims, nit fixes, briefs and PR citations
 

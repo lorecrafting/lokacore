@@ -4,7 +4,7 @@
 - Scope: 2b footer family, 2a leaf components and check E3, the pre-production gate change, the finish
   round (naming rule, test helper, whole-tree lint). The look is the Fable designer's review.
 - Governing: [pre-production gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md),
-  [WORKFLOW steps 4 and 7, Delivery lanes](../WORKFLOW.md#loop), [CHECKS](../CHECKS.md), plan
+  [WORKFLOW steps 4 and 7, Delivery lanes](../PM.md#loop), [CHECKS](../CHECKS.md), plan
   `docs/briefs/polish/storybook-plan-2026-10-08.md` B, C, D, E3; PM naming rule (a pressable's name starts
   with its visible text exactly as rendered, then a suffix; applies everywhere).
 
