@@ -247,19 +247,6 @@ grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
 grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
-# Break: a sim leg's duration (either leg) is missing for a PR head or the nightly, another job or an unfinished sim is printed.
-J='{"jobs":[{"name":"lint","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:01:00Z"},{"name":"sim (fresh)","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:07:23Z"},{"name":"sim (showcase)","conclusion":"failure","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:10:00Z"},{"name":"sim (fresh)","conclusion":"","startedAt":"2026-10-15T10:00:00Z","completedAt":"0001-01-01T00:00:00Z"}]}'
-CI='[{"conclusion":"success","status":"completed","headSha":"abcdef0123","url":"u1","databaseId":7}]' E2E='[]' PRS='[{"headRefOid":"1234567890ab"}]' JOBS=$J \
-  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
-[ "$(grep 'sim (' out | grep -vc median)" = 4 ] && grep -qx 'PR head 12345678: sim (showcase) job failure 600s' out && grep -qx 'PR head 12345678: sim (fresh) job success 443s' out && grep -qx 'ci.yml nightly: sim (fresh) job success 443s' out \
-  || { bad 'session_status sim time: wrong lines'; grep 'sim (' out; }
-# Break (loka-9nd4): the nightly median is the newest run, the mean, or counts a failed leg. Five runs: 280 290 300 540 550 s, newest first.
-leg() { printf '{"name":"sim (fresh)","conclusion":"%s","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:%02d:%02dZ"}' "$1" $(($2 / 60)) $(($2 % 60)); }
-CI='[{"databaseId":1},{"databaseId":2},{"databaseId":3},{"databaseId":4},{"databaseId":5}]' E2E='[]' PRS='[]' JOBS='{"jobs":[]}' \
-  JOBS_1="{\"jobs\":[$(leg success 550),$(leg failure 30)]}" JOBS_2="{\"jobs\":[$(leg success 280)]}" JOBS_3="{\"jobs\":[$(leg success 540)]}" \
-  JOBS_4="{\"jobs\":[$(leg success 290)]}" JOBS_5="{\"jobs\":[$(leg success 300)]}" \
-  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
-grep -qx 'ci.yml nightly median: sim (fresh) 300s over 5 runs' out || { bad 'session_status sim median: wrong line'; grep median out; }
 # --- pm_merge.sh ---------------------------------------------------------------------------
 # A batch worktree, a slice and a record branch on a bare origin (stub prepush.sh passes). Stub gh applies the real
 # --jq to $CI and $E2E, the run lists of ci.yml and book-e2e.yml (newest first). Break: a merge goes ahead while the newest

@@ -24,8 +24,8 @@ handoff); [building mechanics by composition](../system/architecture.md#building
   `mobile/app/stories/SystemDataModel.stories.tsx` Impact story.
 - Exact boundary: test every threshold at the boundary value and one past it.
 - Content: hand back an item loop table (item: source -> sink or cap); no hidden faucet.
-- Mutants: mutate every new conditional in your diff. The check table pastes the failing line from
-  each mutant run (every new check, both kernels, -> the test that fails when it is removed).
+- Mutants: `bin/mutate_diff.sh origin/main` mutates every added conditional; the check table is its
+  output (a SURVIVED or NO-TESTS row needs a test, or a `mutate-skip: <reason>` on a non-logic line).
 - Self-review: `/code-review medium <branch-name>` (the slice branch, e.g. `feat/x`); never with no
   target (a `cd` does not change a skill's target). Name the range; a review that lists files outside the slice
   is void.

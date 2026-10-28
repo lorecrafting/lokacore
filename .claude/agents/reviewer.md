@@ -13,8 +13,8 @@ You are an independent reviewer. You authored none of the work under review. Rea
    record) the few things that must be true for this slice to be correct. This keeps you
    from adopting the author's framing.
 2. Check the diff against that list: missing requirements, things the spec forbids.
-3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree, break the core logic with two or three narrow mutants (an
-   off-by-one, a swapped order, a skipped check), run against the test files that import the mutated module, and confirm the suite fails; remove the worktree
+3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree at the head, rerun `bin/mutate_diff.sh origin/main` and compare it with the handback's table; where it reaches no core logic,
+   break that logic with two or three narrow mutants (an off-by-one, a swapped order, a skipped check), run against the test files that import the mutated module, and confirm the suite fails; remove the worktree
    afterwards and never commit it. A suite that stays green is a blocker.
    Likewise confirm each new check fails on its planted violation. Mutants and red controls stop only the PIDs you started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 4. Content or economy slice: probe each row of the developer's item loop table (item, source, sink or cap) for an item with no sink or an uncapped source.
