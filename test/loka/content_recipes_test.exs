@@ -20,15 +20,14 @@ defmodule Loka.ContentRecipesTest do
 
     for {rel, v} <- Map.merge(base, files), v != nil do
       File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-
-      File.write!(
-        Path.join(dir, rel),
-        with({:raw, text} <- v, do: text, else: (_ -> JSON.encode!(v)))
-      )
+      File.write!(Path.join(dir, rel), text(v))
     end
 
     Loka.Content.compile(dir)
   end
+
+  defp text({:raw, text}), do: text
+  defp text(v), do: JSON.encode!(v)
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp recipe(path, v), do: put_in(src("actions/ring_bell.json"), path, v)
