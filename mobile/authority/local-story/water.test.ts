@@ -1,4 +1,4 @@
-// size: allow 507, water custody and fault cases share one real SQLite fixture
+// size: allow 525, water custody, fault and Book warned-exit cases share one real SQLite fixture
 // Real SQLite and the existing fault injector; teacher/gear locations are declared controlled inputs.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
