@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
-import { book } from './__tests__/polish-book.test.ts';
+import { book, words } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 import { resetLogs, type Logs } from './logs.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -41,21 +41,27 @@ function poisoned() {
 }
 const away = (ms: number) => wait(poisoned(), ms);
 const count = (lines: string[], line: string) => lines.filter((l) => l === line).length;
+const heard = (b: Book) => {
+  const h = b.draw().find((n) => n.type?.name === 'Heard');
+  return words(h.type(h.props));
+};
 
 // Breaks: the settlement's lines go to the log one by one (no grouping or threshold); the block is
 // drawn below the room instead of opening the page; counts or first-seen order are wrong; a press
 // keeps the recap.
-test('a three-hour absence opens the page with one collapsed recap, counts by line', () => {
+test('a three-hour absence logs one collapsed recap entry at the end, counts by line', () => {
   const b = away(HOURS3); // from 07:00: six evenings (she leaves) and six mornings (she arrives)
   let shown = b.text();
   assert.equal(count(shown, LABEL.awayRecap), 1);
   assert.equal(count(shown, TICK), 0); // collapsed, and not in the log either
-  assert.ok(shown.indexOf(LABEL.awayRecap) < shown.indexOf(ROOM));
+  assert.ok(shown.indexOf(LABEL.awayRecap) > shown.indexOf(ROOM));
   assert.ok(!shown.some((l) => l.includes('poisoned'))); // the status line shows the present
+  assert.equal(heard(b), LABEL.awayRecap); // the live region reads the heading, not the lines
   b.tap(`${LABEL.awayRecap}, show`);
   shown = b.text();
-  const block = shown.slice(shown.indexOf(LABEL.awayRecap) + 1, shown.indexOf(ROOM));
-  assert.deepEqual(block, [
+  const at = shown.indexOf(LABEL.awayRecap);
+  assert.deepEqual(shown.slice(at, at + 7), [
+    LABEL.awayRecap,
     `${TICK} (11 times)`,
     'You shiver.',
     'The chill passes.',
@@ -67,6 +73,12 @@ test('a three-hour absence opens the page with one collapsed recap, counts by li
   const line = (s: string) => b.draw().find((x) => x.type === 'Text' && x.props.children === s);
   assert.notEqual(line('You shiver.').props.style.color, line(LABEL.awayRecap).props.style.color);
   assert.equal(line('You shiver.').props.accessibilityLabel, undefined);
+  // A press in place logs after the entry, which stays; a room change drops it.
+  b.tap('A pebble, open');
+  b.tap('Take a pebble');
+  shown = b.text();
+  assert.equal(count(shown, LABEL.awayRecap), 1);
+  assert.equal(shown[shown.indexOf(LABEL.awayRecap) + 7], 'You take a pebble.');
   b.map();
   b.tap('Go north');
   assert.equal(count(b.text(), LABEL.awayRecap), 0);
@@ -99,9 +111,14 @@ test('an absence of exactly the threshold shows the recap; one second less does 
   assert.equal(count(away(30 * 60 * 1000 - 1000).text(), LABEL.awayRecap), 0);
 });
 
-// Break: a second absence before any press replaces the first one's recap, losing its lines.
+// Breaks: a second absence before any press replaces the first one's recap, losing its lines; or
+// joins it silently, so the live region does not read the heading again.
 test('a second long absence before a press adds its lines to the same recap', () => {
-  const b = wait(away(HOURS3), HOURS3); // to 19:00 on day 12: thirteen evenings, twelve mornings
+  const said = (b: Book) => b.draw().find((n) => n.type?.name === 'Heard').props.said;
+  const b = away(HOURS3),
+    first = said(b);
+  wait(b, HOURS3); // to 19:00 on day 12: thirteen evenings, twelve mornings
+  assert.deepEqual(said(b), { ...first, key: first.key + 1 });
   b.tap(`${LABEL.awayRecap}, show`);
   const shown = b.text();
   assert.equal(count(shown, LABEL.awayRecap), 1);
@@ -150,22 +167,22 @@ test('a press in place during catch-up logs the held lines, in order, before its
   assert.ok(log.lastIndexOf('Maud arrives.') < log.indexOf('You take a pebble.'));
 });
 
-// Breaks: the player moved without a press keeps the old room's held lines or recap.
-test('a room change drops the held lines and the recap; staying keeps them', () => {
+// Breaks: the player moved without a press keeps the old room's held lines or recap entry.
+test('a room change drops the held lines and the recap entry; staying keeps them', () => {
+  const entry = { recap: ['b'], text: LABEL.awayRecap };
   const logs = () =>
     ({
-      log: [],
+      log: [entry],
       projection: { view: { place: { id: 'hall' } } },
       away: { from: 0, log: ['a'] },
-      recap: ['b'],
     }) as unknown as Logs;
   const view = (id: string) => ({ place: { id } }) as GameView;
   const stay = logs();
   resetLogs(stay, view('hall'));
-  assert.deepEqual([stay.away, stay.recap], [{ from: 0, log: ['a'] }, ['b']]);
+  assert.deepEqual([stay.away, stay.log], [{ from: 0, log: ['a'] }, [entry]]);
   const moved = logs();
   resetLogs(moved, view('garden'));
-  assert.deepEqual([moved.away, moved.recap], [undefined, undefined]);
+  assert.deepEqual([moved.away, moved.log], [undefined, []]);
 });
 
 // Breaks: the Book reports its subscription before it subscribes, so a cold reopen's catch-up (which
@@ -190,7 +207,26 @@ test('a settlement that ends without settling keeps its lines in the log', () =>
     away: { from: 0, log: ['a', 'a'] },
   } as unknown as Logs;
   settle(s);
-  assert.deepEqual([s.log, s.recap, s.away], [['a', 'a'], undefined, undefined]);
+  assert.deepEqual([s.log, s.away], [['a', 'a'], undefined]);
+});
+
+// Breaks: the recap is kept outside the log (so a later line draws above it), or a second long
+// absence with no line in between makes a second entry instead of adding to the first.
+test('a settled recap is a log entry in time order; a second one before any line joins it', () => {
+  const s = {
+    log: ['a'],
+    status: { kind: 'ready' },
+    projection: { view: { time: 100, recap_after: 50 } },
+  } as unknown as Logs;
+  const after = (from: number, log: string[]) => (
+    settle(Object.assign(s, { away: { from, log } })),
+    s.log
+  );
+  const entry = (recap: string[]) => ({ recap, text: LABEL.awayRecap });
+  assert.deepEqual(after(0, ['b', 'b']), ['a', entry(['b', 'b'])]);
+  assert.deepEqual(after(0, ['d']), ['a', entry(['b', 'b', 'd'])]);
+  assert.deepEqual(after(90, ['c']), ['a', entry(['b', 'b', 'd']), 'c']);
+  assert.deepEqual(after(0, ['e']), ['a', entry(['b', 'b', 'd']), 'c', entry(['e'])]);
 });
 
 // The sampler with 3 HP, so the third poison tick kills the player in the dart room and they wake

@@ -1,7 +1,8 @@
 // C row Pages, Room (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 import { Body } from '../book/Body.tsx';
+import { LABEL } from '../book/labels.ts';
 import { cueLine } from '../book/model.ts';
 import { RoomPage } from '../book/pages.tsx';
 import { pageStory } from './screen.tsx';
@@ -43,7 +44,49 @@ export const Reworded: StoryObj = {
   },
 };
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
-export const LongLog: StoryObj = { ...pageStory(RoomLongLogView), name: 'Long log' };
+// In the page's own viewport (toBeVisible ignores scrolling).
+const inView = (el: HTMLElement) => {
+  const r = el.getBoundingClientRect();
+  return r.top >= 0 && r.bottom <= window.innerHeight;
+};
+// Breaks: World opens at the top of a log that overflows, so the newest line is off screen (owner
+// ruling, loka-x6t.127: World always scrolls to its end).
+const longLog = [
+  ...Array.from({ length: 30 }, (_, i) => `You pace the floor (${i + 1}).`),
+  ...RoomLongLogView.log,
+  'You set the loaf down at last.',
+];
+export const LongLog: StoryObj = {
+  ...pageStory({ ...RoomLongLogView, log: longLog }),
+  name: 'Long log',
+  play: async ({ canvas }) => {
+    const last = await canvas.findByText('You set the loaf down at last.');
+    await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
+// The away recap as the presenter logs it: the log's last entry, collapsed (book-ui.md, Away
+// recap). Breaks: the recap draws above the log or open, or its heading does not open its lines.
+export const AwayRecap: StoryObj = {
+  ...pageStory({
+    ...RoomLongLogView,
+    log: [
+      ...RoomLongLogView.log,
+      { recap: ['Maud leaves.', 'Maud arrives.', 'Maud leaves.'], text: LABEL.awayRecap },
+    ],
+  }),
+  name: 'Away recap',
+  play: async ({ canvas, userEvent }) => {
+    const heading = await canvas.findByRole('button', { name: `${LABEL.awayRecap}, show` });
+    const taken = canvas.getAllByText('You take a loaf.').at(-1)!;
+    await expect(heading.getBoundingClientRect().top).toBeGreaterThan(
+      taken.getBoundingClientRect().top,
+    );
+    await expect(canvas.queryByText(/Maud leaves/)).toBeNull();
+    await userEvent.click(heading);
+    await expect(canvas.getByText('Maud leaves. (2 times)')).toBeVisible();
+    await expect(canvas.getByText('Maud arrives.')).toBeVisible();
+  },
+};
 export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Refusal line' };
 export const AtNight: StoryObj = {
   ...pageStory(RoomAtNightView),

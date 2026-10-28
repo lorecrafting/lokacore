@@ -1,4 +1,4 @@
-// size: allow 507, water custody and fault cases share one real SQLite fixture
+// size: allow 525, water custody, fault and Book warned-exit cases share one real SQLite fixture
 // Real SQLite and the existing fault injector; teacher/gear locations are declared controlled inputs.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -319,6 +319,30 @@ test('malformed water and historical recovery rows refuse save_corrupt without r
       a.sql.close();
     }
   }
+});
+
+// Breaks: the warned exit's warning is not logged, logged before the movement line or twice, for
+// an unwarned exit or on arriving at the warned room (book-ui.md, Room page anatomy).
+test('the warned exit taken logs its warning once, after the movement line', (t) => {
+  // From the prepared well shaft (or the room `from` leads to): press the exit `direction`.
+  const go = (direction: string, from?: string) => {
+    const a = setup();
+    t.after(() => a.sql.close());
+    a.prepared();
+    if (from) a.invoke('move', { direction: from });
+    const game = openGame(a.db, a.b, a.host),
+      book = presenter(game);
+    game.subscribe(book.update);
+    book.press(group(book.screen().buttons).exits.find((e) => e.direction === direction)!.button!);
+    return book.screen().log.map((l) => (typeof l === 'string' ? l : l.text));
+  };
+  const down = go('down'),
+    at = down.indexOf('Your lungs burn.');
+  assert.ok(at > 0, JSON.stringify(down));
+  assert.equal(down.lastIndexOf('Your lungs burn.'), at);
+  assert.equal(down[at - 1], 'You arrive from above.');
+  assert.ok(!go('up').includes('Your lungs burn.')); // the shaft's other, unwarned exit
+  assert.ok(!go('down', 'up').includes('Your lungs burn.')); // arriving at the shaft from the lane
 });
 
 // Breaks: the Book loses captured free Surface on detail navigation or prints recovery before confirmed custody, repeats it, or loses it on reopen.

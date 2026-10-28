@@ -70,7 +70,6 @@ const draw = async (
       g: { place: [], door: () => [] },
       press: () => {},
       open: () => {},
-      openChoice: () => {},
       links: proseLinks(p),
     } as any),
   );

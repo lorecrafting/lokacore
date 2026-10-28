@@ -1,4 +1,5 @@
-// AwayRecap: the World page's grouped lines after an absence (AwayRecap's doc comment).
+// AwayRecap: a room log entry's grouped lines after an absence (AwayRecap's doc comment); in
+// place on World: Pages/Room, Away recap.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { LABEL } from '../book/labels.ts';
