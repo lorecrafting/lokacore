@@ -9,13 +9,14 @@ every agent). Quoted text is one token, so a message or pattern that mentions a 
 ponytail: a command hidden in `sh -c '...'` or eval is not seen.
   python3 -I bin/bash_guard.py < hook-input.json"""
 import json
+import os
 import re
 import shlex
 import sys
 
 MARKER = "LOKA_OWNER_OK_NO_VERIFY=1"
 PM = "LOKA_PM=1"
-NPM_FULL = {"test", "test:e2e", "storybook:smoke"}
+NPM_FULL = {"test", "test:nosim", "test:sim", "test:e2e", "storybook:smoke"}
 
 
 def strip_heredocs(command):
@@ -76,13 +77,14 @@ def skips_hooks(args):
 
 
 def command_word(seg):
-    """(env prefix, words from the command word on), past VAR=x, nice/sh/bash and their flags."""
+    """(env prefix, words from the command word on), past VAR=x and the wrappers nice/sh/bash/env/time/
+    timeout/xargs with their flags and numbers (`timeout 10m`)."""
     i, wrapped = 0, False
     while i < len(seg):
         t = seg[i]
-        if t.rsplit("/", 1)[-1] in ("nice", "sh", "bash"):
+        if t.rsplit("/", 1)[-1] in ("nice", "sh", "bash", "env", "time", "timeout", "xargs"):
             wrapped = True
-        elif not (re.match(r"\w+=", t) or wrapped and (t[:1] == "-" or t.isdigit())):
+        elif not (re.match(r"\w+=", t) or wrapped and (t[:1] == "-" or re.fullmatch(r"[\d.]+[smhd]?", t))):
             break
         i += 1
     return seg[:i], seg[i:]
@@ -101,18 +103,31 @@ def npm_script(args):
     return pos[1] if pos[:1] in (["run"], ["run-script"]) and len(pos) > 1 else None
 
 
-def worktree_path(args):
-    """The path of `git worktree add [opts] <path>`, or None."""
+def worktree_path(words, args, cwd):
+    """The path `git [-C dir] worktree add [opts] <path>` creates, resolved against cwd and -C, or None.
+    ponytail: a `cd` in an earlier segment of the same command is not followed."""
     rest = iter(args)
     for a in rest:
         if a in ("-b", "-B", "--reason"):
             next(rest, None)
         elif a[:1] != "-":
-            return a
+            dirs = [words[j + 1] for j in range(len(words) - 1) if words[j] == "-C"]
+            return os.path.normpath(os.path.join(cwd, *map(os.path.expanduser, dirs + [a])))
     return None
 
 
-def refusal(seg):
+def gh_command(args):
+    """The first two words of a gh command past the global -R/--repo flag."""
+    rest, pos = iter(args), []
+    for a in rest:
+        if a in ("-R", "--repo"):
+            next(rest, None)
+        elif a[:1] != "-":
+            pos.append(a)
+    return pos[:2]
+
+
+def refusal(seg, cwd=""):
     git = invoked(seg, "git")
     if git:
         i, sub = git
@@ -134,21 +149,22 @@ def refusal(seg):
             return f"force push refused: fix the cause with a new commit. With the owner's OK, prefix {MARKER}."
     if PM in env:
         return None
-    path = sub == "worktree" and rest[:1] == ["add"] and worktree_path(rest[1:])
-    if path and "worktrees.noindex" not in path and "$" not in path:
+    path = sub == "worktree" and rest[:1] == ["add"] and worktree_path(words, rest[1:], cwd)
+    if path and "/worktrees.noindex/" not in path + "/" and "$" not in path:
         return "git worktree add outside worktrees.noindex refused: create it under ../worktrees.noindex (docs/WORKFLOW.md, Every agent)."
     if name in ("pkill", "killall"):
         return f"{name} stops processes by name, other agents' too: stop only the PIDs you started (kill <PID>)."
-    if name == "gh" and args[:2] in (["run", "watch"], ["workflow", "run"]):
-        return f"gh {' '.join(args[:2])} refused: only the PM waits on CI (bin/wait_ci.sh); a push already starts the runs."
+    if name == "gh" and gh_command(args) in (["run", "watch"], ["workflow", "run"]):
+        return f"gh {' '.join(gh_command(args))} refused: only the PM waits on CI (bin/wait_ci.sh); a push already starts the runs."
     if name == "check_all.sh" or name == "npm" and npm_script(args) in NPM_FULL:
         return "full suite refused on the M1: run the focused tests your diff touches (npm run test:files -- <files>); hosted CI runs the rest."
     return None
 
 
 try:
-    command = json.load(sys.stdin)["tool_input"]["command"]
-    reasons = [r for r in map(refusal, segments(strip_heredocs(command))) if r]
+    hook = json.load(sys.stdin)
+    cwd = hook.get("cwd") or os.getcwd()
+    reasons = [r for r in (refusal(s, cwd) for s in segments(strip_heredocs(hook["tool_input"]["command"]))) if r]
 except Exception:
     sys.exit(0)
 if reasons:

@@ -136,8 +136,9 @@ their rules and red controls remain available for resumption.
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`,
   `git commit -n`, a force push and `git rebase` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`, `gh run watch`,
-  `gh workflow run`, the full `npm test`, `test:e2e`, `storybook:smoke`, `bin/check_all.sh` and `git worktree add` outside
-  `worktrees.noindex` without the PM's `LOKA_PM=1` prefix; and a bare `br create`; `bin/send_guard.py`
+  `gh workflow run` (past `-R`), the full `npm test`, `test:nosim`, `test:sim`, `test:e2e`, `storybook:smoke`, `bin/check_all.sh`
+  (past `nice`, `env`, `time`, `timeout`, `xargs`) and a `git worktree add` path that resolves outside `worktrees.noindex`
+  without the PM's `LOKA_PM=1` prefix; and a bare `br create`; `bin/send_guard.py`
   (SendMessage) refuses to resume a subagent whose newest compaction was a hook one (under 1 s).
   `bin/integration_red_controls.sh` feeds both their refused and allowed inputs.
 - CI (`.github/workflows/`): `ci.yml` and `book-e2e.yml` run on every push to a branch other than

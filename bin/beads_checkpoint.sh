@@ -19,5 +19,5 @@ git fetch -q origin main || die 'fetch failed'
 beads_sync || die 'export not committed: fix the cause, rerun'
 git add $j docs/HANDOFF.md || die 'git add failed'
 git diff --cached --quiet || git commit -q -m "$subject" || die 'commit failed'
-git push -q origin main || die "push rejected: git pull --rebase origin main; br sync --merge; br sync --flush-only; commit $j; push"
+git push -q origin main || die "push rejected: main moved; rerun bin/beads_checkpoint.sh (it pulls and merges again)"
 echo "beads_checkpoint: pushed $(git rev-parse --short HEAD)"

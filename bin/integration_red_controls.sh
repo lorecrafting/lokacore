@@ -71,7 +71,7 @@ cat > "$tmp/brstub/br" <<'SH'
 echo "$*" >> "$BR_LOG"
 case $1 in
   close) [ -z "${BR_FAIL-}" ] || { echo 'some other error' >&2; exit 1; }
-    if [ -n "${BR_BUSY-}" ] && [ ! -e "$BR_BUSY" ]; then : > "$BR_BUSY"; echo 'Database error: database is busy' >&2; exit 1; fi
+    if [ -n "${BR_BUSY-}" ] && [ ! -e "$BR_BUSY" ]; then : > "$BR_BUSY"; echo "${BR_ERR:-Database error: database is busy}" >&2; exit 1; fi
     echo "closed $2" >> .beads/issues.jsonl ;;
   sync) [ -z "${BR_MERGE_FAIL-}" ] || exit 1
     j=.beads/issues.jsonl; { cat $j; grep -vxFf $j "$BR_DB"; } > $j.new; mv $j.new $j ;;
@@ -108,7 +108,7 @@ git fetch -q origin
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
   && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
 [ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf '{"id":"base"}\n{"id":"m"}\n{"id":"local-write"}\nclosed loka-a')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
-grep -qx 'sync --merge --force' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
+grep -qx 'sync --merge --force-db' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
 [ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
   && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
 # Break: a commit pushed to the PR branch after the merge is deleted with the remote branch.
@@ -133,13 +133,16 @@ git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7'
 # Break: a rerun (the failed first run already closed the issue) dies at br close, or closes it again.
 amk; export ISSUE_STATUS=closed; am rerun-closed 0; unset ISSUE_STATUS; git fetch -q origin
 { [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && ! grep -q '^close' "$R.br"; } || bad 'after_merge rerun-closed: br close called, or main not pushed'
-# Break: a busy database at br close stops the run, or is retried without recover, or more than once (loka-8zf5).
+# Break: a busy database or stale WAL index at br close stops the run, or is retried without recover, or more than once (loka-8zf5).
 amk; export BR_BUSY=$R.busy; am busy-db 0; unset BR_BUSY
 [ "$(grep -E '^(close|doctor)' "$R.br" | cut -d' ' -f1 | tr '\n' ' ')" = 'close doctor close ' ] && grep -q 'closed loka-a' .beads/issues.jsonl \
   || { bad 'after_merge busy-db: not recover then one retry'; cat "$R.br"; }
-# Break: a failed Beads merge still closes the issue, commits or pushes.
-amk; export BR_MERGE_FAIL=1; am merge-fails 1; unset BR_MERGE_FAIL; git fetch -q origin
-! grep -q '^close' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ -d "$R.wt" ] || bad 'after_merge merge-fails: closed, committed or removed something'
+amk; export BR_BUSY=$R.busy BR_ERR='stale WAL index'; am wal-index 0; unset BR_BUSY BR_ERR
+[ "$(grep -E '^(close|doctor)' "$R.br" | cut -d' ' -f1 | tr '\n' ' ')" = 'close doctor close ' ] || { bad 'after_merge wal-index: not recover then one retry'; cat "$R.br"; }
+# Break: a failed Beads merge still closes the issue, commits or pushes, or loses the local export write.
+amk; o=$(git ls-remote origin refs/heads/main); export BR_MERGE_FAIL=1; am merge-fails 1; unset BR_MERGE_FAIL; git fetch -q origin
+! grep -q '^close' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git ls-remote origin refs/heads/main)" = "$o" ] \
+  && [ -d "$R.wt" ] && grep -q local-write .beads/issues.jsonl || bad 'after_merge merge-fails: closed, committed, pushed, removed something or lost the export'
 amk; export BR_FAIL=1; am other-br-error 1; unset BR_FAIL; ! grep -q '^doctor' "$R.br" || bad 'after_merge other-br-error: recovered on an unknown error'
 # Break: a br write that dirties the export after the commit (stand-in post-commit hook) is left
 # uncommitted or unpushed.
@@ -353,9 +356,10 @@ lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
 # Break: a force push, git rebase, pkill/killall, gh run watch, gh workflow run, the full npm test, test:e2e, storybook:smoke,
 # check_all.sh or a worktree outside worktrees.noindex passes; its marker (owner's, or LOKA_PM=1) does not let it through;
+# a wrapper (timeout, env) or gh's -R hides the command; a worktree path is read as text, not resolved against cwd and -C;
 # LOKA_PM=1 unlocks a rebase; or a near miss (pull --rebase, test:files, a file that names the script) is refused.
-bg() { # <want-rc> <command>
-  rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.stdin.read()}}))' |
+bg() { # <want-rc> <command> [cwd, default /r/lokacore]
+  rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"cwd":sys.argv[1],"tool_input":{"command":sys.stdin.read()}}))' "${3:-/r/lokacore}" |
     python3 -I "$bin/bash_guard.py" 2> /dev/null || rc=$?
   [ "$rc" = "$1" ] || bad "bash_guard: exit $rc, want $1: $2"
 }
@@ -423,11 +427,15 @@ bg 2 'killall node'
 bg 0 'grep -rn pkill bin && kill 123'
 bg 2 'gh run watch 123'
 bg 0 'gh run list --commit abc'
+bg 2 'gh -R o/r run watch 1'
 bg 2 'gh workflow run ci.yml --ref b'
 bg 0 'LOKA_PM=1 gh workflow run ci.yml --ref b'
 bg 2 'cd kernel/ts && nice -n 10 npm test'
 bg 0 'nice -n 10 npm run test:files -- test/a.test.ts'
 bg 0 'LOKA_PM=1 npm test'
+bg 2 'timeout 10m npm test'
+bg 2 'env CI=1 npm run test:nosim'
+bg 2 'npm run test:sim'
 bg 2 'npm --prefix mobile/app run test:e2e'
 bg 2 'npm run storybook:smoke'
 bg 0 'npm run build'
@@ -435,6 +443,9 @@ bg 2 'sh bin/check_all.sh'
 bg 0 'sed -n 1,20p bin/check_all.sh'
 bg 2 'git worktree add -b x ../x main'
 bg 0 'git worktree add -b x ../worktrees.noindex/x main'
+bg 0 'git worktree add ../x' /r/worktrees.noindex/a
+bg 0 'git -C ../worktrees.noindex/a worktree add ../b'
+bg 0 'git worktree remove ../x'
 bg 0 'git worktree add "$W" b'
 bg 0 'LOKA_PM=1 git worktree add ../lokacore-session'
 # Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
@@ -655,11 +666,11 @@ git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
 git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
-# A main clone of a bare origin; stub br's merge writes $BC_ROW as the export. Break: a machine path,
+# A main clone of a bare origin; stub br's merge replaces row a of the export with $BC_ROW. Break: a machine path,
 # a non-main checkout, an unpushed local commit, another dirty tracked file or a failed pull is still
-# committed or pushed; an export main changed is refused; a rejected push exits 0; the happy path does
+# committed or pushed; main's own export row is lost or refused; a rejected push exits 0; the happy path does
 # not reach origin.
-printf '#!/bin/sh\n[ "$*" = "sync --merge --force" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
+printf '#!/bin/sh\nj=.beads/issues.jsonl; [ "$*" = "sync --merge --force-db" ] && { grep -v "\\"a\\"" $j; echo "$BC_ROW"; } > $j.n && mv $j.n $j\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
 mkdir -p bin/lib docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/; echo h > docs/HANDOFF.md
 echo '{"id":"a","title":"one"}' > .beads/issues.jsonl; git add . && git commit -qm base && git push -q origin main
@@ -675,13 +686,14 @@ echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git re
 git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
 git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
 bc main-changed '{"id":"a","title":"merged"}' 0 '"merged"'
+git --git-dir="$O" show main:.beads/issues.jsonl | grep -q '"main"' || bad 'beads_checkpoint main-changed: main row lost'
 echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
 git --git-dir="$O" log main | grep -q local && bad 'beads_checkpoint ahead: pushed an unpushed local commit'; git reset -q --hard HEAD~1
 (cd "$R.o" && git pull -q && echo n > docs/n.md && git add docs/n.md && git commit -qm n && git push -q origin main); echo z > docs/n.md; h=$(git rev-parse HEAD)
 bc pull-fail '{"id":"a","title":"bad"}' 1 -; [ "$(git rev-parse HEAD)" = "$h" ] || bad 'beads_checkpoint pull-fail: committed after a failed pull'; rm docs/n.md
 printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
 bc push-rejected '{"id":"a","title":"three"}' 1 -
-grep -q 'br sync --merge' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'
+grep -q 'rerun bin/beads_checkpoint.sh' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'
 
 # --- ci_fail.sh --------------------------------------------------------------------------------
 # Stub gh lists one failed run and serves a log with one failing line among noise. Break: the failing
