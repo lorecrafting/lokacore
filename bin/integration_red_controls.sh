@@ -108,7 +108,7 @@ git fetch -q origin
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
   && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
 [ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf '{"id":"base"}\n{"id":"m"}\n{"id":"local-write"}\nclosed loka-a')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
-grep -qx 'sync --merge --force-db' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
+grep -qx 'sync --merge' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
 [ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
   && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
 # Break: a commit pushed to the PR branch after the merge is deleted with the remote branch.
@@ -354,8 +354,9 @@ lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- bash_guard.py, send_guard.py (Claude Code PreToolUse hooks) ------------------------------------
 # Break: a git hook skip (--no-verify, commit -n) or a bare br create passes, the owner marker does not let it through, or a
 # command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
-# Break: a force push, git rebase, pkill/killall, gh run watch, gh workflow run, the full npm test, test:e2e, storybook:smoke,
-# check_all.sh or a worktree outside worktrees.noindex passes; its marker (owner's, or LOKA_PM=1) does not let it through;
+# Break: a force or mirror push, git rebase, pkill/killall, kill fed by pgrep (a pipe or $( ), not after ;), gh run watch,
+# gh pr checks --watch, gh workflow run, the full npm test, test:e2e, storybook:smoke, check_all.sh or a worktree outside
+# worktrees.noindex (or inside a checkout) passes; its marker (owner's, or LOKA_PM=1) does not let it through;
 # a wrapper (timeout, env) or gh's -R hides the command; a worktree path is read as text, not resolved against cwd and -C;
 # LOKA_PM=1 unlocks a rebase; or a near miss (pull --rebase, test:files, a file that names the script) is refused.
 bg() { # <want-rc> <command> [cwd, default /r/lokacore]
@@ -415,6 +416,7 @@ bg 2 'cat <<< EOF
 git push --no-verify'
 bg 2 'git push --force-with-lease origin b'
 bg 2 'git push -fu origin b'
+bg 2 'git push --mirror origin'
 bg 2 'git push origin +b'
 bg 0 'git push -u origin b'
 bg 0 'LOKA_OWNER_OK_NO_VERIFY=1 git push --force'
@@ -425,7 +427,14 @@ bg 0 'git rebase --abort'
 bg 2 'pkill -f vitest'
 bg 2 'killall node'
 bg 0 'grep -rn pkill bin && kill 123'
+bg 2 'kill $(pgrep -f vitest)'
+bg 2 'pgrep -f storybook | xargs kill'
+bg 2 'kill "`pgrep -f x`"'
+bg 0 'pgrep -f vitest; kill 123'
+bg 0 'LOKA_PM=1 kill $(pgrep -f x)'
 bg 2 'gh run watch 123'
+bg 2 'gh pr checks 484 --watch'
+bg 0 'gh pr checks 484'
 bg 0 'gh run list --commit abc'
 bg 2 'gh -R o/r run watch 1'
 bg 2 'gh workflow run ci.yml --ref b'
@@ -448,6 +457,7 @@ bg 0 'git -C ../worktrees.noindex/a worktree add ../b'
 bg 0 'git worktree remove ../x'
 bg 0 'git worktree add "$W" b'
 bg 0 'LOKA_PM=1 git worktree add ../lokacore-session'
+mkdir -p "$tmp/ck/.git"; bg 2 'git worktree add worktrees.noindex/x' "$tmp/ck"
 # Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
 P=$(mktemp -d); mkdir -p "$P/s1/subagents"
 cb() { printf '{"type":"system","subtype":"compact_boundary","compactMetadata":{"durationMs":%s}}\n' "$1"; }
@@ -665,12 +675,32 @@ echo b > a; mp dirty OPEN 0 0 1 - 'pr '; git checkout -q a
 git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
 git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 
+# --- lib/beads_sync.sh with real br -------------------------------------------------------
+# Two clones of a bare origin, the post-merge import hook on; a row edited locally, then on main.
+# Break: the step keeps one side's edit (the pull's hook import, or br sync --force/--force-db) instead of
+# refusing with the local edit and the export restored. Skipped where br is not installed (hosted lint job).
+if command -v br > /dev/null; then
+  B=$tmp/bs; mkdir "$B"; git init -q --bare -b main "$B/o.git"; git clone -q "$B/o.git" "$B/A" 2> /dev/null; cd "$B/A"
+  br init --prefix t > /dev/null 2>&1; mkdir -p bin/lib .githooks; cp "$bin/../.githooks/post-merge" .githooks/
+  cp "$bin/br_create.sh" "$bin/beads_after_git.py" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/
+  printf '. "$(dirname "$0")/lib/beads_sync.sh"\nbeads_sync\n' > bin/drive.sh; a=$(sh bin/br_create.sh one)
+  git config core.hooksPath .githooks; git config loka.beads.integrationRoot "$B/A"
+  br sync --flush-only > /dev/null 2>&1; git add -A; git commit -qm base; git push -q origin main 2> /dev/null
+  git clone -q "$B/o.git" "$B/M" 2> /dev/null; br update "$a" --title one-local > /dev/null 2>&1; sleep 1.1
+  (cd "$B/M" && br init --prefix t && br sync --import-only && br update "$a" --priority 0 && br sync --flush-only) > /dev/null 2>&1
+  git -C "$B/M" commit -qam main; git -C "$B/M" push -q origin main 2> /dev/null
+  rc=0; sh bin/drive.sh > "$B/out" 2>&1 || rc=$?
+  [ "$rc" = 1 ] && br show "$a" 2> /dev/null | grep -q one-local && grep -q one-local .beads/issues.jsonl \
+    || { bad "beads_sync same-row: exit $rc, want 1 with the local edit kept"; cat "$B/out"; }
+  cd "$tmp"
+fi
+
 # --- beads_checkpoint.sh -------------------------------------------------------------------
 # A main clone of a bare origin; stub br's merge replaces row a of the export with $BC_ROW. Break: a machine path,
 # a non-main checkout, an unpushed local commit, another dirty tracked file or a failed pull is still
 # committed or pushed; main's own export row is lost or refused; a rejected push exits 0; the happy path does
 # not reach origin.
-printf '#!/bin/sh\nj=.beads/issues.jsonl; [ "$*" = "sync --merge --force-db" ] && { grep -v "\\"a\\"" $j; echo "$BC_ROW"; } > $j.n && mv $j.n $j\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
+printf '#!/bin/sh\nj=.beads/issues.jsonl; [ "$*" = "sync --merge" ] && { grep -v "\\"a\\"" $j; echo "$BC_ROW"; } > $j.n && mv $j.n $j\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
 mkdir -p bin/lib docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/; echo h > docs/HANDOFF.md
 echo '{"id":"a","title":"one"}' > .beads/issues.jsonl; git add . && git commit -qm base && git push -q origin main

@@ -12,6 +12,7 @@ Book interaction delivery, Every agent, Token hygiene, Git hygiene and Review st
 `docs/BOOK-UI-COMPONENTS.md`, `docs/system/book-ui.md` (read its head and heading list (`grep '^## ' docs/system/book-ui.md`),
 then only the sections the slice touches) and `docs/design/`. Link to them; never copy them.
 To see a component live, use Storybook's MCP endpoint and the `browser-use` skill ([web preview](../../docs/web-preview.md#storybook)).
+Never use `--no-verify` or force-push without the owner's OK (`bin/bash_guard.py` refuses both; [CHECKS](../../docs/CHECKS.md)).
 
 You own and are the single writer of the design system: tokens (color, type, spacing,
 motion, light/dark), the component specs (each Book component's doc comment, indexed in the catalogue) with

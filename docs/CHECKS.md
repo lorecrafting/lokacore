@@ -119,7 +119,7 @@ their rules and red controls remain available for resumption.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
-  PR worktree, an unmerged `review-<N>`, or a remote PR branch ahead of main is refused with nothing changed; a dirty Beads export and main's export rows both survive the shared `bin/lib/beads_sync.sh` step (`br sync --merge --force`), and a failed merge stops before the close; the worktree,
+  PR worktree, an unmerged `review-<N>`, or a remote PR branch ahead of main is refused with nothing changed; a dirty Beads export and main's export rows both survive the shared `bin/lib/beads_sync.sh` step (a pull with hooks off, then plain `br sync --merge`), a row edited on both sides is refused with the local edit and export kept (real `br`, skipped where it is not installed), and a failed merge stops before the close; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit; a script copy behind main is replaced and re-run, and an export dirtied after the commit gets its own commit before the push.
   It also runs `.githooks/pre-commit` (stub `mise`): a staged `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md`, `docs/system/mechanics.md` or `protocol/` file runs `contracts.exs --check` and a failure blocks the commit; an unrelated file does not. A rerun of `bin/after_merge.sh` for an issue already closed skips `br close`.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
@@ -135,9 +135,9 @@ their rules and red controls remain available for resumption.
   It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`,
-  `git commit -n`, a force push and `git rebase` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`, `gh run watch`,
-  `gh workflow run` (past `-R`), the full `npm test`, `test:nosim`, `test:sim`, `test:e2e`, `storybook:smoke`, `bin/check_all.sh`
-  (past `nice`, `env`, `time`, `timeout`, `xargs`) and a `git worktree add` path that resolves outside `worktrees.noindex`
+  `git commit -n`, a force or `--mirror` push and `git rebase` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`,
+  `kill` fed by `pgrep`/`pidof` in one pipe or `$( )`, `gh run watch`, `gh pr checks --watch`, `gh workflow run` (past `-R`), the full `npm test`, `test:nosim`, `test:sim`, `test:e2e`, `storybook:smoke`, `bin/check_all.sh`
+  (past `nice`, `env`, `time`, `timeout`, `xargs`) and a `git worktree add` path that resolves outside `worktrees.noindex` or inside a checkout
   without the PM's `LOKA_PM=1` prefix; and a bare `br create`; `bin/send_guard.py`
   (SendMessage) refuses to resume a subagent whose newest compaction was a hook one (under 1 s).
   `bin/integration_red_controls.sh` feeds both their refused and allowed inputs.

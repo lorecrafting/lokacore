@@ -1,8 +1,9 @@
 """PreToolUse hook on Bash (.claude/settings.json): refuse `git ... --no-verify` (or `git commit -n`),
-a force push and `git rebase` (not --continue/--abort, nor `git pull --rebase`) without the owner's OK
+a force or mirror push and `git rebase` (not --continue/--abort, nor `git pull --rebase`) without the owner's OK
 marker, and a bare `br create` (loka-zrqm, loka-sakg). Without the PM's LOKA_PM=1 prefix refuse
-pkill/killall, `gh run watch`, `gh workflow run`, the full `npm test`, `test:e2e`, `storybook:smoke`,
-bin/check_all.sh, and `git worktree add` outside worktrees.noindex (docs/WORKFLOW.md, Every agent).
+pkill/killall and other by-name kills (`kill $(pgrep ...)`, `pgrep ... | xargs kill`), `gh run watch`,
+`gh pr checks --watch`, `gh workflow run`, the full `npm test`, `test:e2e`, `storybook:smoke`, bin/check_all.sh,
+and `git worktree add` outside worktrees.noindex or inside a checkout (docs/WORKFLOW.md, Every agent).
 Both markers count only as an env prefix of the command. Exit 2 blocks the call
 and shows stderr to the agent; anything unparseable lets the call through (one wrong refusal blocks
 every agent). Quoted text is one token, so a message or pattern that mentions a flag passes.
@@ -32,19 +33,27 @@ def strip_heredocs(command):
     return "\n".join(out)
 
 
-def segments(command):
+def chunks(command):
+    """Lists of segments, one list per run joined only by a pipe or a `$( )` (split at ; & && || newline)."""
     command = re.sub(r">&|<&|&>", ">", command.replace("\\\n", " "))  # 2>&1 and a line continuation join
     lex = shlex.shlex(command, posix=True, punctuation_chars=";&|\n()")
     lex.whitespace = " \t\r"
     lex.whitespace_split = True
-    seg = []
+    chunk, seg = [], []
     for tok in lex:
         if tok and set(tok) <= set(";&|\n()"):
-            yield seg
+            chunk.append(seg)
             seg = []
+            if tok not in ("|", "(", ")", ")|"):
+                yield chunk
+                chunk = []
         else:
             seg.append(tok)
-    yield seg
+    yield chunk + [seg]
+
+
+def segments(command):
+    return [seg for chunk in chunks(command) for seg in chunk]
 
 
 def invoked(seg, name):
@@ -127,6 +136,25 @@ def gh_command(args):
     return pos[:2]
 
 
+def in_checkout(path):
+    """True when a directory above path holds a .git: a worktree there sits inside a checkout."""
+    while path != os.path.dirname(path):
+        path = os.path.dirname(path)
+        if os.path.exists(os.path.join(path, ".git")):
+            return True
+    return False
+
+
+def by_name_kill(chunk):
+    """`kill` fed by pgrep/pidof in one pipe or `$( )` run (`kill $(pgrep -f x)`, `pgrep x | xargs kill`)."""
+    seen = [(env, words[0].rsplit("/", 1)[-1]) for env, words in map(command_word, chunk) if words]
+    quoted = r"(?:\$\(|`)\s*(?:\S*/)?(\w+)"  # `kill "$(pgrep x)"` or backticks: one token
+    names = {n for _, n in seen} | {n for seg in chunk for w in seg for n in re.findall(quoted, w)}
+    if "kill" in names and names & {"pgrep", "pidof"} and not any(PM in env for env, _ in seen):
+        return "kill fed by pgrep/pidof stops processes by name, other agents' too: stop only the PIDs you started (kill <PID>)."
+    return None
+
+
 def refusal(seg, cwd=""):
     git = invoked(seg, "git")
     if git:
@@ -145,16 +173,16 @@ def refusal(seg, cwd=""):
     if MARKER not in env:
         if sub == "rebase" and not {"--continue", "--abort", "--skip", "--quit"} & set(rest):
             return f"git rebase refused: merge, never rebase (docs/WORKFLOW.md). With the owner's OK, prefix {MARKER}."
-        if sub == "push" and any(a.startswith(("--force", "+")) or re.fullmatch(r"-[a-z]*f[a-z]*", a) for a in rest):
+        if sub == "push" and any(a.startswith(("--force", "--mirror", "+")) or re.fullmatch(r"-[a-z]*f[a-z]*", a) for a in rest):
             return f"force push refused: fix the cause with a new commit. With the owner's OK, prefix {MARKER}."
     if PM in env:
         return None
     path = sub == "worktree" and rest[:1] == ["add"] and worktree_path(words, rest[1:], cwd)
-    if path and "/worktrees.noindex/" not in path + "/" and "$" not in path:
-        return "git worktree add outside worktrees.noindex refused: create it under ../worktrees.noindex (docs/WORKFLOW.md, Every agent)."
+    if path and "$" not in path and ("/worktrees.noindex/" not in path + "/" or in_checkout(path)):
+        return "git worktree add outside worktrees.noindex (or inside a checkout) refused: create it under ../worktrees.noindex (docs/WORKFLOW.md, Every agent)."
     if name in ("pkill", "killall"):
         return f"{name} stops processes by name, other agents' too: stop only the PIDs you started (kill <PID>)."
-    if name == "gh" and gh_command(args) in (["run", "watch"], ["workflow", "run"]):
+    if name == "gh" and (gh_command(args) in (["run", "watch"], ["workflow", "run"]) or gh_command(args) == ["pr", "checks"] and "--watch" in args):
         return f"gh {' '.join(gh_command(args))} refused: only the PM waits on CI (bin/wait_ci.sh); a push already starts the runs."
     if name == "check_all.sh" or name == "npm" and npm_script(args) in NPM_FULL:
         return "full suite refused on the M1: run the focused tests your diff touches (npm run test:files -- <files>); hosted CI runs the rest."
@@ -164,7 +192,8 @@ def refusal(seg, cwd=""):
 try:
     hook = json.load(sys.stdin)
     cwd = hook.get("cwd") or os.getcwd()
-    reasons = [r for r in (refusal(s, cwd) for s in segments(strip_heredocs(hook["tool_input"]["command"]))) if r]
+    runs = list(chunks(strip_heredocs(hook["tool_input"]["command"])))
+    reasons = [r for r in [*(refusal(s, cwd) for c in runs for s in c), *map(by_name_kill, runs)] if r]
 except Exception:
     sys.exit(0)
 if reasons:
