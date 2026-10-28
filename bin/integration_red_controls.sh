@@ -620,8 +620,8 @@ git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
 # A main clone of a bare origin; stub br's flush writes $BC_ROW as the export. Break: a machine path,
-# a non-main checkout, another dirty tracked file or a dirty export that main also changed is still
-# committed or pushed; a rejected push exits 0; the happy path does not reach origin.
+# a non-main checkout, another dirty tracked file, a failed pull or a dirty export that main also
+# changed is still committed or pushed; a rejected push exits 0; the happy path does not reach origin.
 printf '#!/bin/sh\n[ "$*" = "sync --flush-only" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
 mkdir bin docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; echo h > docs/HANDOFF.md
@@ -638,6 +638,8 @@ echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git re
 git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
 git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
 echo '{"id":"c","title":"bad"}' >> .beads/issues.jsonl; bc main-changed '{"id":"a","title":"bad"}' 1 -
+echo y > docs/HANDOFF.md; git commit -qam local; h=$(git rev-parse HEAD); bc pull-fail '{"id":"a","title":"bad"}' 1 -
+[ "$(git rev-parse HEAD)" = "$h" ] || bad 'beads_checkpoint pull-fail: committed after a failed pull'; git reset -q --hard HEAD~1
 printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
 bc push-rejected '{"id":"a","title":"three"}' 1 -
 grep -q 'br sync --merge' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'
