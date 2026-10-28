@@ -9,12 +9,12 @@ and not repeated here.
 ## Product and scope
 
 - The prologue teaches every basic (Tending, Making, Guarding, Words) through quests of gifts or labour, no coin; houses and guilds open at the landing; Skills stay on Character, one collapsed line per profession, until the landing ([record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)).
-- Chapter 1 proof order: E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
+- Proof order for the real game's chapter (PM ruling loka-40d4, 2026-10-28; the rule was set for Chapter 1): E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 - Book design foundation: the Chapter 1 mock's base look with only the page curl (one Skia shader for web and phone) and paper sound; day and night follow in-game time (no override for now) ([record](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 - Each Book component's spec is a doc comment on its export, the catalogue an index of them, both kept in step by `catalogue.test.ts` ([record](../decisions/owner-decision-component-docs-in-code-2026-10-22.md)).
 
-- Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
+- Beads may include concrete, evidence-linked audit follow-up tasks alongside the slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
 
 - D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
   waiver; Sedge teaches swim immediately for free while the Chapel remains the
@@ -49,8 +49,8 @@ and not repeated here.
   and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
   World time starts at first entry (D11 selection); before it there is no world clock to pause
   ([2026-10-08](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md)).
-- One development lane, the mechanics toolbox; the Storybook polish lane is paused until the owner reactivates it ([record](../decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
-- Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the parked polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
+- Two lanes: the mechanics toolbox ([record](../decisions/owner-decision-one-lane-mechanics-2026-10-12.md)) and the Storybook polish lane, reactivated by the owner on 2026-10-22 ("set things up so that its easy for me to do my ui polish there").
+- Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
 - In Homestead the skill path replaces NPC cooking and building; a paid NPC reaches only a beginner tier, better results need the player's own crafting, and Star Wars Galaxies style skill trees are approved ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Homestead professions: a failed craft loses its inputs; a skill box costs a trainer coin fee (after the prologue: [prologue record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)), XP is never spent, the novice box is free; several hidden elite professions are possible ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Product order: no Chapter 1 yet; finish all showcases, then UI polish, then worldbuilding, then the official Chapters 1-3; new content uses generic names ([record](../decisions/owner-decision-product-order-2026-10-15.md)).
@@ -183,9 +183,9 @@ and not repeated here.
 ## Process
 
 - HANDOFF holds the present only; rulings edit briefs in place; repeated command sequences become `bin/` tools; roles exist for independent judgement, not file ownership ([record](../decisions/owner-decision-harness-patterns-2026-10-28.md)).
-- During pre-production, hosted CI runs on every pushed branch head, nightly on `main` and by hand, and a green run on the exact head is the merge gate; no local pre-push checks, no check lock, no agent-count cap (load under 8 instead), focused tests only on the M1; review records only for save, protocol or kernel contract slices ([owner decision](../decisions/owner-decision-two-lane-ci-2026-10-09.md); earlier lanes: [scope](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md), [gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md), [drafts](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
+- During pre-production, hosted CI runs on every pushed branch head, nightly on `main` and by hand, and a green run on the exact head is the merge gate; no local pre-push checks, no check lock, at most 5 agents with 3 running tests while load is under 8 (owner 2026-10-10; `bin/agent_load_gate.sh`), focused tests only on the M1; review records only for save, protocol or kernel contract slices ([owner decision](../decisions/owner-decision-two-lane-ci-2026-10-09.md); earlier lanes: [scope](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md), [gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md), [drafts](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
 - Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
-- After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
+- After the real game's chapter E3 (PM ruling loka-40d4, 2026-10-28), adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 
 - Keep review findings and dispositions as cross-referenceable history while their work is open ([closed work](../decisions/owner-decision-move-forward-2026-10-07.md)); promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
@@ -201,7 +201,18 @@ and not repeated here.
 
 - Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).
 
-- The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Fable for gate-level audits and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
+- The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Fable for gate-level audits and assign useful parallel work without waiting for owner input, records each call in Beads and starts the next row without asking (owner 2026-10-09); normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
+
+- A blind playtest in the web Book (phone width, screenshots) runs before the owner plays each new district (owner 2026-10-10); at high weekly usage Opus builds and reviews, then one sweeping blind Fable playtest (owner 2026-10-16, paraphrased).
+- The all-models weekly limit binds before the Fable cap, so the PM may use Fable for high-stakes judgement (owner 2026-10-14, paraphrased).
+- In a live polish session, polish questions and results go to the Storybook panel with `bin/polish_status.sh log` (owner 2026-10-09).
+- Merge a reviewed PR once its exact head is green, without asking; no permission asks for normal workflow steps. Stop only for spending money, `--no-verify` or force pushes, destructive or outward-facing actions beyond PRs and merges, and product or spec conflicts (owner 2026-09-30). Owner-approved docs or tooling changes may be committed directly on `main` when the owner says so (2026-10-24: "just directly commit").
+- Status reports to the owner are in ASD-STE100; design choices and risks in plain English (owner 2026-10-07).
+- Beads: short reads (`| head -5`), quiet writes (`br -q`), notes of one or two lines; mark `in_progress` when work starts (owner 2026-10-08).
+- Browser automation uses the local `browser-use` skill (`bu.sh`); Claude in Chrome is denied in settings (owner 2026-10-21).
+- Budget: the weekly allowance resets Wednesdays 05:00 HST; near the cap, keep to 1 or 2 agents (2026-10-13).
+- Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line, `[Pi · model · session]` on tracker comments) (2026-10-13).
+- Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency cap, worktree isolation and a usage reading before and after (PM recommendation recorded 2026-10-15).
 
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
@@ -227,10 +238,10 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - A `designer` (Opus; Fable only for a new page type or component family without precedent, a visual refresh or a design audit, [record](../decisions/owner-decision-designer-opus-2026-10-21.md)) is the single writer of the Book UI design system and its spec text; a UI batch gets one design pass, and the code reviewer checks each slice's screenshots and wording against the designer's rulings ([role](../decisions/owner-decision-designer-role-2026-10-07.md)). In a live polish session the owner's approval is the design review ([record](../decisions/owner-decision-live-polish-session-2026-10-09.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-- Developers default to Opus; Sonnet only for a bounded content or docs edit ([record](../decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding the [Sonnet default](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
-- Mechanical PM chores and docs-only slices run on Sonnet, searches on Haiku (`Explore` override), briefs paste `ast-grep outline` signatures, plugin changes are allowed mid-session, and `bin/sync_pr.sh` merges `main` into each open PR once after the last of several close merges ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)).
+- Sonnet builds purely mechanical slices (re-snapshots, transcript re-recording, moving tests onto existing content); Opus builds save, protocol, new-content and judgement slices and does every review (owner 2026-10-21, superseding the [two-lane rule](../decisions/owner-decision-two-lane-ci-2026-10-09.md)).
+- Mechanical PM chores run on Sonnet, searches on Haiku (`Explore` override), briefs paste `ast-grep outline` signatures, plugin changes are allowed mid-session, and `bin/sync_pr.sh` merges `main` into each open PR once after the last of several close merges ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)).
 - Self-review is one pass, `/code-review medium`, reported in the PR description (the reviewer notes a missing one). Full-suite mutant sweeps run only at release-candidate certification and the E3 gate; elsewhere `bin/mutate.sh` runs narrow first, reviewers sample 2-3 mutants, and any run expected over ~10 minutes is announced to the owner first ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
-- A retro (at most 5 evidence-backed items, kept as `housekeeping` Beads issues) is written at every handoff and as a pattern retro at each milestone gate; `bin/session_status.sh` reminds ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
+- A retro (at most 5 evidence-backed items, kept as `housekeeping` Beads issues) is written at every handoff and as a pattern retro at each milestone gate; `bin/session_status.sh` reminds; no weekly routine (owner 2026-10-08) ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
 - PR-body claims ("catches", "only here", "every") and `file:line` cites come from a same-turn run listed in the PR; doc-only nit fixes need no re-review agent; briefs are stored durably and link process rules; every PR cited to the owner carries its Beads id and a short description; the review index is generated from the records ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
   ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).

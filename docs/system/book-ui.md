@@ -276,7 +276,7 @@ foot. A control that opens a child (Resume dream, Continue conversation) stays i
 
 ## Line placement
 
-Owner and PM rulings 2026-10-24 ([narration log brief](../briefs/narration-log/README.md)). The
+Owner and PM rulings 2026-10-24 ([narration log brief](https://github.com/lorecrafting/lokacore/blob/3a0af6b75d34c7ee7fac55837038ab3833562dd0/docs/briefs/narration-log/README.md)). The
 engine emits every line; the Book only words and places it. An engine line's sentence comes from
 `mobile/packages/game-view/line_words.ts`, first person when the player acted, third person
 otherwise; an authored line keeps its own text.

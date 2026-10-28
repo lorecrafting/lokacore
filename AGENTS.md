@@ -64,9 +64,7 @@ Keep lessons in area files; link here only when relevant to all work.
 
 **All work**
 - Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
-- Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
-  certificate or provisioning identifiers, home/scratch/worktree paths or
-  app-container UUIDs. Every capture script has a `redact()` covering them.
+- Never print or commit home, scratch or worktree paths; device identifiers: [mobile lessons](docs/lessons/mobile.md).
 - Nothing invented; unknowns stay null.
 - zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
 
@@ -138,7 +136,6 @@ A test exists to catch a specific break. Adapted from
 Checks: [current gates](docs/CHECKS.md), focused [provisional lane](docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md).
 On the M1 run only the tests your diff touches, never the full `npm test`, the Storybook smoke, `test:e2e`
 or `bin/check_all.sh`; hosted CI on the pushed head is the gate ([two-lane CI](docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
-[Post-E3 tiering](docs/decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md) awaits reviewed implementation.
 
 ## Working rules
 

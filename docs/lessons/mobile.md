@@ -9,6 +9,11 @@ resumes that work; retained results prove their recorded releases. The Node game
 simulator remains an engine check, and isolated browser preview can exercise the
 shared client. Neither closes deferred native proof or the known UI blur carry.
 
+**Redaction**
+- Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
+  certificate or provisioning identifiers, home/scratch/worktree paths or
+  app-container UUIDs. Every capture script has a `redact()` covering them.
+
 **expo-sqlite and React Native**
 - `expo-sqlite` 57.0.3 on web: first-open WASM/OPFS initialization can outlast a synchronous
   worker request, so open asynchronously before the existing synchronous authority calls.

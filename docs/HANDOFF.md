@@ -56,37 +56,14 @@ balance tools (loka-kgd.107), worldbuilding (loka-ikch), Chapters 1-3.
 - Worldbuilding first decisions (after polish): premise and pillars, cosmology shape, magic hardness and
   cost, Story vs Realm canon.
 
-## Standing owner rules not yet written elsewhere in the repo
-
-- Merge a reviewed PR once its exact head is green, without asking; no permission asks for normal workflow
-  steps. Stop only for spending money, `--no-verify` or force pushes, destructive or outward-facing actions
-  beyond PRs and merges, and product or spec conflicts. Owner-approved docs or tooling changes may be
-  committed directly on main when the owner says so (2026-10-24: "just directly commit").
-- Owner-facing text: every PR number carries its Beads id and a short description, for example
-  `#475 (loka-kgd.185, narration log batch)`. Status reports in ASD-STE100; design choices and risks in plain English.
-- Beads: short reads (`| head -5`), quiet writes (`br -q`), notes of one or two lines; create with
-  `bin/br_create.sh`; mark `in_progress` when work starts.
-- Models: the [WORKFLOW routing table](WORKFLOW.md#work-routing) is the source (Opus default; Fable for
-  save/protocol/contract briefs under ~80% weekly usage; never Sonnet for briefs or design).
-- Browser automation: the local `browser-use` skill (`bu.sh`); Claude in Chrome is denied in settings.
-- Load gate: `uptime` in its own call before each spawn; spawn below load 8; at most 5 agents, 3 running tests.
-- Budget: the weekly allowance resets Wednesdays 05:00 HST; read `~/.claude/usage-cache.json`, do not ask.
-  Near the cap, keep to 1 or 2 agents.
-- Jev (TypeSafe): spend approved (owner, 2026-10-14: "yes to this approve to allow spend"); briefs and
-  cartridge text may leave the machine, redacted first, never saves or player words; Jev is advisory only,
-  never a gate. Pi keeps its $2/day cap. A decision record is still owed.
-- Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line,
-  `[Pi · model · session]` on tracker comments).
-- Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency
-  cap, worktree isolation and a usage reading before and after.
+Standing owner rules live in [owner rules](system/owner-rules.md#process).
 
 ## Session procedure
 
-- Start: `mise install`, `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh auth status`; `br sync --import-only`;
+- Start: `mise install`, `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh auth status`; `git pull --ff-only origin main`, then `br sync --import-only`;
   read [WORKFLOW](WORKFLOW.md) (Loop) and this page; `bin/session_status.sh` prints the board.
-- Beads writes from the `main` checkout: `git pull --ff-only origin main` and `br sync --import-only` first;
-  after each checkpoint `br sync --flush-only`, check the JSONL has no machine path, commit
-  `.beads/issues.jsonl` (and this page) on main, push. On a push conflict: `git pull --rebase`, then
-  `br sync --merge`, flush, commit. Never commit `beads.db`.
+- Beads writes from the `main` checkout after `br sync --import-only`; each checkpoint is
+  `bin/beads_checkpoint.sh` (pull, flush, machine-path check, commit the export and this page, push;
+  a rejected push prints the recovery steps). Never commit `beads.db`.
 - End: rewrite this page, push every branch with work, file the
   [retro](WORKFLOW.md#retro-and-housekeeping-queue) items in Beads.

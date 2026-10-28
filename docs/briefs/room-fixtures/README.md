@@ -12,7 +12,7 @@ before slice 4): title, description with fixture links, people, items, event log
 nothing else; every action on a fixture, person or item page; everything ambient a log line.
 Drafted by Fable (contract changes: room schema, kernel_api, the GameView rule for recipe offers, the aside removal),
 PM edits. One draft batch branch, `toolbox/batch-room-fixtures`; slices run in order on it, each its own commits. Read
-the [brief kit](../brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
+the [brief kit](../../guides/brief-kit.md) for every slice. Handoff threshold: 220k (WORKFLOW token hygiene).
 
 Beads: slice 1 loka-x6t.120.1 (Book), slice 2 loka-x6t.120.2 (engine), slice 3 loka-x6t.120.3 (content and lint),
 slice 4 loka-x6t.127 Book half plus the Book half of loka-x6t.125, slice 5 loka-x6t.125 engine half. The PM files the
