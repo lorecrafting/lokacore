@@ -13,7 +13,7 @@ const files = readdirSync(dir).filter((name) => name.endsWith('.schema.json'));
 const ajv = new Ajv2020({ allErrors: true });
 for (const name of files) ajv.addSchema(read(join(dir, name)) as object, name);
 const check = (kind: string, value: unknown) => {
-  const valid = ajv.getSchema(`${kind}.schema.json`)!;
+  const valid = ajv.getSchema(kind.includes('#') ? kind : `${kind}.schema.json`)!;
   return valid(value) ? [] : valid.errors!;
 };
 
@@ -57,6 +57,10 @@ const signal = { op: 'signal', signal: 'bell' };
 const reaction = { on: { event: 'signal', signal: 'bell' }, apply: [signal] };
 const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [signal] };
 const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [signal] };
+const defs = 'defs.schema.json#/$defs/';
+const discount = { numerator: 1, denominator: 2, minimum: 1, skill: 'haggle' };
+const outcome = 'source.StoryPointDefinition/properties/outcomes/additionalProperties';
+const consume = { items: ['log'], quantity: 1, to: { in: 'room', room: 'yard' } };
 const fact = {
   version: 1,
   value_type: { type: 'bool', default: false },
@@ -65,7 +69,9 @@ const fact = {
 };
 
 // Each pair: a file the schema accepts, then the same file with one mistake. The corpus
-// covers every other shortcut; no committed cartridge uses a signal yet.
+// covers every other shortcut; no committed cartridge uses a signal or extends a scene,
+// dialogue choice or nested npc member yet. The defs rows pin the contract's
+// exactlyOneRequired and requiredUnless translations.
 test('the schemas refuse a misspelled field and each shortcut written wrong', () => {
   const pairs: [string, object, object][] = [
     ['rooms', room, { ...room, titel: 'hall.title' }],
@@ -82,6 +88,21 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
     ['behaviours', { reactions: {}, params: ['who'] }, { reactions: {}, params: ['holder'] }],
     ['behaviours', { reactions: {} }, { params: [] }],
     ['areas', { rooms: { hall: room } }, { rooms: { hall: { ...room, titel: 'x' } } }],
+    ['reactions', reaction, { ...reaction, apply: [{ op: 'signal' }] }],
+    ['scenes', { extends: 'intro' }, { extends: 'intro', titel: 'x' }],
+    [
+      'npcs',
+      { extends: 'deer', attack: { crit: { chance: 5 } } },
+      { extends: 'deer', attack: { crit: { chance: 0 } } },
+    ],
+    [
+      'dialogues',
+      { extends: 'talk', choices: { ask: { check: {} } } },
+      { extends: 'talk', choices: { ask: { chek: {} } } },
+    ],
+    [defs + 'Shop/properties/buy_discount', discount, { ...discount, friendly: true }],
+    [defs + outcome, { scene: 'intro' }, { scene: 'intro', dialogue: 'talk', choice: 'ask' }],
+    [defs + 'RecipeCraft', { consume }, {}],
     ['facts', { facts: { lit: fact } }, { facts: { lit: { ...fact, colour: 'red' } } }],
   ];
   for (const [kind, good, bad] of pairs) {

@@ -276,25 +276,17 @@ defmodule Loka.Content.SourceSchema do
   defp standard(s) do
     {once, s} = Map.pop(s, "exactlyOneRequired")
     {unless, s} = Map.pop(s, "requiredUnless")
-    {branches, s} = Map.pop(s, "oneOf")
 
     s =
-      s
-      |> Map.delete("examples")
-      |> Map.update("$ref", nil, &ref/1)
-      |> Map.reject(&match?({"$ref", nil}, &1))
+      Map.new(Map.delete(s, "examples"), fn
+        {"oneOf", branches} -> {"anyOf", branches}
+        {"$ref", r} -> {"$ref", "#/$defs/" <> r}
+        other -> other
+      end)
 
-    {s, alt} = any_of(s, branches)
-    extra = required_unless(unless) ++ exactly_one(once, unless) ++ alt
+    extra = required_unless(unless) ++ exactly_one(once, unless)
     if extra == [], do: s, else: Map.update(s, "allOf", extra, &(&1 ++ extra))
   end
-
-  defp any_of(s, nil), do: {s, []}
-  defp any_of(%{"anyOf" => _} = s, branches), do: {s, [%{"anyOf" => branches}]}
-  defp any_of(s, branches), do: {Map.put(s, "anyOf", branches), []}
-
-  defp ref("#" <> _ = r), do: r
-  defp ref(r), do: "#/$defs/" <> r
 
   defp required_unless(nil), do: []
 
