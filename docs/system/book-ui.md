@@ -758,21 +758,22 @@ GameView `conditions` lists every active [status](mechanics.md#status-effects-ov
 
 Proposed for [designer](../decisions/owner-decision-designer-role-2026-10-07.md) approval; wording pending designer (Beads `loka-x6t.14`). When GameView carries `recap_after` ([away recap](mechanics.md#away-recap-toolbox-row-w27)), the presenter holds the World-log lines of each elapsed settlement (ambient arrivals and departures and receipt narration, each receipt line on its own) from its first background update until the elapsed status is no longer catching up. If the status is then ready, the held lines are not empty and the settlement spanned at least `recap_after` of logical time, they become the away recap; otherwise (a shorter settlement, or a pending, error, fault or replaced status) they go to the World log in order, as without the field. The recap is one entry in the room event log, written when the settlement settles, after the lines already logged; later lines follow it. It is collapsed to its heading "While you were away", whose accessible name adds ", show" or ", hide"; tapped open, it lists each distinct line once in first-seen order, with " (N times)" after a line seen more than once ("The poison burns in your veins. (11 times)", "Maud leaves. (6 times)"). The status line shows the present state. The entry stays in the log until the room changes; a press while time still catches up ends the settlement's holding, so its lines go to the World log in order before the press's own; a second long absence before any other line adds its lines to the same entry; when the player's room changes, held lines and the entry are dropped with the old room's log. Nothing is stored, so a recap shown before the app closed is gone after a reopen; on a cold reopen with the field authored, catch-up waits until the Book has subscribed, so that absence's settlement gives its recap. Lines routed to a detail, a conversation or the combat log keep those routes. Without `recap_after` (Chapter 1) nothing changes.
 
-## Worn affects details
+## Mechanic renderings
 
-GameView `attributes` carries each attribute's current value, which already includes the [affects](mechanics.md#item-slots-and-affects-toolbox-row-3) of worn items, and `worn`, their nonzero sum (absent at zero); `worn` sums identified items only, so an [unidentified](mechanics.md#unidentified-items-toolbox-row-27) worn item moves the value but adds no note. The Character page's attribute line appends it in parentheses with its sign: "PER 14 (+4 worn)", "STR 8 (-2 worn)"; without `worn` the line is unchanged ("PER 10"). The sign is always in the text. The presenter never adds or computes an affect; Wear and Remove are the ordinary equipment actions, and a second ring is worn on the finger slot like any item.
+One row per mechanic whose Book rendering is a short rule.
+
+| Mechanic | Rendering |
+|---|---|
+| <a id="worn-affects-details"></a>Worn affects | GameView `attributes` carries each attribute's current value, which already includes the [affects](mechanics.md#item-slots-and-affects-toolbox-row-3) of worn items, and `worn`, their nonzero sum (absent at zero); `worn` sums identified items only, so an [unidentified](mechanics.md#unidentified-items-toolbox-row-27) worn item moves the value but adds no note. The Character page's attribute line appends it in parentheses with its sign: "PER 14 (+4 worn)", "STR 8 (-2 worn)"; without `worn` the line is unchanged ("PER 10"). The sign is always in the text. The presenter never adds or computes an affect; Wear and Remove are the ordinary equipment actions, and a second ring is worn on the finger slot like any item. |
+| <a id="displayed-name-details"></a>Displayed name | When GameView carries actor_name, the Character page's first line is its authored text, uncapitalised, with no label; it suppresses the empty placeholder. A title or disguise change shows as the new name once its receipt is confirmed; the only log line is the receipt's authored narration. Without actor_name the page is unchanged. |
+| <a id="sense-cues-details"></a>Sense cues | GameView `cues` reach the player as log lines ([room page anatomy](#room-page-anatomy), part 5): one plain line per cue, the authored text, then ' from the ' and the direction when it comes from another room, logged once the first time it shows during a room visit, after that update's narration and arrivals, in projected order; a room change starts a new visit. The sense is in the words, never an icon or colour. |
+| <a id="fd7-ask-details"></a>Ask about a topic (FD7) | An NPC that the GameView lists an available `ask` on shows, after its other action cards and before services, one card per known topic (GameView `topics`, projected order) labelled "Ask about" and the topic's authored label. Pressing it sends `ask` with that topic; the answer or the person's knows-nothing line joins the page's history as narration, the page stays, no conversation opens. A topic granted by the answer adds its card at once. No known topics, no cards and no note; a hostile, absent or unlisted person shows none, as Talk. ([Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7)) |
+| <a id="storylet-card-details"></a>Storylet card | Removed: storylets are retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)), so there is no storylet card and no pick to show. |
+| <a id="mount-details"></a>Mount | Riding shows nowhere but the horse's saddled description variant and the mv fare; a non-road exit while mounted is the ordinary barred exit ("East: not now", no Go). No indicator, icon or status line text. |
 
 ## Levelling details
 
 GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows on the Character page's status line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
-
-## Displayed name details
-
-When GameView carries actor_name, the Character page's first line is its authored text, uncapitalised, with no label; it suppresses the empty placeholder. A title or disguise change shows as the new name once its receipt is confirmed; the only log line is the receipt's authored narration. Without actor_name the page is unchanged.
-
-## Sense cues details
-
-GameView `cues` reach the player as log lines ([room page anatomy](#room-page-anatomy), part 5): one plain line per cue, the authored text, then ' from the ' and the direction when it comes from another room, logged once the first time it shows during a room visit, after that update's narration and arrivals, in projected order; a room change starts a new visit. The sense is in the words, never an icon or colour.
 
 ## Lore details
 
@@ -784,10 +785,6 @@ The Journal's last section, **Chronicle**, shown when at least one entry exists 
 `mobile/packages/game-view/line_words.ts`) and a talk's opening prompt (`dialogue.<npc>.prompt`,
 which the conversation page and the room log show; the Chronicle stays as before the narration
 batch); the Book adds no words but the heading, the count and the accessible name. Opening the Journal reads the receipts once; the page is not live-updated while open (a press returns to World anyway). A Chronicle day counts as written for "Nothing written yet." ([Lore details](#lore-details)).
-
-## FD7 ask details
-
-An NPC that the GameView lists an available `ask` on shows, after its other action cards and before services, one card per known topic (GameView `topics`, projected order) labelled "Ask about" and the topic's authored label. Pressing it sends `ask` with that topic; the answer or the person's knows-nothing line joins the page's history as narration, the page stays, no conversation opens. A topic granted by the answer adds its card at once. No known topics, no cards and no note; a hostile, absent or unlisted person shows none, as Talk. ([Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7))
 
 ## Word bar
 
@@ -821,17 +818,8 @@ carries no narration gets one log line from `words.ts`, the Book's own echo of w
 a receipt with narration draws that instead. Beyond this echo the Book never writes the typed
 word anywhere; only its writer sees it.
 
-## Storylet card details
-
-Removed: storylets are retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)), so there is no storylet card and no pick to show.
-
-
 ## Skill tree details
 
 Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
 
 An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "Blade: locked. <requirement>"; a learned one "Blade: learned." with no requirement (nothing is left to meet, pass-2), or while unqualified "Blade: learned, unqualified. <requirement>" as on Character (loka-x6t.24).
-
-## Mount details
-
-Riding shows nowhere but the horse's saddled description variant and the mv fare; a non-road exit while mounted is the ordinary barred exit ("East: not now", no Go). No indicator, icon or status line text.
