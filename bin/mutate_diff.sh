@@ -4,13 +4,15 @@
 # the test files that import the module (TS: a relative import that resolves to it; Elixir: a test/
 # .exs file naming the module). Prints the mutant count first, then one row per mutant: the result
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
-# unique in its file), file:line, the change, and the first failing test line of a killed mutant.
+# unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
+# and the first failing test line of a killed mutant.
 # Exits as bin/mutate.sh does (0 with survivors; the table is the report).
 #   bin/mutate_diff.sh <base>
 # Mutants: flip ` < `/` <= `, ` > `/` >= `, ` === `/` !== `, ` == `/` != `, ` && `/` || ` (and ` and `/
 # ` or ` in Elixir; spaces on both sides), drop a TS `return`/`throw` statement or a one-line guard
-# ending in one, add 1 to the first number. Skipped: test, story and *.gen.* files, comment, import
-# and @attribute lines, lines with a tab, and a line carrying `mutate-skip: <reason>` (non-logic).
+# ending in one, negate a block guard (TS `if (...) {`, Elixir `if ... do`), add 1 to the first
+# number. Skipped: test, story and *.gen.* files, comment, import and @attribute lines, lines with
+# a tab, and a line carrying `mutate-skip: <reason>` (non-logic).
 # ponytail: direct importers only; a module tested through another one reads as NO-TESTS or SURVIVED.
 [ $# -eq 1 ] || { echo "usage: $0 <base>" >&2; exit 2; }
 here=$(cd "$(dirname "$0")" && pwd)
@@ -18,7 +20,7 @@ cd "$(git rev-parse --show-toplevel)" || exit 2
 exec python3 -I - "$1" "$here/mutate.sh" <<'PY'
 import os, re, shutil, subprocess, sys, tempfile
 base, mutate = sys.argv[1], sys.argv[2]
-d = subprocess.run(['git', 'diff', '-U0', '--no-color', '--diff-filter=AM', base + '...HEAD', '--',
+d = subprocess.run(['git', 'diff', '-U0', '--no-color', '--no-renames', '--diff-filter=AM', base + '...HEAD', '--',
                     '*.ts', '*.tsx', '*.mjs', '*.ex'], capture_output=True, text=True)
 if d.returncode:
     sys.exit('mutate_diff: ' + d.stderr.strip())
@@ -28,6 +30,7 @@ OPS = {' < ': ' <= ', ' <= ': ' < ', ' > ': ' >= ', ' >= ': ' > ', ' === ': ' !=
        ' == ': ' != ', ' != ': ' == ', ' && ': ' || ', ' || ': ' && '}
 EX_OPS = {' and ': ' or ', ' or ': ' and '}
 DROP = re.compile(r'^\s*((if \(.*\) )?(return|throw)\b.*;)\s*$')
+COND = re.compile(r'^(\s*(?:\} else )?(?:if|while) \()(.*)(\) \{)$|^(\s*(?:if|unless) )(.*)( do)$')  # block guard: negate it
 NUM = re.compile(r'(?<![\w.$])\d+(?![\w.])')
 rows, f = [], None  # rows: (file, line, old, new, label)
 for l in d.stdout.splitlines():
@@ -45,6 +48,10 @@ for l in d.stdout.splitlines():
                 rows.append((f, n - 1, t, t[:m.start()] + rep + t[m.end():], op.strip() + ' -> ' + rep.strip()))
         if not f.endswith('.ex') and DROP.match(t):
             rows.append((f, n - 1, t, '', 'drop ' + DROP.match(t).group(1)[:40]))
+        c = COND.match(t)
+        if c:
+            a, cond, z = (c.group(1), c.group(2), c.group(3)) if c.group(1) else (c.group(4), c.group(5), c.group(6))
+            rows.append((f, n - 1, t, a + '!(' + cond + ')' + z, 'negate ' + cond[:40]))
         m = NUM.search(t)
         if m and t[:m.start()].count("'") % 2 == 0 and t[:m.start()].count('"') % 2 == 0:
             rows.append((f, n - 1, t, t[:m.start()] + str(int(m.group()) + 1) + t[m.end():], m.group() + ' -> ' + str(int(m.group()) + 1)))
@@ -80,15 +87,18 @@ def narrow(mod, log):
     return '{ %s; } > %s 2>&1' % (cmds[mod], log) if cmds[mod] else ''
 
 tmp = tempfile.mkdtemp()
-lst, plan = open(os.path.join(tmp, 'list'), 'w'), []
+lst, plan, base_red = open(os.path.join(tmp, 'list'), 'w'), [], {}
 for i, (f, n, old, new, label) in enumerate(rows):
     if open(f).read().count(old) != 1:
         plan.append(('NOT-UNIQUE', f, n, label, None))
         continue
     log = os.path.join(tmp, '%d.out' % i)
     cmd = narrow(f, log)
-    plan.append((None if cmd else 'NO-TESTS', f, n, label, log))
-    if cmd:
+    if cmd and f not in base_red:  # an unmutated red run would make every mutant look killed
+        base_red[f] = subprocess.run(['sh', '-c', narrow(f, os.devnull)]).returncode != 0
+    kind = 'BASELINE-RED' if cmd and base_red[f] else None if cmd else 'NO-TESTS'
+    plan.append((kind, f, n, label, log))
+    if kind is None:
         lst.write('\t'.join((f, old, new, cmd)) + '\n')
 lst.close()
 print('mutate_diff: %d mutants from %s...HEAD (%d run)' % (len(plan), base, sum(1 for p in plan if p[0] is None)), flush=True)

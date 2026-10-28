@@ -2,7 +2,8 @@
 # Red controls for bin/mutate_diff.sh in a throwaway repo: a module adds two guards and a constant; its
 # test covers one guard only. Break: the untested guard is not a survivor, the tested one is not killed
 # with its failing test line, a module no test imports is not NO-TESTS, a
-# repeated line is not NOT-UNIQUE, or a mutate-skip line or a number in a string is mutated.
+# repeated line is not NOT-UNIQUE, a block guard's negation is not killed, tests red before any
+# mutant are not BASELINE-RED, or a mutate-skip line or a number in a string is mutated.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -21,14 +22,24 @@ export function gate(n: number): string {
   const limit = 100; // mutate-skip: a label width, not logic
   return n > limit ? 'big' : 'ok';
 }
+export function sign(n: number): string {
+  if (n < 0) {
+    return 'minus';
+  }
+  return 'plus';
+}
 TS
+echo 'export const broken = (n: number) => n > 1;' > src/broken.ts
+printf '%s\n' "import { test } from 'node:test';" "import assert from 'node:assert/strict';" \
+  "import { broken } from '../src/broken.ts';" "test('already red', () => assert.equal(broken(0), true));" > test/broken.test.ts
 printf '%s\n' 'export const lonely = (a: number) => a >= 3;' "export const label = 'level 2';" 'lonely(1 < 2);' 'lonely(1 < 2);' > src/lonely.ts
 cat > test/gate.test.ts <<'TS'
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { gate } from '../src/gate.ts';
+import { gate, sign } from '../src/gate.ts';
 test('refuses a negative', () => assert.equal(gate(-1), 'negative'));
 test('zero passes', () => assert.equal(gate(0), 'ok'));
+test('sign of a negative', () => assert.equal(sign(-1), 'minus'));
 TS
 git add . && git commit -qm change
 sh bin/mutate_diff.sh HEAD~1 > out 2>&1 || bad "exit $?"
@@ -37,6 +48,8 @@ row 'src/gate.ts:3' '< -> <=' red-narrow && grep -F 'src/gate.ts:3	< -> <=' out 
   || bad 'tested guard: not killed with its failing test line'
 row 'src/gate.ts:3' 'drop if (n < 0)' red-narrow || bad 'tested guard drop: not killed'
 row 'src/gate.ts:4' '7 -> 8' SURVIVED && row 'src/gate.ts:4' 'drop if (n === 7)' SURVIVED || bad 'untested guard: not a survivor'
+row 'src/gate.ts:9' 'negate n < 0' red-narrow || bad 'tested block guard: negation not killed'
+row 'src/broken.ts:1' '> -> >=' BASELINE-RED || bad 'tests red before mutation: not BASELINE-RED'
 row 'src/lonely.ts:1' '>= -> >' NO-TESTS || bad 'unimported module: not NO-TESTS'
 ! grep -q 'src/gate.ts:5' out || bad 'mutate-skip line was mutated'
 ! grep -q 'src/lonely.ts:2' out || bad 'a number inside a string was mutated'
