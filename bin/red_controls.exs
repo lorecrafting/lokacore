@@ -135,7 +135,7 @@ controls = [
    %{
      "cartridges/toolbox_showcase/transcripts/walk_red.jsonl" =>
        root
-       |> Path.join("cartridges/toolbox_showcase/transcripts/walk_combat_tilt.jsonl")
+       |> Path.join("cartridges/toolbox_showcase/transcripts/walk_combat.jsonl")
        |> File.read!()
        |> String.replace(~s("direction":"west"), ~s("direction":"north"), global: false)
    }, ~w(node --test kernel/ts/test/transcripts.test.ts), "walk_red.jsonl: replay differs"}
