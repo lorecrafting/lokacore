@@ -4,8 +4,8 @@ The active checks run in hosted CI on every push to a branch, nightly on `main` 
 run on the exact head is the merge gate with review ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
 `bin/check_all.sh` mirrors the hosted line for an occasional full local run. `bin/prepush.sh` runs
-the static checks of hosted CI, in about 30 s (about 40 s with the stories test) before every push and after every
-`bin/pm_merge.sh` merge. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF) and `kernel/ts/test/state_sections.test.ts`. The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
+the static checks of hosted CI, in about 50 s (more when it rebuilds the stories) before every push and after every
+`bin/pm_merge.sh` merge. It first runs `bin/regen.sh`, the one command that rewrites every generated file from its inputs (the `contracts.exs` and `features.exs` outputs, `docs/state-sections.gen.json`, the review index, and, only when the diff against `origin/main` touches their inputs, the story views and saves, a changed cartridge's (every one after a `lib/` change) `{description, canonical, sha256}` hash fixture with its transcripts' content hash, and `test/loka/lint_baseline.txt`, which only shrinks: a new finding fails), and fails `REGEN_DIRTY` naming each file it rewrote: after editing a generator's input, run `bin/regen.sh` and commit what it rewrites. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF). The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption.
@@ -46,12 +46,13 @@ their rules and red controls remain available for resumption.
   40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt), `mobile/` included:
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs`. With no paths the TypeScript check
   selects the tracked files itself; CI and `bin/check_all.sh` both call it
-  that way (red control `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
+  that way (red control `bin/ts_size_red_controls.sh`). Pre-commit runs both on the staged files, and
+  the edit hook (`bin/format_on_edit.sh`) runs the TypeScript check on each edited file. Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
   a split would be worse. Source files: a file at its limit (300 lines, or its existing
   `size: allow`) splits instead of growing; no new `size: allow` is added to a source file and
   an existing one is never raised. Test files keep the escape hatch.
-- `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
+- `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else (pre-commit runs it on the staged `.ex` files).
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
 - `elixir bin/contracts.exs --check` (also in pre-commit when `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md`, `docs/system/mechanics.md` or `protocol/` is staged, as a push to `main` runs no hosted CI): `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](contracts.gen.md) and the capability/residency matrix
@@ -62,7 +63,7 @@ their rules and red controls remain available for resumption.
   `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/`, and the System
   Checks and Toolbox pages' `docs/checks.gen.json` and `docs/toolbox.gen.json` match this page's
   bullets and the [toolbox](MECHANICS-TOOLBOX.md) table with its `docs/system/mechanics.md` rules
-  (run without `--check` to regenerate, also after editing any of the three); an
+  (`bin/regen.sh` regenerates, also after editing any of the three); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so
   does a registry command, event or policy op that no schema declares.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the

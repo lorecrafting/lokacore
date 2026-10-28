@@ -302,11 +302,13 @@ CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.
 # run b); a sampler hash change does not add the transcript and Impact story checks, or any other change adds them.
 mkdir -p "$tmp/pp"; cat > "$tmp/pp/mise" <<'SH'
 #!/bin/sh
-shift 2; echo "$*" >> "$PP_LOG"; echo "run-$RUN"; exit "${STUB_RC:-0}"
+shift 2; echo "$*" >> "$PP_LOG"; echo "run-$RUN"
+case $* in *regen.sh*) [ -z "${STUB_REGEN-}" ] || echo regenerated > "$STUB_REGEN" ;; esac
+exit "${STUB_RC:-0}"
 SH
 chmod +x "$tmp/pp/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin protocol protocol/fixtures; cp "$bin/prepush.sh" bin/; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
-pp() { PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || true; }
+pp() { rc=0; PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} STUB_REGEN=${STUB_REGEN-} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || rc=$?; }
 pp a 1; pp b 1
 la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.b")
 [ -n "$la" ] && [ "$la" != "$lb" ] && grep -qx run-a "$la" && grep -qx run-b "$lb" || bad "prepush logs: run a's log is '$la' ($(cat "$la" 2>/dev/null)), run b's '$lb'"
@@ -314,19 +316,53 @@ la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FA
 ! grep -q 'transcripts.test.ts' "$R.pp" && ! grep -q IMPACT_STORY "$R.c" || bad 'prepush: transcript or Impact checks ran without a sampler hash change'
 echo '{}' > protocol/fixtures/new_sampler_hash.json; git add . && git commit -qm hash; : > "$R.pp"; pp d
 grep -q 'test/transcripts.test.ts' "$R.pp" && grep -q '^IMPACT_STORY_' "$R.d" || bad 'prepush: a sampler hash change did not run the transcript and Impact checks'
-# Break (loka-8qzi, loka-yz58, loka-u58): the story or state-sections check is skipped for its inputs, runs for others, or is
+# Break (loka-8qzi, loka-yz58): the story check is skipped for its inputs, runs for others, or is
 # skipped when the branch diff cannot be read (no origin/main).
-! grep -qE '^(STORIES|STATE_SECTIONS)_' "$R.c" || bad 'prepush: story or state-sections check ran for an unrelated change'
+! grep -q '^STORIES_' "$R.c" || bad 'prepush: the story check ran for an unrelated change'
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/app kernel/ts/src; echo x > mobile/app/x; git add . && git commit -qm app; pp e
-grep -q '^STORIES_' "$R.e" && ! grep -q '^STATE_SECTIONS_' "$R.e" || bad 'prepush: a mobile/app change did not run only the story check'
+grep -q '^STORIES_' "$R.e" || bad 'prepush: a mobile/app change did not run the story check'
 git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/x; git add . && git commit -qm src; pp f
-grep -q '^STORIES_' "$R.f" && grep -q '^STATE_SECTIONS_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story and state-sections checks'
+grep -q '^STORIES_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story check'
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/authority; echo x > mobile/authority/x; git add . && git commit -qm auth; pp i
-grep -q '^STORIES_' "$R.i" && ! grep -q '^STATE_SECTIONS_' "$R.i" || bad 'prepush: a mobile/authority change did not run only the story check'
-git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; echo x > docs/state-sections.gen.json; git add . && git commit -qm gen; pp h
-grep -q '^STATE_SECTIONS_' "$R.h" && ! grep -q '^STORIES_' "$R.h" || bad 'prepush: an edit of docs/state-sections.gen.json did not run only the state-sections check'
+grep -q '^STORIES_' "$R.i" || bad 'prepush: a mobile/authority change did not run the story check'
 git update-ref -d refs/remotes/origin/main; pp g
-grep -q '^STORIES_' "$R.g" && grep -q '^STATE_SECTIONS_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
+grep -q '^STORIES_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
+# Break (loka-ivjq.25): bin/regen.sh rewrites a file and prepush passes, or does not name it; or a file already
+# uncommitted before the run, which regen leaves alone, is reported.
+echo own > own.txt; STUB_REGEN=a pp j
+[ "$rc" = 1 ] && grep -q '^REGEN_DIRTY' "$R.j" && grep -qx '  a' "$R.j" && ! grep -q own.txt "$R.j" || bad "prepush: a regenerated file was not reported, or an untouched one was (exit $rc, want 1): $(cat "$R.j")"
+git checkout -q a; rm own.txt
+# --- regen.sh -------------------------------------------------------------------------------
+# Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
+# into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them
+# (the story views read the fixture this run rewrites; a lib/ change rebuilds every fixture);
+# a fixture other than the changed cartridge's 3-key one is rebuilt; the transcripts keep the old content hash; a fixed
+# lint finding stays in the baseline; a new finding is pinned instead of failing regen.
+mkdir "$tmp/rg"; cat > "$tmp/rg/mise" <<'SH'
+#!/bin/sh
+shift 2; echo "$*" >> "$RG_LOG"
+case $* in *loka.lint*) echo "lint: ${RG_LINT:-finding}" >&2; exit 1 ;; esac
+SH
+chmod +x "$tmp/rg/mise"
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p bin kernel/ts mobile/app protocol/fixtures cartridges/a/transcripts cartridges/b test/loka
+cp "$bin/regen.sh" bin/; : > bin/review_index.sh
+printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
+for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
+printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b\\"}}",\n  "sha256": "old",\n  "value": 1\n}\n' > protocol/fixtures/v_hash.json
+echo '{"content_hash":"old"}' > cartridges/a/transcripts/t.jsonl; echo x > cartridges/b/x; printf '# header\ntoolbox_showcase lint: finding\ntoolbox_showcase lint: fixed\n' > test/loka/lint_baseline.txt
+git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
+rg() { RG_LOG=$R.$1 PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2>&1 || bad "regen.sh exited non-zero ($1)"; }
+echo y > cartridges/a/y; rg a
+grep -qx 'protocol/fixtures/a_hash.json' "$R.a" && ! grep -q 'protocol/fixtures/[bv]_' "$R.a" && grep -q stories:views "$R.a" && ! grep -q loka.lint "$R.a" \
+  || bad "regen: wrong generators for a cartridges/a change: $(tr '\n' ' ' < "$R.a")"
+grep -q '"new"' cartridges/a/transcripts/t.jsonl || bad 'regen: the transcript kept the old content hash'
+git add . && git commit -qm a; git update-ref refs/remotes/origin/main HEAD; mkdir lib; echo x > lib/x; rg l
+grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b_hash.json' "$R.l" || bad "regen: a lib/ change did not rebuild every fixture: $(tr '\n' ' ' < "$R.l")"
+git add . && git commit -qm l; git update-ref -d refs/remotes/origin/main; rg b
+grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && ! grep -q v_hash "$R.b" || bad "regen: no diff did not rebuild every 3-key fixture, or rebuilt one with value: $(tr '\n' ' ' < "$R.b")"
+[ "$(cat test/loka/lint_baseline.txt)" = "$(printf '# header\ntoolbox_showcase lint: finding')" ] || bad "regen: lint baseline is: $(cat test/loka/lint_baseline.txt)"
+if RG_LINT=new RG_LOG=$R.n PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2> "$R.n.err" || ! grep -qx 'toolbox_showcase lint: new' "$R.n.err" \
+  || grep -q new test/loka/lint_baseline.txt; then bad "regen: a new lint finding was pinned or not named: $(cat "$R.n.err")"; fi
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
 # Break: the Impact story's pinned list is not compared with the README row (a new fixture only in the README passes).
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p protocol mobile/app/stories
@@ -422,12 +458,16 @@ while IFS= read -r c; do echo '{}' | CLAUDE_PROJECT_DIR="$tmp/none" sh -c "$c" 2
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
 # CHECKS.md, system/mechanics.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.
-mkdir "$tmp/hk"; printf '#!/bin/sh\ncase $* in *contracts.exs*) exit 1 ;; esac\nexit 0\n' > "$tmp/hk/mise"; chmod +x "$tmp/hk/mise"
+mkdir "$tmp/hk"; printf '#!/bin/sh\ncase $* in *"${HK_FAIL:-contracts.exs}"*) exit 1 ;; esac\nexit 0\n' > "$tmp/hk/mise"; chmod +x "$tmp/hk/mise"
 R=$(mktemp -d); cd "$R"; git init -q; mkdir -p docs/system protocol; : > a.txt
+hk() { echo 1 >> $1; git add $1; rc=0; HK_FAIL=${2-} PATH="$tmp/hk:$PATH" sh "$bin/../.githooks/pre-commit" > /dev/null 2>&1 || rc=$?; git reset -q; }
 for f in docs/MECHANICS-TOOLBOX.md docs/CHECKS.md docs/system/mechanics.md protocol/x.json a.txt; do
-  echo 1 >> $f; git add $f; rc=0; PATH="$tmp/hk:$PATH" sh "$bin/../.githooks/pre-commit" > /dev/null 2>&1 || rc=$?
-  case $f in a.txt) want=0 ;; *) want=1 ;; esac
-  [ "$rc" = $want ] || bad "pre-commit $f: exit $rc, want $want"; git reset -q
+  hk $f; case $f in a.txt) want=0 ;; *) want=1 ;; esac
+  [ "$rc" = $want ] || bad "pre-commit $f: exit $rc, want $want"
+done
+# Break (loka-ivjq.27): a staged file over the size limit, or a staged .ex failing Credo, commits; or Credo runs on .exs.
+for c in 'x.ts check_ts_size 1' 'x.mjs check_ts_size 1' 'x.exs check_size.exs 1' 'x.ex credo 1' 'x.exs credo 0' 'a.txt check_ 0'; do
+  set -- $c; hk $1 $2; [ "$rc" = $3 ] || bad "pre-commit $1 with $2 failing: exit $rc, want $3"
 done
 # --- preview_update.sh, polish_session.sh ----------------------------------------------------------
 # Bare origin with three lockfiles; the preview is a detached clone; ports 7006/7019/7020/7081, never
@@ -676,11 +716,41 @@ wt=$R/worktrees.noindex/feat-x; rc=0; NB_LOG=$R/setup capped sh bin/new_batch.sh
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
 git clone -q "$O" . 2>/dev/null; git checkout -qb main; echo 1 > a.txt; git add a.txt; git commit -qm base; git push -q origin main
 git checkout -qb slice; echo 2 > a.txt; git commit -qam slice
-out=$(sh "$bin/push_slice.sh" "$R" slice) && [ "$(echo "$out" | head -1)" = "PUSH_EXIT=0 $(git rev-parse slice)" ] || bad "push_slice: accepted push: $out"
+mkdir "$tmp/ps"; printf '#!/bin/sh\necho "$*" > "$GH_LOG"; echo ci\n' > "$tmp/ps/gh"; chmod +x "$tmp/ps/gh"
+out=$(GH_LOG=$R.gh PATH="$tmp/ps:$PATH" sh "$bin/push_slice.sh" "$R" slice) && [ "$(echo "$out" | head -1)" = "PUSH_EXIT=0 $(git rev-parse slice)" ] || bad "push_slice: accepted push: $out"
+# Break (loka-ivjq.19): the hosted runs are looked up by a short or wrong sha, or a run's status is misread.
+case "$out" in *"ci: started"*"book-e2e: not started"*) ;; *) bad "push_slice: run status lines wrong: $out";; esac
+grep -q -- "--commit $(git rev-parse slice) " "$R.gh" || bad "push_slice: gh was not asked for the full pushed sha: $(cat "$R.gh")"
 git clone -q "$O" "$R.other" && git -C "$R.other" checkout -q slice && echo 3 > "$R.other/a.txt" && git -C "$R.other" commit -qam other && git -C "$R.other" push -q origin slice
 echo 4 > a.txt; git commit -qam diverged
 out=$(sh "$bin/push_slice.sh" "$R" slice) && bad "push_slice: a rejected push exited 0: $out"
-case "$out" in PUSH_EXIT=0*) bad "push_slice: a rejected push printed PUSH_EXIT=0";; PUSH_EXIT=*) ;; *) bad "push_slice: no PUSH_EXIT line: $out";; esac
+case "$out" in PUSH_EXIT=0*) bad "push_slice: a rejected push printed PUSH_EXIT=0";; *started*) bad "push_slice: a rejected push reported runs";; PUSH_EXIT=*) ;; *) bad "push_slice: no PUSH_EXIT line: $out";; esac
 out=$(sh "$bin/push_slice.sh" "$R" main 2>&1) || true  # the refusal exits 2; set -e must not stop here
 case "$out" in *"is not the branch checked out"*) ;; *) bad "push_slice: pushed a branch that is not checked out in the worktree: $out";; esac
+# --- .githooks/pre-push, format_on_edit.sh ----------------------------------------------------
+# Break (loka-ivjq.19): a new commit whose message names a home or worktree path is pushed; a clean one is refused.
+R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; chmod +x bin/prepush.sh; git add .
+z=0000000000000000000000000000000000000000
+for m in 'clean 0' 'see /Users/x/f 1' 'in worktrees.noindex/x 1'; do
+  git commit -qm "${m% *}" --allow-empty; rc=0
+  echo "refs/heads/x $(git rev-parse HEAD) refs/heads/x $z" | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
+  [ "$rc" = "${m##* }" ] || bad "pre-push: message '${m% *}': exit $rc, want ${m##* }"; git reset -q --hard HEAD~1 2> /dev/null || git update-ref -d HEAD
+done
+# Break: a new branch first in the push ends the scan, so a later ref's path-naming message is pushed.
+git commit -qm clean --allow-empty; a=$(git rev-parse HEAD); git commit -qm 'see /Users/x/f' --allow-empty; rc=0
+printf 'refs/heads/a %s refs/heads/a %s\nrefs/heads/b %s refs/heads/b %s\n' "$a" $z "$(git rev-parse HEAD)" $z | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
+[ "$rc" = 1 ] || bad "pre-push: a second ref's path-naming message: exit $rc, want 1"
+# Same break when the earlier refs change code against a known remote sha, or name an unknown one.
+git reset -q --hard "$a"; base=$a; echo g > g; git add g; git commit -qm code; c1=$(git rev-parse HEAD)
+git commit -qm 'see /Users/x/f' --allow-empty; rc=0
+printf 'refs/heads/a %s refs/heads/a %s\nrefs/heads/b %s refs/heads/b 1111111111111111111111111111111111111111\nrefs/heads/c %s refs/heads/c %s\n' "$c1" "$base" "$c1" "$(git rev-parse HEAD)" $z \
+  | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
+[ "$rc" = 1 ] || bad "pre-push: a path-naming message after code and unknown-sha refs: exit $rc, want 1"
+# Break (loka-ivjq.27): an edited TypeScript file over the size limit passes the edit hook silently, the check gets
+# a path the size script cannot resolve from the repo root, or a non-TypeScript edit runs it.
+mkdir "$tmp/fe"; printf '#!/bin/sh\nshift 2; echo "$*" >> "$FE_LOG"; case $* in *check_ts_size*) echo too-long; exit 1 ;; esac\n' > "$tmp/fe/mise"
+chmod +x "$tmp/fe/mise"; mkdir sub; : > sub/x.ts; : > sub/x.json
+fe() { rc=0; echo "{\"tool_input\":{\"file_path\":\"$R/sub/$1\"}}" | FE_LOG=$R.fe CLAUDE_PROJECT_DIR=$R PATH="$tmp/fe:$PATH" sh "$bin/format_on_edit.sh" > /dev/null 2> "$R.err" || rc=$?; }
+fe x.ts; [ "$rc" = 2 ] && grep -q too-long "$R.err" && grep -qx 'node bin/check_ts_size.mjs sub/x.ts' "$R.fe" || bad "format_on_edit: oversize x.ts: exit $rc, log $(cat "$R.fe")"
+: > "$R.fe"; fe x.json; [ "$rc" = 0 ] && ! grep -q check_ts_size "$R.fe" || bad "format_on_edit: x.json: exit $rc, log $(cat "$R.fe")"
 exit $fail
