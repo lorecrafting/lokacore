@@ -92,23 +92,10 @@ responsibilities, which are never capabilities (05 §6). No fixtures: none bound
 Account/run binding, story point reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
 
 - **AccountId**: A platform account (23 §2, §5): server-owned, never reused. Lowercase hyphenated UUID, any version.
-- **AdmissionPolicy**: A deployment's versioned admission policy (23 §5, §7): a conjunction of requirements, at least one. Ungated is its own explicit kind, never an empty list.
-  - `gated`: Every requirement must be met.
-  - `ungated`: Intentionally no requirement.
-- **AdmissionRequirement**: A requirement and its explicit alternative qualifying story points, at least one (23 §7).
-- **AdmissionResult**: A server admission decision (23 §7): eligible, or the missing requirements, with the policy and progress versions it was evaluated at.
-  - `eligible`
-  - `missing_requirements`
 - **EvidenceClass**: How a story point was evidenced (23 §6). A client cannot select or upgrade it.
-- **LocalProfileId**: A local profile on a device (23 §2), distinct from AccountId and CharacterId. Lowercase hyphenated UUID, any version.
-- **QualifyingStoryPoint**: One approved (release hash, story point, outcome) that satisfies a requirement (23 §7).
-- **QueuedReport**: A report in the local queue (23 §4, §5): account_id is the binding recorded when queued, verified on upload and never rebound to another account (absent for an unbound guest run).
-- **ReportDisposition**: A queued report's delivery state (23 §4). A report is never dropped after a retry limit.
-- **RequirementId**: A stable admission requirement id, namespace.name@version (23 §7: onboarding.loka_fundamentals@1); each segment lowercase snake_case, at most 64 characters.
 - **StoryPointAcceptance**: The platform's durable acceptance record (23 §5 'Platform acceptance'): authenticated account, canonical payload digest (hash of the StoryPointReport), recognized release and story point, evidence class, acceptance-policy revision and result. integrity_conflict: the report id was reused with a different payload; outcome_conflict: another outcome for the same story point in the same run (23 §5). The server receipt time is host metadata whose format is fixed with the platform API (R12A).
 - **StoryPointReport**: The payload of one story point report (23 §5 'Local story point/report'): story point key, occurrence id, run and exact release, outcome and the observed game revision. It names no account (authentication supplies it) and no evidence class (only the server assigns one, 23 §6).
 - **StoryPointReportId**: One story point occurrence's report, stable across retry and restore (23 §4, §11). Lowercase hyphenated UUID, any version.
-- **StoryRun**: A Story run and its binding (23 §5, §11; 03 §25): the exact cartridge release, the local profile, and the account once bound (host-side, outside portable semantics, 23 §4). parent_run_id is the run a restore or fork branched from; alone it is not full restore provenance: the parent snapshot/ancestor revision (23 §11; 03 §25) belongs to the R6 save-header contract. The server enforces that an account binding and release never change after registration (23 §5).
 - **StoryRunId**: A Story run/save lineage (23 §5; 03 §25). A semantic restore or fork is a new run (23 §11). Lowercase hyphenated UUID, any version.
 
 ## Action contracts (`protocol/action.schema.json`)
@@ -554,10 +541,9 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 
 Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id is its own named type; the types are not interchangeable (03 §6).
 
-- **AuthorityDomainId**: The current serialized mutation-ownership domain (03 §6). Distinct from WorldContextId: one logical world can hold many authority domains. Lowercase hyphenated UUID, any version.
 - **CartridgeId**: A cartridge identity (05 §3 id, 05 §4), lowercase snake_case, at most 64 characters.
 - **CharacterId**: A character (02 §4); the id of player StateScope and player AudiencePolicy (03 §6). Lowercase hyphenated UUID, any version.
-- **CommandId**: Stable semantic Command id (04 §3), derived from the logical idempotency scope and the InvocationId; stable when the AuthorityDomainId changes (03 §6). Lowercase hyphenated UUID, any version.
+- **CommandId**: Stable semantic Command id (04 §3), derived from the logical idempotency scope and the InvocationId; stable when the authority domain changes (03 §6). Lowercase hyphenated UUID, any version.
 - **DefinitionRef**: Globally stable, immutable reference to a content definition (03 §2; 05 §4: no global content-key namespace). cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.
 - **DefinitionRefString**: Canonical string form of a DefinitionRef, cartridge_id@cartridge_version:kind/key (03 §2, 05 §4), with the same segment rules: each at most 64 characters, so every valid DefinitionRef has a valid string form.
 - **EntityId**: Runtime entity identity (03 §3). Two entities from one DefinitionRef have different EntityIds. Lowercase hyphenated UUID, any version.
@@ -566,7 +552,6 @@ Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id i
 - **RealmId**: The broader persistent Realm identity (03 §6); the id of realm StateScope. Lowercase hyphenated UUID, any version.
 - **ReleaseVersion**: A release version (05 §3 version, §12): MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.
 - **WorldContextId**: Logical world/context identity: the simulation, save or deployment context in which state exists (03 §6, 'Logical world identity is not mutation-owner placement'). Never a fencing, owner or shard token. Lowercase hyphenated UUID, any version.
-- **ZoneShardId**: One Realm placement/routing identity for an authority domain (03 §6). Player and party scope are not permanently owned by it. Lowercase hyphenated UUID, any version.
 
 ## Invariant registry contract (`protocol/invariant.schema.json`)
 
@@ -589,13 +574,11 @@ Cartridge, deployment and campaign manifests and their version fields (05 §3, �
 
 - **ApiVersion**: api_version: the authored source document/schema family (05 §3).
 - **CampaignId**: A campaign identity (07 §15), lowercase snake_case, at most 64 characters.
-- **CampaignManifest**: A versioned campaign manifest (07 §15, 05 §23): the exact cartridge releases a save lineage composes, at least one. An expansion changes this manifest, never an existing artifact.
 - **CartridgeManifest**: A cartridge's manifest (05 §3, §20): identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then (14 §R3B).
 - **CartridgeRelease**: An exact immutable cartridge release: cartridge_id@version names exactly one semantic hash (05 §12).
 - **ClientFeature**: A presentation/input capability of the installed Loka app (05 §3 client_features), lowercase snake_case, at most 64 characters.
 - **CompatibilityRequirements**: requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here (05 §3 'Version vocabulary').
 - **ContentHash**: A semantic content hash: SHA-256 as 64 lowercase hex digits. It covers the semantic payload only, never signatures, certificates or package bytes (05 §11 'Hash domains and attestations'); how the payload is formed is the compiler's (R4).
-- **DeploymentManifest**: How one exact cartridge release is hosted (05 §22): its profile and the exact capability lock it runs (05 §6: deployments pin exact capability versions). Hosting-policy and semantic overlays, each separately hashed and certified, are added when specified.
 - **ExecutionProfile**: A hosting profile a cartridge supports or a deployment uses: the canonical execution-profile vocabulary (07 §3; 09 §20 reuses it).
 - **KernelApiRange**: The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.
 - **KernelApiVersion**: A kernel_api version, MAJOR.MINOR without leading zeros (05 §3).
