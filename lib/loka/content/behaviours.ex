@@ -30,34 +30,44 @@ defmodule Loka.Content.Behaviours do
     extra =
       for m <- Map.keys(value), m != "reactions", do: {"UNKNOWN_FIELD", {rel, steps ++ [m]}, %{}}
 
-    case value["reactions"] do
-      %{} = rs -> {{name, for({r, v} <- rs, do: {rel, steps ++ ["reactions", r], r, v})}, extra}
-      _ -> {{name, []}, [invalid_type(rel, steps ++ ["reactions"]) | extra]}
-    end
+    {rs, bad} = reactions({rel, steps ++ ["reactions"]}, value["reactions"])
+    {{name, rs}, bad ++ extra}
   end
 
   defp rules({_, {_, name, _}, :invalid}), do: {{name, []}, []}
-  defp rules({rel, {_, name, steps}, _}), do: {{name, []}, [invalid_type(rel, steps)]}
+  defp rules({rel, {_, name, steps}, _}), do: {{name, []}, [invalid_type({rel, steps})]}
+
+  defp reactions({rel, steps}, %{} = rs),
+    do: {for({r, v} <- rs, do: {rel, steps ++ [r], r, v}), []}
+
+  defp reactions(at, _), do: {[], [invalid_type(at)]}
 
   defp hold({rel, {kind, holder, steps} = id, %{"behaviours" => names} = value}, named)
        when kind in [:npc, :item] do
-    held = {rel, id, Map.delete(value, "behaviours")}
-
-    if is_list(names) and Enum.all?(names, &(Contracts.validate("Key", &1) == :ok)) do
-      # A name listed twice counts once, at its first index.
-      names = names |> Enum.with_index() |> Enum.uniq_by(&elem(&1, 0))
-
-      {[held | for({n, _} <- names, c <- Map.get(named, n, []), do: copy(c, holder))],
-       for {n, i} <- names, not is_map_key(named, n) do
-         at = {rel, steps ++ ["behaviours", i]}
-         {"UNRESOLVED_REFERENCE", at, %{"target" => "behaviours/" <> n}}
-       end}
-    else
-      {[held], [invalid_type(rel, steps ++ ["behaviours"])]}
-    end
+    {copies, faults} = copies(names, named, holder, {rel, steps ++ ["behaviours"]})
+    {[{rel, id, Map.delete(value, "behaviours")} | copies], faults}
   end
 
   defp hold(file, _), do: {[file], []}
+
+  defp copies(names, named, holder, at) do
+    if keys?(names) do
+      # A name listed twice counts once, at its first index.
+      names = names |> Enum.with_index() |> Enum.uniq_by(&elem(&1, 0))
+      {known, unknown} = Enum.split_with(names, fn {n, _} -> is_map_key(named, n) end)
+
+      {for({n, _} <- known, c <- named[n], do: copy(c, holder)),
+       Enum.map(unknown, &unresolved(at, &1))}
+    else
+      {[], [invalid_type(at)]}
+    end
+  end
+
+  defp keys?(names),
+    do: is_list(names) and Enum.all?(names, &(Contracts.validate("Key", &1) == :ok))
+
+  defp unresolved({rel, steps}, {name, i}),
+    do: {"UNRESOLVED_REFERENCE", {rel, steps ++ [i]}, %{"target" => "behaviours/" <> name}}
 
   # A copy keeps the behaviour rule's location, so each diagnostic reports once there.
   defp copy({rel, steps, rule, value}, holder),
@@ -68,6 +78,5 @@ defmodule Loka.Content.Behaviours do
   defp fill(list, holder) when is_list(list), do: Enum.map(list, &fill(&1, holder))
   defp fill(value, _), do: value
 
-  defp invalid_type(rel, steps),
-    do: {"SCHEMA_VIOLATION", {rel, steps}, %{"error" => "invalid_type"}}
+  defp invalid_type(at), do: {"SCHEMA_VIOLATION", at, %{"error" => "invalid_type"}}
 end
