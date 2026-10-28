@@ -1,4 +1,4 @@
-// size: allow 587, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 590, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -342,6 +342,9 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room_wanted');
   const back = go(walk(s, 'south'), 'north');
   assert.deepEqual(back.lines, ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
+  // The arrest ends the move in the cell, not entered by a way back: "You arrive." (loka-glj8).
+  const arrived = back.decision.kind === 'accepted' && back.decision.narration?.[0];
+  assert.deepEqual(arrived, { key: 'movement.moved', participants: { actor: s.body } });
   s = back.world;
   assert.equal(where(s, s.body), room(s, 'cell'));
   assert.equal(engaged(s, s.body), undefined);

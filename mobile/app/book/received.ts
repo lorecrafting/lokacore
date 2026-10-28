@@ -117,7 +117,7 @@ const routedLines = (
 ) => {
   const lines = (r: typeof retained) =>
     narrationLines(closing(r, was, now, commandOf(b) === 'cast'), now, text, false, was);
-  // The room log takes the fight's lines up to a room change only (loka-glj8).
+  // The room reached logs the lines from its arrival on; the fight page keeps the rest (loka-glj8).
   return [...lines(retained), lines(arrived(retained))[1]] as const;
 };
 

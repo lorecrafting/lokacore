@@ -78,27 +78,30 @@ export function moveSequence(
     outcome,
     [...ops, ...progress.ops],
     [entered, ...progress.events],
-    [arrival(world, command, body, here, there, outcome), ...(progress.narration ?? [])],
+    [arrival(world, command, plan, outcome, progress.ops), ...(progress.narration ?? [])],
   );
 }
 
 /**
  * The room reached opens with its arrival line (book-ui Line placement; loka-glj8): `from` is the
  * destination's exit back to `here` the actor can see, the opposite face first, else none ("You arrive.").
+ * None either when the move ends elsewhere (an arrest takes the body on to the cell).
  */
 function arrival(
   world: World,
   { payload: { actor_id, direction } }: MoveCommand,
-  body: EntityId,
-  here: EntityId,
-  there: EntityId,
+  { body, here, there }: Planned,
   outcome: string,
+  after: readonly { op: string; entity_id?: EntityId }[],
 ) {
   const room = world.rooms[there];
-  const from = [OPPOSITE[direction], ...COMPASS].find((d) => {
-    const to = d && exitTo(room, d);
-    return to && world.roomIds[refString(to)] === here && !hidden(world, room, d, actor_id);
-  });
+  const moved = after.some((o) => o.op === 'entity.transfer' && o.entity_id === body);
+  const from = moved
+    ? undefined
+    : [OPPOSITE[direction], ...COMPASS].find((d) => {
+        const to = d && exitTo(room, d);
+        return to && world.roomIds[refString(to)] === here && !hidden(world, room, d, actor_id);
+      });
   return engineLine(
     outcome === 'fled' ? 'combat.ran_in' : 'movement.moved',
     { actor: body },
