@@ -120,7 +120,7 @@ their rules and red controls remain available for resumption.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
-  PR worktree, an unmerged `review-<N>`, or a remote PR branch ahead of main is refused with nothing changed; a dirty Beads export and main's export rows both survive the shared `bin/lib/beads_sync.sh` step (a pull with hooks off, then plain `br sync --merge`), a row edited on both sides is refused with the local edit and export kept (real `br`, skipped where it is not installed), and a failed merge stops before the close; the worktree,
+  PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit; a script copy behind main is replaced and re-run, and an export dirtied after the commit gets its own commit before the push.
   It also runs `.githooks/pre-commit` (stub `mise`): a staged `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md`, `docs/system/mechanics.md` or `protocol/` file runs `contracts.exs --check` and a failure blocks the commit; an unrelated file does not. A rerun of `bin/after_merge.sh` for an issue already closed skips `br close`.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
