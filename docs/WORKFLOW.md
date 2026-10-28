@@ -133,7 +133,7 @@ Report at the end of the slice, not at every step.
    fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
    diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
-7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`) once the verdict is
+7. **Merge (PM).** Merge with `bin/merge_pr.sh <PR> <beads-id[,...]> ["ROADMAP status: ..."]` (waits on `bin/wait_ci.sh` for the head, merge commit with `--match-head-commit`, then `bin/after_merge.sh`) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
@@ -147,7 +147,7 @@ Report at the end of the slice, not at every step.
    Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly; never for unreviewed code or past a red check. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
-   `bin/after_merge.sh <PR> <beads-id[,beads-id...]> ["ROADMAP status: ..."]` does that bookkeeping after the PM's
+   `bin/after_merge.sh` (run by `bin/merge_pr.sh`) does that bookkeeping after the PM's
    ROADMAP edit: pull, close the issue, remove the worktree, branch and `review-<N>`, commit, push. Then tell the owner:
    PR link, verdict, notes; cite every PR as #N (Beads id, short description). Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as

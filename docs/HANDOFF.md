@@ -62,9 +62,8 @@ Standing owner rules live in [owner rules](system/owner-rules.md#process).
 
 - Start: `mise install`, `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh auth status`; `br sync --import-only`;
   read [WORKFLOW](WORKFLOW.md) (Loop) and this page; `bin/session_status.sh` prints the board.
-- Beads writes from the `main` checkout: `git pull --ff-only origin main` and `br sync --import-only` first;
-  after each checkpoint `br sync --flush-only`, check the JSONL has no machine path, commit
-  `.beads/issues.jsonl` (and this page) on main, push. On a push conflict: `git pull --rebase`, then
-  `br sync --merge`, flush, commit. Never commit `beads.db`.
+- Beads writes from the `main` checkout after `br sync --import-only`; each checkpoint is
+  `bin/beads_checkpoint.sh` (pull, flush, machine-path check, commit the export and this page, push;
+  a rejected push prints the recovery steps). Never commit `beads.db`.
 - End: rewrite this page, push every branch with work, file the
   [retro](WORKFLOW.md#retro-and-housekeeping-queue) items in Beads.
