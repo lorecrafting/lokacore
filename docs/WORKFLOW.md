@@ -136,7 +136,7 @@ PM, developer, reviewer and designer alike; the role files link here instead of 
   notice, no sleep or poll loops. Any agent that expects a run over ~10 minutes (full-suite
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
-- Only the PM waits on CI. A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and `book-e2e.yml` started, and hands back; a reviewer or designer reports the CI state it sees, once; the PM returns a red run as a finding.
+- Only the PM waits on CI. A developer pushes with `bin/push_slice.sh`, which reports whether `ci.yml` and `book-e2e.yml` started, and hands back; a reviewer or designer reports the CI state it sees, once; the PM returns a red run as a finding.
 - Work in your own worktree under `worktrees.noindex` ([Git hygiene](#git-hygiene)); in a new one run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) first; in a shared one commit with `git commit -- <your own paths>`.
 - Stop only processes you started, by their PID, planted breaks and red controls included (a planted `pkill -f storybook` killed the owner's Storybook twice, loka-hg7, loka-rar); `bin/orphans.sh` lists orphaned busy ones. Red controls
   that plant files run in a `git worktree add --detach` scratch copy, never in the worktree
