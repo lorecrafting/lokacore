@@ -16,6 +16,7 @@ world's definitions and text:
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
+| `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]`; the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
@@ -353,11 +354,12 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
-`lib/loka/content/signals.ex`, `lib/loka/content/zones.ex`), so `mix loka.compile` and
-`mix loka.lint` see the same flattened definitions. The order is: open area bundles, refuse
-repeated definitions, flatten `extends`, lower inline prose, lower signals, expand zone rules,
-refuse repeated definitions again. The artifact never carries a bundle, `extends`, `abstract`, a
-prose marker, a signal or a zone; the loader is unchanged.
+`lib/loka/content/behaviours.ex`, `lib/loka/content/signals.ex`, `lib/loka/content/zones.ex`),
+so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
+area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
+behaviours, lower signals, expand zone rules, refuse repeated definitions again. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a signal or a zone;
+the loader is unchanged.
 
 **Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
@@ -500,6 +502,40 @@ Existing checks cover the rest: a trigger with no room filter is `UNKNOWN_FIELD`
 to an authored reaction or another copy (rule `a` in room `b_c` and rule `a_b` in room `c`) is
 `DUPLICATE_DEFINITION` at each site. [codex_sampler](../../cartridges/codex_sampler/reactions/wanderer.json)
 is the working example: one zone rule for its five rooms; its artifact equals the five hand-written
+rules byte for byte.
+
+**Behaviours.** One set of reactions for many NPCs or items.
+- `behaviours/<name>.json` (or `"behaviours": {"<name>": ...}` in an area bundle) holds
+  `{"reactions": {"<rule>": <ReactionRule without key>}}`. An NPC or item may carry
+  `"behaviours": ["<Key>", ...]`; the compiler strips it from every NPC and item and drops every
+  behaviour. `behaviours` on any other kind is `UNKNOWN_FIELD`; a behaviour no holder lists adds
+  nothing.
+- Each rule becomes one reaction per holder (once, however often the holder lists the name),
+  keyed `<rule>_<holder>` (`take` on `trout_01` is `take_trout_01`). In the copy, every
+  `{"param": "holder"}` (an object with that one member) becomes the holder's key, so the
+  trigger names the holder; any other `param` object stays and the schema refuses it there. A
+  copy keeps the behaviour rule's location, so each of its diagnostics reports once at
+  `behaviours/<name>.reactions.<rule>...`.
+- Copies sort by the bytes of `<rule>_<holder>`, as zone copies do: a holder's rules sort by rule
+  name.
+- Prose lowers first, so all copies share the rule's generated key
+  `behaviour.<name>.reactions.<rule>...`. Flattening runs first, so a holder inherits
+  `behaviours` through `extends` and an abstract holder gets no copy. Signals and zones run
+  after, so a behaviour rule may send a signal or carry a `zone`.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| `behaviours` is not a list of Keys | `SCHEMA_VIOLATION` | `<src>.behaviours` | `{"error": "invalid_type"}` |
+| A name with no behaviour (reported at its first index) | `UNRESOLVED_REFERENCE` | `<src>.behaviours[<i>]` | `{"target": "behaviours/<name>"}` |
+| A behaviour that is not an object | `SCHEMA_VIOLATION` | `behaviours/<name>` | `{"error": "invalid_type"}` |
+| A behaviour member other than `reactions` | `UNKNOWN_FIELD` | `behaviours/<name>.<member>` | `{}` |
+| `reactions` is missing or not an object | `SCHEMA_VIOLATION` | `behaviours/<name>.reactions` | `{"error": "invalid_type"}` |
+
+A behaviour that fails to decode, is not an object or has no `reactions` object gives its
+holders no copies and no diagnostic of their own. Existing checks cover the rest: a copy key over 64 characters is `SCHEMA_VIOLATION` at
+the behaviour rule; a copy key equal to another reaction's is `DUPLICATE_DEFINITION` at each site.
+[fishing_sampler](../../cartridges/fishing_sampler/behaviours/spoils.json) is the working
+example: one behaviour on its four fish; its artifact equals the four hand-written `take_*`
 rules byte for byte.
 
 ## Artifact and loader

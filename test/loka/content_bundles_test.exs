@@ -18,9 +18,8 @@ defmodule Loka.ContentBundlesTest do
     assert refused([{@bundle, &Map.put(&1, "widgets", %{})}]) ==
              [{"UNKNOWN_FIELD", "areas/village.widgets", %{}}]
 
-    assert {"SCHEMA_VIOLATION", "areas/village.npcs", %{"error" => "invalid_type"}} in refused([
-             {@bundle, &Map.put(&1, "npcs", [])}
-           ])
+    assert refused([{@bundle, &Map.put(&1, "npcs", [])}]) ==
+             [{"SCHEMA_VIOLATION", "areas/village.npcs", %{"error" => "invalid_type"}}]
 
     assert refused([{@bundle, []}]) ==
              [{"SCHEMA_VIOLATION", "areas/village", %{"error" => "invalid_type"}}]

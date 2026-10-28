@@ -3,7 +3,7 @@ defmodule Loka.Content.Source do
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Bundles, Extends, Prose, Signals, Zones}
+  alias Loka.Content.{Behaviours, Bundles, Extends, Prose, Signals, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -38,6 +38,7 @@ defmodule Loka.Content.Source do
              | :service
              | :transport
              | :bleed
+             | :behaviour
              | :status
              | :blueprint, String.t(), steps()}
 
@@ -57,9 +58,10 @@ defmodule Loka.Content.Source do
 
   defp shortcuts(files, faults) do
     {files, clashes} = Prose.lower(files)
+    {files, held} = Behaviours.expand(files)
     {files, unsent} = Signals.lower(files)
     {files, zoned} = Zones.expand(files)
-    {files, Enum.map(faults ++ clashes ++ unsent ++ zoned, &bundle_diag/1)}
+    {files, Enum.map(faults ++ clashes ++ held ++ unsent ++ zoned, &bundle_diag/1)}
   end
 
   defp read(dir) do
@@ -153,7 +155,8 @@ defmodule Loka.Content.Source do
     "transports" => :transport,
     "bleeds" => :bleed,
     "statuses" => :status,
-    "blueprints" => :blueprint
+    "blueprints" => :blueprint,
+    "behaviours" => :behaviour
   }
 
   defp classify(rel) do
