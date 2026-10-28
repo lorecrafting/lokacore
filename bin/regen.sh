@@ -8,7 +8,7 @@
 #     (bin/regen_hash_fixture.sh), and the old content hash in its transcripts becomes the new one;
 #     fixtures that also carry `value` are rebuilt by hand;
 #   - mobile/, kernel/ts/src/, protocol/: the stories' views and saves (npm run stories:views);
-#   - cartridges/toolbox_showcase/, lib/: test/loka/lint_baseline.txt (mix loka.lint).
+#   - cartridges/toolbox_showcase/, lib/: test/loka/lint_baseline.txt (mix loka.lint; fixed findings drop out, a new one fails).
 #   bin/regen.sh
 set -eu
 cd "$(git rev-parse --show-toplevel)"
@@ -44,7 +44,10 @@ m elixir bin/features.exs
 sh bin/review_index.sh
 if touched '^(mobile/|kernel/ts/src/|protocol/)'; then (cd mobile/app && m npm run -s stories:views); fi
 if touched '^(cartridges/toolbox_showcase/|lib/)'; then
-  lint=$(m mix loka.lint cartridges/toolbox_showcase 2>&1 >/dev/null || true)
-  { head -1 test/loka/lint_baseline.txt; [ -z "$lint" ] || printf '%s\n' "$lint" | sed 's/^/toolbox_showcase /'; } >test/loka/lint_baseline.txt.new
+  lint=$(m mix loka.lint cartridges/toolbox_showcase 2>&1 >/dev/null | sed 's/^/toolbox_showcase /')
+  # The baseline only shrinks: a new finding (or a lint crash) fails here instead of being pinned.
+  new=$(printf '%s\n' "$lint" | grep -vxFf test/loka/lint_baseline.txt || true)
+  if [ -n "$new" ]; then printf 'regen: lint findings not in test/loka/lint_baseline.txt (fix them):\n%s\n' "$new" >&2; exit 1; fi
+  { head -1 test/loka/lint_baseline.txt; [ -z "$lint" ] || printf '%s\n' "$lint"; } >test/loka/lint_baseline.txt.new
   mv test/loka/lint_baseline.txt.new test/loka/lint_baseline.txt
 fi

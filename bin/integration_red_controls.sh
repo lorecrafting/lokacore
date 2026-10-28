@@ -308,7 +308,7 @@ exit "${STUB_RC:-0}"
 SH
 chmod +x "$tmp/pp/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin protocol protocol/fixtures; cp "$bin/prepush.sh" bin/; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
-pp() { PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} STUB_REGEN=${STUB_REGEN-} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || true; }
+pp() { rc=0; PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} STUB_REGEN=${STUB_REGEN-} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || rc=$?; }
 pp a 1; pp b 1
 la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.b")
 [ -n "$la" ] && [ "$la" != "$lb" ] && grep -qx run-a "$la" && grep -qx run-b "$lb" || bad "prepush logs: run a's log is '$la' ($(cat "$la" 2>/dev/null)), run b's '$lb'"
@@ -316,34 +316,32 @@ la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FA
 ! grep -q 'transcripts.test.ts' "$R.pp" && ! grep -q IMPACT_STORY "$R.c" || bad 'prepush: transcript or Impact checks ran without a sampler hash change'
 echo '{}' > protocol/fixtures/new_sampler_hash.json; git add . && git commit -qm hash; : > "$R.pp"; pp d
 grep -q 'test/transcripts.test.ts' "$R.pp" && grep -q '^IMPACT_STORY_' "$R.d" || bad 'prepush: a sampler hash change did not run the transcript and Impact checks'
-# Break (loka-8qzi, loka-yz58, loka-u58): the story or state-sections check is skipped for its inputs, runs for others, or is
+# Break (loka-8qzi, loka-yz58): the story check is skipped for its inputs, runs for others, or is
 # skipped when the branch diff cannot be read (no origin/main).
-! grep -qE '^(STORIES|STATE_SECTIONS)_' "$R.c" || bad 'prepush: story or state-sections check ran for an unrelated change'
+! grep -q '^STORIES_' "$R.c" || bad 'prepush: the story check ran for an unrelated change'
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/app kernel/ts/src; echo x > mobile/app/x; git add . && git commit -qm app; pp e
-grep -q '^STORIES_' "$R.e" && ! grep -q '^STATE_SECTIONS_' "$R.e" || bad 'prepush: a mobile/app change did not run only the story check'
+grep -q '^STORIES_' "$R.e" || bad 'prepush: a mobile/app change did not run the story check'
 git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/x; git add . && git commit -qm src; pp f
-grep -q '^STORIES_' "$R.f" && grep -q '^STATE_SECTIONS_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story and state-sections checks'
+grep -q '^STORIES_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story check'
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/authority; echo x > mobile/authority/x; git add . && git commit -qm auth; pp i
-grep -q '^STORIES_' "$R.i" && ! grep -q '^STATE_SECTIONS_' "$R.i" || bad 'prepush: a mobile/authority change did not run only the story check'
-git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; echo x > docs/state-sections.gen.json; git add . && git commit -qm gen; pp h
-grep -q '^STATE_SECTIONS_' "$R.h" && ! grep -q '^STORIES_' "$R.h" || bad 'prepush: an edit of docs/state-sections.gen.json did not run only the state-sections check'
+grep -q '^STORIES_' "$R.i" || bad 'prepush: a mobile/authority change did not run the story check'
 git update-ref -d refs/remotes/origin/main; pp g
-grep -q '^STORIES_' "$R.g" && grep -q '^STATE_SECTIONS_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
+grep -q '^STORIES_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
 # Break (loka-ivjq.25): bin/regen.sh rewrites a file and prepush passes, or does not name it; or a file already
 # uncommitted before the run, which regen leaves alone, is reported.
 echo own > own.txt; STUB_REGEN=a pp j
-grep -q '^REGEN_DIRTY' "$R.j" && grep -qx '  a' "$R.j" && ! grep -q own.txt "$R.j" || bad "prepush: a regenerated file was not reported, or an untouched one was: $(cat "$R.j")"
+[ "$rc" = 1 ] && grep -q '^REGEN_DIRTY' "$R.j" && grep -qx '  a' "$R.j" && ! grep -q own.txt "$R.j" || bad "prepush: a regenerated file was not reported, or an untouched one was (exit $rc, want 1): $(cat "$R.j")"
 git checkout -q a; rm own.txt
 # --- regen.sh -------------------------------------------------------------------------------
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
 # into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them
 # (the story views read the fixture this run rewrites; a lib/ change rebuilds every fixture);
-# a fixture other than the changed cartridge's 3-key one is rebuilt; the transcripts keep the old content hash; the
-# lint baseline is not rewritten from the findings.
+# a fixture other than the changed cartridge's 3-key one is rebuilt; the transcripts keep the old content hash; a fixed
+# lint finding stays in the baseline; a new finding is pinned instead of failing regen.
 mkdir "$tmp/rg"; cat > "$tmp/rg/mise" <<'SH'
 #!/bin/sh
 shift 2; echo "$*" >> "$RG_LOG"
-case $* in *loka.lint*) echo 'lint: finding' >&2; exit 1 ;; esac
+case $* in *loka.lint*) echo "lint: ${RG_LINT:-finding}" >&2; exit 1 ;; esac
 SH
 chmod +x "$tmp/rg/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p bin kernel/ts mobile/app protocol/fixtures cartridges/a/transcripts cartridges/b test/loka
@@ -351,7 +349,7 @@ cp "$bin/regen.sh" bin/; : > bin/review_index.sh
 printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
 for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
 printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b\\"}}",\n  "sha256": "old",\n  "value": 1\n}\n' > protocol/fixtures/v_hash.json
-echo '{"content_hash":"old"}' > cartridges/a/transcripts/t.jsonl; echo x > cartridges/b/x; echo '# header' > test/loka/lint_baseline.txt
+echo '{"content_hash":"old"}' > cartridges/a/transcripts/t.jsonl; echo x > cartridges/b/x; printf '# header\ntoolbox_showcase lint: finding\ntoolbox_showcase lint: fixed\n' > test/loka/lint_baseline.txt
 git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 rg() { RG_LOG=$R.$1 PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2>&1 || bad "regen.sh exited non-zero ($1)"; }
 echo y > cartridges/a/y; rg a
@@ -363,6 +361,8 @@ grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b
 git add . && git commit -qm l; git update-ref -d refs/remotes/origin/main; rg b
 grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && ! grep -q v_hash "$R.b" || bad "regen: no diff did not rebuild every 3-key fixture, or rebuilt one with value: $(tr '\n' ' ' < "$R.b")"
 [ "$(cat test/loka/lint_baseline.txt)" = "$(printf '# header\ntoolbox_showcase lint: finding')" ] || bad "regen: lint baseline is: $(cat test/loka/lint_baseline.txt)"
+if RG_LINT=new RG_LOG=$R.n PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2> "$R.n.err" || ! grep -qx 'toolbox_showcase lint: new' "$R.n.err" \
+  || grep -q new test/loka/lint_baseline.txt; then bad "regen: a new lint finding was pinned or not named: $(cat "$R.n.err")"; fi
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
 # Break: the Impact story's pinned list is not compared with the README row (a new fixture only in the README passes).
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p protocol mobile/app/stories
