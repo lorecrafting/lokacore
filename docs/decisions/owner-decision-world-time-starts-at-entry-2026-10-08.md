@@ -1,6 +1,6 @@
 # Owner decision: world time starts at first entry — 2026-10-08
 
-Question ([E2 gate audit](../reviews/2026-10-08-e2-gate-fable-audit.md)): `stepElapsed` skips
+Question ([E2 gate audit](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-gate-fable-audit.md)): `stepElapsed` skips
 Step's ancestry gate, so a managed session advances world time while the player is still on the
 ancestry screen (two minutes there is 6000 units at rate 50).
 

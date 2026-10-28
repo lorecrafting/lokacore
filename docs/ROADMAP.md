@@ -93,7 +93,7 @@ and new review carries; their linked records retain the governing details.
 | Next necessary dialogue boundary change | c1-journal: inline continuationId when a typed replacement satisfies rule purity. Older-development Lantern migration is not required under the [preproduction policy](decisions/owner-decision-forward-development-2026-10-05.md); retain saved bytes and exact mismatch refusal. |
 
 Closed C1 carries: bound Continue ([A3 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-a3-green-primary-review.md));
-implicit position/scene fact dependency ([loader review](reviews/2026-10-06-e1-loader-integrated-review.md));
+implicit position/scene fact dependency ([loader review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-06-e1-loader-integrated-review.md));
 spawn provenance ([C3 contract](system/protocol.md#c3-spawned-bundles-and-population-composition));
 due-job generation re-read ([combat round contract](system/protocol.md#encounter-and-round-supplements-m6-a));
 alias identity ([M12-A review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-m12-a-readable-review.md));
@@ -109,7 +109,7 @@ Before E1 certification, inventory remaining sampler and older-release fixtures/
 against current behavior. For each obsolete development pin, identify the current
 regression it still guards, then migrate that proof to the current chapter or record
 why deletion is safe; independently derive changed literal answers. The
-[Round 1 audit](reviews/2026-10-06-current-baseline-round1-review.md) retains the
+[Round 1 audit](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-06-current-baseline-round1-review.md) retains the
 findings and exact audited source. This documentation correction does not migrate
 or delete runtime fixtures and does not close this follow-up. E1 also resolves the
 [known planning-matrix omissions](spec/release-scope.md) before final applicability certification. Preserve owner-save

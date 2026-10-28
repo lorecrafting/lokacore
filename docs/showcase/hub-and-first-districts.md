@@ -398,7 +398,7 @@ badge, tide gate x hidden exit x time window x climb, potion x derived carry, NP
 variants x schedule, deadline x exposure, pick x force x skill growth, schedule cases x sky).
 Combat x loot x levelling x death waits for the combat district.
 
-## Settled questions ([review](../reviews/2026-10-10-showcase-plan-1-review.md))
+## Settled questions ([review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-showcase-plan-1-review.md))
 
 1. The hp pool minimum 1 stands: a fall stops at 1 (row 30) and ticks saturate at the pool
    minimum (row 1); the combat district brief lowers it to 0 when death arrives.

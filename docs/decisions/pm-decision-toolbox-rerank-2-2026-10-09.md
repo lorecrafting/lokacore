@@ -1,7 +1,7 @@
 # PM decision: re-rank 2, immersion rows and foundation primitives — 2026-10-09
 
 (paraphrased) The owner asked for a second mechanics review aimed at a deeply immersive RPG. The PM
-adopted [review 2](../reviews/2026-10-09-mechanics-review-2.md) in full under mechanics autonomy
+adopted [review 2](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-09-mechanics-review-2.md) in full under mechanics autonomy
 (Beads `loka-kgd.15`). It builds on the [first re-rank](owner-decision-toolbox-rerank-2026-10-09.md).
 
 ## Effect

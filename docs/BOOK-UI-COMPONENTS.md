@@ -7,7 +7,7 @@ a claim that every existing page has finished visual polish.
 
 ## Agent rules for Book UI code
 
-For every agent writing `mobile/app/book/` or its stories ([audit](reviews/2026-10-09-ui-architecture-audit.md)); [where each fact lives](#where-each-fact-lives) says where values, looks and behaviour go.
+For every agent writing `mobile/app/book/` or its stories ([audit](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-09-ui-architecture-audit.md)); [where each fact lives](#where-each-fact-lives) says where values, looks and behaviour go.
 
 1. Build from the [catalogue](#component-catalogue); a new component needs a real consumer and its doc comment and index line in the same slice.
 2. A state a component's doc comment lists is a prop on that component, never a sibling the page draws: an unavailable action is `<ActionCard label reason />`, a page's empty state or "save not confirmed" is a `Note`.
