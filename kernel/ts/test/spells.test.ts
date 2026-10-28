@@ -4,7 +4,6 @@
 // grimoire. An unknown word and a barred spell are refused alike.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,9 +12,9 @@ import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level } from '../src/mechanics/resource.ts';
 import { noticeAction } from './notice_action.ts';
+import { cartridgeOf, ctx, reload, verdict } from './harness.ts';
 
 function compiled(dir: string): Uint8Array {
   const scratch = mkdtempSync(join(tmpdir(), 'loka-spells-sampler-'));
@@ -72,38 +71,24 @@ const levelled = (w: World, experience: number): World => ({
   },
 });
 
-/** The sampler's artifact after `change`, as the loader's verdict: 'loaded' or [code, path]. */
-function reload(change: (c: Record<string, any>) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
-function verdict(change: (c: Record<string, any>) => void) {
-  const r = reload(change);
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 
 function fresh(): World {
   n = 0;
-  return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1, 2, 3, 4]);
+  return newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55'), [1, 2, 3, 4]);
 }
 
 // Breaks: cast is offered in a cartridge without spells: the spells sampler minus its spell
 // recipes still offers it.
 test('cast is not offered once the spells sampler loses its spell recipes', () => {
-  const r = reload((c) => {
+  const r = reload(base, (c) => {
     c.recipes = Object.fromEntries(
       Object.entries(c.recipes).filter(([, v]: [string, any]) => v.target.kind !== 'spell'),
     );
   });
   assert.ok(r.ok, JSON.stringify(!r.ok && r.diagnostic));
   const cast = (c: Cartridge) =>
-    gameView(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1])).actions.some(
+    gameView(newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55'), [1])).actions.some(
       (a) => a.action_key === 'cast',
     );
   assert.equal(cast(content), true);
@@ -225,7 +210,7 @@ test('loader: spells and the level_compare leaf need 1.51; spell words are uniqu
     ],
   ];
   for (const [change, diagnostic, path] of rows)
-    assert.deepEqual(verdict(change), [diagnostic, path]);
+    assert.deepEqual(verdict(base, change), [diagnostic, path]);
 });
 
 const words = (w: World, actor = w.character) =>
@@ -349,7 +334,7 @@ test('loader: a spell learned names a bool player fact; spells need 1.98', () =>
     ],
   ];
   for (const [change, diagnostic, path] of rows)
-    assert.deepEqual(verdict(change), [diagnostic, path]);
+    assert.deepEqual(verdict(base, change), [diagnostic, path]);
 });
 
 // Breaks (loka-j64e): a recipe reason is not resolved in the catalog, its 1.100 floor is missing,
@@ -358,20 +343,20 @@ test('loader: a recipe reason resolves and needs 1.100, which is above 1.99', ()
   const ward = (c: Record<string, any>) => c.recipes['spells_sampler@0.0.1:recipe/ward'];
   const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
   assert.equal(
-    verdict(() => {}),
+    verdict(base, () => {}),
     'loaded',
   );
   assert.deepEqual(
-    verdict((c) => (ward(c).reason = 'reason.nope')),
+    verdict(base, (c) => (ward(c).reason = 'reason.nope')),
     ['UNRESOLVED_REFERENCE', `${at}.reason`],
   );
   assert.deepEqual(
-    verdict((c) => (c.manifest.requires.kernel_api.at_least = '1.99')),
+    verdict(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.99')),
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
   const plain = (c: Record<string, any>) => {
     delete ward(c).reason;
     c.manifest.requires.kernel_api.at_least = '1.99';
   };
-  assert.equal(verdict(plain), 'loaded');
+  assert.equal(verdict(base, plain), 'loaded');
 });

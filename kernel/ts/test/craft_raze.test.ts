@@ -13,6 +13,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-raze-'));
@@ -65,7 +66,7 @@ test('the self-built hut razes like a commissioned one', () => {
   const benefit = { kind: 'raze', site: R('room', 'lane'), direction: 'north' };
   c.services[`${P}service/raze_hut`] = { ...plain, benefit };
   c.npcs[`${P}npc/carpenter`].services.push(R('service', 'raze_hut'));
-  let w = ok(newWorld(c, '6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f' as never, [1, 2, 3, 4]), {
+  let w = ok(newWorld(c, ctx('6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f'), [1, 2, 3, 4]), {
     type: 'choose_ancestry',
     ancestry: 'woodfolk',
   });

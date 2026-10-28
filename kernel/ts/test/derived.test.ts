@@ -27,6 +27,7 @@ import {
   wait,
   hpView,
 } from './derived_fixture.ts';
+import { ctx } from './harness.ts';
 
 // Breaks: truncation instead of floor (nimble damage -2), a dropped divisor or pivot, or the
 // definition start read instead of the selected value (strong would match nimble).
@@ -117,7 +118,7 @@ test('constitution 16 raises the hp maximum to 16; the body regenerates to it an
 // selection that moves the derived hp maximum. Not observable through step today: elapsed time is
 // refused before an ancestry is chosen, so the rule is called directly.
 test('choosing hardy settles hp at 10 before the selection raises its maximum', () => {
-  const w = newWorld(content, '1d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx('1d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
   const command = {
     payload: { type: 'choose_ancestry', actor_id: w.character, ancestry: 'hardy' },
   };

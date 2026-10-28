@@ -13,6 +13,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import * as patrol from './patrol_fixture.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-climb-sampler-'));
 let artifact: Uint8Array;
@@ -34,7 +35,7 @@ const P = 'climb_sampler@0.0.1';
 // The player's session over `cartridge`: send a command, read the narration keys, room and HP.
 function session(cartridge: Cartridge) {
   let n = 0;
-  let w: World = newWorld(cartridge, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1f' as never, [1, 2, 3, 4]);
+  let w: World = newWorld(cartridge, ctx('3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1f'), [1, 2, 3, 4]);
   const send = (payload: object) => {
     const r = step(
       w,

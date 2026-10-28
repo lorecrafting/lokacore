@@ -20,6 +20,7 @@ import { offerMaps } from '../src/view/invariants_view.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { dark } from '../src/mechanics/light/shared.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-aimed-spells-'));
 const file = join(scratch, 'artifact.json');
@@ -63,17 +64,8 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const aimed = loaded.cartridge as Cartridge;
 const plain = (loadCartridge(artifact, INSTALLED) as { cartridge: Cartridge }).cartridge;
 
-let n = 0;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-1090-4109-8109-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-1090-4109-8109');
+const { send: play } = stream;
 function ok(r: ReturnType<typeof step>) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
@@ -83,8 +75,8 @@ const code = (r: ReturnType<typeof step>) =>
 const at = (w: World, word: string, key?: string) =>
   play(w, { type: 'cast', word, ...(key && { target_id: w.entityIds[`${P}:${key}`] }) });
 const hall = (c = aimed) => {
-  n = 0;
-  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29'), [1, 2, 3, 4]);
 };
 /** Orb (and glowdust) taken, east into the crypt, lit by aimed lux at the orb. */
 function crypt(c = aimed): World {
@@ -182,7 +174,7 @@ test('the offer resolves to cast {word, target_id}; a second bolt in a fight kil
     world_context_id: w.context,
     payload: (command as { payload: object }).payload,
   };
-  w = ok(step(w, keyed as never, ++n, 'flamma' as never)); // the Book's keyed invocation
+  w = ok(step(w, keyed as never, ++stream.n, 'flamma' as never)); // the Book's keyed invocation
   w = ok(at(w, 'flamma', 'npc/wight'));
   assert.equal(wightHp(w), 0);
 });

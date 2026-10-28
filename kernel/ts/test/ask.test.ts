@@ -4,7 +4,6 @@
 // hostile once asked about smugglers; the miller has no ask.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,9 +14,9 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { knownTopics } from '../src/mechanics/topics/shared.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ask-sampler-'));
 let artifact: Uint8Array;
@@ -40,18 +39,6 @@ const ref = (kind: string, key: string) =>
 const id = (w: World, key: string) => w.entityIds[`${P}npc/${key}`] as EntityId;
 const topics = (w: World) => knownTopics(w, w.character).map((t) => t.topic.key);
 
-// The sampler changed by `change`, loaded again.
-function reload(change: (c: Obj) => void) {
-  const c = structuredClone(content) as unknown as Obj;
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
-
 let n = 0;
 function play(w: World, p: object) {
   n += 1;
@@ -72,7 +59,7 @@ const accepted = (w: World, p: object) => {
 };
 // A fresh game, walked into the square.
 const square = (c: Cartridge = content) =>
-  accepted(newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-00000000000a' as never, [1, 2, 3, 4]), {
+  accepted(newWorld(c, ctx('7e1f0c2a-5d3b-4c8e-9a6f-00000000000a'), [1, 2, 3, 4]), {
     type: 'move',
     direction: 'north',
   });
@@ -166,7 +153,7 @@ test('a topic the actor does not know is refused; the first answer whose when ho
   const s = answer(t, 'smith', 'smugglers');
   assert.deepEqual([s.text, s.events.length], ['smith.smugglers', 1]);
   // A fallback smugglers answer authored after the trust-gated one.
-  const fallback = reload((c) =>
+  const fallback = reload(content, (c) =>
     c.npcs[`${P}npc/smith`].ask.answers.push({
       topic: ref('topic', 'smugglers'),
       text: 'smith.mill',
@@ -187,7 +174,7 @@ test('a topic the actor does not know is refused; the first answer whose when ho
 test('the miller cannot be asked; the guard turns hostile on smugglers; a conversation blocks ask', () => {
   const w = answer(square(), 'smith', 'mill').w;
   assert.equal(refused(w, 'miller', 'mill'), 'invalid_target');
-  const gate = newWorld(content, '7e1f0c2a-5d3b-4c8e-9a6f-00000000000a' as never, [1, 2, 3, 4]);
+  const gate = newWorld(content, ctx('7e1f0c2a-5d3b-4c8e-9a6f-00000000000a'), [1, 2, 3, 4]);
   assert.equal(refused(gate, 'smith', 'mill'), 'not_present');
   const room = {
     type: 'ask',
@@ -207,7 +194,10 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
     available: false,
     reason: { code: 'invalid_state' },
   });
-  const strict = reload((c) => (c.reactions[`${P}reaction/guard_smugglers`].on.answered = true));
+  const strict = reload(
+    content,
+    (c) => (c.reactions[`${P}reaction/guard_smugglers`].on.answered = true),
+  );
   assert.ok(strict.ok);
   const unanswered = answer(
     answer(square(strict.cartridge as Cartridge), 'smith', 'mill').w,
@@ -216,7 +206,7 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   );
   assert.equal(value(unanswered.w, unanswered.w.character, ref('fact', 'wanted')), false);
   // The asked reaction's subject is the asked NPC: trust (a pair fact) set toward the guard.
-  const toward = reload((c) =>
+  const toward = reload(content, (c) =>
     c.reactions[`${P}reaction/guard_smugglers`].apply.push({
       op: 'fact.assign',
       fact: ref('fact', 'trust'),
@@ -243,7 +233,7 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
 test('the loader refuses an unknown answer topic or grant, ask without speech@1, 1.95 and a bad trigger topic', () => {
   const smith = `${P}npc/smith`;
   const refusal = (change: (c: Obj) => void) => {
-    const r = reload(change);
+    const r = reload(content, change);
     assert.ok(!r.ok);
     return [r.diagnostic.code, r.diagnostic.path?.split('.').at(-1)];
   };

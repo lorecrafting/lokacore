@@ -22,6 +22,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-farm-sampler-'));
 let artifact: Uint8Array;
@@ -39,28 +40,14 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const S = 'farm_sampler@0.0.1';
 const fresh = () =>
-  newWorld(loaded.cartridge as Cartridge, '3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c' as never, [1]);
+  newWorld(loaded.cartridge as Cartridge, ctx('3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c'), [1]);
 
-let n = 0;
-const send = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-1081-4081-8081-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-1081-4081-8081');
+const { send, play } = stream;
 const code = (w: World, payload: object) => {
   const d = send(w, payload).decision;
   return d.kind === 'accepted' ? 'accepted' : (d as any).error.code;
 };
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
 const npc = (w: World, k: string) => w.entityIds[`${S}:npc/${k}`]!;
 const room = (w: World, k: string) => w.roomIds[`${S}:room/${k}`]!;

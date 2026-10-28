@@ -4,18 +4,16 @@
 // player's 5 pennies and restores up to 2 edge. Expected numbers are hand-computed.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-durability-sampler-'));
 let artifact: Uint8Array;
@@ -33,42 +31,16 @@ const S = 'durability_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'durability_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function sampler(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return r.cartridge as Cartridge;
 }
 
-let n = 0;
-const id = () => `eeeeeeee-2121-4121-8121-${String(++n).padStart(12, '0')}` as never;
-function send(w: World, payload: object) {
-  const command = { id: id(), world_context_id: w.context, payload };
-  return step(w, { ...command, payload: { actor_id: w.character, ...payload } } as never, n);
-}
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
-function round(w: World) {
-  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
-  const [from, until] = [w.state.clock, w.state.clock + 150];
-  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
-  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('eeeeeeee-2121-4121-8121', 'aaaaaaaa-0000-4000-8000');
+const { send, play } = stream;
+const round = (w: World) => stream.elapsed(w, w.state.clock + 150);
 const e = (w: World, kind: string, key: string) => w.entityIds[`${S}:${kind}/${key}`]!;
 const sword = (w: World) => e(w, 'item', 'sword');
 const dummy = (w: World) => level(w, e(w, 'npc', 'dummy'), resourceRef(w, 'hp'));
@@ -87,16 +59,16 @@ const offer = (w: World) =>
 
 /** As `ancestry`, take and wield `item` and attack the dummy. */
 function armed(content = sampler(), item = 'sword', ancestry = 'smith') {
-  n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never, [2, 1, 2, 1]);
+  stream.n = 0;
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'), [2, 1, 2, 1]);
   w = play(w, { type: 'choose_ancestry', ancestry });
   w = play(w, { type: 'take', item_id: e(w, 'item', item) });
   return play(w, { type: 'wear', item_id: e(w, 'item', item) });
 }
 /** As `ancestry`, carry the sword and the hammer (a use target lies in the body, not a slot). */
 function forging(content: Cartridge, ancestry = 'smith') {
-  n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never, [2, 1, 2, 1]);
+  stream.n = 0;
+  let w = newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'), [2, 1, 2, 1]);
   w = play(w, { type: 'choose_ancestry', ancestry });
   w = play(w, { type: 'take', item_id: e(w, 'item', 'sword') });
   return play(w, { type: 'take', item_id: e(w, 'item', 'hammer') });
@@ -203,7 +175,7 @@ test('only combat and the smith write the edge', () => {
       },
     };
   });
-  let x = newWorld(reaction, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21' as never, [2, 1, 2, 1]);
+  let x = newWorld(reaction, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e21'), [2, 1, 2, 1]);
   x = play(x, { type: 'choose_ancestry', ancestry: 'smith' });
   assert.deepEqual(send(x, { type: 'take', item_id: sword(x) }).decision, {
     kind: 'fault',
@@ -239,7 +211,7 @@ test('the forge sets a fine or crude band by strength, once', () => {
 // weapon uses, or a repair service without its refusal text.
 test('the loader keeps durability to API 1.69, a bounded entity fact and its repair texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const MEND = `.cartridge.services["${S}:service/mend"]`;

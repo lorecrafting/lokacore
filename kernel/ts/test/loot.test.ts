@@ -12,6 +12,7 @@ import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/in
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-loot-sampler-'));
 let artifact: Uint8Array;
@@ -40,7 +41,7 @@ function accepted(r: ReturnType<typeof step>) {
  * command ids restart, so a second call replays the same commands. */
 function killRat(seed: number[]) {
   n = 0;
-  let w: World = newWorld(content, '2d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, seed);
+  let w: World = newWorld(content, ctx('2d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), seed);
   const play = (payload: object) =>
     accepted(
       step(

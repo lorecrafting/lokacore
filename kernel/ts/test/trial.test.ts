@@ -24,6 +24,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import type { DefinitionRef } from '../src/contracts.gen.ts';
 import { noticeAction } from './notice_action.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-trial-'));
 let artifact: Uint8Array;
@@ -62,19 +63,10 @@ const reload = (change: (c: any) => void) => {
 };
 const guardOf = (c: any) => c.npcs[`${S}npc/guard`];
 
-let n = 0;
+const stream = commands('cccccccc-4444-4333-8444');
+const { send: play } = stream;
 // A decision's line keys; a move's own line (movement.moved) comes first.
 const keys = (lines?: readonly { key: string }[]) => lines?.map((l) => l.key);
-const play = (w: World, p: object) =>
-  step(
-    w,
-    {
-      id: `cccccccc-4444-4333-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p },
-    } as never,
-    n,
-  );
 const ok = (r: ReturnType<typeof step>) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r;
@@ -91,8 +83,8 @@ const chat = (w: World, who: string, choice: string) => {
   return left ? act(chosen, { type: 'close_choice', continuation_id: left[0] }) : chosen;
 };
 const fresh = (c = content) => {
-  n = 0;
-  return newWorld(c, '5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  return newWorld(c, ctx('5d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 };
 const north = (w: World) => {
   const r = ok(play(w, { type: 'move', direction: 'north' }));

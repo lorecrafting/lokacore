@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")/.."
 case "${1-}" in '') core_only=0 ;; --core-only) core_only=1 ;; *) echo "unknown option: $1" >&2; exit 2 ;; esac
 # Mobile plants are .tsx and the kernel plant is .ts, so both file types are proven covered.
-planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/foundation/red_control.ts"
+planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/foundation/red_control.ts kernel/ts/test/red_control.test.ts"
 [ "$core_only" -eq 1 ] || planted="$planted mobile/app/.storybook/picker/red_control.tsx mobile/packages/ui/red_control.tsx mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx mobile/authority/local-story/red_control.ts mobile/app/book/red_control.tsx"
 mkdir -p lib/loka/core
 cp kernel/ts/src/runtime/world.ts kernel/ts/src/runtime/world.ts.red
@@ -29,6 +29,8 @@ printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.sta
 echo 'export const z = world.character;' >> kernel/ts/src/mechanics/movement/rule.ts
 # Foundation must not import the runtime, even as types.
 printf "import type { World } from '../runtime/decision.ts';\n" > kernel/ts/src/foundation/red_control.ts
+# A kernel test cast outside test/harness.ts, in a file with no baseline (bin/check_as_never.sh).
+echo 'export const c = x as never;' > kernel/ts/test/red_control.test.ts
 # Review F2: an inline rule registered in RULES.
 sed -i.bak 's/  movement: movement.decide,/  movement: (w) => w,/' kernel/ts/src/runtime/world.ts && rm kernel/ts/src/runtime/world.ts.bak
 # The shared and realm plants are a template-literal require and a require.resolve only, so their
@@ -57,7 +59,7 @@ printf "import { color } from '../../book/tokens.ts';\nexport const raw = { bord
 echo 'layer.style.cssText = `background:#7b2d20`;' >> mobile/app/.storybook/picker/overlay.ts
 fi
 if [ "$core_only" -eq 1 ]; then
-  out=$(ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src 2>&1)
+  out=$(ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src kernel/ts/test 2>&1)
 else
   out=$(ast-grep scan --error . mobile/app/.storybook 2>&1) # hidden directories only when named
 fi
@@ -67,4 +69,5 @@ for rule in $(ls lint/rules lint/tests | sed -nE 's/(-test)?\.yml$//p' | sort -u
   [ "$core_only" -eq 0 ] || { case "$rule" in mobile-*) continue ;; esac; }
   if printf '%s' "$out" | grep -q "error\[$rule\]"; then echo "ok   $rule"; else echo "FAIL $rule not reported"; status=1; fi
 done
+if sh bin/check_as_never.sh >/dev/null; then echo "FAIL check_as_never passed the planted cast"; status=1; else echo "ok   check_as_never"; fi
 exit $status

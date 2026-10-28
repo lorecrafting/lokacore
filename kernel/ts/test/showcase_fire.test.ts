@@ -23,6 +23,7 @@ import {
   take,
   wait,
 } from './showcase_fixture.ts';
+import { ctx } from './harness.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-0000000f1e22';
 const C = { cartridge_id: 'toolbox_showcase', cartridge_version: '0.0.1' };
@@ -137,7 +138,7 @@ test('budget: 64 burnables light at once, 65 fault budget_exceeded and nothing b
     return { ...content, items } as Cartridge;
   };
   const drop = (extra: number) => {
-    let x = newWorld(smithy(extra), WORLD as never, [1, 2, 3, 4]);
+    let x = newWorld(smithy(extra), ctx(WORLD), [1, 2, 3, 4]);
     x = go(go(go(x, 'north').world, 'east').world, 'south').world;
     x = take(x, 'smithy_torch');
     return step(
@@ -251,7 +252,7 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
 function light(edit: (c: any) => void, carry: string[] = []) {
   const c = structuredClone(content) as any;
   edit(c);
-  let x = newWorld(c as Cartridge, WORLD as never, [1, 2, 3, 4]);
+  let x = newWorld(c as Cartridge, ctx(WORLD), [1, 2, 3, 4]);
   x = go(go(go(x, 'north').world, 'east').world, 'south').world;
   for (const item of [...carry, 'smithy_torch']) x = take(x, item);
   return play(x, { type: 'drop', item_id: id(x, 'item', 'smithy_torch') }).world;

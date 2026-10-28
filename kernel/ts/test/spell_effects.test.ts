@@ -16,6 +16,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { dark } from '../src/mechanics/light/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-spell-effects-'));
 const file = join(scratch, 'artifact.json');
@@ -80,7 +81,7 @@ function cartridge(change: (c: Record<string, any>) => void) {
 /** A new world with the orb taken in the hall (when `orb`), then in the dark crypt. */
 function crypt(orb = true, c = content): World {
   n = 0;
-  let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never, [1, 2, 3, 4]);
+  let w = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29'), [1, 2, 3, 4]);
   if (orb) w = ok(play(w, { type: 'take', item_id: w.entityIds[`${P}:item/orb`] }));
   return ok(play(w, { type: 'move', direction: 'east' }));
 }

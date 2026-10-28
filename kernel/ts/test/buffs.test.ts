@@ -14,6 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { npcValue, value } from '../src/mechanics/attributes/shared.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-buffs-'));
 let artifact: Uint8Array;
@@ -73,8 +74,7 @@ function wait(w: World, seconds: number): World {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-const fresh = () =>
-  newWorld(content, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a'), [1, 2, 3, 4]);
 
 // Breaks (row 18): the potion reaction misses the drink (kind filter, subject), the second dose
 // stacks (16) or leaves the first end in place (10 at +3601), or the might outlives its refresh.

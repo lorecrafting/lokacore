@@ -3,7 +3,6 @@
 // for 2. A shout of "begone" applies `afraid` (a fear status) to each goblin that hears it.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,10 +11,10 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
+import { cartridgeOf, ctx, verdict } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fear-sampler-'));
 let artifact: Uint8Array;
@@ -72,7 +71,7 @@ const slay = (w: World) => round(play(w, { type: 'attack', target_id: npc(w, 'ch
 /** A new game, moved into the den, and its two goblins in EntityId order. */
 function den(c: Cartridge) {
   n = 0;
-  const w = play(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]), {
+  const w = play(newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]), {
     type: 'move',
     direction: 'east',
   });
@@ -218,18 +217,7 @@ test('co_present with no room frightens no one', () => {
   assert.deepEqual(r && r.kind === 'accepted' ? r.delta.ops : r, []);
 });
 
-/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
+const base = cartridgeOf(artifact);
 const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
 const afraid = (c: any) => c.statuses['fear_sampler@0.0.1:status/afraid'];
 const leader = '.cartridge.reactions["fear_sampler@0.0.1:reaction/leader_fell"]';
@@ -241,14 +229,14 @@ const fell = (c: any) => c.reactions['fear_sampler@0.0.1:reaction/leader_fell'].
 test('fear and co_present need API 1.50; co_present names no holder', () => {
   const at149 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.49');
   assert.deepEqual(
-    reload((c) => {
+    verdict(base, (c) => {
       at149(c);
       delete c.reactions['fear_sampler@0.0.1:reaction/leader_fell'];
     }),
     api,
   );
   assert.deepEqual(
-    reload((c) => {
+    verdict(base, (c) => {
       at149(c);
       delete afraid(c).fear;
       afraid(c).per_tick = -1;
@@ -260,7 +248,7 @@ test('fear and co_present need API 1.50; co_present names no holder', () => {
     ['item', 'ear'],
   ])
     assert.deepEqual(
-      reload((c) => (fell(c)[field] = { ...fell(c).status, kind: field, key })),
+      verdict(base, (c) => (fell(c)[field] = { ...fell(c).status, kind: field, key })),
       ['SCHEMA_VIOLATION', `${leader}.apply[0].${field}`],
     );
 });

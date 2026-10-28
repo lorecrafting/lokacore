@@ -13,7 +13,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { gameView, INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { LIMITS, type DefinitionRef, type EntityId } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
@@ -21,6 +21,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-senses-sampler-'));
 let artifact: Uint8Array;
@@ -42,23 +43,10 @@ const ref = (kind: string, key: string) =>
 const id = (w: World, kind: string, key: string) =>
   w.entityIds[`senses_sampler@0.0.1:${kind}/${key}`] as EntityId;
 
-let n = 0;
+const stream = commands('dddddddd-6666-4333-8444');
+const { play } = stream;
 const fresh = (c: Cartridge = content) =>
-  newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-000000000006' as never, [1, 2, 3, 4]);
-function play(w: World, p: object): World {
-  n += 1;
-  const r = step(
-    w,
-    {
-      id: `dddddddd-6666-4333-8444-${String(n).padStart(12, '0')}` as never,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p } as never,
-    },
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+  newWorld(c, ctx('7e1f0c2a-5d3b-4c8e-9a6f-000000000006'), [1, 2, 3, 4]);
 
 // Breaks: range ignored (the forge heat shows next door), the last exit taken as the direction
 // (stew "east" instead of "north"), unsorted cues, or a cue past its range listed (storeroom).

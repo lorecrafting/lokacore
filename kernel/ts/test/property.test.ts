@@ -6,18 +6,17 @@
 // from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { skillSpec, usesSpec } from '../src/content/cartridge_skills.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-property-sampler-'));
 let artifact: Uint8Array;
@@ -35,38 +34,20 @@ const S = 'property_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'property_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function fresh(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
-  n = 0;
-  return newWorld(r.cartridge as Cartridge, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e24' as never, [1]);
+  stream.n = 0;
+  return newWorld(r.cartridge as Cartridge, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e24'), [1]);
 }
 
-let n = 0;
-function send(w: World, payload: object) {
-  const id = `eeeeeeee-2424-4024-8024-${String(++n).padStart(12, '0')}`;
-  const command = { id, world_context_id: w.context, payload };
-  return step(w, { ...command, payload: { actor_id: w.character, ...payload } } as never, n);
-}
+const stream = commands('eeeeeeee-2424-4024-8024');
+const { send, play } = stream;
 const code = (w: World, payload: object) => {
   const d = send(w, payload).decision;
   return d.kind === 'accepted' ? 'accepted' : (d as any).error.code;
 };
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
 const npc = (w: World, k: string) => w.entityIds[`${S}:npc/${k}`]!;
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
 const room = (w: World, k: string) => w.roomIds[`${S}:room/${k}`]!;
@@ -213,7 +194,7 @@ test('h2. a purse of 11 deposits 10 and can still withdraw it, ending at 9', () 
 // authored dialogue write on the account, or a bank service without service.no_funds.
 test('g. the loader keeps the bank to API 1.83, a bounded account and one vault', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = (k: string) => `.cartridge.services["${S}:service/${k}"]`;

@@ -16,6 +16,7 @@ import { decode, encode } from '../src/foundation/canonical.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { scopeSites } from '../src/content/cartridge_scoped_facts.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-scoped-facts-'));
 let artifact: Uint8Array;
@@ -72,7 +73,7 @@ const at = (w: World, who: string, key: string, equals: number) =>
 // Breaks: a pair fact ignores its subject (one shared row, so the smith's count reaches the miller
 // or the stranger), or a read at the target falls back to the actor's scope.
 test('two NPCs remember the player separately; a stranger does not', () => {
-  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  let w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   w = chat(chat(chat(w, 'smith', 'greet'), 'smith', 'greet'), 'smith', 'help');
   w = chat(w, 'miller', 'greet');
   for (const [who, met, trust] of [
@@ -105,7 +106,7 @@ test('an apple given to the smith marks her fed (or the named miller), at the in
     [content, 'smith', 'miller'],
     [named, 'miller', 'smith'],
   ] as const) {
-    let w = newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+    let w = newWorld(c, ctx(CONTEXT), [1, 2, 3, 4]);
     const apple = w.entityIds[`${S}:item/apple`];
     w = act(w, { type: 'take', item_id: apple });
     w = act(w, { type: 'give', item_id: apple, recipient_id: npc(w, 'smith') });
@@ -224,6 +225,6 @@ test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () =
 // Breaks (policy.ts compared): a subject "target" read with no target faults (evaluator_error)
 // instead of reading false, in any policy evaluated without one.
 test('fact_compare at subject target with no target reads false', () => {
-  const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
   assert.equal(compare(w, 'trust', 0, { subject: 'target' }), false);
 });

@@ -9,8 +9,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { INSTALLED, gameView, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { commands, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fishing-sampler-'));
@@ -29,17 +30,8 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-5555-4555-8555-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-5555-4555-8555');
+const { send: play } = stream;
 const ok = (w: World, payload: object) => {
   const r = play(w, payload);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
@@ -62,7 +54,7 @@ const PASS = [2, 2, 2, 2];
 const FAIL = [1, 1, 1, 1];
 /** A fresh world with the rod in hand, waited to `clock`. */
 function holding(clock: number): World {
-  const w = newWorld(content, CONTEXT as never, PASS as never);
+  const w = newWorld(content, ctx(CONTEXT), PASS as never);
   const held = ok(w, { type: 'take', item_id: id(w, 'rod') });
   return clock > 0 ? ok(held, { type: 'wait', until: clock }) : held;
 }
@@ -163,7 +155,7 @@ test('the bank holds one trout at a time and the larder bounds the catch', () =>
 // (a held wooden item that is no rod fishes), or the held rod stops offering it.
 test('the cast card is listed with the rod in hand and unlisted without it', () => {
   const offers = (w: World) => JSON.stringify(gameView(w)).includes('"action_key":"fish"');
-  assert.equal(offers(newWorld(content, CONTEXT as never, PASS as never)), false);
+  assert.equal(offers(newWorld(content, ctx(CONTEXT), PASS as never)), false);
   const w = holding(0);
   const rod = id(w, 'rod');
   const stick = { ...w.entities[rod]!, tags: ['wooden'] } as never;

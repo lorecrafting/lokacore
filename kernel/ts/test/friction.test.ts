@@ -16,6 +16,7 @@ import type { Policy } from '../play/flows.ts';
 import { friction, tally } from '../play/friction.ts';
 import { INSTALLED, loadCartridge, newWorld, step, type Cartridge } from '../src/index.ts';
 import type { Payload } from './sim.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-friction-'));
 after(() => rmSync(scratch, { recursive: true, force: true }));
@@ -95,7 +96,7 @@ test('giving the apple is one new fact per seed, four steps from the start', () 
 // Breaks: a held fact's new value not counted as a new fact (only new keys compared). A planted
 // step from trust 1 to trust 2 at step 5 of the run: one new fact, 5 steps from the start.
 test('a held fact that changes value is a new fact', () => {
-  const w = newWorld(content, '1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
+  const w = newWorld(content, ctx('1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a'), [1, 2, 3, 4]);
   const held = (trust: number) => ({ ...w, state: { ...w.state, facts: { trust } } }) as never;
   const t = tally();
   t.observe(
@@ -117,7 +118,7 @@ test('a held fact that changes value is a new fact', () => {
 // west in gate); a refusal invalid_state (a code the view shows on an exit) of that move is a
 // disagreement.
 test('a refusal of a move the view offers is drift, in each room', () => {
-  const square = newWorld(content, '1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
+  const square = newWorld(content, ctx('1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a'), [1, 2, 3, 4]);
   const move = (w: typeof square, direction: string, n: number) => ({
     id: `dddddddd-5555-4333-8444-00000000000${n}`,
     world_context_id: w.context,

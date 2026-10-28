@@ -4,18 +4,16 @@
 // are hand-counted from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-escrow-sampler-'));
 let artifact: Uint8Array;
@@ -33,36 +31,18 @@ const S = 'escrow_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'escrow_sampler', cartridge_version: '0.0.1', kind, key }) as never;
 
-function reload(edit: (c: any) => void = () => {}) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
+const base = cartridgeOf(artifact);
 function sampler(edit?: (c: any) => void) {
-  const r = reload(edit);
+  const r = reload(base, edit);
   assert.ok(r.ok, JSON.stringify(r));
   return r.cartridge as Cartridge;
 }
 
-let n = 0;
-function send(w: World, payload: object) {
-  const id = `eeeeeeee-2020-4020-8020-${String(++n).padStart(12, '0')}`;
-  const command = { id, world_context_id: w.context, payload };
-  return step(w, { ...command, payload: { actor_id: w.character, ...payload } } as never, n);
-}
-function play(w: World, payload: object) {
-  const r = send(w, payload);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+const stream = commands('eeeeeeee-2020-4020-8020', 'aaaaaaaa-2020-4020-8020');
+const { send, play } = stream;
 function fresh(content = sampler()) {
-  n = 0;
-  return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e20' as never, [1, 2, 3, 4]);
+  stream.n = 0;
+  return newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e20'), [1, 2, 3, 4]);
 }
 const ore = (w: World, k: string) => w.entityIds[`${S}:item/ore_${k}`]!;
 const smith = (w: World) => w.entityIds[`${S}:npc/smith`]!;
@@ -165,7 +145,7 @@ test('a protected input is refused as Give would refuse it', () => {
 // offer as an input, or a repeated input, or an escrow without its refusal text.
 test('the loader keeps escrow to API 1.79, item inputs, a room custody and its texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = `.cartridge.services["${S}:service/commission"]`;
@@ -223,15 +203,7 @@ const offers = (w: World) =>
   gameView(w)
     .entities.find((x) => x.id === smith(w))!
     .services!.map((s) => s.action);
-const elapse = (w: World, until: number) => {
-  const run_id = `aaaaaaaa-2020-4020-8020-${String(++n).padStart(12, '0')}`;
-  const from = w.state.clock;
-  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
-  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-};
+const elapse = (w: World, until: number) => stream.elapsed(w, until);
 const ordering = (content = sampler()) => {
   const w = take(fresh(content), 'a', 'b');
   return used(w, 'commission', 3);
@@ -321,7 +293,7 @@ test('a new order after a cancel waits for its own job', () => {
 // fact (it would open an order with no ore and no job), or a claim or cancel without its texts.
 test('the loader keeps claim and cancel to API 1.80, a timed commission and its texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(edit);
+    const r = reload(base, edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = (k: string) => `.cartridge.services["${S}:service/${k}"]`;

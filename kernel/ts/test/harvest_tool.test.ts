@@ -16,6 +16,7 @@ import { key } from '../src/foundation/compose.ts';
 import { acquisition } from '../src/mechanics/skills.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-harvest-sampler-'));
 let artifact: Uint8Array;
@@ -33,17 +34,8 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
-let n = 0;
-const play = (w: World, payload: object) =>
-  step(
-    w,
-    {
-      id: `eeeeeeee-4444-4444-8444-${String(++n).padStart(12, '0')}`,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
-    } as never,
-    n,
-  );
+const stream = commands('eeeeeeee-4444-4444-8444');
+const { send: play } = stream;
 const C = { cartridge_id: 'harvest_sampler', cartridge_version: '0.0.1' };
 const item = (w: World, key: string) => w.entityIds[`harvest_sampler@0.0.1:item/${key}`]!;
 const seam = (w: World) => Object.keys(w.details)[0];
@@ -63,8 +55,7 @@ const offer = (w: World, action = 'harvest') => {
   return found;
 };
 const ore = (w: World) => ['ore_01', 'ore_02'].map((k) => w.state.containers[item(w, k)]);
-const fresh = () =>
-  newWorld(content, '2c6e1a9b-7d3f-4e5a-8b1c-0f2e4d6a8c1b' as never, [1, 2, 3, 4]);
+const fresh = () => newWorld(content, ctx('2c6e1a9b-7d3f-4e5a-8b1c-0f2e4d6a8c1b'), [1, 2, 3, 4]);
 const held = () => take(fresh(), 'pickaxe');
 const wear = (w: World, k: string) => play(w, { type: 'wear', item_id: item(w, k) }).world;
 const sacked = () => {

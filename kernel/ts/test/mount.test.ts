@@ -2,15 +2,14 @@
 // yard [road] north to road [road], east to fen [marsh]; yard south to ford [road, marsh]. A move
 // costs 2 mv, road 50%, marsh 300%; mv starts at 10. The horse (yard) rides road at 0%.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld, step } from '../src/index.ts';
 import { type Cartridge, type World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
+import { commands, ctx, reload } from './harness.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -21,38 +20,23 @@ const kat = JSON.parse(
 const P = 'mount_sampler@0.0.1';
 const HORSE = `${P}:npc/horse`;
 
-/** The pinned artifact, edited and re-hashed, loaded. */
-function load(edit: (c: any) => void = () => {}) {
-  const c = structuredClone(kat.value);
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-}
 const refused = (edit: (c: any) => void) => {
-  const r = load(edit);
+  const r = reload(kat.value, edit);
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
-let n = 0;
+const stream = commands('eeeeeeee-4343-4b4b-8b4b');
+const { send, play } = stream;
 /** A new game in the yard on the artifact edited by `edit`. */
 function yard(edit?: (c: any) => void) {
-  const r = load(edit);
+  const r = reload(kat.value, edit);
   assert.ok(r.ok, JSON.stringify(r));
-  n = 0;
+  stream.n = 0;
   return newWorld(
     r.cartridge as Cartridge,
-    '4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c43' as never,
+    ctx('4b3a2c1d-5e6f-4a1b-8c2d-3e4f5a6b7c43'),
     [1, 2, 3, 4],
   );
-}
-function send(w: World, p: object) {
-  const id = `eeeeeeee-4343-4b4b-8b4b-${String(++n).padStart(12, '0')}`;
-  const payload = { actor_id: w.character, ...p };
-  return step(w, { id, world_context_id: w.context, payload } as never, n);
 }
 const code = (r: ReturnType<typeof step>) =>
   r.decision.kind === 'rejected' ? r.decision.error.code : r.decision.kind;
