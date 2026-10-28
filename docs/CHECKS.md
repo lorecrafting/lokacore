@@ -3,7 +3,7 @@
 The active checks run in hosted CI on every push to a branch, nightly on `main` and by hand; a green
 run on the exact head is the merge gate with review ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
-`bin/check_all.sh` mirrors the hosted line for an occasional full local run. `bin/prepush.sh` runs
+`bin/check_all.sh` mirrors the hosted line for an occasional full local run (PM only: `LOKA_PM=1` prefix). `bin/prepush.sh` runs
 the static checks of hosted CI, in about 50 s (more when it rebuilds the stories) before every push and after every
 `bin/pm_merge.sh` merge. It first runs `bin/regen.sh`, the one command that rewrites every generated file from its inputs (the `contracts.exs` and `features.exs` outputs, `docs/state-sections.gen.json`, the review index, and, only when the diff against `origin/main` touches their inputs, the story views and saves, a changed cartridge's (every one after a `lib/` change) `{description, canonical, sha256}` hash fixture with its transcripts' content hash, and `test/loka/lint_baseline.txt`, which only shrinks: a new finding fails), and fails `REGEN_DIRTY` naming each file it rewrote: after editing a generator's input, run `bin/regen.sh` and commit what it rewrites. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF). The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
@@ -135,12 +135,15 @@ their rules and red controls remain available for resumption.
   count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not; a red, running or missing nightly run is reported; the nightly sim median of five runs skips a failed leg).
   It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
-  listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`
-  or `git commit -n` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix, and a bare `br create`; `bin/send_guard.py`
+  listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`,
+  `git commit -n`, a force or `--mirror` push and `git rebase` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`,
+  `kill` fed by `pgrep`/`pidof` in one pipe or `$( )`, `gh run watch`, `gh pr checks --watch`, `gh workflow run` (past `-R`), the full `npm test`, `test:nosim`, `test:sim`, `test:e2e`, `storybook:smoke`, `bin/check_all.sh`
+  (past `nice`, `env`, `time`, `timeout`, `xargs`) and a `git worktree add` path that resolves outside `worktrees.noindex` or inside a checkout
+  without the PM's `LOKA_PM=1` prefix; and a bare `br create`; `bin/send_guard.py`
   (SendMessage) refuses to resume a subagent whose newest compaction was a hook one (under 1 s).
   `bin/integration_red_controls.sh` feeds both their refused and allowed inputs.
 - CI (`.github/workflows/`): `ci.yml` and `book-e2e.yml` run on every push to a branch other than
-  `main`, nightly on `main` (10:00 UTC) and by `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`),
+  `main`, nightly on `main` (10:00 UTC) and by `workflow_dispatch` (`LOKA_PM=1 gh workflow run <wf> --ref <branch>`, PM only),
   a superseded head's run cancelled; no pull request trigger ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
   `graph-diff.yml` alone runs on a pull request (never a push): it posts or updates one PR comment
   listing the System graph's node and edge changes against the base (`bin/graph_diff.py`, its

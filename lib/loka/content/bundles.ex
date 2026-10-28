@@ -13,20 +13,27 @@ defmodule Loka.Content.Bundles do
   @typedoc "A refusal: code, `{rel, steps}` and diagnostic data."
   @type fault :: {String.t(), {String.t(), [String.t()]}, map()}
 
-  @doc "Every bundle entry replaced by its definitions; a bad member is refused at its path."
+  @doc """
+  Every bundle entry replaced by its definitions; a bad member is refused at its path, and a
+  refused bundle stays as `{rel, :bundle, :invalid}`.
+  """
   @spec split([entry()], %{String.t() => atom()}) :: {[entry()], [fault()]}
   def split(files, dirs) do
     {files, faults} = files |> Enum.map(&open(&1, dirs)) |> Enum.unzip()
     {List.flatten(files), List.flatten(faults)}
   end
 
-  # A bundle that failed to decode adds nothing; its INVALID_JSON or DUPLICATE_KEY stands.
-  defp open({_, :bundle, :invalid}, _), do: {[], []}
+  # The compiler holds back unresolved references while a refused bundle stays. One that failed to
+  # decode adds nothing else; its INVALID_JSON or DUPLICATE_KEY stands.
+  defp open({_, :bundle, :invalid} = file, _), do: {[file], []}
 
-  defp open({rel, :bundle, %{} = bundle}, dirs),
-    do: bundle |> Enum.map(&member(rel, &1, dirs)) |> Enum.unzip()
+  defp open({rel, :bundle, %{} = bundle}, dirs) do
+    {files, faults} = bundle |> Enum.map(&member(rel, &1, dirs)) |> Enum.unzip()
+    if List.flatten(faults) == [], do: {files, []}, else: {[refused(rel) | files], faults}
+  end
 
-  defp open({rel, :bundle, _}, _), do: {[], [{"SCHEMA_VIOLATION", {rel, []}, invalid_type()}]}
+  defp open({rel, :bundle, _}, _),
+    do: {[refused(rel)], [{"SCHEMA_VIOLATION", {rel, []}, invalid_type()}]}
 
   defp open(file, _), do: {[file], []}
 
@@ -38,6 +45,7 @@ defmodule Loka.Content.Bundles do
     end
   end
 
+  defp refused(rel), do: {rel, :bundle, :invalid}
   defp invalid_type, do: %{"error" => "invalid_type"}
 
   @doc "The first definition of each kind and key; every site of a repeat is DUPLICATE_DEFINITION."

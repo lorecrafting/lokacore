@@ -32,6 +32,8 @@ defmodule Loka.Content.Lint do
   end
 
   defp lint_rel(_, {_, key, [dir, _]}), do: dir <> "/" <> key <> ".json"
+  # A copy of a bundled behaviour's rule sits at [behaviours, name, reactions, rule].
+  defp lint_rel(_, {:reaction, key, [_, _, _, _]}), do: "reactions/" <> key <> ".json"
   defp lint_rel(rel, _), do: rel
 
   @doc "The findings for decoded source files, keyed by their path relative to the cartridge."
@@ -49,8 +51,8 @@ defmodule Loka.Content.Lint do
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
   end
 
-  defp file(["recipes", _], rel, %{"policy" => %{"root" => root}} = r)
-       when root != @always and not is_map_key(r, "reason"),
+  defp file(["actions", _], rel, %{"policy" => %{"root" => root}} = r)
+       when root != @always and not is_map_key(r, "reason") and not is_map_key(r, "command"),
        do: ["#{rel}: policy refuses with no reason"]
 
   defp file(["reactions", _], rel, %{"apply" => steps} = r) do
@@ -133,7 +135,7 @@ defmodule Loka.Content.Lint do
 
   defp refs(["replenish", _], r), do: tag(:source, r["items"])
 
-  defp refs(["recipes", _], %{"craft" => c}),
+  defp refs(["actions", _], %{"craft" => c}),
     do: tag(:source, c["yield"]["items"]) ++ tag(:sink, c["consume"]["items"])
 
   defp refs(["npcs", _], n) do
@@ -192,7 +194,7 @@ defmodule Loka.Content.Lint do
 
   defp filled(_, _), do: []
 
-  defp wants(["recipes", name], %{"target" => %{"tool" => %{"liquid" => l}}}),
+  defp wants(["actions", name], %{"target" => %{"tool" => %{"liquid" => l}}}),
     do: [{{:liquid, l}, Path.rootname(name)}]
 
   defp wants(["services", _], %{"benefit" => %{"kind" => "drink", "liquid" => l, "vessel" => v}}),

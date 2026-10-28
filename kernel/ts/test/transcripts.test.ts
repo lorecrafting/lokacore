@@ -3,7 +3,8 @@
 // byte for byte on this kernel against its cartridge's known-answer artifact
 // (protocol/fixtures/*hash.json below, matched by manifest id) and exercise a command its
 // capability owns. Breaks: a kernel change that alters a recorded decision, or a transcript
-// filed under a capability it never uses.
+// filed under a capability it never uses. A walk_<district>.jsonl tours a district for
+// coverage.ts and only has to replay.
 import assert from 'node:assert/strict';
 import { globSync, readFileSync } from 'node:fs';
 import { basename } from 'node:path';
@@ -51,6 +52,7 @@ test('every example transcript replays and exercises its capability', () => {
       header(r) + entries.map((e) => line(decideReplay(r, e.data.command).trace)).join('');
     assert.equal(out, bytes, `${rel}: replay differs`);
     const capability = basename(file, '.jsonl');
+    if (cartridge === 'toolbox_showcase' && capability.startsWith('walk_')) continue;
     const owners = readFileSync(ROOT + rel, 'utf8')
       .split('\n')
       .filter(Boolean)

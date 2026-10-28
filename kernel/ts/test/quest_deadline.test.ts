@@ -1,6 +1,6 @@
 // Toolbox row W24 on the compiled quest_sampler (one real minute is 3000 logical units): find_key
 // fails `late` forty minutes after acceptance; reactions/late.json lowers keeper_trust to 0 and
-// reactions/word_left.json resolves the quest when recipes/leave_word.json assigns word_left.
+// reactions/word_left.json resolves the quest when actions/leave_word.json assigns word_left.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';

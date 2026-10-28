@@ -10,7 +10,7 @@
         ["rooms/mine.json", ["details", "seam", "harvest", "tool"], null],
         ["rooms/mine.json", ["details", "seam", "harvest", "careful"], null],
         ["actions/mine_carefully.json", [], null],
-        ["recipes/whittle.json", [], null],
+        ["actions/whittle.json", [], null],
         ["skills/mining.json", [], null],
         ["cartridge.json", ["requires", "capabilities", "skills"], null],
         ["cartridge.json", ["requires", "capabilities", "equipment"], null],
@@ -89,7 +89,7 @@
         ["text.json", ["npc.warden.short"], "the warden"],
         ["text.json", ["npc.warden.room"], "The warden is here."],
         ["text.json", ["npc.warden.description"], "A tired warden."],
-        ["recipes/knock.json", [], null]
+        ["actions/knock.json", [], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -107,7 +107,7 @@
       "feature": "the knowledge capability",
       "edits": [
         ["cartridge.json", ["requires", "capabilities", "knowledge"], 1],
-        ["recipes/knock.json", [], null]
+        ["actions/knock.json", [], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -463,10 +463,10 @@
         ["actions/raze_hut.json", [], null],
         ["services/raise_hut_plain.json", [], null],
         ["services/raze_hut.json", [], null],
-        ["recipes/chop.json", [], null],
-        ["recipes/saw.json", [], null],
-        ["recipes/carve_spoon.json", [], null],
-        ["recipes/raise_timbered_hut.json", [], null],
+        ["actions/chop.json", [], null],
+        ["actions/saw.json", [], null],
+        ["actions/carve_spoon.json", [], null],
+        ["actions/raise_timbered_hut.json", [], null],
         ["reactions/cot_rest.json", [], null],
         ["actions/barter.json", [], null],
         ["actions/buy_pen.json", [], null],
@@ -541,13 +541,13 @@
         ["reactions/water_plot.json", [], null],
         ["reactions/wither_croft.json", [], null],
         ["reactions/wither_plot.json", [], null],
-        ["recipes/cook_feast.json", [], null],
-        ["recipes/cook_stew.json", [], null],
-        ["recipes/cook_stew_croft.json", [], null],
-        ["recipes/fish.json", [], null],
-        ["recipes/fish_croft.json", [], null],
-        ["recipes/water_croft.json", [], null],
-        ["recipes/water_plot.json", [], null],
+        ["actions/cook_feast.json", [], null],
+        ["actions/cook_stew.json", [], null],
+        ["actions/cook_stew_croft.json", [], null],
+        ["actions/fish.json", [], null],
+        ["actions/fish_croft.json", [], null],
+        ["actions/water_croft.json", [], null],
+        ["actions/water_plot.json", [], null],
         ["replenish/croft_fish.json", [], null],
         ["replenish/crop_croft.json", [], null],
         ["replenish/crop_plot.json", [], null],
@@ -603,9 +603,9 @@
         ["reactions/yard_hide.json", [], null],
         ["dialogues/clerk_fine.json", [], null],
         ["cartridge.json", ["requires", "capabilities", "light"], null],
-        ["recipes/lux.json", [], null],
-        ["recipes/ward.json", [], null],
-        ["recipes/flamma.json", [], null],
+        ["actions/lux.json", [], null],
+        ["actions/ward.json", [], null],
+        ["actions/flamma.json", [], null],
         ["reactions/flamma_sparks.json", [], null],
         ["items/lantern.json", [], null],
         ["items/attic_lantern.json", [], null],
@@ -1393,7 +1393,7 @@
       "below": "1.97",
       "source": "cartridges/spells_sampler",
       "feature": "a spell's learned",
-      "edits": [["recipes/ward.json", ["reason"], null]],
+      "edits": [["actions/ward.json", ["reason"], null]],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -1514,7 +1514,7 @@
         ["cartridge.json", ["requires", "capabilities", "action_recipe"], 1],
         ["cartridge.json", ["requires", "capabilities", "reaction"], 1],
         [
-          "recipes/dig.json",
+          "actions/dig.json",
           [],
           {
             "label": "action.mine",
@@ -1561,16 +1561,16 @@
         ["skills/joinery.json", ["profession"], null],
         ["skills/carpentry.json", ["prerequisite"], null],
         [
-          "recipes/raise_timbered_hut.json",
+          "actions/raise_timbered_hut.json",
           ["outcomes", "success", "sequence"],
           [{ "op": "fact.assign", "fact": "wood_chopped", "value": true }]
         ]
       ],
       "without": [
-        ["recipes/carve_spoon.json", ["craft"], null],
-        ["recipes/chop.json", ["craft"], null],
-        ["recipes/raise_timbered_hut.json", ["craft"], null],
-        ["recipes/saw.json", ["craft"], null]
+        ["actions/carve_spoon.json", ["craft"], null],
+        ["actions/chop.json", ["craft"], null],
+        ["actions/raise_timbered_hut.json", ["craft"], null],
+        ["actions/saw.json", ["craft"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1586,7 +1586,7 @@
         ["skills/joinery.json", ["profession"], null]
       ],
       "without": [
-        ["recipes/raise_timbered_hut.json", ["outcomes", "success", "sequence"], [{"op": "fact.assign", "fact": "wood_chopped", "value": true}]]
+        ["actions/raise_timbered_hut.json", ["outcomes", "success", "sequence"], [{"op": "fact.assign", "fact": "wood_chopped", "value": true}]]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1960,8 +1960,8 @@
         ["items/yard_crate.json", ["words"], null],
         ["items/yard_purse.json", ["words"], null],
         ["items/yard_torch.json", ["words"], null],
-        ["recipes/lux.json", [], null],
-        ["recipes/flamma.json", [], null],
+        ["actions/lux.json", [], null],
+        ["actions/flamma.json", [], null],
         ["reactions/flamma_sparks.json", [], null],
         ["items/lantern.json", ["tags"], ["metal"]],
         ["items/attic_lantern.json", ["tags"], ["metal"]]
@@ -2207,8 +2207,8 @@
         ["items/yard_crate.json", ["words"], null],
         ["items/yard_purse.json", ["words"], null],
         ["items/yard_torch.json", ["words"], null],
-        ["recipes/lux.json", [], null],
-        ["recipes/flamma.json", [], null],
+        ["actions/lux.json", [], null],
+        ["actions/flamma.json", [], null],
         ["reactions/flamma_sparks.json", [], null],
         ["items/lantern.json", ["tags"], ["metal"]],
         ["items/attic_lantern.json", ["tags"], ["metal"]]
@@ -2377,9 +2377,9 @@
       "below": "1.118",
       "source": "cartridges/spell_effects_sampler",
       "feature": "an aimed spell (loka-x6t.109)",
-      "edits": [["recipes/flamma.json", ["target", "aimed"], {"scopes": ["room_occupants"]}]],
+      "edits": [["actions/flamma.json", ["target", "aimed"], {"scopes": ["room_occupants"]}]],
       "without": [
-        ["recipes/flamma.json", ["target", "aimed"], null]
+        ["actions/flamma.json", ["target", "aimed"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]

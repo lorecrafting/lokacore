@@ -14,13 +14,15 @@ defmodule Loka.ContentLintTest do
   defp variant(items), do: %{"when" => %{"root" => %{"op" => "all", "items" => items}}}
 
   test "check 1: a recipe whose policy refuses names a reason (M1, flamma)" do
-    assert lint(%{"recipes/flamma.json" => %{"policy" => @refuses}}) ==
-             ["recipes/flamma.json: policy refuses with no reason"]
+    assert lint(%{"actions/flamma.json" => %{"policy" => @refuses}}) ==
+             ["actions/flamma.json: policy refuses with no reason"]
 
-    assert lint(%{"recipes/flamma.json" => %{"policy" => @refuses, "reason" => "reason.flamma"}}) ==
+    assert lint(%{"actions/flamma.json" => %{"policy" => @refuses, "reason" => "reason.flamma"}}) ==
              []
 
-    assert lint(%{"recipes/look.json" => %{"policy" => @always}}) == []
+    assert lint(%{"actions/look.json" => %{"policy" => @always}}) == []
+    # Break: a built-in action (with command, no reason field to add) gets an unfixable finding.
+    assert lint(%{"actions/look.json" => %{"command" => "look", "policy" => @refuses}}) == []
   end
 
   test "check 3: a reaction that writes state narrates or says it is silent (T4, plate_springs)" do
@@ -78,7 +80,7 @@ defmodule Loka.ContentLintTest do
     aim = %{"target" => %{"kind" => "detail", "room" => "loft", "detail" => "hearth"}}
     plain = %{"room.loft" => "A low loft with a hearth."}
     linked = %{"room.loft" => "A low loft with a [hearth](hearth)."}
-    files = &Map.merge(%{"rooms/loft.json" => room, "recipes/gather_ash.json" => aim}, &1)
+    files = &Map.merge(%{"rooms/loft.json" => room, "actions/gather_ash.json" => aim}, &1)
     unlinked = "rooms/loft.json: details.hearth has a page and no prose link"
     untitled = "rooms/loft.json: details.hearth is a recipe target (gather_ash) and has no title"
 
@@ -228,7 +230,7 @@ defmodule Loka.ContentLintTest do
     assert fills.(Map.merge(lamp, flask.(1))) == []
 
     want = %{
-      "recipes/oil_winch.json" => %{"target" => %{"tool" => %{"liquid" => "oil"}}},
+      "actions/oil_winch.json" => %{"target" => %{"tool" => %{"liquid" => "oil"}}},
       "services/s.json" => %{
         "benefit" => %{"kind" => "drink", "liquid" => "oil", "vessel" => "cask"}
       }
@@ -260,7 +262,7 @@ defmodule Loka.ContentLintTest do
 
     for {rel, v} <- [
           {"replenish/r.json", %{"items" => ["ear"]}},
-          {"recipes/r.json", %{"craft" => %{"yield" => %{"items" => ["ear"]}}}},
+          {"actions/r.json", %{"craft" => %{"yield" => %{"items" => ["ear"]}}}},
           {"npcs/n.json", %{"drops" => [%{"item" => "ear", "chance" => 1}]}},
           {"npcs/n.json", shop.(%{"item" => "ear", "buy" => 1})},
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["ear"]}})},
@@ -279,7 +281,7 @@ defmodule Loka.ContentLintTest do
 
     for {rel, v} <- [
           {"items/lamp_oil.json", %{"location" => %{"in" => "npc"}, "edible" => %{}}},
-          {"recipes/r.json", %{"craft" => %{"consume" => %{"items" => ["lamp_oil"]}}}},
+          {"actions/r.json", %{"craft" => %{"consume" => %{"items" => ["lamp_oil"]}}}},
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["lamp_oil"]}})},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
           {"dialogues/d.json",
@@ -291,7 +293,7 @@ defmodule Loka.ContentLintTest do
     # Holding it for a quest or a recipe guard checks the item; neither takes it out of play.
     quest = %{"objective" => %{"policy" => %{"root" => has}}}
     guard = %{"policy" => %{"root" => has}, "reason" => "reason.r"}
-    assert lint(Map.merge(flask, %{"recipes/r.json" => guard, "quests/q.json" => quest})) == dry
+    assert lint(Map.merge(flask, %{"actions/r.json" => guard, "quests/q.json" => quest})) == dry
 
     assert lint(%{"items/ear.json" => %{"location" => %{"in" => "template"}}}) ==
              [
@@ -314,7 +316,7 @@ defmodule Loka.ContentLintTest do
 
     matches =
       for {rel, _, %{} = r} <- files,
-          String.starts_with?(rel, ["recipes/", "reactions/"]),
+          String.starts_with?(rel, ["actions/", "reactions/"]),
           tag <- List.wrap(get_in(r, ["target", "tool", "tag"])) ++ queried(r),
           into: %{},
           do: {"#{rel} #{tag}", Enum.sort(holders.(tag))}
@@ -323,13 +325,13 @@ defmodule Loka.ContentLintTest do
     holding = ~w(items/loft_bucket items/oilcan items/smithy_bucket items/watering_can)
 
     assert matches == %{
-             "recipes/fish.json rod" => ["items/rod", "items/rod_2"],
-             "recipes/fish.json water" => ["items/pond_water"],
-             "recipes/lux.json lamp" => ["items/attic_lantern", "items/lantern"],
-             "recipes/oil_winch.json metal" => Enum.map(metal, &"items/#{&1}"),
-             "recipes/quench.json liquid_holding" => holding,
-             "recipes/water_croft.json liquid_holding" => holding,
-             "recipes/water_plot.json liquid_holding" => holding
+             "actions/fish.json rod" => ["items/rod", "items/rod_2"],
+             "actions/fish.json water" => ["items/pond_water"],
+             "actions/lux.json lamp" => ["items/attic_lantern", "items/lantern"],
+             "actions/oil_winch.json metal" => Enum.map(metal, &"items/#{&1}"),
+             "actions/quench.json liquid_holding" => holding,
+             "actions/water_croft.json liquid_holding" => holding,
+             "actions/water_plot.json liquid_holding" => holding
            }
   end
 
@@ -406,8 +408,8 @@ defmodule Loka.ContentLintTest do
     # The parent folder holds cartridges but no manifest of its own.
     assert_raise ArgumentError, fn -> Lint.run(Path.dirname(dir)) end
     assert_raise ArgumentError, fn -> Lint.run(Path.join(dir, "missing")) end
-    File.mkdir_p!(Path.join(dir, "recipes"))
-    File.write!(Path.join(dir, "recipes/flamma.json"), Jason.encode!(%{"policy" => @refuses}))
+    File.mkdir_p!(Path.join(dir, "actions"))
+    File.write!(Path.join(dir, "actions/flamma.json"), Jason.encode!(%{"policy" => @refuses}))
 
     ExUnit.CaptureIO.capture_io(:stderr, fn ->
       assert catch_exit(Mix.Tasks.Loka.Lint.run([dir])) == {:shutdown, 1}

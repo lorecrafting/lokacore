@@ -1,9 +1,10 @@
+# size: allow 311, the behaviours pass and the source schema dirs join the existing source-shortcut pipeline
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Bundles, Extends, Prose, Signals, Zones}
+  alias Loka.Content.{Behaviours, Bundles, Extends, Prose, Signals, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -22,7 +23,6 @@ defmodule Loka.Content.Source do
              | :room
              | :item
              | :npc
-             | :recipe
              | :barrier
              | :quest
              | :reaction
@@ -38,6 +38,7 @@ defmodule Loka.Content.Source do
              | :service
              | :transport
              | :bleed
+             | :behaviour
              | :status
              | :blueprint, String.t(), steps()}
 
@@ -57,9 +58,10 @@ defmodule Loka.Content.Source do
 
   defp shortcuts(files, faults) do
     {files, clashes} = Prose.lower(files)
+    {files, held} = Behaviours.expand(files)
     {files, unsent} = Signals.lower(files)
     {files, zoned} = Zones.expand(files)
-    {files, Enum.map(faults ++ clashes ++ unsent ++ zoned, &bundle_diag/1)}
+    {files, Enum.map(faults ++ clashes ++ held ++ unsent ++ zoned, &bundle_diag/1)}
   end
 
   defp read(dir) do
@@ -77,9 +79,9 @@ defmodule Loka.Content.Source do
 
   defp bundle_diag({code, location, data}), do: diag(code, at(location, []), data)
 
-  defp extends_diag({code, rel, data, from}) do
+  defp extends_diag({code, location, data, from}) do
     data = if from, do: Map.put(data, "from", at(from, [])), else: data
-    diag(code, at(rel, ["extends"]), data)
+    diag(code, at(location, []), data)
   end
 
   defp entry(rel, dir), do: entry(rel, classify(rel), dir)
@@ -136,7 +138,6 @@ defmodule Loka.Content.Source do
     "rooms" => :room,
     "items" => :item,
     "npcs" => :npc,
-    "recipes" => :recipe,
     "barriers" => :barrier,
     "quests" => :quest,
     "reactions" => :reaction,
@@ -153,7 +154,8 @@ defmodule Loka.Content.Source do
     "transports" => :transport,
     "bleeds" => :bleed,
     "statuses" => :status,
-    "blueprints" => :blueprint
+    "blueprints" => :blueprint,
+    "behaviours" => :behaviour
   }
 
   defp classify(rel) do
@@ -164,12 +166,21 @@ defmodule Loka.Content.Source do
     end
   end
 
-  defp dirs, do: @dirs
+  @doc false
+  def dirs, do: @dirs
 
-  @doc "The `kind` definitions as `{key, location, value}`; a bundled one is located at `{rel, steps}`."
+  @doc """
+  The `kind` definitions as `{key, location, value}`; a bundled one is located at `{rel, steps}`.
+  `actions/` holds both `:action` (with `command`) and `:recipe` (without it); an unreadable
+  file stays an action, so it adds no recipe.
+  """
   @spec of_kind([{String.t(), file(), term()}], atom()) :: [{String.t(), location(), term()}]
-  def of_kind(files, kind),
-    do: for({rel, {^kind, k, s}, v} <- files, do: {k, location(rel, s), v})
+  def of_kind(files, :recipe), do: Enum.reject(dir(files, :action), &command?/1)
+  def of_kind(files, :action), do: Enum.filter(dir(files, :action), &command?/1)
+  def of_kind(files, kind), do: dir(files, kind)
+
+  defp dir(files, kind), do: for({rel, {^kind, k, s}, v} <- files, do: {k, location(rel, s), v})
+  defp command?({_, _, v}), do: not is_map(v) or is_map_key(v, "command")
 
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}

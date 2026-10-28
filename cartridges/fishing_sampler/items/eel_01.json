@@ -10,5 +10,8 @@
   "location": {
     "in": "room",
     "room": "larder"
-  }
+  },
+  "behaviours": [
+    "spoils"
+  ]
 }

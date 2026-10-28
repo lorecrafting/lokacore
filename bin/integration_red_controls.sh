@@ -383,8 +383,13 @@ lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- bash_guard.py, send_guard.py (Claude Code PreToolUse hooks) ------------------------------------
 # Break: a git hook skip (--no-verify, commit -n) or a bare br create passes, the owner marker does not let it through, or a
 # command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
-bg() { # <want-rc> <command>
-  rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.stdin.read()}}))' |
+# Break: a force or mirror push, git rebase, pkill/killall, kill fed by pgrep (a pipe or $( ), not after ;), gh run watch,
+# gh pr checks --watch, gh workflow run, the full npm test, test:e2e, storybook:smoke, check_all.sh or a worktree outside
+# worktrees.noindex (or inside a checkout) passes; its marker (owner's, or LOKA_PM=1) does not let it through;
+# a wrapper (timeout, env) or gh's -R hides the command; a worktree path is read as text, not resolved against cwd and -C;
+# LOKA_PM=1 unlocks a rebase; or a near miss (pull --rebase, test:files, a file that names the script) is refused.
+bg() { # <want-rc> <command> [cwd, default /r/lokacore]
+  rc=0; printf '%s' "$2" | python3 -I -c 'import json,sys;print(json.dumps({"cwd":sys.argv[1],"tool_input":{"command":sys.stdin.read()}}))' "${3:-/r/lokacore}" |
     python3 -I "$bin/bash_guard.py" 2> /dev/null || rc=$?
   [ "$rc" = "$1" ] || bad "bash_guard: exit $rc, want $1: $2"
 }
@@ -438,6 +443,50 @@ EOF
 git push --no-verify"
 bg 2 'cat <<< EOF
 git push --no-verify'
+bg 2 'git push --force-with-lease origin b'
+bg 2 'git push -fu origin b'
+bg 2 'git push --mirror origin'
+bg 2 'git push origin +b'
+bg 0 'git push -u origin b'
+bg 0 'LOKA_OWNER_OK_NO_VERIFY=1 git push --force'
+bg 2 'git -C ../wt rebase main'
+bg 2 'LOKA_PM=1 git rebase main'
+bg 0 'git pull --rebase'
+bg 0 'git rebase --abort'
+bg 2 'pkill -f vitest'
+bg 2 'killall node'
+bg 0 'grep -rn pkill bin && kill 123'
+bg 2 'kill $(pgrep -f vitest)'
+bg 2 'pgrep -f storybook | xargs kill'
+bg 2 'kill "`pgrep -f x`"'
+bg 0 'pgrep -f vitest; kill 123'
+bg 0 'LOKA_PM=1 kill $(pgrep -f x)'
+bg 2 'gh run watch 123'
+bg 2 'gh pr checks 484 --watch'
+bg 0 'gh pr checks 484'
+bg 0 'gh run list --commit abc'
+bg 2 'gh -R o/r run watch 1'
+bg 2 'gh workflow run ci.yml --ref b'
+bg 0 'LOKA_PM=1 gh workflow run ci.yml --ref b'
+bg 2 'cd kernel/ts && nice -n 10 npm test'
+bg 0 'nice -n 10 npm run test:files -- test/a.test.ts'
+bg 0 'LOKA_PM=1 npm test'
+bg 2 'timeout 10m npm test'
+bg 2 'env CI=1 npm run test:nosim'
+bg 2 'npm run test:sim'
+bg 2 'npm --prefix mobile/app run test:e2e'
+bg 2 'npm run storybook:smoke'
+bg 0 'npm run build'
+bg 2 'sh bin/check_all.sh'
+bg 0 'sed -n 1,20p bin/check_all.sh'
+bg 2 'git worktree add -b x ../x main'
+bg 0 'git worktree add -b x ../worktrees.noindex/x main'
+bg 0 'git worktree add ../x' /r/worktrees.noindex/a
+bg 0 'git -C ../worktrees.noindex/a worktree add ../b'
+bg 0 'git worktree remove ../x'
+bg 0 'git worktree add "$W" b'
+bg 0 'LOKA_PM=1 git worktree add ../lokacore-session'
+mkdir -p "$tmp/ck/.git"; bg 2 'git worktree add worktrees.noindex/x' "$tmp/ck"; bg 0 'git worktree add ../worktrees.noindex/x' "$tmp/ck"
 # Break: a hook-compacted agent (durationMs < 1000) is resumed, a built-in compaction or an unknown agent is refused.
 P=$(mktemp -d); mkdir -p "$P/s1/subagents"
 cb() { printf '{"type":"system","subtype":"compact_boundary","compactMetadata":{"durationMs":%s}}\n' "$1"; }

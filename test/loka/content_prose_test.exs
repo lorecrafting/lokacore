@@ -72,6 +72,31 @@ defmodule Loka.ContentProseTest do
     end
   end
 
+  # Breaks: a line over the catalog's word limit is reported only at the generated text["<key>"]
+  # the author never wrote, the marker check drops the words (an UNRESOLVED_REFERENCE joins it),
+  # or it refuses a line at the limit.
+  test "a line too long for the catalog is refused at the marker and at its key" do
+    long = fn n -> &Map.put(&1, "short", %{"prose" => String.duplicate("x", n)}) end
+    elder = fn n -> &update_in(&1, @elder, long.(n)) end
+    assert {:ok, _, []} = speech([{@bundle, elder.(4096)}])
+    assert {:error, diags} = speech([{@bundle, elder.(4097)}])
+
+    assert triples(diags) == [
+             {"SCHEMA_VIOLATION", "areas/village.npcs.elder.short", %{"error" => "too_long"}},
+             {"SCHEMA_VIOLATION", "text[\"npc.elder.short\"]", %{"error" => "too_long"}}
+           ]
+
+    dir = Loka.ContentSource.copy("cartridges/ask_sampler")
+    untext = {"text.json", &Map.delete(&1, "npc.guard.short")}
+    own = {"npcs/guard.json", long.(4097)}
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [own, untext])
+
+    assert triples(diags) == [
+             {"SCHEMA_VIOLATION", "npcs/guard.short", %{"error" => "too_long"}},
+             {"SCHEMA_VIOLATION", "text[\"npc.guard.short\"]", %{"error" => "too_long"}}
+           ]
+  end
+
   # Breaks: a plain file (steps []) is not lowered, or prose is lowered before `extends`
   # flattens, so the line belongs to the prototype instead of each child.
   test "a plain file and an inherited field get the child's key" do

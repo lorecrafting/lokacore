@@ -35,7 +35,7 @@ defmodule Loka.ContentUseTest do
 
     on_detail = [
       {"cartridge.json", &put_in(&1, ["requires", "capabilities", "inspectable_detail"], 1)},
-      {"recipes/quench.json", &Map.put(&1, "target", detail)},
+      {"actions/quench.json", &Map.put(&1, "target", detail)},
       {"rooms/yard.json",
        &Map.put(&1, "details", %{
          "pump" => %{"aliases" => ["pump"], "description" => "room.yard.title"}
@@ -45,7 +45,7 @@ defmodule Loka.ContentUseTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, on_detail)
 
     assert pairs(diags) == [
-             {"SCHEMA_VIOLATION", "recipes/quench.outcomes.success.sequence[0].op"}
+             {"SCHEMA_VIOLATION", "actions/quench.outcomes.success.sequence[0].op"}
            ]
 
     opposed = %{"key" => "q", "kind" => "opposed", "attribute" => "str"}
@@ -56,7 +56,7 @@ defmodule Loka.ContentUseTest do
          Map.merge(c, %{"attributes" => 1, "check" => 1})
        end)},
       {"attributes.json", %{"attributes" => %{"str" => %{"start" => 8}}}},
-      {"recipes/quench.json",
+      {"actions/quench.json",
        &(&1
          |> Map.put("check", opposed)
          |> put_in(["outcomes", "failure"], &1["outcomes"]["success"]))}
@@ -64,10 +64,10 @@ defmodule Loka.ContentUseTest do
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, checked)
 
-    assert {"SCHEMA_VIOLATION", "recipes/quench.check"} in pairs(diags), inspect(diags)
+    assert {"SCHEMA_VIOLATION", "actions/quench.check"} in pairs(diags), inspect(diags)
 
-    milk = [{"recipes/quench.json", &put_in(&1, ["target", "tool", "liquid"], "milk")}]
+    milk = [{"actions/quench.json", &put_in(&1, ["target", "tool", "liquid"], "milk")}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, milk)
-    assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "recipes/quench.target.tool.liquid"}]
+    assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "actions/quench.target.tool.liquid"}]
   end
 end

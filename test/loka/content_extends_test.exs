@@ -85,6 +85,12 @@ defmodule Loka.ContentExtendsTest do
              [{"UNRESOLVED_REFERENCE", "items/deer_hide.extends", %{"target" => "items/ghost"}}]
   end
 
+  # Breaks: the actions/ hold drops the action's own UNRESOLVED_REFERENCE and the build crashes.
+  test "an action refused by its extends reports, not crashes", %{dir: dir} do
+    assert diags(dir, [{"actions/poke.json", %{"extends" => "ghost"}}]) ==
+             [{"UNRESOLVED_REFERENCE", "actions/poke.extends", %{"target" => "actions/ghost"}}]
+  end
+
   # Breaks: any `abstract` value is taken as abstract, so `false` silently drops the definition.
   test "abstract other than true is an unknown field", %{dir: dir} do
     assert diags(dir, [{"npcs/crow.json", &Map.put(&1, "abstract", false)}]) ==

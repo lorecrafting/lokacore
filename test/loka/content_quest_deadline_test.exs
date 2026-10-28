@@ -20,7 +20,7 @@ defmodule Loka.ContentQuestDeadlineTest do
            |> Map.put("deadline", %{"after" => 60, "outcome" => "late"})
            |> pop_in(["journal", "hints"])
            |> elem(1))},
-        {"recipes/search_floor.json", &Map.delete(&1, "tip")},
+        {"actions/search_floor.json", &Map.delete(&1, "tip")},
         {"reactions/late.json", nil},
         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], api)}
       ]
@@ -31,7 +31,7 @@ defmodule Loka.ContentQuestDeadlineTest do
     late = [
       {"quests/find_key.json",
        &(&1 |> Map.delete("deadline") |> pop_in(["journal", "hints"]) |> elem(1))},
-      {"recipes/search_floor.json", &Map.delete(&1, "tip")},
+      {"actions/search_floor.json", &Map.delete(&1, "tip")},
       {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")},
       {"reactions/late.json", %{"on" => %{"event" => "quest_failed"}, "apply" => [assign]}}
     ]

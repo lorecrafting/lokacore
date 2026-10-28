@@ -2,14 +2,15 @@ defmodule Loka.Content.Extends do
   @moduledoc """
   Flattens `extends` and `abstract` in the source definition files before any stage reads
   them: a child merges over its parent of the same kind, and an abstract definition is removed
-  once its children resolve (docs/system/cartridge.md, Source shortcuts).
+  once its children resolve. A child's `with` fills its parent's `params` markers before the
+  merge (docs/system/cartridge.md, Source shortcuts).
   """
 
-  alias Loka.Content.Source
+  alias Loka.Content.{Params, Source}
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
-  @typedoc "A refusal at `<at>.extends`; Source builds the diagnostic, `from` is a location too."
+  @typedoc "A refusal at `at`; Source builds the diagnostic, `from` is a location too."
   @type fault ::
           {code :: String.t(), at :: Source.location(), data :: map(),
            from :: Source.location() | nil}
@@ -17,8 +18,10 @@ defmodule Loka.Content.Extends do
   @doc "The files with every `extends` resolved and every abstract definition removed."
   @spec flatten([entry()]) :: {[entry()], [fault()]}
   def flatten(files) do
+    # A behaviour is not flattened: Behaviours.expand refuses `extends` and `abstract` on it.
     index =
       for {rel, {kind, key, steps}, value} <- files,
+          kind != :behaviour,
           into: %{},
           do: {{kind, key}, {{rel, steps}, value}}
 
@@ -27,6 +30,8 @@ defmodule Loka.Content.Extends do
 
     {Enum.flat_map(files, &output(&1, memo)), faults}
   end
+
+  defp output({_, {:behaviour, _, _}, _} = behaviour, _), do: [behaviour]
 
   defp output({rel, {kind, key, _} = id, _}, memo) do
     case memo[{kind, key}] do
@@ -50,26 +55,73 @@ defmodule Loka.Content.Extends do
 
   # ponytail: data.from names the parent only on these refusals; a schema error in an inherited
   # field reports at the child without it (provenance would need a table through Source.load/1).
-  defp own(id, stack, {index, _} = ctx, acc), do: own(index[id], id, stack, ctx, acc)
+  defp own(id, stack, {index, _} = ctx, acc) do
+    case declared(index[id]) do
+      [] -> own(index[id], id, stack, ctx, acc)
+      faults -> refuse(acc, faults)
+    end
+  end
 
-  defp own({_, %{"extends" => parent} = value}, {kind, _} = id, stack, {index, _} = ctx, acc)
-       when is_map_key(index, {kind, parent}),
-       do: inherit(value, resolve({kind, parent}, [id | stack], ctx, acc))
+  defp own({at, %{"extends" => parent} = value}, {kind, _} = id, stack, {index, _} = ctx, acc)
+       when is_map_key(index, {kind, parent}) do
+    {up_at, _} = index[{kind, parent}]
+    inherit(at, up_at, value, resolve({kind, parent}, [id | stack], ctx, acc))
+  end
 
   defp own({at, %{"extends" => parent}}, _, _, {_, files}, acc) when is_binary(parent) do
     data = %{"target" => dir(at) <> "/" <> parent}
-    refuse(acc, [{"UNRESOLVED_REFERENCE", at, data, other_kind(files, parent)}])
+
+    refuse(acc, [
+      {"UNRESOLVED_REFERENCE", under(at, ["extends"]), data, other_kind(files, parent)}
+    ])
   end
 
-  defp own({rel, %{"extends" => _}}, _, _, _, acc),
-    do: refuse(acc, [{"SCHEMA_VIOLATION", rel, %{"error" => "invalid_type"}, nil}])
+  defp own({at, %{"extends" => _}}, _, _, _, acc),
+    do:
+      refuse(acc, [
+        {"SCHEMA_VIOLATION", under(at, ["extends"]), %{"error" => "invalid_type"}, nil}
+      ])
 
   defp own({_, value}, _, _, _, acc), do: {{:ok, value}, acc}
 
-  defp inherit(value, {{:ok, %{} = up}, acc}),
-    do: {{:ok, merge(Map.delete(up, "abstract"), Map.delete(value, "extends"))}, acc}
+  # A refused `params` or a marker naming none of them refuses the declaring definition once.
+  defp declared({at, %{"abstract" => true, "params" => params} = value}) do
+    case Params.declared(params) do
+      {:error, e} ->
+        [{"SCHEMA_VIOLATION", under(at, ["params"]), %{"error" => e}, nil}]
 
-  defp inherit(_, {_, acc}), do: {:invalid, acc}
+      :ok ->
+        for {path, name} <- Params.unresolved(value, params),
+            do: {"UNRESOLVED_REFERENCE", under(at, path), %{"target" => name}, nil}
+    end
+  end
+
+  defp declared(_), do: []
+
+  # The child's `with` fills the parent's markers before the child merges over it.
+  # A concrete parent's `params` stays for the schema, but a child cannot be checked against a non-list.
+  defp inherit(_, up_at, _, {{:ok, %{"params" => p}}, acc}) when not is_list(p),
+    do:
+      refuse(acc, [
+        {"SCHEMA_VIOLATION", under(up_at, ["params"]), %{"error" => "invalid_type"}, nil}
+      ])
+
+  defp inherit(at, _, value, {{:ok, %{} = up}, acc}) do
+    with = Map.get(value, "with", %{})
+
+    case Params.check(with, up["params"] || []) do
+      [] ->
+        up = Params.fill(Map.drop(up, ["abstract", "params"]), with)
+        {{:ok, merge(up, Map.drop(value, ["extends", "with"]))}, acc}
+
+      faults ->
+        refuse(acc, for({c, path, d} <- faults, do: {c, under(at, ["with" | path]), d, nil}))
+    end
+  end
+
+  defp inherit(_, _, _, {_, acc}), do: {:invalid, acc}
+
+  defp under({rel, steps}, more), do: {rel, steps ++ more}
 
   defp dir({rel, []}), do: Path.dirname(rel)
   defp dir({_, [dir, _]}), do: dir
@@ -91,7 +143,7 @@ defmodule Loka.Content.Extends do
       for m <- members do
         {rel, %{"extends" => parent}} = index[m]
         {parent_rel, _} = index[{kind, parent}]
-        {"SCHEMA_VIOLATION", rel, %{"error" => "invalid_value"}, parent_rel}
+        {"SCHEMA_VIOLATION", under(rel, ["extends"]), %{"error" => "invalid_value"}, parent_rel}
       end
 
     refuse({Enum.reduce(members, memo, &Map.put(&2, &1, :invalid)), faults}, found)
