@@ -2,7 +2,7 @@
 # PM bookkeeping after a reviewed PR merged (docs/WORKFLOW.md step 7), in the integration checkout:
 # pull main, close the Beads issue, remove the PR branch's worktree, delete the branch (local and
 # remote) and review-<PR>, commit the Beads export (plus a ROADMAP edit already made) and push main.
-#   bin/after_merge.sh <PR> <beads-id> [ROADMAP commit subject]
+#   bin/after_merge.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]
 # Refuses unless the PR is MERGED, main is checked out and the tracked files are clean (untracked files are ignored, like pm_merge.sh) apart from
 # .beads/issues.jsonl, and docs/ROADMAP.md (which must then be edited) when a subject is given.
 # A dirty export is copied out, reset, the pull runs, it is copied back and `br sync --flush-only`
@@ -26,7 +26,7 @@ br1() {
     *) echo "$err" >&2; return 1 ;;
   esac
 }
-[ $# -ge 2 ] && [ $# -le 3 ] || { echo "usage: $0 <PR> <beads-id> [ROADMAP commit subject]" >&2; exit 2; }
+[ $# -ge 2 ] && [ $# -le 3 ] || { echo "usage: $0 <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]" >&2; exit 2; }
 pr=$1 id=$2 subject=${3-} j=.beads/issues.jsonl
 cd "$(git rev-parse --show-toplevel)" || exit 2
 [ "$(git branch --show-current)" = main ] || die 'main is not checked out here'
@@ -74,8 +74,10 @@ fi
 [ ! -f "$tmp/export" ] || cp "$tmp/export" $j
 br1 sync --flush-only || die 'br sync --flush-only failed'
 # A rerun after a failed Beads commit finds the issue closed already.
-[ "$(br show "$id" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
-  || br1 close "$id" --reason "Merged #$pr" || die "br close $id failed"
+for i in $(echo "$id" | tr , ' '); do
+  [ "$(br show "$i" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
+    || br1 close "$i" --reason "Merged #$pr" || die "br close $i failed"
+done
 [ -z "$wt" ] || git worktree remove "$wt" || die "worktree for $branch not removed (uncommitted work?)"
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git branch -q -d "$branch" || die "$branch is not merged; not deleted"
 [ -z "$review" ] || git update-ref -d "refs/heads/review-$pr" "$review" || die "review-$pr moved or not deleted"

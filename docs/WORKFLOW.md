@@ -24,7 +24,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Brief drafting | Opus for a row that follows an existing pattern, an S row or content (owner, 2026-10-14; never Sonnet since 2026-10-23) | Opus drafts every other brief too (a new module, a Realm-sensitive row, a new interaction pattern); Fable drafts a save, protocol or core engine contract brief while weekly usage is under about 80%, else Opus; Sonnet never drafts a brief (owner 2026-10-23 accepted the PM recommendation, quoted: "okay lets go with your rec") |
 | Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
-| Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as single writer). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to the Opus designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
+| Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as main writer; decided small spec text may come from the PM, see the roles note below the table). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to the Opus designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
 
 The PM also sets each spawn's `effort`: high for a reviewer or Fable design
 work, the default otherwise ([two-lane CI record](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
@@ -34,6 +34,12 @@ several spawns); resume an agent with `SendMessage` only for its own scoped fix 
 re-check, otherwise spawn fresh with a self-contained brief (worktree, exact base/head,
 governing sections, acceptance checks, open findings). Agents keep full logs in a
 scratch file and return failing lines or counts.
+
+Roles exist for independent judgement, not ownership of files: a fresh reviewer or designer keeps its view
+unanchored on the author's work, and that is the only wall worth paying for. Any agent fixes a stale line in any
+doc it is already touching (HANDOFF included) instead of leaving it for its "owner"; the PM writes small spec
+text that is already decided (a ruling, a paragraph) itself and the reviewer checks it; spawn the designer for
+design decisions, not to type decided text ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 **Review count** ([owner decision](decisions/owner-decision-one-reviewer-default-2026-10-04.md)):
 one fresh independent reviewer is the default for a mechanics PR. Add a separate
 second opinion (another fresh reviewer) when the change alters save/reconciliation behavior, protocol or
@@ -74,6 +80,9 @@ Report at the end of the slice, not at every step.
    never absolute or home-relative paths. Before ruling on an owner-approved item, read the owner's
    approval note and cite it, not the proposal text. Link process rules (AGENTS.md,
    WORKFLOW sections, the role files), never copy them; write out only the slice's own rules.
+   A ruling made after drafting edits the brief's body in place and deletes the text it replaces, so the brief
+   always reads as one current spec; never append a "rulings override the body" section. The dated ruling and its
+   source go in the Beads notes ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
    Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.
    Mechanic briefs include the [composition record](system/architecture.md#building-mechanics-by-composition).
@@ -139,7 +148,7 @@ Report at the end of the slice, not at every step.
    while GitHub still requires checks; never for unreviewed code or past a red check. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
-   `bin/after_merge.sh <PR> <beads-id> ["ROADMAP status: ..."]` does that bookkeeping after the PM's
+   `bin/after_merge.sh <PR> <beads-id[,beads-id...]> ["ROADMAP status: ..."]` does that bookkeeping after the PM's
    ROADMAP edit: pull, close the issue, remove the worktree, branch and `review-<N>`, commit, push. Then tell the owner:
    PR link, verdict, notes; cite every PR as #N (Beads id, short description). Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
@@ -277,8 +286,9 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
 - A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and
   `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding;
-  developers never wait on CI. The PM waits with `bin/wait_ci.sh <sha>` in the background (one line per
-  workflow; exit 0 only when all succeeded).
+  developers never wait on CI. The PM waits with `bin/wait_ci.sh <sha|branch>` in the background (one line per
+  workflow; exit 0 only when all succeeded; a branch waits on its fetched origin head). On red,
+  `bin/ci_fail.sh <sha|branch>` prints only the failing lines; send those as the finding.
 - Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
   same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
   caught?") run narrow first against the test files that import the mutated module, the full suite

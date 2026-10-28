@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run the PM and agent scripts (sync_pr, br_create, after_merge, mutate, session_status, pm_merge, prepush,
 # check_impact_fixtures, the agent_load_gate/bash_guard/send_guard hooks, pre-commit, preview_update,
-# polish_session, regen_hash_fixture, test_files, wait_ci, new_batch, push_slice) in throwaway repos
+# polish_session, regen_hash_fixture, test_files, wait_ci, ci_fail, new_batch, push_slice) in throwaway repos
 # with stubs; each case names the break it catches.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
@@ -142,6 +142,11 @@ amk; export BR_FAIL=1; am other-br-error 1; unset BR_FAIL; ! grep -q '^doctor' "
 amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit; chmod +x .git/hooks/post-commit
 am concurrent-write 0; git fetch -q origin
 [ "$(git show origin/main:.beads/issues.jsonl | tail -1)" = concurrent ] && git diff --quiet || bad 'after_merge concurrent-write: export not committed and pushed'
+# Break: an id after the first in a comma list is not closed (loka-4zvw).
+amk; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a,loka-b > "$R.out" 2>&1 || rc=$?
+[ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && grep -qx 'close loka-b --reason Merged #7' "$R.br" \
+  || { bad "after_merge several-ids: exit $rc or an id not closed"; cat "$R.br"; }
+
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor
@@ -577,6 +582,25 @@ rc=0; WC_N=$tmp/wc/n WC_RUNS=$tmp/wc/runs PATH="$tmp/wc:$PATH" capped sh "$bin/w
 echo 'graph-diff:completed:success' > "$tmp/wc/runs"; rm "$tmp/wc/n"; rc=0
 WC_N=$tmp/wc/n WC_RUNS=$tmp/wc/runs PATH="$tmp/wc:$PATH" capped sh "$bin/wait_ci.sh" abc > "$tmp/wc/out" 2>&1 || rc=$?
 [ "$rc" = 1 ] && [ "$(cat "$tmp/wc/n")" = 40 ] || { bad "wait_ci timeout: exit $rc after $(cat "$tmp/wc/n") polls, want 1 after 40"; cat "$tmp/wc/out"; }
+
+# Break: a branch argument polls a stale or wrong head instead of the fetched origin tip. The script
+# runs from a throwaway repo (it cds to its own root) whose origin branch feat/x moved after the clone.
+O=$(mktemp -d); git init -q --bare -b main "$O"; W=$(mktemp -d); git clone -q "$O" "$W" 2>/dev/null
+(cd "$W" && mkdir bin && cp "$bin/wait_ci.sh" "$bin/ci_fail.sh" bin/ && git add . && git commit -qm base && git push -q origin HEAD:main HEAD:feat/x)
+M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git checkout -q feat/x && echo n > n && git add n && git commit -qm tip && git push -q origin feat/x)
+tip=$(git -C "$M" rev-parse HEAD)
+printf '#!/bin/sh\necho "$*" >> "$WC_ARGS"\nprintf "ci:completed:success\\nbook-e2e:completed:success\\n"\n' > "$tmp/wc/gh"
+rc=0; WC_ARGS=$tmp/wc/args PATH="$tmp/wc:$PATH" capped sh "$W/bin/wait_ci.sh" feat/x > "$tmp/wc/out" 2>&1 || rc=$?
+[ "$rc" = 0 ] && grep -q -- "--commit $tip" "$tmp/wc/args" || { bad "wait_ci branch: exit $rc, did not poll the origin tip $tip"; cat "$tmp/wc/args" "$tmp/wc/out"; }
+
+# --- ci_fail.sh --------------------------------------------------------------------------------
+# Stub gh lists one failed run and serves a log with one failing line among noise. Break: the failing
+# line is dropped, noise is printed, a red head exits 0, or a head with no failed run exits non-zero.
+printf '#!/bin/sh\ncase $2 in list) [ -n "${CF_NONE-}" ] || echo "11 book-e2e" ;; view) printf "storybook\\trun\\t2026-10-24T19:08:39.39Z FAIL live--nell-shop play: no text\\nstorybook\\trun\\t2026-10-24T19:08:40Z npm warn noise\\n" ;; esac\n' > "$tmp/wc/gh"
+rc=0; out=$(PATH="$tmp/wc:$PATH" capped sh "$W/bin/ci_fail.sh" abc 2>&1) || rc=$?
+[ "$rc" = 1 ] && [ "$out" = "$(printf '== book-e2e (run 11)\nstorybook: FAIL live--nell-shop play: no text')" ] || bad "ci_fail: exit $rc, output: $out"
+rc=0; CF_NONE=1 PATH="$tmp/wc:$PATH" capped sh "$W/bin/ci_fail.sh" abc > /dev/null 2>&1 || rc=$?
+[ "$rc" = 0 ] || bad "ci_fail none: exit $rc, want 0"
 
 # --- new_batch.sh --------------------------------------------------------------------------------
 # A main checkout cloned from a bare origin; stub worktree_setup.sh records the worktree it set up.
