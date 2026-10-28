@@ -32,7 +32,7 @@ defmodule Loka.ContentQuestHintsTest do
   # a tipped recipe key too long for seen_tip_ in a 64-character Key, accepted.
   test "a recipe tip resolves, owns seen_tip_<key>, needs 1.46 and fact@1 and a short key" do
     dir = Loka.ContentSource.copy("cartridges/quest_sampler")
-    recipe = "recipes/search_floor.json"
+    recipe = "actions/search_floor.json"
     seen = %{"op" => "fact.assign", "fact" => "seen_tip_search_floor", "value" => true}
     long = String.duplicate("s", 56)
     spec = %{"version" => 1, "value_type" => %{"type" => "bool", "default" => false}}
@@ -40,21 +40,21 @@ defmodule Loka.ContentQuestHintsTest do
 
     cases = [
       {[{recipe, &Map.put(&1, "tip", "tip.nope")}],
-       {"UNRESOLVED_REFERENCE", "recipes/search_floor.tip"}},
+       {"UNRESOLVED_REFERENCE", "actions/search_floor.tip"}},
       {[{"facts.json", &put_in(&1, ["facts", "seen_tip_search_floor"], spec)}],
        {"RESERVED_FACT", "facts.facts.seen_tip_search_floor"}},
       {[{recipe, &put_in(&1, ["outcomes", "success", "sequence"], [seen])}],
-       {"RESERVED_FACT", "recipes/search_floor.outcomes.success.sequence[0].fact"}},
+       {"RESERVED_FACT", "actions/search_floor.outcomes.success.sequence[0].fact"}},
       {[
          {"quests/find_key.json", &(pop_in(&1, ["journal", "hints"]) |> elem(1))},
          {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}
        ], {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {[{"cartridge.json", &(pop_in(&1, ["requires", "capabilities", "fact"]) |> elem(1))}],
-       {"UNDECLARED_CAPABILITY", "recipes/search_floor.tip"}},
+       {"UNDECLARED_CAPABILITY", "actions/search_floor.tip"}},
       {[
          {recipe, nil},
-         {"recipes/#{long}.json", dir |> Path.join(recipe) |> File.read!() |> JSON.decode!()}
-       ], {"SCHEMA_VIOLATION", "recipes/#{long}.key"}}
+         {"actions/#{long}.json", dir |> Path.join(recipe) |> File.read!() |> JSON.decode!()}
+       ], {"SCHEMA_VIOLATION", "actions/#{long}.key"}}
     ]
 
     for {changes, {code, path}} <- cases do

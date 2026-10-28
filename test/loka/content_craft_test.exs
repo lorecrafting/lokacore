@@ -2,10 +2,10 @@ defmodule Loka.ContentCraftTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/craft_sampler")}
 
-  @at "recipes/carve_spoon.craft"
+  @at "actions/carve_spoon.craft"
 
   defp codes(dir, f) do
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"recipes/carve_spoon.json", f}])
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"actions/carve_spoon.json", f}])
     Enum.map(diags, &{&1["code"], &1["path"]})
   end
 
@@ -55,7 +55,7 @@ defmodule Loka.ContentCraftTest do
   # Break: a storylet target compiles again (FD3 retired by the owner, 2026-10-23).
   test "a storylet target is refused", %{dir: dir} do
     storylet = &(&1 |> Map.drop(~w(check craft)) |> Map.put("target", %{"kind" => "storylet"}))
-    assert [{"SCHEMA_VIOLATION", "recipes/carve_spoon.target.kind"}] = codes(dir, storylet)
+    assert [{"SCHEMA_VIOLATION", "actions/carve_spoon.target.kind"}] = codes(dir, storylet)
   end
 
   # Break (hs-11; twin of the loader test in kernel/ts/test/craft.test.ts): a skill prerequisite
@@ -164,8 +164,8 @@ defmodule Loka.ContentCraftTest do
   # list. The floor is loader_floors.json's "a build step" case.
   test "a build step needs a site detail, its listed blueprint and direction, once, on success",
        %{dir: dir} do
-    seq = "recipes/raise_timbered_hut.outcomes.success.sequence"
-    raise = "recipes/raise_timbered_hut.json"
+    seq = "actions/raise_timbered_hut.outcomes.success.sequence"
+    raise = "actions/raise_timbered_hut.json"
 
     builds = fn edits ->
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
@@ -202,7 +202,7 @@ defmodule Loka.ContentCraftTest do
     failed =
       &put_in(&1, ["outcomes", "failure", "sequence"], &1["outcomes"]["success"]["sequence"])
 
-    at = "recipes/raise_timbered_hut.outcomes.failure.sequence[0].op"
+    at = "actions/raise_timbered_hut.outcomes.failure.sequence[0].op"
     assert {"SCHEMA_VIOLATION", at} in builds.([{raise, failed}])
   end
 end

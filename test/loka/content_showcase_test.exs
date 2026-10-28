@@ -9,8 +9,8 @@ defmodule Loka.ContentShowcaseTest do
   # hide, NPC locks, stolen offers, fine, jail talk and arrest dropped for the older-floor rows;
   # protocol/fixtures/loader_floors.json case 18 drops the same.
   @homestead_files ~w(blueprints/hut_plain blueprints/hut_timbered actions/raise_hut_plain
-                    actions/raze_hut services/raise_hut_plain services/raze_hut recipes/chop
-                    recipes/saw recipes/carve_spoon recipes/raise_timbered_hut reactions/cot_rest
+                    actions/raze_hut services/raise_hut_plain services/raze_hut actions/chop
+                    actions/saw actions/carve_spoon actions/raise_timbered_hut reactions/cot_rest
                     actions/barter actions/buy_pen actions/buy_plot actions/claim
                     actions/commission actions/raise_croft_hut actions/raze_croft_hut
                     dialogues/cook_lesson items/cot_2 items/croft_plot items/dead_rat items/eel_01
@@ -28,9 +28,9 @@ defmodule Loka.ContentShowcaseTest do
                     reactions/sow reactions/spoil reactions/take_eel_01 reactions/take_salmon_01
                     reactions/take_trout_01 reactions/take_trout_02 reactions/trout
                     reactions/water_croft reactions/water_plot reactions/wither_croft
-                    reactions/wither_plot recipes/cook_feast recipes/cook_stew
-                    recipes/cook_stew_croft recipes/fish recipes/fish_croft recipes/water_croft
-                    recipes/water_plot replenish/croft_fish replenish/crop_croft
+                    reactions/wither_plot actions/cook_feast actions/cook_stew
+                    actions/cook_stew_croft actions/fish actions/fish_croft actions/water_croft
+                    actions/water_plot replenish/croft_fish replenish/crop_croft
                     replenish/crop_plot replenish/eel replenish/eggs replenish/grain_return
                     replenish/restock replenish/salmon replenish/seed_return replenish/spent_croft
                     replenish/spent_grain replenish/spent_plot replenish/trout services/buy_pen
@@ -42,8 +42,8 @@ defmodule Loka.ContentShowcaseTest do
                     services/forge_cancel services/forge_claim services/forge_commission
                     services/withdraw_a services/withdraw_b statuses/hidden reactions/hide
                     reactions/yard_hide dialogues/clerk_fine dialogues/jailer_broke
-                    dialogues/jailer_talk reactions/charge recipes/lux recipes/ward
-                    recipes/flamma reactions/flamma_sparks
+                    dialogues/jailer_talk reactions/charge actions/lux actions/ward
+                    actions/flamma reactions/flamma_sparks
                     items/lantern items/attic_lantern items/lamp_oil)
 
   @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at

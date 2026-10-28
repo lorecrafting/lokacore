@@ -56,7 +56,7 @@ defmodule Loka.ContentCalendarTest do
       end
     )
 
-    recipe = Path.join(dir, "recipes/coil_rope.json")
+    recipe = Path.join(dir, "actions/coil_rope.json")
 
     update(
       recipe,

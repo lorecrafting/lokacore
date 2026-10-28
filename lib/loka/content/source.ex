@@ -23,7 +23,6 @@ defmodule Loka.Content.Source do
              | :room
              | :item
              | :npc
-             | :recipe
              | :barrier
              | :quest
              | :reaction
@@ -139,7 +138,6 @@ defmodule Loka.Content.Source do
     "rooms" => :room,
     "items" => :item,
     "npcs" => :npc,
-    "recipes" => :recipe,
     "barriers" => :barrier,
     "quests" => :quest,
     "reactions" => :reaction,

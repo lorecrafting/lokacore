@@ -1,4 +1,35 @@
 # Pinned findings loka-kgd.184 clears; the test caps this list at 204 lines: shrink it, never grow it.
+toolbox_showcase actions/carve_spoon.json: policy refuses with no reason
+toolbox_showcase actions/cook_feast.json: policy refuses with no reason
+toolbox_showcase actions/cook_stew.json: policy refuses with no reason
+toolbox_showcase actions/cook_stew_croft.json: policy refuses with no reason
+toolbox_showcase actions/disarm_cellar.json: policy refuses with no reason
+toolbox_showcase actions/disarm_plate.json: policy refuses with no reason
+toolbox_showcase actions/fish.json: policy refuses with no reason
+toolbox_showcase actions/fish_croft.json: policy refuses with no reason
+toolbox_showcase actions/force_grate.json: policy refuses with no reason
+toolbox_showcase actions/force_hall_cupboard.json: policy refuses with no reason
+toolbox_showcase actions/force_iron_door.json: policy refuses with no reason
+toolbox_showcase actions/force_strongbox.json: policy refuses with no reason
+toolbox_showcase actions/force_tollhouse_door.json: policy refuses with no reason
+toolbox_showcase actions/lift_store_bar.json: policy refuses with no reason
+toolbox_showcase actions/oil_winch.json: policy refuses with no reason
+toolbox_showcase actions/pick_hall_strongbox.json: policy refuses with no reason
+toolbox_showcase actions/pick_strongbox.json: policy refuses with no reason
+toolbox_showcase actions/play_fold_song.json: policy refuses with no reason
+toolbox_showcase actions/play_song.json: policy refuses with no reason
+toolbox_showcase actions/quench.json: policy refuses with no reason
+toolbox_showcase actions/raise_timbered_hut.json: policy refuses with no reason
+toolbox_showcase actions/saw.json: policy refuses with no reason
+toolbox_showcase actions/search_cellar.json: policy refuses with no reason
+toolbox_showcase actions/search_cleft.json: policy refuses with no reason
+toolbox_showcase actions/search_floor.json: policy refuses with no reason
+toolbox_showcase actions/shove_drover.json: policy refuses with no reason
+toolbox_showcase actions/think_hall_lectern.json: policy refuses with no reason
+toolbox_showcase actions/think_lectern.json: policy refuses with no reason
+toolbox_showcase actions/think_letter.json: policy refuses with no reason
+toolbox_showcase actions/water_croft.json: policy refuses with no reason
+toolbox_showcase actions/water_plot.json: policy refuses with no reason
 toolbox_showcase cartridge.json: world.bands have no normal band below 100%
 toolbox_showcase reactions/attic_drench.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/attic_kindle.json: writes state with no narrate step and no "silent": true
@@ -85,37 +116,6 @@ toolbox_showcase reactions/wither_croft.json: writes state with no narrate step 
 toolbox_showcase reactions/wither_plot.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/word_out.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/yard_hide.json: writes state with no narrate step and no "silent": true
-toolbox_showcase recipes/carve_spoon.json: policy refuses with no reason
-toolbox_showcase recipes/cook_feast.json: policy refuses with no reason
-toolbox_showcase recipes/cook_stew.json: policy refuses with no reason
-toolbox_showcase recipes/cook_stew_croft.json: policy refuses with no reason
-toolbox_showcase recipes/disarm_cellar.json: policy refuses with no reason
-toolbox_showcase recipes/disarm_plate.json: policy refuses with no reason
-toolbox_showcase recipes/fish.json: policy refuses with no reason
-toolbox_showcase recipes/fish_croft.json: policy refuses with no reason
-toolbox_showcase recipes/force_grate.json: policy refuses with no reason
-toolbox_showcase recipes/force_hall_cupboard.json: policy refuses with no reason
-toolbox_showcase recipes/force_iron_door.json: policy refuses with no reason
-toolbox_showcase recipes/force_strongbox.json: policy refuses with no reason
-toolbox_showcase recipes/force_tollhouse_door.json: policy refuses with no reason
-toolbox_showcase recipes/lift_store_bar.json: policy refuses with no reason
-toolbox_showcase recipes/oil_winch.json: policy refuses with no reason
-toolbox_showcase recipes/pick_hall_strongbox.json: policy refuses with no reason
-toolbox_showcase recipes/pick_strongbox.json: policy refuses with no reason
-toolbox_showcase recipes/play_fold_song.json: policy refuses with no reason
-toolbox_showcase recipes/play_song.json: policy refuses with no reason
-toolbox_showcase recipes/quench.json: policy refuses with no reason
-toolbox_showcase recipes/raise_timbered_hut.json: policy refuses with no reason
-toolbox_showcase recipes/saw.json: policy refuses with no reason
-toolbox_showcase recipes/search_cellar.json: policy refuses with no reason
-toolbox_showcase recipes/search_cleft.json: policy refuses with no reason
-toolbox_showcase recipes/search_floor.json: policy refuses with no reason
-toolbox_showcase recipes/shove_drover.json: policy refuses with no reason
-toolbox_showcase recipes/think_hall_lectern.json: policy refuses with no reason
-toolbox_showcase recipes/think_lectern.json: policy refuses with no reason
-toolbox_showcase recipes/think_letter.json: policy refuses with no reason
-toolbox_showcase recipes/water_croft.json: policy refuses with no reason
-toolbox_showcase recipes/water_plot.json: policy refuses with no reason
 toolbox_showcase resources.json: pennies bands have no normal band below 100%
 toolbox_showcase items/anvil.json: nothing takes it out of play
 toolbox_showcase items/apple.json: nothing takes it out of play

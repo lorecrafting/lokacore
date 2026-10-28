@@ -60,18 +60,18 @@ defmodule Loka.ContentRoadTest do
   # Breaks: a short resource reference left short (the loader would reject the artifact).
   test "full resource references compile to the same artifact", %{tmp_dir: dir} do
     shove =
-      src("recipes/shove_cart.json")
+      src("actions/shove_cart.json")
       |> put_in(["costs", Access.at(0), "resource"], ref("resource", "mv"))
       |> put_in(["check", "resource"], ref("resource", "hp"))
 
     pray =
       put_in(
-        src("recipes/pray.json"),
+        src("actions/pray.json"),
         ["outcomes", "success", "sequence", Access.at(0), "resource"],
         ref("resource", "hp")
       )
 
-    files = %{"recipes/shove_cart.json" => shove, "recipes/pray.json" => pray}
+    files = %{"actions/shove_cart.json" => shove, "actions/pray.json" => pray}
     assert compile(dir, files) == {:ok, @expected, []}
   end
 
@@ -135,24 +135,24 @@ defmodule Loka.ContentRoadTest do
 
     assert compile(
              Path.join(dir, "a"),
-             edit("recipes/shove_cart.json", ["costs", Access.at(0), "resource"], "sp")
+             edit("actions/shove_cart.json", ["costs", Access.at(0), "resource"], "sp")
            ) ==
-             {:error, [d("UNRESOLVED_REFERENCE", "recipes/shove_cart.costs[0].resource", target)]}
+             {:error, [d("UNRESOLVED_REFERENCE", "actions/shove_cart.costs[0].resource", target)]}
 
     assert compile(
              Path.join(dir, "b"),
-             edit("recipes/shove_cart.json", ["check", "resource"], "sp")
+             edit("actions/shove_cart.json", ["check", "resource"], "sp")
            ) ==
-             {:error, [d("UNRESOLVED_REFERENCE", "recipes/shove_cart.check.resource", target)]}
+             {:error, [d("UNRESOLVED_REFERENCE", "actions/shove_cart.check.resource", target)]}
 
     step = ["outcomes", "success", "sequence", Access.at(0), "resource"]
 
-    assert compile(Path.join(dir, "c"), edit("recipes/pray.json", step, "sp")) ==
+    assert compile(Path.join(dir, "c"), edit("actions/pray.json", step, "sp")) ==
              {:error,
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "recipes/pray.outcomes.success.sequence[0].resource",
+                  "actions/pray.outcomes.success.sequence[0].resource",
                   target
                 )
               ]}

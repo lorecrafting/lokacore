@@ -49,11 +49,11 @@ defmodule Loka.ContentFerryTest do
 
   # coil_rope with its Bram participant replaced by `p`.
   defp bram(p) do
-    r = src("recipes/coil_rope.json")
-    %{"recipes/coil_rope.json" => put_in(r, ~w(outcomes success narration participants bram), p)}
+    r = src("actions/coil_rope.json")
+    %{"actions/coil_rope.json" => put_in(r, ~w(outcomes success narration participants bram), p)}
   end
 
-  @bram "recipes/coil_rope.outcomes.success.narration.participants.bram"
+  @bram "actions/coil_rope.outcomes.success.narration.participants.bram"
 
   # Breaks: a participant's short npc left short (Checks.expand; the loader would reject it).
   test "a full participant reference compiles to the same artifact", %{dir: dir} do
@@ -364,7 +364,7 @@ defmodule Loka.ContentFerryTest do
 
     %{
       "cartridge.json" => manifest,
-      "recipes/coil_rope.json" => Map.delete(src("recipes/coil_rope.json"), "duration")
+      "actions/coil_rope.json" => Map.delete(src("actions/coil_rope.json"), "duration")
     }
   end
 
@@ -430,12 +430,12 @@ defmodule Loka.ContentFerryTest do
                 ]}
     end
 
-    duration = Map.put(files, "recipes/coil_rope.json", src("recipes/coil_rope.json"))
+    duration = Map.put(files, "actions/coil_rope.json", src("actions/coil_rope.json"))
 
     assert compile(dir, duration) ==
              {:error,
               [
-                d("INVALID_TIME_POLICY", "recipes/coil_rope.duration", %{})
+                d("INVALID_TIME_POLICY", "actions/coil_rope.duration", %{})
               ]}
   end
 end

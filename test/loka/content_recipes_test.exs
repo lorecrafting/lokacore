@@ -27,7 +27,7 @@ defmodule Loka.ContentRecipesTest do
   end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
-  defp recipe(path, v), do: put_in(src("recipes/ring_bell.json"), path, v)
+  defp recipe(path, v), do: put_in(src("actions/ring_bell.json"), path, v)
 
   defp d(code, path, data \\ %{}, suggested \\ []) do
     %{
@@ -63,11 +63,11 @@ defmodule Loka.ContentRecipesTest do
     ]
 
     r =
-      src("recipes/ring_bell.json")
+      src("actions/ring_bell.json")
       |> put_in(["target", "room"], full("room", "belfry"))
       |> put_in(["outcomes", "success", "sequence"], seq)
 
-    assert compile(dir, %{"recipes/ring_bell.json" => r}) == {:ok, @expected, []}
+    assert compile(dir, %{"actions/ring_bell.json" => r}) == {:ok, @expected, []}
   end
 
   # Breaks: a recipe naming a room, detail or fact that does not exist compiles, or a wrongly
@@ -77,21 +77,21 @@ defmodule Loka.ContentRecipesTest do
 
     cases = [
       {recipe(["target", "room"], "crypt"),
-       d("UNRESOLVED_REFERENCE", "recipes/ring_bell.target.room", %{
+       d("UNRESOLVED_REFERENCE", "actions/ring_bell.target.room", %{
          "target" => "recipe_sampler@0.0.1:room/crypt"
        })},
       {recipe(["target", "detail"], "gong"),
-       d("UNRESOLVED_REFERENCE", "recipes/ring_bell.target.detail", %{"target" => "gong"})},
+       d("UNRESOLVED_REFERENCE", "actions/ring_bell.target.detail", %{"target" => "gong"})},
       {recipe(seq, [%{"op" => "fact.assign", "fact" => "bell_tolled", "value" => true}]),
-       d("UNRESOLVED_REFERENCE", "recipes/ring_bell.outcomes.success.sequence[0].fact", %{
+       d("UNRESOLVED_REFERENCE", "actions/ring_bell.outcomes.success.sequence[0].fact", %{
          "target" => "recipe_sampler@0.0.1:fact/bell_tolled"
        })},
       {recipe(seq, [%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => "yes"}]),
-       d("FACT_TYPE_MISMATCH", "recipes/ring_bell.outcomes.success.sequence[0].value")}
+       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.sequence[0].value")}
     ]
 
     for {r, diag} <- cases,
-        do: assert(compile(dir, %{"recipes/ring_bell.json" => r}) == {:error, [diag]})
+        do: assert(compile(dir, %{"actions/ring_bell.json" => r}) == {:error, [diag]})
   end
 
   # Breaks: a label or narration key without catalog text compiles (the player sees a raw key).
@@ -101,12 +101,12 @@ defmodule Loka.ContentRecipesTest do
     assert compile(dir, %{"text.json" => text}) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "recipes/ring_bell.label", %{
+                d("UNRESOLVED_REFERENCE", "actions/ring_bell.label", %{
                   "target" => "actions.ring_bell"
                 }),
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "recipes/ring_bell.outcomes.success.narration.observers",
+                  "actions/ring_bell.outcomes.success.narration.observers",
                   %{"target" => "narration.ring_bell.observers"}
                 )
               ]}
@@ -129,8 +129,8 @@ defmodule Loka.ContentRecipesTest do
     assert compile(dir, %{"cartridge.json" => manifest.(["action_recipe"])}) ==
              {:error,
               [
-                owner.("recipes/ring_bell"),
-                owner.("recipes/ring_bell.outcomes.success.sequence[1].op")
+                owner.("actions/ring_bell"),
+                owner.("actions/ring_bell.outcomes.success.sequence[1].op")
               ]}
 
     action = %{
@@ -143,16 +143,56 @@ defmodule Loka.ContentRecipesTest do
       "accessibility" => "actions.ring_bell"
     }
 
-    assert compile(dir, %{"actions/ring_bell.json" => action}) ==
-             {:error, [d("DUPLICATE_DEFINITION", "recipes/ring_bell")]}
+    # One actions/ directory: the clash is a bundled action beside the recipe's file.
+    assert compile(dir, %{"areas/belfry.json" => %{"actions" => %{"ring_bell" => action}}}) ==
+             {:error,
+              [
+                d("DUPLICATE_DEFINITION", "actions/ring_bell"),
+                d("DUPLICATE_DEFINITION", "areas/belfry.actions.ring_bell")
+              ]}
 
     look = %{
-      "recipes/ring_bell.json" => nil,
-      "recipes/look.json" => src("recipes/ring_bell.json")
+      "actions/ring_bell.json" => nil,
+      "actions/look.json" => src("actions/ring_bell.json")
     }
 
     assert compile(Path.join(dir, "verb"), look) ==
-             {:error, [d("DUPLICATE_DEFINITION", "recipes/look")]}
+             {:error, [d("DUPLICATE_DEFINITION", "actions/look")]}
+  end
+
+  # Breaks: actions/ files route by a field other than `command` (a mixed file is then
+  # refused at the wrong field or compiles), or a leftover recipes/ directory still loads.
+  test "an actions/ file with command is a built-in action, without it a recipe",
+       %{tmp_dir: dir} do
+    bell = src("actions/ring_bell.json")
+
+    assert compile(dir, %{"actions/ring_bell.json" => Map.put(bell, "command", "look")}) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "actions/ring_bell.accessibility", %{
+                  "error" => "missing_property"
+                }),
+                d("UNKNOWN_FIELD", "actions/ring_bell.aliases"),
+                d("SCHEMA_VIOLATION", "actions/ring_bell.input", %{"error" => "missing_property"}),
+                d("UNKNOWN_FIELD", "actions/ring_bell.outcomes"),
+                # TargetSpec has no detail kind (action.schema.json).
+                d("SCHEMA_VIOLATION", "actions/ring_bell.target.kind", %{
+                  "error" => "unknown_variant"
+                })
+              ]}
+
+    assert compile(Path.join(dir, "neither"), %{
+             "actions/ring_bell.json" => Map.delete(bell, "outcomes")
+           }) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "actions/ring_bell.outcomes", %{
+                  "error" => "missing_property"
+                })
+              ]}
+
+    assert compile(Path.join(dir, "old"), %{"recipes/ring_bell.json" => bell}) ==
+             {:error, [d("UNKNOWN_FIELD", "recipes/ring_bell")]}
   end
 
   # Breaks: a room's contribution naming nothing compiles (a typo that silently changes

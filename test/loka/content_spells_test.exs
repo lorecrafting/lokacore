@@ -15,7 +15,7 @@ defmodule Loka.ContentSpellsTest do
     below = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.50")}
     open = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
     # Spells without a level leaf.
-    spells = [below, {"recipes/ward.json", &Map.put(&1, "policy", open)}]
+    spells = [below, {"actions/ward.json", &Map.put(&1, "policy", open)}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, spells)
     assert pairs(diags) == [@floor]
 
@@ -23,8 +23,8 @@ defmodule Loka.ContentSpellsTest do
     level = %{"policy_version" => 1, "root" => %{"op" => "level_compare", "at_least" => 1}}
 
     leaf =
-      [below, {"recipes/gather_ash.json", &Map.put(&1, "policy", level)}] ++
-        for k <- ~w(lux ward noctis), do: {"recipes/#{k}.json", nil}
+      [below, {"actions/gather_ash.json", &Map.put(&1, "policy", level)}] ++
+        for k <- ~w(lux ward noctis), do: {"actions/#{k}.json", nil}
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, leaf)
     assert pairs(diags) == [@floor]
@@ -32,21 +32,21 @@ defmodule Loka.ContentSpellsTest do
     # An opposed check on a spell: no detail rating, and no npc named.
     opposed = [
       {"cartridge.json", &put_in(&1, ["requires", "capabilities", "check"], 1)},
-      {"recipes/ward.json",
+      {"actions/ward.json",
        &(&1
          |> Map.put("check", %{"key" => "w", "kind" => "opposed", "attribute" => "wis"})
          |> put_in(["outcomes", "failure"], &1["outcomes"]["success"]))}
     ]
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, opposed)
-    assert {"SCHEMA_VIOLATION", "recipes/ward.check"} in pairs(diags), inspect(diags)
+    assert {"SCHEMA_VIOLATION", "actions/ward.check"} in pairs(diags), inspect(diags)
 
-    same = [{"recipes/noctis.json", &put_in(&1, ["target", "word"], "lux")}]
+    same = [{"actions/noctis.json", &put_in(&1, ["target", "word"], "lux")}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, same)
 
     assert Enum.sort(pairs(diags)) == [
-             {"DUPLICATE_DEFINITION", "recipes/lux.target.word"},
-             {"DUPLICATE_DEFINITION", "recipes/noctis.target.word"}
+             {"DUPLICATE_DEFINITION", "actions/lux.target.word"},
+             {"DUPLICATE_DEFINITION", "actions/noctis.target.word"}
            ]
 
     # A spell is cast by word, never by key: a room contribution naming one is unresolved.
@@ -63,7 +63,7 @@ defmodule Loka.ContentSpellsTest do
   # too; spells.test.ts).
   test "a spell's learned names a bool player fact of this cartridge; spells need 1.98" do
     dir = Loka.ContentSource.copy(@dir)
-    learned = &{"recipes/ward.json", fn r -> update_in(r, ["target"], &1) end}
+    learned = &{"actions/ward.json", fn r -> update_in(r, ["target"], &1) end}
 
     fact = fn key, spec ->
       [
@@ -77,17 +77,17 @@ defmodule Loka.ContentSpellsTest do
 
     for {edits, expected} <- [
           {[learned.(&Map.delete(&1, "learned"))],
-           {"SCHEMA_VIOLATION", "recipes/ward.target.learned"}},
+           {"SCHEMA_VIOLATION", "actions/ward.target.learned"}},
           {[learned.(&Map.put(&1, "learned", "nope"))],
-           {"UNRESOLVED_REFERENCE", "recipes/ward.target.learned"}},
+           {"UNRESOLVED_REFERENCE", "actions/ward.target.learned"}},
           {fact.("count", %{
              "value_type" => %{"type" => "int", "default" => 0},
              "scopes" => ["player"]
-           }), {"FACT_TYPE_MISMATCH", "recipes/ward.target.learned"}},
+           }), {"FACT_TYPE_MISMATCH", "actions/ward.target.learned"}},
           {fact.("world", Map.put(bool, "scopes", ["instance"])),
-           {"FACT_SCOPE_UNSUPPORTED", "recipes/ward.target.learned"}},
+           {"FACT_SCOPE_UNSUPPORTED", "actions/ward.target.learned"}},
           {fact.("pair", Map.merge(bool, %{"scopes" => ["player"], "per_subject" => true})),
-           {"FACT_SCOPE_UNSUPPORTED", "recipes/ward.target.learned"}},
+           {"FACT_SCOPE_UNSUPPORTED", "actions/ward.target.learned"}},
           {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.97")}],
            @floor}
         ] do
@@ -100,12 +100,12 @@ defmodule Loka.ContentSpellsTest do
   test "a recipe reason names a text key and needs 1.100, which is above 1.99" do
     dir = Loka.ContentSource.copy(@dir)
     api = &{"cartridge.json", fn m -> put_in(m, ["requires", "kernel_api"], &1) end}
-    reason = &{"recipes/ward.json", &1}
+    reason = &{"actions/ward.json", &1}
     at_199 = api.(%{"at_least" => "1.99", "below" => "1.100"})
 
     for {edits, expected} <- [
           {[reason.(&Map.put(&1, "reason", "reason.nope"))],
-           [{"UNRESOLVED_REFERENCE", "recipes/ward.reason"}]},
+           [{"UNRESOLVED_REFERENCE", "actions/ward.reason"}]},
           {[at_199], [@floor]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)

@@ -16,7 +16,7 @@ defmodule Loka.ContentCuesTest do
 
     no_cues =
       for f <-
-            ~w(rooms/forge.json rooms/tower.json items/torch.json recipes/pick_lock.json npcs/sentry.json),
+            ~w(rooms/forge.json rooms/tower.json items/torch.json actions/pick_lock.json npcs/sentry.json),
           do: {f, &drop_cues/1}
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [api])
@@ -46,7 +46,7 @@ defmodule Loka.ContentCuesTest do
     untexted = {"text.json", &Map.delete(&1, "cue.rattle")}
     assert {:error, diags} = Loka.ContentSource.compile(dir, [untexted])
 
-    assert {"UNRESOLVED_REFERENCE", "recipes/pick_lock.outcomes.failure.cues[0].text"} in pairs(
+    assert {"UNRESOLVED_REFERENCE", "actions/pick_lock.outcomes.failure.cues[0].text"} in pairs(
              diags
            ),
            inspect(diags)
