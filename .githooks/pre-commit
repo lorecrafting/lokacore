@@ -15,3 +15,9 @@ if git -c core.quotePath=false diff --cached --name-only | grep -q '\.md$'; then
 if printf '%s\n' "$staged" | grep -qx '.beads/issues.jsonl'; then python3 bin/check_beads_export.py --staged; fi
 # The generated dashboard JSON is otherwise checked only by hosted CI on branches, not on a push to main.
 if printf '%s\n' "$staged" | grep -qE '^(docs/MECHANICS-TOOLBOX\.md|docs/CHECKS\.md|docs/system/mechanics\.md|protocol/)'; then mise exec -- elixir bin/contracts.exs --check; fi
+# Size limits and Credo, so a breach fails here rather than at push (bin/prepush.sh checks every file).
+tsf=$(printf '%s\n' "$staged" | grep -E '\.(ts|tsx|mjs)$' || true)
+[ -z "$tsf" ] || mise exec -- node bin/check_ts_size.mjs $tsf
+[ -z "$ex" ] || mise exec -- elixir bin/check_size.exs $ex
+exf=$(printf '%s\n' "$ex" | grep -E '\.ex$' || true)
+[ -z "$exf" ] || MIX_ENV=test mise exec -- mix credo --strict $exf
