@@ -55,6 +55,14 @@ test('every $ref in the source schemas resolves', () => {
 const room = { title: 'hall.title', description: 'hall.description', exits: {} };
 const signal = { op: 'signal', signal: 'bell' };
 const reaction = { on: { event: 'signal', signal: 'bell' }, apply: [signal] };
+const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [signal] };
+const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [signal] };
+const fact = {
+  version: 1,
+  value_type: { type: 'bool', default: false },
+  scopes: ['player'],
+  meaning: 'm',
+};
 
 // Each pair: a file the schema accepts, then the same file with one mistake. The corpus
 // covers every other shortcut; no committed cartridge uses a signal yet.
@@ -69,6 +77,12 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
       { extends: 'deer', behaviours: ['spoils'] },
       { extends: 'deer', behaviours: 'spoils' },
     ],
+    ['reactions', entered, { ...entered, on: { event: 'entity_entered_room' } }],
+    ['reactions', zoned, { ...zoned, on: entered.on }],
+    ['behaviours', { reactions: {}, params: ['who'] }, { reactions: {}, params: ['holder'] }],
+    ['behaviours', { reactions: {} }, { params: [] }],
+    ['areas', { rooms: { hall: room } }, { rooms: { hall: { ...room, titel: 'x' } } }],
+    ['facts', { facts: { lit: fact } }, { facts: { lit: { ...fact, colour: 'red' } } }],
   ];
   for (const [kind, good, bad] of pairs) {
     assert.deepEqual(check(kind, good), [], JSON.stringify(good));
