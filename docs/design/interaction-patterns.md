@@ -333,8 +333,6 @@ For a brief that adds or changes anything the player sees or taps
 
 Conflicts (code or spec contradicts a pattern above):
 
-- Exit warning notes and the Continue conversation button still draw on the World page outside
-  the five parts: loka-x6t.127 follow-ups.
 - Containers show contents without Open: loka-x6t.121 (in progress).
 
 Gaps (no pattern or no check yet):

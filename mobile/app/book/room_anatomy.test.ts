@@ -112,7 +112,7 @@ const game = (current: () => GameView): Game => ({
   lastNarration: () => undefined,
 });
 
-const world = async (view: GameView, opened: Page[] = [], pressed: string[] = []) => {
+const world = async (view: GameView, opened: Page[] = [], pressed: string[] = [], page?: Page) => {
   const { Body } = await import('./Body.tsx');
   const screen = presenter(game(() => view)).screen();
   const press = (b: { action_key: string }) => pressed.push(b.action_key);
@@ -120,6 +120,7 @@ const world = async (view: GameView, opened: Page[] = [], pressed: string[] = []
   return nodes(
     Body({
       screen,
+      page,
       g: group(screen.buttons),
       press,
       open: (page: Page) => opened.push(page),
@@ -129,20 +130,13 @@ const world = async (view: GameView, opened: Page[] = [], pressed: string[] = []
 };
 
 // Breaks: any removed block restored (World verb lines, the refused note, the
-// unlinked notice, board, bed and ferry entries, the cue block).
+// unlinked notice, board, bed and ferry entries, the cue block, the exit warning note, Continue
+// conversation for an absent speaker's open choice).
 test('the World page draws only title, linked prose, people, items and log', async () => {
   const drawn = await world(forge());
   assert.deepEqual(
     drawn.filter(pressable).map((n) => n.props.accessibilityLabel),
-    [
-      'Forge, look',
-      'hearth, open',
-      'sign, open',
-      'The smith, open',
-      'Tongs, open',
-      // Still open (loka-x6t.127 follow-ups): the Continue conversation control.
-      'Continue conversation',
-    ],
+    ['Forge, look', 'hearth, open', 'sign, open', 'The smith, open', 'Tongs, open'],
   );
   const page = drawn
     .filter((n) => n.type === 'Text')
@@ -153,8 +147,21 @@ test('the World page draws only title, linked prose, people, items and log', asy
   // A cue is a log line only: a restored cue block would draw it twice.
   for (const cue of ['Hammering', 'Heat beats'])
     assert.equal(page.split(cue).length - 1, 1, `${cue} drawn once`);
-  // Still open (loka-x6t.127 follow-ups): the exit warning note.
-  assert.ok(page.includes('The north path is iced.'));
+  // An exit warning is a movement log line, never a note on the page.
+  assert.ok(!page.includes('The north path is iced.'));
+});
+
+// Breaks: the carried-item note returns to World's people list, or is not on the NPC page.
+test("a person's carried item is a note on their page, not on World", async () => {
+  SAY['npc.carry'] = 'The smith has a coin in its beak.';
+  const carrying = forge({
+    entities: [{ id: 'smith', name: 'npc.smith', kind: 'npc', actions: [], carrying: 'npc.carry' }],
+  });
+  const shown = async (page?: Page) =>
+    (await world(carrying, [], [], page)).filter((n) => n.type === 'Text').map(words);
+  const count = (lines: string[]) => lines.filter((l) => l === SAY['npc.carry']).length;
+  assert.equal(count(await shown()), 0);
+  assert.equal(count(await shown({ kind: 'thing', id: 'smith' })), 1);
 });
 
 // Breaks: an unlinked bed or ferry stays unreachable from its prose link, or a bed's link sleeps

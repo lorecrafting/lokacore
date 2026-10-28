@@ -34,8 +34,10 @@ The scrolling World page is, top to bottom, and nothing else:
 4. The items paragraph, each name opening its detail page.
 5. The room event log, the full record: every line lands here ([line placement](#line-placement)).
    Ambient lines (sounds from the next room, weather changes, room events, NPCs acting or emoting,
-   arrivals and departures), the player's own lines and refusals, combat lines and the lines a
-   detail page also shows.
+   arrivals and departures), the player's own lines and refusals, combat lines, the lines a
+   detail page also shows and the [away recap](#away-recap) (one collapsible entry; its heading is
+   the log's only pressable). An exit's projected warning (D6 water entry) is logged once when
+   the player moves through that exit, after the movement line; World draws no warning block.
 
 No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
 fixture, person or item detail page. On hold: a skill check (perception, lore) may add a sentence,
@@ -52,8 +54,7 @@ description, the people and items sentences and, last, the event log (words go t
 notice entry: every action, available or refused, draws on its target's fixture, person or item
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
-main room page"). The exit warning notes and the Continue conversation control still draw until
-the `loka-x6t.127` follow-ups close.
+main room page").
 World draws no door card: Open and Unlock work from the Map and the
 [joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
@@ -89,7 +90,7 @@ every member stays reachable (PM ruling 2026-10-23); a name without words draws 
 form, one line per foe. Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
 its own inline link named "<name>, open" that opens its detail (a tap, or Enter or Space on a keyboard); the commas, "and" and "are here."
-are not pressable. A person's carried-item line follows the people sentence as a Note. An item's Take option appears only when currently offered; an NPC or
+are not pressable. An item's Take option appears only when currently offered; an NPC or
 player uses its own offered interactions. Omit an empty group. Player presence is a
 future projection; the current Book has NPCs and items only. This distinction is
 presentation and custody, not a new entity kind: fixture, actor and item actions still
@@ -101,6 +102,7 @@ projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
+World scrolls to its end as its log grows, as a person's page does.
 Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
@@ -272,7 +274,7 @@ no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pen
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
 fault show there as on every page. Combat, Character, Contents, the map and World keep the
 [status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
-foot. A control that opens a child (Resume dream, Continue conversation) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
+foot. A control that opens a child (Resume dream) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
 
 ## Line placement
 
@@ -359,7 +361,8 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 ## NPC dialogue and action details
 
 Tapping an NPC opens full details using its actual projected name, authored description and
-actions. Description comes first. Outside a conversation the page offers the person's actions as one
+actions. Description comes first. A person's carried-item line (EntityView `carrying`) follows the
+description as a Note; World never draws it. Outside a conversation the page offers the person's actions as one
 ordered list of Action cards straight after the description and history (owner pick
 mvlrlvappy4w, mvlymuams73l, 2026-10-23): **Talk**, then **Trade**, the [pick
 options](#item-details-and-takedrop) Use an item… and Cast a spell…, Lift or Take, [Ask
@@ -419,7 +422,9 @@ conversation on the page, sends no engine verb and preserves any unmatched saved
 structurally; meaningful authored/quest consequences and genuine errors remain. Sections retain
 Back to World. Item Leave remains local navigation.
 
-An absent pending speaker uses its actual continuation without invented NPC data. Live results
+An absent pending speaker uses its actual continuation without invented NPC data. World draws no
+control for it: the choice waits on the speaker's page, the conversation page opens on a reopen,
+and a talk to anyone else closes it. Live results
 stay in their original detail even when retried elsewhere. Available choices/actions use the
 freshness token captured when drawn; scenes and queued chapters retain precedence.
 
@@ -751,7 +756,7 @@ GameView `conditions` lists every active [status](mechanics.md#status-effects-ov
 
 ## Away recap
 
-Proposed for [designer](../decisions/owner-decision-designer-role-2026-10-07.md) approval; wording pending designer (Beads `loka-x6t.14`). When GameView carries `recap_after` ([away recap](mechanics.md#away-recap-toolbox-row-w27)), the presenter holds the World-log lines of each elapsed settlement (ambient arrivals and departures and receipt narration, each receipt line on its own) from its first background update until the elapsed status is no longer catching up. If the status is then ready, the held lines are not empty and the settlement spanned at least `recap_after` of logical time, they become the away recap; otherwise (a shorter settlement, or a pending, error, fault or replaced status) they go to the World log in order, as without the field. The recap opens the World page, after the fixed title and before the room prose: one block, collapsed to its heading "While you were away", whose accessible name adds ", show" or ", hide"; tapped open, it lists each distinct line once in first-seen order, with " (N times)" after a line seen more than once ("The poison burns in your veins. (11 times)", "Maud leaves. (6 times)"). The page below is unchanged and ends in its status line, which shows the present state. The next press removes the recap; a press while time still catches up ends the settlement's holding, so its lines go to the World log in order before the press's own; a second long absence before any press adds its lines to the same recap; when the player's room changes, held lines and a shown recap are dropped with the old room's log. Nothing is stored, so a recap shown before the app closed is gone after a reopen; on a cold reopen with the field authored, catch-up waits until the Book has subscribed, so that absence's settlement gives its recap. Lines routed to a detail, a conversation or the combat log keep those routes. Without `recap_after` (Chapter 1) nothing changes.
+Proposed for [designer](../decisions/owner-decision-designer-role-2026-10-07.md) approval; wording pending designer (Beads `loka-x6t.14`). When GameView carries `recap_after` ([away recap](mechanics.md#away-recap-toolbox-row-w27)), the presenter holds the World-log lines of each elapsed settlement (ambient arrivals and departures and receipt narration, each receipt line on its own) from its first background update until the elapsed status is no longer catching up. If the status is then ready, the held lines are not empty and the settlement spanned at least `recap_after` of logical time, they become the away recap; otherwise (a shorter settlement, or a pending, error, fault or replaced status) they go to the World log in order, as without the field. The recap is one entry in the room event log, written when the settlement settles, after the lines already logged; later lines follow it. It is collapsed to its heading "While you were away", whose accessible name adds ", show" or ", hide"; tapped open, it lists each distinct line once in first-seen order, with " (N times)" after a line seen more than once ("The poison burns in your veins. (11 times)", "Maud leaves. (6 times)"). The status line shows the present state. The entry stays in the log until the room changes; a press while time still catches up ends the settlement's holding, so its lines go to the World log in order before the press's own; a second long absence before any other line adds its lines to the same entry; when the player's room changes, held lines and the entry are dropped with the old room's log. Nothing is stored, so a recap shown before the app closed is gone after a reopen; on a cold reopen with the field authored, catch-up waits until the Book has subscribed, so that absence's settlement gives its recap. Lines routed to a detail, a conversation or the combat log keep those routes. Without `recap_after` (Chapter 1) nothing changes.
 
 ## Worn affects details
 

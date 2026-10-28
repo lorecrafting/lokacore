@@ -7,7 +7,7 @@ import { cap, plain } from './model.ts';
 import { COUNT, LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import { lineText } from './words.ts';
-import type { RecapLine } from './recap.ts';
+import { grouped, type RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { size, space, type } from './tokens.ts';
@@ -68,7 +68,8 @@ export function Note({ children }: { children: string }) {
  *   ink italic, plain prose with no tag or chip (owner pick mvlyp3gphp2t, 2026-10-23); its reason
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads it). A speech line
  *   (speaker bar) waits until the log projects a speaker.
- * - States: narration (a repeated quiet line reads `<line> (N times)`); system; refused.
+ * - States: narration (a repeated quiet line reads `<line> (N times)`); system; refused; an away
+ *   recap entry, drawn as AwayRecap.
  * - Story: LogLines.stories.tsx
  */
 export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
@@ -83,6 +84,8 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
           <Text key={i} style={{ ...t.log, color: c.fg }}>
             {lineText(line)}
           </Text>
+        ) : 'recap' in line ? (
+          <AwayRecap key={i} lines={grouped(line.recap)} />
         ) : 'event' in line ? (
           <Text key={i} style={{ ...t.log, color: c.dim, ...type.italic }}>
             {line.text}
@@ -102,8 +105,8 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
 }
 
 /**
- * The World page's first block after an absence (book-ui.md, Away recap).
- * - Use: the World page; the Chronicle's day headings (`heading` "Day N").
+ * A room log entry after an absence (book-ui.md, Away recap).
+ * - Use: the room log (LogLines); the Chronicle's day headings (`heading` "Day N").
  * - Rules: a Tap heading like a system log line, named with ", show" or ", hide"; open, one line
  *   per group, " (N times)" after a repeat; `milestone` lines named "<line>, story point".
  *   Wording pending the designer (loka-x6t.14).
@@ -147,15 +150,14 @@ export function AwayRecap({
 }
 
 /**
- * The room's people, then items, then sense cues; no headings, an empty group omitted
- * (book-ui.md, World and status entry). Superseded by book-ui.md Room page anatomy: cues become
- * log lines (loka-x6t.127).
+ * The room's people, then items; no headings, an empty group omitted (book-ui.md, Room page
+ * anatomy).
  * - Use: RoomPage only.
  * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
  *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word
  *   capitalised, each name its own link named "<name>, open"; articles, commas and "and" are plain
  *   text. A name with words shows its bare name; an article is shared by a run of different names
- *   that take it. A person's carried-item line follows the people sentence as a Note.
+ *   that take it.
  * - Story: RoomPage.stories.tsx
  */
 export function Here(p: {
@@ -165,16 +167,8 @@ export function Here(p: {
 }) {
   const npcs = p.view.entities.filter((e) => e.kind === 'npc');
   const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  const carried = npcs.flatMap((e) => (e.carrying ? [p.text(e.carrying)] : []));
   return [
-    npcs.length > 0 && (
-      <View key="npcs">
-        <Present group={npcs} text={p.text} open={p.open} />
-        {carried.map((line, i) => (
-          <Note key={i}>{line}</Note>
-        ))}
-      </View>
-    ),
+    npcs.length > 0 && <Present key="npcs" group={npcs} text={p.text} open={p.open} />,
     items.length > 0 && <Present key="items" group={items} text={p.text} open={p.open} />,
   ];
 }

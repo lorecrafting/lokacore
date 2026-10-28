@@ -37,4 +37,3 @@ export const BackToBoard: Story = { args: { label: 'Back to board' } };
 export const BackToMap: Story = { args: { label: 'Back to map' } };
 export const Close: Story = { args: { label: 'Close' } };
 export const ResumeDream: Story = { args: { label: 'Resume dream' } };
-export const ContinueConversation: Story = { args: { label: 'Continue conversation' } };
