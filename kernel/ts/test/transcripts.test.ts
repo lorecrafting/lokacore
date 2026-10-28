@@ -51,6 +51,8 @@ test('every example transcript replays and exercises its capability', () => {
       header(r) + entries.map((e) => line(decideReplay(r, e.data.command).trace)).join('');
     assert.equal(out, bytes, `${rel}: replay differs`);
     const capability = basename(file, '.jsonl');
+    // A walk_ transcript tours a district across capabilities; it only has to replay.
+    if (capability.startsWith('walk_')) continue;
     const owners = readFileSync(ROOT + rel, 'utf8')
       .split('\n')
       .filter(Boolean)

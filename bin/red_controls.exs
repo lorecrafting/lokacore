@@ -130,7 +130,15 @@ controls = [
    "#{ruleless["key"]}@#{ruleless["version"]}: missing spec"},
   {"features: a transcript added without regenerating the feature map",
    %{"cartridges/details_sampler/transcripts/skills.jsonl" => ""},
-   ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
+   ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"},
+  {"transcripts: a walk_ transcript whose replay differs",
+   %{
+     "cartridges/toolbox_showcase/transcripts/walk_red.jsonl" =>
+       root
+       |> Path.join("cartridges/toolbox_showcase/transcripts/walk_combat_tilt.jsonl")
+       |> File.read!()
+       |> String.replace(~s("direction":"west"), ~s("direction":"north"), global: false)
+   }, ~w(node --test kernel/ts/test/transcripts.test.ts), "walk_red.jsonl: replay differs"}
 ]
 
 for {_, files, _, _} <- controls, {rel, _} <- files do
