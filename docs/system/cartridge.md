@@ -597,6 +597,22 @@ and an NPC and an item sharing a key give one `DUPLICATE_DEFINITION` at the beha
 example: one behaviour on its four fish (without parameters); its artifact equals the four hand-written `take_*`
 rules byte for byte.
 
+### Source schema
+
+`schemas/source/` holds one JSON Schema (draft 2020-12) per source file kind, for editors and
+LLM authors: one per definition directory (`rooms.schema.json`, `behaviours.schema.json`, ...),
+one per root file (`cartridge`, `facts`, `text`, `resources`, `attributes`, `map_positions`)
+and `areas.schema.json` for bundles, each a `$ref` into the shared `defs.schema.json`.
+`mix loka.source_schema` writes them from the contracts the compiler checks source with plus the
+shortcuts above (`lib/loka/content/source_schema.ex`); a test fails when the committed files
+are stale, and `kernel/ts/test/source_schema.test.ts` validates every committed cartridge file
+with them. They accept every shortcut: no `key`, an `abstract` parent (checked only as an
+object), an `extends` child (no inherited member required), `with`, `{"prose": ...}` wherever a
+text key goes (root files too), the signal step and trigger, `zone` and `zones`, and
+`behaviours`. They are a writing aid, not a gate: nothing reads them, the compiler remains the
+judge, and they do not check references, bundle-member keys against file stems, or the
+`resources` and `attributes` entries beyond being objects.
+
 ## Artifact and loader
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:48`) returns the decoded

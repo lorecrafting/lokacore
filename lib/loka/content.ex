@@ -56,6 +56,10 @@ defmodule Loka.Content do
   @spec lint(Path.t()) :: [String.t()]
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
 
+  @doc "The source JSON Schema files, name => text (Loka.Content.SourceSchema)."
+  @spec source_schema() :: %{String.t() => binary()}
+  defdelegate source_schema(), to: Loka.Content.SourceSchema, as: :files
+
   # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
   defp artifact(cartridge) do
     {:ok, bytes} = Canonical.encode(cartridge)

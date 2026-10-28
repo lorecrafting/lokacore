@@ -56,6 +56,23 @@ capability locks, references, placements and capacities, dialogue/quest links, t
 and other content relationships ([compiler checks](system/cartridge.md#compiler)). A
 compiled artifact is checked again when loaded ([loader](system/cartridge.md#artifact-and-loader)).
 
+## Validate while writing
+
+`schemas/source/` has a JSON Schema for each source file kind ([source schema](system/cartridge.md#source-schema)),
+so an editor flags a misspelled field or a malformed shortcut as you type. In VS Code, map them
+in the workspace `settings.json`:
+
+```json
+"json.schemas": [
+  { "fileMatch": ["cartridges/*/rooms/*.json"], "url": "./schemas/source/rooms.schema.json" },
+  { "fileMatch": ["cartridges/*/text.json"], "url": "./schemas/source/text.schema.json" }
+]
+```
+
+Add one entry per directory or root file you edit; the schema file is named after it. Do not put
+`$schema` in a source file: the compiler refuses it as `UNKNOWN_FIELD`. The compiler is still
+the judge; the schemas do not check references.
+
 ## Preview an edit
 
 To see a cartridge in the Book on the web, compile it into the author preview, then, in a second

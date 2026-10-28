@@ -1,4 +1,4 @@
-# size: allow 310, the behaviours pass joins the existing source-shortcut pipeline
+# size: allow 311, the behaviours pass and the source schema dirs join the existing source-shortcut pipeline
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -166,7 +166,8 @@ defmodule Loka.Content.Source do
     end
   end
 
-  defp dirs, do: @dirs
+  @doc false
+  def dirs, do: @dirs
 
   @doc """
   The `kind` definitions as `{key, location, value}`; a bundled one is located at `{rel, steps}`.

@@ -1,4 +1,4 @@
-# size: allow 370, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
+# size: allow 376, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -169,7 +169,8 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  defp manifest_file(defs) do
+  @doc false
+  def manifest_file(defs) do
     v2 = get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties"])
 
     defs["CartridgeManifest"]
@@ -228,6 +229,11 @@ defmodule Loka.Content.Compiler do
     {"status", :status, "StatusDefinition"},
     {"blueprint", :blueprint, "BlueprintDefinition"}
   ]
+
+  @doc false
+  def kind_contracts, do: @kinds
+  @doc false
+  def facts_file, do: @facts_file
 
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
