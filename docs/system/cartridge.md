@@ -509,7 +509,7 @@ rules byte for byte.
   `{"reactions": {"<rule>": <ReactionRule without key>}}`. An NPC or item may carry
   `"behaviours": ["<Key>", ...]`; the compiler strips it from every NPC and item and drops every
   behaviour. `behaviours` on any other kind is `UNKNOWN_FIELD`; a behaviour no holder lists adds
-  nothing.
+  no reaction (its inline prose lines, lowered first, stay in the text catalog).
 - Each rule becomes one reaction per holder (once, however often the holder lists the name),
   keyed `<rule>_<holder>` (`take` on `trout_01` is `take_trout_01`). In the copy, every
   `{"param": "holder"}` (an object with that one member) becomes the holder's key, so the

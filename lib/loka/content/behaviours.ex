@@ -19,7 +19,8 @@ defmodule Loka.Content.Behaviours do
   def expand(files) do
     {defs, files} = Enum.split_with(files, &match?({_, {:behaviour, _, _}, _}, &1))
     {named, refused} = defs |> Enum.map(&rules/1) |> Enum.unzip()
-    {files, faults} = files |> Enum.map(&hold(&1, Map.new(named))) |> Enum.unzip()
+    named = Map.new(named)
+    {files, faults} = files |> Enum.map(&hold(&1, named)) |> Enum.unzip()
     {List.flatten(files), List.flatten(refused) ++ List.flatten(faults)}
   end
 
