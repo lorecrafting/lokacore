@@ -10,7 +10,7 @@ it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-
 **Coverage** (2026-10-28, at 1fe9bfdb2, `node kernel/ts/play/coverage.ts <artifact>` over the 31
 showcase transcripts, `walk_*` included): 128 of 140 reactions fired, 46 of 49 recipes completed,
 25 of 34 choices taken, 3 of 3 quests done.
-To re-record a `walk_*` transcript, drive `Rec` from `kernel/ts/play/record.ts` in a script (`new Rec(ctx)`, its moves, `r.save(out)`) and run `node <script> <out>`.
+To re-pin a `walk_*` transcript after a content change, run `node kernel/ts/play/record.ts <transcript.jsonl>`: it replays the transcript's own commands and rewrites it. To record a new walk, drive `Rec` in a script (`new Rec(ctx)`, its moves, `r.save(out)`).
 
 ## Structure
 
@@ -40,7 +40,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | disposition x commerce x dialogue | social | `village_green` (Nell's shop and prices, the Reeve's `help`/`wrong`, the apple), `warden_gate` (engage) | `kernel/ts/test/showcase_social.test.ts` (social 1-4) | built |
 | deadlines x schedules x away recap | social | the letter quest, Tam's day, the recap block on return | `mobile/app/book/showcase_recap.test.ts` (the block is Book-side); `showcase_social.test.ts` (social 14) for the facts | built |
 | combat x loot x levelling x death | combat | `boar_run` (an unarmed death and the corpse, then the boar's tusk and purse), the Raise after the bounty | `kernel/ts/test/showcase_combat.test.ts` (combat 4-8) | built |
-| hidden exits x senses x traps | world (hidden exits), combat (senses) | `sea_cave` night search; the boar's grunt heard from `drill_yard` | `kernel/ts/test/showcase_world.test.ts` (world 5, 7); `showcase_combat.test.ts` (combat 1, 8) | hidden exits built; senses built; traps planned (plan 7) |
+| hidden exits x senses x traps | world (hidden exits), combat (senses) | `sea_cave` night search; the boar's grunt heard from `drill_yard` | `kernel/ts/test/showcase_world.test.ts` (world 5, 7); `showcase_combat.test.ts` (combat 1, 8) | hidden exits built; senses built; traps built |
 | quests x deadlines x hints | social | `carry_letter` from the Reeve to Wat | `showcase_social.test.ts` (social 10, 13) | built |
 | scenes x dialogue x reactions | social | Wat's `deliver`/`burn`, story point `letter_fate`, scenes `letter_read`/`letter_ash`, standing on scene end | `showcase_social.test.ts` (social 12) | built |
 | rumour x dialogue check x codex | social | `mill`, `village_green` (Tam tells Nell; `press` grants "The fire") | `showcase_social.test.ts` (social 5, 8) | built |
@@ -61,13 +61,13 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | fuse status x status_expired x schedule cases x disposition | social | `tollhouse` (the forced strongbox carries `word_travels`), `village_green` (the Warden's 13:00 walk), `warden_gate` (engage, the ledger mend) | `showcase_consequence.test.ts` (social 15-18, 21) | built |
 | rumour hops x conditional schedule x dialogue check x codex deduction | social | `shepherd_hut` (burn), `warden_gate` (Wat tells Tam), `village_green` (Tam tells Nell; `press`), `church` ("What the letter carried") | `showcase_consequence.test.ts` (social 19-20) | built |
 | fire: statuses on things x tags x reactions x use-on x cues x barriers (row W22) | body (sandbox off `the_fold`) | `smithy` (torch, kindling, bench, anvil, bucket), `woodstore` behind the burnable `store_door`, barred from inside (`lift_store_bar` sets `store_unbarred`) | `kernel/ts/test/showcase_fire.test.ts` | built |
-| craft x skill growth x skill prerequisites x hidden elite | Homestead | `carpenter_shop` (two carves open the carving lesson; the hidden skill shows nothing until carving is learned) | `kernel/ts/test/showcase_homestead.test.ts` (homestead 1-4) | planned (plan 4) |
-| self-build x built rooms x services x raze | Homestead | `glade`, `carpenter_shop`, the site north of `holding_lane` | `showcase_homestead.test.ts` (homestead 5, 6, 8) | planned (plan 4) |
-| furnishing x rest x variants | Homestead | the built hut (a cot, a rug) | `showcase_homestead.test.ts` (homestead 7) | planned (plan 4) |
-| gifts x pair facts x barter | Homestead | `farm_yard` (the apple, the rat, two pelts for a knife) | `showcase_homestead.test.ts` (homestead 9) | planned (plan 4) |
-| fishing x time window x sky x replenish | Homestead | `pond` | `showcase_homestead.test.ts` (homestead 10) | planned (plan 4) |
-| escrow x cooking x status modifiers | Homestead | `farm_kitchen` (the cook's stew, the hearth) | `showcase_homestead.test.ts` (homestead 11, 12) | planned (plan 4) |
-| farming x statuses x locks x replenish | Homestead | `farm_yard` (the plot) | `showcase_homestead.test.ts` (homestead 13) | planned (plan 4) |
+| craft x skill growth x skill prerequisites x hidden elite | Homestead | `carpenter_shop` (two carves open the carving lesson; the hidden skill shows nothing until carving is learned) | `kernel/ts/test/showcase_homestead.test.ts` (homestead 1-4) | built |
+| self-build x built rooms x services x raze | Homestead | `glade`, `carpenter_shop`, the site north of `holding_lane` | `showcase_homestead.test.ts` (homestead 5, 6, 8) | built |
+| furnishing x rest x variants | Homestead | the built hut (a cot, a rug) | `showcase_homestead.test.ts` (homestead 7) | built |
+| gifts x pair facts x barter | Homestead | `farm_yard` (the apple, the rat, two pelts for a knife) | `showcase_homestead.test.ts` (homestead 9) | built |
+| fishing x time window x sky x replenish | Homestead | `pond` | `showcase_homestead.test.ts` (homestead 10) | built |
+| escrow x cooking x status modifiers | Homestead | `farm_kitchen` (the cook's stew, the hearth) | `showcase_homestead.test.ts` (homestead 11, 12) | built |
+| farming x statuses x locks x replenish | Homestead | `farm_yard` (the plot) | `showcase_homestead.test.ts` (homestead 13) | built |
 | stock prices x replenish x commerce | economy/law | `market_row` (the chandler's shelf) | `kernel/ts/test/showcase_economy.test.ts` (economy 3, 5, prices, yard) | built |
 | escrow x timed claim x cancel | economy/law | `forge_stall` | `showcase_economy.test.ts` (economy 4, 5, 5 branch) | built |
 | bank x two counters x fees | economy/law | `counting_house`, `market_row` | `showcase_economy.test.ts` (economy 2, 3) | built |
@@ -80,9 +80,9 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | spell damage x resistances x death credit | magic/use-on | `crypt` (the wight) | `showcase_magic.test.ts` (magic 7) | built |
 | spells x fire x use-on x cues | magic/use-on | `crypt` (the bier), `crypt_stair` (the smoke, the winch) | `showcase_magic.test.ts` (magic 6-8) | built |
 | status readers x reactions x NPC statuses | magic/use-on | `golem_yard` | `showcase_magic.test.ts` (magic 9) | built |
-| traps x statuses x reset x senses | traps | `sapper_stair` (search, disarm), `plate_passage` | `kernel/ts/test/showcase_traps.test.ts` (traps 1-4, 7) | planned (plan 7) |
-| puzzles x barriers x readables | traps | `lever_hall`, `lever_vault`, `dial_vault` | `showcase_traps.test.ts` (traps 5, 6) | planned (plan 7) |
-| fear x pack x shout x death | traps | `chief_den` | `showcase_traps.test.ts` (traps 8, 9) | planned (plan 7) |
+| traps x statuses x reset x senses | traps | `sapper_stair` (search, disarm), `plate_passage` | `kernel/ts/test/showcase_traps.test.ts` (traps 1-4, 7) | built |
+| puzzles x barriers x readables | traps | `lever_hall`, `lever_vault`, `dial_vault` | `showcase_traps.test.ts` (traps 5, 6) | built |
+| fear x pack x shout x death | traps | `chief_den` | `showcase_traps.test.ts` (traps 8, 9) | built |
 
 ## How a batch adds a district
 

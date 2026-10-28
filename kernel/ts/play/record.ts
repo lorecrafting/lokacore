@@ -1,6 +1,7 @@
 // Transcript recorder for showcase walks: the transcripts.test.ts replay path, fed chosen commands.
 // A walk script does `const r = new Rec(ctx); r.go('west'); ...; r.save(out)`, run as `node <script> <out>`.
 import { readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { gameView, INSTALLED, KERNEL_ID, loadCartridge, type Cartridge } from '../src/index.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
@@ -117,4 +118,15 @@ export class Rec {
     console.log(this.log.join('\n'));
     console.log(`${path}: ${this.r.ordinal} commands`);
   }
+}
+
+// Re-pin a walk after a content change: node kernel/ts/play/record.ts <transcript.jsonl>
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const [head, ...entries] = readFileSync(process.argv[2], 'utf8')
+    .split('\n')
+    .filter(Boolean)
+    .map((l) => JSON.parse(l));
+  const r = new Rec(head.data.world_context_id);
+  for (const e of entries) r.run(e.data.command, 'any');
+  r.save(process.argv[2]);
 }
