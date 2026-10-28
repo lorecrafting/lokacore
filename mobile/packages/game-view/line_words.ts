@@ -3,7 +3,10 @@
 // key, its bindings and participants; each entry is [first person, third person], its {slots}
 // filled from the line's bindings as the client words them, {actor} with the actor's name. A third
 // and fourth entry are the same without the line's other slots ("You arrive." with no way back).
-export const LINE_WORDS = new Map<string, readonly string[]>([
+export const LINE_WORDS = new Map<
+  string,
+  readonly [string, string] | readonly [string, string, string, string]
+>([
   ['item.taken', ['You take {item}.', '{actor} takes {item}.']],
   ['item.dropped', ['You drop {item}.', '{actor} drops {item}.']],
   ['item.given', ['You give {item} to {to}.', '{actor} gives {item} to {to}.']],

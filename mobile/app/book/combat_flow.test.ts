@@ -361,3 +361,47 @@ test('reopening a receipt that changed room restores the room log from its arriv
     assert.deepEqual([p.screen().log, p.screen().combatLog], [[after], []]);
   }
 });
+
+// Break (review of loka-glj8): a flight into a room with its own fight (no closure) drops the
+// arrival line from the room log, or logs it twice (the press line and the arrival cut).
+test('a flight into another fight opens the room log at its arrival line', () => {
+  let current = view(),
+    fled = false;
+  const g = game(current);
+  const p = presenter({
+    ...g,
+    view: () => ({ view: current, token: 'view:drawn' }),
+    lastNarration: () =>
+      (fled && {
+        command_id: 'fled',
+        lines: [
+          { key: 'combat.fled', bindings: { direction: 'north' } },
+          { key: 'combat.ran_in', bindings: { from: 'south' } },
+        ],
+        combat_lines: [0],
+        arrival: 1,
+      }) as never,
+    invoke: () => {
+      fled = true;
+      current = view({
+        combat: { ...view().combat!, encounter_id: 'second' },
+        place: { ...view().place, id: 'road' },
+      });
+      return {
+        kind: 'saved',
+        command_id: 'fled',
+        decision: {
+          kind: 'accepted',
+          events: [],
+          outcome: 'fled',
+          narration: [{ key: 'combat.fled' }],
+        },
+      } as never;
+    },
+  });
+  p.press(p.screen().buttons.find((b) => b.label === 'Flee')!);
+  assert.deepEqual(
+    p.screen().log.filter((l) => l.includes('south')),
+    ['You run in from the south.'],
+  );
+});
