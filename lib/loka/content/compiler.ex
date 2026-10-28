@@ -266,16 +266,7 @@ defmodule Loka.Content.Compiler do
   defp expand(:invalid, _), do: :invalid
 
   defp files(files, kind, contract),
-    do: collect(for {k, r, v} <- source(files, kind), do: {k, definition(r, [], k, v, contract)})
-
-  # actions/<key>.json is one source kind: with `command` it binds a built-in command
-  # (ActionDefinition); without it, its authored outcomes make it an ActionRecipe.
-  defp source(files, :action), do: Enum.filter(of_kind(files, :action), &command?/1)
-  defp source(files, :recipe), do: Enum.reject(of_kind(files, :action), &command?/1)
-  defp source(files, kind), do: of_kind(files, kind)
-
-  # An unreadable or non-object file stays an action, as before the merge, so it adds no recipe.
-  defp command?({_, _, v}), do: not is_map(v) or is_map_key(v, "command")
+    do: collect(for {k, r, v} <- of_kind(files, kind), do: {k, definition(r, [], k, v, contract)})
 
   # {key => definition | :invalid, diagnostics}. An invalid definition stays known, so a
   # reference to it resolves instead of adding a second, false cause (08 §6); any

@@ -365,7 +365,7 @@ the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
 names a built-in command and is checked as an ActionDefinition; a file without it carries
-authored `outcomes` and is checked as an ActionRecipe (`Loka.Content.Compiler`, `source/2`). One
+authored `outcomes` and is checked as an ActionRecipe (`Loka.Content.Source.of_kind/2`). One
 field decides, so a file never mixes the two shapes: the contract it is routed to refuses the
 other shape's fields. The artifact keeps both maps, so a diagnostic that names a reference shows
 the internal kind (`UNRESOLVED_REFERENCE` `data.target` `"<id>@<version>:recipe/<key>"`); the
