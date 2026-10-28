@@ -1,3 +1,4 @@
+# size: allow 310, the behaviours pass joins the existing source-shortcut pipeline
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
