@@ -24,6 +24,10 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 
 ## Review and tests
 
+- Before a PM ruling on Book wording or placement, grep `docs/system/book-ui.md` for the case: on #477 a PM
+  ruling on deaths outside a fight contradicted `book-ui.md:111` and a pinned test, and was withdrawn.
+- Before sizing a split or rename, count references and parsers (`grep -rl`, generators in `bin/`): the audit
+  rated the `mechanics.md` split M, but 463 files and two generators depend on it (loka-u15o).
 - A slice that changes a protocol schema needs a review record even in a toolbox batch (`loka-1qa2`).
 - A save-path or `runtime/proposal.ts` change in a fix round gets a second opinion.
 - Tests passed while the GameView they built failed the schema: validate the view in view tests (`loka-x3i0`).

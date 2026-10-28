@@ -5,12 +5,15 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #476 (loka-glj8 spec, room point of view) plus the 2026-10-28 harness changes; written
-2026-10-28 by Claude Code (Opus 5.5), PM session 661e816a. Weekly usage reset 2026-10-28 05:00 HST.
+AS OF main after #479 (loka-40d4, WORKFLOW split); written 2026-10-28 by Claude Code (Opus 5.5), PM session
+661e816a. Merged today: #477 (loka-glj8, room point of view: "You arrive from the south.", "You run in from
+the south."), #478 (loka-40d4, docs audit pass A: owner rules from PM memory into owner-rules.md,
+`bin/merge_pr.sh`, `bin/beads_checkpoint.sh`), #479 (WORKFLOW core plus [PM.md](PM.md)). Weekly usage reset
+2026-10-28 05:00 HST.
 
 ## Now
 
-- Nothing is building. Open PR: draft #454 (E2 engine bugs, kgd.153 only) ON HOLD with the P3 hold below.
+- Nothing is building. Merge with `bin/merge_pr.sh <PR> <beads-id>`; on red, `bin/ci_fail.sh <branch>`. Open PR: draft #454 (E2 engine bugs, kgd.153 only) ON HOLD with the P3 hold below.
 - Polish session `polish/session-2026-10-23` in ~/dev/lokacore-session serves Storybook on 6006 (on main
   after #475). The picks Monitor is off (owner 2026-10-24: "no need to arm monitor, just diarm for now");
   re-arm only when the owner is back at Storybook. Loop: [PM, Live polish session](PM.md#live-polish-session).
@@ -18,21 +21,18 @@ AS OF main after #476 (loka-glj8 spec, room point of view) plus the 2026-10-28 h
 
 ## Next, in order (owner-approved)
 
-1. loka-glj8 room point of view: "You arrive from the south." / "You run in from the south.", the direction
-   from the destination's exit back; flee and fall lines stay in the fight room's log; NPC arrives/leaves
-   lines; re-freeze the move narration in the conformance fixtures by hand (IMPORT.md 2026-10-24 precedent).
-   Spec: [Book UI, Line placement](system/book-ui.md#line-placement).
-2. loka-x6t.127 remainder: away recap as a new entry at the bottom of the event log (owner, quoted: "It
+1. loka-x6t.127 remainder: away recap as a new entry at the bottom of the event log (owner, quoted: "It
    should be a new entry in the event log, meaning at the very bottom"); NPC carried-item note on the NPC
    page; exit warnings and the Continue conversation button under the
    [room page anatomy](decisions/owner-decision-room-page-anatomy-2026-10-23.md). PM idea: an exit
    warning becomes a movement log line.
-3. Authoring batch A (owner go 2026-10-24, queued for this reset): loka-kgd.194.12, .13, .14 (diagnostics
+2. Authoring batch A (owner go 2026-10-24, queued for this reset): loka-kgd.194.12, .13, .14 (diagnostics
    at the author's line), .16 behaviours, .18 prototype parameters, .17 source JSON Schema last, .9 showcase
    walk transcripts. One draft branch, Opus developer and reviewer; the PM decides whether .17 is a Fable
    contract brief. Groundwork for the visual builder (.8). Not in it: .15 .11 .19 .20; .7 waits on lore.
-4. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
-   loka-nw03 formal methods plan; approved before chapter work: loka-kgd.173 sim invariants, .174 Book
+3. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
+   loka-tjhk flee line on a second fight's page; loka-nw03 formal methods plan; audit leftovers loka-u9x8,
+   mz8m, yjuk, kovp (loka-u15o mechanics.md split deferred); approved before chapter work: loka-kgd.173 sim invariants, .174 Book
    visibility check, .175 scale benchmark.
 
 Lane order (owner 2026-10-15/16): UI polish over the showcase (owner at Storybook), then measuring and
@@ -61,7 +61,7 @@ Standing owner rules live in [owner rules](system/owner-rules.md#process).
 ## Session procedure
 
 - Start: `mise install`, `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh auth status`; `git pull --ff-only origin main`, then `br sync --import-only`;
-  read [WORKFLOW](WORKFLOW.md) (Loop) and this page; `bin/session_status.sh` prints the board.
+  read [WORKFLOW](WORKFLOW.md), [PM](PM.md) and this page; `bin/session_status.sh` prints the board.
 - Beads writes from the `main` checkout after `br sync --import-only`; each checkpoint is
   `bin/beads_checkpoint.sh` (pull, flush, machine-path check, commit the export and this page, push;
   a rejected push prints the recovery steps). Never commit `beads.db`.
