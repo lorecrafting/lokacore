@@ -89,6 +89,12 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
     ['behaviours', { reactions: {} }, { params: [] }],
     ['areas', { rooms: { hall: room } }, { rooms: { hall: { ...room, titel: 'x' } } }],
     ['reactions', reaction, { ...reaction, apply: [{ op: 'signal' }] }],
+    ['reactions', reaction, { ...reaction, on: { event: 'signal' } }],
+    [
+      'items',
+      { extends: 'pie', behaviours: [{ behaviour: 'spoils', with: {} }] },
+      { extends: 'pie', behaviours: [{ with: {} }] },
+    ],
     ['scenes', { extends: 'intro' }, { extends: 'intro', titel: 'x' }],
     [
       'npcs',
