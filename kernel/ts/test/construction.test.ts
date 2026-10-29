@@ -1,4 +1,4 @@
-// Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): the TS loader
+// Built rooms S1 (construction@1; cartridge.md Structure and site declarations): the TS loader
 // admits build_sampler's pinned artifact (test/loka/content_construction_test.exs).
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

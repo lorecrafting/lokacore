@@ -25,7 +25,7 @@ file covers: [the protocol map](../../protocol/README.md).
   ([owner decision](../archive/decisions/owner-decision-puppeting-2026-09-25.md)).
 - Cartridge source accepts a short reference (a Key) at every DefinitionRef, but only the
   fields `Loka.Content.Checks.expand/2` lists, and `Loka.Content.Construction.expand/2` for a
-  room's `site.blueprints`, get expanded. A new source reference field
+  room's `site.structures`, get expanded. A new source reference field
   needs an entry there and a short-ref test; otherwise the compiler emits an artifact the
   loader rejects
   ([owner decision](../archive/decisions/owner-decision-short-refs-2026-09-25.md)).

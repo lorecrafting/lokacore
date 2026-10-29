@@ -106,7 +106,7 @@ defmodule Loka.Core.ContractsTest do
       {"policies", "policy"},
       {"actions", "action"},
       {"rooms", "room"},
-      {"blueprints", "blueprint"}
+      {"structures", "structure"}
     ]
 
     for %{"properties" => props} <- Contracts.defs()["CompiledCartridge"]["oneOf"],

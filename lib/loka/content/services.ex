@@ -9,7 +9,7 @@ defmodule Loka.Content.Services do
       k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
       k when k in ~w(claim cancel) -> [{"service", "service"}]
       k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
-      "build" -> [{"blueprint", "blueprint"}, {"site", "room"}] ++ fact_field(b)
+      "build" -> [{"structure", "structure"}, {"site", "room"}] ++ fact_field(b)
       k when k in ~w(mend raze) -> [{"site", "room"}]
       "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
       "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
@@ -120,9 +120,9 @@ defmodule Loka.Content.Services do
       unresolved(a, "fact", at(rel, ["benefit", "account"]), m, defs) ++
         unresolved(v, "npc", at(rel, ["benefit", "vault"]), m, defs)
 
-  defp benefit_refs(rel, %{"kind" => "build", "blueprint" => b, "site" => r}, m, defs),
+  defp benefit_refs(rel, %{"kind" => "build", "structure" => b, "site" => r}, m, defs),
     do:
-      unresolved(b, "blueprint", at(rel, ["benefit", "blueprint"]), m, defs) ++
+      unresolved(b, "structure", at(rel, ["benefit", "structure"]), m, defs) ++
         unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
 
   defp benefit_refs(rel, %{"kind" => k, "site" => r}, m, defs) when k in ~w(mend raze),
@@ -280,15 +280,15 @@ defmodule Loka.Content.Services do
     ]
   end
 
-  # Built rooms S2: a resolved site lists the direction and a resolved blueprint.
-  defp benefit(%{"kind" => "build", "blueprint" => b, "site" => r} = build, _, _, m, defs) do
+  # Built rooms S2: a resolved site lists the direction and a resolved structure.
+  defp benefit(%{"kind" => "build", "structure" => b, "site" => r} = build, _, _, m, defs) do
     case Refs.resolve(r, "room", m, defs) do
       {_, _, room} ->
         site = room["site"] || %{}
 
         [
-          {resolved(b, "blueprint", m, defs) == %{} or b in (site["blueprints"] || []),
-           ["benefit", "blueprint"]},
+          {resolved(b, "structure", m, defs) == %{} or b in (site["structures"] || []),
+           ["benefit", "structure"]},
           {build["direction"] in (site["directions"] || []), ["benefit", "direction"]}
         ]
 
@@ -297,16 +297,16 @@ defmodule Loka.Content.Services do
     end ++ build_fact(build, m, defs)
   end
 
-  # Built rooms S4, S5: a resolved site lists the direction; a mend's site has a blueprint with a ruin.
+  # Built rooms S4, S5: a resolved site lists the direction; a mend's site has a structure with a ruin.
   defp benefit(%{"kind" => k, "site" => r} = b, _, _, m, defs) when k in ~w(mend raze) do
     case Refs.resolve(r, "room", m, defs) do
       {_, _, room} ->
         site = room["site"] || %{}
-        ruin? = &(resolved(&1, "blueprint", m, defs)["ruin"] != nil)
+        ruin? = &(resolved(&1, "structure", m, defs)["ruin"] != nil)
 
         [{b["direction"] in (site["directions"] || []), ["benefit", "direction"]}] ++
           for true <- [k == "mend"],
-              do: {Enum.any?(site["blueprints"] || [], ruin?), ["benefit", "site"]}
+              do: {Enum.any?(site["structures"] || [], ruin?), ["benefit", "site"]}
 
       _ ->
         []

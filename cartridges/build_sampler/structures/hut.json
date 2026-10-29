@@ -1,6 +1,6 @@
 {
-  "title": "blueprint.hut.title",
-  "description": "blueprint.hut.description",
+  "title": "structure.hut.title",
+  "description": "structure.hut.description",
   "max_per_owner": 1,
   "variants": [
     {
@@ -12,7 +12,7 @@
           "status": "ruin"
         }
       },
-      "description": "blueprint.hut.description.ruin"
+      "description": "structure.hut.description.ruin"
     },
     {
       "when": {
@@ -23,7 +23,7 @@
           "equals": true
         }
       },
-      "description": "blueprint.hut.description.owned"
+      "description": "structure.hut.description.owned"
     }
   ],
   "locks": {

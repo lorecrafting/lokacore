@@ -1,5 +1,5 @@
 {
-  "description": "Pinned artifact of cartridges/build_sampler (Built rooms S1 to S5, construction@1; cartridge.md Blueprint and site declarations): value is the compiler's output; canonical and sha256 were recomputed in Python (sorted compact JSON, SHA-256). Kept in sync with the compiler by test/loka/content_construction_test.exs.",
+  "description": "Pinned artifact of cartridges/build_sampler (Built rooms S1 to S5, construction@1; cartridge.md Structure and site declarations): value is the compiler's output; canonical and sha256 were recomputed in Python (sorted compact JSON, SHA-256). Kept in sync with the compiler by test/loka/content_construction_test.exs.",
   "value": {
     "actions": {
       "build_sampler@0.0.1:action/buy_plot": {
@@ -126,75 +126,6 @@
           "scopes": [
             "room_occupants"
           ]
-        }
-      }
-    },
-    "blueprints": {
-      "build_sampler@0.0.1:blueprint/hut": {
-        "description": "blueprint.hut.description",
-        "key": "hut",
-        "locks": {
-          "enter": {
-            "policy_version": 1,
-            "root": {
-              "equals": true,
-              "fact": {
-                "cartridge_id": "build_sampler",
-                "cartridge_version": "0.0.1",
-                "key": "owns_plot",
-                "kind": "fact"
-              },
-              "op": "fact_compare"
-            }
-          }
-        },
-        "max_per_owner": 1,
-        "ruin": {
-          "cartridge_id": "build_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "ruin",
-          "kind": "status"
-        },
-        "title": "blueprint.hut.title",
-        "variants": [
-          {
-            "description": "blueprint.hut.description.ruin",
-            "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "status_active",
-                "status": {
-                  "cartridge_id": "build_sampler",
-                  "cartridge_version": "0.0.1",
-                  "key": "ruin",
-                  "kind": "status"
-                },
-                "subject": "room"
-              }
-            }
-          },
-          {
-            "description": "blueprint.hut.description.owned",
-            "when": {
-              "policy_version": 1,
-              "root": {
-                "equals": true,
-                "fact": {
-                  "cartridge_id": "build_sampler",
-                  "cartridge_version": "0.0.1",
-                  "key": "owns_plot",
-                  "kind": "fact"
-                },
-                "op": "fact_compare"
-              }
-            }
-          }
-        ],
-        "weathering": {
-          "cartridge_id": "build_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "weathering",
-          "kind": "status"
         }
       }
     },
@@ -479,16 +410,16 @@
         "exits": {},
         "key": "lane",
         "site": {
-          "blueprints": [
+          "directions": [
+            "north"
+          ],
+          "structures": [
             {
               "cartridge_id": "build_sampler",
               "cartridge_version": "0.0.1",
               "key": "hut",
-              "kind": "blueprint"
+              "kind": "structure"
             }
-          ],
-          "directions": [
-            "north"
           ]
         },
         "title": "room.lane.title",
@@ -636,12 +567,6 @@
       "build_sampler@0.0.1:service/raise_hut": {
         "action": "raise_hut",
         "benefit": {
-          "blueprint": {
-            "cartridge_id": "build_sampler",
-            "cartridge_version": "0.0.1",
-            "key": "hut",
-            "kind": "blueprint"
-          },
           "direction": "north",
           "escrow": {
             "custody": {
@@ -685,6 +610,12 @@
             "cartridge_version": "0.0.1",
             "key": "lane",
             "kind": "room"
+          },
+          "structure": {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "hut",
+            "kind": "structure"
           }
         },
         "currency": {
@@ -771,11 +702,76 @@
         "tick_every": 300
       }
     },
+    "structures": {
+      "build_sampler@0.0.1:structure/hut": {
+        "description": "structure.hut.description",
+        "key": "hut",
+        "locks": {
+          "enter": {
+            "policy_version": 1,
+            "root": {
+              "equals": true,
+              "fact": {
+                "cartridge_id": "build_sampler",
+                "cartridge_version": "0.0.1",
+                "key": "owns_plot",
+                "kind": "fact"
+              },
+              "op": "fact_compare"
+            }
+          }
+        },
+        "max_per_owner": 1,
+        "ruin": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "ruin",
+          "kind": "status"
+        },
+        "title": "structure.hut.title",
+        "variants": [
+          {
+            "description": "structure.hut.description.ruin",
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "status_active",
+                "status": {
+                  "cartridge_id": "build_sampler",
+                  "cartridge_version": "0.0.1",
+                  "key": "ruin",
+                  "kind": "status"
+                },
+                "subject": "room"
+              }
+            }
+          },
+          {
+            "description": "structure.hut.description.owned",
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "equals": true,
+                "fact": {
+                  "cartridge_id": "build_sampler",
+                  "cartridge_version": "0.0.1",
+                  "key": "owns_plot",
+                  "kind": "fact"
+                },
+                "op": "fact_compare"
+              }
+            }
+          }
+        ],
+        "weathering": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "weathering",
+          "kind": "status"
+        }
+      }
+    },
     "text": {
-      "blueprint.hut.description": "A small hut of rough planks.",
-      "blueprint.hut.description.owned": "Your small hut of rough planks.",
-      "blueprint.hut.description.ruin": "A small hut of rough planks; the roof has fallen in.",
-      "blueprint.hut.title": "The Hut",
       "condition.ruin": "in ruin",
       "condition.weathering": "weathering",
       "item.timber.description": "A sawn length of timber.",
@@ -818,7 +814,11 @@
       "service.raze_hut.used": "The carpenter takes your coin and pulls the hut down. Whatever was inside is set out in the lane.",
       "service.ready": "The hut is already finished.",
       "service.site_taken": "Something already stands there.",
-      "service.unaffordable": "You cannot pay."
+      "service.unaffordable": "You cannot pay.",
+      "structure.hut.description": "A small hut of rough planks.",
+      "structure.hut.description.owned": "Your small hut of rough planks.",
+      "structure.hut.description.ruin": "A small hut of rough planks; the roof has fallen in.",
+      "structure.hut.title": "The Hut"
     },
     "world": {
       "construction": {
@@ -826,6 +826,6 @@
       }
     }
   },
-  "canonical": "{\"actions\":{\"build_sampler@0.0.1:action/buy_plot\":{\"accessibility\":\"service.buy_plot\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"buy_plot\",\"label\":\"service.buy_plot\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/cancel_hut\":{\"accessibility\":\"service.cancel_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"cancel_hut\",\"label\":\"service.cancel_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/mend_hut\":{\"accessibility\":\"service.mend_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"mend_hut\",\"label\":\"service.mend_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/raise_hut\":{\"accessibility\":\"service.raise_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"raise_hut\",\"label\":\"service.raise_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/raze_hut\":{\"accessibility\":\"service.raze_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"raze_hut\",\"label\":\"service.raze_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"blueprints\":{\"build_sampler@0.0.1:blueprint/hut\":{\"description\":\"blueprint.hut.description\",\"key\":\"hut\",\"locks\":{\"enter\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"max_per_owner\":1,\"ruin\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ruin\",\"kind\":\"status\"},\"title\":\"blueprint.hut.title\",\"variants\":[{\"description\":\"blueprint.hut.description.ruin\",\"when\":{\"policy_version\":1,\"root\":{\"op\":\"status_active\",\"status\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ruin\",\"kind\":\"status\"},\"subject\":\"room\"}}},{\"description\":\"blueprint.hut.description.owned\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}],\"weathering\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"weathering\",\"kind\":\"status\"}}},\"calendar\":{\"start\":25200},\"entry\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"facts\":{\"build_sampler@0.0.1:fact/hut_ordered\":{\"key\":\"hut_ordered\",\"meaning\":\"The carpenter holds this character's timber for a hut.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"build_sampler@0.0.1:fact/owns_plot\":{\"key\":\"owns_plot\",\"meaning\":\"The character bought the plot north of the lane.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"build_sampler@0.0.1:item/timber_a\":{\"description\":\"item.timber.description\",\"key\":\"timber_a\",\"keywords\":[\"timber\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"room_line\":\"item.timber.room\",\"short\":\"item.timber.short\"},\"build_sampler@0.0.1:item/timber_b\":{\"description\":\"item.timber.description\",\"key\":\"timber_b\",\"keywords\":[\"timber\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"room_line\":\"item.timber.room\",\"short\":\"item.timber.short\"},\"build_sampler@0.0.1:item/timber_c\":{\"description\":\"item.timber.description\",\"key\":\"timber_c\",\"keywords\":[\"timber\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"room_line\":\"item.timber.room\",\"short\":\"item.timber.short\"}},\"lock\":{\"capabilities\":{\"calendar\":1,\"construction\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"service\":1,\"status\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"build_sampler\",\"requires\":{\"capabilities\":{\"calendar\":1,\"construction\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"service\":1,\"status\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.102\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"time_policy\":{\"profile\":\"real_elapsed\",\"rate\":50},\"title\":\"Build Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"build_sampler@0.0.1:npc/carpenter\":{\"description\":\"npc.carpenter.description\",\"key\":\"carpenter\",\"keywords\":[\"carpenter\"],\"resource_starts\":{\"pennies\":0},\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"room_line\":\"npc.carpenter.room\",\"services\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"raise_hut\",\"kind\":\"service\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cancel_hut\",\"kind\":\"service\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mend_hut\",\"kind\":\"service\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"raze_hut\",\"kind\":\"service\"}],\"short\":\"npc.carpenter.short\"},\"build_sampler@0.0.1:npc/seller\":{\"description\":\"npc.seller.description\",\"key\":\"seller\",\"keywords\":[\"seller\"],\"resource_starts\":{\"pennies\":0},\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"room_line\":\"npc.seller.room\",\"services\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"buy_plot\",\"kind\":\"service\"}],\"short\":\"npc.seller.short\"}},\"policies\":{},\"reactions\":{\"build_sampler@0.0.1:reaction/ruin\":{\"apply\":[{\"op\":\"status.apply\",\"status\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ruin\",\"kind\":\"status\"}}],\"key\":\"ruin\",\"on\":{\"event\":\"status_expired\",\"status\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"weathering\",\"kind\":\"status\"}}}},\"resources\":{\"build_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":10,\"minimum\":0,\"start\":10},\"build_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"build_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82},\"build_sampler@0.0.1:resource/pennies\":{\"gain\":0,\"key\":\"pennies\",\"maximum\":100,\"minimum\":0,\"start\":30}},\"rooms\":{\"build_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{},\"key\":\"lane\",\"site\":{\"blueprints\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut\",\"kind\":\"blueprint\"}],\"directions\":[\"north\"]},\"title\":\"room.lane.title\",\"variants\":[{\"description\":\"room.lane.framing\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut_ordered\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}]},\"build_sampler@0.0.1:room/yard\":{\"description\":\"room.yard.description\",\"exits\":{},\"key\":\"yard\",\"title\":\"room.yard.title\"}},\"services\":{\"build_sampler@0.0.1:service/buy_plot\":{\"action\":\"buy_plot\",\"benefit\":{\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"kind\":\"entitlement\"},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"buy_plot\",\"label\":\"service.buy_plot\",\"narration\":\"service.buy_plot.used\",\"price\":10,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"seller\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/cancel_hut\":{\"action\":\"cancel_hut\",\"benefit\":{\"kind\":\"cancel\",\"service\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"raise_hut\",\"kind\":\"service\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"cancel_hut\",\"label\":\"service.cancel_hut\",\"narration\":\"service.cancel_hut.used\",\"price\":1,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/mend_hut\":{\"action\":\"mend_hut\",\"benefit\":{\"direction\":\"north\",\"escrow\":{\"custody\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"},\"items\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_a\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_b\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_c\",\"kind\":\"item\"}],\"quantity\":1},\"kind\":\"mend\",\"site\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"mend_hut\",\"label\":\"service.mend_hut\",\"narration\":\"service.mend_hut.used\",\"price\":3,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/raise_hut\":{\"action\":\"raise_hut\",\"benefit\":{\"blueprint\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut\",\"kind\":\"blueprint\"},\"direction\":\"north\",\"escrow\":{\"custody\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"},\"items\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_a\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_b\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_c\",\"kind\":\"item\"}],\"quantity\":2,\"ready_after\":7200},\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut_ordered\",\"kind\":\"fact\"},\"kind\":\"build\",\"site\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"raise_hut\",\"label\":\"service.raise_hut\",\"narration\":\"service.raise_hut.used\",\"price\":5,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/raze_hut\":{\"action\":\"raze_hut\",\"benefit\":{\"direction\":\"north\",\"kind\":\"raze\",\"site\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"raze_hut\",\"label\":\"service.raze_hut\",\"narration\":\"service.raze_hut.used\",\"price\":2,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}}},\"statuses\":{\"build_sampler@0.0.1:status/ruin\":{\"duration\":\"permanent\",\"key\":\"ruin\",\"label\":\"condition.ruin\",\"narration\":{\"applied\":\"narration.ruin.applied\",\"expired\":\"narration.ruin.expired\",\"tick\":\"narration.ruin.tick\"},\"resource\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"},\"tick_every\":86400},\"build_sampler@0.0.1:status/weathering\":{\"duration\":600,\"key\":\"weathering\",\"label\":\"condition.weathering\",\"narration\":{\"applied\":\"narration.weathering.applied\",\"expired\":\"narration.weathering.expired\",\"tick\":\"narration.weathering.tick\"},\"per_tick\":-1,\"resource\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"},\"tick_every\":300}},\"text\":{\"blueprint.hut.description\":\"A small hut of rough planks.\",\"blueprint.hut.description.owned\":\"Your small hut of rough planks.\",\"blueprint.hut.description.ruin\":\"A small hut of rough planks; the roof has fallen in.\",\"blueprint.hut.title\":\"The Hut\",\"condition.ruin\":\"in ruin\",\"condition.weathering\":\"weathering\",\"item.timber.description\":\"A sawn length of timber.\",\"item.timber.room\":\"A length of [timber] lies here.\",\"item.timber.short\":\"a length of timber\",\"narration.ruin.applied\":\"The roof falls in.\",\"narration.ruin.expired\":\"The ruin is mended.\",\"narration.ruin.tick\":\"The ruin settles.\",\"narration.weathering.applied\":\"The weather starts on the new planks.\",\"narration.weathering.expired\":\"The weather has had its way.\",\"narration.weathering.tick\":\"The weather works at the planks.\",\"npc.carpenter.description\":\"A carpenter who raises huts on bought plots.\",\"npc.carpenter.room\":\"A [carpenter](carpenter) waits with a cart of planks.\",\"npc.carpenter.short\":\"the carpenter\",\"npc.seller.description\":\"A brisk seller of building plots.\",\"npc.seller.room\":\"The [seller](seller) offers the plot for sale.\",\"npc.seller.short\":\"the seller\",\"room.lane.description\":\"A lane beside an empty plot to the north.\",\"room.lane.framing\":\"A lane beside a plot to the north, where a hut frame of fresh timber is going up.\",\"room.lane.title\":\"Market Lane\",\"room.yard.description\":\"The carpenter's fenced yard.\",\"room.yard.title\":\"Timber Yard\",\"service.already_paid\":\"The plot is already yours.\",\"service.buy_plot\":\"Buy the plot\",\"service.buy_plot.used\":\"The seller takes your coin; the plot is yours.\",\"service.cancel_hut\":\"Cancel the hut\",\"service.cancel_hut.used\":\"The carpenter returns your timber.\",\"service.construction_full\":\"Nothing more can be built here.\",\"service.mend_hut\":\"Mend the hut\",\"service.mend_hut.used\":\"The carpenter takes a length of timber and your coin, and puts the roof back on.\",\"service.missing_inputs\":\"Bring two lengths of timber.\",\"service.no_order\":\"The carpenter holds no order of yours.\",\"service.nothing_to_mend\":\"Nothing here needs mending.\",\"service.nothing_to_raze\":\"There is no hut of yours here to raze.\",\"service.occupied\":\"Something inside the hut cannot be moved.\",\"service.order_open\":\"The carpenter is already building for you.\",\"service.raise_hut\":\"Raise a hut\",\"service.raise_hut.used\":\"The carpenter takes two lengths of timber and your coin, and starts framing.\",\"service.raze_hut\":\"Raze the hut\",\"service.raze_hut.used\":\"The carpenter takes your coin and pulls the hut down. Whatever was inside is set out in the lane.\",\"service.ready\":\"The hut is already finished.\",\"service.site_taken\":\"Something already stands there.\",\"service.unaffordable\":\"You cannot pay.\"},\"world\":{\"construction\":{\"max_total\":1}}}",
-  "sha256": "1164e1b0e774a0dd72f69f238d602e9c0eccac536297ad641684415c57c0e5d9"
+  "canonical": "{\"actions\":{\"build_sampler@0.0.1:action/buy_plot\":{\"accessibility\":\"service.buy_plot\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"buy_plot\",\"label\":\"service.buy_plot\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/cancel_hut\":{\"accessibility\":\"service.cancel_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"cancel_hut\",\"label\":\"service.cancel_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/mend_hut\":{\"accessibility\":\"service.mend_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"mend_hut\",\"label\":\"service.mend_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/raise_hut\":{\"accessibility\":\"service.raise_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"raise_hut\",\"label\":\"service.raise_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"build_sampler@0.0.1:action/raze_hut\":{\"accessibility\":\"service.raze_hut\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"raze_hut\",\"label\":\"service.raze_hut\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"calendar\":{\"start\":25200},\"entry\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"facts\":{\"build_sampler@0.0.1:fact/hut_ordered\":{\"key\":\"hut_ordered\",\"meaning\":\"The carpenter holds this character's timber for a hut.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"build_sampler@0.0.1:fact/owns_plot\":{\"key\":\"owns_plot\",\"meaning\":\"The character bought the plot north of the lane.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"build_sampler@0.0.1:item/timber_a\":{\"description\":\"item.timber.description\",\"key\":\"timber_a\",\"keywords\":[\"timber\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"room_line\":\"item.timber.room\",\"short\":\"item.timber.short\"},\"build_sampler@0.0.1:item/timber_b\":{\"description\":\"item.timber.description\",\"key\":\"timber_b\",\"keywords\":[\"timber\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"room_line\":\"item.timber.room\",\"short\":\"item.timber.short\"},\"build_sampler@0.0.1:item/timber_c\":{\"description\":\"item.timber.description\",\"key\":\"timber_c\",\"keywords\":[\"timber\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"room_line\":\"item.timber.room\",\"short\":\"item.timber.short\"}},\"lock\":{\"capabilities\":{\"calendar\":1,\"construction\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"service\":1,\"status\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"build_sampler\",\"requires\":{\"capabilities\":{\"calendar\":1,\"construction\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"service\":1,\"status\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.102\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"time_policy\":{\"profile\":\"real_elapsed\",\"rate\":50},\"title\":\"Build Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"build_sampler@0.0.1:npc/carpenter\":{\"description\":\"npc.carpenter.description\",\"key\":\"carpenter\",\"keywords\":[\"carpenter\"],\"resource_starts\":{\"pennies\":0},\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"room_line\":\"npc.carpenter.room\",\"services\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"raise_hut\",\"kind\":\"service\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cancel_hut\",\"kind\":\"service\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mend_hut\",\"kind\":\"service\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"raze_hut\",\"kind\":\"service\"}],\"short\":\"npc.carpenter.short\"},\"build_sampler@0.0.1:npc/seller\":{\"description\":\"npc.seller.description\",\"key\":\"seller\",\"keywords\":[\"seller\"],\"resource_starts\":{\"pennies\":0},\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"room_line\":\"npc.seller.room\",\"services\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"buy_plot\",\"kind\":\"service\"}],\"short\":\"npc.seller.short\"}},\"policies\":{},\"reactions\":{\"build_sampler@0.0.1:reaction/ruin\":{\"apply\":[{\"op\":\"status.apply\",\"status\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ruin\",\"kind\":\"status\"}}],\"key\":\"ruin\",\"on\":{\"event\":\"status_expired\",\"status\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"weathering\",\"kind\":\"status\"}}}},\"resources\":{\"build_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":10,\"minimum\":0,\"start\":10},\"build_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"build_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82},\"build_sampler@0.0.1:resource/pennies\":{\"gain\":0,\"key\":\"pennies\",\"maximum\":100,\"minimum\":0,\"start\":30}},\"rooms\":{\"build_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{},\"key\":\"lane\",\"site\":{\"directions\":[\"north\"],\"structures\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut\",\"kind\":\"structure\"}]},\"title\":\"room.lane.title\",\"variants\":[{\"description\":\"room.lane.framing\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut_ordered\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}]},\"build_sampler@0.0.1:room/yard\":{\"description\":\"room.yard.description\",\"exits\":{},\"key\":\"yard\",\"title\":\"room.yard.title\"}},\"services\":{\"build_sampler@0.0.1:service/buy_plot\":{\"action\":\"buy_plot\",\"benefit\":{\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"kind\":\"entitlement\"},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"buy_plot\",\"label\":\"service.buy_plot\",\"narration\":\"service.buy_plot.used\",\"price\":10,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"seller\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/cancel_hut\":{\"action\":\"cancel_hut\",\"benefit\":{\"kind\":\"cancel\",\"service\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"raise_hut\",\"kind\":\"service\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"cancel_hut\",\"label\":\"service.cancel_hut\",\"narration\":\"service.cancel_hut.used\",\"price\":1,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/mend_hut\":{\"action\":\"mend_hut\",\"benefit\":{\"direction\":\"north\",\"escrow\":{\"custody\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"},\"items\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_a\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_b\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_c\",\"kind\":\"item\"}],\"quantity\":1},\"kind\":\"mend\",\"site\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"mend_hut\",\"label\":\"service.mend_hut\",\"narration\":\"service.mend_hut.used\",\"price\":3,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/raise_hut\":{\"action\":\"raise_hut\",\"benefit\":{\"direction\":\"north\",\"escrow\":{\"custody\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"},\"items\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_a\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_b\",\"kind\":\"item\"},{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"timber_c\",\"kind\":\"item\"}],\"quantity\":2,\"ready_after\":7200},\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut_ordered\",\"kind\":\"fact\"},\"kind\":\"build\",\"site\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"structure\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut\",\"kind\":\"structure\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"raise_hut\",\"label\":\"service.raise_hut\",\"narration\":\"service.raise_hut.used\",\"price\":5,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}},\"build_sampler@0.0.1:service/raze_hut\":{\"action\":\"raze_hut\",\"benefit\":{\"direction\":\"north\",\"kind\":\"raze\",\"site\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"raze_hut\",\"label\":\"service.raze_hut\",\"narration\":\"service.raze_hut.used\",\"price\":2,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"carpenter\",\"kind\":\"npc\"}}},\"statuses\":{\"build_sampler@0.0.1:status/ruin\":{\"duration\":\"permanent\",\"key\":\"ruin\",\"label\":\"condition.ruin\",\"narration\":{\"applied\":\"narration.ruin.applied\",\"expired\":\"narration.ruin.expired\",\"tick\":\"narration.ruin.tick\"},\"resource\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"},\"tick_every\":86400},\"build_sampler@0.0.1:status/weathering\":{\"duration\":600,\"key\":\"weathering\",\"label\":\"condition.weathering\",\"narration\":{\"applied\":\"narration.weathering.applied\",\"expired\":\"narration.weathering.expired\",\"tick\":\"narration.weathering.tick\"},\"per_tick\":-1,\"resource\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"},\"tick_every\":300}},\"structures\":{\"build_sampler@0.0.1:structure/hut\":{\"description\":\"structure.hut.description\",\"key\":\"hut\",\"locks\":{\"enter\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"max_per_owner\":1,\"ruin\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ruin\",\"kind\":\"status\"},\"title\":\"structure.hut.title\",\"variants\":[{\"description\":\"structure.hut.description.ruin\",\"when\":{\"policy_version\":1,\"root\":{\"op\":\"status_active\",\"status\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ruin\",\"kind\":\"status\"},\"subject\":\"room\"}}},{\"description\":\"structure.hut.description.owned\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}],\"weathering\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"weathering\",\"kind\":\"status\"}}},\"text\":{\"condition.ruin\":\"in ruin\",\"condition.weathering\":\"weathering\",\"item.timber.description\":\"A sawn length of timber.\",\"item.timber.room\":\"A length of [timber] lies here.\",\"item.timber.short\":\"a length of timber\",\"narration.ruin.applied\":\"The roof falls in.\",\"narration.ruin.expired\":\"The ruin is mended.\",\"narration.ruin.tick\":\"The ruin settles.\",\"narration.weathering.applied\":\"The weather starts on the new planks.\",\"narration.weathering.expired\":\"The weather has had its way.\",\"narration.weathering.tick\":\"The weather works at the planks.\",\"npc.carpenter.description\":\"A carpenter who raises huts on bought plots.\",\"npc.carpenter.room\":\"A [carpenter](carpenter) waits with a cart of planks.\",\"npc.carpenter.short\":\"the carpenter\",\"npc.seller.description\":\"A brisk seller of building plots.\",\"npc.seller.room\":\"The [seller](seller) offers the plot for sale.\",\"npc.seller.short\":\"the seller\",\"room.lane.description\":\"A lane beside an empty plot to the north.\",\"room.lane.framing\":\"A lane beside a plot to the north, where a hut frame of fresh timber is going up.\",\"room.lane.title\":\"Market Lane\",\"room.yard.description\":\"The carpenter's fenced yard.\",\"room.yard.title\":\"Timber Yard\",\"service.already_paid\":\"The plot is already yours.\",\"service.buy_plot\":\"Buy the plot\",\"service.buy_plot.used\":\"The seller takes your coin; the plot is yours.\",\"service.cancel_hut\":\"Cancel the hut\",\"service.cancel_hut.used\":\"The carpenter returns your timber.\",\"service.construction_full\":\"Nothing more can be built here.\",\"service.mend_hut\":\"Mend the hut\",\"service.mend_hut.used\":\"The carpenter takes a length of timber and your coin, and puts the roof back on.\",\"service.missing_inputs\":\"Bring two lengths of timber.\",\"service.no_order\":\"The carpenter holds no order of yours.\",\"service.nothing_to_mend\":\"Nothing here needs mending.\",\"service.nothing_to_raze\":\"There is no hut of yours here to raze.\",\"service.occupied\":\"Something inside the hut cannot be moved.\",\"service.order_open\":\"The carpenter is already building for you.\",\"service.raise_hut\":\"Raise a hut\",\"service.raise_hut.used\":\"The carpenter takes two lengths of timber and your coin, and starts framing.\",\"service.raze_hut\":\"Raze the hut\",\"service.raze_hut.used\":\"The carpenter takes your coin and pulls the hut down. Whatever was inside is set out in the lane.\",\"service.ready\":\"The hut is already finished.\",\"service.site_taken\":\"Something already stands there.\",\"service.unaffordable\":\"You cannot pay.\",\"structure.hut.description\":\"A small hut of rough planks.\",\"structure.hut.description.owned\":\"Your small hut of rough planks.\",\"structure.hut.description.ruin\":\"A small hut of rough planks; the roof has fallen in.\",\"structure.hut.title\":\"The Hut\"},\"world\":{\"construction\":{\"max_total\":1}}}",
+  "sha256": "79117157c1b9b825a70f6a45b4c75d5d03f3698865d9965b38b0b31978ca9e64"
 }

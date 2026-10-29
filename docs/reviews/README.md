@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
+- [Review: C2 slice E, blueprints -> structures (F8, loka-ivjq.8)](2026-10-28-c2-e-review.md): **APPROVE WITH NOTES**
 - [Review: batch C1 final head (loka-ivjq.20 S7, loka-ivjq.2 F2)](2026-10-28-c1-final-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **APPROVE**
 - [Review: C1 slice F2-docs, drop per-field kernel_api floors from docs and schema descriptions (loka-ivjq.2)](2026-10-28-c1-f2-docs-review.md): **APPROVE WITH NOTES**

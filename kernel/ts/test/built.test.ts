@@ -95,7 +95,7 @@ function refused(
 }
 
 // Breaks: the build benefit not gated by the plot, no room minted or no site exit written, the
-// room's title not the blueprint's, the way back missing, a second build on the same site taken,
+// room's title not the structure's, the way back missing, a second build on the same site taken,
 // the minted id not deterministic, or the room lost on reopen.
 test('buy the plot, raise the hut, walk north into it and back; the room survives reopen', () => {
   stream.n = 0;
@@ -113,7 +113,7 @@ test('buy the plot, raise the hut, walk north into it and back; the room survive
   );
   w = play(w, { type: 'move', direction: 'north' });
   assert.equal(w.state.containers[w.body], hut);
-  assert.equal(gameView(w).place.title.key, 'blueprint.hut.title');
+  assert.equal(gameView(w).place.title.key, 'structure.hut.title');
   for (const id of ['exits_resolve', 'player_in_one_room']) assert.ok(invariants[id](w), id);
   w = play(w, { type: 'move', direction: 'south' });
   assert.equal(w.state.containers[w.body], lane);
@@ -137,7 +137,7 @@ test('buy the plot, raise the hut, walk north into it and back; the room survive
 });
 
 // Breaks: the max_total cap not counted over the built rows (a second site direction is built
-// past world.construction.max_total 1), or (Built rooms S3) the blueprint's max_per_owner not
+// past world.construction.max_total 1), or (Built rooms S3) the structure's max_per_owner not
 // counted over the owner's rows (max_total 2: the order would get as far as missing_inputs).
 test('a second structure past max_total, or past max_per_owner, is refused', () => {
   const wider = (max_total: number, cap?: number) =>
@@ -145,7 +145,7 @@ test('a second structure past max_total, or past max_per_owner, is refused', () 
       c.rooms[`${S}:room/lane`].site.directions.push('east');
       c.services[`${S}:service/raise_hut`].benefit.direction = 'east';
       c.world.construction.max_total = max_total;
-      if (!cap) delete c.blueprints[`${S}:blueprint/hut`].max_per_owner;
+      if (!cap) delete c.structures[`${S}:structure/hut`].max_per_owner;
     });
   stream.n = 0;
   let w = fresh();
@@ -160,8 +160,8 @@ test('a second structure past max_total, or past max_per_owner, is refused', () 
 
 // Breaks: hydrate admitting a built row whose direction the site does not declare, two rows on
 // one site direction (max_total 2), more rows than max_total (a second direction), an owner no
-// body has, an id other than its row key, an unknown blueprint, a
-// blueprint the site does not list, or an unknown site.
+// body has, an id other than its row key, an unknown structure, a
+// structure the site does not list, or an unknown site.
 test('a forged built row refuses the load', () => {
   stream.n = 0;
   let w = fresh();
@@ -172,8 +172,8 @@ test('a forged built row refuses the load', () => {
   const east = sampler((c) => c.rooms[`${S}:room/lane`].site.directions.push('east'));
   const shed = sampler(
     (c) =>
-      (c.blueprints[`${S}:blueprint/shed`] = {
-        ...c.blueprints[`${S}:blueprint/hut`],
+      (c.structures[`${S}:structure/shed`] = {
+        ...c.structures[`${S}:structure/hut`],
         key: 'shed',
       }),
   );
@@ -392,11 +392,11 @@ test('600 s after completion the hut reads in ruin, its exits unchanged, and the
   w = play(w, { type: 'move', direction: 'north' });
   const [hut] = built(w);
   const exits = gameView(w).exits;
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  assert.equal(gameView(w).place.description.key, 'structure.hut.description.owned');
   w = elapse(w, w.state.clock + 599);
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  assert.equal(gameView(w).place.description.key, 'structure.hut.description.owned');
   w = elapse(w, w.state.clock + 1);
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
+  assert.equal(gameView(w).place.description.key, 'structure.hut.description.ruin');
   const ruin = Object.entries(w.state.statuses ?? {}).filter(([, r]) => r.active);
   assert.deepEqual(
     ruin.map(([at]) => [JSON.parse(at).body_id, JSON.parse(at).status.key]),
@@ -419,11 +419,11 @@ test('mend is refused on a sound hut; on a ruin it cures it for 3 pennies and a 
   w = play(w, mend(w));
   assert.deepEqual([before - pennies(w)!, held(w, yard) - held0, held(w, w.body)], [3, 1, 0]);
   w = play(w, { type: 'move', direction: 'north' });
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  assert.equal(gameView(w).place.description.key, 'structure.hut.description.owned');
   w = elapse(w, w.state.clock + 599);
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  assert.equal(gameView(w).place.description.key, 'structure.hut.description.owned');
   w = elapse(w, w.state.clock + 1);
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
+  assert.equal(gameView(w).place.description.key, 'structure.hut.description.ruin');
 });
 
 // Built rooms S5 raze (mechanics.md Built rooms, S5).

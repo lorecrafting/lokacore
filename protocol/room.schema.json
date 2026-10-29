@@ -499,7 +499,7 @@
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "site": {
-          "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "type": "object",
           "properties": {
             "directions": {
@@ -517,7 +517,7 @@
               "minItems": 1,
               "maxItems": 6
             },
-            "blueprints": {
+            "structures": {
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -528,7 +528,7 @@
           },
           "required": [
             "directions",
-            "blueprints"
+            "structures"
           ],
           "additionalProperties": false
         },
