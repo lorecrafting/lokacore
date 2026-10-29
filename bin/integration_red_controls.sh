@@ -329,6 +329,10 @@ git commit -qm ex; git update-ref refs/remotes/origin/main HEAD; echo x > kernel
 grep -q '^TS_SIZE_' "$R.m" && grep -q '^TYPECHECK_' "$R.m" && grep -q '^PRETTIER_' "$R.m" && ! grep -q '^MIX_FORMAT_' "$R.m" || bad "prepush: a kernel/ts change skipped the TS checks or prettier, or ran the Elixir ones: $(cat "$R.m")"
 git commit -qm ts; git update-ref refs/remotes/origin/main HEAD; echo '{}' > .prettierrc; git add .; : > "$R.pp"; pp n
 grep -q 'git ls-files' "$R.pp" || bad "prepush: a Prettier setup change did not check every tracked file: $(cat "$R.pp")"
+git commit -qm p; git update-ref refs/remotes/origin/main HEAD; echo x > v.mts; git add .; pp o
+grep -q '^TS_SIZE_' "$R.o" || bad "prepush: a .mts change skipped the TS checks: $(cat "$R.o")"
+git commit -qm o; git update-ref refs/remotes/origin/main HEAD; mkdir -p protocol; echo '{}' > protocol/x.json; git add .; pp p
+grep -q '^COMPILE_' "$R.p" || bad "prepush: a protocol JSON change skipped the Elixir compile that reads it: $(cat "$R.p")"
 # --- ci_changes.sh --------------------------------------------------------------------------
 # Break (loka-n0ng): a docs-only branch runs the test jobs or sim/walk; an engine change skips sim/walk; a test-only or
 # contract-doc change skips the test jobs; a non-push event, or a branch diff that is empty or cannot be read, skips anything.
@@ -342,6 +346,9 @@ cc push .beads/issues.jsonl 'code=false sim_walk=false'
 cc push lib/x.ex 'code=true sim_walk=true'
 cc push kernel/ts/test/x.ts 'code=true sim_walk=false'
 cc push kernel/ts/test/sim.test.ts 'code=true sim_walk=true'
+cc push mobile/app/src/x.tsx 'code=true sim_walk=true'
+cc push kernel/ts/play/obs.ts 'code=true sim_walk=true'
+cc push mix.exs 'code=true sim_walk=true'
 cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
 cc push docs/spec/conformance/x.json 'code=true sim_walk=false'
 cc push docs/spec/x.md 'code=true sim_walk=false'

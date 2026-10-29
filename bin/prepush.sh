@@ -16,7 +16,7 @@ run() { # <name> <command...>
 # (loka-n0ng); when the diff fails, every gated check runs.
 base=$(git merge-base origin/main HEAD 2>/dev/null) && changed=$(git diff --name-only "$base") || changed=ALL
 touched() { [ "$changed" = ALL ] || printf '%s\n' "$changed" | grep -qE "$1"; }
-ex='\.exs?$|(^|/)mix\.lock$' ts='\.(ts|tsx|mjs)$|^(kernel/ts|mobile|cartridges|protocol)/.*\.json$|^package(-lock)?\.json$'
+ex='\.exs?$|(^|/)mix\.lock$|^protocol/|composition-profile\.json$' ts='\.([cm]?ts|tsx|mjs)$|^(kernel/ts|mobile|cartridges|protocol)/.*\.json$|^package(-lock)?\.json$'
 touched "$ts" && run TS_SIZE node bin/check_ts_size.mjs
 touched "$ex" && run EX_SIZE elixir bin/check_size.exs
 # Prettier on the changed non-mobile files only; all tracked ones when its setup changed or the diff fails.
