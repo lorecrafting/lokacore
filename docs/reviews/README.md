@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
+- [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **CHANGES REQUIRED**
 - [Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)](2026-10-24-narration-log-batch-review.md): **APPROVE WITH NOTES**
 - [Review: room words batch, signpost fixture link and entity name words (loka-x6t.105, loka-6qi, PR #458, kernel_api 1.118)](2026-10-23-room-words-batch-review.md): **CHANGES REQUIRED**
 - [Review: room fixtures batch slices 1-3, fixture pages, detail title, World guard (loka-x6t.120, PR #464, kernel_api 1.120)](2026-10-23-room-fixtures-review.md): **APPROVE**
