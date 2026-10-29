@@ -117,7 +117,8 @@ defmodule Loka.ContentScenesTest do
   end
 
   # Breaks: a scene end not derived into its story point's outcomes, an end outcome a choice
-  # already claims, or one fact assigned twice at scene end, loads.
+  # already claims, one fact assigned twice at scene end, or a scene-reached point key whose
+  # story_point_<key> fact overflows a Key (53 characters), loads.
   test "scene end reaches its own story point outcome", %{tmp_dir: dir} do
     scene = src("scenes/bell_rung.json")
     m = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.15")
@@ -140,8 +141,15 @@ defmodule Loka.ContentScenesTest do
     assert JSON.decode!(bytes)["cartridge"]["story_points"][id] ==
              put_in(canonical, ["outcomes", "rung"], %{"scene" => scene_ref})
 
+    long = String.duplicate("p", 52)
+
+    assert {:ok, _, _} =
+             compile(Path.join(dir, "key52"), files.(%{ended | "story_point" => long}))
+
     for {name, s, path, code} <- [
           {"outcome", %{ended | "outcome" => "carry"}, "on_end", "DUPLICATE_DEFINITION"},
+          {"key53", %{ended | "story_point" => long <> "p"}, "on_end.story_point",
+           "SCHEMA_VIOLATION"},
           {"assign", %{ended | "assign" => [assign, assign]}, "on_end.assign",
            "DUPLICATE_DEFINITION"}
         ] do
