@@ -61,11 +61,20 @@ defmodule Loka.ContentStepsTest do
              refused("dialogues/guard.choices.ask.check.kind")
   end
 
-  # Breaks: a scripted action's check runs failure, which only a dialogue choice's runs.
+  # Breaks: a scripted action's check runs failure or rating, which only a dialogue choice's runs.
   test "a scripted action's check refuses failure" do
-    check = %{"kind" => "luck", "key" => "guess", "chance" => 0.5, "failure" => "narration.x"}
+    check = %{"kind" => "opposed", "key" => "guess", "failure" => "narration.x", "rating" => 1}
 
     assert CheckKinds.context("scripted_actions/ring.json", ["check"], check, :action) ==
-             refused("scripted_actions/ring.check.failure")
+             refused("scripted_actions/ring.check.failure") ++
+               refused("scripted_actions/ring.check.rating")
+  end
+
+  # Breaks: a dialogue choice's opposed check runs without failure narration.
+  test "a dialogue choice's opposed check needs failure" do
+    check = %{"kind" => "opposed", "key" => "ask", "rating" => 1}
+
+    assert CheckKinds.context("dialogues/g.json", ["check"], check, :choice) ==
+             refused("dialogues/g.check.failure")
   end
 end
