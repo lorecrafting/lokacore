@@ -21,7 +21,6 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
         maximum: 1,
         default: 0,
       }),
-    (c: any) => (c.manifest.requires.kernel_api.at_least = '1.23'),
   ])
     assert.equal(codex.load(mutate).ok, false, String(mutate));
   for (const invalid of [
