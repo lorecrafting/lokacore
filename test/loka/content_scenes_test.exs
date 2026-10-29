@@ -172,8 +172,8 @@ defmodule Loka.ContentScenesTest do
           {"actions/coil_rope.json", ["outcomes", "success", "sequence"],
            "actions/coil_rope.outcomes.success.sequence[0].fact"},
           {"reactions/bell_after.json", ["apply"], "reactions/bell_after.apply[0].fact"},
-          {"dialogues/bram.json", ["choices", "carry", "sequence"],
-           "dialogues/bram.choices.carry.sequence[0].fact"}
+          {"dialogues/bram.json", ["choices", "carry", "steps"],
+           "dialogues/bram.choices.carry.steps[0].fact"}
         ] do
       assert compile(dir, %{rel => put_in(src(rel), path, [write])}) ==
                {:error, [d("RESERVED_FACT", diagnostic)]}

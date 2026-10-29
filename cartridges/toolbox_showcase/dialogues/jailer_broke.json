@@ -34,7 +34,7 @@
         "resource": "pennies",
         "amount": 3
       },
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",
@@ -45,7 +45,7 @@
     "work_off": {
       "label": "dialogue.jailer.work_off",
       "narration": "narration.jailer.work_off",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",

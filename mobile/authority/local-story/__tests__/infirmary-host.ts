@@ -25,7 +25,7 @@ const change = (c: any) => {
       pledge: {
         label: 'quest.herbs.accept',
         narration: 'narration.healer',
-        sequence: [{ op: 'fact.adjust', fact: ref('fact', 'axis'), amount: 2 }],
+        steps: [{ op: 'fact.adjust', fact: ref('fact', 'axis'), amount: 2 }],
       },
     },
   };

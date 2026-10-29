@@ -11,7 +11,7 @@
     "invite": {
       "label": "dialogue.ada.invite",
       "narration": "narration.ada.invite",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "role",
@@ -22,7 +22,7 @@
     "revoke": {
       "label": "dialogue.ada.revoke",
       "narration": "narration.ada.revoke",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "role",
@@ -33,7 +33,7 @@
     "settle": {
       "label": "dialogue.ada.settle",
       "narration": "narration.ada.settle",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "role",

@@ -213,7 +213,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
           learn: {
             label: 'narration.bandaged',
             narration: 'narration.bandaged',
-            sequence: [{ op: 'skill.acquire', skill: ref('skill', 'bandage') }],
+            steps: [{ op: 'skill.acquire', skill: ref('skill', 'bandage') }],
           },
         },
       },

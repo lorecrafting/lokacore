@@ -21,7 +21,7 @@
         "resource": "pennies",
         "amount": 5
       },
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",
@@ -32,7 +32,7 @@
     "plead": {
       "label": "dialogue.jailer.plead",
       "narration": "narration.jailer.sentence",
-      "sequence": []
+      "steps": []
     }
   }
 }

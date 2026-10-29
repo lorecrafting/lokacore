@@ -380,7 +380,7 @@ test('real SQLite: a riddle left by the dream Continue reopens closed at count o
           label: 'dialogue.riddle.answer',
           narration: 'narration.riddle.answer',
           accept: ref('quest', 'tide'),
-          sequence: [],
+          steps: [],
         },
       },
     };
@@ -396,7 +396,7 @@ test('real SQLite: a riddle left by the dream Continue reopens closed at count o
         answer: {
           label: 'dialogue.riddle.answer',
           narration: 'narration.riddle.answer',
-          sequence: [],
+          steps: [],
         },
       },
       riddle: {

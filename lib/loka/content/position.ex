@@ -155,5 +155,5 @@ defmodule Loka.Content.Position do
     ]
 
   defp lists("dialogue", d),
-    do: for({id, o} <- d["choices"], do: {["choices", id, "sequence"], o["sequence"] || []})
+    do: for({id, o} <- d["choices"], do: {["choices", id, "steps"], o["steps"] || []})
 end

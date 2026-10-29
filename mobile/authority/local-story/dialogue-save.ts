@@ -131,7 +131,7 @@ type Expected = Map<
 function expect(
   world: World,
   expected: Expected,
-  sequence: NonNullable<DialogueChoice['sequence']>,
+  sequence: NonNullable<DialogueChoice['steps']>,
   selected: boolean,
 ) {
   for (const step of sequence) {
@@ -162,7 +162,7 @@ function checkAssignments(world: World, rows: [string, ChoiceRow][], items: Enti
       const selected = rows.some(
         ([, r]) => refString(r.source) === key && r.status === 'resolved' && r.choice_id === choice,
       );
-      expect(world, expected, option.sequence ?? [], selected);
+      expect(world, expected, option.steps ?? [], selected);
     }
   }
   for (const e of expected.values())

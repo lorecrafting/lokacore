@@ -175,11 +175,11 @@ const variant = build((dir) => {
   });
   json(dir, 'dialogues/stranger_talk.json', (d) => {
     d.riddle = { choice_id: 'help', answer: 'ab', bank: ['A', 'B'], wrong: 'narration.talk.greet' };
-    d.choices.help.sequence = [trust2];
+    d.choices.help.steps = [trust2];
     return d;
   });
   json(dir, 'dialogues/miller_talk.json', (d) => {
-    d.choices.help.sequence = [{ op: 'skill.acquire', skill: 'pick' }, trust2];
+    d.choices.help.steps = [{ op: 'skill.acquire', skill: 'pick' }, trust2];
     return d;
   });
   json(dir, 'text.json', (t) => ({
@@ -205,7 +205,7 @@ const variant = build((dir) => {
     roles: { smith: { role: 'npc', npc: 'smith' } },
     quest: 'errand',
     choices: {
-      done: { label: 'dialogue.talk.help', narration: 'narration.talk.help', sequence: [trust2] },
+      done: { label: 'dialogue.talk.help', narration: 'narration.talk.help', steps: [trust2] },
     },
   });
 });

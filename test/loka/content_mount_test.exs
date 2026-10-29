@@ -38,7 +38,7 @@ defmodule Loka.ContentMountTest do
                talk = "dialogues/horse_#{k}.json"
 
                [
-                 edit(talk, ["choices", k, "sequence", Access.at(0), "value"], 1),
+                 edit(talk, ["choices", k, "steps", Access.at(0), "value"], 1),
                  edit(talk, ["policy", "equals"], v)
                ]
              end) ++

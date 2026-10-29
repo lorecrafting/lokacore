@@ -16,7 +16,7 @@
     "teach": {
       "label": "dialogue.wizard_lux.teach",
       "narration": "narration.wizard_lux.teach",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "lux_known",

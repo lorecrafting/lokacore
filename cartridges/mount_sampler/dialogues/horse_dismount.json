@@ -17,7 +17,7 @@
     "dismount": {
       "label": "dialogue.horse.dismount",
       "narration": "narration.horse.dismount",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "riding",

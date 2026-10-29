@@ -56,7 +56,7 @@ defmodule Loka.ContentRestTest do
         &[@write | &1]
       )
 
-    dialogue = put_in(src("dialogues/bram.json"), ["choices", "carry", "sequence"], [@write])
+    dialogue = put_in(src("dialogues/bram.json"), ["choices", "carry", "steps"], [@write])
     plan = %{"op" => "fact.assign", "fact" => "search_plan", "value" => "party_led"}
     on = %{"event" => "fact_changed", "fact" => "search_plan"}
 

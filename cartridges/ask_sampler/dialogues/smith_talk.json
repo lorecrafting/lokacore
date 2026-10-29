@@ -11,7 +11,7 @@
     "help": {
       "label": "dialogue.smith.help",
       "narration": "narration.smith.help",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "trust",

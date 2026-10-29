@@ -87,7 +87,7 @@ export function escortSource(c: any) {
     roles: { child: npcRole('child'), stranger: npcRole('stranger') },
     choices: choice('rescue', {
       escort: { npc: 'child', quest, transition: 'start' },
-      sequence: [{ op: 'fact.assign', fact: ref('fact', 'homeward_started'), value: true }],
+      steps: [{ op: 'fact.assign', fact: ref('fact', 'homeward_started'), value: true }],
     }),
   });
   dialogue('child_rejoin', 'child', {

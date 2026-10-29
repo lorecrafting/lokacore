@@ -22,7 +22,7 @@ export function skillsSave(world: World, db: Db, meta: Meta) {
     const d = world.cartridge.dialogues?.[refString(row.source)];
     const option = row.choice_id && d?.choices[row.choice_id];
     if (!option || row.status !== 'resolved') continue;
-    for (const s of option.sequence ?? []) {
+    for (const s of option.steps ?? []) {
       if (s.op !== 'skill.acquire') continue;
       checkRow(world, id, row);
       committedDialogue(world, db, scope, id);

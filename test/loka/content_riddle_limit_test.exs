@@ -17,7 +17,7 @@ defmodule Loka.ContentRiddleLimitTest do
       "answer" => %{
         "label" => "dialogue.riddle.answer",
         "narration" => "narration.riddle.answer",
-        "sequence" => [%{"op" => "fact.assign", "fact" => "riddle_solved", "value" => true}]
+        "steps" => [%{"op" => "fact.assign", "fact" => "riddle_solved", "value" => true}]
       }
     },
     "riddle" => %{
@@ -100,7 +100,7 @@ defmodule Loka.ContentRiddleLimitTest do
           "ask" => %{
             "label" => "dialogue.bram.carry",
             "narration" => "narration.bram.carry",
-            "sequence" => [%{"op" => "fact.assign", "fact" => fact, "value" => true}]
+            "steps" => [%{"op" => "fact.assign", "fact" => fact, "value" => true}]
           },
           "bye" => %{"label" => "dialogue.bram.leave", "narration" => "narration.bram.leave"}
         }
