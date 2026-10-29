@@ -353,7 +353,7 @@ cc push kernel/ts/play/obs.ts 'code=true sim_walk=true'
 cc push mix.exs 'code=true sim_walk=true'
 cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
 for f in cartridges/x/room.md protocol/x.json config/config.exs .github/workflows/ci.yml kernel/ts/src/x.ts \
-  kernel/ts/test/read.ts kernel/ts/package.json mix.lock bin/loka docs/spec/conformance/x.json; do cc push "$f" 'code=true sim_walk=true'; done
+  kernel/ts/test/read.ts kernel/ts/package.json mix.lock bin/loka bin/ci_changes.sh docs/spec/conformance/x.json; do cc push "$f" 'code=true sim_walk=true'; done
 # A move out of a sim/walk path still runs sim/walk (rename detection lists only the destination).
 git checkout -qB t main; mkdir -p cartridges docs; echo r > cartridges/r.md; git add . && git commit -qm r; git update-ref refs/remotes/origin/main HEAD
 git mv cartridges/r.md docs/r.md && git commit -qm mv; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' ')
