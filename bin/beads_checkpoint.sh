@@ -20,5 +20,5 @@ beads_sync
 git add $j docs/HANDOFF.md || die 'git add failed'
 before=$(git rev-parse HEAD)
 git diff --cached --quiet || git commit -q -m "$subject" || die 'commit failed'
-git push -q origin main || { git reset -q "$before"; die 'push rejected: main moved; rerun bin/beads_checkpoint.sh'; }
+git push -q origin main || { git reset -q "$before"; die 'push failed (see git above; usually main moved): this run'\''s commit is undone; rerun bin/beads_checkpoint.sh'; }
 echo "beads_checkpoint: pushed $(git rev-parse --short HEAD)"
