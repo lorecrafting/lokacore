@@ -16,7 +16,6 @@
       "barrier": 1,
       "resource": 1,
       "schedule": 1,
-      "behavior": 1,
       "calendar": 1,
       "fact": 1,
       "policy": 1,

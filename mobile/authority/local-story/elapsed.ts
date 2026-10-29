@@ -12,7 +12,7 @@ import {
   natural,
 } from './elapsed-store.ts';
 import { needsAncestry } from '../../../kernel/ts/src/commands/actions.ts';
-import { CLOCK_JOB } from '../../../kernel/ts/src/mechanics/schedule/behavior.ts';
+import { CLOCK_JOB } from '../../../kernel/ts/src/mechanics/schedule/daily.ts';
 import { adopt, type Story } from './save.ts';
 import { identityOf, persistElapsed, reconcile, transaction } from './store.ts';
 

@@ -25,7 +25,7 @@ import { activation, resolution } from '../quest/lifecycle.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { admission } from '../combat/behavior.ts';
 import { attackRefused, encounterId, npcRef } from '../combat/shared.ts';
-import { jobId } from '../schedule/behavior.ts';
+import { jobId } from '../schedule/daily.ts';
 
 type ExpeditionEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'quest_activated' | 'quest_resolved' }>;

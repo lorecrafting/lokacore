@@ -9,7 +9,7 @@ import { initialPopulation } from '../mechanics/population/shared.ts';
 import { initialLiquids } from '../mechanics/liquid/shared.ts';
 import { key } from '../foundation/compose.ts';
 import { refString, type Cartridge, type Detail, type Entity, type World } from './decision.ts';
-import { firstJobs } from '../mechanics/schedule/behavior.ts';
+import { firstJobs } from '../mechanics/schedule/daily.ts';
 import { id } from '../foundation/id_source.ts';
 import type { RngState } from '../foundation/rng.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -23,7 +23,7 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * slot holder per distinct item slot, in slot-key order: numeric profile, Initial world ids and
  * Slot holder ids), then one roomless consumed holder under food@1, each slot holder in the body with capacity 1 (finger 2) and not an entity, the body in the entry room, each NPC in its room and each item at
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
- * schedule's first listed hour strictly after that time (mechanics/schedule/behavior.ts next; 04 §5.4: a job is
+ * schedule's first listed hour strictly after that time (mechanics/schedule/daily.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
  * and no fact set. A world after 0 stores the body's resource rows at start (an unset legacy one
  * regenerates from 0); at clock 0 only opted (standing rate, no remainder) and currency rows.

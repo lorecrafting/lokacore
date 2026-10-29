@@ -30,7 +30,8 @@
           "fact": "search_plan",
           "value": "player_led"
         }
-      ]
+      ],
+      "story_point": "proof_terminal/carry"
     },
     "leave": {
       "label": "dialogue.bram.leave",
@@ -45,7 +46,8 @@
       "hand_over": {
         "item": "lantern",
         "to": "bram"
-      }
+      },
+      "story_point": "proof_terminal/leave"
     }
   }
 }

@@ -8,7 +8,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
-import { entered } from '../schedule/behavior.ts';
+import { entered } from '../schedule/daily.ts';
 import { moves } from '../status/bars.ts';
 import {
   changed,

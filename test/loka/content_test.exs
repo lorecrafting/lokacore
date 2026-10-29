@@ -463,4 +463,10 @@ defmodule Loka.ContentTest do
              d("UNKNOWN_FIELD", "polices/x")
            ]
   end
+
+  # Breaks: a pass emits a code the schema's DiagnosticCode enum lacks (the bell cue's
+  # UNRESOLVED_TEXT_KEY did), so the diagnostic fails the Diagnostic contract downstream.
+  test "a diagnostic code outside DiagnosticCode raises" do
+    assert_raise ArgumentError, fn -> Loka.Content.Source.diag("NOPE", "cartridge") end
+  end
 end

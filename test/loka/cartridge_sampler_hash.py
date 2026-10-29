@@ -17,7 +17,7 @@ def quest_state(state):
     return dict(op='quest_state', quest=ref('quest', 'lantern'), state=state)
 def definition(name, **parts):
     return dict(key=name, **parts)
-caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior', 'death', 'combat'], 1)
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'death', 'combat'], 1)
 v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Cellar Sampler', requires=dict(kernel_api=dict(at_least='1.7', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)

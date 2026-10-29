@@ -66,7 +66,7 @@ defmodule Loka.ContentD9Test do
           {"cartridge.json", &put_in(&1, ["world", "bell_cue", "fact"], "absent"),
            "UNRESOLVED_REFERENCE", "cartridge.world.bell_cue.fact"},
           {"cartridge.json", &put_in(&1, ["world", "bell_cue", "text"], "narration.absent"),
-           "UNRESOLVED_TEXT_KEY", "cartridge.world.bell_cue.text"},
+           "UNRESOLVED_REFERENCE", "cartridge.world.bell_cue.text"},
           {"#{reaction}.json", &put_in(&1, ["apply", Access.at(0), "plan"], "hens"),
            "SCHEMA_VIOLATION", "#{reaction}.apply[0].plan"},
           {"#{reaction}.json", &put_in(&1, ["on", "fact"], "lever_stage"), "FACT_TYPE_MISMATCH",

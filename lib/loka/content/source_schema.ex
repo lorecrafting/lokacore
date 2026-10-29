@@ -93,15 +93,7 @@ defmodule Loka.Content.SourceSchema do
   defp shortcuts("NpcDefinition", s), do: put(s, "behaviours", behaviours())
   defp shortcuts("ItemDefinition", s), do: put(s, "behaviours", behaviours())
 
-  defp shortcuts("ReactionRule", s) do
-    on = update_in(s, ["properties", "on", "oneOf"], &[signal(&1, "event", "fact_changed") | &1])
-    steps = ["properties", "apply", "items", "oneOf"]
-
-    on
-    |> update_in(steps, &[signal(&1, "op", "fact.adjust") | &1])
-    |> put("zone", @key)
-    |> zoned()
-  end
+  defp shortcuts("ReactionRule", s), do: s |> put("zone", @key) |> zoned()
 
   defp shortcuts(_, s), do: s
 
@@ -138,19 +130,6 @@ defmodule Loka.Content.SourceSchema do
     }
 
     %{"type" => "array", "items" => %{"anyOf" => [@key, with_args]}}
-  end
-
-  # The signal step and trigger (Loka.Content.Signals): its target branch with `signal` for `fact`.
-  defp signal(branches, tag, target) do
-    branch = Enum.find(branches, &(&1["properties"][tag]["const"] == target))
-    props = Map.drop(branch["properties"], ["fact", "amount"])
-    required = [tag, "signal"]
-
-    %{
-      branch
-      | "properties" => Map.merge(props, %{tag => %{"const" => "signal"}, "signal" => @key}),
-        "required" => required
-    }
   end
 
   defp put(s, name, schema), do: put_in(s, ["properties", name], schema)

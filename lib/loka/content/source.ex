@@ -1,10 +1,10 @@
-# size: allow 311, the behaviours pass and the source schema dirs join the existing source-shortcut pipeline
+# size: allow 320, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Areas, Behaviours, Extends, Prose, Signals, Zones}
+  alias Loka.Content.{Areas, Behaviours, Extends, Prose, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -26,7 +26,6 @@ defmodule Loka.Content.Source do
              | :quest
              | :reaction
              | :dialogue
-             | :story_point
              | :scene
              | :skill
              | :topic
@@ -57,9 +56,8 @@ defmodule Loka.Content.Source do
   defp shortcuts(files, faults) do
     {files, clashes} = Prose.lower(files)
     {files, held} = Behaviours.expand(files)
-    {files, unsent} = Signals.lower(files)
     {files, zoned} = Zones.expand(files)
-    {files, Enum.map(faults ++ clashes ++ held ++ unsent ++ zoned, &bundle_diag/1)}
+    {files, Enum.map(faults ++ clashes ++ held ++ zoned, &bundle_diag/1)}
   end
 
   defp read(dir) do
@@ -139,7 +137,6 @@ defmodule Loka.Content.Source do
     "quests" => :quest,
     "reactions" => :reaction,
     "dialogues" => :dialogue,
-    "story_points" => :story_point,
     "scenes" => :scene,
     "skills" => :skill,
     "topics" => :topic,
@@ -181,9 +178,12 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
-  @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json)."
+  @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json); raises on a code outside DiagnosticCode."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()
   def diag(code, path, data \\ %{}, suggested \\ []) do
+    code in Loka.Core.Contracts.defs()["DiagnosticCode"]["enum"] or
+      raise ArgumentError, "#{inspect(code)} is not a DiagnosticCode"
+
     %{
       "severity" => "error",
       "code" => code,
@@ -259,12 +259,21 @@ defmodule Loka.Content.Source do
     |> elem(0)
   end
 
+  # Source only (Dialogues.points/2 derives CompiledCartridge.story_points and strips it).
+  @choice_point %{
+    "description" =>
+      "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+    "type" => "string",
+    "pattern" => "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$"
+  }
+
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
   def contracts do
     defs = Loka.Core.Contracts.defs()
 
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",

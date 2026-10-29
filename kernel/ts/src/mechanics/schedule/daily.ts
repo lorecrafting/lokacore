@@ -1,4 +1,4 @@
-// behavior@1 (capability_registry.json definitions; 06 §13 Behavior/schedule profiles; 21 §10):
+// schedule@1 (capability_registry.json definitions; 06 §13 Behavior/schedule profiles; 21 §10):
 // an NPC's daily location schedule (entity.schema.json NpcDefinition daily_schedule), read by
 // world creation and by schedule@1's run_job (mechanics/schedule/rule.ts); and the world's calendar job below.
 import type {

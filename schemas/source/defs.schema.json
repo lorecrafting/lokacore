@@ -917,6 +917,11 @@
             ]
           },
           "type": "array"
+        },
+        "story_point": {
+          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
         }
       },
       "required": [
@@ -4034,6 +4039,11 @@
             ]
           },
           "type": "array"
+        },
+        "story_point": {
+          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
         }
       },
       "type": "object"
@@ -5817,7 +5827,7 @@
     },
     "partial.source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -5953,7 +5963,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -6422,25 +6432,6 @@
             "anyOf": [
               {
                 "additionalProperties": false,
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "properties": {
-                  "item": { "$ref": "#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "#/$defs/DefinitionRef" },
-                  "op": { "const": "signal" },
-                  "signal": { "$ref": "#/$defs/Key" },
-                  "with": {
-                    "$ref": "#/$defs/DefinitionRef",
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
-                  }
-                },
-                "required": [
-                  "op",
-                  "signal"
-                ],
-                "type": "object"
-              },
-              {
-                "additionalProperties": false,
                 "properties": {
                   "fact": { "$ref": "#/$defs/DefinitionRef" },
                   "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -6719,14 +6710,6 @@
         "extends": { "$ref": "#/$defs/Key" },
         "on": {
           "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "event": { "const": "signal" },
-                "signal": { "$ref": "#/$defs/Key" }
-              },
-              "type": "object"
-            },
             {
               "additionalProperties": false,
               "properties": {
@@ -7469,28 +7452,6 @@
       },
       "type": "object"
     },
-    "partial.source.StoryPointDefinition": {
-      "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
-      "properties": {
-        "extends": { "$ref": "#/$defs/Key" },
-        "outcomes": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "properties": {
-              "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/partial.DefinitionRef" },
-              "scene": { "$ref": "#/$defs/partial.DefinitionRef" }
-            },
-            "type": "object"
-          },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "type": "object"
-        },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
     "partial.source.StructureDefinition": {
       "additionalProperties": false,
       "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
@@ -8144,7 +8105,7 @@
     },
     "source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -8294,7 +8255,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -8903,25 +8864,6 @@
             "anyOf": [
               {
                 "additionalProperties": false,
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "properties": {
-                  "item": { "$ref": "#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "#/$defs/DefinitionRef" },
-                  "op": { "const": "signal" },
-                  "signal": { "$ref": "#/$defs/Key" },
-                  "with": {
-                    "$ref": "#/$defs/DefinitionRef",
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
-                  }
-                },
-                "required": [
-                  "op",
-                  "signal"
-                ],
-                "type": "object"
-              },
-              {
-                "additionalProperties": false,
                 "properties": {
                   "fact": { "$ref": "#/$defs/DefinitionRef" },
                   "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -9199,18 +9141,6 @@
         },
         "on": {
           "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "event": { "const": "signal" },
-                "signal": { "$ref": "#/$defs/Key" }
-              },
-              "required": [
-                "event",
-                "signal"
-              ],
-              "type": "object"
-            },
             {
               "additionalProperties": false,
               "properties": {
@@ -10145,58 +10075,6 @@
       ],
       "type": "object"
     },
-    "source.StoryPointDefinition": {
-      "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
-      "properties": {
-        "outcomes": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "allOf": [
-              {
-                "anyOf": [
-                  {
-                    "required": [
-                      "scene"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "dialogue",
-                      "choice"
-                    ]
-                  }
-                ]
-              },
-              {
-                "not": {
-                  "anyOf": [
-                    {
-                      "required": [
-                        "dialogue",
-                        "scene"
-                      ]
-                    }
-                  ]
-                }
-              }
-            ],
-            "properties": {
-              "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/DefinitionRef" },
-              "scene": { "$ref": "#/$defs/DefinitionRef" }
-            },
-            "type": "object"
-          },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "type": "object"
-        }
-      },
-      "required": [
-        "outcomes"
-      ],
-      "type": "object"
-    },
     "source.StructureDefinition": {
       "additionalProperties": false,
       "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
@@ -10439,11 +10317,6 @@
         },
         "statuses": {
           "additionalProperties": { "$ref": "#/$defs/source.statuses" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
-        "story_points": {
-          "additionalProperties": { "$ref": "#/$defs/source.story_points" },
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
@@ -11013,30 +10886,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.StatusDefinition" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.story_points": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.StoryPointDefinition" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.StoryPointDefinition" }
       },
       "if": {
         "required": [
