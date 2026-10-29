@@ -2588,26 +2588,6 @@
     "valid": false
   },
   {
-    "name": "QuestJournal active_variants.0.when missing",
-    "contract": "QuestJournal",
-    "value": {
-      "active": "quest.lantern.find",
-      "objectives_met": "quest.lantern.return",
-      "resolved": "quest.lantern.done",
-      "failed": "quest.lantern.failed",
-      "abandoned": "quest.lantern.abandoned",
-      "outcomes": {
-        "carry": "quest.lantern.carried"
-      },
-      "active_variants": [
-        {
-          "text": "quest.lantern.find"
-        }
-      ]
-    },
-    "valid": false
-  },
-  {
     "name": "QuestJournal active_variants.0.text missing",
     "contract": "QuestJournal",
     "value": {

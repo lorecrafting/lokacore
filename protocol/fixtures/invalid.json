@@ -3512,10 +3512,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policy",
-        "code": "missing_property"
-      },
-      {
         "path": "/priority",
         "code": "missing_property"
       },
@@ -8556,10 +8552,6 @@
       {
         "path": "/description",
         "code": "missing_property"
-      },
-      {
-        "path": "/when",
-        "code": "missing_property"
       }
     ]
   },
@@ -8987,10 +8979,6 @@
       {
         "path": "/variants",
         "code": "too_many_items"
-      },
-      {
-        "path": "/variants/16/when",
-        "code": "missing_property"
       }
     ]
   },
@@ -10356,10 +10344,6 @@
       },
       {
         "path": "/outcomes",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policy",
         "code": "missing_property"
       },
       {
@@ -11934,10 +11918,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/offer/policy",
-        "code": "missing_property"
-      },
-      {
         "path": "/offer/x",
         "code": "unknown_property"
       },
@@ -11974,10 +11954,6 @@
       {
         "path": "/item_acquired",
         "code": "unknown_property"
-      },
-      {
-        "path": "/policy",
-        "code": "missing_property"
       }
     ]
   },
@@ -13538,10 +13514,6 @@
       },
       {
         "path": "/npc",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policy",
         "code": "missing_property"
       },
       {
@@ -27159,22 +27131,6 @@
       "title": "t",
       "description": "d",
       "exits": {},
-      "locks": {}
-    },
-    "errors": [
-      {
-        "path": "/locks/enter",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
-    "contract": "RoomDefinition",
-    "value": {
-      "key": "hut",
-      "title": "t",
-      "description": "d",
-      "exits": {},
       "locks": {
         "build": {
           "policy_version": 1,
@@ -27240,33 +27196,6 @@
       {
         "path": "/locks/get",
         "code": "unknown_property"
-      },
-      {
-        "path": "/locks/traverse",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
-    "contract": "ItemDefinition",
-    "value": {
-      "key": "chest",
-      "keywords": [
-        "chest"
-      ],
-      "short": "s",
-      "room_line": "r",
-      "description": "d",
-      "location": {
-        "in": "template"
-      },
-      "container": true,
-      "locks": {}
-    },
-    "errors": [
-      {
-        "path": "/locks/get",
-        "code": "missing_property"
       }
     ]
   },
@@ -29760,10 +29689,6 @@
       }
     },
     "errors": [
-      {
-        "path": "/locks/enter",
-        "code": "missing_property"
-      },
       {
         "path": "/locks/x",
         "code": "unknown_property"
