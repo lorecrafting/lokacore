@@ -1,4 +1,4 @@
-# size: allow 311, the behaviours pass and the source schema dirs join the existing source-shortcut pipeline
+# size: allow 313, the behaviours pass and the source schema dirs join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -184,9 +184,12 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
-  @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json)."
+  @codes Loka.Core.Contracts.defs()["DiagnosticCode"]["enum"]
+  @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json); raises on a code outside DiagnosticCode."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()
   def diag(code, path, data \\ %{}, suggested \\ []) do
+    code in @codes or raise ArgumentError, "#{inspect(code)} is not a DiagnosticCode"
+
     %{
       "severity" => "error",
       "code" => code,
