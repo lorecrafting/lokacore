@@ -1,7 +1,8 @@
 defmodule Loka.Content.Scenes do
   @moduledoc """
   scene@1's modal ordered subset, trigger/text references and compiler-added facts
-  (mechanics.md scene@1; cartridge.md Compiler). Twin of cartridge_scenes.ts.
+  (mechanics.md scene@1; cartridge.md Compiler). Its fact specs match
+  kernel/ts/src/content/cartridge_scenes.ts.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6, resolve: 4]
