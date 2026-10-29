@@ -35,12 +35,7 @@ defmodule Loka.Content.Replenish do
   def check(m, defs) do
     entries = for {_, {rel, [], r}} <- defs["replenish"] || %{}, do: {rel, r}
 
-    floor =
-      if entries != [] and api(m) < [1, 71],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    floor ++ Enum.flat_map(entries, fn {rel, r} -> entry(m, defs, rel, r) end)
+    Enum.flat_map(entries, fn {rel, r} -> entry(m, defs, rel, r) end)
   end
 
   defp entry(m, defs, rel, r) do
@@ -49,26 +44,17 @@ defmodule Loka.Content.Replenish do
   end
 
   @doc """
-  Homestead hs-10 (docs/system/cartridge.md Craft declarations): a craft recipe needs kernel_api
-  1.101 (one diagnostic), sits on no spell, its consume and yield follow replenish's
+  Homestead hs-10 (docs/system/cartridge.md Craft declarations): a craft recipe sits on no spell, its consume and yield follow replenish's
   item and holder rules, and consume's reason has a catalog entry (unless `text` is `:unknown`).
   """
   @spec craft(map(), map(), map() | :unknown) :: [map()]
   def craft(m, defs, text) do
     crafts = for {_, {rel, [], %{"craft" => c} = r}} <- defs["recipe"], do: {rel, r, c}
 
-    floor(m, crafts) ++
-      for {rel, r, c} <- crafts,
-          d <- misplaced(rel, r) ++ parts(m, defs, rel, c) ++ reason(rel, c, text),
-          do: d
+    for {rel, r, c} <- crafts,
+        d <- misplaced(rel, r) ++ parts(m, defs, rel, c) ++ reason(rel, c, text),
+        do: d
   end
-
-  defp floor(m, crafts),
-    do:
-      if(crafts != [] and api(m) < [1, 101],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-      )
 
   # A spell has no station whose stock it could use.
   defp misplaced(rel, r),
@@ -153,12 +139,6 @@ defmodule Loka.Content.Replenish do
       _ -> []
     end
   end
-
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 
   @doc "The item refs a replenish entry refills into `room` (a harvest seam's stock may start elsewhere)."
   @spec refilled(map(), map()) :: [map()]

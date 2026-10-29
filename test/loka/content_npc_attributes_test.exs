@@ -3,8 +3,7 @@ defmodule Loka.ContentNpcAttributesTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/npc_attr_sampler")}
 
   # Breaks: an opposed check naming no NPC, a guard without the checked attribute or a template
-  # NPC, or an NPC attribute list naming nothing or one attribute twice, or either G3 field under
-  # kernel_api 1.46, compiles (the compiler twin of the TypeScript loader's row G3 checks).
+  # NPC, or an NPC attribute list naming nothing or one attribute twice, compiles (the compiler twin of the TypeScript loader's row G3 checks).
   test "row G3 NPC attributes and opposed NPCs keep their boundaries", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     north = "actions/shove_north.json"
@@ -21,9 +20,7 @@ defmodule Loka.ContentNpcAttributesTest do
       {strong, &put_in(&1, ["attributes"], [%{str | "attribute" => "dex"}]),
        {"UNRESOLVED_REFERENCE", "npcs/strong_guard.attributes[0].attribute"}},
       {strong, &Map.update!(&1, "attributes", fn a -> a ++ [str] end),
-       {"SCHEMA_VIOLATION", "npcs/strong_guard.attributes[1].attribute"}},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45"),
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}}
+       {"SCHEMA_VIOLATION", "npcs/strong_guard.attributes[1].attribute"}}
     ]
 
     for {file, change, {code, path}} <- cases do

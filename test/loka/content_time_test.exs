@@ -3,8 +3,8 @@ defmodule Loka.ContentTimeTest do
 
   # Breaks (toolbox row 10): the compiler drops a barrier's opens_when, leaves a short reference
   # inside it unexpanded, skips its policy's owner check, accepts a sky phase the lunar cuts do
-  # not name, or accepts opens_when or sky below kernel_api 1.45 (each alone included).
-  test "opens_when reaches the artifact; sky names a lunar phase; both need 1.45" do
+  # not name.
+  test "opens_when reaches the artifact; sky names a lunar phase" do
     dir = Loka.ContentSource.copy("cartridges/time_sampler")
     gate = fn root -> &put_in(&1, ["opens_when", "root"], root) end
     other = %{"op" => "barrier_state", "barrier" => "moon_door", "equals" => "open"}
@@ -25,21 +25,12 @@ defmodule Loka.ContentTimeTest do
            }
 
     drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "calendar") end)
-    api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.44")
     moon = "barriers/moon_door.opens_when.root"
 
-    ungate = &Map.delete(&1, "opens_when")
-    floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
-    no_sky = [{"barriers/moon_door.json", ungate}, {"cartridge.json", api}]
-
-    # The last two: a sky leaf alone (the hall's variant) and an opens_when alone each need 1.45.
     cases = [
       {[{"barriers/moon_door.json", gate.(%{"op" => "sky", "lunar" => "half"})}],
        {"SCHEMA_VIOLATION", moon <> ".lunar"}},
-      {[{"cartridge.json", drop}], {"UNDECLARED_CAPABILITY", moon <> ".op"}},
-      {[{"cartridge.json", api}], floor},
-      {[{"barriers/hour_door.json", ungate} | no_sky], floor},
-      {[{"rooms/hall.json", &Map.delete(&1, "variants")} | no_sky], floor}
+      {[{"cartridge.json", drop}], {"UNDECLARED_CAPABILITY", moon <> ".op"}}
     ]
 
     for {changes, {code, path}} <- cases do

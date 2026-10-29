@@ -1,12 +1,11 @@
 defmodule Loka.Content.Delayed do
   @moduledoc """
-  Toolbox row FD1: a reaction's `after`, the fact.stamp step and the time_since leaf need
-  kernel_api 1.90; a delayed rule carries no step that reads its event (barrier.set, item.move, npc.move,
+  Toolbox row FD1: a reaction's `after`, the fact.stamp step and the time_since leaf: a delayed rule carries no step that reads its event (barrier.set, item.move, npc.move,
   population.suppress, a co_present or tagged step, a quest step: RS-4's subject) and no `when`
   leaf with `subject: "subject"`;
   a stamped or timed fact is an int fact with no maximum and a minimum absent or at most 0. Twin of kernel/ts/src/content/cartridge_delayed.ts.
   """
-  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [resolve: 4]
 
   # The fired job keeps its actor, not the subject RS-4's quest steps read (NPC no-op, trigger holder).
@@ -21,7 +20,7 @@ defmodule Loka.Content.Delayed do
     timed = timed(steps, trees)
 
     Enum.flat_map(timed, &clock(&1, m, defs)) ++
-      Enum.flat_map(steps, &refused/1) ++ subjective(defs) ++ floor(m, timed, defs)
+      Enum.flat_map(steps, &refused/1) ++ subjective(defs)
   end
 
   # Each fact.stamp step and time_since leaf, with its path.
@@ -84,18 +83,4 @@ defmodule Loka.Content.Delayed do
     ]
 
   defp nodes(rel, path, n), do: [{rel, path, n}]
-
-  # Per rule, so a rule with `after` and no steps needs 1.90 too.
-  defp floor(m, timed, defs) do
-    used = timed != [] or for({_, {_, [], %{"after" => _}}} <- defs["reaction"], do: 1) != []
-
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if used and api < [1, 90],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
 end

@@ -4,10 +4,10 @@ defmodule Loka.ContentUseTest do
   @dir "cartridges/use_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row G4): the compiler accepts a use recipe below kernel_api 1.49, a status.cure
-  # on a detail recipe, an opposed check on a use recipe (no detail, so no rating), a use tool's
+  # Breaks (toolbox row G4): the compiler accepts a status.cure on a detail recipe,
+  # an opposed check on a use recipe (no detail, so no rating), a use tool's
   # liquid naming no liquid of the cartridge, or leaves its short liquid reference unexpanded.
-  test "use recipes need 1.49, cures only on them, no rating-opposed check, liquid expands" do
+  test "use recipes: cures only on them, no rating-opposed check, liquid expands" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, artifact, []} = Loka.ContentSource.compile(dir, [])
 
@@ -24,11 +24,6 @@ defmodule Loka.ContentUseTest do
              "kind" => "liquid",
              "key" => "oil"
            }
-
-    api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.48")}
-    floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [api])
-    assert floor in pairs(diags), inspect(diags)
 
     # A status.cure on a detail recipe cures nothing (a detail holds no status): refused.
     detail = %{"kind" => "detail", "room" => "yard", "detail" => "pump"}

@@ -10,13 +10,8 @@ Rules (read once): `AGENTS.md` Simplicity and Writing tests; `.claude/agents/dev
 handoff); [building mechanics by composition](../system/architecture.md#building-mechanics-by-composition);
 `docs/MECHANICS-TOOLBOX.md#traps`.
 - Loader refusals: run every existing test a new refusal could hit
-  (`kernel/ts/test/loader_floors.test.ts`, `test/loka/loader_floors_test.exs`, every test that
-  compiles a sampler, `elapsed-host.test.ts` coldReopen). One invalid row per kernel, with a red
+  (every test that compiles a sampler, `elapsed-host.test.ts` coldReopen). One invalid row per kernel, with a red
   control for every new check.
-- Floors: a new floor or gated feature whose cartridge carries no other feature at that floor gets a
-  `protocol/fixtures/loader_floors.json` case (strip the other features by edits), with a red control
-  in both kernels. After a merge that adds a feature to a shared sampler, rerun the other floor
-  cases' mutants of that sampler.
 - View tests: validate `gameView(w)` against `protocol/gameview.schema.json` (an empty `choices` or a
   price 0 must fail the schema, not pass the test).
 - Sampler hash: a change to a sampler with transcripts (`cartridges/*/transcripts`) updates its

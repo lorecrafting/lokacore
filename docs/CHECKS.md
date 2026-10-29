@@ -69,13 +69,6 @@ their rules and red controls remain available for resumption.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
   capability registry and `docs/features.json`; an implemented capability (a rule module) with
   a missing cell fails.
-- Loader floors: every `kernel_api` floor a `protocol/*.schema.json` names has a case in
-  [`protocol/fixtures/loader_floors.json`](../protocol/fixtures/loader_floors.json), read by both
-  kernels (`test/loka/loader_floors_test.exs`, which also checks the coverage, and
-  `kernel/ts/test/loader_floors.test.ts`); a new floor adds its case there. A case's `without`
-  edits remove only its own feature; that source compiles (Elixir) and loads (TS) just below the floor, so
-  a case another feature shadows fails; every new case carries one (the Elixir test freezes
-  today's exceptions, never a shared sampler: craft, skills, status, build, terrain, gift).
 - `elixir bin/red_controls.exs`: refuses occupied plant paths and creates files exclusively;
   `test/loka/red_controls_test.exs` checks preserved local bytes. It plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
@@ -112,10 +105,10 @@ their rules and red controls remain available for resumption.
 - `bin/prose_lint.py <cartridge dir>` (report only, never a gate; exit 0 on findings, 2 on bad input; balance N6 text health): per cartridge it prints W7 variant groups whose texts share a first word, keys with one alternate, sentence length (mean, spread) per key kind, and the Flesch-Kincaid grade. Band-phrase coverage is skipped: N6 defines no bands. Its control `bin/prose_lint_red_controls.sh` (fixture `test/fixtures/prose_lint`) is in `ci.yml`'s `lint` job.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
   sides' whole `## `/`### ` sections at one spot of `docs/system/mechanics.md`, both sides' table rows at one spot of
-  `docs/MECHANICS-TOOLBOX.md`, both sides' elements appended to `protocol/fixtures/loader_floors.json` (a floor on both sides once), the higher
+  `docs/MECHANICS-TOOLBOX.md`, the higher
   `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`; and leaves unresolved a section
-  that repeats a `## ` heading, a `###` beside a `##` section, a non-table line, two sections inside another section, one row id on both sides, two edits of one
-  loader floor, an append against an edit of the last loader floor, a review record that differs
+  that repeats a `## ` heading, a `###` beside a `##` section, a non-table line, two sections inside another section, one row id on both sides, a review
+  record that differs
   beyond whitespace and a TypeScript source conflict.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/push_slice.sh <worktree> <branch>` against a bare origin (a branch not checked out in the worktree is refused): an accepted push prints `PUSH_EXIT=0 <sha>`, a rejected one exits non-zero and prints a non-zero `PUSH_EXIT`.
