@@ -53,10 +53,9 @@ test('every $ref in the source schemas resolves', () => {
 });
 
 const room = { title: 'hall.title', description: 'hall.description', exits: {} };
-const signal = { op: 'signal', signal: 'bell' };
-const reaction = { on: { event: 'signal', signal: 'bell' }, apply: [signal] };
-const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [signal] };
-const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [signal] };
+const step = { op: 'fact.assign', fact: 'known', value: true };
+const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [step] };
+const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [step] };
 const defs = 'defs.schema.json#/$defs/';
 const discount = { numerator: 1, denominator: 2, minimum: 1, skill: 'haggle' };
 const outcome = 'source.StoryPointDefinition/properties/outcomes/additionalProperties';
@@ -69,7 +68,7 @@ const fact = {
 };
 
 // Each pair: a file the schema accepts, then the same file with one mistake. The corpus
-// covers every other shortcut; no committed cartridge uses a signal or extends a scene,
+// covers every other shortcut; no committed cartridge extends a scene,
 // dialogue choice or nested npc member yet. The defs rows pin the contract's
 // exactlyOneRequired and requiredUnless translations.
 test('the schemas refuse a misspelled field and each shortcut written wrong', () => {
@@ -77,7 +76,6 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
     ['rooms', room, { ...room, titel: 'hall.title' }],
     ['rooms', { ...room, title: { prose: 'Hall' } }, { ...room, title: { prose: '' } }],
     ['rooms', { extends: 'hall' }, { extends: 1 }],
-    ['reactions', reaction, { ...reaction, apply: [{ ...signal, amount: 1 }] }],
     [
       'npcs',
       { extends: 'deer', behaviours: ['spoils'] },
@@ -88,8 +86,6 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
     ['behaviours', { reactions: {}, params: ['who'] }, { reactions: {}, params: ['holder'] }],
     ['behaviours', { reactions: {} }, { params: [] }],
     ['areas', { rooms: { hall: room } }, { rooms: { hall: { ...room, titel: 'x' } } }],
-    ['reactions', reaction, { ...reaction, apply: [{ op: 'signal' }] }],
-    ['reactions', reaction, { ...reaction, on: { event: 'signal' } }],
     ['reactions', { extends: 'p', on: { room: 'mill' } }, { extends: 'p', on: { rom: 'mill' } }],
     [
       'npcs',
