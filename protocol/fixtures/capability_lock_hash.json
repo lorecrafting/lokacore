@@ -1,5 +1,5 @@
 {
-  "description": "Known answer for capability_lock_hash (09 \u00a721): the chapter-one lock (00a \u00a71) with keys in authored order, its canonical bytes (keys sorted, no whitespace; numeric-profile.md) and SHA-256 of those bytes. canonical was produced by Python json.dumps(sort_keys=True, separators=(',', ':')) and sha256 by shasum -a 256, never by the kernels.",
+  "description": "Known answer for capability_lock_hash (09 §21): the chapter-one lock (00a §1) with keys in authored order, its canonical bytes (keys sorted, no whitespace; numeric-profile.md) and SHA-256 of those bytes. canonical was produced by Python json.dumps(sort_keys=True, separators=(',', ':')) and sha256 by shasum -a 256, never by the kernels.",
   "value": {
     "format": "loka-capability-lock-v1",
     "capabilities": {
@@ -23,7 +23,7 @@
       "quest": 1,
       "dialogue": 1,
       "scene": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "reaction": 1,
       "schedule": 1,
       "population": 1,
@@ -41,6 +41,6 @@
       "sense_cue": 1
     }
   },
-  "canonical": "{\"capabilities\":{\"action_recipe\":1,\"attributes\":1,\"barrier\":1,\"calendar\":1,\"check\":1,\"combat\":1,\"commerce\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"faction\":1,\"inspectable_detail\":1,\"light\":1,\"liquid\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"population\":1,\"position\":1,\"quest\":1,\"reaction\":1,\"readable\":1,\"relationship\":1,\"resource\":1,\"scene\":1,\"schedule\":1,\"sense_cue\":1,\"service\":1,\"skills\":1,\"status\":1,\"target_resolution\":1,\"tide\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"}",
-  "sha256": "e34a3e1dac3da19c03631d49e121ccf56a1a91a6287df2a3f9e09f2681511960"
+  "canonical": "{\"capabilities\":{\"attributes\":1,\"barrier\":1,\"calendar\":1,\"check\":1,\"combat\":1,\"commerce\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"faction\":1,\"inspectable_detail\":1,\"light\":1,\"liquid\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"population\":1,\"position\":1,\"quest\":1,\"reaction\":1,\"readable\":1,\"relationship\":1,\"resource\":1,\"scene\":1,\"schedule\":1,\"scripted_action\":1,\"sense_cue\":1,\"service\":1,\"skills\":1,\"status\":1,\"target_resolution\":1,\"tide\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"}",
+  "sha256": "ffad3ba5b0ef9324de24179e1bf37125238d6db59528edef6db6b286d6b9db85"
 }
