@@ -302,7 +302,7 @@ CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.
 CI=$ok E2E=$ok SLICE_FILE=s REC_FILE=r REC_IN_BASE= RESOLVE=1 pm batch-resolver 0 '^PUSHED batch'
 [ "$(cat "$R.rg" 2>/dev/null)" = run ] && [ "$(git -C "$R" show origin/batch:a)" = regenerated ] || bad 'pm_merge batch-resolver: regen.sh did not run once into the pushed merge'
 # Break: a failed regen.sh merges anyway, or leaves its edits in the worktree (merge --abort keeps them).
-CI=$ok E2E=$ok REGEN_RC=1 pm regen-fails 1 '^CONFLICT'; unset RESOLVE REGEN_RC # prefix assignments to a function persist in sh
+CI=$ok E2E=$ok SLICE_FILE=s REC_FILE=r REC_IN_BASE= RESOLVE=1 REGEN_RC=1 pm regen-fails 1 '^CONFLICT'; unset RESOLVE REGEN_RC # bash's sh keeps a function's prefix assignments, dash does not
 # --- prepush.sh ----------------------------------------------------------------------------
 # A repo whose stub mise logs each check and fails them when STUB_RC=1; origin/main is the base commit.
 # Break: two runs share log files, so one reports the other's output (the first log must still read "run-a" after
