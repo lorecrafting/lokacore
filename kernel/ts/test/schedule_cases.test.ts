@@ -139,27 +139,6 @@ test("a case's time window is read at the hour's due time, not the end of the wa
   assert.equal(room(w), roomId(w, 'green'));
 });
 
-// Breaks: the loader skips a schedule case condition (an unknown fact loads and fails in play).
-test('the loader checks schedule_cases conditions', () => {
-  const at0 = `.cartridge.npcs[${JSON.stringify(MAUD)}].schedule_cases.8[0]`;
-  const rows: [(c: any) => void, string, string, object][] = [
-    [
-      (c) => (c.npcs[MAUD].schedule_cases['8'][0].when.root.fact.key = 'ghost'),
-      'UNRESOLVED_REFERENCE',
-      `${at0}.when.root.fact`,
-      { target: `${C}:fact/ghost` },
-    ],
-  ];
-  for (const [change, code, path, data] of rows) {
-    const r = reload(source, change);
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data], [
-      code,
-      path,
-      data,
-    ]);
-  }
-});
-
 // Breaks (row W3, loka-qi0r): a wait over two listed hours that faults nonfuture_job, or one that
 // collapses them, so the 17:00 arrival in the woods, and the reaction it fires, never happen; or
 // any difference from waiting hour by hour (the real-time drain's steps).

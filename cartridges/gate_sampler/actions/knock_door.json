@@ -1,5 +1,5 @@
 {
-  "label": "actions.knock",
+  "label": "actions.knock_door",
   "aliases": [
     "knock"
   ],
@@ -26,7 +26,7 @@
         }
       ],
       "narration": {
-        "actor": "narration.knock.actor"
+        "actor": "narration.knock_door.actor"
       }
     }
   }

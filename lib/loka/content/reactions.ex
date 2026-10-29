@@ -1,4 +1,3 @@
-# size: allow 340, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check; Settle S3-1: narrate text; S4-1: npc.move plan) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
@@ -51,8 +50,7 @@ defmodule Loka.Content.Reactions do
   def filters, do: @filters
 
   defp rule({rel, %{"on" => %{"event" => event} = on} = r}, ctx) do
-    api(r, ctx.m) ++
-      owned(at(rel, []), "reaction", ctx.kinds) ++
+    owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
       instances(rel, on, ctx) ++
@@ -93,53 +91,6 @@ defmodule Loka.Content.Reactions do
         []
     end
   end
-
-  # The kernel_api minor (major 1) each consequence op needs; twin of FLOORS in
-  # kernel/ts/src/content/cartridge_reactions.ts.
-  @floors %{
-    "quest.activate" => 8,
-    "quest.resolve" => 12,
-    "quest.fail" => 12,
-    "population.suppress" => 35,
-    "status.cure" => 53,
-    "barrier.set" => 56,
-    "item.move" => 77,
-    "population.spawn" => 84,
-    "npc.move" => 95,
-    "replenish.run" => 101,
-    "narrate" => 103
-  }
-
-  # Each trigger event's kernel_api minor: spoken 1.48 (G9), status_applied 1.53 (G3), asked 1.96 (FD7).
-  @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53, "asked" => 96}
-
-  # One diagnostic per rule below its highest floor; filters: npc 1.47 (W3), attacker 1.58
-  # (loka-kgd.79), target 1.87 (row 39), witness 1.95 (FD5); a co_present status.apply 1.50 (W21),
-  # with a tag 1.56 (W22), naming a room 1.65 (status reader 9); an npc.move naming a plan 1.103 (S4-1).
-  @filters %{"npc" => 47, "attacker" => 58, "target" => 87, "witness" => 95}
-  defp api(r, manifest) do
-    floor = rule_floor(r)
-    at_least = manifest["requires"]["kernel_api"]["at_least"]
-    version = Enum.map(String.split(at_least, "."), &String.to_integer/1)
-
-    if floor > 0 and version < [1, floor],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp rule_floor(%{"on" => on, "apply" => apply}) do
-    Enum.max([
-      Map.get(@events, on["event"], 0)
-      | Enum.map(@filters, fn {f, n} -> if Map.has_key?(on, f), do: n, else: 0 end) ++
-          Enum.map(apply, &step_floor/1)
-    ])
-  end
-
-  defp step_floor(%{"op" => "status.apply", "room" => _}), do: 65
-  defp step_floor(%{"op" => "npc.move", "plan" => _}), do: 103
-  defp step_floor(%{"tag" => _}), do: 56
-  defp step_floor(%{"co_present" => _}), do: 50
-  defp step_floor(s), do: Map.get(@floors, s["op"], 0)
 
   defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do
     path = at(rel, ["apply", i, "op"])

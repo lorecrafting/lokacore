@@ -52,6 +52,12 @@ defmodule Loka.ContentRefusalsTest do
              {"cartridge.json", &put_in(&1, ["ancestries", "strong", "attribute"], "missing")}
            ])
 
+    for {field, value} <- [{"description", "ancestry.absent"}, {"skill", "str"}] do
+      assert {"UNRESOLVED_REFERENCE", "cartridge.ancestries.strong.#{field}"} in codes(dir, [
+               {"cartridge.json", &put_in(&1, ["ancestries", "strong", field], value)}
+             ])
+    end
+
     instance = [{"facts.json", %{"facts" => %{"axis" => %{@axis | "scopes" => ["instance"]}}}}]
 
     assert {"SCHEMA_VIOLATION", "cartridge.ancestries.strong.faction.fact"} in codes(

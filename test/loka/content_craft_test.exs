@@ -13,7 +13,7 @@ defmodule Loka.ContentCraftTest do
 
   # Break (Homestead hs-10; twin of the loader rows in kernel/ts/test/craft.test.ts): a craft
   # compiles with a template or non-container holder, an unresolved item, holder or reason, a
-  # duplicate item, or on a spell. The floor is loader_floors.json's "a craft" case.
+  # duplicate item, or on a spell.
   test "a craft needs resolved, placed holders, distinct items, a catalog reason, a station",
        %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -59,8 +59,7 @@ defmodule Loka.ContentCraftTest do
   end
 
   # Break (hs-11; twin of the loader test in kernel/ts/test/craft.test.ts): a skill prerequisite
-  # naming its own skill, or an unknown skill, compiles. The floor is loader_floors.json's
-  # "a skill prerequisite" case.
+  # naming its own skill, or an unknown skill, compiles.
   test "a skill prerequisite resolves and never names its own skill", %{dir: dir} do
     # The leaf sits under all and not, so a walker that skips nesting misses it.
     nested = fn key ->
@@ -101,8 +100,7 @@ defmodule Loka.ContentCraftTest do
 
   # Break (hs-14; twin of the loader test in kernel/ts/test/craft.test.ts): a shown skill whose
   # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
-  # or an unknown profession text compiles. The floor is loader_floors.json's
-  # "a skill profession" case.
+  # or an unknown profession text compiles.
   test "nothing shown reads or names a hidden skill; a profession resolves", %{dir: dir} do
     edit = fn edits ->
       case Loka.ContentSource.compile(dir, edits) do
@@ -161,7 +159,7 @@ defmodule Loka.ContentCraftTest do
   # Break (Built rooms S6; twin of the loader test in kernel/ts/test/craft.test.ts): a build step
   # compiles off a detail target, on a room that is no site, twice in one sequence, without
   # world.construction or the refusal texts, or naming a blueprint or direction the site does not
-  # list. The floor is loader_floors.json's "a build step" case.
+  # list.
   test "a build step needs a site detail, its listed blueprint and direction, once, on success",
        %{dir: dir} do
     seq = "actions/raise_timbered_hut.outcomes.success.sequence"

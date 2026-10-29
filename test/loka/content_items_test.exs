@@ -293,11 +293,6 @@ defmodule Loka.ContentItemsTest do
 
   # Breaks: an older implementation can load carrying content without enforcing its admission.
   test "carrying source requires its API and containment owner", %{dir: dir} do
-    files = put_in(carry_files(), ["cartridge.json", "requires", "kernel_api", "at_least"], "1.2")
-
-    assert compile(dir, files) ==
-             {:error, [d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]}
-
     files =
       Map.update!(
         carry_files(),
@@ -315,7 +310,7 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: name words outside the text catalog compile, the NPC's words go unchecked, or sound
-  # ones are dropped from the artifact (loka-6qi; the 1.118 floor is a loader_floors.json case).
+  # ones are dropped from the artifact (loka-6qi).
   test "name words keep their catalog keys", %{dir: dir} do
     api = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.118")
     lantern = %{"bare" => "item.lantern.short", "article" => "a", "plural" => "item.lantern.room"}

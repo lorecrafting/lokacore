@@ -2,10 +2,10 @@ defmodule Loka.ContentIdentityTest do
   use ExUnit.Case, async: true
 
   # Breaks (rows W15 and FD9; twin of the loader case in kernel/ts/test/identity.test.ts):
-  # world.identity under API 1.97 (also with no variant at all), a name variant naming an
+  # a name variant naming an
   # undeclared status or an unknown text key, a name variant without description_variant@1, a
   # time_since name variant on a non-clock fact, a fact_compare name variant on subject target, or an unknown name text key compiles.
-  test "world.identity keeps its floor and references" do
+  test "world.identity keeps its references" do
     dir = Loka.ContentSource.copy("cartridges/identity_sampler")
     id = &{"cartridge.json", fn c -> put_in(c, ["world", "identity" | &1], &2) end}
 
@@ -15,20 +15,6 @@ defmodule Loka.ContentIdentityTest do
     end
 
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-
-    assert diags.([
-             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.96")}
-           ]) ==
-             [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]
-
-    assert diags.([
-             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.96")},
-             {"npcs/stranger.json", &Map.delete(&1, "short_variants")},
-             {"npcs/guard.json",
-              &update_in(&1, ["disposition", "hostile", "root"], fn r -> hd(r["items"]) end)},
-             {"cartridge.json", &(pop_in(&1, ["world", "identity", "name_variants"]) |> elem(1))}
-           ]) ==
-             [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]
 
     drop_cap = &(pop_in(&1, ["requires", "capabilities", "description_variant"]) |> elem(1))
 

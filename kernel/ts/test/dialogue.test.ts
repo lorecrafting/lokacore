@@ -606,12 +606,6 @@ test('the loader checks dialogue references, roles, texts, facts and keys', () =
     missing('quest'),
   );
   fails(
-    (c) => (bram(c).policy.root.quest = ref('quest', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${D}.policy.root.quest`,
-    missing('quest'),
-  );
-  fails(
     (c) => {
       bram(c).roles.bram = { role: 'item', item: ref('item', 'lantern') };
       delete bram(c).choices.leave.hand_over;

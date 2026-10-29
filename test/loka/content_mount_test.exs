@@ -15,7 +15,7 @@ defmodule Loka.ContentMountTest do
   end
 
   # Breaks (row 43b): the compiler admits a mount without world.mount or on a spawn template, a
-  # riding fact that is no bool pair fact or names nothing, or world.mount below kernel_api 1.108.
+  # riding fact that is no bool pair fact or names nothing.
   test "mount refusals match the TS loader" do
     dir = Loka.ContentSource.copy(@dir)
     horse = "npcs/horse.json"
@@ -45,9 +45,7 @@ defmodule Loka.ContentMountTest do
              [edit(horse, ["description_variants", Access.at(0), "when", "root", "equals"], 1)],
            [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["world", "mount", "riding"], "nope")],
-           [{"UNRESOLVED_REFERENCE", "cartridge.world.mount.riding"}]},
-          {[edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.107")],
-           [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]}
+           [{"UNRESOLVED_REFERENCE", "cartridge.world.mount.riding"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

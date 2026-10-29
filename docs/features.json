@@ -1106,7 +1106,6 @@
     ],
     "fixtures": [
       "protocol/fixtures/build_sampler_hash.json",
-      "protocol/fixtures/loader_floors.json",
       "protocol/fixtures/invalid.json"
     ],
     "invariants": [

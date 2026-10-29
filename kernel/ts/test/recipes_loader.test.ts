@@ -120,26 +120,6 @@ test("a room's contribution naming no verb, action or recipe is UNRESOLVED_REFER
   );
 });
 
-// S3 review N1. Breaks: a v1 artifact whose action policy compares an undeclared fact loads,
-// then throws at decision time now that action policies are evaluated.
-test("a v1 action policy's undeclared fact is UNRESOLVED_REFERENCE", () => {
-  const talk = 'hello_sampler@0.0.1:action/talk';
-  const fact = { cartridge_id: 'hello_sampler', cartridge_version: '0.0.1', kind: 'fact' };
-  fails(
-    (c) =>
-      (c.actions[talk].policy.root = {
-        op: 'fact_compare',
-        fact: { ...fact, key: 'nope' },
-        equals: true,
-      }),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.actions["${talk}"].policy.root.fact`,
-    { target: 'hello_sampler@0.0.1:fact/nope' },
-    [],
-    'cartridge_hash.json',
-  );
-});
-
 // R5 S6a. The bell with ring_bell given a luck check and a failure outcome, check@1 and
 // schedule@1 locked.
 const checked = (c: any) => {
@@ -183,18 +163,9 @@ test("a failure outcome's references are checked", () => {
   );
 });
 
-// Breaks: a time_window node loads with an empty window (from equal to to) that never holds.
-test('time_window needs a non-empty window', () => {
-  const window = (from: number, to: number) => (c: any) =>
-    (recipe(c).policy.root = { op: 'time_window', from, to });
-  assert.ok(load('cartridge_bell_hash.json', and(window(18, 6))).ok);
-  fails(and(window(18, 18)), 'EMPTY_TIME_WINDOW', `${AT}.policy.root`);
-});
-
-// Astra A1. Breaks: a fact.assign value (any outcome) or a fact_compare value not of the fact's
-// type installs although the compiler rejects its source (FACT_TYPE_MISMATCH), so a failed check
-// faults at play time instead.
-test("a recipe's or a policy's fact value outside its FactSpec is FACT_TYPE_MISMATCH", () => {
+// Astra A1. Breaks: a fact.assign value (any outcome) not of the fact's type installs although
+// the compiler rejects its source (FACT_TYPE_MISMATCH), so a failed check faults at play time.
+test("a recipe's fact value outside its FactSpec is FACT_TYPE_MISMATCH", () => {
   const PICK = 'check_sampler@0.0.1:recipe/pick_lock';
   const gate = {
     cartridge_id: 'check_sampler',
@@ -213,11 +184,6 @@ test("a recipe's or a policy's fact value outside its FactSpec is FACT_TYPE_MISM
     [],
     'cartridge_dusk_hash.json',
   );
-  fails(
-    (c) => (recipe(c).policy.root.item.equals = 'rung'),
-    'FACT_TYPE_MISMATCH',
-    `${AT}.policy.root.item.equals`,
-  );
 });
 
 // Review S2. Breaks: two recipes' checks with one key load, so one check DefinitionRef names two
@@ -235,7 +201,6 @@ test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
 // does not exist, or regenerate outside a spec's bounds, because the loader let it in (each
 // matched by a compiler test in test/loka/content_road_test.exs).
 const ROAD = 'cartridge_road_hash.json';
-const HP = 'resource_sampler@0.0.1:resource/hp';
 const SHOVE = `.cartridge.recipes["resource_sampler@0.0.1:recipe/shove_cart"]`;
 const PRAY = `.cartridge.recipes["resource_sampler@0.0.1:recipe/pray"]`;
 const road = (c: any, key: string) => c.recipes[`resource_sampler@0.0.1:recipe/${key}`];

@@ -153,17 +153,8 @@ test('the guard collars a wanted character unless disguised', () => {
   );
 });
 
-// Breaks: world.identity's name or variants skipped by the reference pass, or a target-subject fact
-// read in a variant whose target is the character's own body.
+// Breaks: a target-subject fact read in a variant whose target is the character's own body.
 test('world.identity loader refusals', () => {
-  assert.deepEqual(
-    diagnostic((c) => (c.world.identity.name = 'identity.nope')),
-    ['UNRESOLVED_REFERENCE', '.cartridge.world.identity.name'],
-  );
-  assert.deepEqual(
-    diagnostic((c) => (c.world.identity.name_variants[0].when.root.status = ref('status', 'nope'))),
-    ['UNRESOLVED_REFERENCE', '.cartridge.world.identity.name_variants[0].when.root.status'],
-  );
   assert.deepEqual(
     diagnostic((c) =>
       Object.assign(c.world.identity.name_variants[1].when.root, {

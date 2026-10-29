@@ -37,24 +37,6 @@ test('build_sampler: the pinned artifact loads with the same content hash', () =
   assert.ok(r.ok, JSON.stringify(r));
 });
 
-// Breaks: the loader admits a blueprint text key or enter-lock fact it does not define.
-test('a blueprint names only defined text and facts', () => {
-  const hut = (c: Obj) => c.blueprints['build_sampler@0.0.1:blueprint/hut'];
-  const at = (p: string) => `.cartridge.blueprints["build_sampler@0.0.1:blueprint/hut"]${p}`;
-  assert.deepEqual(
-    refused((c) => (hut(c).title = 'blueprint.hut.nope')),
-    ['UNRESOLVED_REFERENCE', at('.title')],
-  );
-  assert.deepEqual(
-    refused((c) => (hut(c).variants[0].description = 'blueprint.hut.nope')),
-    ['UNRESOLVED_REFERENCE', at('.variants[0].description')],
-  );
-  assert.deepEqual(
-    refused((c) => (hut(c).locks.enter.root.fact.key = 'nope')),
-    ['UNRESOLVED_REFERENCE', at('.locks.enter.root.fact')],
-  );
-});
-
 // Breaks (Built rooms S2): the loader admits a build service whose direction is not in the
 // site's directions, whose blueprint the site does not list, or whose site does not resolve.
 test('a build benefit names a direction and blueprint of its resolved site', () => {

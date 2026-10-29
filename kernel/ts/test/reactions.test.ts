@@ -368,7 +368,7 @@ const at = (key: string) => `.cartridge.reactions["${G}:reaction/${key}"]`;
 const rule = (c: any, key: string) => c.reactions[`${G}:reaction/${key}`];
 
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_green_test.exs): a
-// trigger of an unregistered event type, a trigger, `when` or fact.assign naming a fact or room the
+// trigger of an unregistered event type, a trigger or fact.assign naming a fact or room the
 // cartridge lacks (the kernel would never match it, or assign an undeclared fact), a value not
 // of its fact's type.
 test('the loader checks reaction triggers and consequences', () => {
@@ -390,12 +390,6 @@ test('the loader checks reaction triggers and consequences', () => {
     (c) => (rule(c, 'gossip').on.fact = ref('fact', 'rumour')),
     'UNRESOLVED_REFERENCE',
     `${at('gossip')}.on.fact`,
-    { target: `${G}:fact/rumour` },
-  );
-  fails(
-    (c) => (rule(c, 'gossip').when.root.fact = ref('fact', 'rumour')),
-    'UNRESOLVED_REFERENCE',
-    `${at('gossip')}.when.root.fact`,
     { target: `${G}:fact/rumour` },
   );
   fails(

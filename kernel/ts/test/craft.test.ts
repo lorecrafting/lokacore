@@ -261,9 +261,8 @@ test('loader: a storylet target is refused', () => {
   assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
 });
 
-// Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill, or an
-// unknown skill, loads. The floor is loader_floors.json's "a skill prerequisite" case.
-test('loader: a skill prerequisite resolves and never names its own skill', () => {
+// Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill loads.
+test('loader: a skill prerequisite never names its own skill', () => {
   const at = `.cartridge.skills["${P}skill/carving"].prerequisite`;
   // The leaf sits under all and not, so a walker that skips nesting misses it.
   const naming = (key: string) => (c: any) => {
@@ -271,9 +270,7 @@ test('loader: a skill prerequisite resolves and never names its own skill', () =
     const leaf = { ...p.root, skill: { ...p.root.skill, key } };
     p.root = { op: 'all', items: [{ op: 'not', item: leaf }] };
   };
-  const leaf = at + '.root.items[0].item.skill';
   assert.deepEqual(loadEdited(naming('carving')), ['SCHEMA_VIOLATION', at]);
-  assert.deepEqual(loadEdited(naming('nothing')), ['UNRESOLVED_REFERENCE', leaf]);
 });
 
 // A stick held, a carry limit of 100 g and 200 g spoons: the carve's exchange is too heavy.

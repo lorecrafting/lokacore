@@ -3,8 +3,7 @@ defmodule Loka.Content.Identity do
   Toolbox rows W15 and FD9: world.identity's name and each name variant's description name text
   catalog keys; description_variant@1 owns each name variant, whose condition names declared
   definitions through ops the cartridge's capabilities own. Twin of the world.identity entries
-  of the TS loader's parts and refStage (kernel/ts/src/content/cartridge_refs.ts); Variants
-  holds the 1.97 floor. Called from Variety. The name variants' condition roots also get
+  of the TS loader's parts and refStage (kernel/ts/src/content/cartridge_refs.ts). Called from Variety. The name variants' condition roots also get
   Delayed's time_since checks and the target-subject FACT_SCOPE_UNSUPPORTED walk (Checks.trees/1
   holds definition roots only).
   """

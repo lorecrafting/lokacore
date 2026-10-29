@@ -307,7 +307,7 @@ body, directly or nested), `barrier_state`, `quest_state` (false while the actor
 instance), `time_window` (hour of day from the validated cartridge calendar, wrapping windows allowed),
 `target_present` (the action's target is in reach, `:47`), and `stat_compare` and
 `resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60)). An op outside this list throws:
-the loader closes the set (`content/cartridge.ts:160`).
+the loader closes the set (its schema stage, `content/cartridge.ts:78`).
 
 ## Target resolution
 

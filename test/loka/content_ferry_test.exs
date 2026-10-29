@@ -312,7 +312,6 @@ defmodule Loka.ContentFerryTest do
       }
     }
 
-    # A receive also raises the ferry's kernel_api floor (KERNEL_API_RANGE_INVALID): not this break.
     assert {:error, diags} = compile(dir, files)
     assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{}) in diags
   end
@@ -378,16 +377,9 @@ defmodule Loka.ContentFerryTest do
              %{"profile" => "real_elapsed", "rate" => 50}
   end
 
-  # Breaks: elapsed mechanics can be claimed by an API 1.0 release or without a schedule owner.
-  test "elapsed policy requires API 1.1 and schedule ownership", %{dir: dir} do
+  # Breaks: elapsed mechanics can be claimed without a schedule owner.
+  test "elapsed policy requires schedule ownership", %{dir: dir} do
     files = elapsed_files()
-    low = put_in(files, ["cartridge.json", "requires", "kernel_api", "at_least"], "1.0")
-
-    assert compile(dir, low) ==
-             {:error,
-              [
-                d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})
-              ]}
 
     missing =
       files

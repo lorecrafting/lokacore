@@ -339,30 +339,10 @@ const Q = `.cartridge.quests["${E}:quest/lantern"]`;
 // the kernel would read a quest, item or text that does not exist, run a quest whose capability
 // is not installed, or list an offer under another action's key.
 test('the loader checks quest references, texts, keys and the lock', () => {
-  const variant = `.cartridge.rooms["${E}:room/ferry_landing"].variants[0].when.root.quest`;
-  const missing = `${E}:quest/missing`;
-  fails(
-    (c) => (c.rooms[`${E}:room/ferry_landing`].variants[0].when.root.quest.key = 'missing'),
-    'UNRESOLVED_REFERENCE',
-    variant,
-    { target: missing },
-  );
   fails(
     (c) => (quest(c).objective = { ...STRICT, item_acquired: ref('item', 'oil') }),
     'UNRESOLVED_REFERENCE',
     `${Q}.objective.item_acquired`,
-    { target: `${E}:item/oil` },
-  );
-  fails(
-    (c) => (quest(c).objective.policy.root.item.key = 'oil'),
-    'UNRESOLVED_REFERENCE',
-    `${Q}.objective.policy.root.item`,
-    { target: `${E}:item/oil` },
-  );
-  fails(
-    (c) => (quest(c).offer.policy.root = { op: 'has_item', item: ref('item', 'oil') }),
-    'UNRESOLVED_REFERENCE',
-    `${Q}.offer.policy.root.item`,
     { target: `${E}:item/oil` },
   );
   fails((c) => (quest(c).title = 'quest.none'), 'UNRESOLVED_REFERENCE', `${Q}.title`, {

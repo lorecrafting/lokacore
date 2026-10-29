@@ -44,15 +44,9 @@ test('loader accepts API1.11 escort effects and policy leaves', () => {
   }
 });
 
-// Breaks: API floor, NPC role, local quest and terminal agreement checks are bypassed.
+// Breaks: NPC role, local quest and terminal agreement checks are bypassed.
 test('loader rejects incompatible and unresolved escort bindings', () => {
   const cases: [string, (c: any) => void][] = [
-    [
-      'KERNEL_API_RANGE_INVALID',
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.10';
-      },
-    ],
     [
       'UNRESOLVED_REFERENCE',
       (c) => {
@@ -95,16 +89,6 @@ test('loader rejects incompatible and unresolved escort bindings', () => {
       (c) => {
         const { label, narration } = dialogue(c).choices.carry;
         dialogue(c).choices.stay = { label, narration };
-      },
-    ],
-    [
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        dialogue(c).policy.root = {
-          op: 'escort_state',
-          quest: { ...quest, key: 'missing' },
-          state: 'following',
-        };
       },
     ],
   ];

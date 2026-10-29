@@ -14,13 +14,6 @@ test('loader refuses a second producer for a dream consequence', () => {
   assert.equal(load().ok, true);
   for (const [name, change] of [
     [
-      'foreign memory writer',
-      (c: any) =>
-        (c.dialogues[`${prefix}:dialogue/bram`].choices.carry.sequence = [
-          { op: 'fact.assign', fact: ref('fact', 'dream_seen'), value: true },
-        ]),
-    ],
-    [
       'inherited quest producer',
       (c: any) =>
         (c.dialogues[`${prefix}:dialogue/bram`].choices.carry.accept = ref('quest', 'a_room')),

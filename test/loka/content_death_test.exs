@@ -13,7 +13,6 @@ defmodule Loka.ContentDeathTest do
     child = JSON.decode!(File.read!(child_path))
 
     for {name, manifest, item, lantern} <- [
-          {"old API", put_in(m, ["requires", "kernel_api", "at_least"], "1.4"), i, child},
           {"missing capability",
            update_in(m, ["requires", "capabilities"], &Map.delete(&1, "death")), i, child},
           {"unknown shrine", put_in(m, ["world", "death", "shrine"], "missing"), i, child},

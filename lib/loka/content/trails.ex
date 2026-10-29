@@ -4,7 +4,7 @@ defmodule Loka.Content.Trails do
   kernel/ts/src/content/cartridge_trails.ts: the engine's trail facts (trail_<plan>_exit and
   trail_<plan>_at for a plan with `trail`, trail_exit and trail_at when some plan `hunts`), an
   authored one RESERVED_FACT; world.trails' leads, a plan's `trail` and `hunts`, a track check's
-  plan, fact_changed's owner and the 1.85 floor.
+  plan and fact_changed's owner.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -87,22 +87,11 @@ defmodule Loka.Content.Trails do
         {rel, c} <- tracks(defs),
         not trailing?(defs, c["plan"]),
         do: unresolved(at(rel, ["check", "plan"]), c["plan"])
-      ) ++
-      api_floor(m, trails, defs)
+      )
   end
 
   defp tracks(defs),
     do: for({_, {rel, _, %{"check" => %{"kind" => "track"} = c}}} <- defs["recipe"], do: {rel, c})
-
-  defp api_floor(m, trails, defs) do
-    used =
-      trails != nil or tracks(defs) != [] or
-        Enum.any?(plans(defs), &(field(&1, "trail") or field(&1, "hunts")))
-
-    if used and api(m) < [1, 85],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
 
   defp field({_, _, _, p}, f), do: p[f] == true
 
@@ -154,10 +143,4 @@ defmodule Loka.Content.Trails do
   defp long(_), do: []
 
   defp unresolved(path, target), do: diag("UNRESOLVED_REFERENCE", path, %{"target" => target})
-
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 end

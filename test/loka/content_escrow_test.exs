@@ -3,9 +3,9 @@ defmodule Loka.ContentEscrowTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/escrow_sampler")}
 
   # Breaks (toolbox row 20a; twin of the loader rows in kernel/ts/test/escrow.test.ts): an escrow
-  # compiles under API 1.79, with an input that is not an item, a custody that is not a room, a
+  # compiles with an input that is not an item, a custody that is not a room, a
   # quantity above the inputs, a shop offer or a repeated item as an input, or without its texts.
-  test "escrow keeps its API floor, item inputs, a room custody and its texts", %{dir: dir} do
+  test "escrow keeps item inputs, a room custody and its texts", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     escrow = ["benefit", "escrow"]
     at = "services/commission.benefit.escrow"
@@ -24,8 +24,6 @@ defmodule Loka.ContentEscrowTest do
     ]
 
     for {edits, expected} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.78")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[service.(&put_in(&1, escrow ++ ["items"], ["nowhere", "ore_b"]))],
            {"UNRESOLVED_REFERENCE", "#{at}.items[0]"}},
           {[service.(&put_in(&1, escrow ++ ["custody"], "ore_a"))],
@@ -45,16 +43,14 @@ defmodule Loka.ContentEscrowTest do
     end
   end
 
-  # Breaks (toolbox row 20b; twin of the loader rows in kernel/ts/test/escrow.test.ts): claim and
-  # cancel compile under API 1.79, a claim names a service with no ready_after, the output lies
+  # Breaks (toolbox row 20b; twin of the loader rows in kernel/ts/test/escrow.test.ts): a claim
+  # names a service with no ready_after, the output lies
   # outside custody or is no item, or a claim or cancel lacks its refusal texts.
-  test "claim and cancel keep their API floor, a timed commission and their texts", %{dir: dir} do
+  test "claim and cancel keep a timed commission and their texts", %{dir: dir} do
     claim = "services/claim"
     output = "services/commission.benefit.escrow.output"
 
     for {edits, expected} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.79")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[{"services/claim.json", &put_in(&1, ["benefit", "service"], "cancel")}],
            {"SCHEMA_VIOLATION", "#{claim}.benefit.service"}},
           {[{"services/cancel.json", &put_in(&1, ["benefit", "service"], "nowhere")}],

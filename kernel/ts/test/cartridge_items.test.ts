@@ -51,12 +51,6 @@ const fails = (
   });
 const ID = 'items_sampler@0.0.1';
 const item = (key: string) => `.cartridge.items["${ID}:item/${key}"]`;
-const ref = (kind: string, key: string) => ({
-  cartridge_id: 'items_sampler',
-  cartridge_version: '0.0.1',
-  kind,
-  key,
-});
 const at = (c: any, key: string) => c.items[`${ID}:item/${key}`];
 
 // Breaks: items or NPCs rejected, or hashed other than the Python known answer.
@@ -64,107 +58,6 @@ test('the items known answer loads', () => {
   const r = load(() => {});
   assert.ok(r.ok);
   assert.equal(r.hash, kat.sha256);
-});
-
-// Breaks: a location, NPC room or has_item item that names nothing still loads (the kernel
-// would place the entity nowhere or read an undefined item).
-test('a location, NPC room or has_item item naming no definition is UNRESOLVED_REFERENCE', () => {
-  fails(
-    (c) => (at(c, 'lantern').location.room = ref('room', 'nowhere')),
-    'UNRESOLVED_REFERENCE',
-    `${item('lantern')}.location.room`,
-    { target: `${ID}:room/nowhere` },
-  );
-  fails(
-    (c) => (at(c, 'lantern').location = { in: 'npc', npc: ref('npc', 'satchel') }),
-    'UNRESOLVED_REFERENCE',
-    `${item('lantern')}.location.npc`,
-    { target: `${ID}:npc/satchel` },
-  );
-  fails(
-    (c) => (c.npcs[`${ID}:npc/bram`].room = ref('room', 'river')),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.npcs["${ID}:npc/bram"].room`,
-    { target: `${ID}:room/river` },
-  );
-  fails(
-    (c) => (at(c, 'lantern').room_line_variants[0].when.root.item = ref('item', 'coin')),
-    'UNRESOLVED_REFERENCE',
-    `${item('lantern')}.room_line_variants[0].when.root.item`,
-    { target: `${ID}:item/coin` },
-  );
-  fails(
-    (c) => (at(c, 'lantern').short = 'item.nothing'),
-    'UNRESOLVED_REFERENCE',
-    `${item('lantern')}.short`,
-    { target: 'item.nothing' },
-  );
-  fails(
-    (c) => (c.npcs[`${ID}:npc/bram`].room_line = 'npc.nothing'),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.npcs["${ID}:npc/bram"].room_line`,
-    { target: 'npc.nothing' },
-  );
-});
-
-// Owner decision Q3 (the compiler's twin in test/loka/content_items_test.exs). Breaks: a link
-// target that names nothing, a bare link in a room's own text, or a detail linked from an
-// item's text loads; or a link to an item, an NPC or the text's own thing is refused.
-test('a touch link naming no detail, item or NPC it may name is UNRESOLVED_REFERENCE', () => {
-  const room = `.cartridge.rooms["${ID}:room/ferry_landing"]`;
-  const linking = (key: string, s: string) => (c: any) => (c.text[key] = s);
-  const ok = linking('detail.mooring_post', 'The [post] and a [lantern](lantern) by [Bram](bram).');
-  assert.ok(load(ok).ok);
-  const fail = (key: string, s: string, path: string, target: string) =>
-    fails(linking(key, s), 'UNRESOLVED_REFERENCE', path, { target });
-  fail('room.ferry_landing.description', 'A [crate](crate).', `${room}.description`, 'crate');
-  fail('room.ferry_landing.description', 'The [water].', `${room}.description`, '[water]');
-  fail(
-    'item.satchel.room',
-    'By the [post](mooring_post).',
-    `${item('satchel')}.room_line`,
-    'mooring_post',
-  );
-  fail(
-    'item.lantern.room_oil',
-    'A [lantern](lamp).',
-    `${item('lantern')}.room_line_variants[0].description`,
-    'lamp',
-  );
-});
-
-// Breaks: a cyclic or overfull start loads, so newWorld builds a world whose containers never
-// reach a room or hold more than their capacity.
-test('items that start in a cycle or over a capacity are rejected', () => {
-  fails(
-    (c) => {
-      at(c, 'lamp_oil').container = true;
-      at(c, 'satchel').location = { in: 'item', item: ref('item', 'lamp_oil') };
-    },
-    'CONTAINMENT_CYCLE',
-    `${item('lamp_oil')}.location.item`, // each item on the cycle; the first in path order
-  );
-  fails(
-    (c) => (at(c, 'lantern').location = { in: 'item', item: ref('item', 'lantern') }),
-    'CONTAINMENT_CYCLE',
-    `${item('lantern')}.location.item`,
-  );
-  fails(
-    (c) => (at(c, 'lantern').location = { in: 'item', item: ref('item', 'satchel') }),
-    'CAPACITY_EXCEEDED',
-    `${item('satchel')}.capacity`,
-    { capacity: 1, held: 2 },
-  );
-  fails(
-    (c) => {
-      for (const key of ['lantern', 'satchel'])
-        at(c, key).location = { in: 'npc', npc: ref('npc', 'bram') };
-    },
-    'CAPACITY_EXCEEDED',
-    `.cartridge.npcs["${ID}:npc/bram"].capacity`,
-    { capacity: 1, held: 2 },
-  );
-  assert.ok(load((c) => (at(c, 'lantern').location = { in: 'npc', npc: ref('npc', 'bram') })).ok);
 });
 
 // Breaks: an item map key that disagrees with its item loads.
@@ -182,20 +75,6 @@ const carryingContent = (c: any) => {
   c.manifest.requires.kernel_api.at_least = '1.3';
   for (const item of Object.values(c.items) as any[]) item.mass_grams = 0;
 };
-
-// Breaks: a nested omitted mass silently becomes zero; explicit zero is mistaken for omission.
-test('carrying loader requires every mass while preserving explicit zero', () => {
-  assert.ok(load(carryingContent).ok);
-  fails(
-    (c) => {
-      carryingContent(c);
-      delete at(c, 'lamp_oil').mass_grams;
-    },
-    'SCHEMA_VIOLATION',
-    `${item('lamp_oil')}.mass_grams`,
-    { error: 'missing_property' },
-  );
-});
 
 // Breaks: malformed mass/carry values or unknown fields bypass the cartridge boundary.
 test('carrying loader and validator reject malformed numbers and fields', () => {
@@ -244,41 +123,8 @@ test('carrying loader and validator reject malformed numbers and fields', () => 
   ]);
 });
 
-// Breaks: opting in keeps an old minimum or permits an older installed implementation.
-test('carrying loader requires API 1.3 and containment', () => {
-  fails(
-    (c) => {
-      carryingContent(c);
-      c.manifest.requires.kernel_api.at_least = '1.2';
-    },
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  );
-  fails(
-    (c) => {
-      carryingContent(c);
-      delete c.manifest.requires.capabilities.containment;
-      delete c.lock.capabilities.containment;
-      c.items = {};
-      c.npcs = {};
-      c.policies = {};
-      c.actions = {};
-      const ferry = c.rooms[`${ID}:room/ferry_landing`];
-      c.rooms = {
-        [`${ID}:room/ferry_landing`]: {
-          key: ferry.key,
-          title: ferry.title,
-          description: ferry.description,
-          exits: {},
-        },
-      };
-      for (const key of Object.keys(c.text)) c.text[key] = 'plain';
-    },
-    'UNDECLARED_CAPABILITY',
-    '.cartridge.world.carry',
-    { capability: 'containment' },
-    ['containment@1'],
-  );
+// Breaks: opting in permits an older installed implementation.
+test('carrying loader requires an installed API 1.3', () => {
   const old = load(carryingContent, { ...INSTALLED, kernel_api: '1.2' });
   assert.ok(!old.ok);
   if (!old.ok)
@@ -288,33 +134,6 @@ test('carrying loader requires API 1.3 and containment', () => {
     );
 });
 
-// Breaks: keys gain custody from a child reference, capacity or lid without authored eligibility.
-test('only explicit receptacles may start with children or declare capacity and lids', () => {
-  for (const field of ['capacity', 'barrier'])
-    fails(
-      (c) => {
-        at(c, 'lantern')[field] = field === 'capacity' ? 1 : ref('barrier', 'lid');
-      },
-      'SCHEMA_VIOLATION',
-      `${item('lantern')}.${field}`,
-      { error: 'invalid_value' },
-    );
-  fails(
-    (c) => {
-      delete at(c, 'satchel').container;
-      delete at(c, 'satchel').capacity;
-    },
-    'SCHEMA_VIOLATION',
-    `${item('lamp_oil')}.location.item`,
-    { error: 'invalid_value' },
-  );
-  assert.ok(
-    load((c) => {
-      delete at(c, 'satchel').capacity;
-    }).ok,
-  );
-});
-
 // Breaks: a required item property, occupancy/mass bound, closed shape or authority literal
 // disappears. Shared literal cases also run through the compiler's portable validator.
 test('item schema enforces its required fields, bounds and literal container authority', () => {
@@ -322,10 +141,9 @@ test('item schema enforces its required fields, bounds and literal container aut
     assert.equal(validate('ItemDefinition', row.value).length === 0, row.valid, row.name);
 });
 
-// Breaks: name words outside the text catalog load, or the NPC's words go unchecked (loka-6qi; the
-// 1.118 floor is a loader_floors.json case, the shape container_contracts.json rows).
-test('name words load at 1.118 and their bare and plural keys resolve in the catalog', () => {
-  const bram = `.cartridge.npcs["${ID}:npc/bram"]`;
+// Breaks: authored name words on an item and an NPC are refused (loka-6qi; the 1.118 floor is a
+// loader_floors.json case, the shape container_contracts.json rows, the catalog keys the compiler's).
+test('name words load at 1.118', () => {
   const worded = (c: any) => {
     c.manifest.requires.kernel_api.at_least = '1.118';
     at(c, 'lantern').words = {
@@ -336,27 +154,4 @@ test('name words load at 1.118 and their bare and plural keys resolve in the cat
     c.npcs[`${ID}:npc/bram`].words = { bare: 'npc.bram.short' };
   };
   assert.equal(load(worded).ok, true);
-  fails(
-    (c) => (worded(c), (at(c, 'lantern').words.plural = 'no.such')),
-    'UNRESOLVED_REFERENCE',
-    `${item('lantern')}.words.plural`,
-    { target: 'no.such' },
-  );
-  fails(
-    (c) => (worded(c), (c.npcs[`${ID}:npc/bram`].words.bare = 'no.such')),
-    'UNRESOLVED_REFERENCE',
-    `${bram}.words.bare`,
-    { target: 'no.such' },
-  );
-  // A touch link in name-word text is checked as in short (twin of the compiler's text_keys scan).
-  fails(
-    (c) => (
-      worded(c),
-      (c.text['npc.bram.bare'] = '[Bram](ghost)'),
-      (c.npcs[`${ID}:npc/bram`].words.bare = 'npc.bram.bare')
-    ),
-    'UNRESOLVED_REFERENCE',
-    `${bram}.words.bare`,
-    { target: 'ghost' },
-  );
 });

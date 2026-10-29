@@ -1,7 +1,7 @@
 defmodule Loka.Content.Theft do
   @moduledoc """
-  Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): world.theft needs
-  kernel_api 1.94, names this cartridge's skill, attribute and an instance-scoped per_subject bool
+  Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): world.theft
+  names this cartridge's skill, attribute and an instance-scoped per_subject bool
   stolen fact, and every bank vault NPC then carries a get lock; without world.theft an NPC lock or
   a stolen offer is refused (ruling 2026-10-15). Twin of
   kernel/ts/src/content/cartridge_theft.ts.
@@ -27,18 +27,13 @@ defmodule Loka.Content.Theft do
   def check(_, _, _, nil), do: []
 
   def check(m, defs, {_, %{"world" => %{"theft" => t}}}, {_, text}) do
-    floor =
-      if version(m) < [1, 94],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
     refs =
       Enum.flat_map(
         [{"skill", "skill"}, {"attribute", "attribute"}, {"stolen", "fact"}],
         &reference("cartridge.json", @path, &1, t, m, defs)
       )
 
-    floor ++ refs ++ stolen(t, m, defs) ++ narration(t, text) ++ vaults(m, defs)
+    refs ++ stolen(t, m, defs) ++ narration(t, text) ++ vaults(m, defs)
   end
 
   def check(_, defs, _, _), do: unarmed(defs)
@@ -92,10 +87,4 @@ defmodule Loka.Content.Theft do
             "error" => "invalid_value"
           })
   end
-
-  defp version(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 end

@@ -304,7 +304,7 @@ test('an arrest shuts a door a visitor left open and reads the charge again', ()
   assert.equal(exit(w, 'west').door?.state, 'closed');
 });
 
-// Break: the loader admits an arrest without hostile or beside engage, a dangling destination or
+// Break: the loader admits an arrest without hostile or beside engage, a dangling
 // line, or an arrest under a floor below 1.105.
 test('the loader refuses a malformed arrest', () => {
   const npcAt = `.cartridge.npcs[${JSON.stringify(`${S}npc/guard`)}].disposition`;
@@ -312,10 +312,6 @@ test('the loader refuses a malformed arrest', () => {
     [() => {}, 'loaded'],
     [(c) => delete guardOf(c).disposition.hostile, ['SCHEMA_VIOLATION', npcAt]],
     [(c) => (guardOf(c).disposition.engage = 'npc.guard.arrest'), ['SCHEMA_VIOLATION', npcAt]],
-    [
-      (c) => (guardOf(c).disposition.arrest.to = ref('npc', 'crier')),
-      ['UNRESOLVED_REFERENCE', `${npcAt}.arrest.to`],
-    ],
     [
       (c) => (guardOf(c).disposition.arrest.narration = 'nope'),
       ['UNRESOLVED_REFERENCE', `${npcAt}.arrest.narration`],

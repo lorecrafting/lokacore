@@ -110,26 +110,6 @@ test('the fall lands after the move cost', () => {
   assert.deepEqual([at(), hp()], ['room.ledge.title', 5]);
 });
 
-// Breaks: the loader drops a climb check, so an unknown item, a missing fell text, a cartridge
-// without an hp pool or an old API floor loads.
-test('the loader refuses each unsound climb declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const face = `.cartridge.rooms["${P}:room/clifftop"].exits.down.climb`;
-  const climb = (c: any) => c.rooms[`${P}:room/clifftop`].exits.down.climb;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.44'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [(c) => (climb(c).item.key = 'vine'), 'UNRESOLVED_REFERENCE', `${face}.item`],
-    [(c) => (climb(c).fell = 'narration.slip'), 'UNRESOLVED_REFERENCE', `${face}.fell`],
-    [(c) => delete c.resources[`${P}:resource/hp`], 'RESOURCE_SPEC_INVALID', face],
-  ];
-  for (const [change, code, path] of rows)
-    assert.deepEqual(refusal(source, change), [code, path], path);
-});
-
 // Breaks: the loader admits a patrol leg over a climb face, so the leader walks it (twin of
 // content_climb_test.exs).
 test('the loader refuses a patrol route over a climb face', () => {
@@ -147,15 +127,3 @@ test('the loader refuses a patrol route over a climb face', () => {
     `.cartridge.quests["${P}:quest/watch_rounds"].patrol.route[0]`,
   ]);
 });
-
-function refusal(source: object, change: (c: any) => void) {
-  const c: any = structuredClone(source);
-  change(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}

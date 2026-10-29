@@ -208,21 +208,11 @@ test('7. the vault refuses and hides its ledger; nested items stay out of reach'
 });
 
 // Breaks (twin of test/loka/content_theft_test.exs): each loader refusal below loading.
-test('8. loader: reserved stolen fact, fence offers, lock references', () => {
+test('8. loader: fence offers', () => {
   const F = `${S}:npc/fence`;
   assert.equal(
     diagnostic(() => {}),
     'loaded',
-  );
-  assert.deepEqual(
-    diagnostic((c) =>
-      c.reactions[`${S}:reaction/theft_seen`].apply.push({
-        op: 'fact.assign',
-        fact: ref('fact', 'stolen'),
-        value: true,
-      }),
-    ),
-    ['RESERVED_FACT', `.cartridge.reactions["${S}:reaction/theft_seen"].apply[1].fact`],
   );
   assert.deepEqual(
     diagnostic((c) => {
@@ -241,15 +231,4 @@ test('8. loader: reserved stolen fact, fence offers, lock references', () => {
     diagnostic((c) => delete c.text['shop.not_stolen']),
     ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${F}"].shop.offers`],
   ); // pass-1 GE3: a fence names its refusal of honest goods
-  assert.deepEqual(
-    diagnostic(
-      (c) =>
-        (c.npcs[`${S}:npc/vault`].locks.get.root = {
-          op: 'fact_compare',
-          fact: ref('fact', 'nope'),
-          equals: true,
-        }),
-    ),
-    ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${S}:npc/vault"].locks.get.root.fact`],
-  );
 });

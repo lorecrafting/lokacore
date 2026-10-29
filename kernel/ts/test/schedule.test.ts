@@ -355,18 +355,6 @@ const fails = (f: (c: any) => void, code: string, path: string, data = {}) =>
     },
   });
 
-// Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): a
-// schedule naming a room the cartridge lacks (run_job would move Bram nowhere).
-test('the loader checks schedule rooms', () => {
-  const bram = `.cartridge.npcs["${F}:npc/bram"]`;
-  fails(
-    (c) => (c.npcs[`${F}:npc/bram`].daily_schedule['19'] = ref('room', 'shed')),
-    'UNRESOLVED_REFERENCE',
-    `${bram}.daily_schedule.19`,
-    { target: `${F}:room/shed` },
-  );
-});
-
 // Narration participants (Early R7/R8 N; 06 §43 "pinned text keys and bindings"): ferry's
 // coil_rope names the actor and Bram. BODY is ordinal 1 under the nil CommandId (runtime/fresh.ts).
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157';

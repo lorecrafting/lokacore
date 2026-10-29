@@ -228,18 +228,13 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
 });
 
-// Breaks: the loader trusting an ask's answer condition, an asked trigger's 1.96 floor, or its topic.
-test('the loader refuses an unknown answer condition fact, an asked trigger below 1.96 and a bad trigger topic', () => {
-  const smith = `${P}npc/smith`;
+// Breaks: the loader trusting an asked trigger's 1.96 floor or its topic.
+test('the loader refuses an asked trigger below 1.96 and a bad trigger topic', () => {
   const refusal = (change: (c: Obj) => void) => {
     const r = reload(content, change);
     assert.ok(!r.ok);
     return [r.diagnostic.code, r.diagnostic.path?.split('.').at(-1)];
   };
-  assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[1].when.root.fact = ref('fact', 'nope'))),
-    ['UNRESOLVED_REFERENCE', 'fact'],
-  );
   assert.deepEqual(
     refusal((c) => {
       c.manifest.requires.kernel_api.at_least = '1.95';

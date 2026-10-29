@@ -1,7 +1,7 @@
 defmodule Loka.Content.ChoiceChecks do
   @moduledoc """
   Toolbox row 14: a dialogue choice's opposed check (dialogue.schema.json DialogueCheck), twin of
-  kernel/ts/src/content/cartridge_choice_checks.ts. A checked choice needs kernel_api 1.47 and
+  kernel/ts/src/content/cartridge_choice_checks.ts. A checked choice needs
   check@1 (its check_passed); its key is no recipe's or other choice's check's
   (DUPLICATE_DEFINITION); its skill, attribute and failure text resolve; it names exactly one of
   rating and npc (SCHEMA_VIOLATION invalid_value), its npc as a recipe check's (row G3); and it
@@ -12,18 +12,6 @@ defmodule Loka.Content.ChoiceChecks do
   import Loka.Content.Refs, only: [owned: 3, reference: 6]
 
   @plain ~w(label narration sequence availability check)
-
-  @doc "A choice check needs kernel_api 1.47: one diagnostic per cartridge."
-  def floor(m, defs) do
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if checked(defs) != [] and version < [1, 47],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
 
   @doc "The diagnostics of choice `o` (at `steps` of dialogue `d` in `rel`)."
   def choice(rel, steps, %{"check" => c} = o, d, ctx) do
@@ -42,12 +30,6 @@ defmodule Loka.Content.ChoiceChecks do
   end
 
   def choice(_, _, _, _, _), do: []
-
-  defp checked(defs) do
-    for {_, {_, [], d}} <- defs["dialogue"] || %{},
-        {id, %{"check" => _} = o} <- d["choices"],
-        do: {id, o}
-  end
 
   defp failure_text(_, _, _, :unknown), do: []
 

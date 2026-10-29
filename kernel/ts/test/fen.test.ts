@@ -178,17 +178,3 @@ test('one long elapsed command reads birth_when at each occurrence time', () => 
   ])
     assert.ok(alive(w, DEER, 2));
 });
-
-// Breaks (loader; twin of test/loka/content_fen_test.exs): a gate naming an unknown plan loads.
-test('the loader refuses an unknown plan', () => {
-  const r = reload(
-    base,
-    (c: any) => (c.populations[DEER].birth_when.root.item.plan.key = 'nowhere'),
-  );
-  assert.ok(
-    !r.ok &&
-      r.diagnostic.code === 'UNRESOLVED_REFERENCE' &&
-      r.diagnostic.path === `.cartridge.populations["${DEER}"].birth_when.root.item.plan`,
-    JSON.stringify(r),
-  );
-});

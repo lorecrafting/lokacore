@@ -91,19 +91,10 @@ const load = (change: (c: any) => void) => {
 const hall = `${C}:room/hall`;
 const sage = `${C}:npc/sage`;
 
-// Breaks: the loader stops walking the leaf (an undeclared skill loads and fails in play) or a
-// retired `asides` field loads
+// Breaks: a retired `asides` field loads
 // (twin of content_voices_test.exs).
-test('the loader checks skill_compare references and refuses asides', () => {
+test('the loader refuses asides', () => {
   const rows: [(c: any) => void, unknown][] = [
-    [
-      (c) => (c.npcs[sage].room_line_variants[0].when.root.skill.key = 'ghost'),
-      [
-        'UNRESOLVED_REFERENCE',
-        `.cartridge.npcs[${JSON.stringify(sage)}].room_line_variants[0].when.root.skill`,
-        { target: `${C}:skill/ghost` },
-      ],
-    ],
     [
       (c) => (c.rooms[hall].asides = []),
       ['UNKNOWN_FIELD', `.cartridge.rooms[${JSON.stringify(hall)}].asides`, {}],

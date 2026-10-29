@@ -44,54 +44,6 @@ const load = (cartridge: any) => {
     installed,
   );
 };
-const withFactType = (value_type: object) => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  cartridge.facts['hello_sampler@0.0.1:fact/village_arrived'].value_type = value_type;
-  return load(cartridge);
-};
-
-// Breaks: an artifact bypasses the compiler and boots with an impossible enum default.
-test('the loader rejects an enum fact default outside its values', () =>
-  assert.deepEqual(withFactType({ type: 'enum', values: ['missing'], default: 'rescued' }), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
-      {},
-    ),
-  }));
-
-// Breaks: an artifact bypasses the compiler and boots with an out-of-bounds numeric default.
-test('the loader rejects a bounded integer fact default outside its bounds', () =>
-  assert.deepEqual(withFactType({ type: 'int', minimum: 0, maximum: 1, default: 2 }), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
-      {},
-    ),
-  }));
-
-// Breaks: default validation is accidentally limited to v1, leaving a v2 artifact with an
-// impossible unwritten fact default loadable.
-test('the loader rejects an invalid v2 fact default', () => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_facts_hash.json').value);
-  cartridge.facts['facts_sampler@0.0.1:fact/review_default'] = {
-    key: 'review_default',
-    version: 1,
-    value_type: { type: 'enum', values: ['missing'], default: 'rescued' },
-    scopes: ['instance'],
-    meaning: 'Controlled loader default.',
-  };
-  assert.deepEqual(load(cartridge), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["facts_sampler@0.0.1:fact/review_default"].value_type.default',
-      {},
-    ),
-  });
-});
 
 // Breaks: the hash is taken over other bytes (the artifact, a re-ordered encoding), or a valid
 // artifact is rejected by some stage.

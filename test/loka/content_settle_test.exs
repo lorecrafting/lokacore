@@ -3,8 +3,7 @@ defmodule Loka.ContentSettleTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/settle_sampler")}
 
   # Break (Settle S3-1; twin of the loader test in kernel/ts/test/settle.test.ts): a narrate line
-  # whose text key is not in the catalog compiles. The 1.103 floor is loader_floors.json's
-  # "a narrate step" case.
+  # whose text key is not in the catalog compiles.
   test "a narrate text key resolves in the text catalog", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     missing = &put_in(&1, ["apply", Access.at(0), "text"], "settle.missing")

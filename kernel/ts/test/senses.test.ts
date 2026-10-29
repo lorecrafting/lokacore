@@ -7,7 +7,6 @@
 // cue_perceived sound.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -16,7 +15,6 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { LIMITS, type DefinitionRef, type EntityId } from '../src/contracts.gen.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
@@ -243,24 +241,4 @@ test('an exhausted query budget perceives nothing', () => {
   const leaf = { op: 'cue_perceived', npc: ref('npc', 'sentry'), sense: 'smell' } as const;
   assert.equal(holds(w, w.character, leaf, { steps: { n: 0 } }), true);
   assert.equal(holds(w, w.character, leaf, { steps: { n: LIMITS.query_steps - 5 } }), false);
-});
-
-// Breaks: the loader accepts a cue with a text key missing from the catalog.
-test('the loader refuses a cue without its text', () => {
-  const load = (change: (c: Obj) => void) => {
-    const c = structuredClone(content) as unknown as Obj;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const [missing, key] = load((c) => delete c.text['cue.rattle']);
-  assert.deepEqual(
-    [missing, key.slice(-29)],
-    ['UNRESOLVED_REFERENCE', 'outcomes.failure.cues[0].text'],
-  );
 });

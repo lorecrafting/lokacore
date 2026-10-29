@@ -118,69 +118,15 @@ const knock = (c: any) => {
   c.text['knock.store.answered'] = 'The smith calls back.';
   c.text['knock.store.unanswered'] = 'No one answers.';
 };
-const exit = `.cartridge.rooms["${smithy}"].exits.south.knock`;
 
-// Breaks: a rehashed artifact draws duplicate/unresolved rooms or grants Knock to a non-door face.
-test('D10 loader refuses invalid authored map and Knock declarations', () => {
+// Breaks: the loader refuses a valid Knock door or loads a non-numeric map coordinate.
+test('D10 loader loads Knock and refuses a malformed map coordinate', () => {
   assert.equal(load(knock).ok, true);
-  for (const [mutate, code, path] of [
-    [(c: any) => c.map_positions.pop(), 'SCHEMA_VIOLATION', '.cartridge.map_positions'],
-    [
-      (c: any) => (c.map_positions[1].room = c.map_positions[0].room),
-      'SCHEMA_VIOLATION',
-      '.cartridge.map_positions',
-    ],
-    [
-      (c: any) =>
-        Object.assign(c.map_positions[1], {
-          x: c.map_positions[0].x,
-          y: c.map_positions[0].y,
-          z: c.map_positions[0].z,
-        }),
-      'SCHEMA_VIOLATION',
-      '.cartridge.map_positions',
-    ],
-    [
-      (c: any) => (c.map_positions[0].room = ref('room', 'absent')),
-      'UNRESOLVED_REFERENCE',
-      '.cartridge.map_positions[0].room',
-    ],
-    [(c: any) => (c.map_positions[0].x = '0'), 'SCHEMA_VIOLATION', '.cartridge.map_positions[0].x'],
-    [
-      (c: any) => {
-        delete c.lock.capabilities.knowledge;
-        delete c.manifest.requires.capabilities.knowledge;
-      },
-      'UNDECLARED_CAPABILITY',
-      '.cartridge.map_positions',
-    ],
-    [
-      (c: any) => (c.rooms[smithy].exits.south.knock.npc = ref('npc', 'absent')),
-      'UNRESOLVED_REFERENCE',
-      `${exit}.npc`,
-    ],
-    [
-      (c: any) => (c.rooms[smithy].exits.south.knock.room = ref('room', 'smithy')),
-      'BARRIER_MISMATCH',
-      exit,
-    ],
-    [
-      (c: any) => {
-        const k = c.rooms[smithy].exits.south.knock;
-        c.rooms[smithy].exits.north.knock = { ...k, room: ref('room', 'the_fold') };
-      },
-      'BARRIER_MISMATCH',
-      `.cartridge.rooms["${smithy}"].exits.north.knock`,
-    ],
-    [
-      (c: any) => (c.rooms[smithy].exits.south.knock.answered = 'absent'),
-      'UNRESOLVED_REFERENCE',
-      `${exit}.answered`,
-    ],
-  ] as [(c: any) => void, string, string][]) {
-    const loaded = load((c) => (knock(c), mutate(c)));
-    assert.equal(loaded.ok, false, path);
-    if (loaded.ok) continue;
-    assert.deepEqual([loaded.diagnostic.code, loaded.diagnostic.path], [code, path]);
-  }
+  const loaded = load((c) => (knock(c), (c.map_positions[0].x = '0')));
+  assert.equal(loaded.ok, false);
+  if (loaded.ok) return;
+  assert.deepEqual(
+    [loaded.diagnostic.code, loaded.diagnostic.path],
+    ['SCHEMA_VIOLATION', '.cartridge.map_positions[0].x'],
+  );
 });

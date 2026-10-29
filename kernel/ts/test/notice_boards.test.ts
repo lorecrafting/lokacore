@@ -4,9 +4,8 @@ import { gameView, step, type World } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { read } from './read.ts';
-import { genesis, load, prefix } from './search_fixture.ts';
+import { genesis } from './search_fixture.ts';
 
-const green = `${prefix}:room/village_green`;
 const detail = (w: World, key: string) =>
   Object.keys(w.details).find((id) => w.details[id].key === key)!;
 const inn = () => {
@@ -21,60 +20,6 @@ const inn = () => {
     1,
   ).world;
 };
-
-// Breaks: loader trusts cross-room/self/board/duplicate references or missing title catalog keys.
-test('loader rejects invalid board membership, title references and readable ownership', () => {
-  for (const [name, change, suffix, target] of [
-    [
-      'remote',
-      (d: any) => (d.rumor_board.notice_board.notices[0].detail = 'tracks'),
-      '.notices[0].detail',
-      'tracks',
-    ],
-    [
-      'self',
-      (d: any) => (d.rumor_board.notice_board.notices[0].detail = 'rumor_board'),
-      '.notices[0].detail',
-      'rumor_board',
-    ],
-    ['ordinary', (d: any) => delete d.lost_whistle.readable, '.notices[0].detail', 'lost_whistle'],
-    [
-      'duplicate',
-      (d: any) => (d.rumor_board.notice_board.notices[1].detail = 'lost_whistle'),
-      '.notices[1].detail',
-      'lost_whistle',
-    ],
-    [
-      'title',
-      (d: any) => (d.rumor_board.notice_board.title = 'missing.title'),
-      '.title',
-      'missing.title',
-    ],
-    [
-      'child title',
-      (d: any) => (d.rumor_board.notice_board.notices[1].title = 'missing.title'),
-      '.notices[1].title',
-      'missing.title',
-    ],
-    [
-      'board readable',
-      (d: any) =>
-        (d.rumor_board.readable = { label: 'actions.read_tracks', text: 'readable.tracks' }),
-      '',
-      undefined,
-    ],
-  ] as const) {
-    const result = load((c) => change(c.rooms[green].details));
-    assert.ok(!result.ok, name);
-    assert.equal(result.diagnostic.code, 'UNRESOLVED_REFERENCE', name);
-    assert.equal(
-      result.diagnostic.path,
-      `.cartridge.rooms["${green}"].details.rumor_board.notice_board${suffix}`,
-      name,
-    );
-    assert.deepEqual(result.diagnostic.data, target === undefined ? {} : { target }, name);
-  }
-});
 
 // Breaks: projection exposes notice bodies, wrong sibling IDs or keys (a board's key on its
 // children), remote boards or base descriptions

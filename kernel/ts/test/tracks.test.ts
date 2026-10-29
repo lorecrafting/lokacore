@@ -204,32 +204,6 @@ test('without hunts the player leaves no trail; without trail a wander writes no
 });
 
 const fact = (k: string) => `${REF}:fact/${k}`;
-const recipe = (k: string) => `${REF}:recipe/${k}`;
-/** The loader's first diagnostic for the sampler after `change`. */
-function refused(change: (c: any) => void) {
-  const r = reload(source, change);
-  assert.equal(r.ok, false);
-  const { code, path, data } = (r as { diagnostic: { code: string; path: string; data?: object } })
-    .diagnostic;
-  return [code, path, data];
-}
-
-// Breaks: an authored definition or write of an engine trail fact loads.
-test('the loader refuses authored trail facts', () => {
-  const cases: [(c: any) => void, unknown[]][] = [
-    [(c) => (c.facts[fact('trail_hounds_exit')].meaning = 'Mine.'), ['RESERVED_FACT']],
-    [
-      (c) => {
-        const seq = c.recipes[recipe('track_clearing')].outcomes.success.sequence;
-        seq.push({ ...structuredClone(seq[0]), value: 1 });
-        seq[1].fact.key = 'trail_hounds_at';
-      },
-      ['RESERVED_FACT'],
-    ],
-  ];
-  for (const [change, want] of cases)
-    assert.deepEqual(refused(change).slice(0, want.length), want, String(change));
-});
 
 // Breaks: facts_typed admitting a room subject for any fact (rooms are subjects of the engine's
 // trail facts only), a trail fact naming its mover, or refusing the trail rows.

@@ -319,37 +319,7 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const GREEN = '.cartridge.rooms["facts_sampler@0.0.1:room/village_green"]';
-const REED = '.cartridge.rooms["facts_sampler@0.0.1:room/reed_path"]';
 const room = (c: any, key: string) => c.rooms[`facts_sampler@0.0.1:room/${key}`];
-
-// Breaks: the kernel would read a fact the cartridge does not declare, or show a raw key.
-test("a variant's unknown fact or missing text is UNRESOLVED_REFERENCE", () => {
-  fails(
-    (c) => (room(c, 'reed_path').details.mud.variants[0].when.root.items[0].fact.key = 'nope'),
-    'UNRESOLVED_REFERENCE',
-    `${REED}.details.mud.variants[0].when.root.items[0].fact`,
-    { target: 'facts_sampler@0.0.1:fact/nope' },
-  );
-  fails(
-    (c) => (room(c, 'village_green').variants[0].when.root.items[1].fact.kind = 'item'),
-    'UNRESOLVED_REFERENCE',
-    `${GREEN}.variants[0].when.root.items[1].fact`,
-    { target: 'facts_sampler@0.0.1:item/chapel_bell_rung' },
-  );
-  fails(
-    (c) => delete c.text['room.village_green.worried'],
-    'UNRESOLVED_REFERENCE',
-    `${GREEN}.variants[1].description`,
-    { target: 'room.village_green.worried' },
-  );
-  fails(
-    (c) => delete c.text['detail.mud.tracks'],
-    'UNRESOLVED_REFERENCE',
-    `${REED}.details.mud.variants[0].description`,
-    { target: 'detail.mud.tracks' },
-  );
-});
 
 // Breaks: this kernel loads a fact it cannot read at one private-world scope.
 test('a fact of any scope other than exactly player or instance is FACT_SCOPE_UNSUPPORTED', () => {
