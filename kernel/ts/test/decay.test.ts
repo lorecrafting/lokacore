@@ -211,19 +211,7 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
   assert.equal(w.state.containers[item(w, 'fish')], w.consumed);
 });
 
-// Breaks: the loader's item.move floor is missing or low, or its room is never resolved.
-test('the loader refuses item.move below 1.77 or with an unknown room', () => {
-  const spoil = `${S}reaction/spoil`;
-  const old = reload(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.76'));
-  assert.deepEqual(old.ok ? undefined : [old.diagnostic.code, old.diagnostic.path], [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
-  const nowhere = reload(base, (c) => (c.reactions[spoil].apply[0].room = ref('room', 'nowhere')));
-  assert.deepEqual(nowhere.ok ? undefined : [nowhere.diagnostic.code, nowhere.diagnostic.path], [
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.reactions["${spoil}"].apply[0].room`,
-  ]);
+test('item.move is not counted as a fact_changed writer', () => {
   // Break: item.move counted as a fact_changed writer (it emits no event, so needs no fact@1).
   const steps = uses(JSON.parse(new TextDecoder().decode(artifact)).cartridge).filter(([, , p]) =>
     /(spoil|sweep)"\]\.apply/.test(p),

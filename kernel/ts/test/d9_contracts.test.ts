@@ -1,42 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { load, prefix, ref } from './bell_fixture.ts';
 import { validate } from '../src/foundation/validate.ts';
-
-const reaction = `.cartridge.reactions["${prefix}:reaction/bell_suppress_goblins"]`;
-const R = (c: any) => c.reactions[`${prefix}:reaction/bell_suppress_goblins`];
-
-// Breaks: a suppression plan/trigger silently resolves to a missing or wrong definition.
-test('D9 cue references and typed suppression declaration fail closed', () => {
-  assert.equal(load().ok, true);
-  for (const [change, code, path] of [
-    [
-      (c: any) => (R(c).apply[0].plan = ref('population', 'absent')),
-      'SCHEMA_VIOLATION',
-      `${reaction}.apply[0].plan`,
-    ],
-    [
-      (c: any) => (R(c).apply[0].plan = ref('population', 'hens')),
-      'SCHEMA_VIOLATION',
-      `${reaction}.apply[0].plan`,
-    ],
-    [
-      (c: any) => (R(c).on.fact = ref('fact', 'lever_stage')),
-      'FACT_TYPE_MISMATCH',
-      `${reaction}.on.fact`,
-    ],
-    [
-      (c: any) => (R(c).on = { event: 'item_dropped', item: ref('item', 'ear') }),
-      'OUTCOME_MISMATCH',
-      `${reaction}.apply[0].op`,
-    ],
-  ] as const) {
-    const loaded = load(change);
-    assert.equal(loaded.ok, false, path);
-    if (!loaded.ok)
-      assert.deepEqual([loaded.diagnostic.code, loaded.diagnostic.path], [code, path]);
-  }
-});
 
 // Breaks: a missing generation, deadline, or cause is accepted as resumable saved control.
 test('D9 typed control and cue reject missing evidence and malformed deadlines', () => {

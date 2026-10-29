@@ -304,10 +304,9 @@ test('an arrest shuts a door a visitor left open and reads the charge again', ()
   assert.equal(exit(w, 'west').door?.state, 'closed');
 });
 
-// Break: the loader admits a zero lesson payment or a barrier write with no reachable key.
-// The disposition shape, arrest and line checks are the compiler's (content_trial_test.exs).
-test('the loader refuses a malformed arrest', () => {
-  const npcAt = `.cartridge.npcs[${JSON.stringify(`${S}npc/guard`)}].disposition`;
+// Break: the loader admits a zero lesson payment. The disposition shape, arrest, line and barrier
+// key checks are the compiler's (content_trial_test.exs, content_showcase_test.exs).
+test('the loader refuses a zero lesson payment', () => {
   const rows: [(c: any) => void, string | string[]][] = [
     [() => {}, 'loaded'],
     [
@@ -320,13 +319,6 @@ test('the loader refuses a malformed arrest', () => {
     [
       (c) => (c.dialogues[`${S}dialogue/jailer_talk`].choices.pay.lesson_payment.amount = 1),
       'loaded',
-    ],
-    [
-      (c) => (c.reactions[`${S}reaction/charge`].apply[1].to = 'locked'),
-      [
-        'BARRIER_UNREACHABLE_KEY',
-        `.cartridge.reactions[${JSON.stringify(`${S}reaction/charge`)}].apply[1].to`,
-      ],
     ],
   ];
   for (const [change, want] of rows) {

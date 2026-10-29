@@ -18,6 +18,10 @@ defmodule Loka.ContentWitnessTest do
 
     assert {"SCHEMA_VIOLATION", "reactions/witnessed.on.witness"} in codes(dir, [template])
 
+    assert {"UNRESOLVED_REFERENCE", "reactions/witnessed.on.witness"} in codes(dir, [
+             {"reactions/witnessed.json", &put_in(&1, ["on", "witness"], "nobody")}
+           ])
+
     on_fact =
       {"reactions/witnessed.json",
        &Map.put(&1, "on", %{"event" => "fact_changed", "fact" => "gloats", "witness" => "baker"})}

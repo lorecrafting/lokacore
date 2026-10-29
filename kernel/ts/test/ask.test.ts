@@ -230,7 +230,7 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
 
 // Breaks: the loader trusting an ask's topic, grants or texts, its owning capability, the 1.96 floor, or an asked
 // trigger's topic.
-test('the loader refuses an unknown answer topic or grant, ask without speech@1, 1.95 and a bad trigger topic', () => {
+test('the loader refuses an unknown answer topic or grant, ask without speech@1 and 1.95', () => {
   const smith = `${P}npc/smith`;
   const refusal = (change: (c: Obj) => void) => {
     const r = reload(content, change);
@@ -270,20 +270,12 @@ test('the loader refuses an unknown answer topic or grant, ask without speech@1,
     })[0],
     'UNDECLARED_CAPABILITY',
   );
-  // Each floor alone: the asks' (no asked trigger left), then the asked trigger's (no ask left).
-  for (const drop of [
-    (c: Obj) => delete c.reactions[`${P}reaction/guard_smugglers`],
-    (c: Obj) => Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask),
-  ])
-    assert.deepEqual(
-      refusal((c) => {
-        c.manifest.requires.kernel_api.at_least = '1.95';
-        drop(c);
-      }),
-      ['KERNEL_API_RANGE_INVALID', 'at_least'],
-    );
+  // The asks' floor alone (no asked trigger left).
   assert.deepEqual(
-    refusal((c) => (c.reactions[`${P}reaction/guard_smugglers`].on.topic = nope)),
-    ['UNRESOLVED_REFERENCE', 'topic'],
+    refusal((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.95';
+      delete c.reactions[`${P}reaction/guard_smugglers`];
+    }),
+    ['KERNEL_API_RANGE_INVALID', 'at_least'],
   );
 });

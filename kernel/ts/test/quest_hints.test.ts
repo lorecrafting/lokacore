@@ -180,13 +180,13 @@ test('a failed checked perform still shows the tip once and assigns seen_tip_', 
 });
 
 // Breaks (loader twin of test/loka/content_quest_hints_test.exs): an artifact whose recipe writes
-// the engine's seen_tip_<key>, lacks its FactSpec, has an unresolved tip, or a tip below 1.46 or
-// without fact@1, loads (a key too long for seen_tip_ fails the schema at its FactSpec).
+// the engine's seen_tip_<key>, lacks its FactSpec, or has a tip below 1.46 or without fact@1,
+// loads (a key too long for seen_tip_ fails the schema at its FactSpec; an unresolved tip is the
+// compiler's).
 test('the loader checks a recipe tip like the compiler', () => {
   const R = 'quest_sampler@0.0.1:recipe/search_floor';
   const recipe = `.cartridge.recipes["${R}"]`;
   const rows: [(c: Obj) => void, string, string][] = [
-    [(c) => (c.recipes[R].tip = 'tip.nope'), 'UNRESOLVED_REFERENCE', `${recipe}.tip`],
     [
       (c) => {
         delete c.quests['quest_sampler@0.0.1:quest/find_key'].journal.hints;

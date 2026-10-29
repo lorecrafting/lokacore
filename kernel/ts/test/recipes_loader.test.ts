@@ -1,5 +1,5 @@
-// The loader on recipes and rooms' action contributions (R5 S5; protocol/cartridge.schema.json
-// DiagnosticCode), and on v1 action policies (S3 review N1). Mutants of the bell and hello known
+// The loader's capability locks for recipes, their checks and resources (R5 S5; recipes.ex checks
+// the recipes themselves). Mutants of the bell and hello known
 // answers are re-hashed with node:crypto over sorted-key JSON.stringify (the canonical form for
 // these values), never by the kernel; expected diagnostics are hand-written.
 import assert from 'node:assert/strict';
@@ -51,75 +51,6 @@ const AT = `.cartridge.recipes["${RECIPE}"]`;
 const recipe = (c: any) => c.recipes[RECIPE];
 const success = (c: any) => recipe(c).outcomes.success;
 
-// Breaks: the kernel would look up a detail, room, fact or text that does not exist (a crash
-// or a raw key at play time) because the loader let the artifact in.
-test("a recipe's unknown target, fact or text is UNRESOLVED_REFERENCE", () => {
-  fails((c) => (recipe(c).target.detail = 'gong'), 'UNRESOLVED_REFERENCE', `${AT}.target.detail`, {
-    target: 'gong',
-  });
-  fails((c) => (recipe(c).target.room.key = 'crypt'), 'UNRESOLVED_REFERENCE', `${AT}.target.room`, {
-    target: 'recipe_sampler@0.0.1:room/crypt',
-  });
-  fails(
-    (c) => (success(c).sequence[0].fact.key = 'bell_tolled'),
-    'UNRESOLVED_REFERENCE',
-    `${AT}.outcomes.success.sequence[0].fact`,
-    { target: 'recipe_sampler@0.0.1:fact/bell_tolled' },
-  );
-  fails((c) => delete c.text['actions.ring_bell'], 'UNRESOLVED_REFERENCE', `${AT}.label`, {
-    target: 'actions.ring_bell',
-  });
-  fails(
-    (c) => delete c.text['narration.ring_bell.observers'],
-    'UNRESOLVED_REFERENCE',
-    `${AT}.outcomes.success.narration.observers`,
-    { target: 'narration.ring_bell.observers' },
-  );
-  assert.ok(load('cartridge_bell_hash.json', (c) => delete success(c).narration.observers).ok);
-});
-
-// Review F1, Astra A3. Breaks: an artifact whose recipe shares an action's or an engine verb's
-// key installs, and one definition silently wins at play time.
-test("a recipe with an action's or a registered command's key is DUPLICATE_DEFINITION", () => {
-  const renamed = (key: string) => (c: any) => {
-    const r = { ...recipe(c), key };
-    delete c.recipes[RECIPE];
-    c.recipes[`recipe_sampler@0.0.1:recipe/${key}`] = r;
-  };
-  fails(
-    renamed('look'),
-    'DUPLICATE_DEFINITION',
-    '.cartridge.recipes["recipe_sampler@0.0.1:recipe/look"]',
-  );
-  fails(
-    (c) =>
-      (c.actions['recipe_sampler@0.0.1:action/ring_bell'] = {
-        key: 'ring_bell',
-        label: 'actions.ring_bell',
-        target: { kind: 'none' },
-        command: 'look',
-        priority: 0,
-        input: [],
-        policy: recipe(c).policy,
-        accessibility: 'actions.ring_bell',
-      }),
-    'DUPLICATE_DEFINITION',
-    AT,
-  );
-});
-
-// Breaks: a room contribution naming no action loads (a typo silently changes nothing).
-test("a room's contribution naming no verb, action or recipe is UNRESOLVED_REFERENCE", () => {
-  const room = (c: any) => c.rooms['recipe_sampler@0.0.1:room/belfry'];
-  const ops = [{ op: 'subtract', actions: ['take', 'ring_bell', 'ring_gong'] }];
-  fails(
-    (c) => (room(c).actions = ops),
-    'UNRESOLVED_REFERENCE',
-    '.cartridge.rooms["recipe_sampler@0.0.1:room/belfry"].actions[0].actions[2]',
-    { target: 'ring_gong' },
-  );
-});
-
 // Breaks: a recipe, or a step's operation, loads without its owner in the lock (05 §6).
 test('a recipe and its steps without their owners locked are UNDECLARED_CAPABILITY', () => {
   const cases = [
@@ -148,34 +79,8 @@ const checked = (c: any) => {
 };
 const and = (f: (c: any) => void) => (c: any) => (checked(c), f(c));
 
-// Breaks: a checked recipe loads with no failure outcome (the kernel has none to run when the
-// check fails), or a failure outcome without a check loads and is dead content.
-test('a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH)', () => {
-  assert.ok(load('cartridge_bell_hash.json', checked).ok);
-  const nofailure = and((c) => delete recipe(c).outcomes.failure);
-  fails(nofailure, 'OUTCOME_MISMATCH', `${AT}.outcomes`);
-  fails(
-    and((c) => delete recipe(c).check),
-    'OUTCOME_MISMATCH',
-    `${AT}.outcomes`,
-  );
-});
-
-// Breaks: the failure outcome's fact, text or step owner goes unchecked, so a failed check
-// crashes or shows a raw key at play time; a check loads without check@1 locked.
-test("a failure outcome's references and owners, and the check's, are checked", () => {
-  fails(
-    and((c) => (recipe(c).outcomes.failure.sequence[0].fact.key = 'bell_cracked')),
-    'UNRESOLVED_REFERENCE',
-    `${AT}.outcomes.failure.sequence[0].fact`,
-    { target: 'recipe_sampler@0.0.1:fact/bell_cracked' },
-  );
-  fails(
-    and((c) => (recipe(c).outcomes.failure.narration.actor = 'narration.cracked')),
-    'UNRESOLVED_REFERENCE',
-    `${AT}.outcomes.failure.narration.actor`,
-    { target: 'narration.cracked' },
-  );
+// Breaks: a failure outcome's step or a check loads without its owner (fact@1, check@1) locked.
+test("a failure outcome's and the check's owners are checked", () => {
   for (const [key, path] of [
     ['check', `${AT}.check`],
     ['fact', `${AT}.outcomes.failure.sequence[0].op`],
@@ -207,72 +112,11 @@ test('time_window needs schedule@1', () => {
   ]);
 });
 
-// Astra A1. Breaks: a fact.assign value (any outcome) not of the fact's type installs although
-// the compiler rejects its source (FACT_TYPE_MISMATCH), so a failed check faults at play time.
-test("a recipe's fact value outside its FactSpec is FACT_TYPE_MISMATCH", () => {
-  const PICK = 'check_sampler@0.0.1:recipe/pick_lock';
-  const gate = {
-    cartridge_id: 'check_sampler',
-    cartridge_version: '0.0.1',
-    kind: 'fact',
-    key: 'crypt_gate_open',
-  };
-  fails(
-    (c) => {
-      c.recipes[PICK].check.chance = 20;
-      c.recipes[PICK].outcomes.failure.sequence = [{ op: 'fact.assign', fact: gate, value: 1 }];
-    },
-    'FACT_TYPE_MISMATCH',
-    `.cartridge.recipes["${PICK}"].outcomes.failure.sequence[0].value`,
-    {},
-    [],
-    'cartridge_dusk_hash.json',
-  );
-});
-
-// Review S2. Breaks: two recipes' checks with one key load, so one check DefinitionRef names two
-// checks and a check_passed objective completes on either.
-test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
-  const toll = 'recipe_sampler@0.0.1:recipe/toll_bell';
-  fails(
-    and((c) => (c.recipes[toll] = { ...structuredClone(recipe(c)), key: 'toll_bell' })),
-    'DUPLICATE_DEFINITION',
-    `${AT}.check`,
-  );
-});
-
-// R5 S6b resources, on the road known answer. Breaks: the kernel would read a resource that
-// does not exist, or regenerate outside a spec's bounds, because the loader let it in (each
-// matched by a compiler test in test/loka/content_road_test.exs).
+// R5 S6b resources, on the road known answer.
 const ROAD = 'cartridge_road_hash.json';
 const HP = 'resource_sampler@0.0.1:resource/hp';
-const SHOVE = `.cartridge.recipes["resource_sampler@0.0.1:recipe/shove_cart"]`;
-const PRAY = `.cartridge.recipes["resource_sampler@0.0.1:recipe/pray"]`;
-const road = (c: any, key: string) => c.recipes[`resource_sampler@0.0.1:recipe/${key}`];
 const road_fails = (f: (c: any) => void, code: string, path: string, data = {}, s: string[] = []) =>
   fails(f, code, path, data, s, ROAD);
-
-test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE", () => {
-  const target = { target: 'resource_sampler@0.0.1:resource/sp' };
-  road_fails(
-    (c) => (road(c, 'shove_cart').costs[0].resource.key = 'sp'),
-    'UNRESOLVED_REFERENCE',
-    `${SHOVE}.costs[0].resource`,
-    target,
-  );
-  road_fails(
-    (c) => (road(c, 'shove_cart').check.resource.key = 'sp'),
-    'UNRESOLVED_REFERENCE',
-    `${SHOVE}.check.resource`,
-    target,
-  );
-  road_fails(
-    (c) => (road(c, 'pray').outcomes.success.sequence[0].resource.key = 'sp'),
-    'UNRESOLVED_REFERENCE',
-    `${PRAY}.outcomes.success.sequence[0].resource`,
-    target,
-  );
-});
 
 test('resources without resource@1 in the lock are UNDECLARED_CAPABILITY', () => {
   road_fails(

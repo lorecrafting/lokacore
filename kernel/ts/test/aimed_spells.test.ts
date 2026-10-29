@@ -33,7 +33,6 @@ rmSync(scratch, { recursive: true });
 const P = 'spell_effects_sampler@0.0.1';
 const R = (key: string) => `${P}:recipe/${key}`;
 const rec = (k: string) => `.cartridge.recipes[${JSON.stringify(R(k))}]`;
-const seq = (k: string) => `${rec(k)}.outcomes.success.sequence[0]`;
 
 function variant(change: (c: Record<string, any>) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
@@ -265,16 +264,10 @@ test('an unlearned or unknown word is invalid_state before any target check', ()
   assert.equal(code(at(w, 'zzz', 'npc/wight')), 'invalid_state');
 });
 
-// Breaks: the TS loader admits a step without its npc on an unaimed spell, a scope outside
-// room_occupants and inventory, aimed on a non-spell target, or aimed below 1.119 (both kernels;
-// content_spell_effects_test.exs).
+// Breaks: the TS loader admits a scope outside room_occupants and inventory, or aimed on a
+// non-spell target.
 test('loader: aimed rows refused', () => {
   const rows: [(c: Record<string, any>) => void, string, string][] = [
-    [
-      (c) => delete c.recipes[R('flamma')].outcomes.success.sequence[0].npc,
-      'SCHEMA_VIOLATION',
-      `${seq('flamma')}.npc`,
-    ],
     [
       (c) => (
         aimedChange(c),
@@ -294,11 +287,6 @@ test('loader: aimed rows refused', () => {
       ),
       'UNKNOWN_FIELD', // the loader's code for a field its schema branch lacks
       `${rec('ward')}.target.aimed`,
-    ],
-    [
-      (c) => (aimedChange(c), (c.manifest.requires.kernel_api.at_least = '1.118')),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
     ],
   ];
   for (const [change, diagnostic, path] of rows) {

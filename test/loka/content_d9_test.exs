@@ -70,7 +70,10 @@ defmodule Loka.ContentD9Test do
           {"#{reaction}.json", &put_in(&1, ["apply", Access.at(0), "plan"], "hens"),
            "SCHEMA_VIOLATION", "#{reaction}.apply[0].plan"},
           {"#{reaction}.json", &put_in(&1, ["on", "fact"], "lever_stage"), "FACT_TYPE_MISMATCH",
-           "#{reaction}.on.value"}
+           "#{reaction}.on.value"},
+          {"#{reaction}.json",
+           &put_in(&1, ["on"], %{"event" => "entity_entered_room", "room" => "drill_yard"}),
+           "OUTCOME_MISMATCH", "#{reaction}.apply[0].op"}
         ] do
       assert {:error, diags} = ContentSource.compile(dir, bell() ++ [{file, change}])
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect({path, diags})

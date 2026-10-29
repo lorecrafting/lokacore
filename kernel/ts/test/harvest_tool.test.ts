@@ -167,9 +167,9 @@ test('a pickaxe in a worn sack is not held: refused, unlisted, and the view agre
   assert.ok(check('gameview_agrees_with_admission', observation));
 });
 
-// Breaks: the loader admits a tool gate under kernel_api 1.51 or without tags@1 (twin of
+// Breaks: the loader admits a tool gate without tags@1 (the 1.52 floor is the compiler's,
 // test/loka/content_harvest_tool_test.exs).
-test('loader: a harvest tool needs kernel_api 1.52 and tags@1', () => {
+test('loader: a harvest tool needs tags@1', () => {
   const reload = (edit: (c: any) => void) => {
     const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
     edit(c);
@@ -182,10 +182,6 @@ test('loader: a harvest tool needs kernel_api 1.52 and tags@1', () => {
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = '.cartridge.rooms["harvest_sampler@0.0.1:room/mine"].details.seam.harvest';
-  assert.deepEqual(
-    reload((c) => (c.manifest.requires.kernel_api.at_least = '1.51')),
-    ['KERNEL_API_RANGE_INVALID', at],
-  );
   assert.deepEqual(
     reload((c) => {
       delete c.manifest.requires.capabilities.tags;

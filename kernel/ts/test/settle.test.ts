@@ -79,15 +79,6 @@ test('S3-1: a delayed line is said by the advance that reaches its due time, not
   assert.deepEqual(wait(moved.world, 900), [LINE]);
 });
 
-// Breaks: the loader admits a line whose text key is not in the catalog.
-test('loader: a narrate text key resolves in the text catalog', () => {
-  const r = reload(base, (c) => (c.reactions[RULE].apply[0].text = 'settle.missing'));
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.reactions["${RULE}"].apply[0].text`,
-  ]);
-});
-
 // Settle S4-1 (N2) on the same sampler (mechanics.md "Plan move (Settle S4-1)"): `band_out` moves
 // every living member of the `raiders` plan (home square, cap 3, targets 0) to `hills` when the
 // instance fact band_out turns true. Test-only hour rules spawn the band and set the fact; the
@@ -244,31 +235,4 @@ test('S4-1: an engaged member stays; the rest of the band moves', () => {
 // Breaks: a plan with no living member faults or emits an event.
 test('S4-1: a plan with no member moves nothing', () => {
   assert.deepEqual(advance(band(8, undefined, false), 800).entered, []);
-});
-
-// Breaks: the loader admits an unknown plan, a plan move that also names an NPC, or one with no
-// room (the event's room is no place for a whole band). Twin of content_settle_test.exs.
-test('loader: a plan move names a known plan and a room, never an NPC', () => {
-  const at = `.cartridge.reactions["${MOVE}"].apply[0]`;
-  const refused = (edit: (s: any) => void) => {
-    const r = reload(base, (c) => {
-      // A placed NPC (the raider is a spawn template, refused at .npc on its own).
-      const { spawn_template, ...guard } = c.npcs['settle_sampler@0.0.1:npc/raider'];
-      c.npcs['settle_sampler@0.0.1:npc/guard'] = { ...guard, key: 'guard' };
-      edit(c.reactions[MOVE].apply[0]);
-    });
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  assert.deepEqual(
-    refused((s) => (s.plan = ref('population', 'nobody'))),
-    ['UNRESOLVED_REFERENCE', `${at}.plan`],
-  );
-  assert.deepEqual(
-    refused((s) => (s.npc = ref('npc', 'guard'))),
-    ['SCHEMA_VIOLATION', `${at}.plan`],
-  );
-  assert.deepEqual(
-    refused((s) => delete s.room),
-    ['SCHEMA_VIOLATION', `${at}.plan`],
-  );
 });

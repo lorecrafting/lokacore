@@ -202,57 +202,6 @@ const loadEdited = (edit: (c: any) => void) => {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
-test('loader: a craft needs resolved, placed holders, distinct items, a catalog reason, a station', () => {
-  const R = (kind: string, key: string) => ({
-    cartridge_id: 'craft_sampler',
-    cartridge_version: '0.0.1',
-    kind,
-    key,
-  });
-  const at = `.cartridge.recipes["${P}recipe/carve_spoon"].craft`;
-  const load = (edit: (r: any, c: any) => void) =>
-    loadEdited((c) => edit(c.recipes[`${P}recipe/carve_spoon`], c));
-  const cases: [(r: any, c: any) => void, string, string][] = [
-    [(r) => (r.craft.consume.to = { in: 'template' }), 'SCHEMA_VIOLATION', '.consume.to'],
-    [
-      (r) => (r.craft.yield.from = { in: 'item', item: R('item', 'stick_02') }),
-      'SCHEMA_VIOLATION',
-      '.yield.from',
-    ],
-    [
-      (r) => (r.craft.consume.items = [R('item', 'nothing')]),
-      'UNRESOLVED_REFERENCE',
-      '.consume.items[0]',
-    ],
-    [
-      (r) => (r.craft.yield.from = { in: 'room', room: R('room', 'nowhere') }),
-      'UNRESOLVED_REFERENCE',
-      '.yield.from.room',
-    ],
-    [
-      (r) => (r.craft.yield.items = [R('item', 'spoon_01'), R('item', 'spoon_01')]),
-      'DUPLICATE_DEFINITION',
-      '.yield.items',
-    ],
-    [(r) => (r.craft.consume.reason = 'craft.unknown'), 'UNRESOLVED_REFERENCE', '.consume.reason'],
-    [
-      (r, c) => {
-        const known = { ...c.facts[`${P}fact/spoon_carved`], key: 'known', scopes: ['player'] };
-        c.facts[`${P}fact/known`] = known; // a valid learned fact, so only the craft refuses
-        delete r.check;
-        r.target = { kind: 'spell', word: 'carve', learned: R('fact', 'known') };
-      },
-      'SCHEMA_VIOLATION',
-      '',
-    ],
-  ];
-  assert.equal(
-    load(() => {}),
-    'loaded',
-  );
-  for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
-});
-
 // Breaks: the loader admits a storylet target again (FD3 retired by the owner, 2026-10-23).
 test('loader: a storylet target is refused', () => {
   const key = `${P}recipe/carve_spoon`;
