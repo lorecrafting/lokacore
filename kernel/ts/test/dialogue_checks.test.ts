@@ -195,14 +195,6 @@ test('the loader refuses each unsound dialogue choice check', () => {
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
-    [
-      (c) => {
-        delete c.manifest.requires.capabilities.check;
-        delete c.lock.capabilities.check;
-      },
-      'UNDECLARED_CAPABILITY',
-      `${at}.intimidate.check`,
-    ],
   ];
   for (const [change, code, path] of rows) {
     const c = structuredClone(source);

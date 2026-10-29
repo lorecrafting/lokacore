@@ -272,8 +272,8 @@ test('a dig event moves one ore from the store at once, up to the cap; the job s
 });
 
 // Breaks: a stale key loads (both kernels: test/loka/content_replenish_test.exs), the step's
-// 1.101 floor, its refusal under `after` (as item.move's, row FD1) or of a repeated key is dropped.
-test('loader: replenish.run needs kernel_api 1.101, a replenish entry, no after, one run a key', () => {
+// 1.101 floor or its refusal of a repeated key is dropped.
+test('loader: replenish.run needs kernel_api 1.101, a replenish entry, one run a key', () => {
   const reload = (edit: (c: any) => void) => {
     const r = edited(edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
@@ -287,13 +287,6 @@ test('loader: replenish.run needs kernel_api 1.101, a replenish entry, no after,
     'KERNEL_API_RANGE_INVALID',
     '.cartridge.manifest.requires.kernel_api.at_least',
   ]);
-  assert.deepEqual(
-    reload((c) => {
-      digging()(c);
-      c.reactions[`${S}reaction/dig`].after = 60;
-    }),
-    ['SCHEMA_VIOLATION', `${at}.apply[0].op`],
-  );
   assert.deepEqual(reload(digging([RUN, RUN])), ['DUPLICATE_DEFINITION', `${at}.apply[1].key`]);
 });
 

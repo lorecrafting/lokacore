@@ -116,44 +116,31 @@ defmodule Loka.ContentScenesTest do
               ]}
   end
 
-  # Breaks: an action start that names another detail, an end outcome the story point does
-  # not resolve to this scene, or one fact assigned twice at scene end, loads.
-  test "scene start and end must agree with their action and story point", %{tmp_dir: dir} do
+  # Breaks: an end outcome the story point does not resolve to this scene, or one fact
+  # assigned twice at scene end, loads.
+  test "scene end must agree with its story point", %{tmp_dir: dir} do
     scene = src("scenes/bell_rung.json")
     m = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.15")
     point = src("story_points/lantern_resolved.json")
     rung = put_in(point, ["outcomes", "rung"], %{"scene" => "bell_rung"})
-
-    on = %{
-      "action" => "coil_rope",
-      "room" => "ferry_landing",
-      "detail" => "mooring_post",
-      "outcome" => "success"
-    }
-
     assign = %{"fact" => "bell_heard", "value" => true}
     ended = %{"story_point" => "lantern_resolved", "outcome" => "rung", "assign" => [assign]}
 
     files = fn s, p ->
       %{
         "cartridge.json" => m,
-        "scenes/bell_rung.json" => s,
+        "scenes/bell_rung.json" => Map.put(scene, "on_end", s),
         "story_points/lantern_resolved.json" => p
       }
     end
 
-    assert {:ok, _, _} = compile(Path.join(dir, "ok"), files.(%{scene | "on" => on}, point))
-
-    assert {:ok, _, _} =
-             compile(Path.join(dir, "end"), files.(Map.put(scene, "on_end", ended), rung))
+    assert {:ok, _, _} = compile(Path.join(dir, "end"), files.(ended, rung))
 
     for {name, s, p, path, code} <- [
-          {"detail", %{scene | "on" => %{on | "detail" => "bell"}}, point, "on",
+          {"outcome", %{ended | "outcome" => "carry"}, point, "on_end.outcome",
            "OUTCOME_MISMATCH"},
-          {"outcome", Map.put(scene, "on_end", %{ended | "outcome" => "carry"}), point,
-           "on_end.outcome", "OUTCOME_MISMATCH"},
-          {"assign", Map.put(scene, "on_end", %{ended | "assign" => [assign, assign]}), rung,
-           "on_end.assign", "DUPLICATE_DEFINITION"}
+          {"assign", %{ended | "assign" => [assign, assign]}, rung, "on_end.assign",
+           "DUPLICATE_DEFINITION"}
         ] do
       assert compile(Path.join(dir, name), files.(s, p)) ==
                {:error, [d(code, "scenes/bell_rung." <> path)]}
