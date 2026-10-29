@@ -1,12 +1,5 @@
 {
   "npc": "peg",
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prompt": "dialogue.peg.prompt",
   "roles": {
     "peg": {

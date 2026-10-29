@@ -5,14 +5,7 @@ import { illuminated } from './light/shared.ts';
 // variety@1's visited_count, population@1's population_count (row W12), equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
 // npc_present, skills@1's skill_compare (row FD2); 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
-import type {
-  CharacterId,
-  DomainEvent,
-  EntityId,
-  Policy,
-  Tag,
-  VersionedPolicy,
-} from '../contracts.gen.ts';
+import type { CharacterId, DomainEvent, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
@@ -32,10 +25,6 @@ import { levelling } from './levelling/shared.ts';
 import { livingCount } from './population/refs.ts';
 import { level as skillLevel } from './skill_level.ts';
 
-// The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
-// disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
-export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
-
 type Ctx = {
   target?: EntityId;
   steps: { n: number };
@@ -47,20 +36,20 @@ type Ctx = {
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
  * (target_present is false without one), `ctx.subject` a reaction's event subject; each leaf it
- * evaluates adds one to `ctx.steps.n` (04 §5.4 query_steps).
+ * evaluates adds one to `ctx.steps.n` (04 §5.4 query_steps). An absent policy holds.
  */
 // size: allow 60, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
 export function holds(
   world: World,
   actor: CharacterId,
-  p: Policy,
+  p?: Policy,
   ctx: Ctx = { steps: { n: 0 } },
 ): boolean {
+  if (!p) return true;
   switch (p.op) {
     case 'all':
-      return p.items.every((i) => holds(world, actor, i, ctx));
     case 'any':
-      return p.items.some((i) => holds(world, actor, i, ctx));
+      return p.items[p.op === 'all' ? 'every' : 'some']((i) => holds(world, actor, i, ctx));
     case 'not':
       return !holds(world, actor, p.item, ctx);
   }

@@ -17,7 +17,6 @@ import { permits } from '../src/mechanics/status/permits.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { check } from '../src/runtime/invariants.ts';
-import { ALWAYS } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
@@ -240,7 +239,6 @@ test('an alias of a blocked command is withheld from view and invocation alike',
     target: { kind: 'none' },
     input: ['word'],
     priority: 0,
-    policy: ALWAYS,
     command: 'say',
   };
   const c = { ...content, actions: { ...content.actions, chant } } as unknown as Cartridge;
@@ -373,7 +371,13 @@ test('a hostile troll does not engage a concealed player unless it sees invisibl
       ...c,
       npcs: {
         ...c.npcs,
-        [T]: { ...c.npcs![T], disposition: { hostile: ALWAYS, engage: 'npc.troll.room' } },
+        [T]: {
+          ...c.npcs![T],
+          disposition: {
+            hostile: { policy_version: 1, root: { op: 'all', items: [] } },
+            engage: 'npc.troll.room',
+          },
+        },
       },
     }) as Cartridge;
   const fights = (c: Cartridge, trollSees = false) => {

@@ -12,7 +12,6 @@ import type {
 } from '../../contracts.gen.ts';
 import { bodyOf, has, values, refString, type World } from '../../runtime/decision.ts';
 import { value } from '../fact.ts';
-import { ALWAYS } from '../policy.ts';
 import type { ActionSet } from '../../commands/actions.ts';
 
 const reference = (world: World, kind: string, key: string): DefinitionRef => ({
@@ -86,7 +85,6 @@ export const modal = (): ActionSet => ({
     target: { kind: 'none' },
     input: ['scene', 'line'],
     priority: 0,
-    policy: ALWAYS,
     engine: true,
   },
 });

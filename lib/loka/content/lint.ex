@@ -111,7 +111,7 @@ defmodule Loka.Content.Lint do
 
   defp conds(%{"when" => %{"root" => %{"op" => "all", "items" => items}}}), do: items
   defp conds(%{"when" => %{"root" => root}}), do: [root]
-  # No guard always wins; the missing `when` itself is reported.
+  # No `when` always holds, so it shadows every later variant.
   defp conds(_), do: []
 
   # Row 7 (M8c): an item nothing places, stocks, drops or yields never enters play; one nothing

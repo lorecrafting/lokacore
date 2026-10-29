@@ -30,7 +30,7 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
   const definition = world.cartridge.skills?.[refString(skill)];
   if (!definition) throw new KernelError('precondition_failed');
   const acquired = membership(world, actor, skill);
-  const qualified = holds(world, actor, definition.qualification.root, { steps });
+  const qualified = holds(world, actor, definition.qualification?.root, { steps });
   return { acquired, qualified, usable: acquired && qualified };
 }
 

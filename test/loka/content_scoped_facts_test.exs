@@ -15,7 +15,10 @@ defmodule Loka.ContentScopedFactsTest do
     leaf = %{"op" => "fact_compare", "fact" => "times_met", "equals" => 0, "npc" => "smith"}
     named = {"reactions/fed.json", &put_in(&1, ["apply", Access.at(0), "npc"], "smith")}
 
-    leafed = {"dialogues/smith_talk.json", &put_in(&1, ["policy", "root"], leaf)}
+    leafed =
+      {"dialogues/smith_talk.json",
+       &put_in(&1, [Access.key("policy", %{"policy_version" => 1}), "root"], leaf)}
+
     assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [leafed, named])
     c = JSON.decode!(artifact)["cartridge"]
 

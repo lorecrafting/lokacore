@@ -3,7 +3,6 @@
   "aliases": ["noctis"],
   "target": { "kind": "spell", "word": "noctis", "learned": "noctis_known" },
   "priority": 0,
-  "policy": { "policy_version": 1, "root": { "op": "all", "items": [] } },
   "costs": [{ "resource": "mana", "amount": 1 }],
   "outcomes": {
     "success": {

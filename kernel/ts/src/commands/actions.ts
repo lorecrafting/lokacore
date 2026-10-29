@@ -21,7 +21,6 @@ import { bodyOf, refString, type Steps, type World } from '../runtime/decision.t
 import { questOf } from '../mechanics/lookups.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { permits } from '../mechanics/status/permits.ts';
-import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
 import { accepts, aimedOffers, hiddenTarget, primaryTarget } from './action_input.ts';
@@ -48,7 +47,7 @@ export type Offered = {
   readonly target: TargetSpec;
   readonly input: readonly ActionInputParameter[];
   readonly priority: number;
-  readonly policy: VersionedPolicy;
+  readonly policy?: VersionedPolicy;
   readonly command: Key;
   readonly recipe?: ActionRecipe;
   readonly quest?: DefinitionRef;
@@ -108,7 +107,7 @@ function engine(world: World, actor: CharacterId): ActionSet {
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
-        const verb_ = { key, label, target, input, priority: 0, policy: ALWAYS, command: key };
+        const verb_ = { key, label, target, input, priority: 0, command: key };
         return [key, { ...verb_, engine: true }];
       }),
   );
@@ -262,7 +261,7 @@ export function refusalReason(
   const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
-    holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
+    holds(world, actor, a.policy?.root, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
   if (used || !matching.some((a) => ok(a))) return used ?? { code: 'invalid_state' };
   return craftRefused(world, matching[0]!.recipe, actor, steps); // after policy, as the offer (hs-10)

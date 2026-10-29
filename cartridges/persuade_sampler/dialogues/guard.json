@@ -1,12 +1,5 @@
 {
   "npc": "guard",
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prompt": "dialogue.guard.prompt",
   "roles": {
     "guard": {

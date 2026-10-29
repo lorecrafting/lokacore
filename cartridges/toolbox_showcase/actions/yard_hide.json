@@ -9,13 +9,6 @@
     "detail": "yard_barrels"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "check": {
     "key": "yard_hide",
     "kind": "opposed",

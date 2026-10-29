@@ -1,11 +1,4 @@
 {
   "label": "skill.blade.label",
-  "requirement": "skill.blade.requirement",
-  "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  }
+  "requirement": "skill.blade.requirement"
 }

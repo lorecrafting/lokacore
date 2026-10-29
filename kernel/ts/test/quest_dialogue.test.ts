@@ -17,13 +17,11 @@ const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const F = 'ferry_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'ferry_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
-const ALWAYS = { policy_version: 1, root: { op: 'all', items: [] } };
 const load = (f: (c: any) => void = () => {}) => {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
   c.dialogues[`${F}:dialogue/bram_offer`] = {
     key: 'bram_offer',
     npc: ref('npc', 'bram'),
-    policy: ALWAYS,
     prompt: 'dialogue.bram.prompt',
     roles: { bram: { role: 'npc', npc: ref('npc', 'bram') } },
     choices: {

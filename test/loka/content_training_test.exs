@@ -6,7 +6,7 @@ defmodule Loka.ContentTrainingTest do
   defp trained do
     [
       {"skills/blade.json",
-       &put_in(&1, ["qualification", "root"], %{
+       &put_in(&1, [Access.key("qualification", %{"policy_version" => 1}), "root"], %{
          "op" => "stat_compare",
          "attribute" => "str",
          "at_least" => 10
@@ -107,7 +107,7 @@ defmodule Loka.ContentTrainingTest do
            {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.block"}},
           {[
              {"skills/blade.json",
-              &put_in(&1, ["qualification", "root"], %{
+              &put_in(&1, [Access.key("qualification", %{"policy_version" => 1}), "root"], %{
                 "op" => "stat_compare",
                 "attribute" => "missing",
                 "at_least" => 10

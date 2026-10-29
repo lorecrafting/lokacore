@@ -413,7 +413,6 @@
         "command",
         "priority",
         "input",
-        "policy",
         "accessibility"
       ],
       "additionalProperties": false,
@@ -1136,7 +1135,6 @@
         "aliases",
         "target",
         "priority",
-        "policy",
         "outcomes"
       ],
       "additionalProperties": false,
