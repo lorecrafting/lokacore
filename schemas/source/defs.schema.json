@@ -5748,7 +5748,7 @@
         "location": { "$ref": "#/$defs/partial.ItemLocation" },
         "locks": {
           "additionalProperties": false,
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "properties": {
             "get": { "$ref": "#/$defs/partial.VersionedPolicy" },
             "put": { "$ref": "#/$defs/partial.VersionedPolicy" }
@@ -8061,7 +8061,7 @@
         "location": { "$ref": "#/$defs/ItemLocation" },
         "locks": {
           "additionalProperties": false,
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "properties": {
             "get": { "$ref": "#/$defs/VersionedPolicy" },
             "put": { "$ref": "#/$defs/VersionedPolicy" }
