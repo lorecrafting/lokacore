@@ -203,8 +203,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   catalog entry, each story point resolves and each selected outcome names one of its keys
   (`UNRESOLVED_REFERENCE`, `data.target` the text key, full reference string or outcome key).
   A counted trigger whose dialogue's quest and choice id are also named by another dialogue
-  is ambiguous (`OUTCOME_MISMATCH`, data `{}`, at `cartridge.chapters[i].story_point` in the
-  compiler, `.cartridge.chapters[i].story_point` at the loader's reference stage). Only the
+  is ambiguous (`OUTCOME_MISMATCH`, data `{}`, at `cartridge.chapters[i].story_point`). Only the
   selected outcome is counted when `outcome` is declared; otherwise all are. These checks
   implement [Chapters](mechanics.md#chapters-kerneltssrcviewviewts), using the existing diagnostic
   code, without changing dialogue or quest rules;

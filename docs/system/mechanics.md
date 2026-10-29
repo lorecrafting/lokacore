@@ -468,7 +468,7 @@ leaves, its options `not_present`
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
 contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:264`). Only a dialogue's speaker, present in the room,
 offers its talk (`mechanics/dialogue/selection.ts:80`), one per dialogue under the dialogue's key, available while that
-dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
+dialogue's policy holds. The compiler rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
 that could repeat must not reach a once-per-lineage save proof: the compiler
@@ -1268,7 +1268,7 @@ trust and nonterminal attempt failure have retained causal evidence, not room-co
 inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
 are outside this selected consumer.
 
-Compiler and loader validate a patrol quest. It requires `patrol@1`, `movement@1`, `quest@1`,
+The compiler validates a patrol quest. It requires `patrol@1`, `movement@1`, `quest@1`,
 `dialogue@1`, `fact@1` and `death@1`; its objective evidence is `patrol` (that evidence requires a
 `patrol` declaration), and it has no offer, repeat, deadline or exchange. The initial cursor lies
 within the route, and each leg, including the last back to the first, is an exit to a different

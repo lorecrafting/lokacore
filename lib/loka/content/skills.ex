@@ -97,7 +97,7 @@ defmodule Loka.Content.Skills do
 
   defp growth(_), do: []
 
-  # Homestead hs-11: a box never requires itself (its own full ref, as cartridge_skills.ts).
+  # Homestead hs-11: a box never requires itself (its own full ref).
   # Homestead hs-14: a shown box never requires a hidden one.
   defp itself(m, {key, {rel, _, %{"prerequisite" => p} = s}}, hidden) do
     me = ref(m, key)
@@ -115,7 +115,7 @@ defmodule Loka.Content.Skills do
   defp itself(_, _, _), do: []
 
   # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
-  # skill, and no labeled talk or riddle dialogue teaches one (cartridge_skills.ts).
+  # skill, and no labeled talk or riddle dialogue teaches one.
   defp secret(m, defs) do
     hidden? =
       &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
