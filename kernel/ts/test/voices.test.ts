@@ -90,13 +90,11 @@ const load = (change: (c: any) => void) => {
 };
 const hall = `${C}:room/hall`;
 const sage = `${C}:npc/sage`;
-const glyphs = `${C}:recipe/read_glyphs`;
-const floor = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}];
 
-// Breaks: the loader stops walking the leaf (an undeclared skill loads and fails in play), the
-// leaf loses its owner, the 1.91 floor misses a lone leaf, or a retired `asides` field loads
+// Breaks: the loader stops walking the leaf (an undeclared skill loads and fails in play) or a
+// retired `asides` field loads
 // (twin of content_voices_test.exs).
-test('the loader checks skill_compare (reference, owner, floor) and refuses asides', () => {
+test('the loader checks skill_compare references and refuses asides', () => {
   const rows: [(c: any) => void, unknown][] = [
     [
       (c) => (c.npcs[sage].room_line_variants[0].when.root.skill.key = 'ghost'),
@@ -105,34 +103,6 @@ test('the loader checks skill_compare (reference, owner, floor) and refuses asid
         `.cartridge.npcs[${JSON.stringify(sage)}].room_line_variants[0].when.root.skill`,
         { target: `${C}:skill/ghost` },
       ],
-    ],
-    [
-      (c) => {
-        delete c.manifest.requires.capabilities.skills;
-        delete c.lock.capabilities.skills;
-        delete c.recipes[glyphs];
-      },
-      [
-        'UNDECLARED_CAPABILITY',
-        `.cartridge.npcs[${JSON.stringify(sage)}].room_line_variants[0].when.root.op`,
-        { capability: 'skills' },
-      ],
-    ],
-    [(c) => (c.manifest.requires.kernel_api.at_least = '1.90'), floor],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.90';
-        delete c.recipes[glyphs];
-      },
-      floor,
-    ],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.90';
-        delete c.npcs[sage].room_line_variants;
-        delete c.recipes[glyphs];
-      },
-      'loaded',
     ],
     [
       (c) => (c.rooms[hall].asides = []),

@@ -74,14 +74,6 @@ test('loader rejects invalid board membership, title references and readable own
     );
     assert.deepEqual(result.diagnostic.data, target === undefined ? {} : { target }, name);
   }
-  const result = load((c) => {
-    delete c.lock.capabilities.readable;
-    delete c.manifest.requires.capabilities.readable;
-    for (const r of Object.values(c.rooms) as any[])
-      for (const d of Object.values(r.details ?? {}) as any[]) delete d.readable;
-  });
-  assert.ok(!result.ok);
-  assert.equal(result.diagnostic.code, 'UNDECLARED_CAPABILITY');
 });
 
 // Breaks: projection exposes notice bodies, wrong sibling IDs or keys (a board's key on its

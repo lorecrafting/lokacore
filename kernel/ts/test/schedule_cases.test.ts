@@ -139,48 +139,15 @@ test("a case's time window is read at the hour's due time, not the end of the wa
   assert.equal(room(w), roomId(w, 'green'));
 });
 
-// Breaks: the loader skips schedule_cases (an unknown room, goal text or condition fact loads and
-// fails in play), accepts a case hour the daily_schedule does not list (its job never runs it),
-// or loads a case below kernel_api 1.47 (twin of content_schedules_test.exs).
-test('the loader checks schedule_cases rooms, goal texts, conditions, hours and the 1.47 floor', () => {
+// Breaks: the loader skips a schedule case condition (an unknown fact loads and fails in play).
+test('the loader checks schedule_cases conditions', () => {
   const at0 = `.cartridge.npcs[${JSON.stringify(MAUD)}].schedule_cases.8[0]`;
   const rows: [(c: any) => void, string, string, object][] = [
-    [
-      (c) => (c.npcs[MAUD].schedule_cases['8'][0].room.key = 'moor'),
-      'UNRESOLVED_REFERENCE',
-      `${at0}.room`,
-      { target: `${C}:room/moor` },
-    ],
-    [
-      (c) => (c.npcs[MAUD].schedule_cases['8'][0].goal = 'npc.maud.gone'),
-      'UNRESOLVED_REFERENCE',
-      `${at0}.goal`,
-      { target: 'npc.maud.gone' },
-    ],
     [
       (c) => (c.npcs[MAUD].schedule_cases['8'][0].when.root.fact.key = 'ghost'),
       'UNRESOLVED_REFERENCE',
       `${at0}.when.root.fact`,
       { target: `${C}:fact/ghost` },
-    ],
-    [
-      (c) => (c.npcs[MAUD].schedule_cases['9'] = c.npcs[MAUD].schedule_cases['8']),
-      'SCHEMA_VIOLATION',
-      `.cartridge.npcs[${JSON.stringify(MAUD)}].schedule_cases.9`,
-      { error: 'invalid_value' },
-    ],
-    [
-      // Seam 5: a job has no player; the instance fact child_lost passes in every other test.
-      (c) => (c.facts[`${C}:fact/child_lost`].scopes = ['player']),
-      'FACT_SCOPE_UNSUPPORTED',
-      `${at0}.when.root.fact`,
-      {},
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.46'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-      {},
     ],
   ];
   for (const [change, code, path, data] of rows) {

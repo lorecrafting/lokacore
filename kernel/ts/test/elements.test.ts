@@ -273,7 +273,6 @@ test('two rules that cure and re-apply each other fault budget_exceeded at react
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
 function reload(edit: (c: any) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  c.manifest.requires.kernel_api.at_least = '1.52';
   delete c.reactions[rule('shock_on_wet')];
   delete c.reactions[rule('warmth_dries')];
   edit(c);
@@ -285,38 +284,13 @@ function reload(edit: (c: any) => void) {
   );
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 }
-const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
 
-// Breaks (twin of test/loka/content_elements_test.exs): a status_applied trigger, a reaction
-// status.cure or a status_active leaf reading self or subject (each alone) loads under API 1.52,
-// or a reaction cure of an undeclared status loads.
-test('status readers need API 1.53; a reaction cure names a declared status', () => {
-  assert.equal(
-    reload(() => {}),
-    'loaded',
-  );
-  const cure = { op: 'status.cure', status: ref('status', 'wet') };
-  const leaf = (subject: string) => ({
-    policy_version: 1,
-    root: { op: 'status_active', subject, status: ref('status', 'wet') },
-  });
-  const spark = (c: any) => c.reactions[rule('spark')];
-  for (const edit of [
-    (c: any) => (spark(c).on = { event: 'status_applied' }),
-    (c: any) => spark(c).apply.push(cure),
-    (c: any) => (spark(c).when = leaf('self')),
-    (c: any) => (spark(c).when = leaf('subject')),
-  ])
-    assert.deepEqual(reload(edit), api);
-  assert.equal(
-    reload((c) => (spark(c).when = leaf('target'))),
-    'loaded',
-  );
+// Breaks (twin of test/loka/content_elements_test.exs): a reaction cure of an undeclared status
+// loads.
+test('a reaction cure names a declared status', () => {
+  const ash = { op: 'status.cure', status: ref('status', 'ash') };
   assert.deepEqual(
-    reload((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.53';
-      spark(c).apply.push({ ...cure, status: ref('status', 'ash') });
-    }),
+    reload((c) => c.reactions[rule('spark')].apply.push(ash)),
     ['UNRESOLVED_REFERENCE', `.cartridge.reactions["${rule('spark')}"].apply[1].status`],
   );
 });

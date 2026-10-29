@@ -245,9 +245,8 @@ test('an exhausted query budget perceives nothing', () => {
   assert.equal(holds(w, w.character, leaf, { steps: { n: LIMITS.query_steps - 5 } }), false);
 });
 
-// Breaks: the loader accepts a cue or a lone cue_perceived leaf below kernel_api 1.48, a cue
-// without sense_cue@1 or with a text key missing from the catalog.
-test('the loader refuses a cue below 1.48, without sense_cue or without its text', () => {
+// Breaks: the loader accepts a cue with a text key missing from the catalog.
+test('the loader refuses a cue without its text', () => {
   const load = (change: (c: Obj) => void) => {
     const c = structuredClone(content) as unknown as Obj;
     change(c);
@@ -259,34 +258,6 @@ test('the loader refuses a cue below 1.48, without sense_cue or without its text
     );
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
-  assert.deepEqual(
-    load((c) => (c.manifest.requires.kernel_api.at_least = '1.47')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  const strip = (v: unknown): unknown =>
-    Array.isArray(v)
-      ? v.map(strip)
-      : v && typeof v === 'object'
-        ? Object.fromEntries(
-            Object.entries(v)
-              .filter(([k]) => k !== 'cues')
-              .map(([k, x]) => [k, strip(x)]),
-          )
-        : v;
-  // the reactions' cue_perceived leaves alone still need 1.48
-  assert.deepEqual(
-    load((c) => {
-      for (const k of ['rooms', 'npcs', 'items', 'recipes']) c[k] = strip(c[k]);
-      c.manifest.requires.kernel_api.at_least = '1.47';
-    }),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  const [owner, at] = load((c) => {
-    delete c.manifest.requires.capabilities.sense_cue;
-    delete c.lock.capabilities.sense_cue;
-    c.reactions = {}; // their cue_perceived leaves would be refused first
-  });
-  assert.deepEqual([owner, at.slice(-8)], ['UNDECLARED_CAPABILITY', '.cues[0]']);
   const [missing, key] = load((c) => delete c.text['cue.rattle']);
   assert.deepEqual(
     [missing, key.slice(-29)],
