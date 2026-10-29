@@ -47,7 +47,7 @@ Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.m
 1. Finish batch A (above).
 2. Simplification batch, epic loka-ivjq (Fable audit 2026-10-28, report in its notes; owner rulings in its
    description): F1 docs, F2 kernel_api floors, F3 policy wrapper, F4 one step/check vocabulary (L, Fable
-   brief), F5 single-use kinds, F6 display-name field, F7 delete signal shortcut, F11 story points onto the
+   brief), F5 single-use kinds, F6 display-name field, F7 signals out, F11 story points onto the
    choice; F9/F10/F12 after .17.
 3. Then polish: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is ready
    (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide: [polish tour](design/polish-tour.md)).
