@@ -176,7 +176,7 @@ def refusal(seg, cwd=""):
             return f"git rebase refused: merge, never rebase (docs/WORKFLOW.md). With the owner's OK, prefix {MARKER}."
         if sub == "push" and any(a.startswith(("--force", "--mirror", "+")) or re.fullmatch(r"-[a-z]*f[a-z]*", a) for a in rest):
             return f"force push refused: fix the cause with a new commit. With the owner's OK, prefix {MARKER}."
-        if any(t.startswith("LOKA_PREPUSH_OK=") for t in env + (args if name == "export" else [])):
+        if any(t.startswith("LOKA_PREPUSH_OK=") for t in seg):  # a prefix, export or declare -x
             return f"LOKA_PREPUSH_OK refused: it skips the pre-push checks; only bin/pm_merge.sh sets it. With the owner's OK, prefix {MARKER}."
     if PM in env:
         return None

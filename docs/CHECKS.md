@@ -141,7 +141,7 @@ their rules and red controls remain available for resumption.
   It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset; a green merge runs `prepush.sh` once, the hook skipping only the sha `pm_merge` checked) and `bin/prepush.sh` (each gated check runs only for its inputs), and `bin/ci_changes.sh` (docs-only skips the test jobs, an engine change runs `sim` and `walk`, any other event or an unreadable diff runs all).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`,
-  `git commit -n`, a force or `--mirror` push and `git rebase` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`,
+  `git commit -n`, a force or `--mirror` push, `git rebase` and setting `LOKA_PREPUSH_OK` (an env prefix, `export`, `declare -x`; only `bin/pm_merge.sh` sets it) without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`,
   `kill` fed by `pgrep`/`pidof` in one pipe or `$( )`, `gh run watch`, `gh pr checks --watch`, `gh workflow run` (past `-R`), the full `npm test`, `test:nosim`, `test:sim`, `test:e2e`, `storybook:smoke`, `bin/check_all.sh`
   (past `nice`, `env`, `time`, `timeout`, `xargs`) and a `git worktree add` path that resolves outside `worktrees.noindex` or inside a checkout
   without the PM's `LOKA_PM=1` prefix; and a bare `br create`; `bin/send_guard.py`
