@@ -2,7 +2,7 @@ defmodule Loka.ContentGroupTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/group_sampler")}
 
-  # Breaks (toolbox row G8; twin of the loader rows in kernel/ts/test/group.test.ts):
+  # Breaks (toolbox row G8):
   # world.group compiles under API 1.69, names an unknown fact, a fact that is not a bool pair
   # fact at the player, or lacks the ally narration beside world.combat.
   test "the group keeps its API floor, a bool pair member fact and the ally narration", %{
@@ -37,7 +37,7 @@ defmodule Loka.ContentGroupTest do
     end
   end
 
-  # Breaks (toolbox row 22a; twin of the loader rows in kernel/ts/test/hireling.test.ts):
+  # Breaks (toolbox row 22a):
   # stay or fight compiles under API 1.72, stay names an unknown fact, or fight a fact that is
   # not a pair fact.
   test "the hireling orders keep API 1.73 and bool pair facts" do
@@ -58,7 +58,7 @@ defmodule Loka.ContentGroupTest do
     end
   end
 
-  # Breaks (toolbox row 22b; twin of the loader rows in kernel/ts/test/hireling.test.ts): the
+  # Breaks (toolbox row 22b): the
   # wage compiles with an unknown, gaining or regenerating resource or under API 1.74, or a skill-less
   # hire fee compiles under API 1.74.
   test "the wage keeps API 1.75 and a conserved resource; a skill-less fee 1.75" do

@@ -178,45 +178,6 @@ test('a barter whose knife has left the stall is refused before the pelts move',
   refused(w, 'not_found', 'service.no_output');
 });
 
-// Breaks: price 0 admitted for a service with no barter escrow, a negative price admitted, or the
-// claim of an untimed output admitted (it would never have a job to claim), the no_output text
-// left unchecked for an untimed output.
-test('price 0 needs a barter escrow; a price below 0 and a claim of an untimed output are refused', () => {
-  const at = `.cartridge.services["${S}:service/knife_for_pelts"]`;
-  const bad = (change: (c: any) => void) => {
-    const r = reload(change) as any;
-    assert.equal(r.ok, false);
-    return [r.diagnostic.code, r.diagnostic.path];
-  };
-  const svc = (c: any) => c.services[`${S}:service/knife_for_pelts`];
-  assert.deepEqual(
-    bad((c) => {
-      svc(c).benefit = { kind: 'entitlement', fact: ref('fact', 'traded_knife') };
-      c.text['service.already_paid'] = 'Already yours.';
-    }),
-    ['SCHEMA_VIOLATION', `${at}.price`],
-  );
-  assert.deepEqual(
-    bad((c) => delete c.text['service.no_output']),
-    ['UNRESOLVED_REFERENCE', `${at}.output`],
-  );
-  assert.deepEqual(
-    bad((c) => (svc(c).price = -1)),
-    ['SCHEMA_VIOLATION', `${at}.price`],
-  );
-  assert.deepEqual(
-    bad((c) => {
-      c.services[`${S}:service/claim`] = {
-        ...svc(c),
-        key: 'claim',
-        price: 1,
-        benefit: { kind: 'claim', service: ref('service', 'knife_for_pelts') },
-      };
-    }),
-    ['SCHEMA_VIOLATION', `.cartridge.services["${S}:service/claim"].benefit.service`],
-  );
-});
-
 // hs-8 view-to-invocation check (key `give`, docs/system/mechanics.md "Give pairs"). Breaks: a pair
 // listed for a corpse, an absent NPC, the actor's own body or an item giveRefused refuses; a
 // listed pair the rule then refuses; the pairs not limited to the held item.

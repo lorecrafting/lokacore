@@ -2,8 +2,7 @@ defmodule Loka.ContentTargetsTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/targets_sampler")}
 
-  # Breaks: world.combat.target_choice compiles under API 1.47 (toolbox row 6a; twin of the
-  # loader row in kernel/ts/test/targets.test.ts).
+  # Breaks: world.combat.target_choice compiles under API 1.47 (toolbox row 6a).
   test "target choice keeps its API floor", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
@@ -18,7 +17,7 @@ defmodule Loka.ContentTargetsTest do
            )
   end
 
-  # Breaks (toolbox row 6b; twin of the loader rows in kernel/ts/test/targets.test.ts): allies
+  # Breaks (toolbox row 6b): allies
   # compile under API 1.47, name a spawn template, an NPC without an attack or nothing, or lack
   # their narration.
   test "allies keep their API floor, authored fighters and narration", %{dir: dir} do

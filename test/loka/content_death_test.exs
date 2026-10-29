@@ -34,4 +34,24 @@ defmodule Loka.ContentDeathTest do
       assert {:error, _} = Loka.Content.compile(dir), name
     end
   end
+
+  # Breaks: death restores a pool the cartridge does not declare (death.ex restoration), so the
+  # first revival writes a resource no holder has.
+  test "death restoration names a declared pool" do
+    dir = Loka.ContentSource.copy("cartridges/cellar_sampler")
+    no_mv = &(pop_in(&1, ["resources", "mv"]) |> elem(1))
+    no_movement = &(pop_in(&1, ["world", "movement"]) |> elem(1))
+
+    assert {:error, ds} =
+             Loka.ContentSource.compile(dir, [
+               {"resources.json", no_mv},
+               {"cartridge.json", no_movement}
+             ])
+
+    assert {"SCHEMA_VIOLATION", "cartridge.world.death.restore.mv"} in Enum.map(
+             ds,
+             &{&1["code"], &1["path"]}
+           ),
+           inspect(ds)
+  end
 end

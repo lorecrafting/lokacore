@@ -1,14 +1,7 @@
 // size: allow 359, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
-import { topics } from './cartridge_topics.ts';
 import { trails } from './cartridge_trails.ts';
-import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
-import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
-import { combat } from './cartridge_combat.ts';
-import { death } from './cartridge_death.ts';
-import { derived } from './cartridge_derived.ts';
-import { levelling } from './cartridge_levelling.ts';
 import { LEAF_REFS } from './cartridge_leaf_refs.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
@@ -212,7 +205,6 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 // In both formats, validate fact defaults and policy references, typed comparisons and windows.
 // In v2 also validate entry, exits, NPC and item locations, text and touch links, barriers,
 // action contributions, quests, reactions, dialogues, resource bounds and movement cost.
-// size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -247,13 +239,6 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...dialogues(c, check));
   // -- D1
   // -- D2
-  out.push(...skills(c, check));
-  out.push(...topics(c, check));
-  out.push(...death(c, check));
-  out.push(...combat(c, named));
-  out.push(...commerce(c));
-  out.push(...derived(c, check));
-  out.push(...levelling(c, check));
   return out;
 }
 

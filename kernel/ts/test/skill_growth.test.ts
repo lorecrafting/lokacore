@@ -109,28 +109,15 @@ test('a taught pick opens the rating 5 gate on the fifth attempt', () => {
   assert.deepEqual(outcomes, ['failure', 'failure', 'failure', 'failure', 'success']);
 });
 
-// Breaks: the loader drops a rows 5/G5 check, so growth that does not increase, an opposed check
-// against an unrated detail, an unknown skill, an authored write of the count or an old API floor
-// loads.
+// Breaks: the loader drops a rows 5/G5 check, so an opposed check against an unrated detail, an
+// unknown skill or an authored write of the count loads. Growth order is the compiler's
+// (content_skill_growth_test.exs).
 test('the loader refuses each unsound growth or opposed declaration', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const skill = `.cartridge.skills["${P}:skill/pick"]`;
   const gate = `.cartridge.recipes["${P}:recipe/pick_gate"]`;
-  const api = '.cartridge.manifest.requires.kernel_api.at_least';
   const room = (c: any) => c.rooms[`${P}:room/vault_room`];
   const rows: [(c: any) => void, string, string][] = [
-    [(c) => (c.manifest.requires.kernel_api.at_least = '1.43'), 'KERNEL_API_RANGE_INVALID', api],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.43'; // a rating alone still needs 1.44
-        delete c.skills[`${P}:skill/pick`].growth;
-        delete c.facts[`${P}:fact/uses_pick`];
-        c.recipes = {};
-      },
-      'KERNEL_API_RANGE_INVALID',
-      api,
-    ],
-    [(c) => (c.skills[`${P}:skill/pick`].growth[2] = 2), 'SCHEMA_VIOLATION', `${skill}.growth`],
     [(c) => delete room(c).details.gate.rating, 'SCHEMA_VIOLATION', `${gate}.check`],
     [
       (c) => (c.recipes[`${P}:recipe/pick_gate`].check.skill.key = 'climb'),

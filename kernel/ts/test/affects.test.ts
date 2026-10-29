@@ -210,108 +210,20 @@ test('extreme affects saturate the attribute, the worn sum and the hp maximum; r
   assert.deepEqual(read(low).slice(1), [[-2147483638, -2147483648], 0, true]); // term saturates at -2^31; max floored at 0
 });
 
-// Breaks: the loader drops an affects check, so an affect on an unworn item, a dangling
-// attribute, a missing attributes@1 or an old API floor (also for finger rings without affects)
-// loads and misbehaves in play.
-test('the loader refuses each unsound item affect', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const belt = 'affects_sampler@0.0.1:item/belt';
-  const at = `.cartridge.items["${belt}"].affects`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.40'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [(c) => delete c.items[belt].slot, 'SCHEMA_VIOLATION', at],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.40';
-        for (const i of Object.values(c.items) as any[]) delete i.affects;
-      },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => (c.items[belt].affects[1].attribute.key = 'luck'),
-      'UNRESOLVED_REFERENCE',
-      `${at}[1].attribute`,
-    ],
-    [
-      (c) => {
-        delete c.manifest.requires.capabilities.attributes;
-        delete c.lock.capabilities.attributes;
-        delete c.attributes;
-        delete c.world.derived;
-        delete c.rooms['affects_sampler@0.0.1:room/hall'].variants;
-      },
-      'UNDECLARED_CAPABILITY',
-      at,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
-});
-
-// Breaks: the loader drops a balance 6b check, so a gear budget without attributes@1 or with an
-// empty per_slot, an intended level without affects, or either one under API 1.72 loads; or a
-// sound budget is refused.
-test('the loader refuses each unsound gear budget and intended level', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const item = (key: string) => `affects_sampler@0.0.1:item/${key}`;
-  const api = '.cartridge.manifest.requires.kernel_api.at_least';
-  const load = (change: (c: any) => void) => {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = (v: string) => (c: any) => (c.manifest.requires.kernel_api.at_least = v);
-  const budget = (c: any) => (c.world.gear_budget = { per_slot: { waist: 1 }, per_level: 1 });
-  const level = (key: string) => (c: any) => (c.items[item(key)].intended_level = 1);
-  const all =
-    (...fs: ((c: any) => void)[]) =>
-    (c: any) =>
-      fs.forEach((f) => f(c));
-  const unowned = (c: any) => {
-    delete c.manifest.requires.capabilities.attributes;
-    delete c.lock.capabilities.attributes;
-    delete c.attributes;
-    delete c.world.derived;
-    delete c.rooms['affects_sampler@0.0.1:room/hall'].variants;
-    for (const i of Object.values(c.items) as any[]) delete i.affects;
-  };
-  const rows: [(c: any) => void, string, string][] = [
-    [all(at('1.72'), budget, unowned), 'UNDECLARED_CAPABILITY', '.cartridge.world.gear_budget'],
-    [
-      all(at('1.72'), level('stone')),
-      'SCHEMA_VIOLATION',
-      `.cartridge.items["${item('stone')}"].intended_level`,
-    ],
-    [
-      all(at('1.72'), (c: any) => (c.world.gear_budget = { per_slot: {}, per_level: 1 })),
-      'SCHEMA_VIOLATION',
-      '.cartridge.world.gear_budget.per_slot',
-    ],
-    [all(at('1.71'), budget), 'KERNEL_API_RANGE_INVALID', api],
-    [all(at('1.71'), level('belt')), 'KERNEL_API_RANGE_INVALID', api],
-  ];
-  for (const [change, code, path] of rows) assert.deepEqual(load(change), [code, path]);
-  assert.equal(load(all(at('1.72'), budget, level('belt'))), 'loaded');
+// Breaks: the artifact schema refuses a sound gear budget or intended level. The affect, budget
+// and level refusals are the compiler's (content_derived_test.exs).
+test('a sound gear budget and intended level load', () => {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  c.manifest.requires.kernel_api.at_least = '1.72';
+  c.world.gear_budget = { per_slot: { waist: 1 }, per_level: 1 };
+  c.items['affects_sampler@0.0.1:item/belt'].intended_level = 1;
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  assert.equal(r.ok ? 'loaded' : r.diagnostic.code, 'loaded');
 });
 
 // Breaks: finger leaves the slot keys. The ItemAffect schema rows are in

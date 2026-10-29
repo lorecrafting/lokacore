@@ -90,15 +90,6 @@ const edited = (edit: (c: any) => void) => {
     INSTALLED,
   );
 };
-const reload = (edit: (c: any) => void) => {
-  const r = edited(edit);
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-};
-// Row 22b's wage and hire fee raise the floor to 1.75; drop both to test a lower floor.
-const unpaid = (c: any) => {
-  delete c.world.group.wage;
-  delete c.dialogues[`${S}dialogue/hal_talk`].choices.hire.lesson_payment;
-};
 
 // Breaks: travel ignores the stay fact (Hal walks off after "stay") or the follow order does not
 // clear it.
@@ -154,40 +145,6 @@ test('a holding hireling is still no Attack target', () => {
   const refused = play(w, { type: 'attack', target_id: npc(w, 'hal') }).decision;
   assert.equal(refused.kind === 'rejected' && refused.error.code, 'invalid_target');
   assert.deepEqual(offered(w), [npc(w, 'goblin')]);
-});
-
-// Breaks (twin of test/loka/content_group_test.exs): the loader admits stay or fight under API
-// 1.72, an unknown stay fact or a fight fact that is not a pair fact.
-test('the loader keeps stay and fight to API 1.73 and bool pair facts', () => {
-  const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-  const cases: [(c: any) => void, unknown][] = [
-    [() => {}, 'loaded'],
-    [
-      (c) => {
-        unpaid(c);
-        c.manifest.requires.kernel_api.at_least = '1.72';
-        delete c.world.group.fight;
-      },
-      api,
-    ],
-    [
-      (c) => {
-        unpaid(c);
-        c.manifest.requires.kernel_api.at_least = '1.72';
-        delete c.world.group.stay;
-      },
-      api,
-    ],
-    [
-      (c) => (c.world.group.stay.key = 'nobody'),
-      ['UNRESOLVED_REFERENCE', '.cartridge.world.group.stay'],
-    ],
-    [
-      (c) => (c.world.group.fight.key = 'goblin_slain'),
-      ['SCHEMA_VIOLATION', '.cartridge.world.group.fight'],
-    ],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);
 });
 
 // Toolbox row 22b: a 3-coin hire fee and a wage of 3 coins every 86400 (player starts at 10,
@@ -306,42 +263,4 @@ test('two hirelings: a running balance pays an EntityId-order prefix', () => {
   w = withRow(chat(withRow(w, w.body, 'coins', 10), 'ivy', 'hire'), hal, 'coins', 100);
   w = elapse(w, C0 + 4 * DAY);
   assert.deepEqual(state(), [7, 100, 12, false, false], 'a full Hal ends the paid prefix');
-});
-
-// Breaks (twin of test/loka/content_group_test.exs): the loader admits an unknown wage resource,
-// one that gains or one that regenerates, a wage under API 1.74, or a skill-less hire fee under API 1.74.
-test('the loader keeps the wage to API 1.75 and a conserved resource; a skill-less fee to 1.75', () => {
-  const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-  const at = '.cartridge.world.group.wage.resource';
-  const hire = (c: any) => c.dialogues[`${S}dialogue/hal_talk`].choices.hire;
-  const by_position = { standing: 1, sitting: 1, resting: 1, sleeping: 1 };
-  const regen = { every: 3600, by_position };
-  const cases: [(c: any) => void, unknown][] = [
-    [(c) => (c.world.group.wage.resource.key = 'gold'), ['UNRESOLVED_REFERENCE', at]],
-    [(c) => (c.world.group.wage.resource.key = 'hp'), ['SCHEMA_VIOLATION', at]],
-    [(c) => (c.resources[`${S}resource/coins`].gain = 1), ['SCHEMA_VIOLATION', at]],
-    [(c) => (c.resources[`${S}resource/coins`].regen = regen), ['SCHEMA_VIOLATION', at]],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.74';
-        delete hire(c).lesson_payment;
-      },
-      api,
-    ],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.74';
-        delete c.world.group.wage;
-      },
-      api,
-    ],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.74';
-        unpaid(c);
-      },
-      'loaded',
-    ],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);
 });

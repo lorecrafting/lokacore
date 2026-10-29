@@ -97,7 +97,8 @@ test('new typed contracts require independent fields and reject boundary values'
   assert.ok(validate('EventPayload', p).length);
 });
 
-// Breaks: loader permits counterfeit acquisition writers, unresolved requirements, bad slots or unfunded teachers.
+// Breaks: loader permits counterfeit acquisition writers, unresolved requirements or unfunded teachers.
+// Equipment slot, weapon and block checks are the compiler's (content_training_test.exs).
 test('skill loader owns reserved acquisition, qualifications, teacher funding and real equipment shapes', () => {
   assert.ok(load(c).ok);
   const mutants: ((c: any) => void)[] = [
@@ -108,11 +109,6 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
         'attribute',
         'missing',
       )),
-    (c) => (c.items['cellar_sampler@0.0.9:item/sword'].slot = 'off_hand'),
-    (c) => (c.items['cellar_sampler@0.0.9:item/shield'].slot = 'wield'),
-    (c) => (c.items['cellar_sampler@0.0.9:item/sword'].weapon.attack.damage_min = 4),
-    (c) => (c.items['cellar_sampler@0.0.9:item/sword'].weapon.skill = ref('skill', 'missing')),
-    (c) => delete c.world.combat.narration.block,
     (c) => delete c.npcs['cellar_sampler@0.0.9:npc/teacher'].resource_starts,
     (c) => {
       const lesson = c.dialogues['cellar_sampler@0.0.9:dialogue/learn_swords'];

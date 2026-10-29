@@ -54,12 +54,12 @@ test('str 10 loses to the strong guard (str 15) and beats the weak guard (str 5)
   assert.equal(perform('shove_south'), 'success');
 });
 
-// Breaks: the loader drops a row G3 attribute check, so an artifact naming no NPC or attribute, a
-// guard without the checked attribute, a template NPC, a duplicate entry or an older kernel_api loads and fails in play.
+// Breaks: the loader drops a row G3 check, so a recipe check naming no NPC, a guard without the
+// checked attribute or a template NPC loads. The NPC attribute list checks are the compiler's
+// (content_npc_attributes_test.exs).
 test('the loader refuses each unsound NPC attribute declaration', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const strong = `${P}:npc/strong_guard`;
-  const at = `.cartridge.npcs[${JSON.stringify(strong)}].attributes`;
   const north = `.cartridge.recipes[${JSON.stringify(`${P}:recipe/shove_north`)}].check`;
   const rows: [(c: any) => void, string, string][] = [
     [
@@ -69,21 +69,6 @@ test('the loader refuses each unsound NPC attribute declaration', () => {
     ],
     [(c) => delete c.npcs[strong].attributes, 'SCHEMA_VIOLATION', `${north}.npc`],
     [(c) => (c.npcs[strong].spawn_template = true), 'SCHEMA_VIOLATION', `${north}.npc`],
-    [
-      (c) => (c.npcs[strong].attributes[0].attribute.key = 'dex'),
-      'UNRESOLVED_REFERENCE',
-      `${at}[0].attribute`,
-    ],
-    [
-      (c) => c.npcs[strong].attributes.push({ ...c.npcs[strong].attributes[0], value: 1 }),
-      'SCHEMA_VIOLATION',
-      `${at}[1].attribute`,
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
   ];
   for (const [change, code, path] of rows) {
     const c = structuredClone(source);

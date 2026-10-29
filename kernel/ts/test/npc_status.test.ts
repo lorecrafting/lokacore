@@ -292,20 +292,14 @@ test('poison leaves the guard at str 12; the fury its tick brings reads 15 until
   assert.equal(str(w), 12);
 });
 
-// Breaks: the loader drops a G3 check, so a reaction on an unknown status, or a G3 field under an
-// older kernel_api, loads and fails in play.
-test('the loader refuses each unsound G3 declaration', () => {
+// Breaks: the loader drops a G3 check, so a reaction on an unknown status loads and fails in play.
+test('the loader refuses a reaction on an unknown status', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const rows: [(c: any) => void, string, string][] = [
     [
       (c) => (c.reactions[`${C}:reaction/groan`].on.status.key = 'plague'),
       'UNRESOLVED_REFERENCE',
       `.cartridge.reactions[${JSON.stringify(`${C}:reaction/groan`)}].on.status`,
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
     ],
   ];
   for (const [change, code, path] of rows) {

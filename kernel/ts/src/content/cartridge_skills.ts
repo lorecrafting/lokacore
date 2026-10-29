@@ -1,7 +1,8 @@
-import { diag, step, walk, type Checks, type Obj } from './cartridge_refs.ts';
+// Skill fact specs (skills@1) and the dialogue lesson and sequence checks cartridge_dialogues.ts uses.
+import { diag, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
-import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
+import type { Diagnostic } from '../contracts.gen.ts';
 
 export const skillSpec = (key: string) => ({
   key: `skill_${key}`,
@@ -19,122 +20,6 @@ export const usesSpec = (key: string, growth: number[]) => ({
   scopes: ['player'],
   meaning: `Skill ${key}'s use count (skills@1): only skills@1 writes it.`,
 });
-
-export function skills(c: Obj, checks: Checks): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-  for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj)) {
-    const at = `.cartridge.skills${step(ref)}`;
-    checks.text(s, ['label', 'requirement', 'profession'], at);
-    if (s.key.length > 58) bad(`${at}.key`);
-    for (const capability of ['skills', 'policy', 'fact'])
-      if (c.lock.capabilities[capability] !== 1)
-        out.push(diag('UNDECLARED_CAPABILITY', at, { capability }, [`${capability}@1`]));
-  }
-  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
-    const at = `.cartridge.items${step(ref)}`;
-    if (i.weapon) {
-      checks.named(i.weapon.skill, 'skill', `${at}.weapon.skill`);
-      if (i.slot !== 'wield' || i.weapon.attack.damage_min > i.weapon.attack.damage_max)
-        bad(`${at}.weapon`);
-    }
-    if (i.block_chance !== undefined && i.slot !== 'off_hand') bad(`${at}.block_chance`);
-  }
-  const combat = c.world?.combat;
-  if (combat?.dodge) {
-    checks.named(combat.dodge.skill, 'skill', '.cartridge.world.combat.dodge.skill');
-    if (!combat.narration.dodge) bad('.cartridge.world.combat.narration.dodge');
-  }
-  if (
-    Object.values((c.items ?? {}) as Obj).some((i) => i.block_chance !== undefined) &&
-    !combat?.narration.block
-  )
-    bad('.cartridge.world.combat.narration.block');
-  if (Object.keys(c.skills ?? {}).length) {
-    const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-    if (major < 1 || (major === 1 && minor < 18))
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-  }
-  return [...out, ...growth(c), ...prerequisites(c), ...secret(c), ...durability(c, checks)];
-}
-
-// Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
-// needs API 1.101. Homestead hs-14: a shown skill's prerequisite never reads a hidden skill, and a
-// profession or a hidden skill needs API 1.102.
-function prerequisites(c: Obj): Diagnostic[] {
-  const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
-  const out = named
-    .filter(([ref, s]) =>
-      walk(s.prerequisite.root, '').some(
-        ([p]) =>
-          p.op === 'skill_compare' &&
-          (refString(p.skill) === ref ||
-            (!s.hidden && c.skills?.[refString(p.skill)]?.hidden === true)),
-      ),
-    )
-    .map(([ref]) =>
-      diag('SCHEMA_VIOLATION', `.cartridge.skills${step(ref)}.prerequisite`, {
-        error: 'invalid_value',
-      }),
-    );
-  // A birth grant skips learning, so an ancestry never grants a box with a prerequisite.
-  for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
-    if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
-      out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
-  const newer = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession || s.hidden);
-  const floor = newer ? '1.102' : '1.101';
-  if ((named.length || newer) && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  return out;
-}
-
-// Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
-// skill, and no labeled talk or riddle dialogue (its letter bank shows) teaches one.
-function secret(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  const hidden = (r: DefinitionRef) => c.skills?.[refString(r)]?.hidden === true;
-  const reads = (root: Obj) =>
-    walk(root, '').some(([p]) => p.op === 'skill_compare' && hidden(p.skill));
-  const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-  for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj))
-    if (!s.hidden && reads(s.qualification.root))
-      bad(`.cartridge.skills${step(ref)}.qualification`);
-  for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Obj)) {
-    const at = `.cartridge.dialogues${step(ref)}`;
-    if (reads(d.policy.root)) bad(`${at}.policy`);
-    const teaches = Object.values(d.choices as Obj).some((o) =>
-      (o.sequence ?? []).some((q: Obj) => q.op === 'skill.acquire' && hidden(q.skill)),
-    );
-    if (d.label !== undefined && teaches) bad(`${at}.label`);
-    if (d.riddle !== undefined && teaches) bad(`${at}.riddle`);
-  }
-  return out;
-}
-
-// Toolbox rows 5 and G5: growth thresholds strictly increase; skill growth, an opposed check or
-// a detail rating needs API 1.44.
-function growth(c: Obj): Diagnostic[] {
-  const out = Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
-    s.growth?.some((t: number, i: number) => i > 0 && t <= s.growth[i - 1])
-      ? [
-          diag('SCHEMA_VIOLATION', `.cartridge.skills${step(ref)}.growth`, {
-            error: 'invalid_value',
-          }),
-        ]
-      : [],
-  );
-  const used =
-    Object.values((c.skills ?? {}) as Obj).some((s) => s.growth) ||
-    Object.values((c.recipes ?? {}) as Obj).some((r) => r.check?.kind === 'opposed') ||
-    Object.values(c.rooms as Obj).some((r) =>
-      Object.values((r.details ?? {}) as Obj).some((d) => d.rating !== undefined),
-    );
-  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  return out;
-}
 
 export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -183,33 +68,5 @@ export function sequence(o: Obj, path: string, c: Obj, { named, typedValue, text
         out.push(diag('FACT_TYPE_MISMATCH', `${path}.sequence[${i}].fact`));
     } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
   });
-  return out;
-}
-
-// Toolbox row 21: a weapon's durability names a bounded int entity fact, and needs kernel_api 1.69.
-function durability(c: Obj, checks: Checks): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  const durable = Object.entries((c.items ?? {}) as Obj).filter(([, i]) => i.weapon?.durability);
-  for (const [ref, i] of durable) {
-    const at = `.cartridge.items${step(ref)}.weapon.durability.fact`;
-    checks.named(i.weapon.durability.fact, 'fact', at);
-    const f = c.facts[refString(i.weapon.durability.fact)];
-    const t = f?.value_type;
-    const bounded =
-      t?.type === 'int' && Number.isSafeInteger(t.minimum) && Number.isSafeInteger(t.maximum);
-    if (
-      f &&
-      !(
-        bounded &&
-        f.per_subject === true &&
-        !f.npc_pair &&
-        f.scopes.length === 1 &&
-        f.scopes[0] === 'instance'
-      )
-    )
-      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-  }
-  if (durable.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.69') < 0)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

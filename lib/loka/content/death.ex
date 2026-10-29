@@ -1,5 +1,5 @@
 defmodule Loka.Content.Death do
-  @moduledoc "Corpse templates and shrine settings; twin of content/cartridge_death.ts."
+  @moduledoc "Corpse templates and shrine settings."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
   alias Loka.Content.Entities

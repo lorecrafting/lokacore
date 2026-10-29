@@ -1,6 +1,5 @@
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
-import { scopedFacts } from './cartridge_scoped_facts.ts';
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,
@@ -32,9 +31,7 @@ import { delayed } from './cartridge_delayed.ts';
 import { senses } from './cartridge_senses.ts';
 import { variants } from './cartridge_variants.ts';
 import { schedules } from './cartridge_schedules.ts';
-import { standing } from './cartridge_standing.ts';
 import { construction } from './cartridge_construction.ts';
-import { services } from './cartridge_services.ts';
 import { apiCmp, installedStage, type Installed } from './cartridge_installed.ts';
 export type { Installed } from './cartridge_installed.ts';
 
@@ -286,8 +283,5 @@ function declarations(c: Obj): Diagnostic[] {
   out.push(...construction(c));
   // -- D1
   // -- D2
-  out.push(...services(c));
-  out.push(...scopedFacts(c));
-  out.push(...standing(c));
   return out;
 }

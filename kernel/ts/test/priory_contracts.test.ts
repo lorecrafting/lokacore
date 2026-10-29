@@ -9,15 +9,13 @@ import { chest, codex } from './codex_fixture.ts';
 const { prefix, ref } = codex;
 const ledger = `${prefix}:item/mill_ledger`;
 
-// Break: malformed readable metadata or undeclared, wrong-kind, non-Boolean/shared knowledge is accepted.
+// Break: malformed readable metadata or non-Boolean knowledge is accepted.
+// Topic and readable reference checks are the compiler's (content_priory_test.exs, content_refusals_test.exs).
 test('item writing, topic refs, text and unique player Boolean mappings fail closed', () => {
   assert.ok(codex.load().ok);
   for (const mutate of [
-    (c: any) => (c.items[ledger].readable.topic = ref('topic', 'missing')),
-    (c: any) => (c.items[ledger].readable.topic = ref('fact', 'topic_mill_known')),
     (c: any) => (c.items[ledger].readable.text = 'missing'),
     (c: any) => (c.items[ledger].readable.label = 'missing'),
-    (c: any) => (c.facts[`${prefix}:fact/topic_mill_known`].scopes = ['instance']),
     (c: any) =>
       (c.facts[`${prefix}:fact/topic_mill_known`].value_type = {
         type: 'int',
@@ -25,8 +23,6 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
         maximum: 1,
         default: 0,
       }),
-    (c: any) => (c.topics[`${prefix}:topic/mill`].fact = ref('fact', 'topic_missing_cart_known')),
-    (c: any) => (c.topics[`${prefix}:topic/mill`].fact = ref('topic', 'mill')),
     (c: any) => (c.manifest.requires.kernel_api.at_least = '1.23'),
     (c: any) => {
       delete c.manifest.requires.capabilities.readable;

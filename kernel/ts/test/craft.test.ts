@@ -261,9 +261,9 @@ test('loader: a storylet target is refused', () => {
   assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
 });
 
-// Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill, or an
-// unknown skill, loads. The floor is loader_floors.json's "a skill prerequisite" case.
-test('loader: a skill prerequisite resolves and never names its own skill', () => {
+// Breaks: a skill prerequisite naming an unknown skill loads. The self-reference and hidden-skill
+// checks are the compiler's (content_craft_test.exs).
+test('loader: a skill prerequisite resolves', () => {
   const at = `.cartridge.skills["${P}skill/carving"].prerequisite`;
   // The leaf sits under all and not, so a walker that skips nesting misses it.
   const naming = (key: string) => (c: any) => {
@@ -272,7 +272,6 @@ test('loader: a skill prerequisite resolves and never names its own skill', () =
     p.root = { op: 'all', items: [{ op: 'not', item: leaf }] };
   };
   const leaf = at + '.root.items[0].item.skill';
-  assert.deepEqual(loadEdited(naming('carving')), ['SCHEMA_VIOLATION', at]);
   assert.deepEqual(loadEdited(naming('nothing')), ['UNRESOLVED_REFERENCE', leaf]);
 });
 
@@ -487,56 +486,6 @@ test('a concealed lesson is left out of the opened choices and refused', () => {
   const r = play(level1, { type: 'choose', choice_id: 'learn', continuation_id });
   assert.equal(code(r), 'invalid_state');
   assert.deepEqual(ids(opened(carve(secret(true)).world)), ['learn', 'leave']); // whittling 2
-});
-
-// Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
-// dialogue policy reading a hidden skill loads, a labeled talk or a riddle dialogue (its letter
-// bank shows) teaching one loads, or a hidden skill's own qualification reading one is refused.
-test('loader: no shown qualification, dialogue policy, talk label or riddle reveals a hidden skill', () => {
-  const S = (k: string) => `${P}skill/${k}`;
-  const D = (k: string) => `${P}dialogue/${k}`;
-  const hide = (c: any) => ['carving', 'joinery'].forEach((k) => (c.skills[S(k)].hidden = true));
-  const reading = (policy: (c: any) => any) => (c: any) => {
-    const skill = { ...c.skills[S('carving')].prerequisite.root.skill, key: 'carving' };
-    hide(c);
-    policy(c).root = { op: 'all', items: [{ op: 'skill_compare', skill, at_least: 1 }] };
-  };
-  const at = (path: string) => ['SCHEMA_VIOLATION', `.cartridge.${path}`];
-  const whittling = reading((c) => c.skills[S('whittling')].qualification);
-  assert.deepEqual(loadEdited(whittling), at(`skills["${S('whittling')}"].qualification`));
-  const carpentry = reading((c) => c.dialogues[D('old_carver_carpentry')].policy);
-  assert.deepEqual(loadEdited(carpentry), at(`dialogues["${D('old_carver_carpentry')}"].policy`));
-  assert.equal(loadEdited(reading((c) => c.skills[S('joinery')].qualification)), 'loaded');
-  const wrong = 'old_carver.carving.prompt';
-  for (const [field, value] of Object.entries({
-    label: wrong,
-    riddle: { choice_id: 'learn', answer: 'a', bank: ['A'], wrong },
-  })) {
-    const set = (c: any) => (c.dialogues[D('old_carver_carving')][field] = value);
-    const hidden = (c: any) => (hide(c), set(c));
-    assert.deepEqual(loadEdited(hidden), at(`dialogues["${D('old_carver_carving')}"].${field}`));
-    assert.equal(loadEdited(set), 'loaded'); // carving shown
-  }
-});
-
-// Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
-// skill loads, a hidden skill reading a hidden one is refused, or an unknown profession text
-// loads. The floor is loader_floors.json's "a skill profession" case.
-test('loader: a shown prerequisite never reads a hidden skill; a profession resolves', () => {
-  const S = (k: string) => `${P}skill/${k}`;
-  const hide =
-    (...keys: string[]) =>
-    (c: any) =>
-      keys.forEach((k) => (c.skills[S(k)].hidden = true));
-  assert.deepEqual(loadEdited(hide('carving')), [
-    'SCHEMA_VIOLATION',
-    `.cartridge.skills["${S('joinery')}"].prerequisite`,
-  ]);
-  assert.equal(loadEdited(hide('carving', 'joinery')), 'loaded');
-  assert.deepEqual(
-    loadEdited((c) => (c.skills[S('whittling')].profession = 'profession.nothing')),
-    ['UNRESOLVED_REFERENCE', `.cartridge.skills["${S('whittling')}"].profession`],
-  );
 });
 
 // Homestead hs-12 (Built rooms S6): the axe lies in the workshop; chop at the glade's oak yields a

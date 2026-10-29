@@ -1,7 +1,7 @@
 defmodule Loka.Content.Levelling do
   @moduledoc """
   Checks toolbox row 4 world.levelling and experience.grant steps, and the kernel_api 1.51 floor
-  of a level_compare policy leaf (row 29a); twin of cartridge_levelling.ts.
+  of a level_compare policy leaf (row 29a).
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs

@@ -562,7 +562,6 @@
     "modules": [
       "kernel/ts/src/mechanics/death/sequence.ts",
       "kernel/ts/src/runtime/created.ts",
-      "kernel/ts/src/content/cartridge_death.ts",
       "lib/loka/content/death.ex"
     ],
     "fixtures": [
@@ -826,7 +825,6 @@
     "modules": [
       "kernel/ts/src/mechanics/service/shared.ts",
       "kernel/ts/src/view/services.ts",
-      "kernel/ts/src/content/cartridge_services.ts",
       "lib/loka/content/services.ex",
       "mobile/authority/local-story/receipt-history.ts"
     ],

@@ -98,6 +98,15 @@ defmodule Loka.ContentTrainingTest do
            ], {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.dodge"}},
           {[{"items/training_sword.json", &Map.put(&1, "slot", "off_hand")}],
            {"SCHEMA_VIOLATION", "items/training_sword.weapon"}},
+          {[{"items/training_sword.json", &put_in(&1, ["weapon", "attack", "damage_min"], 4)}],
+           {"SCHEMA_VIOLATION", "items/training_sword.weapon"}},
+          {[{"items/training_sword.json", &put_in(&1, ["weapon", "skill"], "missing")}],
+           {"UNRESOLVED_REFERENCE", "items/training_sword.weapon.skill"}},
+          # A block chance belongs on an off-hand item, and a shield needs its block narration.
+          {[{"items/training_sword.json", &Map.put(&1, "block_chance", 10)}],
+           {"SCHEMA_VIOLATION", "items/training_sword.block_chance"}},
+          {[{"items/training_sword.json", &Map.put(&1, "block_chance", 10)}],
+           {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.block"}},
           {[
              {"skills/blade.json",
               &put_in(&1, ["qualification", "root"], %{
