@@ -90,23 +90,17 @@
       "name_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "status_active",
-              "subject": "target",
-              "status": "disguised"
-            }
+            "op": "status_active",
+            "subject": "target",
+            "status": "disguised"
           },
           "description": "identity.name_hooded"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "topic_houndbane_known",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "topic_houndbane_known",
+            "equals": true
           },
           "description": "identity.name_houndbane"
         }

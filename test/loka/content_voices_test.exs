@@ -16,10 +16,10 @@ defmodule Loka.ContentVoicesTest do
     for {changes, path, data} <- [
           {[
              {"npcs/sage.json",
-              &put_in(&1, ["room_line_variants", Access.at(0), "when", "root", "skill"], "ghost")}
-           ], "npcs/sage.room_line_variants[0].when.root.skill",
+              &put_in(&1, ["room_line_variants", Access.at(0), "when", "skill"], "ghost")}
+           ], "npcs/sage.room_line_variants[0].when.skill",
            %{"target" => "voices_sampler@0.0.1:skill/ghost"}},
-          {[unowned, no_recipe], "npcs/sage.room_line_variants[0].when.root.op",
+          {[unowned, no_recipe], "npcs/sage.room_line_variants[0].when.op",
            %{"capability" => "skills"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)

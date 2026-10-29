@@ -157,7 +157,7 @@ test('conditions evaluate all, any, not and fact_compare over committed facts', 
 // variant with no `when` skipped (absent holds, F3).
 test('describe shows the first variant whose condition holds, else the base', () => {
   const v = (root: object, description: string) => ({
-    when: { policy_version: 1, root },
+    when: root,
     description,
   });
   const of = (...variants: object[]) => ({ description: 'base', variants }) as never;

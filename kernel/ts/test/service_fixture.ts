@@ -45,7 +45,7 @@ function base(c: any) {
   };
   const cook = c.npcs[rk('npc', 'cook')];
   cook.resource_starts = { pennies: 10, meal_stock: 4 };
-  const open = { policy_version: 1, root: { op: 'all', items: [] } };
+  const open = { op: 'all', items: [] };
   const services: [string, string, object][] = [
     [
       'kitchen_meal',

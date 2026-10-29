@@ -127,16 +127,16 @@ defmodule Loka.ContentDuskTest do
               [
                 d(
                   "UNDECLARED_CAPABILITY",
-                  "actions/ring_bell.policy.root.op",
+                  "actions/ring_bell.policy.op",
                   %{"capability" => "schedule"},
                   ["schedule@1"]
                 )
               ]}
 
-    ring = put_in(src("actions/ring_bell.json"), ["policy", "root", "to"], 18)
+    ring = put_in(src("actions/ring_bell.json"), ["policy", "to"], 18)
 
     assert compile(dir, %{"actions/ring_bell.json" => ring}) ==
-             {:error, [d("EMPTY_TIME_WINDOW", "actions/ring_bell.policy.root")]}
+             {:error, [d("EMPTY_TIME_WINDOW", "actions/ring_bell.policy")]}
   end
 
   # Review S2. Breaks: two recipes' checks with one key compile, so one check DefinitionRef names

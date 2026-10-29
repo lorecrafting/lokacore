@@ -14,7 +14,7 @@ import {
   type TargetSpec,
   type TextKey,
   type UnavailableReason,
-  type VersionedPolicy,
+  type Policy,
 } from '../contracts.gen.ts';
 import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
@@ -47,7 +47,7 @@ export type Offered = {
   readonly target: TargetSpec;
   readonly input: readonly ActionInputParameter[];
   readonly priority: number;
-  readonly policy?: VersionedPolicy;
+  readonly policy?: Policy;
   readonly command: Key;
   readonly recipe?: ActionRecipe;
   readonly quest?: DefinitionRef;
@@ -261,7 +261,7 @@ export function refusalReason(
   const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
-    holds(world, actor, a.policy?.root, { target: d ?? primaryTarget(payload), steps });
+    holds(world, actor, a.policy, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
   if (used || !matching.some((a) => ok(a))) return used ?? { code: 'invalid_state' };
   return craftRefused(world, matching[0]!.recipe, actor, steps); // after policy, as the offer (hs-10)

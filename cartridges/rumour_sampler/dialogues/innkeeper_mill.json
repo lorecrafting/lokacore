@@ -1,13 +1,10 @@
 {
   "npc": "innkeeper",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "knows_mill",
-      "subject": "target",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "knows_mill",
+    "subject": "target",
+    "equals": true
   },
   "prompt": "dialogue.mill.prompt",
   "roles": {

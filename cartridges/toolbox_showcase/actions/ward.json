@@ -11,21 +11,18 @@
   },
   "priority": 0,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "level_compare",
-          "at_least": 2
-        },
-        {
-          "op": "stat_compare",
-          "attribute": "cha",
-          "at_least": 7
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "level_compare",
+        "at_least": 2
+      },
+      {
+        "op": "stat_compare",
+        "attribute": "cha",
+        "at_least": 7
+      }
+    ]
   },
   "costs": [
     {

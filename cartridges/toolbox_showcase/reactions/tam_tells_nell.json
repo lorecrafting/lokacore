@@ -5,13 +5,10 @@
     "npc": "tam"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "knows_fire",
-      "npc": "tam",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "knows_fire",
+    "npc": "tam",
+    "equals": true
   },
   "apply": [
     {

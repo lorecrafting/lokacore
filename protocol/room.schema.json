@@ -88,7 +88,7 @@
           "type": "object",
           "properties": {
             "traverse": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
           "additionalProperties": false
@@ -374,17 +374,14 @@
           "variants": [
             {
               "when": {
-                "policy_version": 1,
-                "root": {
-                  "op": "fact_compare",
-                  "fact": {
-                    "cartridge_id": "facts_sampler",
-                    "cartridge_version": "0.0.1",
-                    "kind": "fact",
-                    "key": "chapel_bell_rung"
-                  },
-                  "equals": true
-                }
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "facts_sampler",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "chapel_bell_rung"
+                },
+                "equals": true
               },
               "description": "detail.bell.rung"
             }
@@ -534,7 +531,7 @@
           "type": "object",
           "properties": {
             "enter": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
           "additionalProperties": false
@@ -592,19 +589,16 @@
           "variants": [
             {
               "when": {
-                "policy_version": 1,
-                "root": {
-                  "op": "not",
-                  "item": {
-                    "op": "fact_compare",
-                    "fact": {
-                      "cartridge_id": "facts_sampler",
-                      "cartridge_version": "0.0.1",
-                      "kind": "fact",
-                      "key": "chapel_bell_rung"
-                    },
-                    "equals": false
-                  }
+                "op": "not",
+                "item": {
+                  "op": "fact_compare",
+                  "fact": {
+                    "cartridge_id": "facts_sampler",
+                    "cartridge_version": "0.0.1",
+                    "kind": "fact",
+                    "key": "chapel_bell_rung"
+                  },
+                  "equals": false
                 }
               },
               "description": "room.reed_path.flooded"
@@ -628,11 +622,11 @@
       ]
     },
     "DescriptionVariant": {
-      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json VersionedPolicy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
+      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json Policy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
       "type": "object",
       "properties": {
         "when": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -645,17 +639,14 @@
       "examples": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "facts_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "fact",
-                "key": "chapel_bell_rung"
-              },
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "facts_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
           },
           "description": "room.reed_path.flooded"
         }
@@ -709,7 +700,7 @@
         },
         "opens_when": {
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected.",
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         }
       },
       "required": [

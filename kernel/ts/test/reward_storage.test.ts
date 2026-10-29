@@ -195,7 +195,7 @@ test('received identity completes an already-active acquisition quest in the sam
       title: 'fixture.quest',
       offer: {
         label: 'fixture.accept',
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
       },
       objective: { evidence: 'post_activation_event', item_acquired: ref('item', 'reward_key') },
     };

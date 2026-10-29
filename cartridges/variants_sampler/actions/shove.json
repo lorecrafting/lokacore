@@ -10,11 +10,8 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "npc_present",
-      "npc": "guard"
-    }
+    "op": "npc_present",
+    "npc": "guard"
   },
   "check": {
     "key": "shove",

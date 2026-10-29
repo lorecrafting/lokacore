@@ -6,10 +6,7 @@
   "short": "barrier.tidegate.short",
   "initial": "closed",
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "sky",
-      "tide": "low"
-    }
+    "op": "sky",
+    "tide": "low"
   }
 }

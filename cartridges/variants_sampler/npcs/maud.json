@@ -7,12 +7,9 @@
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "bruised"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "bruised"
       },
       "description": "npc.maud.room_bruised"
     }
@@ -21,12 +18,9 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "bruised"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "bruised"
       },
       "description": "npc.maud.description_bruised"
     }

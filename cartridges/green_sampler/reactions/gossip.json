@@ -4,12 +4,9 @@
     "fact": "green_busy"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "green_busy",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "green_busy",
+    "equals": true
   },
   "apply": [
     {

@@ -33,7 +33,7 @@ defmodule Loka.ContentErrandTest do
     }
   end
 
-  defp variant, do: ["variants", Access.at(0), "when", "root", "quest"]
+  defp variant, do: ["variants", Access.at(0), "when", "quest"]
   @strict %{"evidence" => "post_activation_event", "item_acquired" => "lantern"}
 
   # Breaks: a quest, its objective or a quest_state dropped or reshaped.
@@ -44,7 +44,7 @@ defmodule Loka.ContentErrandTest do
   # Breaks: a short quest, objective item or item_acquired reference left short (the loader
   # would reject it).
   test "full quest and item references compile to the same artifact", %{dir: dir} do
-    objective = ["objective", "policy", "root", "item"]
+    objective = ["objective", "policy", "item"]
 
     files = %{
       "rooms/ferry_landing.json" =>
@@ -73,7 +73,7 @@ defmodule Loka.ContentErrandTest do
     assert compile(dir, edit("rooms/ferry_landing.json", variant(), "missing")) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "rooms/ferry_landing.variants[0].when.root.quest", %{
+                d("UNRESOLVED_REFERENCE", "rooms/ferry_landing.variants[0].when.quest", %{
                   "target" => "errand_sampler@0.0.1:quest/missing"
                 })
               ]}
@@ -86,10 +86,9 @@ defmodule Loka.ContentErrandTest do
 
     assert compile(
              dir,
-             edit("quests/lantern.json", ["objective", "policy", "root", "item"], "oil")
+             edit("quests/lantern.json", ["objective", "policy", "item"], "oil")
            ) ==
-             {:error,
-              [d("UNRESOLVED_REFERENCE", "quests/lantern.objective.policy.root.item", oil)]}
+             {:error, [d("UNRESOLVED_REFERENCE", "quests/lantern.objective.policy.item", oil)]}
 
     text = Map.drop(src("text.json"), ["quest.lantern.title", "quest.lantern.accept"])
 
@@ -117,7 +116,7 @@ defmodule Loka.ContentErrandTest do
              {:error,
               [
                 undeclared.("quests/lantern"),
-                undeclared.("rooms/ferry_landing.variants[0].when.root.op")
+                undeclared.("rooms/ferry_landing.variants[0].when.op")
               ]}
 
     take = %{
@@ -136,7 +135,7 @@ defmodule Loka.ContentErrandTest do
       "command" => "look",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+      "policy" => %{"op" => "all", "items" => []}
     }
 
     assert compile(dir, %{"actions/lantern.json" => action}) ==

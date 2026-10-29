@@ -95,8 +95,9 @@ export function ancestrySource() {
       label: 'ancestry.strong.label',
       requirement: 'ancestry.strong.label',
       qualification: {
-        policy_version: 1,
-        root: { op: 'stat_compare', attribute: ancestryRef('attribute', 'str'), at_least: 100 },
+        op: 'stat_compare',
+        attribute: ancestryRef('attribute', 'str'),
+        at_least: 100,
       },
     },
   };

@@ -16,11 +16,8 @@
   },
   "priority": 0,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "npc_present",
-      "npc": "wight"
-    }
+    "op": "npc_present",
+    "npc": "wight"
   },
   "costs": [
     {

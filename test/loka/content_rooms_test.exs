@@ -175,7 +175,7 @@ defmodule Loka.ContentRoomsTest do
       "command" => "move",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+      "policy" => %{"op" => "all", "items" => []},
       "accessibility" => "r.t"
     }
 
@@ -334,7 +334,7 @@ defmodule Loka.ContentRoomsTest do
   end
 
   defp variant(root, text \\ "r.d"),
-    do: %{"when" => %{"policy_version" => 1, "root" => root}, "description" => text}
+    do: %{"when" => root, "description" => text}
 
   defp bell(equals), do: %{"op" => "fact_compare", "fact" => "bell", "equals" => equals}
 
@@ -379,13 +379,13 @@ defmodule Loka.ContentRoomsTest do
     assert compile(dir, files) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "rooms/b.details.lamp.variants[0].when.root.fact", %{
+                d("UNRESOLVED_REFERENCE", "rooms/b.details.lamp.variants[0].when.fact", %{
                   "target" => "c@1.0.0:fact/nope"
                 }),
                 d("UNRESOLVED_REFERENCE", "rooms/b.variants[0].description", %{
                   "target" => "d.gone"
                 }),
-                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.root.equals")
+                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.equals")
               ]}
   end
 
@@ -416,10 +416,10 @@ defmodule Loka.ContentRoomsTest do
               [
                 undeclared.("rooms/b.details.lamp", "inspectable_detail"),
                 undeclared.("rooms/b.details.lamp.variants[0]", "description_variant"),
-                undeclared.("rooms/b.details.lamp.variants[0].when.root.op", "fact"),
+                undeclared.("rooms/b.details.lamp.variants[0].when.op", "fact"),
                 undeclared.("rooms/b.variants[0]", "description_variant"),
-                undeclared.("rooms/b.variants[0].when.root.item.op", "fact"),
-                undeclared.("rooms/b.variants[0].when.root.op", "policy")
+                undeclared.("rooms/b.variants[0].when.item.op", "fact"),
+                undeclared.("rooms/b.variants[0].when.op", "policy")
               ]}
   end
 
@@ -447,6 +447,6 @@ defmodule Loka.ContentRoomsTest do
     assert {:ok, bytes, _} = compile(dir, files)
     %{"cartridge" => c} = JSON.decode!(bytes)
     [v] = c["rooms"]["c@1.0.0:room/b"]["details"]["exits"]["variants"]
-    assert v["when"]["root"]["fact"] == ref("bell", "fact")
+    assert v["when"]["fact"] == ref("bell", "fact")
   end
 end

@@ -10,10 +10,7 @@ export const { ref, prefix } = f;
 export const entity = (w: World, kind: string, name: string) =>
   w.entityIds[`${prefix}:${kind}/${name}`]!;
 
-const active = {
-  policy_version: 1,
-  root: { op: 'quest_state', quest: ref('quest', 'lantern'), state: 'active' },
-};
+const active = { op: 'quest_state', quest: ref('quest', 'lantern'), state: 'active' };
 
 export function riddleSource(c: any) {
   c.manifest.requires.kernel_api.at_least = '1.21';

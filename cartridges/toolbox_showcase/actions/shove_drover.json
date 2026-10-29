@@ -10,11 +10,8 @@
   },
   "priority": 10,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "npc_present",
-      "npc": "drover"
-    }
+    "op": "npc_present",
+    "npc": "drover"
   },
   "check": {
     "key": "shove_drover",

@@ -398,7 +398,7 @@
           }
         },
         "policy": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "accessibility": {
           "type": "string",
@@ -430,10 +430,7 @@
           "priority": 100,
           "input": [],
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "accessibility": "actions.talk.a11y"
         },
@@ -449,11 +446,8 @@
             "direction"
           ],
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "accessibility": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
         }
@@ -910,7 +904,7 @@
           "type": "integer"
         },
         "policy": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "outcomes": {
           "type": "object",
@@ -1158,19 +1152,16 @@
           },
           "priority": 10,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "not",
-              "item": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "recipe_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "fact",
-                  "key": "chapel_bell_rung"
-                },
-                "equals": true
-              }
+            "op": "not",
+            "item": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "recipe_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "equals": true
             }
           },
           "outcomes": {
@@ -1231,11 +1222,8 @@
           },
           "priority": -1,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "outcomes": {
             "success": {
@@ -1330,19 +1318,16 @@
           },
           "priority": 10,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "not",
-              "item": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "recipe_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "fact",
-                  "key": "chapel_bell_rung"
-                },
-                "equals": true
-              }
+            "op": "not",
+            "item": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "recipe_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "equals": true
             }
           },
           "outcomes": {

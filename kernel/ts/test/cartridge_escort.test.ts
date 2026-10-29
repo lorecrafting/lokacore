@@ -38,7 +38,7 @@ test('loader accepts API1.11 escort effects and policy leaves', () => {
     const result = load((c) => {
       effect(c).transition = transition;
       if (transition === 'complete') dialogue(c).quest = quest;
-      dialogue(c).policy.root = { op: 'escort_state', quest, state: 'following' };
+      dialogue(c).policy = { op: 'escort_state', quest, state: 'following' };
     });
     assert.ok(result.ok, JSON.stringify(result));
   }

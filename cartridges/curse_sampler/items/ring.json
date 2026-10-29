@@ -6,21 +6,18 @@
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "cursed"
-            },
-            {
-              "op": "wearing",
-              "tag": "cursed"
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "cursed"
+          },
+          {
+            "op": "wearing",
+            "tag": "cursed"
+          }
+        ]
       },
       "description": "item.ring.short_cursed"
     }
@@ -30,21 +27,18 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "cursed"
-            },
-            {
-              "op": "wearing",
-              "tag": "cursed"
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "cursed"
+          },
+          {
+            "op": "wearing",
+            "tag": "cursed"
+          }
+        ]
       },
       "description": "item.ring.description_cursed"
     }

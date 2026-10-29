@@ -8,11 +8,8 @@
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "has_item",
-          "item": "lamp_oil"
-        }
+        "op": "has_item",
+        "item": "lamp_oil"
       },
       "description": "item.lantern.room_oil"
     }

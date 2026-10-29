@@ -10,12 +10,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "skill_compare",
-      "skill": "cooking",
-      "at_least": 2
-    }
+    "op": "skill_compare",
+    "skill": "cooking",
+    "at_least": 2
   },
   "check": {
     "key": "cook_feast",

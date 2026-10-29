@@ -115,7 +115,7 @@ test('a reaction chain from a dropped pebble stops at the budget', () => {
   const rule = (key: string, on: object, equals: boolean) => ({
     key,
     on,
-    when: { policy_version: 1, root: { op: 'fact_compare', fact, equals } },
+    when: { op: 'fact_compare', fact, equals },
     apply: [{ op: 'fact.assign', fact, value: !equals }],
   });
   const pebble = { ...c.reactions[`${R}:reaction/bone_drop`].on.item, key: 'pebble' };

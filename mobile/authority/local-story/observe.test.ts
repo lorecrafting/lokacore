@@ -37,7 +37,7 @@ const release = (() => {
     command: 'move',
     priority: 0,
     input: ['direction'],
-    policy: { policy_version: 1, root: { op: 'all', items: Array(32769).fill(TRUE) } },
+    policy: { op: 'all', items: Array(32769).fill(TRUE) },
   };
   const text = encode(c);
   const content_hash = createHash('sha256').update(text).digest('hex');

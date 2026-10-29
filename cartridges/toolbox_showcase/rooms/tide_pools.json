@@ -29,61 +29,43 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "weather": "clear"
-            }
+            "op": "sky",
+            "weather": "clear"
           },
           "description": "detail.pool_sky.clear"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "weather": "frost"
-            }
+            "op": "sky",
+            "weather": "frost"
           },
           "description": "detail.pool_sky.frost"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "weather": "rain"
-            }
+            "op": "sky",
+            "weather": "rain"
           },
           "description": "detail.pool_sky.rain"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "weather": "gale"
-            }
+            "op": "sky",
+            "weather": "gale"
           },
           "description": "detail.pool_sky.gale"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "weather": "heat"
-            }
+            "op": "sky",
+            "weather": "heat"
           },
           "description": "detail.pool_sky.heat"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "weather": "drought"
-            }
+            "op": "sky",
+            "weather": "drought"
           },
           "description": "detail.pool_sky.drought"
         }
@@ -97,21 +79,15 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "tide": "low"
-            }
+            "op": "sky",
+            "tide": "low"
           },
           "description": "detail.pool_water.low"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "tide": "high"
-            }
+            "op": "sky",
+            "tide": "high"
           },
           "description": "detail.pool_water.high"
         }
@@ -125,41 +101,29 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "season": "spring"
-            }
+            "op": "sky",
+            "season": "spring"
           },
           "description": "detail.pool_shore.spring"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "season": "summer"
-            }
+            "op": "sky",
+            "season": "summer"
           },
           "description": "detail.pool_shore.summer"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "season": "autumn"
-            }
+            "op": "sky",
+            "season": "autumn"
           },
           "description": "detail.pool_shore.autumn"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "sky",
-              "season": "winter"
-            }
+            "op": "sky",
+            "season": "winter"
           },
           "description": "detail.pool_shore.winter"
         }

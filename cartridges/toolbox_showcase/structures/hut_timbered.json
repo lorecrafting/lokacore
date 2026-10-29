@@ -5,11 +5,8 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "item_present",
-          "tag": "rug"
-        }
+        "op": "item_present",
+        "tag": "rug"
       },
       "description": "structure.hut_timbered.description.rug"
     }

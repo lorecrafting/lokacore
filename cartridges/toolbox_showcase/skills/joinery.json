@@ -2,12 +2,9 @@
   "label": "skill.joinery.label",
   "requirement": "skill.joinery.requirement",
   "prerequisite": {
-    "policy_version": 1,
-    "root": {
-      "op": "skill_compare",
-      "skill": "carving",
-      "at_least": 1
-    }
+    "op": "skill_compare",
+    "skill": "carving",
+    "at_least": 1
   },
   "hidden": true,
   "profession": "profession.woodcraft"

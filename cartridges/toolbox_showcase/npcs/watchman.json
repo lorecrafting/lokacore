@@ -25,12 +25,9 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "wanted",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "wanted",
+      "equals": true
     },
     "engage": "npc.watchman.engage"
   },
@@ -40,12 +37,9 @@
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "wanted",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
       },
       "description": "npc.watchman.room_wanted"
     }

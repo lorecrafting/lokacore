@@ -34,7 +34,7 @@ const TARGETLESS = ['reactions', 'quests', 'barriers', 'skills', 'world.identity
 );
 const targetless = (at: string) =>
   TARGETLESS.some((p) => at.startsWith(p)) ||
-  /^\.cartridge\.rooms\[[^\]]*\](\.exits\.[a-z_]+)?\.locks\.(enter|traverse)\./.test(at);
+  /^\.cartridge\.rooms\[[^\]]*\](\.exits\.[a-z_]+)?\.locks\.(enter|traverse)\b/.test(at);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 // Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
 const wielded = (o?: Obj) => o?.wear !== undefined || o?.kind === 'repair';

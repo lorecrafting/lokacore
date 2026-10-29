@@ -53,7 +53,7 @@ defmodule Loka.Content.Identity do
 
   # Checks.trees/1 reads definitions only; these roots get its tree checks here.
   defp trees(variants),
-    do: for({v, p} <- variants, do: {"cartridge.json", p ++ ["when", "root"], v["when"]["root"]})
+    do: for({v, p} <- variants, do: {"cartridge.json", p ++ ["when"], v["when"]})
 
   defp keys(id, variants),
     do: [

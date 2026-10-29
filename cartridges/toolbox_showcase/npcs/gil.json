@@ -20,12 +20,9 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "gil_warned",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "gil_warned",
+        "equals": true
       },
       "description": "npc.gil.description_warned"
     }

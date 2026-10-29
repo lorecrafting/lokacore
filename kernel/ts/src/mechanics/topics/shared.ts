@@ -50,7 +50,7 @@ export function lore(world: World, actor: CharacterId) {
   const deductions = Object.values(world.cartridge.recipes ?? {})
     .sort((a, b) => cmp(a.key, b.key))
     .flatMap((r) => {
-      const root = r.policy?.root;
+      const root = r.policy;
       const from = [
         ...new Set(
           (root?.op === 'all' ? root.items : []).flatMap((p) =>

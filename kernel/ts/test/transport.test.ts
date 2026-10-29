@@ -177,7 +177,7 @@ test('a recipe aimed at a transport detail keeps its card beside the ride', () =
         aliases: ['polish'],
         label: 'actions.polish_post',
         priority: 5,
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
         target: { kind: 'detail', room: ref('room', 'north_post'), detail: 'post' },
         outcomes: {
           success: {

@@ -4,14 +4,11 @@
     "action": "pull_b"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "fact_compare",
-        "fact": "lever_stage",
-        "equals": 1
-      }
+    "op": "not",
+    "item": {
+      "op": "fact_compare",
+      "fact": "lever_stage",
+      "equals": 1
     }
   },
   "apply": [

@@ -10,22 +10,19 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "grate_forced",
-          "equals": false
-        },
-        {
-          "op": "has_tag",
-          "barrier": "grate",
-          "tag": "fragile"
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "grate_forced",
+        "equals": false
+      },
+      {
+        "op": "has_tag",
+        "barrier": "grate",
+        "tag": "fragile"
+      }
+    ]
   },
   "check": {
     "key": "force_grate",

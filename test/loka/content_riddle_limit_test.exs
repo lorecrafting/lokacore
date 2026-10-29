@@ -8,10 +8,7 @@ defmodule Loka.ContentRiddleLimitTest do
     "npc" => "sphinx",
     "prompt" => "dialogue.riddle.prompt",
     "quest" => "lantern",
-    "policy" => %{
-      "policy_version" => 1,
-      "root" => %{"op" => "quest_state", "quest" => "lantern", "state" => "active"}
-    },
+    "policy" => %{"op" => "quest_state", "quest" => "lantern", "state" => "active"},
     "roles" => %{
       "sphinx" => %{"role" => "npc", "npc" => "sphinx"},
       "bram" => %{"role" => "npc", "npc" => "bram"}

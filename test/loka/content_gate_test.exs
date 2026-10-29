@@ -34,7 +34,7 @@ defmodule Loka.ContentGateTest do
     }
   end
 
-  defp variant, do: ["details", "oak_door", "variants", Access.at(0), "when", "root", "barrier"]
+  defp variant, do: ["details", "oak_door", "variants", Access.at(0), "when", "barrier"]
 
   # Breaks: a barrier, an exit's barrier, a key_item or a barrier_state dropped or reshaped.
   test "gate_sampler compiles to its Python known answer without warnings" do
@@ -103,7 +103,7 @@ defmodule Loka.ContentGateTest do
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "rooms/gatehouse.details.oak_door.variants[0].when.root.barrier",
+                  "rooms/gatehouse.details.oak_door.variants[0].when.barrier",
                   trapdoor
                 )
               ]}
@@ -162,7 +162,7 @@ defmodule Loka.ContentGateTest do
               [
                 undeclared.("barriers/cell_door"),
                 undeclared.("barriers/oak_door"),
-                undeclared.("rooms/gatehouse.details.oak_door.variants[0].when.root.op")
+                undeclared.("rooms/gatehouse.details.oak_door.variants[0].when.op")
               ]}
   end
 

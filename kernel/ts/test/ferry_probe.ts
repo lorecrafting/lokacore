@@ -23,7 +23,7 @@ export const chat = (root: object) => ({
   command: 'talk',
   priority: 0,
   input: [],
-  policy: { policy_version: 1, root },
+  policy: root,
 });
 
 // Loaded against the real INSTALLED, so dropping target_resolution from it fails every test here.

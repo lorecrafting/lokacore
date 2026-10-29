@@ -29,7 +29,7 @@ function water(c: any) {
     key: 'swim',
     label: 'skill.bandage.label',
     requirement: 'skill.bandage.requirement',
-    qualification: { policy_version: 1, root: { op: 'all', items: [] } },
+    qualification: { op: 'all', items: [] },
   };
   c.facts[`${prefix}:fact/skill_swim`] = {
     key: 'skill_swim',

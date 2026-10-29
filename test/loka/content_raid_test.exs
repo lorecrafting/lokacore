@@ -50,10 +50,10 @@ defmodule Loka.ContentRaidTest do
           {[{"reactions/aftershock.json", &update_in(&1, ["apply"], fn a -> a ++ [shake] end)}],
            {"SCHEMA_VIOLATION", "reactions/aftershock.apply[1].op"}},
           {[
-             {"reactions/calm.json", &put_in(&1, ["when", "root"], %{since | "fact" => "raided"})}
-           ], {"SCHEMA_VIOLATION", "reactions/calm.when.root.fact"}},
-          {[{"reactions/aftershock.json", &put_in(&1, ["when", "root"], mv)}],
-           {"SCHEMA_VIOLATION", "reactions/aftershock.when.root.item.subject"}},
+             {"reactions/calm.json", &put_in(&1, ["when"], %{since | "fact" => "raided"})}
+           ], {"SCHEMA_VIOLATION", "reactions/calm.when.fact"}},
+          {[{"reactions/aftershock.json", &put_in(&1, ["when"], mv)}],
+           {"SCHEMA_VIOLATION", "reactions/aftershock.when.item.subject"}},
           # RS-4: the fired job keeps its actor, not the subject or trigger its quest steps read.
           {[{"reactions/called_to_hold.json", &Map.put(&1, "after", 100)}],
            {"SCHEMA_VIOLATION", "reactions/called_to_hold.apply[0].op"}},

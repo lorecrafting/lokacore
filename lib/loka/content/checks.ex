@@ -419,7 +419,7 @@ defmodule Loka.Content.Checks do
   @doc "Every located policy root from the source definitions."
   def trees(defs) do
     Enum.concat([
-      for({rel, a} <- actions(defs), do: {rel, ["policy", "root"], a["policy"]["root"]}),
+      for({rel, a} <- actions(defs), do: {rel, ["policy"], a["policy"]}),
       RoomParts.conditions(defs),
       Entities.conditions(defs),
       Recipes.conditions(defs),

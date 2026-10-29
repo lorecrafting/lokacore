@@ -13,12 +13,9 @@
   ],
   "priority": 0,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "visited_count",
-      "room": "north_post",
-      "at_least": 1
-    }
+    "op": "visited_count",
+    "room": "north_post",
+    "at_least": 1
   },
   "accessibility": "transport.ride_north"
 }

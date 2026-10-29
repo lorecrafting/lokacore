@@ -1,22 +1,19 @@
 {
   "npc": "aldous",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "skill_blade",
-          "equals": true
-        },
-        {
-          "op": "fact_compare",
-          "fact": "raider_slain",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "skill_blade",
+        "equals": true
+      },
+      {
+        "op": "fact_compare",
+        "fact": "raider_slain",
+        "equals": false
+      }
+    ]
   },
   "prompt": "dialogue.aldous_talk.prompt",
   "roles": {

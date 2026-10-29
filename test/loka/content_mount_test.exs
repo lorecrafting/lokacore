@@ -39,10 +39,10 @@ defmodule Loka.ContentMountTest do
 
                [
                  edit(talk, ["choices", k, "sequence", Access.at(0), "value"], 1),
-                 edit(talk, ["policy", "root", "equals"], v)
+                 edit(talk, ["policy", "equals"], v)
                ]
              end) ++
-             [edit(horse, ["description_variants", Access.at(0), "when", "root", "equals"], 1)],
+             [edit(horse, ["description_variants", Access.at(0), "when", "equals"], 1)],
            [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["world", "mount", "riding"], "nope")],
            [{"UNRESOLVED_REFERENCE", "cartridge.world.mount.riding"}]}

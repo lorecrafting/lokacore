@@ -10,22 +10,19 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "strongbox_picked",
-          "equals": false
-        },
-        {
-          "op": "fact_compare",
-          "fact": "strongbox_forced",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "strongbox_picked",
+        "equals": false
+      },
+      {
+        "op": "fact_compare",
+        "fact": "strongbox_forced",
+        "equals": false
+      }
+    ]
   },
   "check": {
     "key": "pick_strongbox",

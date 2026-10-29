@@ -40,7 +40,7 @@ defmodule Loka.Content.Barriers do
     do:
       for(
         {_, {rel, [], %{"opens_when" => p}}} <- defs["barrier"] || %{},
-        do: {rel, ["opens_when", "root"], p["root"]}
+        do: {rel, ["opens_when"], p}
       )
 
   defp knock(m, defs) do

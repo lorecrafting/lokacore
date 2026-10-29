@@ -94,7 +94,7 @@ defmodule Loka.CartridgeCrossKernelTest do
         "label" => "actions.look",
         "command" => "look",
         "accessibility" => "actions.look.a11y",
-        "policy" => %{"policy_version" => 1, "root" => root}
+        "policy" => root
       })
 
     variant(Path.join(dir, "rich"), %{
@@ -157,7 +157,7 @@ defmodule Loka.CartridgeCrossKernelTest do
       "attributes.json" => %{
         "attributes" => Map.new(stats, fn {k, v} -> {k, %{"start" => v}} end)
       },
-      "actions/pray.json" => put_in(src.("actions/pray.json"), ["policy", "root"], root)
+      "actions/pray.json" => put_in(src.("actions/pray.json"), ["policy"], root)
     }
 
     for {rel, v} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(v))
@@ -237,7 +237,7 @@ defmodule Loka.CartridgeCrossKernelTest do
     manifest = read("cartridge.json")
     undeclared = update_in(manifest, ["requires", "capabilities"], &Map.delete(&1, "dialogue"))
     has_item = %{"op" => "has_item", "item" => %{fact("lantern") | "kind" => "item"}}
-    talk = put_in(read("actions/talk.json"), ["policy", "root"], has_item)
+    talk = put_in(read("actions/talk.json"), ["policy"], has_item)
 
     for {name, files, code} <- [
           {"undeclared", %{"cartridge.json" => undeclared}, "UNDECLARED_CAPABILITY"},

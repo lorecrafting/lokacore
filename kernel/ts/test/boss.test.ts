@@ -85,7 +85,7 @@ const fact = (w: World, name: string) =>
 const W = `${P}npc/warlord`;
 const R = (k: string) => `${P}reaction/${k}`;
 const percentLeaf = (c: any, k: string) =>
-  k === 'summon' ? c.reactions[R(k)].when.root.items[0].item : c.reactions[R(k)].when.root.item;
+  k === 'summon' ? c.reactions[R(k)].when.items[0].item : c.reactions[R(k)].when.item;
 const warlordHp = (maximum: number, start: number) => (c: any) =>
   Object.assign(c.npcs[W].hp, { maximum, start });
 const fought = (edit?: (c: any) => void, until = 150) => {
@@ -162,7 +162,7 @@ test('the warlord drops his one crown into his corpse in the hall, and calls no 
 // (the warlord has no `mv`: full by default, or NaN with regen, which faults the attack).
 test('a subject without the pool reads false', () => {
   const w = fought((c) => {
-    const items = c.reactions[R('summon')].when.root.items;
+    const items = c.reactions[R('summon')].when.items;
     items[0] = JSON.parse(JSON.stringify(items[0].item).replace('"key":"hp"', '"key":"mv"'));
     items[0].at_least_percent = 1;
   });
@@ -233,13 +233,10 @@ test('a reaction write and a later death credit of one fact compose in one wait 
       key: 'mark',
       on: { event: 'attack_result', target: ref('npc', 'warlord') },
       when: {
-        policy_version: 1,
-        root: {
-          at_least_percent,
-          op: 'resource_compare',
-          resource: ref('resource', 'hp'),
-          subject: 'subject',
-        },
+        at_least_percent,
+        op: 'resource_compare',
+        resource: ref('resource', 'hp'),
+        subject: 'subject',
       },
     };
   });

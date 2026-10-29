@@ -21,12 +21,9 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "barrier_state",
-              "barrier": "oak_door",
-              "equals": "open"
-            }
+            "op": "barrier_state",
+            "barrier": "oak_door",
+            "equals": "open"
           },
           "description": "detail.oak_door.open"
         }

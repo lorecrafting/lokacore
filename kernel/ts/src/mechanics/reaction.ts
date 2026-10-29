@@ -149,7 +149,7 @@ export function sequence(
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
-  if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
+  if (rule.when && !holds(then, actor, rule.when, about)) return undefined;
   if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint, ran);
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), seen: new Set() };
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];

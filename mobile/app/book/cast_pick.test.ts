@@ -28,8 +28,7 @@ function cartridge(ash = 0, den = false, luxCooldown = 0) {
     for (const spell of ['flamma', 'lux'])
       edit(`actions/${spell}.json`, (j) => (j.target.learned = 'known_here'));
     edit('cartridge.json', (j) => (j.entry = den ? 'chief_den' : 'crypt'));
-    if (den)
-      edit('actions/flamma.json', (j) => (j.policy.root = { op: 'not', item: j.policy.root }));
+    if (den) edit('actions/flamma.json', (j) => (j.policy = { op: 'not', item: j.policy }));
     if (luxCooldown) edit('actions/lux.json', (j) => (j.cooldown = luxCooldown));
     edit('resources.json', (j) => (j.resources.ash.start = ash));
     edit('rooms/crypt.json', (j) => delete j.dark_description);

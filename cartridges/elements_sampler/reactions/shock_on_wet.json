@@ -4,12 +4,9 @@
     "status": "shocked"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "status_active",
-      "subject": "subject",
-      "status": "wet"
-    }
+    "op": "status_active",
+    "subject": "subject",
+    "status": "wet"
   },
   "apply": [
     {

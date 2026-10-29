@@ -502,7 +502,7 @@
           ]
         },
         "when": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "silent": {
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it.",
@@ -791,17 +791,14 @@
             }
           },
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "green_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "fact",
-                "key": "green_busy"
-              },
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "green_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
           },
           "apply": [
             {

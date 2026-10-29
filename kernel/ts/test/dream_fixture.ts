@@ -11,7 +11,7 @@ import { fragment } from './fragment.ts';
 
 const f = fragment('protocol/fixtures/cartridge_scene_hash.json');
 export const { prefix, ref } = f;
-const always = () => ({ policy_version: 1, root: { op: 'all', items: [] } });
+const always = () => ({ op: 'all', items: [] });
 const flag = (key: string, meaning: string) => ({
   key,
   version: 1,
@@ -68,10 +68,7 @@ function dreamSource(c: any) {
         variants: [
           {
             description: 'detail.bed.paid',
-            when: {
-              policy_version: 1,
-              root: { op: 'fact_compare', fact: ref('fact', 'bed_paid'), equals: true },
-            },
+            when: { op: 'fact_compare', fact: ref('fact', 'bed_paid'), equals: true },
           },
         ],
       },
@@ -130,10 +127,7 @@ function dreamSource(c: any) {
     title: 'quest.room.title',
     objective: {
       evidence: 'current_state',
-      policy: {
-        policy_version: 1,
-        root: { op: 'fact_compare', fact: ref('fact', 'dream_seen'), equals: true },
-      },
+      policy: { op: 'fact_compare', fact: ref('fact', 'dream_seen'), equals: true },
     },
     journal: {
       active: 'quest.room.active',

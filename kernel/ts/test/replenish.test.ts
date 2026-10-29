@@ -157,7 +157,7 @@ const digging =
         aliases: ['dig'],
         target: { kind: 'detail', room: ref('room', 'mine'), detail: 'seam' },
         priority: 10,
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
         outcomes: {
           success: {
             sequence: [{ op: 'event.emit', event: 'dig' }],

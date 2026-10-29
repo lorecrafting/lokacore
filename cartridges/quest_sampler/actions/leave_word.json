@@ -10,12 +10,9 @@
   },
   "priority": 10,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "quest_state",
-      "quest": "find_key",
-      "state": "objectives_complete"
-    }
+    "op": "quest_state",
+    "quest": "find_key",
+    "state": "objectives_complete"
   },
   "outcomes": {
     "success": {

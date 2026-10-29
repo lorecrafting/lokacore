@@ -11,23 +11,20 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "has_tag",
-          "subject": "target",
-          "tag": "sharp"
-        },
-        {
-          "op": "fact_compare",
-          "fact": "quality",
-          "equals": "unforged",
-          "subject": "target"
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "has_tag",
+        "subject": "target",
+        "tag": "sharp"
+      },
+      {
+        "op": "fact_compare",
+        "fact": "quality",
+        "equals": "unforged",
+        "subject": "target"
+      }
+    ]
   },
   "check": {
     "kind": "attribute_threshold",

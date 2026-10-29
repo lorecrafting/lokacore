@@ -208,10 +208,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
         label: 'narration.bandaged',
         prompt: 'narration.bandaged',
         roles: { teacher: { role: 'npc', npc: ref('npc', 'teacher') } },
-        policy: {
-          policy_version: 1,
-          root: { op: 'fact_compare', fact: ref('fact', 'skill_bandage'), equals: false },
-        },
+        policy: { op: 'fact_compare', fact: ref('fact', 'skill_bandage'), equals: false },
         choices: {
           learn: {
             label: 'narration.bandaged',

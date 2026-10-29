@@ -77,7 +77,7 @@ defmodule Loka.ContentZoneTest do
   # Breaks: copies lose the authored location, so a bad ref in a zone rule reports at a copy key
   # that has no file, or once per copy.
   test "a check on a zone copy reports once at the authored rule" do
-    room = &put_in(&1, ["when", "root", "items", Access.at(0), "room"], "nowhere")
+    room = &put_in(&1, ["when", "items", Access.at(0), "room"], "nowhere")
     diags = refused(@codex, [{"reactions/wanderer.json", room}])
     assert [{"UNRESOLVED_REFERENCE", "reactions/wanderer.when." <> _, _}] = diags
   end

@@ -3,12 +3,9 @@
   "description": "room.pen.description",
   "locks": {
     "enter": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_pen",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_pen",
+      "equals": true
     }
   },
   "exits": {

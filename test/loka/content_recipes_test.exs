@@ -142,7 +142,7 @@ defmodule Loka.ContentRecipesTest do
       "command" => "look",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+      "policy" => %{"op" => "all", "items" => []},
       "accessibility" => "actions.ring_bell"
     }
 

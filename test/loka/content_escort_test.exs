@@ -62,7 +62,7 @@ defmodule Loka.ContentEscortTest do
     update(
       dir,
       "dialogues/bram.json",
-      &put_in(&1, ["policy", "root"], %{
+      &put_in(&1, ["policy"], %{
         "op" => "escort_state",
         "quest" => "lantern",
         "state" => "following"
@@ -71,7 +71,7 @@ defmodule Loka.ContentEscortTest do
 
     assert {:ok, bytes, []} = Loka.Content.compile(dir)
     d = JSON.decode!(bytes)["cartridge"]["dialogues"]["ferry_sampler@0.0.1:dialogue/bram"]
-    assert d["policy"]["root"]["quest"]["key"] == "lantern"
+    assert d["policy"]["quest"]["key"] == "lantern"
   end
 
   # Breaks: escort capability/API, role typing, local quest and complete agreement cease guarding content.
@@ -104,7 +104,7 @@ defmodule Loka.ContentEscortTest do
              Map.take(&1["choices"]["carry"], ["label", "narration"])
            ), "OUTCOME_MISMATCH"},
           {"dialogues/bram.json",
-           &put_in(&1, ["policy", "root"], %{
+           &put_in(&1, ["policy"], %{
              "op" => "escort_state",
              "quest" => "missing",
              "state" => "following"

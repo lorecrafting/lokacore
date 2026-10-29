@@ -17,25 +17,19 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "regard",
-          "equals": 1,
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "regard",
+        "equals": 1,
+        "subject": "target"
       },
       "description": "npc.farmer.description_warm"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "regard",
-          "equals": -1,
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "regard",
+        "equals": -1,
+        "subject": "target"
       },
       "description": "npc.farmer.description_cold"
     }

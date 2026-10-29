@@ -5,35 +5,26 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "room",
-          "status": "ruin"
-        }
+        "op": "status_active",
+        "subject": "room",
+        "status": "ruin"
       },
       "description": "structure.hut.description.ruin"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "owns_plot",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "owns_plot",
+        "equals": true
       },
       "description": "structure.hut.description.owned"
     }
   ],
   "locks": {
     "enter": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_plot",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_plot",
+      "equals": true
     }
   },
   "weathering": "weathering",

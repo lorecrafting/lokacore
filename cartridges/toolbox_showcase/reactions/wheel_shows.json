@@ -13,15 +13,12 @@
     }
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": {
-        "param": "fact"
-      },
-      "equals": {
-        "param": "n"
-      }
+    "op": "fact_compare",
+    "fact": {
+      "param": "fact"
+    },
+    "equals": {
+      "param": "n"
     }
   },
   "apply": [

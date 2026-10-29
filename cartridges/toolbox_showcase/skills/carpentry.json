@@ -2,12 +2,9 @@
   "label": "skill.carpentry.label",
   "requirement": "skill.carpentry.requirement",
   "prerequisite": {
-    "policy_version": 1,
-    "root": {
-      "op": "skill_compare",
-      "skill": "woodcutting",
-      "at_least": 2
-    }
+    "op": "skill_compare",
+    "skill": "woodcutting",
+    "at_least": 2
   },
   "growth": [
     2

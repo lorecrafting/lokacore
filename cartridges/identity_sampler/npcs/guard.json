@@ -19,25 +19,22 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": [
-          {
-            "op": "fact_compare",
-            "fact": "wanted",
-            "equals": true
-          },
-          {
-            "op": "not",
-            "item": {
-              "op": "status_active",
-              "subject": "self",
-              "status": "disguised"
-            }
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "wanted",
+          "equals": true
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "status_active",
+            "subject": "self",
+            "status": "disguised"
           }
-        ]
-      }
+        }
+      ]
     },
     "engage": "guard.collars"
   }

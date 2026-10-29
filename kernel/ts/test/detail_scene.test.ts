@@ -29,7 +29,7 @@ const begin = (c: any) => {
     aliases: ['begin'],
     target: { kind: 'detail', room, detail: 'mooring_post' },
     priority: 10,
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     outcomes: {
       success: {
         sequence: [{ op: 'event.emit', event: 'begun' }],

@@ -4,12 +4,9 @@
     "room": "village_green"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "time_window",
-      "from": 19,
-      "to": 20
-    }
+    "op": "time_window",
+    "from": 19,
+    "to": 20
   },
   "apply": [
     {

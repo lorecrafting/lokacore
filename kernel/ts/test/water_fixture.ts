@@ -63,7 +63,7 @@ export function waterSource(c: any) {
       key: 'swim',
       label: 'skill.swim.label',
       requirement: 'skill.swim.requirement',
-      qualification: { policy_version: 1, root: { op: 'all', items: [] } },
+      qualification: { op: 'all', items: [] },
     },
   };
   text(c, { 'skill.swim.label': 'Swim', 'skill.swim.requirement': 'Learn to swim.' });
@@ -144,10 +144,7 @@ export function waterSource(c: any) {
     label: 'sedge.swim.choice',
     prompt: 'sedge.swim.prompt',
     roles: { teacher: { role: 'npc', npc: ref('npc', 'sedge') } },
-    policy: {
-      policy_version: 1,
-      root: { op: 'fact_compare', fact: ref('fact', 'skill_swim'), equals: false },
-    },
+    policy: { op: 'fact_compare', fact: ref('fact', 'skill_swim'), equals: false },
     choices: {
       learn: {
         label: 'sedge.swim.choice',

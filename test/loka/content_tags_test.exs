@@ -13,7 +13,7 @@ defmodule Loka.ContentTagsTest do
     assert c["items"]["tags_sampler@0.0.1:item/rod"]["tags"] == ~w(metal)
     assert hall["tags"] == ~w(wooden)
 
-    assert hall["details"]["wooden_door"]["variants"] |> hd() |> get_in(["when", "root"]) == %{
+    assert hall["details"]["wooden_door"]["variants"] |> hd() |> get_in(["when"]) == %{
              "op" => "has_tag",
              "tag" => "burnable",
              "barrier" => %{
@@ -24,10 +24,10 @@ defmodule Loka.ContentTagsTest do
              }
            }
 
-    root = ["details", "iron_door", "variants", Access.at(0), "when", "root"]
+    root = ["details", "iron_door", "variants", Access.at(0), "when"]
 
     leaf = &put_in(&1, root, Map.merge(%{"op" => "has_tag", "tag" => "metal"}, &2))
-    variant = "rooms/hall.details.iron_door.variants[0].when.root"
+    variant = "rooms/hall.details.iron_door.variants[0].when"
     drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "tags") end)
 
     cases = [

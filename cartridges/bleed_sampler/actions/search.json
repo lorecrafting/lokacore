@@ -9,13 +9,6 @@
     "detail": "bones"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

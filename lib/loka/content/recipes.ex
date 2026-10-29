@@ -14,7 +14,7 @@ defmodule Loka.Content.Recipes do
   @doc "Each schema-valid recipe's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs),
-    do: for({rel, r} <- all(defs), do: {rel, ["policy", "root"], r["policy"]["root"]})
+    do: for({rel, r} <- all(defs), do: {rel, ["policy"], r["policy"]})
 
   defp all(defs), do: for({_, {rel, [], r}} <- defs["recipe"], do: {rel, r})
 

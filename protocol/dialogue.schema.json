@@ -20,7 +20,7 @@
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "policy": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "prompt": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -108,11 +108,8 @@
             "key": "bram"
           },
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "prompt": "dialogue.bram.prompt",
           "roles": {

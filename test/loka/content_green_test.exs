@@ -61,8 +61,8 @@ defmodule Loka.ContentGreenTest do
        d("UNRESOLVED_REFERENCE", "reactions/gossip.on.fact", %{
          "target" => "green_sampler@0.0.1:fact/rumour"
        })},
-      {rule("gossip", &put_in(&1, ["when", "root", "fact"], "rumour")),
-       d("UNRESOLVED_REFERENCE", "reactions/gossip.when.root.fact", %{
+      {rule("gossip", &put_in(&1, ["when", "fact"], "rumour")),
+       d("UNRESOLVED_REFERENCE", "reactions/gossip.when.fact", %{
          "target" => "green_sampler@0.0.1:fact/rumour"
        })},
       {rule("ring", &put_in(&1, ["on", "room"], "tower")),

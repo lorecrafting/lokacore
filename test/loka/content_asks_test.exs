@@ -24,7 +24,7 @@ defmodule Loka.ContentAsksTest do
     for {path, at} <- [
           {["ask", "unknown"], "unknown"},
           {["ask", "answers", Access.at(0), "text"], "answers[0].text"},
-          {["ask", "answers", Access.at(1), "when", "root", "fact"], "answers[1].when.root.fact"}
+          {["ask", "answers", Access.at(1), "when", "fact"], "answers[1].when.fact"}
         ] do
       assert [{"UNRESOLVED_REFERENCE", "npcs/smith.ask." <> ^at}] =
                diags.([{"npcs/smith.json", &nope.(&1, path)}])

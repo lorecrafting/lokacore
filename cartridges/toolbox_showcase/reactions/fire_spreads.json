@@ -4,14 +4,11 @@
     "status": "burning"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "status_active",
-        "subject": "subject",
-        "status": "spent"
-      }
+    "op": "not",
+    "item": {
+      "op": "status_active",
+      "subject": "subject",
+      "status": "spent"
     }
   },
   "apply": [

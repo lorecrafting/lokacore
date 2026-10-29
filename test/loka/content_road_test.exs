@@ -84,7 +84,7 @@ defmodule Loka.ContentRoadTest do
     cart =
       JSON.decode!(a)["cartridge"]["rooms"]["resource_sampler@0.0.1:room/mill_yard"]["details"]
 
-    assert cart["cart"]["variants"] |> hd() |> get_in(["when", "root", "fact", "kind"]) == "fact"
+    assert cart["cart"]["variants"] |> hd() |> get_in(["when", "fact", "kind"]) == "fact"
   end
 
   # Breaks: the defaults missing without resources.json, or an authored resource not declared.

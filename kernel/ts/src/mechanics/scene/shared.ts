@@ -71,7 +71,7 @@ function legacyStarts(world: World, e: DomainEvent): ReactionRule[] {
     .map((s) => ({
       key: s.key as Key,
       on: { event: 'fact_changed', fact: fact(world, s) },
-      when: { policy_version: 1, root: { op: 'fact_compare', fact: fact(world, s), equals: 0 } },
+      when: { op: 'fact_compare', fact: fact(world, s), equals: 0 },
       apply: [{ op: 'fact.assign', fact: fact(world, s), value: 1 }],
     }));
 }

@@ -84,7 +84,7 @@ export function patrolSource(c: any) {
     key: 'tobin_watch',
     npc: r('npc', 'tobin'),
     roles: { leader: { role: 'npc', npc: r('npc', 'tobin') } },
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     prompt: 'watch.prompt',
     label: 'watch.talk',
     choices: {

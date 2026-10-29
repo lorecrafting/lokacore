@@ -12,7 +12,7 @@ defmodule Loka.Content.Reactions do
   @doc "Each schema-valid reaction's `when` root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs),
-    do: for({rel, %{"when" => w}} <- all(defs), do: {rel, ["when", "root"], w["root"]})
+    do: for({rel, %{"when" => w}} <- all(defs), do: {rel, ["when"], w})
 
   defp all(defs), do: for({_, {rel, [], r}} <- defs["reaction"], do: {rel, r})
 

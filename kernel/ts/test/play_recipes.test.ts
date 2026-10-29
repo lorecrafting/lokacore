@@ -70,7 +70,7 @@ function gongs(): string[] {
     ...bell,
     key: 'ring_gong',
     label: 'actions.ring_gong',
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
   };
   gong.target = { kind: 'detail', room: ref('room', 'bell_tower'), detail: 'gong' };
   const success = {

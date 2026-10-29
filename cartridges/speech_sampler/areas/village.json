@@ -85,13 +85,6 @@
     "elder_ward": {
       "npc": "elder",
       "keyword": "ward",
-      "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
-      },
       "prompt": { "prose": "The elder leans close. \"The ward fails at the new moon.\"" },
       "roles": {
         "elder": {

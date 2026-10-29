@@ -345,7 +345,7 @@ test('each exit lists only the door verbs step accepts there now', () => {
       input: ['direction'],
       label: 'action.open',
       priority: 0,
-      policy: { policy_version: 1, root: { op: 'barrier_state', barrier: OAK, equals: 'locked' } },
+      policy: { op: 'barrier_state', barrier: OAK, equals: 'locked' },
       accessibility: 'action.open.a11y',
     };
   });

@@ -132,7 +132,7 @@ test('journal leader name follows the leader short_variants', () => {
   const id = npc(fresh);
   const e = {
     ...fresh.entities[id],
-    short_variants: [{ when: { root: { op: 'all', items: [] } }, description: 'npc.leader.named' }],
+    short_variants: [{ when: { op: 'all', items: [] }, description: 'npc.leader.named' }],
   };
   const a = journey({ ...fresh, entities: { ...fresh.entities, [id]: e } } as never);
   a.start();

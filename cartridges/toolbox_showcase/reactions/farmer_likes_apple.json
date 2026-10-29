@@ -4,13 +4,10 @@
     "item": "holding_apple"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "gifted_apple",
-      "equals": false,
-      "npc": "farmer"
-    }
+    "op": "fact_compare",
+    "fact": "gifted_apple",
+    "equals": false,
+    "npc": "farmer"
   },
   "apply": [
     {

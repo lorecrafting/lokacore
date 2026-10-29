@@ -76,6 +76,5 @@ export const answerTo = (
   steps: Steps,
 ) =>
   (w.entities[npc] as NpcDefinition | undefined)?.ask?.answers.find(
-    (a) =>
-      same(a.topic, topic) && (!a.when || holds(w, actor, a.when.root, { target: npc, steps })),
+    (a) => same(a.topic, topic) && (!a.when || holds(w, actor, a.when, { target: npc, steps })),
   );

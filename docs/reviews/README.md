@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: C2 slice C1, source kinds and population wrappers cut (F5 F6, naming audit #2 #3, loka-ivjq.3)](2026-10-29-c2-c1-review.md): **APPROVE**
+- [Review: C2 slice B2, drop the `{policy_version, root}` wrapper (F3, loka-ivjq.3)](2026-10-29-c2-b2-review.md): **APPROVE WITH NOTES**
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
 - [Review: C2 slice F, `story_point` on the dialogue choice (F11)](2026-10-28-c2-f-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice E, blueprints -> structures (F8, loka-ivjq.8)](2026-10-28-c2-e-review.md): **APPROVE WITH NOTES**

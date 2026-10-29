@@ -48,7 +48,7 @@ test('the target reaches admission for a talk alias, a recipe and a take', () =>
   const w = after(
     world((c) => {
       c.actions[`${F}:action/chat`] = chat(PRESENT);
-      c.recipes[`${F}:recipe/coil_rope`].policy.root = PRESENT;
+      c.recipes[`${F}:recipe/coil_rope`].policy = PRESENT;
       // Overrides the engine take (no policy: always holds); only this policy admits a take.
       c.actions[`${F}:action/take`] = { ...chat(PRESENT), key: 'take', command: 'take' };
       c.actions[`${F}:action/take`].target.scopes = ['room_contents'];
@@ -105,7 +105,7 @@ test('every talk path gives the same code in the GameView and in step', () => {
   const pending = after(active, { type: 'talk', target_id: at(active, 'npc/bram') });
   const plain = after(world(), accept);
   // Bram's dialogue's own policy is target_present (its talk's and talkRefused's).
-  const own = world((c) => (c.dialogues[`${F}:dialogue/bram`].policy.root = PRESENT));
+  const own = world((c) => (c.dialogues[`${F}:dialogue/bram`].policy = PRESENT));
   const rows: [string, World, string, string, string, string][] = [
     ["Bram's talk, policy holding", active, 'bram', 'bram', 'available', 'accepted'],
     ["Bram's talk, policy failing", before, 'bram', 'bram', 'invalid_state', 'invalid_state'],

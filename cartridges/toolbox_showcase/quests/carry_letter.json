@@ -3,11 +3,8 @@
   "objective": {
     "evidence": "current_state",
     "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "has_item",
-        "item": "letter"
-      }
+      "op": "has_item",
+      "item": "letter"
     }
   },
   "deadline": {

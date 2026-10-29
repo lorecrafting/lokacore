@@ -84,17 +84,14 @@
             "variants": [
               {
                 "when": {
-                  "policy_version": 1,
-                  "root": {
-                    "op": "fact_compare",
-                    "fact": {
-                      "cartridge_id": "resource_sampler",
-                      "cartridge_version": "0.0.1",
-                      "kind": "fact",
-                      "key": "cart_moved"
-                    },
-                    "equals": true
-                  }
+                  "op": "fact_compare",
+                  "fact": {
+                    "cartridge_id": "resource_sampler",
+                    "cartridge_version": "0.0.1",
+                    "kind": "fact",
+                    "key": "cart_moved"
+                  },
+                  "equals": true
                 },
                 "description": "detail.cart.moved"
               }
@@ -145,13 +142,6 @@
           "detail": "shrine"
         },
         "priority": 5,
-        "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
-        },
         "costs": [
           {
             "resource": {
@@ -202,19 +192,16 @@
         },
         "priority": 5,
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "not",
-            "item": {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "resource_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "fact",
-                "key": "cart_moved"
-              },
-              "equals": true
-            }
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "resource_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "cart_moved"
+            },
+            "equals": true
           }
         },
         "costs": [
@@ -311,6 +298,6 @@
       "narration.pray.actor": "You bow your head at the shrine. Warmth steadies your limbs."
     }
   },
-  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"},\"facts\":{\"resource_sampler@0.0.1:fact/cart_moved\":{\"key\":\"cart_moved\",\"meaning\":\"The mired cart was shoved free of the ruts.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"resource_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Resource Sampler\",\"version\":\"0.0.1\"},\"recipes\":{\"resource_sampler@0.0.1:recipe/pray\":{\"aliases\":[\"pray\"],\"cooldown\":3600,\"costs\":[{\"amount\":10,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}],\"key\":\"pray\",\"label\":\"actions.pray\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.pray.actor\"},\"sequence\":[{\"by\":5,\"op\":\"resource.adjust\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}]}},\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":5,\"target\":{\"detail\":\"shrine\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"resource_sampler@0.0.1:recipe/shove_cart\":{\"aliases\":[\"shove\"],\"check\":{\"difficulty\":15,\"key\":\"shove_cart\",\"kind\":\"threshold\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}},\"costs\":[{\"amount\":1,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}],\"key\":\"shove_cart\",\"label\":\"actions.shove_cart\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.shove_cart.failure\"},\"sequence\":[]},\"success\":{\"narration\":{\"actor\":\"narration.shove_cart.success\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}},\"priority\":5,\"target\":{\"detail\":\"cart\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}}},\"resources\":{\"resource_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":25,\"minimum\":0,\"start\":10},\"resource_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"resource_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":3,\"minimum\":0,\"start\":3}},\"rooms\":{\"resource_sampler@0.0.1:room/mill_yard\":{\"description\":\"room.mill_yard.description\",\"details\":{\"cart\":{\"aliases\":[\"cart\",\"handcart\"],\"description\":\"detail.cart\",\"variants\":[{\"description\":\"detail.cart.moved\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}]}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"key\":\"mill_yard\",\"title\":\"room.mill_yard.title\"},\"resource_sampler@0.0.1:room/wayside\":{\"description\":\"room.wayside.description\",\"details\":{\"shrine\":{\"aliases\":[\"shrine\",\"wayside_shrine\"],\"description\":\"detail.shrine\"}},\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}},\"key\":\"wayside\",\"title\":\"room.wayside.title\"}},\"text\":{\"actions.pray\":\"Pray at the shrine\",\"actions.shove_cart\":\"Shove the cart\",\"detail.cart\":\"A handcart sunk deep in the mud. It would take a hale body to shift it.\",\"detail.cart.moved\":\"The handcart stands free of the ruts now, its wheels caked in mud.\",\"detail.shrine\":\"A little stone shrine, its niche worn smooth by hands.\",\"narration.pray.actor\":\"You bow your head at the shrine. Warmth steadies your limbs.\",\"narration.shove_cart.failure\":\"You heave at the cart, but you are too weak to shift it.\",\"narration.shove_cart.success\":\"You set your shoulder to the cart and heave. It lurches free of the ruts.\",\"room.mill_yard.description\":\"Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.\",\"room.mill_yard.title\":\"Mill Yard\",\"room.wayside.description\":\"The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.\",\"room.wayside.title\":\"Wayside\"}}",
-  "sha256": "89376f472ce26fe1cea5aebd0836e067429477be542733e9c0ecce042cade102"
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"},\"facts\":{\"resource_sampler@0.0.1:fact/cart_moved\":{\"key\":\"cart_moved\",\"meaning\":\"The mired cart was shoved free of the ruts.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"resource_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Resource Sampler\",\"version\":\"0.0.1\"},\"recipes\":{\"resource_sampler@0.0.1:recipe/pray\":{\"aliases\":[\"pray\"],\"cooldown\":3600,\"costs\":[{\"amount\":10,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}],\"key\":\"pray\",\"label\":\"actions.pray\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.pray.actor\"},\"sequence\":[{\"by\":5,\"op\":\"resource.adjust\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}]}},\"priority\":5,\"target\":{\"detail\":\"shrine\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"resource_sampler@0.0.1:recipe/shove_cart\":{\"aliases\":[\"shove\"],\"check\":{\"difficulty\":15,\"key\":\"shove_cart\",\"kind\":\"threshold\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}},\"costs\":[{\"amount\":1,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}],\"key\":\"shove_cart\",\"label\":\"actions.shove_cart\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.shove_cart.failure\"},\"sequence\":[]},\"success\":{\"narration\":{\"actor\":\"narration.shove_cart.success\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"},\"priority\":5,\"target\":{\"detail\":\"cart\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}}},\"resources\":{\"resource_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":25,\"minimum\":0,\"start\":10},\"resource_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"resource_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":3,\"minimum\":0,\"start\":3}},\"rooms\":{\"resource_sampler@0.0.1:room/mill_yard\":{\"description\":\"room.mill_yard.description\",\"details\":{\"cart\":{\"aliases\":[\"cart\",\"handcart\"],\"description\":\"detail.cart\",\"variants\":[{\"description\":\"detail.cart.moved\",\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}]}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"key\":\"mill_yard\",\"title\":\"room.mill_yard.title\"},\"resource_sampler@0.0.1:room/wayside\":{\"description\":\"room.wayside.description\",\"details\":{\"shrine\":{\"aliases\":[\"shrine\",\"wayside_shrine\"],\"description\":\"detail.shrine\"}},\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}},\"key\":\"wayside\",\"title\":\"room.wayside.title\"}},\"text\":{\"actions.pray\":\"Pray at the shrine\",\"actions.shove_cart\":\"Shove the cart\",\"detail.cart\":\"A handcart sunk deep in the mud. It would take a hale body to shift it.\",\"detail.cart.moved\":\"The handcart stands free of the ruts now, its wheels caked in mud.\",\"detail.shrine\":\"A little stone shrine, its niche worn smooth by hands.\",\"narration.pray.actor\":\"You bow your head at the shrine. Warmth steadies your limbs.\",\"narration.shove_cart.failure\":\"You heave at the cart, but you are too weak to shift it.\",\"narration.shove_cart.success\":\"You set your shoulder to the cart and heave. It lurches free of the ruts.\",\"room.mill_yard.description\":\"Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.\",\"room.mill_yard.title\":\"Mill Yard\",\"room.wayside.description\":\"The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.\",\"room.wayside.title\":\"Wayside\"}}",
+  "sha256": "9ed450a821fdf650f8a1cf350b69aa623f86972759dd0ad2d7febeeb28244805"
 }

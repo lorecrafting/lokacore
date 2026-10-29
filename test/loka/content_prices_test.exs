@@ -55,7 +55,7 @@ defmodule Loka.ContentPricesTest do
              "minimum" => minimum
            })
            |> Map.put("disposition", %{
-             "friendly" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+             "friendly" => %{"op" => "all", "items" => []}
            })
          end}
       ]

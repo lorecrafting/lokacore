@@ -65,7 +65,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
       priority: 10,
       target: { kind: 'entity', scopes: ['inventory'] },
       input: [],
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
     };
   });
   const apple = entity(w, 'item', 'apple_01'),
@@ -144,10 +144,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
         ...held.cartridge.actions,
         [actionRef]: {
           ...bite,
-          policy: {
-            policy_version: 1 as const,
-            root: { op: 'not' as const, item: { op: 'all' as const, items: [] } },
-          },
+          policy: { op: 'not' as const, item: { op: 'all' as const, items: [] } },
         },
       },
     },

@@ -120,7 +120,7 @@ test("a case's target leaf reads the NPC", () => {
     fresh((c) => {
       c.manifest.requires.capabilities.target_resolution = 1;
       c.lock.capabilities.target_resolution = 1;
-      c.npcs[MAUD].schedule_cases['8'][0].when.root = { op: 'target_present' };
+      c.npcs[MAUD].schedule_cases['8'][0].when = { op: 'target_present' };
     }),
     at(9),
   );
@@ -132,7 +132,7 @@ test("a case's target leaf reads the NPC", () => {
 test("a case's time window is read at the hour's due time, not the end of the wait", () => {
   const w = play(
     fresh((c) => {
-      c.npcs[MAUD].schedule_cases['8'][0].when.root = { op: 'time_window', from: 8, to: 9 };
+      c.npcs[MAUD].schedule_cases['8'][0].when = { op: 'time_window', from: 8, to: 9 };
     }),
     at(11),
   );

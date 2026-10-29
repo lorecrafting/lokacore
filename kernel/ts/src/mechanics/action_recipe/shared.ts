@@ -112,7 +112,7 @@ export function castAdmission(
   const id = payload.target_id;
   const aimed = spell.target.kind === 'spell' ? spell.target.aimed : undefined;
   if (aimed ? !aimedAt(world, body!, id, aimed.scopes) : id) return { code: 'invalid_target' };
-  return holds(world, payload.actor_id, spell.policy?.root, { target: id, steps })
+  return holds(world, payload.actor_id, spell.policy, { target: id, steps })
     ? undefined
     : policyRefusal(spell);
 }

@@ -49,7 +49,7 @@ function skillView(
   steps: { n: number },
 ) {
   if (concealed(world, actor, skill, steps)) return [];
-  const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
+  const locked = s.prerequisite && !holds(world, actor, s.prerequisite, { steps });
   const st = status(world, actor, skill, steps);
   return [
     {

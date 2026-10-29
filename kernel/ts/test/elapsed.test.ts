@@ -53,7 +53,7 @@ const alias = (command: string) => ({
   priority: 0,
   target: { kind: 'none' },
   input: ['until'],
-  policy: { policy_version: 1, root: { op: 'all', items: [] } },
+  policy: { op: 'all', items: [] },
 });
 const withAlias = (w: World, name: string) =>
   ({

@@ -19,11 +19,8 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
+      "op": "all",
+      "items": []
     },
     "engage": "npc.hound.engage"
   }

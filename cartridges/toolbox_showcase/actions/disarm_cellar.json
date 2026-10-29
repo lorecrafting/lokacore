@@ -10,22 +10,19 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "cellar_found",
-          "equals": true
-        },
-        {
-          "op": "fact_compare",
-          "fact": "cellar_disarmed",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "cellar_found",
+        "equals": true
+      },
+      {
+        "op": "fact_compare",
+        "fact": "cellar_disarmed",
+        "equals": false
+      }
+    ]
   },
   "check": {
     "key": "disarm_cellar",

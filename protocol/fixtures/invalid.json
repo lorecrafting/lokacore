@@ -361,19 +361,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -430,19 +427,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -581,19 +575,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -650,19 +641,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -729,19 +717,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -1830,10 +1815,7 @@
         "speed"
       ],
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "target_present"
-        }
+        "op": "target_present"
       },
       "accessibility": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
     },
@@ -1857,45 +1839,13 @@
     ]
   },
   {
-    "contract": "ActionDefinition",
+    "contract": "Policy",
     "value": {
-      "key": "talk",
-      "label": "actions.talk",
-      "target": {
-        "kind": "entity",
-        "scopes": [
-          "room_occupants"
-        ]
-      },
-      "command": "talk",
-      "priority": 100,
-      "input": [],
-      "policy": {
-        "policy_version": 2,
-        "root": {
-          "op": "target_present"
-        }
-      },
-      "accessibility": "actions.talk.a11y"
+      "op": "xor"
     },
     "errors": [
       {
-        "path": "/policy/policy_version",
-        "code": "const_mismatch"
-      }
-    ]
-  },
-  {
-    "contract": "VersionedPolicy",
-    "value": {
-      "policy_version": 1,
-      "root": {
-        "op": "xor"
-      }
-    },
-    "errors": [
-      {
-        "path": "/root/op",
+        "path": "/op",
         "code": "unknown_variant"
       }
     ]
@@ -3527,20 +3477,6 @@
       },
       {
         "path": "/role",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
-    "contract": "VersionedPolicy",
-    "value": {},
-    "errors": [
-      {
-        "path": "/policy_version",
-        "code": "missing_property"
-      },
-      {
-        "path": "/root",
         "code": "missing_property"
       }
     ]
@@ -6407,10 +6343,7 @@
           "priority": 100,
           "input": [],
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "accessibility": "actions.talk.a11y"
         }
@@ -8532,11 +8465,8 @@
     "contract": "DescriptionVariant",
     "value": {
       "when": {
-        "policy_version": 2,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "description": "D",
       "extra": 1
@@ -8549,10 +8479,6 @@
       {
         "path": "/extra",
         "code": "unknown_property"
-      },
-      {
-        "path": "/when/policy_version",
-        "code": "const_mismatch"
       }
     ]
   },
@@ -8582,171 +8508,120 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         }
@@ -8785,161 +8660,113 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
@@ -9583,171 +9410,120 @@
       "room_line_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         }
@@ -10320,11 +10096,8 @@
       },
       "priority": 0,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "outcomes": {}
     },
@@ -10359,11 +10132,8 @@
       },
       "priority": 0,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "outcomes": {
         "success": {}
@@ -10400,11 +10170,8 @@
       },
       "priority": 0,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "outcomes": {
         "success": {
@@ -10460,11 +10227,8 @@
       },
       "priority": 0,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "outcomes": {
         "y": 1,
@@ -10959,19 +10723,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -11038,19 +10799,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -11118,19 +10876,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -11198,19 +10953,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -11277,19 +11029,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -11360,19 +11109,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -11841,11 +11587,8 @@
       "objective": {
         "evidence": "current_state",
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       }
     },
@@ -11903,11 +11646,8 @@
     "value": {
       "evidence": "post_activation_event",
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       }
     },
     "errors": [
@@ -13478,11 +13218,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "Bad",
       "roles": {
@@ -16778,11 +16515,8 @@
           },
           "priority": 10,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "duration": 3600,
           "outcomes": {
@@ -16900,25 +16634,19 @@
           "offer": {
             "label": "quest.lantern.accept",
             "policy": {
-              "policy_version": 1,
-              "root": {
-                "op": "all",
-                "items": []
-              }
+              "op": "all",
+              "items": []
             }
           },
           "objective": {
             "evidence": "current_state",
             "policy": {
-              "policy_version": 1,
-              "root": {
-                "op": "has_item",
-                "item": {
-                  "cartridge_id": "scene_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "item",
-                  "key": "lantern"
-                }
+              "op": "has_item",
+              "item": {
+                "cartridge_id": "scene_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "item",
+                "key": "lantern"
               }
             }
           },
@@ -16934,17 +16662,14 @@
             "key": "bram"
           },
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "quest_state",
-              "quest": {
-                "cartridge_id": "scene_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "quest",
-                "key": "lantern"
-              },
-              "state": "active"
-            }
+            "op": "quest_state",
+            "quest": {
+              "cartridge_id": "scene_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "quest",
+              "key": "lantern"
+            },
+            "state": "active"
           },
           "prompt": "dialogue.bram.prompt",
           "roles": {
@@ -17087,17 +16812,14 @@
             }
           },
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "scene_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "fact",
-                "key": "scene_bell_rung"
-              },
-              "equals": -1
-            }
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "scene_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "scene_bell_rung"
+            },
+            "equals": -1
           },
           "apply": [
             {
@@ -17656,11 +17378,8 @@
       "priority": 0,
       "input": [],
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "accessibility": "Invalid accessibility"
     },
@@ -17695,11 +17414,8 @@
       },
       "priority": 0,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "outcomes": {
         "success": {
@@ -17750,11 +17466,8 @@
       },
       "priority": 0,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "outcomes": {
         "success": {
@@ -19505,11 +19218,8 @@
       "label": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "growth": []
     },
@@ -19528,11 +19238,8 @@
       "label": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "growth": [
         1,
@@ -19561,11 +19268,8 @@
       "label": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "growth": [
         0
@@ -19586,11 +19290,8 @@
       "label": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "growth": [
         "1"
@@ -19600,34 +19301,6 @@
       {
         "path": "/growth/0",
         "code": "invalid_type"
-      }
-    ]
-  },
-  {
-    "name": "skill_prerequisite_without_version",
-    "contract": "SkillDefinition",
-    "value": {
-      "key": "carving",
-      "label": "skill.carving.label",
-      "requirement": "skill.carving.requirement",
-      "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
-      },
-      "prerequisite": {
-        "root": {
-          "op": "all",
-          "items": []
-        }
-      }
-    },
-    "errors": [
-      {
-        "path": "/prerequisite/policy_version",
-        "code": "missing_property"
       }
     ]
   },
@@ -19743,11 +19416,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "key": "pick_gate",
@@ -19807,11 +19477,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "key": "pick_gate",
@@ -19883,11 +19550,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "kind": "opposed",
@@ -20192,39 +19856,6 @@
       {
         "path": "/lunar",
         "code": "invalid_type"
-      }
-    ]
-  },
-  {
-    "contract": "BarrierDefinition",
-    "value": {
-      "key": "door",
-      "keywords": [
-        "door"
-      ],
-      "short": "barrier.door.short",
-      "initial": "closed",
-      "opens_when": {
-        "op": "sky",
-        "lunar": "full"
-      }
-    },
-    "errors": [
-      {
-        "path": "/opens_when/lunar",
-        "code": "unknown_property"
-      },
-      {
-        "path": "/opens_when/op",
-        "code": "unknown_property"
-      },
-      {
-        "path": "/opens_when/policy_version",
-        "code": "missing_property"
-      },
-      {
-        "path": "/opens_when/root",
-        "code": "missing_property"
       }
     ]
   },
@@ -21153,11 +20784,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "key": "pick_gate",
@@ -21325,11 +20953,8 @@
       "objective": {
         "evidence": "current_state",
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       },
       "deadline": {
@@ -21352,11 +20977,8 @@
       "objective": {
         "evidence": "current_state",
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       },
       "deadline": {
@@ -21379,11 +21001,8 @@
       "objective": {
         "evidence": "current_state",
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       },
       "deadline": {
@@ -21405,11 +21024,8 @@
       "objective": {
         "evidence": "current_state",
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       },
       "deadline": {
@@ -21506,154 +21122,103 @@
     "value": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "target_present"
-          }
+          "op": "target_present"
         },
         "description": "t.k"
       }
@@ -22393,17 +21958,14 @@
     "value": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22414,17 +21976,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22435,17 +21994,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22456,17 +22012,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22477,17 +22030,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22498,17 +22048,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22519,17 +22066,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22540,17 +22084,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22561,17 +22102,14 @@
       },
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "lost"
+          },
+          "equals": true
         },
         "room": {
           "cartridge_id": "c",
@@ -22642,17 +22180,14 @@
         "08": [
           {
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "c",
-                  "cartridge_version": "1.0.0",
-                  "kind": "fact",
-                  "key": "lost"
-                },
-                "equals": true
-              }
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "lost"
+              },
+              "equals": true
             },
             "room": {
               "cartridge_id": "c",
@@ -22901,11 +22436,8 @@
       },
       "disposition": {
         "angry": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       }
     },
@@ -23305,11 +22837,8 @@
       },
       "keyword": "Ward",
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.elder_ward.prompt",
       "roles": {
@@ -26640,16 +26169,9 @@
       "night_end": 6,
       "replacement_delay": 3600,
       "wander_interval": 3600,
-      "floor": 0,
-      "birth_when": {
-        "policy_version": 1
-      }
+      "floor": 0
     },
     "errors": [
-      {
-        "path": "/birth_when/root",
-        "code": "missing_property"
-      },
       {
         "path": "/floor",
         "code": "below_minimum"
@@ -27080,18 +26602,12 @@
       "exits": {},
       "locks": {
         "build": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         },
         "enter": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       }
     },
@@ -27131,11 +26647,8 @@
       },
       "locks": {
         "get": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       }
     },
@@ -27162,18 +26675,12 @@
       "container": true,
       "locks": {
         "enter": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         },
         "put": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         }
       }
     },
@@ -28826,11 +28333,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "key": "k",
@@ -28896,11 +28400,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "key": "k",
@@ -28960,11 +28461,8 @@
       },
       "priority": 5,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "check": {
         "kind": "track",
@@ -29665,171 +29163,120 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "description": "d"
         }
@@ -30497,19 +29944,16 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "recipe_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "chapel_bell_rung"
-            },
-            "equals": true
-          }
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "equals": true
         }
       },
       "outcomes": {
@@ -31343,11 +30787,8 @@
       "label": "skill.carving.label",
       "requirement": "skill.carving.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "hidden": true
     },
@@ -31366,19 +30807,13 @@
       "label": "skill.carving.label",
       "requirement": "skill.carving.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "hidden": false,
       "prerequisite": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       }
     },
     "errors": [
@@ -31396,11 +30831,8 @@
       "label": "skill.carving.label",
       "requirement": "skill.carving.requirement",
       "qualification": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "profession": "Woodcraft"
     },
@@ -31817,11 +31249,8 @@
       },
       "disposition": {
         "hostile": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
+          "op": "all",
+          "items": []
         },
         "arrest": {
           "x": 1

@@ -70,7 +70,7 @@ defmodule Loka.ContentCraftTest do
     naming = fn key ->
       assert {:error, diags} =
                Loka.ContentSource.compile(dir, [
-                 {"skills/carving.json", &put_in(&1, ["prerequisite", "root"], nested.(key))}
+                 {"skills/carving.json", &put_in(&1, ["prerequisite"], nested.(key))}
                ])
 
       Enum.map(diags, &{&1["code"], &1["path"]})
@@ -78,7 +78,7 @@ defmodule Loka.ContentCraftTest do
 
     assert {"SCHEMA_VIOLATION", "skills/carving.prerequisite"} in naming.("carving")
 
-    assert {"UNRESOLVED_REFERENCE", "skills/carving.prerequisite.root.items[0].item.skill"} in naming.(
+    assert {"UNRESOLVED_REFERENCE", "skills/carving.prerequisite.items[0].item.skill"} in naming.(
              "nothing"
            )
   end
@@ -86,7 +86,7 @@ defmodule Loka.ContentCraftTest do
   # Homestead hs-11. Break: an ancestry grants at birth a skill whose
   # prerequisite was never met (woodfolk's woodcutting takes one here).
   test "an ancestry never grants a skill with a prerequisite", %{dir: dir} do
-    prerequisite = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+    prerequisite = %{"op" => "all", "items" => []}
 
     assert {:error, diags} =
              Loka.ContentSource.compile(dir, [
@@ -119,10 +119,7 @@ defmodule Loka.ContentCraftTest do
 
     # hs-14 secret: a shown skill's
     # qualification, any dialogue policy, or a talk label or riddle on a dialogue teaching a hidden skill.
-    reads = %{
-      "policy_version" => 1,
-      "root" => %{"op" => "skill_compare", "skill" => "carving", "at_least" => 1}
-    }
+    reads = %{"op" => "skill_compare", "skill" => "carving", "at_least" => 1}
 
     read = &{"#{&1}.json", fn x -> Map.put(x, &2, reads) end}
     hidden = [hide.("carving"), hide.("joinery")]
