@@ -21,12 +21,10 @@ import {
   fresh,
   go,
   id,
-  homestead,
   play,
   pool,
   ref,
   refused,
-  reload,
   take,
   wait,
   leave,
@@ -422,28 +420,6 @@ test('tilt yard: the sandbox pack is two goblins fought together; their hits do 
   const hit = wait(r.world, r.world.state.clock + 150).world;
   assert.ok(pool(hit, 'hp')! < pool(s, 'hp')!); // a goblin's blow landed
   assert.deepEqual(conditions(hit), conditions(s));
-});
-
-// Twin of the compiler rows in test/loka/content_showcase_test.exs (loka-kgd.79). Breaks: an
-// attacker filter loads under API 1.57, names a spawn template (no instance ever attacks) or an
-// NPC the cartridge lacks.
-test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
-  const gore = (api: string, key: string) => (c: any) => {
-    c.manifest.requires.kernel_api.at_least = api;
-    c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
-    delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
-    for (const n of ['nell', 'bess']) delete c.npcs[ref('npc', n)].disposition.refuse; // 1.104
-    delete c.speech; // phrases: 1.98
-    homestead(c);
-  };
-  const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
-  assert.equal(reload(gore('1.58', 'boar')), 'ok');
-  assert.equal(
-    reload(gore('1.57', 'boar')),
-    'KERNEL_API_RANGE_INVALID .cartridge.manifest.requires.kernel_api.at_least',
-  );
-  assert.equal(reload(gore('1.58', 'goblin')), `SCHEMA_VIOLATION ${at}`);
-  assert.equal(reload(gore('1.58', 'wolf')), `UNRESOLVED_REFERENCE ${at}`);
 });
 
 // Breaks (plan 5's world.theft impact): an NPC's held item not listed with Take, the lift not a

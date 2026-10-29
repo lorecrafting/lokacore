@@ -2,7 +2,7 @@ defmodule Loka.ContentFoodTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}
 
-  # Breaks: source allows non-recovery food, holder/equipment conflicts or a missing food API/capability.
+  # Breaks: source allows non-recovery food, holder/equipment conflicts or a missing food capability.
   test "held-food source rejects unsafe or unbound consequences", %{dir: dir} do
     file = "items/loaf.json"
 
@@ -18,8 +18,6 @@ defmodule Loka.ContentFoodTest do
        ["items/loaf.edible.narration"]},
       {"resources.json", &put_in(&1, ["resources", "mv", "regen", "by_position", "standing"], 0),
        ["items/loaf.edible"]},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.26"),
-       ["cartridge.requires.kernel_api.at_least"]},
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "food") end),
        ["items/loaf.edible"]}
@@ -47,8 +45,7 @@ defmodule Loka.ContentMealTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/kitchen_sampler")}
 
   # Row hs-5. Breaks: an empty `applies` (minItems), a ref left unresolved, or a meal status
-  # moving the derived hp maximum (loka-kgd.50), its term named short or qualified; the 1.101
-  # floor row is in loader_floors.json.
+  # moving the derived hp maximum (loka-kgd.50), its term named short or qualified.
   test "a meal's applies resolves and never names an hp_max status", %{dir: dir} do
     stew = "items/stew_plain_01.json"
     read = &JSON.decode!(File.read!(Path.join(dir, &1)))

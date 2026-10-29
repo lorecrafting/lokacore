@@ -17,7 +17,7 @@ import { apply } from '../src/runtime/apply.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { positioned } from './combat_fixture.ts';
-import { cartridgeOf, commands, ctx, verdict } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-targets-sampler-'));
 let artifact: Uint8Array;
@@ -100,45 +100,6 @@ test('only another roster member is a choice, and only when the cartridge opts i
   const [off, , other] = engaged(plain as unknown as Cartridge);
   assert.deepEqual(offered(off), []);
   assert.equal(play(off, { type: 'attack', target_id: other }).decision.kind, 'rejected');
-});
-
-// Breaks: the loader admits target choice under API 1.47 (twin of content_targets_test.exs).
-const base = cartridgeOf(artifact);
-const FLOOR = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-
-test('the loader refuses target choice below API 1.48', () => {
-  assert.deepEqual(
-    verdict(base, (c) => {
-      c.manifest.requires.kernel_api.at_least = '1.47';
-      delete c.world.combat.allies;
-    }),
-    FLOOR,
-  );
-});
-
-// Toolbox row 6b (twin of content_targets_test.exs). Breaks: the loader admits allies under API
-// 1.47, a spawn template, an NPC without an attack or an unknown NPC as an ally, or allies
-// without their narration.
-test('the loader keeps allies to API 1.48, authored fighters and their narration', () => {
-  const ally = '.cartridge.world.combat.allies[0]';
-  const npc = (key: string) => ({ ...C, kind: 'npc', key });
-  const cases: [(c: any) => void, unknown][] = [
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.47';
-        delete c.world.combat.target_choice;
-      },
-      FLOOR,
-    ],
-    [(c) => (c.world.combat.allies = [npc('goblin')]), ['SCHEMA_VIOLATION', ally]],
-    [(c) => delete c.npcs['targets_sampler@0.0.1:npc/guard'].attack, ['SCHEMA_VIOLATION', ally]],
-    [(c) => (c.world.combat.allies = [npc('nobody')]), ['UNRESOLVED_REFERENCE', ally]],
-    [
-      (c) => delete c.world.combat.narration.ally_miss,
-      ['SCHEMA_VIOLATION', '.cartridge.world.combat.narration.ally_miss'],
-    ],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(verdict(base, edit), expected);
 });
 
 // Toolbox row 6c (6a carry). Breaks: the ActionSet counts the roster row, not the members still

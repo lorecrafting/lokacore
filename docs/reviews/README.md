@@ -11,6 +11,16 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
+- [Review: batch C1 final head (loka-ivjq.20 S7, loka-ivjq.2 F2)](2026-10-28-c1-final-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **APPROVE**
+- [Review: C1 slice F2-docs, drop per-field kernel_api floors from docs and schema descriptions (loka-ivjq.2)](2026-10-28-c1-f2-docs-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice F, final cleanup and docs (loka-ivjq.20)](2026-10-28-c1-f-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice D2, characters and economy loader checks (loka-ivjq.20)](2026-10-28-c1-d2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice D1, entities and supplies loader checks (loka-ivjq.20)](2026-10-28-c1-d1-review.md): **APPROVE WITH NOTES**
+- [Review: batch C1 slice C2, dialogue and quest loader checks (S7)](2026-10-28-c1-c2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice C1, rules modules (loka-ivjq.20)](2026-10-28-c1-c1-review.md): **APPROVE WITH NOTES**
+- [Review: C1 B2, world, time and the lock walk (loka-ivjq.20)](2026-10-28-c1-b2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice 0 prep and slice B1 references core (loka-ivjq.20)](2026-10-28-c1-b1-review.md): **APPROVE WITH NOTES**
 - [Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)](2026-10-24-narration-log-batch-review.md): **APPROVE WITH NOTES**
 - [Review: room words batch, signpost fixture link and entity name words (loka-x6t.105, loka-6qi, PR #458, kernel_api 1.118)](2026-10-23-room-words-batch-review.md): **CHANGES REQUIRED**
 - [Review: room fixtures batch slices 1-3, fixture pages, detail title, World guard (loka-x6t.120, PR #464, kernel_api 1.120)](2026-10-23-room-fixtures-review.md): **APPROVE**

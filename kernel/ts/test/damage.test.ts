@@ -147,42 +147,6 @@ test('a seeded silver fight has exactly one doubled hit', () => {
   assert.deepEqual(fight(sampler(), seed, 'silver_sword', 3), [15, 5, 0]);
 });
 
-// Breaks: the loader skips the 1.44 floor for one site, so an older-API artifact with damage
-// kinds, crits or resistances loads on a kernel that would ignore them.
-test('the loader refuses G2 fields below kernel_api 1.44', () => {
-  const api = '.cartridge.manifest.requires.kernel_api.at_least';
-  const old = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.43');
-  const bare = (c: any) => {
-    delete c.world.combat.player_attack.kind;
-    delete c.world.combat.player_attack.crit;
-    delete c.npcs[WIGHT].resistances;
-    for (const sword of ['iron_sword', 'silver_sword']) {
-      delete c.items[`damage_sampler@0.0.1:item/${sword}`].weapon.attack.kind;
-      delete c.items[`damage_sampler@0.0.1:item/${sword}`].weapon.attack.crit;
-    }
-  };
-  const sword = (c: any) => c.items['damage_sampler@0.0.1:item/iron_sword'].weapon.attack;
-  // Each row adds one G2 field to the bare sampler, so no other site can report the floor.
-  const rows: [string, (c: any) => void][] = [
-    ['player kind', (c) => (c.world.combat.player_attack.kind = 'fire')],
-    ['player crit', (c) => (c.world.combat.player_attack.crit = { chance: 10, multiplier: 2 })],
-    ['npc resistances', (c) => (c.npcs[WIGHT].resistances = { fire: 10 })],
-    ['npc attack kind', (c) => (c.npcs[WIGHT].attack.kind = 'cold')],
-    ['weapon attack kind', (c) => (sword(c).kind = 'cold')],
-    ['weapon attack crit', (c) => (sword(c).crit = { chance: 10, multiplier: 2 })],
-  ];
-  for (const [name, change] of rows) {
-    const r = reload(source, (c) => (bare(c), change(c), old(c)));
-    assert.deepEqual(
-      r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path],
-      ['KERNEL_API_RANGE_INVALID', api],
-      name,
-    );
-  }
-  const none = reload(source, (c) => (bare(c), old(c)));
-  assert.ok(none.ok, 'without G2 fields 1.43 still loads');
-});
-
 // Breaks: a later row adds a DamageKind or Tag without its Resistances member, so no NPC can
 // resist the new kind or material (mechanics.md damage model: the members are exactly both sets).
 test('Resistances names exactly the damage kinds and tags', () => {

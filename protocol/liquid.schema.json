@@ -100,7 +100,7 @@
           "maximum": 2147483647
         },
         "cures": {
-          "description": "Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not. Needs kernel_api at least 1.46.",
+          "description": "Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"

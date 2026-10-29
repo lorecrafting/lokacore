@@ -1,6 +1,6 @@
 defmodule Loka.Content.Food do
-  @moduledoc "Checks opted food, recovery metadata and the terminal-custody API floor."
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
+  @moduledoc "Checks opted food and recovery metadata."
+  import Loka.Content.Source, only: [diag: 3, at: 2]
 
   def check(nil, _, _), do: []
   def check(_, _, nil), do: []
@@ -8,22 +8,8 @@ defmodule Loka.Content.Food do
   def check(m, defs, {_, text}) do
     foods = for {_, {rel, [], %{"edible" => _} = item}} <- defs["item"], do: {rel, item}
 
-    minimum =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    api =
-      if foods != [] and minimum < api_floor(foods),
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    api ++ Enum.flat_map(foods, fn {rel, i} -> declaration(rel, i, m, defs, text) end)
+    Enum.flat_map(foods, fn {rel, i} -> declaration(rel, i, m, defs, text) end)
   end
-
-  # Row hs-5: a meal's `applies` needs 1.101.
-  defp api_floor(foods),
-    do: if(Enum.any?(foods, fn {_, i} -> i["edible"]["applies"] end), do: [1, 101], else: [1, 27])
 
   defp declaration(rel, i, m, defs, text) do
     e = i["edible"]

@@ -1,6 +1,6 @@
 defmodule Loka.Content.Bleed do
   @moduledoc "Checks the one authored hound bleed and directly held bandage declaration."
-  import Loka.Content.Source, only: [at: 2, diag: 2]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4]
   alias Loka.Content.Refs
 
   def check(nil, _, _), do: []
@@ -27,17 +27,11 @@ defmodule Loka.Content.Bleed do
   end
 
   defp gate(m) do
-    caps = m["requires"]["capabilities"]
+    path = at("cartridge.json", ["requires", "capabilities"])
 
-    [major, minor] =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if caps["bleed"] == 1 and caps["combat"] == 1 and caps["skills"] == 1 and
-         caps["food"] == 1 and (major > 1 or (major == 1 and minor >= 30)),
-       do: [],
-       else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
+    for c <- ~w(bleed combat skills food),
+        m["requires"]["capabilities"][c] != 1,
+        do: diag("UNDECLARED_CAPABILITY", path, %{"capability" => c}, [c <> "@1"])
   end
 
   defp values(bleeds, text) do

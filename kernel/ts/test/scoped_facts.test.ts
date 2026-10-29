@@ -120,10 +120,10 @@ test('an apple given to the smith marks her fed (or the named miller), at the in
   }
 });
 
-// Breaks: the loader admits a per_subject fact below 1.47, or one named where no subject is known
-// (it would be read or written without one), a subject on another fact, a fact_compare of one
-// fact without a subject, or a leaf naming two subjects.
-test('row W2 needs 1.47 and a known subject, at fact sites only', () => {
+// Breaks: the loader admits a per_subject fact named where no subject is known (it would be read
+// or written without one), a subject on another fact, a fact_compare of one fact without a
+// subject, or a leaf naming two subjects.
+test('row W2 needs a known subject, at fact sites only', () => {
   const met = `${S}:fact/times_met`;
   const smith = `${S}:dialogue/smith_talk`;
   const leaf = (extra: object) => (c: any) =>
@@ -136,11 +136,6 @@ test('row W2 needs 1.47 and a known subject, at fact sites only', () => {
   const npcRef = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
   const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy.root`;
   const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.46'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
     [leaf({}), 'FACT_SCOPE_UNSUPPORTED', root],
     [
       leaf({ subject: 'target', npc: { ...npcRef, key: 'miller' } }),

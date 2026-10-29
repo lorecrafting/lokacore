@@ -7,32 +7,10 @@ defmodule Loka.ContentStatusReadersTest do
     Enum.map(ds, &{&1["code"], &1["path"]})
   end
 
-  defp plain(s), do: s |> Map.drop(~w(blocks allows resistances)) |> Map.put("per_tick", -1)
-
-  # Breaks (status readers 4 and 5; twin of the loader row in kernel/ts/test/status_readers.test.ts):
-  # one reader field (each alone) compiles under API 1.53, a blocks or allows entry naming no
-  # command (or the authority-internal elapsed) compiles, or a reader status without per_tick (the
-  # sampler's four) is refused.
-  test "reader fields need API 1.54 and name player commands", %{dir: dir} do
+  # Breaks (status readers 4 and 5):
+  # a blocks or allows entry naming no command (or the authority-internal elapsed) compiles.
+  test "reader fields name player commands", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-    at153 = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.53")}
-
-    for {key, field, value} <- [
-          {"warded", "resistances", %{"fire" => 10}},
-          {"hushed", "blocks", ["say"]},
-          {"hushed", "allows", ["look"]}
-        ] do
-      plains =
-        for k <- ~w(warded hushed soaked stunned), k != key, do: {"statuses/#{k}.json", &plain/1}
-
-      one = {"statuses/#{key}.json", &(&1 |> plain() |> Map.put(field, value))}
-
-      assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags(
-               dir,
-               [at153, one | plains]
-             ),
-             field
-    end
 
     for {field, name} <- [{"blocks", "fly"}, {"allows", "elapsed"}] do
       named = &Map.put(&1, field, ["say", name])
@@ -43,10 +21,9 @@ defmodule Loka.ContentStatusReadersTest do
     end
   end
 
-  # Breaks (status readers 6 and 8; twin of the loader row in kernel/ts/test/status_readers.test.ts):
-  # a perception or a concealment (each alone) compiles under API 1.60, such a status without
-  # per_tick is refused, or an empty perception compiles. `soaked`: no entry reaction applies it (row 16).
-  test "perception and concealment need API 1.61 and stand in for per_tick", %{dir: dir} do
+  # Breaks (status readers 6 and 8):
+  # a perception or a concealment (each alone) without per_tick is refused, or an empty perception compiles. `soaked`: no entry reaction applies it (row 16).
+  test "perception and concealment stand in for per_tick", %{dir: dir} do
     api = &{"cartridge.json", fn c -> put_in(c, ["requires", "kernel_api", "at_least"], &1) end}
 
     soaked =
@@ -54,12 +31,6 @@ defmodule Loka.ContentStatusReadersTest do
 
     for fields <- [%{"perception" => %{"hearing" => "deaf"}}, %{"concealment" => "hidden"}] do
       assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.61"), soaked.(fields)])
-
-      assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags(dir, [
-               api.("1.60"),
-               soaked.(fields)
-             ]),
-             inspect(fields)
     end
 
     assert {"SCHEMA_VIOLATION", "statuses/soaked.perception"} in diags(dir, [
@@ -68,19 +39,14 @@ defmodule Loka.ContentStatusReadersTest do
            ])
   end
 
-  # Breaks (status reader 9; twin of the loader row in kernel/ts/test/status_room.test.ts): a step
-  # naming a room compiles under API 1.64, beside an npc, an item or co_present, or naming no room of
+  # Breaks (status reader 9): a step
+  # naming a room compiles beside an npc, an item or co_present, or naming no room of
   # the cartridge.
-  test "a room step needs API 1.65, stands alone and names a room", %{dir: dir} do
+  test "a room step stands alone and names a room", %{dir: dir} do
     api = &{"cartridge.json", fn c -> put_in(c, ["requires", "kernel_api", "at_least"], &1) end}
     step = &{"reactions/thunder.json", fn r -> put_in(r, ["apply"], [&1]) end}
     room = %{"op" => "status.apply", "status" => "stunned", "room" => "den"}
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.65"), step.(room)])
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in diags(dir, [
-             api.("1.64"),
-             step.(room)
-           ])
 
     for {edit, code} <- [
           {%{"npc" => "troll"}, "SCHEMA_VIOLATION"},

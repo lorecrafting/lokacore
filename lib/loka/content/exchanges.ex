@@ -1,5 +1,5 @@
 defmodule Loka.Content.Exchanges do
-  @moduledoc "Finite authored stock and equal-count exchanges; twin of cartridge_exchange.ts."
+  @moduledoc "Finite authored stock and equal-count exchanges."
   import Loka.Content.Source, only: [diag: 2, at: 2, ref: 3]
   alias Loka.Content.Refs
 
@@ -25,8 +25,7 @@ defmodule Loka.Content.Exchanges do
   defp patch(m, defs, {rel, r, k, h}) do
     steps = ["details", k, "harvest"]
 
-    api(m, at(rel, steps), if(h["tool"], do: [1, 52], else: [1, 17])) ++
-      stock(m, defs, h["items"], ref(r["key"], "room", m), at(rel, steps ++ ["items"]), true) ++
+    stock(m, defs, h["items"], ref(r["key"], "room", m), at(rel, steps ++ ["items"]), true) ++
       careful(m, defs, h, at(rel, steps ++ ["careful"]))
   end
 
@@ -60,16 +59,6 @@ defmodule Loka.Content.Exchanges do
         o["exchange"],
         not valid_choice?(m, defs, d, o),
         do: diag("OUTCOME_MISMATCH", at(rel, ["choices", k, "exchange"]))
-  end
-
-  # Harvest needs kernel_api 1.17, a tool gate (toolbox row 19) 1.52.
-  defp api(m, path, floor \\ [1, 17]) do
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if version < floor, do: [diag("KERNEL_API_RANGE_INVALID", path)], else: []
   end
 
   defp stock(m, defs, items, holder, path, harvest? \\ false) do
@@ -118,8 +107,7 @@ defmodule Loka.Content.Exchanges do
 
     valid = valid_quest?(q) and tuning?(m, defs, x)
 
-    api(m, path) ++
-      refs ++
+    refs ++
       quest_stock(m, defs, patches, x, path) ++
       if(valid, do: [], else: [diag("OUTCOME_MISMATCH", path)])
   end

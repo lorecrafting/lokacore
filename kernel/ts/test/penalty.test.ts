@@ -281,57 +281,17 @@ test('items kept: the body keeps the tail in the hall and the corpse in the yard
   assert.equal(r.world.state.containers[w.entityIds[`${P}:item/tail`]!], died.payload.corpse_id);
 });
 
-// Breaks: the loader admits a penalty below kernel_api 1.109, an experience loss without
-// levelling, an unknown narration key, or a percent or items value outside the schema.
+// Breaks: the loader admits a percent or items value outside the schema. The floor, levelling
+// and narration checks are the compiler's (content_penalty_test.exs).
 test('the loader refuses each malformed penalty', () => {
   const at = (path: string) => ['SCHEMA_VIOLATION', `.cartridge.world.death.penalty${path}`];
   assert.deepEqual(
     [
-      refused((c) => (c.manifest.requires.kernel_api.at_least = '1.108')),
-      refused((c) => {
-        delete c.world.levelling;
-        delete c.reactions[`${P}:reaction/cull_reward`];
-      }),
-      refused((c) => (penalty(c).experience.narration = 'death.nope')),
       refused((c) => (penalty(c).experience.percent = 0)),
       refused((c) => (penalty(c).experience.percent = 101)),
       refused((c) => (penalty(c).items = 'bag')),
       refused((c) => (penalty(c).items = 'kept')),
     ],
-    [
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-      at('.experience'),
-      ['UNRESOLVED_REFERENCE', '.cartridge.world.death.penalty.experience.narration'],
-      at('.experience.percent'),
-      at('.experience.percent'),
-      at('.items'),
-      'loaded',
-    ],
-  );
-});
-
-// Breaks (loka-3w3q): the loader admits death narration below kernel_api 1.117, or a fall or
-// waking line naming no text key.
-test('the loader refuses each malformed death narration', () => {
-  const lines =
-    (narration: object, api = '1.117') =>
-    (c: any) => {
-      c.manifest.requires.kernel_api.at_least = api;
-      c.world.death.narration = narration;
-    };
-  const path = (f: string) => `.cartridge.world.death.narration.${f}`;
-  assert.deepEqual(
-    [
-      refused(lines({ woke: 'combat.player_died' }, '1.116')),
-      refused(lines({ woke: 'death.nope' })),
-      refused(lines({ player_died: 'death.nope' })),
-      refused(lines({ player_died: 'combat.player_died', woke: 'death.penalty' })),
-    ],
-    [
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-      ['UNRESOLVED_REFERENCE', path('woke')],
-      ['UNRESOLVED_REFERENCE', path('player_died')],
-      'loaded',
-    ],
+    [at('.experience.percent'), at('.experience.percent'), at('.items'), 'loaded'],
   );
 });

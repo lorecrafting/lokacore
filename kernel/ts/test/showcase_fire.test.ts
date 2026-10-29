@@ -10,19 +10,7 @@ import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { key } from '../src/foundation/compose.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
-import {
-  content,
-  fresh,
-  go,
-  homestead,
-  id,
-  play,
-  ref,
-  refused,
-  reload,
-  take,
-  wait,
-} from './showcase_fixture.ts';
+import { content, fresh, go, id, play, ref, refused, take, wait } from './showcase_fixture.ts';
 import { ctx } from './harness.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-0000000f1e22';
@@ -159,93 +147,6 @@ test('budget: 64 burnables light at once, 65 fault budget_exceeded and nothing b
   const over = drop(63);
   assert.deepEqual(over.decision, { kind: 'fault', code: 'budget_exceeded' });
   assert.equal(over.limit, 'created_jobs');
-});
-
-// Twin of the compiler rows in test/loka/content_showcase_test.exs. Breaks: a barrier.set step or a
-// co_present tag loads under API 1.55 (each alone); a barrier.set to locked on a barrier without
-// key_item loads (named or by tag), or one with a key_item is refused.
-test('loader: barrier.set and co_present tag need API 1.56; to locked needs a key_item', () => {
-  const spread = (c: any) => c.reactions[ref('reaction', 'fire_spreads')].apply;
-  const at155 = (c: any) => {
-    c.manifest.requires.kernel_api.at_least = '1.55';
-    delete c.reactions[ref('reaction', 'kindle')];
-    delete c.reactions[ref('reaction', 'gate_lifted')];
-    delete c.reactions[ref('reaction', 'gate_shut')];
-    for (const r of ['boar_gore', 'tilt_boar_gore'])
-      delete c.reactions[ref('reaction', r)].on.attacker;
-    delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
-    for (const n of ['nell', 'bess']) delete c.npcs[ref('npc', n)].disposition.refuse; // 1.104
-    delete c.speech; // phrases: 1.98
-    homestead(c);
-  };
-  const untagged = (c: any) => {
-    delete spread(c)[0].tag; // and the door named, so no tag is left
-    spread(c)[1] = {
-      op: 'barrier.set',
-      to: 'open',
-      barrier: { ...C, kind: 'barrier', key: 'store_door' },
-    };
-  };
-  const noDoor = (c: any) => spread(c).splice(1, 1);
-  const api = 'KERNEL_API_RANGE_INVALID .cartridge.manifest.requires.kernel_api.at_least';
-  assert.equal(
-    reload((c) => (at155(c), untagged(c), noDoor(c))),
-    'ok',
-  );
-  assert.equal(
-    reload((c) => (at155(c), untagged(c))),
-    api,
-  );
-  assert.equal(
-    reload((c) => (at155(c), noDoor(c))),
-    api,
-  );
-
-  const door = (by: object) => (c: any) =>
-    (spread(c)[1] = { op: 'barrier.set', to: 'locked', ...by });
-  const site = `.cartridge.reactions["${ref('reaction', 'fire_spreads')}"].apply[1].to`;
-  const lockout = `BARRIER_UNREACHABLE_KEY ${site}`;
-  const named = { barrier: { ...C, kind: 'barrier', key: 'store_door' } };
-  assert.equal(reload(door({ tag: 'burnable' })), lockout);
-  assert.equal(reload(door(named)), lockout);
-  const keyed = (c: any) =>
-    (c.barriers[ref('barrier', 'store_door')].key_item = { ...C, kind: 'item', key: 'anvil' });
-  assert.equal(
-    reload((c) => (keyed(c), door({ tag: 'burnable' })(c))),
-    'ok',
-  );
-  // A keyless burnable barrier on no exit (a lid) is out of a tag's reach.
-  const stray = (c: any) => {
-    const b = { ...c.barriers[ref('barrier', 'store_door')], key: 'stray' };
-    delete b.opens_when;
-    delete b.key_item;
-    c.barriers[ref('barrier', 'stray')] = b;
-  };
-  assert.equal(
-    reload((c) => (keyed(c), stray(c), door({ tag: 'burnable' })(c))),
-    'ok',
-  );
-  // loka-kgd.103. Breaks: a trigger's room filter is ignored (a keyless burnable door on another
-  // room's exit refuses), or the room's own exits go unchecked.
-  const entering = (key: string) => (c: any) =>
-    (c.reactions[ref('reaction', 'fire_spreads')].on = {
-      event: 'entity_entered_room',
-      room: { ...C, kind: 'room', key },
-    });
-  assert.equal(
-    reload((c) => (entering('the_fold')(c), door({ tag: 'burnable' })(c))),
-    'ok',
-  );
-  assert.equal(
-    reload((c) => (entering('smithy')(c), door({ tag: 'burnable' })(c))),
-    lockout,
-  );
-  // Breaks: a barrier.set naming no barrier of the cartridge loads.
-  const gate = { barrier: { ...C, kind: 'barrier', key: 'gate' } };
-  assert.equal(
-    reload((c) => (spread(c)[1] = { op: 'barrier.set', to: 'open', ...gate })),
-    `UNRESOLVED_REFERENCE .cartridge.reactions["${ref('reaction', 'fire_spreads')}"].apply[1].barrier`,
-  );
 });
 
 /** The showcase edited, the player in the smithy carrying `carry`, the torch then dropped. */

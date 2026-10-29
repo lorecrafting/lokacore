@@ -184,34 +184,6 @@ test('neither a held light nor dark sight sees in a darkened room', () => {
   assert.equal(visible(held, held.character, troll(held)), false);
 });
 
-// Breaks (twin of test/loka/content_status_readers_test.exs): a room step loads under API 1.64, a
-// room beside an npc, an item or co_present loads, or an unknown room loads.
-test('loader: a room step needs API 1.65, stands alone and names a room of the cartridge', () => {
-  const code = (r: ReturnType<typeof edited>) =>
-    r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  const at = '.cartridge.reactions["ward_sampler@0.0.1:reaction/blessing"].apply[0]';
-  assert.deepEqual(code(edited((c) => (c.manifest.requires.kernel_api.at_least = '1.64'))), [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
-  const npc = { ...C, kind: 'npc', key: 'troll' };
-  assert.deepEqual(code(edited((c) => (shrine(c).apply[0].npc = npc))), [
-    'SCHEMA_VIOLATION',
-    `${at}.room`,
-  ]);
-  const corpse = { ...C, kind: 'item', key: 'npc_corpse' };
-  for (const beside of [{ item: corpse }, { co_present: true }])
-    assert.deepEqual(code(edited((c) => Object.assign(shrine(c).apply[0], beside))), [
-      'SCHEMA_VIOLATION',
-      `${at}.room`,
-    ]);
-  const nowhere = { ...denRef, key: 'nowhere' };
-  assert.deepEqual(code(edited((c) => (shrine(c).apply[0].room = nowhere))), [
-    'UNRESOLVED_REFERENCE',
-    `${at}.room`,
-  ]);
-});
-
 // loka-x6t.37: gloom with its own lines, applied by the shrine's entry to the shrine (where the
 // player stands) or to the den (elsewhere).
 const told = (target: 'shrine' | 'den', observed = true) => {

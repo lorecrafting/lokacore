@@ -15,7 +15,6 @@ import type { DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { knownTopics } from '../src/mechanics/topics/shared.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
-import type { Obj } from '../src/content/cartridge_refs.ts';
 import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ask-sampler-'));
@@ -226,65 +225,4 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   const t = accepted(w, { type: 'talk', target_id: id(w, 'smith') });
   assert.equal(offer(t, 'smith'), undefined);
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
-});
-
-// Breaks: the loader trusting an ask's topic, grants, texts or answer condition, its owning capability, the 1.96 floor, or an asked
-// trigger's topic.
-test('the loader refuses an unknown answer topic or grant, ask without speech@1, 1.95 and a bad trigger topic', () => {
-  const smith = `${P}npc/smith`;
-  const refusal = (change: (c: Obj) => void) => {
-    const r = reload(content, change);
-    assert.ok(!r.ok);
-    return [r.diagnostic.code, r.diagnostic.path?.split('.').at(-1)];
-  };
-  const nope = ref('topic', 'nope');
-  assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[0].topic = nope)),
-    ['UNRESOLVED_REFERENCE', 'topic'],
-  );
-  assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[0].grants = nope)),
-    ['UNRESOLVED_REFERENCE', 'grants'],
-  );
-  for (const [change, field] of [
-    [(a: Obj) => (a.unknown = 'nope'), 'unknown'],
-    [(a: Obj) => (a.answers[0].text = 'nope'), 'text'],
-    [(a: Obj) => (a.answers[1].when.root.fact = ref('fact', 'nope')), 'fact'],
-  ] as const)
-    assert.deepEqual(
-      refusal((c) => change(c.npcs[smith].ask)),
-      ['UNRESOLVED_REFERENCE', field],
-    );
-  assert.deepEqual(
-    refusal((c) => {
-      delete c.lock.capabilities.speech;
-      delete c.manifest.requires.capabilities.speech;
-      delete c.reactions[`${P}reaction/guard_smugglers`]; // its asked trigger needs speech@1 too
-    }),
-    ['UNDECLARED_CAPABILITY', 'ask'],
-  );
-  // Without topics@1 the topic definitions refuse first (cartridge_asks.ts has no topics@1 check).
-  assert.deepEqual(
-    refusal((c) => {
-      delete c.lock.capabilities.topics;
-      delete c.manifest.requires.capabilities.topics;
-    })[0],
-    'UNDECLARED_CAPABILITY',
-  );
-  // Each floor alone: the asks' (no asked trigger left), then the asked trigger's (no ask left).
-  for (const drop of [
-    (c: Obj) => delete c.reactions[`${P}reaction/guard_smugglers`],
-    (c: Obj) => Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask),
-  ])
-    assert.deepEqual(
-      refusal((c) => {
-        c.manifest.requires.kernel_api.at_least = '1.95';
-        drop(c);
-      }),
-      ['KERNEL_API_RANGE_INVALID', 'at_least'],
-    );
-  assert.deepEqual(
-    refusal((c) => (c.reactions[`${P}reaction/guard_smugglers`].on.topic = nope)),
-    ['UNRESOLVED_REFERENCE', 'topic'],
-  );
 });

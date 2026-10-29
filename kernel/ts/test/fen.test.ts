@@ -178,39 +178,3 @@ test('one long elapsed command reads birth_when at each occurrence time', () => 
   ])
     assert.ok(alive(w, DEER, 2));
 });
-
-// Breaks (loader; twin of test/loka/content_fen_test.exs): population_count under API 1.85, an
-// unknown plan, an actor leaf in a gate, or a floor above day_target loads.
-test('the loader refuses an old API, an unknown plan, an actor leaf and a high floor', () => {
-  const at = `.cartridge.populations["${DEER}"]`;
-  for (const [edit, code, path] of [
-    [
-      (c: any) => (c.manifest.requires.kernel_api.at_least = '1.85'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c: any) => (c.populations[DEER].birth_when.root.item.plan.key = 'nowhere'),
-      'UNRESOLVED_REFERENCE',
-      `${at}.birth_when.root.item.plan`,
-    ],
-    [
-      (c: any) =>
-        (c.populations[DEER].birth_when.root.item = {
-          op: 'has_item',
-          item: {
-            cartridge_id: 'fen_sampler',
-            cartridge_version: '0.0.1',
-            kind: 'item',
-            key: 'tuft',
-          },
-        }),
-      'SCHEMA_VIOLATION',
-      `${at}.birth_when`,
-    ],
-    [(c: any) => (c.populations[DEER].floor = 4), 'SCHEMA_VIOLATION', `${at}.floor`],
-  ] as const) {
-    const r = reload(base, edit);
-    assert.ok(!r.ok && r.diagnostic.code === code && r.diagnostic.path === path, JSON.stringify(r));
-  }
-});

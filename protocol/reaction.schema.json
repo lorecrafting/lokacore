@@ -39,7 +39,7 @@
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The entrant is this NPC's authored instance (toolbox row W3). Needs kernel_api at least 1.47."
+                  "description": "The entrant is this NPC's authored instance (toolbox row W3)."
                 }
               },
               "required": [
@@ -50,7 +50,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row G9 (speech@1; kernel_api at least 1.48): one spoken event per NPC that heard the word.",
+              "description": "Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.",
               "properties": {
                 "event": {
                   "const": "spoken"
@@ -73,7 +73,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row FD7 (speech@1; kernel_api at least 1.96): the actor asked an NPC about a topic.",
+              "description": "Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.",
               "properties": {
                 "event": {
                   "const": "asked"
@@ -138,7 +138,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -157,7 +157,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -272,7 +272,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "action": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -291,7 +291,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -310,7 +310,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -362,7 +362,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "victim": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -384,18 +384,18 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "hit": {
                   "type": "boolean"
                 },
                 "attacker": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches. Needs kernel_api at least 1.58."
+                  "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches."
                 },
                 "target": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches. Needs kernel_api at least 1.87."
+                  "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches."
                 }
               },
               "required": [
@@ -449,7 +449,7 @@
               "additionalProperties": false
             },
             {
-              "description": "The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body. Needs kernel_api at least 1.46.",
+              "description": "The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body.",
               "type": "object",
               "properties": {
                 "event": {
@@ -472,7 +472,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row G3 reader 2 (kernel_api at least 1.53).",
+              "description": "Toolbox row G3 reader 2.",
               "properties": {
                 "event": { "const": "status_applied" },
                 "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
@@ -509,7 +509,7 @@
           "const": true
         },
         "after": {
-          "description": "Toolbox row FD1 (kernel_api at least 1.90): the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
+          "description": "Toolbox row FD1: the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -534,7 +534,7 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "with": {
-                    "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
+                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "value": {
@@ -549,7 +549,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row 15 (kernel_api at least 1.47): adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
+                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
                 "type": "object",
                 "properties": {
                   "op": {
@@ -565,7 +565,7 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "with": {
-                    "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
+                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "amount": {
@@ -656,15 +656,15 @@
                   "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
                   "room": {
                     "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                    "description": "Status reader 9 (kernel_api at least 1.65): the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler and loader SCHEMA_VIOLATION)."
+                    "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION)."
                   },
                   "co_present": {
                     "enum": [true],
-                    "description": "Toolbox row W21 (kernel_api at least 1.50): the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION)."
+                    "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION)."
                   },
                   "tag": {
                     "$ref": "entity.schema.json#/$defs/Tag",
-                    "description": "Toolbox row W22 (kernel_api at least 1.56; only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing."
+                    "description": "Toolbox row W22 (only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing."
                   }
                 },
                 "dependentRequired": { "tag": ["co_present"] },
@@ -672,7 +672,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row W22 (Beads loka-kgd.96; kernel_api at least 1.56, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler and loader BARRIER_UNREACHABLE_KEY at to).",
+                "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).",
                 "type": "object",
                 "properties": {
                   "op": { "const": "barrier.set" },
@@ -685,7 +685,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row G3 reader 3 (kernel_api at least 1.53): end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins.",
+                "description": "Toolbox row G3 reader 3: end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "status.cure" },
@@ -705,7 +705,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row 41 (decay; kernel_api at least 1.77): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
+                "description": "Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "item.move" },
@@ -715,7 +715,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row FD5 (loka-kgd.22; kernel_api at least 1.95): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1 (kernel_api at least 1.103): plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.",
+                "description": "Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1: plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "npc.move" },
@@ -727,7 +727,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row 37a (phased world events; kernel_api at least 1.84): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
+                "description": "Toolbox row 37a (phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
                 "type": "object",
                 "properties": {
                   "op": { "const": "population.spawn" },
@@ -737,7 +737,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Homestead hs-1 (kernel_api at least 1.101): one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
+                "description": "Homestead hs-1: one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "replenish.run" },
@@ -747,7 +747,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Settle S3-1 (kernel_api at least 1.103): appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.",
+                "description": "Settle S3-1: appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "narrate" },
@@ -757,7 +757,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row FD1 (kernel_api at least 1.90): writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+                "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "fact.stamp" },

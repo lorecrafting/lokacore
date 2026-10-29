@@ -352,13 +352,7 @@ test('4097 events exceed the events budget; 4096 commit', () => {
   }
 });
 
-const fails = (
-  f: (c: any) => void,
-  code: string,
-  path: string,
-  data: object = {},
-  suggested: string[] = [],
-) =>
+const fails = (f: (c: any) => void, code: string, path: string, data: object = {}) =>
   assert.deepEqual(load(f), {
     ok: false,
     diagnostic: {
@@ -367,22 +361,15 @@ const fails = (
       path,
       message_key: `diagnostics.${code.toLowerCase()}`,
       data,
-      suggested_capabilities: suggested,
+      suggested_capabilities: [],
     },
   });
-const unlock = (c: any, cap: string) => {
-  delete c.manifest.requires.capabilities[cap];
-  delete c.lock.capabilities[cap];
-};
 const at = (key: string) => `.cartridge.reactions["${G}:reaction/${key}"]`;
 const rule = (c: any, key: string) => c.reactions[`${G}:reaction/${key}`];
 
-// Breaks: the loader admitting what the compiler rejects (test/loka/content_green_test.exs): a
-// trigger of an unregistered event type, a trigger, `when` or fact.assign naming a fact or room the
-// cartridge lacks (the kernel would never match it, or assign an undeclared fact), a value not
-// of its fact's type, or a reaction, its trigger's event or its fact.assign's fact_changed whose
-// owner (reaction@1, fact@1) is not locked.
-test('the loader checks reaction triggers, consequences and owners', () => {
+// Breaks: the loader admitting a trigger of an unregistered event type or a reaction keyed outside
+// its kind. Unresolved names and fact types are the compiler's (test/loka/content_green_test.exs).
+test('the loader checks reaction trigger events and keys', () => {
   fails(
     (c) => (rule(c, 'ring').on.event = 'bell_rung'),
     'SCHEMA_VIOLATION',
@@ -396,70 +383,6 @@ test('the loader checks reaction triggers, consequences and owners', () => {
     'SCHEMA_VIOLATION',
     `.cartridge.reactions["${G}:quest/ring"]`,
     { error: 'pattern_mismatch' },
-  );
-  fails(
-    (c) => (rule(c, 'gossip').on.fact = ref('fact', 'rumour')),
-    'UNRESOLVED_REFERENCE',
-    `${at('gossip')}.on.fact`,
-    { target: `${G}:fact/rumour` },
-  );
-  fails(
-    (c) => (rule(c, 'gossip').when.root.fact = ref('fact', 'rumour')),
-    'UNRESOLVED_REFERENCE',
-    `${at('gossip')}.when.root.fact`,
-    { target: `${G}:fact/rumour` },
-  );
-  fails(
-    (c) => (rule(c, 'ring').on.room = ref('room', 'tower')),
-    'UNRESOLVED_REFERENCE',
-    `${at('ring')}.on.room`,
-    { target: `${G}:room/tower` },
-  );
-  // W1: a new kind's filter naming a definition the cartridge lacks.
-  fails(
-    (c) => (rule(c, 'ring').on = { event: 'item_dropped', item: ref('item', 'nope') }),
-    'UNRESOLVED_REFERENCE',
-    `${at('ring')}.on.item`,
-    { target: `${G}:item/nope` },
-  );
-  fails(
-    (c) => (rule(c, 'ring').apply[0].fact = ref('fact', 'bell')),
-    'UNRESOLVED_REFERENCE',
-    `${at('ring')}.apply[0].fact`,
-    { target: `${G}:fact/bell` },
-  );
-  fails(
-    (c) => (rule(c, 'ring').apply[0].value = 1),
-    'FACT_TYPE_MISMATCH',
-    `${at('ring')}.apply[0].value`,
-  );
-  fails(
-    (c) => unlock(c, 'reaction'),
-    'UNDECLARED_CAPABILITY',
-    at('bell_falls'),
-    { capability: 'reaction' },
-    ['reaction@1'],
-  );
-  // Without fact@1 and every other use of it: only `key`'s trigger, or its one fact.assign, uses it.
-  const only = (key: string, apply?: []) => (c: any) => {
-    unlock(c, 'fact');
-    const r = rule(c, key);
-    delete r.when;
-    c.reactions = { [`${G}:reaction/${key}`]: apply ? { ...r, apply } : r };
-  };
-  fails(
-    only('gossip', []),
-    'UNDECLARED_CAPABILITY',
-    `${at('gossip')}.on.event`,
-    { capability: 'fact' },
-    ['fact@1'],
-  );
-  fails(
-    only('ring'),
-    'UNDECLARED_CAPABILITY',
-    `${at('ring')}.apply[0].op`,
-    { capability: 'fact' },
-    ['fact@1'],
   );
 });
 

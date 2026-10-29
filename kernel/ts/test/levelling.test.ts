@@ -178,61 +178,6 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
   assert.ok(narration(up).includes(LEVEL_UP));
 });
 
-// Breaks: the loader drops a levelling check, so an artifact with an old API floor, no
-// attributes@1, non-rising thresholds, an unknown NPC or text, or a grant without world.levelling
-// loads and fails in play. Equal thresholds catch `<` for `<=`.
-test('the loader refuses each unsound levelling declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const at = '.cartridge.world.levelling';
-  const api = '.cartridge.manifest.requires.kernel_api.at_least';
-  const grant = '.cartridge.reactions["levelling_sampler@0.0.1:reaction/cull_reward"].apply[0].op';
-  const rows: [(c: any) => void, string, string][] = [
-    [(c) => (c.manifest.requires.kernel_api.at_least = '1.41'), 'KERNEL_API_RANGE_INVALID', api],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.41';
-        delete c.world.levelling;
-      },
-      'KERNEL_API_RANGE_INVALID',
-      api,
-    ],
-    [(c) => delete c.world.levelling, 'SCHEMA_VIOLATION', grant],
-    [
-      (c) => {
-        delete c.manifest.requires.capabilities.attributes;
-        delete c.lock.capabilities.attributes;
-        delete c.attributes;
-        delete c.world.derived;
-      },
-      'UNDECLARED_CAPABILITY',
-      at,
-    ],
-    [(c) => (c.world.levelling.thresholds = [30, 30]), 'SCHEMA_VIOLATION', `${at}.thresholds[1]`],
-    [(c) => (c.world.levelling.thresholds = [30, 20]), 'SCHEMA_VIOLATION', `${at}.thresholds[1]`],
-    [
-      (c) => (c.world.levelling.kills[1].npc.key = 'wolf'),
-      'UNRESOLVED_REFERENCE',
-      `${at}.kills[1].npc`,
-    ],
-    [
-      (c) => (c.world.levelling.level_up = 'levelling.missing'),
-      'UNRESOLVED_REFERENCE',
-      `${at}.level_up`,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path], path);
-  }
-});
-
 /** The sampler with its loaded levelling declaration changed by `change`. */
 function variant(change: (l: any) => void) {
   const c = structuredClone(content);

@@ -216,25 +216,6 @@ test('independent resource replay honors authored gain boundaries', () => {
   );
 });
 
-// Breaks: malformed calendar or impossible schedule/window reaches runtime arithmetic.
-test('loader refuses malformed calendar and out-of-day references', () => {
-  for (const mutate of [
-    (c: any) => {
-      c.calendar.solar[1].at = 100;
-    },
-    (c: any) => {
-      c.calendar.lunar.phases[1].phase = 'new';
-    },
-    (c: any) => {
-      c.calendar.units_per_hour = 101;
-    },
-    (c: any) => {
-      c.npcs['ferry_sampler@0.0.1:npc/bram'].daily_schedule['10'] = c.entry;
-    },
-  ])
-    assert.equal(load(mutate).ok, false);
-});
-
 // Breaks: removing a new schema minimum, required field, or phase-key pattern admits malformed content.
 test('calendar schema guards refuse malformed bounded fields', () => {
   const cal = { start: 0, units_per_hour: 100, hours_per_day: 10, subdivisions_per_hour: 10 };

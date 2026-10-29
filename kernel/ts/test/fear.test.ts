@@ -14,7 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
-import { cartridgeOf, ctx, verdict } from './harness.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fear-sampler-'));
 let artifact: Uint8Array;
@@ -215,40 +215,4 @@ test('co_present with no room frightens no one', () => {
     () => 'j' as never,
   );
   assert.deepEqual(r && r.kind === 'accepted' ? r.delta.ops : r, []);
-});
-
-const base = cartridgeOf(artifact);
-const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-const afraid = (c: any) => c.statuses['fear_sampler@0.0.1:status/afraid'];
-const leader = '.cartridge.reactions["fear_sampler@0.0.1:reaction/leader_fell"]';
-const fell = (c: any) => c.reactions['fear_sampler@0.0.1:reaction/leader_fell'].apply[0];
-
-// Breaks (twin of test/loka/content_fear_test.exs): the loader admits a fear status or a
-// co_present step (each alone) under API 1.49, or a co_present step that also names its holder.
-// The sampler's load above fails if one without per_tick is refused.
-test('fear and co_present need API 1.50; co_present names no holder', () => {
-  const at149 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.49');
-  assert.deepEqual(
-    verdict(base, (c) => {
-      at149(c);
-      delete c.reactions['fear_sampler@0.0.1:reaction/leader_fell'];
-    }),
-    api,
-  );
-  assert.deepEqual(
-    verdict(base, (c) => {
-      at149(c);
-      delete afraid(c).fear;
-      afraid(c).per_tick = -1;
-    }),
-    api,
-  );
-  for (const [field, key] of [
-    ['npc', 'guard'],
-    ['item', 'ear'],
-  ])
-    assert.deepEqual(
-      verdict(base, (c) => (fell(c)[field] = { ...fell(c).status, kind: field, key })),
-      ['SCHEMA_VIOLATION', `${leader}.apply[0].${field}`],
-    );
 });

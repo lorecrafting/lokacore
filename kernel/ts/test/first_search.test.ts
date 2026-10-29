@@ -7,8 +7,7 @@ import { accepted, allocator } from '../src/runtime/decision.ts';
 import { admit, adopt } from '../src/runtime/proposal.ts';
 import { sequence, triggered } from '../src/mechanics/reaction.ts';
 import { gameview_agrees_with_admission } from '../src/view/invariants_view.ts';
-import { read } from './read.ts';
-import { genesis, load, prefix, ref } from './search_fixture.ts';
+import { genesis, prefix, ref } from './search_fixture.ts';
 
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const actor = genesis().character;
@@ -242,51 +241,6 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
       ),
   );
   assert.equal(result.decision.events[2].actor_id, actor);
-});
-
-// Breaks: loader leaves the new quest refs unchecked, accepts activation under an actorless
-// trigger (fact_changed; entering is legal since loka-kgd.150.2), omits quest/reaction lock ownership, or permits an older kernel API range.
-test('loader rejects missing quest references, trigger misuse and missing ownership locks', () => {
-  for (const [change, code] of [
-    [
-      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].on.quest.key = 'absent'),
-      'UNRESOLVED_REFERENCE',
-    ],
-    [
-      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest.key = 'absent'),
-      'UNRESOLVED_REFERENCE',
-    ],
-    [
-      (c: any) =>
-        (c.reactions[`${prefix}:reaction/start_search`].on = {
-          event: 'fact_changed',
-          fact: ref('fact', 'tracks_found'),
-        }),
-      'OUTCOME_MISMATCH',
-    ],
-    [
-      (c: any) => {
-        delete c.lock.capabilities.quest;
-        delete c.manifest.requires.capabilities.quest;
-      },
-      'UNDECLARED_CAPABILITY',
-    ],
-    [
-      (c: any) => {
-        delete c.lock.capabilities.reaction;
-        delete c.manifest.requires.capabilities.reaction;
-      },
-      'UNDECLARED_CAPABILITY',
-    ],
-    [
-      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest = 'lost_lamb'),
-      'SCHEMA_VIOLATION',
-    ],
-  ] as const) {
-    const c = load(change);
-    assert.ok(!c.ok);
-    assert.equal(c.diagnostic.code, code);
-  }
 });
 
 // Breaks: a notice-only unavailable recipe or an absent recipe vacuously agrees with an

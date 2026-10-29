@@ -34,21 +34,9 @@ defmodule Loka.Content.Dreams do
   defp capabilities(m) do
     caps = m["requires"]["capabilities"]
 
-    missing =
-      for cap <- ~w(position scene quest dialogue reaction fact resource death service),
-          caps[cap] != 1,
-          do: bad("cartridge.requires.capabilities.#{cap}")
-
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    missing ++
-      if(api < [1, 25],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-      )
+    for cap <- ~w(position scene quest dialogue reaction fact resource death service),
+        caps[cap] != 1,
+        do: bad("cartridge.requires.capabilities.#{cap}")
   end
 
   defp binding(rel, path, r, ctx) do

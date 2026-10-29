@@ -154,7 +154,7 @@ function tip(world: World, actor: CharacterId, recipe: ActionRecipe, run: Run): 
   return { ...tipped, lines: [...tipped.lines, { key: recipe.tip }] };
 }
 
-// The narration's participants as EntityIds; the loader checked each npc or item resolves.
+// The narration's participants as EntityIds; the compiler checked each npc or item resolves.
 function pinned(world: World, participants: RecipeNarration['participants'], body: EntityId) {
   if (!participants) return {};
   const id = (p: NarrationParticipant) =>
@@ -239,7 +239,7 @@ const step =
   (world: World, command: Command, mint: Mint, subject_id: EntityId, body: EntityId) =>
   (r: Run, s: RecipeStep): Run => {
     if (s.op === 'build') {
-      const site = recipeOf(world, command.payload)!.target; // a detail (the loader's builds)
+      const site = recipeOf(world, command.payload)!.target; // a detail (the compiler's build check)
       if (site.kind !== 'detail') return r;
       const b = { blueprint: s.blueprint, site: site.room, direction: s.direction };
       return { ...r, ops: [...r.ops, ...created(world, b, command.payload.actor_id, mint)] };

@@ -307,7 +307,7 @@ body, directly or nested), `barrier_state`, `quest_state` (false while the actor
 instance), `time_window` (hour of day from the validated cartridge calendar, wrapping windows allowed),
 `target_present` (the action's target is in reach, `:47`), and `stat_compare` and
 `resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60)). An op outside this list throws:
-the loader closes the set (`content/cartridge.ts:160`).
+the loader closes the set (its schema stage, `content/cartridge.ts:78`).
 
 ## Target resolution
 
@@ -331,7 +331,7 @@ adjacent-sight projection, rule, content artifact or saved state
 
 EntityView, ContentView and the combat opponent (`combat` and each `active_opponents`
 member) carry `words` copied from the definition while the selected short is the base
-`short`; a holding `short_variants` entry omits them (loka-6qi, kernel_api 1.118).
+`short`; a holding `short_variants` entry omits them (loka-6qi).
 
 NoticeView and NoticeBoardView carry `key`, the authored detail Key, so a presenter can match
 a touch link ([cartridge.md](cartridge.md#compiler)) in the selected description to the
@@ -539,7 +539,7 @@ bound-role and direct-custody checks. No GameView shape, command or event is add
 
 API1.11 introduces escort@1's bounded relation branch, actor-keyed mutation target and
 preconditioned escort.transition, plus the authored dialogue effect and escort_state
-policy leaf described in [mechanics](mechanics.md#escort1). Contracts, compiler and loader
+policy leaf described in [mechanics](mechanics.md#escort1). Contracts and the compiler
 validate typed IDs/references, role/quest agreement, supported transitions and feature
 minimum. The portable delta composer in both kernels checks full prior-row equality, legal
 status edges and immutable binding. Runtime adoption and changed-row persistence add only
@@ -661,7 +661,7 @@ needed for this consumer.
 
 The installed wire shape is `buy`/`sell` with `actor_id`, `provider_id`, `item_id`
 and positive `quoted_price`. `ActionInput.quoted_price` carries that displayed quote;
-ordered invocation targets are provider then item. API 1.16 adds NPC `shop` with
+ordered invocation targets are provider then item. NPC `shop` has
 one conserved `resource`, finite `offers` (`item`, `buy`, `sell`) and `bought`/`sold`
 narration keys. Each NPC `EntityView.shop` row carries `item_id`, `name` and its
 Buy/Sell price, availability and optional typed refusal reason. Runtime admission
@@ -694,7 +694,7 @@ consequences and the bound receipt command prove the result. Register the actual
 command/outcome ownership and invariants; do not invent receipt fields. The receipt command identifies its
 original provider/service for confirmed narration routing and save validation.
 
-`service@1` requires kernel API **1.23**. `ServiceDefinition` binds its original
+`ServiceDefinition` binds its original
 provider, exact authored action key, currency, price, label/narration and one
 closed `ServiceBenefit`: entitlement fact, meal stock/debit/MV, or provider-held
 vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
@@ -703,7 +703,7 @@ and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
 valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
 paid, full MV, sold out and unavailable exact payment without changing error codes.
 `GameError` and `UnavailableReason` may also carry `cause`, a closed `RefusalCause`
-(`error.schema.json`; kernel_api 1.111, owner Q13 option A): the one reason a shared code
+(`error.schema.json`, owner Q13 option A): the one reason a shared code
 stands for, so a client can tell the player. `not_standing` is a move while the actor is not
 standing (`invalid_state`, position@1); `cursed` is a remove a curse holds on (`invalid_state`,
 equipment@1, loka-x6t.38). The code stays the contract; a
@@ -825,11 +825,9 @@ Item definitions opt into `fuel`: a supply declares `kind: supply`, positive
 `supply` reference and the `ignited`, `doused`, `refueled` narration keys. Runtime
 immutable `fuel_specs` bind these specifications to their actual item instances;
 mutable `fuel` rows are keyed by item ID. A room's optional `dark_description`
-is its authored darkness opt-in; the optional `dark: true` flag (kernel_api 1.114)
-darkens a room with no text of its own, read as the engine key `place.dark`. Actual
-fuel or darkness fields require a `requires.kernel_api.at_least` floor of 1.19 (1.114
-for `dark`) in both compiler and loader;
-an unused reserved light capability does not impose that floor. `FuelView` carries confirmed `remaining`,
+is its authored darkness opt-in; the optional `dark: true` flag
+darkens a room with no text of its own, read as the engine key `place.dark`.
+`FuelView` carries confirmed `remaining`,
 `capacity`, and effective `lit` without a presenter clock.
 
 Add only immutable per-item fuel specifications needed to validate those rows.
@@ -1010,8 +1008,7 @@ No due-job chain, new player verb, global objective interpreter or per-frame wri
 is needed. Declare new typed state/transition bounds and planted invalid fixtures;
 update generated contracts and current release pins in the implementation PR.
 
-C2 typed patrol state and drawn control input require kernel API **1.22**.
-The concrete row is `PatrolRelation`, stored in `State.patrols` by QuestInstanceId:
+The concrete patrol row is `PatrolRelation`, stored in `State.patrols` by QuestInstanceId:
 actor/body/NPC, quest instance, activation continuation/choice, accepted command
 `attempt_id`, route `cursor`, ordered unique room-ID `credit` and status.
 `patrol.transition` targets that quest instance and compares its full prior row.
@@ -1279,8 +1276,9 @@ Typed character-owned visited-room and observed-NPC rows are the only new gamepl
 knowledge. Their delta operations are written by the accepted entry/Look decision and
 committed with the receipt; GameView, Map, Where and Knock never write them while
 projecting. Observation retains exact entity ID, last visible room and logical time.
-The loader rejects unknown room/NPC refs and evidence inconsistent with character
-ownership or visible committed observation. GameView carries only the actor's known
+The compiler rejects unknown room/NPC refs and evidence inconsistent with character
+ownership or visible committed observation; the loader checks only integrity and install.
+GameView carries only the actor's known
 rooms, observed targets and current-room door options, with no hidden coordinates,
 unobserved NPC names or live remote positions. Where applies Look/direct-target current
 visibility before returning `here` for an exact present NPC; hidden co-location falls

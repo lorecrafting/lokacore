@@ -11,12 +11,20 @@ defmodule Loka.ContentBleedTest do
       {"items/bandage.json", &put_in(&1, ["bandage", "skill"], "missing")},
       {"items/bandage.json", &put_in(&1, ["bandage", "action"], "eat")},
       {"items/bandage.json", &Map.put(&1, "container", true)},
-      {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.29")}
+      {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")}
     ]
 
     for {file, change} <- cases do
       assert {:error, _} = Loka.ContentSource.compile(dir, [{file, change}]), file
     end
+  end
+
+  # Breaks: a bleed declaration without food@1 compiles, or is refused under another code or path.
+  test "bleed without the food capability is UNDECLARED_CAPABILITY at the manifest", %{dir: dir} do
+    drop = &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "food") end)
+    assert {:error, ds} = Loka.ContentSource.compile(dir, [{"cartridge.json", drop}])
+
+    got = Enum.map(ds, &{&1["code"], &1["path"], &1["data"]["capability"]})
+    assert {"UNDECLARED_CAPABILITY", "cartridge.requires.capabilities", "food"} in got
   end
 end

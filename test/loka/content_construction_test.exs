@@ -5,9 +5,7 @@ defmodule Loka.ContentConstructionTest do
   @kat JSON.decode!(File.read!("protocol/fixtures/build_sampler_hash.json"))
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
   defp lane(f), do: {"rooms/lane.json", &update_in(&1, ["site"], f)}
-  defp api(v), do: {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], v)}
   defp hut(path, v), do: {"blueprints/hut.json", &put_in(&1, path, v)}
-  @floor {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
 
   # Breaks: a blueprint, its variant or enter lock, a site (its short blueprint ref expanded) or
   # world.construction dropped or reshaped in the artifact (protocol/fixtures/build_sampler_hash.json).
@@ -18,9 +16,8 @@ defmodule Loka.ContentConstructionTest do
 
   # Breaks (Built rooms S1): the compiler accepts a site direction the room has an exit in, a site
   # blueprint the cartridge does not define, a blueprint text key, enter-lock fact or (S4)
-  # weathering or ruin status it does not define, or construction content below kernel_api 1.99 (the TS
-  # loader refuses them too; construction.test.ts).
-  test "a site names no exit direction and only defined blueprints; construction needs 1.99" do
+  # weathering or ruin status it does not define.
+  test "a site names no exit direction and only defined blueprints" do
     dir = Loka.ContentSource.copy(@dir)
     exit = {"rooms/lane.json", &put_in(&1, ["exits"], %{"north" => %{"to" => "lane"}})}
     missing = lane(&put_in(&1, ["blueprints"], ["hut", "shed"]))
@@ -28,7 +25,6 @@ defmodule Loka.ContentConstructionTest do
     for {edits, expected} <- [
           {[exit], [{"SITE_EXIT_CONFLICT", "rooms/lane.site.directions[0]"}]},
           {[missing], [{"UNRESOLVED_REFERENCE", "rooms/lane.site.blueprints[1]"}]},
-          {[api("1.98")], [@floor]},
           {[hut(["title"], "blueprint.hut.nope")],
            [{"UNRESOLVED_REFERENCE", "blueprints/hut.title"}]},
           {[hut(["variants", Access.at(0), "description"], "blueprint.hut.nope")],
@@ -41,30 +37,6 @@ defmodule Loka.ContentConstructionTest do
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected
-    end
-
-    # Each trigger alone: world.construction, a blueprint or a site still needs 1.99.
-    only_world = [
-      api("1.98"),
-      {"blueprints/hut.json", nil},
-      {"rooms/lane.json", &Map.delete(&1, "site")}
-    ]
-
-    only_blueprint = [
-      api("1.98"),
-      {"cartridge.json", &Map.delete(&1, "world")},
-      {"rooms/lane.json", &Map.delete(&1, "site")}
-    ]
-
-    only_site = [
-      api("1.98"),
-      {"blueprints/hut.json", nil},
-      {"cartridge.json", &Map.delete(&1, "world")}
-    ]
-
-    for edits <- [only_world, only_blueprint, only_site] do
-      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
-      assert @floor in pairs(diags), inspect(diags)
     end
 
     unowned =
@@ -87,8 +59,7 @@ defmodule Loka.ContentConstructionTest do
   end
 
   # Breaks (Built rooms S2): the compiler admits a build service whose direction is not in the
-  # site's directions, whose blueprint the site does not list, or whose site does not resolve
-  # (the TS loader refuses them too; construction.test.ts).
+  # site's directions, whose blueprint the site does not list, or whose site does not resolve.
   # Breaks (Built rooms S3): the compiler admits a claim on a build commission or a build fact that
   # is not a false-default player bool (construction.test.ts pins the TS side).
   # Breaks (Built rooms S4): the compiler admits a mend whose direction is not its site's, whose

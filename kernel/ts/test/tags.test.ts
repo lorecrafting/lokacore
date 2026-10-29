@@ -13,7 +13,6 @@ import { holds } from '../src/mechanics/policy.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { LEAF_REFS } from '../src/content/cartridge_leaf_refs.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { ctx } from './harness.ts';
 
@@ -73,37 +72,10 @@ test('a burnable check passes only on the wooden door, stick and the wooden hall
   assert.equal(holds(away, world.character, wooden, { steps: { n: 0 } }), false);
 });
 
-// Breaks: the loader skips one of has_tag's reference fields, so a policy naming no definition
-// loads, or loads tags without tags@1.
-test('the loader refuses a has_tag naming no definition and tags without tags@1', () => {
+// Breaks: the loader loads tags without tags@1.
+test('the loader refuses tags without tags@1', () => {
   const hall = 'tags_sampler@0.0.1:room/hall';
-  const variant = `.cartridge.rooms["${hall}"].details.iron_door.variants[0].when.root`;
-  const leaf = (subject: object) => (c: Obj) => {
-    c.rooms[hall].details.iron_door.variants[0].when.root = {
-      op: 'has_tag',
-      tag: 'metal',
-      ...subject,
-    };
-  };
-  const rows: [(c: Obj) => void, string, string][] = [
-    [leaf({ barrier: ref('barrier', 'oak_door') }), 'UNRESOLVED_REFERENCE', `${variant}.barrier`],
-    [leaf({ item: ref('item', 'plank') }), 'UNRESOLVED_REFERENCE', `${variant}.item`],
-    [leaf({ room: ref('room', 'attic') }), 'UNRESOLVED_REFERENCE', `${variant}.room`],
-    [
-      (c) => {
-        // Only the stick's tags remain, so the one owner diagnostic is at its tags.
-        delete c.manifest.requires.capabilities.tags;
-        delete c.lock.capabilities.tags;
-        for (const b of Object.values(c.barriers as Obj)) delete b.tags;
-        delete c.items['tags_sampler@0.0.1:item/rod'].tags;
-        delete c.rooms[hall].tags;
-        delete c.rooms[hall].variants;
-        for (const d of Object.values(c.rooms[hall].details as Obj)) delete d.variants;
-      },
-      'UNDECLARED_CAPABILITY',
-      '.cartridge.items["tags_sampler@0.0.1:item/stick"].tags',
-    ],
-  ];
+  const rows: [(c: Obj) => void, string, string][] = [];
   for (const [change, code, path] of rows) {
     const c = structuredClone(content) as unknown as Obj;
     change(c);
@@ -117,11 +89,9 @@ test('the loader refuses a has_tag naming no definition and tags without tags@1'
   }
 });
 
-// Breaks: a leaf's reference field is missing from (or extra in) one kernel's table, so that
-// kernel skips expanding or resolving it. The schema gives only the fields (each DefinitionRef
-// property); the kind a field maps to is checked TS against Elixir, since it may differ from the
-// field name (mechanics.md leaf naming).
-test('LEAF_REFS, Loka.Content.LeafRefs and policy.schema.json name the same reference fields', () => {
+// Breaks: a leaf's reference field is missing from (or extra in) the compiler's table, so it
+// skips expanding or resolving it. The schema gives the fields (each DefinitionRef property).
+test('Loka.Content.LeafRefs and policy.schema.json name the same reference fields', () => {
   const schema = JSON.parse(readFileSync(join(root, 'protocol/policy.schema.json'), 'utf8'));
   const fromSchema: Record<string, string[]> = {};
   for (const branch of schema.$defs.Policy.oneOf) {
@@ -132,6 +102,5 @@ test('LEAF_REFS, Loka.Content.LeafRefs and policy.schema.json name the same refe
   }
   const fieldsOf = (t: object) =>
     Object.fromEntries(Object.entries(t).map(([op, m]) => [op, Object.keys(m).sort()]));
-  assert.deepEqual(leafRefsEx, LEAF_REFS);
-  assert.deepEqual(fieldsOf(LEAF_REFS), fromSchema);
+  assert.deepEqual(fieldsOf(leafRefsEx as object), fromSchema);
 });

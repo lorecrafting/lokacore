@@ -15,7 +15,7 @@ const skin = (key: string, keywords: string[]) => ({
   vessel: { capacity: 4, unit_label: 'liquid.units', initial: { kind: null, quantity: 0 } },
 });
 
-export function liquid(c: any) {
+function liquid(c: any) {
   light(c);
   for (const cap of ['liquid', 'readable']) {
     c.manifest.requires.capabilities[cap] = 1;

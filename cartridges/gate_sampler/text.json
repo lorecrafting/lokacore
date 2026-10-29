@@ -12,6 +12,6 @@
   "item.iron_key.description": "A heavy iron key, its bow shaped like a ring.",
   "barrier.oak_door.short": "the oak door",
   "barrier.cell_door.short": "the cell door",
-  "actions.knock": "Knock on the oak door",
-  "narration.knock.actor": "You rap on the oak door. The knocks echo in the courtyard beyond; no one answers."
+  "actions.knock_door": "Knock on the oak door",
+  "narration.knock_door.actor": "You rap on the oak door. The knocks echo in the courtyard beyond; no one answers."
 }

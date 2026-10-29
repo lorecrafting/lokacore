@@ -15,7 +15,7 @@ import type { EntityId } from '../src/contracts.gen.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { triggered } from '../src/mechanics/reaction.ts';
-import { cartridgeOf, ctx, verdict } from './harness.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-witness-'));
 let artifact: Uint8Array;
@@ -168,43 +168,4 @@ test('the baker is never his own witness', () => {
     } as never).some((r) => r.key === 'witnessed');
   assert.equal(got(w.body), true);
   assert.equal(got(id(w, 'npc/baker')), false);
-});
-
-const base = cartridgeOf(artifact);
-
-// Breaks: the loader's witness reference, spawn-template check, 1.95 floor or the npc.move step's
-// checks skipped (twin of test/loka/content_witness_test.exs).
-test('the loader refuses a template witness, a pre-1.95 manifest and a bad npc.move', () => {
-  const rule = `.cartridge.reactions["${S}:reaction/witnessed"]`;
-  const on = (c: any) => c.reactions[`${S}:reaction/witnessed`].on;
-  const move = (s: object) => (c: any) =>
-    (c.reactions[`${S}:reaction/witnessed`].apply = [{ op: 'npc.move', ...s }]);
-  assert.equal(
-    verdict(base, () => {}),
-    'loaded',
-  );
-  assert.deepEqual(
-    verdict(base, (c) => (c.npcs[`${S}:npc/baker`].spawn_template = true)),
-    ['SCHEMA_VIOLATION', `${rule}.on.witness`],
-  );
-  assert.deepEqual(
-    verdict(base, (c) => (on(c).witness = { ...on(c).witness, key: 'ghost' })),
-    ['UNRESOLVED_REFERENCE', `${rule}.on.witness`],
-  );
-  assert.deepEqual(
-    verdict(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.94')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  assert.deepEqual(verdict(base, move({ npc: ref('npc', 'baker'), room: ref('room', 'attic') })), [
-    'UNRESOLVED_REFERENCE',
-    `${rule}.apply[0].room`,
-  ]);
-  assert.deepEqual(
-    verdict(base, (c) => {
-      move({ npc: ref('npc', 'baker') })(c);
-      c.npcs[`${S}:npc/baker`].spawn_template = true;
-      delete on(c).witness;
-    }),
-    ['SCHEMA_VIOLATION', `${rule}.apply[0].npc`],
-  );
 });

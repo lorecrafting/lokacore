@@ -15,9 +15,9 @@ defmodule Loka.ContentPenaltyTest do
     assert Loka.Content.compile(@dir) == {:ok, expected, []}
   end
 
-  # Breaks (row 47): the compiler admits an experience penalty without world.levelling, an
-  # unknown narration key, or world.death.penalty below kernel_api 1.109.
-  test "penalty refusals match the TS loader" do
+  # Breaks (row 47): the compiler admits an experience penalty without world.levelling, or an
+  # unknown narration key.
+  test "penalty refusals" do
     dir = Loka.ContentSource.copy(@dir)
     path = "cartridge.world.death.penalty.experience"
 
@@ -30,18 +30,15 @@ defmodule Loka.ContentPenaltyTest do
                ["world", "death", "penalty", "experience", "narration"],
                "death.nope"
              )
-           ], [{"UNRESOLVED_REFERENCE", path <> ".narration"}]},
-          {[edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.108")],
-           [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]}
+           ], [{"UNRESOLVED_REFERENCE", path <> ".narration"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected
     end
   end
 
-  # Breaks (loka-3w3q): the compiler admits a fall or waking line naming no text key (the
-  # kernel_api 1.117 floor is a protocol/fixtures/loader_floors.json case).
-  test "death narration refusals match the TS loader" do
+  # Breaks (loka-3w3q): the compiler admits a fall or waking line naming no text key.
+  test "death narration refusals" do
     dir = Loka.ContentSource.copy(@dir)
     api = edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.117")
 

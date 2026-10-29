@@ -323,8 +323,7 @@
       "kernel/ts/src/mechanics/quest/lifecycle.ts",
       "kernel/ts/src/commands/actions.ts",
       "kernel/ts/src/mechanics/policy.ts",
-      "kernel/ts/src/view/view.ts",
-      "kernel/ts/src/content/cartridge_quests.ts"
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_errand_hash.json",
@@ -384,8 +383,7 @@
       "kernel/ts/src/mechanics/reaction.ts",
       "kernel/ts/src/runtime/proposal.ts",
       "kernel/ts/src/runtime/world.ts",
-      "kernel/ts/src/foundation/compose.ts",
-      "kernel/ts/src/content/cartridge_refs.ts"
+      "kernel/ts/src/foundation/compose.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_green_hash.json"
@@ -405,8 +403,7 @@
       "DecisionResult"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/action_recipe/rule.ts",
-      "kernel/ts/src/content/cartridge_refs.ts"
+      "kernel/ts/src/mechanics/action_recipe/rule.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -436,7 +433,6 @@
       "kernel/ts/src/commands/actions.ts",
       "kernel/ts/src/runtime/proposal.ts",
       "kernel/ts/src/view/view.ts",
-      "kernel/ts/src/content/cartridge_dialogues.ts",
       "kernel/ts/src/mechanics/dialogue/selection.ts",
       "kernel/ts/src/mechanics/dialogue/behavior.ts"
     ],
@@ -562,7 +558,6 @@
     "modules": [
       "kernel/ts/src/mechanics/death/sequence.ts",
       "kernel/ts/src/runtime/created.ts",
-      "kernel/ts/src/content/cartridge_death.ts",
       "lib/loka/content/death.ex"
     ],
     "fixtures": [
@@ -826,7 +821,6 @@
     "modules": [
       "kernel/ts/src/mechanics/service/shared.ts",
       "kernel/ts/src/view/services.ts",
-      "kernel/ts/src/content/cartridge_services.ts",
       "lib/loka/content/services.ex",
       "mobile/authority/local-story/receipt-history.ts"
     ],
@@ -852,7 +846,6 @@
     "modules": [
       "kernel/ts/src/mechanics/transport/shared.ts",
       "kernel/ts/src/view/transports.ts",
-      "kernel/ts/src/content/cartridge_transports.ts",
       "lib/loka/content/transports.ex",
       "mobile/authority/local-story/receipt-history.ts"
     ],
@@ -878,7 +871,6 @@
     "modules": [
       "kernel/ts/src/mechanics/food/shared.ts",
       "kernel/ts/src/view/food.ts",
-      "kernel/ts/src/content/cartridge_food.ts",
       "lib/loka/content/food.ex",
       "lib/loka/core/compose_food.ex",
       "lib/loka/core/invariants_food.ex",
@@ -939,7 +931,6 @@
     "modules": [
       "kernel/ts/src/mechanics/status/shared.ts",
       "kernel/ts/src/mechanics/status/job.ts",
-      "kernel/ts/src/content/cartridge_status.ts",
       "kernel/ts/src/foundation/compose_status.ts",
       "lib/loka/content/status.ex",
       "lib/loka/core/compose_status.ex"
@@ -999,7 +990,6 @@
     "modules": [
       "kernel/ts/src/mechanics/expedition/shared.ts",
       "kernel/ts/src/mechanics/expedition/sequence.ts",
-      "kernel/ts/src/content/cartridge_expedition.ts",
       "kernel/ts/src/foundation/compose_expedition.ts",
       "lib/loka/content/expedition.ex",
       "lib/loka/core/compose_expedition.ex",
@@ -1032,7 +1022,6 @@
     ],
     "modules": [
       "lib/loka/content/map_positions.ex",
-      "kernel/ts/src/content/cartridge_refs.ts",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
       "kernel/ts/src/foundation/compose_knowledge.ts",
       "lib/loka/core/compose_knowledge.ex",
@@ -1060,7 +1049,6 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
-      "kernel/ts/src/content/cartridge_refs.ts",
       "lib/loka/content/checks.ex",
       "lib/loka/content/policies.ex",
       "lib/loka/content/leaf_refs.ex"
@@ -1085,7 +1073,6 @@
       "kernel/ts/src/mechanics/variety.ts",
       "kernel/ts/src/mechanics/policy.ts",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
-      "kernel/ts/src/content/cartridge_variety.ts",
       "lib/loka/content/variety.ex",
       "lib/loka/core/compose_knowledge.ex"
     ],
@@ -1106,12 +1093,10 @@
       "WorldSettings"
     ],
     "modules": [
-      "kernel/ts/src/content/cartridge_construction.ts",
       "lib/loka/content/construction.ex"
     ],
     "fixtures": [
       "protocol/fixtures/build_sampler_hash.json",
-      "protocol/fixtures/loader_floors.json",
       "protocol/fixtures/invalid.json"
     ],
     "invariants": [

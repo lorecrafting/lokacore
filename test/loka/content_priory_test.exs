@@ -11,7 +11,7 @@ defmodule Loka.ContentPrioryTest do
     assert Loka.Content.compile(@dir) == {:ok, expected, []}
   end
 
-  # Break: item-readable short refs, its text or API floor bypass the compiler boundary.
+  # Break: item-readable short refs, its text or readable@1 bypass the compiler boundary.
   test "book authoring rejects malformed metadata and undeclared topic references" do
     dir = Loka.ContentSource.copy(@dir)
     fact = %{"cartridge_id" => "codex_sampler", "cartridge_version" => "0.0.1"}
@@ -25,13 +25,16 @@ defmodule Loka.ContentPrioryTest do
           {"items/mill_ledger.json", ["readable"], %{"label" => "actions.read_book"},
            "SCHEMA_VIOLATION"},
           {"items/mill_ledger.json", ["readable"], %{"text" => "readable.mill_ledger"},
-           "SCHEMA_VIOLATION"},
-          {"cartridge.json", ["requires", "kernel_api", "at_least"], "1.23",
-           "KERNEL_API_RANGE_INVALID"}
+           "SCHEMA_VIOLATION"}
         ] do
       change = &put_in(&1, Enum.map(keys, fn k -> Access.key!(k) end), value)
       assert {:error, errors} = Loka.ContentSource.compile(dir, [{rel, change}])
       assert Enum.any?(errors, &(&1["code"] == code)), inspect({rel, keys, errors})
     end
+
+    drop = &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "readable") end)
+    assert {:error, errors} = Loka.ContentSource.compile(dir, [{"cartridge.json", drop}])
+    found = for e <- errors, do: {e["code"], e["path"]}
+    assert {"UNDECLARED_CAPABILITY", "items/mill_ledger.readable"} in found, inspect(errors)
   end
 end

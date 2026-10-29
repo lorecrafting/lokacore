@@ -3,7 +3,6 @@
 // and the tick and expiry events reach reactions.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,7 +12,6 @@ import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/in
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
@@ -290,57 +288,6 @@ test('poison leaves the guard at str 12; the fury its tick brings reads 15 until
   assert.equal(str(w), 15);
   w = wait(w, 1);
   assert.equal(str(w), 12);
-});
-
-// Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field
-// under an older kernel_api, loads and fails in play.
-test('the loader refuses each unsound G3 declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const golem = `${C}:npc/golem`;
-  const kindle = `.cartridge.reactions[${JSON.stringify(`${C}:reaction/kindle`)}]`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.npcs[golem].immune[0].key = 'plague'),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.npcs[${JSON.stringify(golem)}].immune[0]`,
-    ],
-    [
-      (c) => (c.items[`${C}:item/torch`].immune = [{ ...c.npcs[golem].immune[0], key: 'plague' }]),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.items[${JSON.stringify(`${C}:item/torch`)}].immune[0]`,
-    ],
-    [
-      (c) => (c.reactions[`${C}:reaction/kindle`].apply[0].item.key = 'gate'),
-      'UNRESOLVED_REFERENCE',
-      `${kindle}.apply[0].item`,
-    ],
-    [
-      (c) => (c.reactions[`${C}:reaction/groan`].on.status.key = 'plague'),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.reactions[${JSON.stringify(`${C}:reaction/groan`)}].on.status`,
-    ],
-    [
-      (c) => (c.statuses[`${C}:status/fury`].modifies[0].attribute.key = 'dex'),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.statuses[${JSON.stringify(`${C}:status/fury`)}].modifies[0].attribute`,
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });
 
 // Status reader 4 on NPC movement (loka-kgd.102). Breaks: a schedule job moving an NPC whose statuses

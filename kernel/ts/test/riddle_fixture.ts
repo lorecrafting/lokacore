@@ -98,7 +98,6 @@ const withRiddle =
     change(c);
   };
 export const bundle = (change?: (c: any) => void) => f.bundle(withRiddle(change));
-export const load = (change?: (c: any) => void) => f.load(withRiddle(change));
 export const genesis = (change?: (c: any) => void) => f.genesis(withRiddle(change));
 
 /** Kernel steps over a riddle world: `run` asserts the decision kind or refusal code. */

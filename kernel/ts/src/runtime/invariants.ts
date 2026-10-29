@@ -118,7 +118,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     decision.kind === 'accepted' || same(before, after),
   // An unregistered command type is never accepted, and an accepted decision is valid against
   // its closed contract, so it names only registered delta ops, events and effects. Policy
-  // operators are closed at the cartridge loader (lockStage).
+  // operators are closed at the cartridge loader (its schema stage).
   unknown_types_fail_closed: ({ command, decision }) =>
     decision.kind !== 'accepted' ||
     (Object.hasOwn(CAPABILITY_OWNERS.command, command.payload.type) &&

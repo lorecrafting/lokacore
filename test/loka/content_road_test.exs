@@ -1,8 +1,7 @@
 defmodule Loka.ContentRoadTest do
   # Resources, costs, threshold checks and cooldowns in the compiler (R5 S6b; resource.schema.json
   # ResourceSpec; action.schema.json ActionRecipe). Expected diagnostics are hand-written from
-  # protocol/cartridge.schema.json DiagnosticCode, with the loader's paths in
-  # kernel/ts/test/recipes_loader.test.ts; the known answer is
+  # protocol/cartridge.schema.json DiagnosticCode; the known answer is
   # protocol/fixtures/cartridge_road_hash.json (Python).
   use ExUnit.Case, async: true
 

@@ -9,18 +9,14 @@ defmodule Loka.ContentReplenishTest do
 
   defp seam(f), do: [{"replenish/seam_regrowth.json", f}]
 
-  # Break (toolbox row 19b; twin of the loader row in kernel/ts/test/replenish.test.ts): replenish
-  # compiles under API 1.70, with a template, spawn-template, template-item or self-move holder, a
+  # Break (toolbox row 19b): replenish
+  # compiles with a template, spawn-template, template-item or self-move holder, a
   # non-container item target or one beside a listed container (which may be or hold it), an
   # unresolved item or holder or a duplicate item; or the harvest allowance is dropped, so the
   # seam's ore in the store is refused.
-  test "replenish needs API 1.71 and resolved, distinct holders and items", %{dir: dir} do
+  test "replenish needs resolved, distinct holders and items", %{dir: dir} do
     at = "replenish/seam_regrowth"
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(dir, [
-             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.70")}
-           ])
 
     assert {"SCHEMA_VIOLATION", at <> ".from"} in codes(
              dir,
@@ -117,21 +113,16 @@ defmodule Loka.ContentReplenishTest do
     ]
   end
 
-  # Break (twin of the loader test in kernel/ts/test/replenish.test.ts): replenish.run compiles
-  # with an unresolved key, under API 1.101, on a rule with `after` (refused as item.move is), or
+  # Break: replenish.run compiles
+  # with an unresolved key, on a rule with `after` (refused as item.move is), or
   # twice with one key in a rule.
-  test "replenish.run needs API 1.101, a replenish entry and no after", %{dir: dir} do
+  test "replenish.run needs a replenish entry and no after", %{dir: dir} do
     run = %{"op" => "replenish.run", "key" => "seam_regrowth"}
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, digging(run))
 
     assert {"UNRESOLVED_REFERENCE", "reactions/dig.apply[0].key"} in codes(
              dir,
              digging(%{run | "key" => "gone"})
-           )
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(
-             dir,
-             digging(run, "1.100")
            )
 
     assert {"SCHEMA_VIOLATION", "reactions/dig.apply[0].op"} in codes(

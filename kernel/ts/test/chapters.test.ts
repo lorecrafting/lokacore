@@ -3,7 +3,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { hash } from '../src/foundation/canonical.ts';
-import { refStage } from '../src/content/cartridge_refs.ts';
 import type { CharacterId, Command, Key } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
@@ -133,39 +132,4 @@ test('only the player resolved quest with its trigger choice counts', () => {
 // Breaks: inserting a chapter property even for legacy cartridges without a declaration.
 test('a cartridge without chapters preserves the view shape', () => {
   assert.equal(Object.hasOwn(gameView(world('ferry')), 'chapter'), false);
-});
-
-// Breaks: ambiguity only checks the first marker, or rejects unrelated choices/other quests
-// and outcomes excluded by a selected chapter marker.
-test('ambiguity counts only matching quest choices in selected outcomes', () => {
-  const kat = read('protocol/fixtures/cartridge_chapters_hash.json');
-  const base = JSON.parse(kat.canonical);
-  const prefix = 'chapters_sampler@0.0.1';
-  const add = (c: any, choice: string, quest = 'lantern') => {
-    const bram = c.dialogues[`${prefix}:dialogue/bram`];
-    c.dialogues[`${prefix}:dialogue/bram_again`] = {
-      ...bram,
-      key: 'bram_again',
-      quest: { ...bram.quest, key: quest },
-      choices: { [choice]: bram.choices.take_it },
-    };
-  };
-  add(base, 'take_it');
-  assert.deepEqual(
-    refStage(base).map((d) => [d.code, d.path, d.data]),
-    [
-      ['OUTCOME_MISMATCH', '.cartridge.chapters[1].story_point', {}],
-      ['OUTCOME_MISMATCH', '.cartridge.chapters[2].story_point', {}],
-    ],
-  );
-  world('chapters', (c) => {
-    c.chapters.splice(1, 1);
-    add(c, 'leave_it');
-  });
-  world('chapters', (c) => add(c, 'unrelated_choice'));
-  world('chapters', (c) => {
-    const q = c.quests[`${prefix}:quest/lantern`];
-    c.quests[`${prefix}:quest/other`] = { ...q, key: 'other' };
-    add(c, 'take_it', 'other');
-  });
 });

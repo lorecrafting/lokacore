@@ -11,8 +11,6 @@ import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { holds } from '../src/mechanics/policy.ts';
-import { reactions } from '../src/content/cartridge_reactions.ts';
-import type { Checks } from '../src/content/cartridge_refs.ts';
 import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-rumour-'));
@@ -113,74 +111,4 @@ test('two NPCs firing one reaction in one wait commit', () => {
 test('the player entering the inn while Ada is away carries nothing', () => {
   const w = play(play(fresh(), until(16, 30)), move('west')); // Ada knows, at the mill
   assert.deepEqual([knows(w, 'ada'), knows(w, 'innkeeper')], [true, false]);
-});
-
-// Row W2's own 1.47 uses removed, so only the entrant filter needs the floor.
-const plain = (c: any) => {
-  delete c.facts[`${C}:fact/knows_mill`].per_subject;
-  delete c.reactions[TELLS].when.root.npc;
-  delete c.reactions[TELLS].apply[0].npc;
-  c.dialogues[`${C}:dialogue/innkeeper_mill`].policy.root = { op: 'all', items: [] };
-  c.manifest.requires.kernel_api.at_least = '1.46';
-};
-// Breaks: the loader skips the entrant filter's reference (a misspelt NPC or a spawn template
-// loads and the rule silently never fires) or loads it below kernel_api 1.47 (twin of
-// content_rumour_test.exs).
-test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
-  const verdict = (change: (c: any) => void) => {
-    const r = reload(source, change);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data];
-  };
-  assert.deepEqual(
-    verdict((c) => (c.reactions[TELLS].on.npc.key = 'ghost')),
-    [
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.reactions[${JSON.stringify(TELLS)}].on.npc`,
-      { target: `${C}:npc/ghost` },
-    ],
-  );
-  assert.deepEqual(
-    verdict((c) => (c.npcs[`${C}:npc/ada`].spawn_template = true)),
-    [
-      'SCHEMA_VIOLATION',
-      `.cartridge.reactions[${JSON.stringify(TELLS)}].on.npc`,
-      { error: 'invalid_value' },
-    ],
-  );
-  assert.deepEqual(verdict(plain), [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-    {},
-  ]);
-  assert.equal(
-    verdict((c) => {
-      plain(c);
-      delete c.reactions[TELLS].on.npc;
-    }),
-    'loaded',
-  );
-});
-
-// Breaks: a consequence op's kernel_api floor dropped from FLOORS, so a cartridge below it loads
-// and an older host faults at runtime (twin of content_rumour_test.exs). Called directly: any
-// sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
-// row: quest_resolved, its only trigger the loader and compiler accept, has the same floor.
-test('each consequence op is refused just below its kernel_api floor', () => {
-  const refused = (op: string, at_least: string, event = 'fact_changed') =>
-    reactions(
-      {
-        manifest: { requires: { kernel_api: { at_least } } },
-        reactions: { r: { on: { event }, apply: [{ op }] } },
-      },
-      { named() {}, typedValue() {} } as unknown as Checks,
-    ).some((d) => d.code === 'KERNEL_API_RANGE_INVALID');
-  for (const [op, floor] of [
-    ['quest.resolve', 12],
-    ['quest.fail', 12],
-    ['population.suppress', 35],
-  ] as const)
-    assert.deepEqual([refused(op, `1.${floor - 1}`), refused(op, `1.${floor}`)], [true, false], op);
-  // the quest_resolved trigger's own 1.8 floor, the one quest.activate's missing row relies on
-  const trigger = (v: string) => refused('fact.assign', v, 'quest_resolved');
-  assert.deepEqual([trigger('1.7'), trigger('1.8')], [true, false], 'quest_resolved');
 });

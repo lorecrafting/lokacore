@@ -2,10 +2,9 @@ defmodule Loka.Content.Schedules do
   @moduledoc """
   Toolbox row W10: a source `daily_schedule` hour may be `[case, ..., room]`, cases
   `{when?, room, goal?, walks?}` and a short room key last, or (toolbox row W26) one walking case
-  `{room, walks: true}`. The checks: that order, each case room, kernel_api 1.47, and 1.81 for any
-  `walks` (a case or a population plan); the artifact splits each such hour into the fallback room
-  and `schedule_cases`. Goal texts and conditions are Loka.Content.Entities'. Twin of
-  kernel/ts/src/content/cartridge_schedules.ts.
+  `{room, walks: true}`. The checks: that order and each case
+  room; the artifact splits each such hour into the fallback room
+  and `schedule_cases`. Goal texts and conditions are Loka.Content.Entities'.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
@@ -14,11 +13,7 @@ defmodule Loka.Content.Schedules do
   def check(nil, _), do: []
 
   def check(m, defs) do
-    hours = hours(defs)
-    lists? = Enum.any?(hours, &is_list(elem(&1, 2)))
-
-    Enum.flat_map(hours, &hour(&1, {m, defs})) ++
-      floor(lists?, [1, 47], m) ++ floor(walks?(hours, defs), [1, 81], m)
+    Enum.flat_map(hours(defs), &hour(&1, {m, defs}))
   end
 
   # Each source hour with cases: a list, or one walking case.
@@ -67,23 +62,6 @@ defmodule Loka.Content.Schedules do
 
   defp walk(_, _, _, _), do: []
 
-  defp floor(false, _, _), do: []
-
-  defp floor(true, least, m),
-    do:
-      if(api(m) < least,
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-        else: []
-      )
-
-  # Toolbox row W26: a walking case (in a list or alone) or a walking population plan.
-  defp walks?(hours, defs) do
-    cases = Enum.flat_map(hours, fn {_, _, c} -> List.wrap(c) end)
-
-    Enum.any?(cases, &match?(%{"walks" => _}, &1)) or
-      Enum.any?(defs["population"] || %{}, &match?({_, {_, _, %{"walks" => _}}}, &1))
-  end
-
   defp order({rel, h, list}) do
     if ordered?(list),
       do: [],
@@ -127,10 +105,4 @@ defmodule Loka.Content.Schedules do
 
   # A lone walking case's room, at daily_schedule/<h>/room.
   defp room(rel, h, c, {m, defs}), do: reference(rel, ["daily_schedule", h], "room", c, m, defs)
-
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 end

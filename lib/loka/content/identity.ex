@@ -2,9 +2,8 @@ defmodule Loka.Content.Identity do
   @moduledoc """
   Toolbox rows W15 and FD9: world.identity's name and each name variant's description name text
   catalog keys; description_variant@1 owns each name variant, whose condition names declared
-  definitions through ops the cartridge's capabilities own. Twin of the world.identity entries
-  of the TS loader's parts and refStage (kernel/ts/src/content/cartridge_refs.ts); Variants
-  holds the 1.97 floor. Called from Variety. The name variants' condition roots also get
+  definitions through ops the cartridge's capabilities own. Called from Variety. The name
+  variants' condition roots also get
   Delayed's time_since checks and the target-subject FACT_SCOPE_UNSUPPORTED walk (Checks.trees/1
   holds definition roots only).
   """
@@ -32,7 +31,7 @@ defmodule Loka.Content.Identity do
       Loka.Content.Delayed.check(m, Map.put(defs, "reaction", %{}), trees) ++
         Enum.flat_map(trees, fn {rel, p, root} -> targetless(rel, p, root) end)
 
-  # A name variant reads the player's body with no fact subject (twin of TS TARGETLESS).
+  # A name variant reads the player's body with no fact subject.
   defp targetless(rel, p, %{"op" => "fact_compare", "subject" => "target"}),
     do: [diag("FACT_SCOPE_UNSUPPORTED", at(rel, p ++ ["subject"]), %{})]
 

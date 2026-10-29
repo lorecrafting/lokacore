@@ -161,6 +161,15 @@ defmodule Loka.ContentRecipesTest do
 
     assert compile(Path.join(dir, "verb"), look) ==
              {:error, [d("DUPLICATE_DEFINITION", "actions/look")]}
+
+    # recipe_sampler is at_least 1.0: a command key is reserved at any kernel_api.
+    where = %{
+      "actions/ring_bell.json" => nil,
+      "actions/where.json" => src("actions/ring_bell.json")
+    }
+
+    assert compile(Path.join(dir, "where"), where) ==
+             {:error, [d("DUPLICATE_DEFINITION", "actions/where")]}
   end
 
   # Breaks: actions/ files route by a field other than `command` (a mixed file is then

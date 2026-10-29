@@ -189,10 +189,9 @@ test('a closed door before the hut answers exit_closed first', () => {
   assert.equal(code(shut, go('north')), 'exit_closed');
 });
 
-// Breaks: the loader's 1.78 floor is missing or 1.77, a put lock on a non-container loads, a lock
-// root is not walked for references, subject "target" loads in a room or exit lock (no target) or
-// is refused in an item's lock (the item is its target).
-test('the loader checks the floor, put on a container and every lock root', () => {
+// Breaks: subject "target" loads in a room or exit lock (no target) or is refused in an item's
+// lock (the item is its target).
+test('the loader checks subject target in every lock root', () => {
   const at = (kind: string, k: string) => `.cartridge.${kind}[${JSON.stringify(`${S}:${k}`)}]`;
   const hut = `${at('rooms', 'room/hut')}.locks.enter.root`;
   const east = `${at('rooms', 'room/lane')}.exits.east.locks.traverse.root`;
@@ -201,26 +200,6 @@ test('the loader checks the floor, put on a container and every lock root', () =
     r.subject = 'target';
   };
   const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.77'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => (c.items[`${S}:item/ring`].locks = { put: resident }),
-      'SCHEMA_VIOLATION',
-      `${at('items', 'item/ring')}.locks.put`,
-    ],
-    [
-      (c) => (c.rooms[`${S}:room/hut`].locks.enter.root.items[0].fact = ref('fact', 'nope')),
-      'UNRESOLVED_REFERENCE',
-      `${hut}.items[0].fact`,
-    ],
-    [
-      (c) => (c.items[`${S}:item/chest`].locks.put.root.fact = ref('fact', 'nope')),
-      'UNRESOLVED_REFERENCE',
-      `${at('items', 'item/chest')}.locks.put.root.fact`,
-    ],
     [
       (c) => targeted(c.rooms[`${S}:room/lane`].exits.east.locks.traverse.root),
       'FACT_SCOPE_UNSUPPORTED',

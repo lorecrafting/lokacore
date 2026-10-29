@@ -165,7 +165,7 @@ export const apart = (world: World, npc: EntityId, body: EntityId | undefined) =
 
 /**
  * Whether a dialogue returns to its hub after an answer (dialogue@1): it resolves no quest, declares
- * no riddle and has several choices (the hub, its separation close and the loader's once-only check).
+ * no riddle and has several choices (the hub, its separation close and the compiler's once-only check).
  */
 export const reopens = (d: Pick<DialogueDefinition, 'quest' | 'riddle' | 'choices'>) =>
   !d.quest && !d.riddle && Object.keys(d.choices).length > 1;

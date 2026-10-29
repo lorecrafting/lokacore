@@ -159,7 +159,7 @@
       ]
     },
     "BandTable": {
-      "description": "A condition band table (04 \u00a715 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler and loader report a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
+      "description": "A condition band table (04 \u00a715 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler reports a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/ConditionBand"
@@ -187,7 +187,7 @@
       ]
     },
     "ResourceRegen": {
-      "description": "Optional exact fractional recovery by stored position rate. Requires position@1, real_elapsed and the recovery API. Compiler/loader additionally require every <= floor(MAX_SAFE/(maximum authored rate+1)).",
+      "description": "Optional exact fractional recovery by stored position rate. Requires position@1, real_elapsed and the recovery API. The compiler additionally requires every <= floor(MAX_SAFE/(maximum authored rate+1)).",
       "type": "object",
       "properties": {
         "every": {
@@ -245,7 +245,7 @@
       ]
     },
     "NpcHp": {
-      "description": "Explicit entity-specific HP bounds/start/gain. Requires kernel API 1.4; minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
+      "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
       "type": "object",
       "properties": {
         "minimum": {

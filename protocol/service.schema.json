@@ -26,7 +26,7 @@
         },
         "price": {
           "type": "integer",
-          "description": "Row kgd.70 (kernel_api at least 1.102): 0 only on an entitlement with escrow, a barter.",
+          "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
           "minimum": 0,
           "maximum": 2147483647
         },
@@ -90,7 +90,7 @@
             },
             "escrow": {
               "type": "object",
-              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70 (kernel_api at least 1.102): output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
+              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
               "properties": {
                 "items": {
                   "type": "array",
@@ -438,7 +438,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Built rooms S5 (construction@1, kernel_api 1.102): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
+          "description": "Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
           "type": "object",
           "properties": {
             "kind": {

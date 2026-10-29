@@ -1,4 +1,3 @@
-// size: allow 530, barrier and arrival cases share one gate world and its helpers (loka-glj8)
 // Barriers (R5 S7; 21 §5 Barrier; 04 §5.3 Lifecycle transition, §7, §19): open, close, lock and
 // unlock, moves through closed and locked exits, the GameView's exits, barrier_state, and the
 // loader's barrier references. Worlds are the gate known answer
@@ -395,131 +394,14 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const ROOM = (k: string) => `.cartridge.rooms["${G}:room/${k}"]`;
 const room = (c: any, k: string) => c.rooms[`${G}:room/${k}`];
-const trapdoor = { ...OAK, key: 'trapdoor' };
 
-// Breaks: the loader admitting what the compiler rejects (test/loka/content_gate_test.exs):
-// the kernel would read a barrier or key that does not exist, or two faces with two states.
-test('the loader checks barrier references, texts, faces and the lock', () => {
-  const target = { target: `${G}:barrier/trapdoor` };
-  fails(
-    (c) =>
-      (room(c, 'courtyard').exits.south.barrier = room(c, 'gatehouse').exits.north.barrier =
-        trapdoor),
-    'UNRESOLVED_REFERENCE',
-    `${ROOM('courtyard')}.exits.south.barrier`,
-    target,
-  );
-  fails(
-    (c) => (c.barriers[`${G}:barrier/cell_door`].key_item = { ...OAK, kind: 'room', key: 'cell' }),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.barriers["${G}:barrier/cell_door"].key_item`,
-    { target: `${G}:room/cell` },
-  );
-  fails(
-    (c) => (room(c, 'gatehouse').details.oak_door.variants[0].when.root.barrier = trapdoor),
-    'UNRESOLVED_REFERENCE',
-    `${ROOM('gatehouse')}.details.oak_door.variants[0].when.root.barrier`,
-    target,
-  );
-  fails(
-    (c) => delete c.text['barrier.oak_door.short'],
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.barriers["${G}:barrier/oak_door"].short`,
-    { target: 'barrier.oak_door.short' },
-  );
-  fails(
-    (c) => (room(c, 'cell').exits.west.barrier = OAK),
-    'BARRIER_MISMATCH',
-    `${ROOM('cell')}.exits.west`,
-  );
-  fails(
-    (c) => delete room(c, 'gatehouse').exits.north.barrier,
-    'BARRIER_MISMATCH',
-    `${ROOM('courtyard')}.exits.south`,
-  );
-  fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.barrier;
-      delete c.lock.capabilities.barrier;
-    },
-    'UNDECLARED_CAPABILITY',
-    `.cartridge.barriers["${G}:barrier/cell_door"]`,
-    { capability: 'barrier' },
-    ['barrier@1'],
-  );
+// Breaks: the loader admitting a barrier without its capability or under the wrong map key.
+test('the loader checks the barrier capability and definition key', () => {
   fails(
     (c) => (c.barriers[`${G}:barrier/oak_door`].key = 'gate'),
     'ARTIFACT_DEFINITION_KEY_MISMATCH',
     `.cartridge.barriers["${G}:barrier/oak_door"]`,
     { field: 'key', declared: 'oak_door', expected: 'gate' },
-  );
-});
-
-// Review #50 A2/N2. Breaks: faces paired by destination room rather than by connection, so two
-// passages between the same rooms cannot carry two doors (twin: test/loka/content_gate_test.exs).
-test('two passages between the same rooms may carry different barriers', () => {
-  const blue = { ...OAK, key: 'blue' };
-  const passages = (c: any, back: object) => {
-    c.barriers[`${G}:barrier/blue`] = {
-      key: 'blue',
-      keywords: ['hatch'],
-      short: 'barrier.oak_door.short',
-      initial: 'open',
-    };
-    room(c, 'gatehouse').exits.west = {
-      to: { ...OAK, kind: 'room', key: 'courtyard' },
-      barrier: blue,
-    };
-    room(c, 'courtyard').exits.east = {
-      to: { ...OAK, kind: 'room', key: 'gatehouse' },
-      barrier: back,
-    };
-    room(c, 'courtyard').exits.down = { to: { ...OAK, kind: 'room', key: 'gatehouse' } }; // a chute: no face
-  };
-  assert.ok(load((c) => passages(c, blue)).ok);
-  fails((c) => passages(c, OAK), 'BARRIER_MISMATCH', `${ROOM('courtyard')}.exits.east`);
-});
-
-// Review #50 A1. Breaks: a locked door whose key lies only behind it (or that has no key) loading
-// into a cartridge no one can finish. The gate known answer itself is the passing case (the key
-// lies past the oak door, closed, not locked); the carried-bag test above passes a key in a bag.
-test('a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY', () => {
-  const CELL = `.cartridge.barriers["${G}:barrier/cell_door"]`;
-  const key = (c: any) => c.items[`${G}:item/iron_key`];
-  fails((c) => (key(c).location.room.key = 'cell'), 'BARRIER_UNREACHABLE_KEY', CELL);
-  fails(
-    (c) => delete c.barriers[`${G}:barrier/cell_door`].key_item,
-    'BARRIER_UNREACHABLE_KEY',
-    CELL,
-  );
-  fails(
-    (c) => (c.barriers[`${G}:barrier/oak_door`].initial = 'locked'),
-    'BARRIER_UNREACHABLE_KEY',
-    CELL,
-  );
-});
-
-// Review #50 re-review S2 (twin: test/loka/content_gate_test.exs). Breaks: a face paired without
-// the "leads back" condition, so a door on A.north to B and B.south to C is taken for one door.
-test('a door on a bent passage is BARRIER_MISMATCH', () => {
-  const bent = (c: any) =>
-    (room(c, 'courtyard').exits.south = {
-      to: { ...OAK, kind: 'room', key: 'cell' },
-      barrier: OAK,
-    });
-  fails(bent, 'BARRIER_MISMATCH', `${ROOM('courtyard')}.exits.south`);
-  // With cell.north back to the courtyard, only the gatehouse's face is bent.
-  fails(
-    (c) => {
-      bent(c);
-      room(c, 'cell').exits.north = {
-        to: { ...OAK, kind: 'room', key: 'courtyard' },
-        barrier: OAK,
-      };
-    },
-    'BARRIER_MISMATCH',
-    `${ROOM('gatehouse')}.exits.north`,
   );
 });

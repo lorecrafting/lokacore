@@ -1,6 +1,6 @@
 defmodule Loka.Content.Hub do
   @moduledoc """
-  dialogue@1 hub (twin of kernel/ts/src/content/cartridge_dialogues.ts `once`): a dialogue with no
+  dialogue@1 hub: a dialogue with no
   quest, no riddle and several choices reopens after an answer, so an answer receiving an item,
   granting a topic, assigning a fact the save proves by one receipt or starting an escort could
   repeat; it needs the once-only accept or a patrol ending (OUTCOME_MISMATCH at the field). A

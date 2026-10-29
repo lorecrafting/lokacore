@@ -1,8 +1,7 @@
 defmodule Loka.Content.Quests do
   @moduledoc """
-  Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8), twin of
-  `kernel/ts/src/content/cartridge_quests.ts`: each quest's owning capability is required (quest@1, by
-  its quest_activated, as a recipe's check by check@1's events), its key is no registered
+  Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8): each quest's owning capability is
+  required (quest@1, by its quest_activated, as a recipe's check by check@1's events), its key is no registered
   command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
   title, its offer's label (the offer is optional) and all journal texts have catalog entries
   (unless the catalog was rejected, `:unknown`), and a post_activation_event objective names an item of this cartridge. Its policy trees are checked
@@ -41,18 +40,7 @@ defmodule Loka.Content.Quests do
     Enum.flat_map(
       all(defs),
       &quest(&1, %{m: m, defs: defs, text: text, events: events, taken: taken})
-    ) ++ failed_floor(m, defs)
-  end
-
-  # Toolbox row W24: a reaction on quest_failed needs kernel_api 1.46 (as G3's status_ triggers).
-  # Twin of cartridge_quests.ts.
-  defp failed_floor(m, defs) do
-    failed =
-      for {_, {_, [], r}} <- defs["reaction"] || %{}, r["on"]["event"] == "quest_failed", do: r
-
-    if failed != [] and api(m) < [1, 46],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
+    )
   end
 
   defp quest({rel, q}, ctx) do
@@ -74,8 +62,8 @@ defmodule Loka.Content.Quests do
         hints(rel, q, ctx.m)
 
   # Toolbox row W24: a deadline is legacy (S2: at, fact, trust_fact and trust_amount, no after) or
-  # generic (exactly one of after or at, no legacy field, kernel_api 1.46); any other shape is
-  # SCHEMA_VIOLATION invalid_value at the deadline. Twin of cartridge_quests.ts deadline.
+  # generic (exactly one of after or at, no legacy field); any other shape is
+  # SCHEMA_VIOLATION invalid_value at the deadline.
   defp deadline(_, nil, _), do: []
 
   defp deadline(rel, d, ctx) do
@@ -90,9 +78,6 @@ defmodule Loka.Content.Quests do
 
       legacy > 0 or is_map_key(d, "after") == is_map_key(d, "at") ->
         [diag("SCHEMA_VIOLATION", at(rel, ["deadline"]), %{"error" => "invalid_value"})]
-
-      api(ctx.m) < [1, 46] ->
-        [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
 
       true ->
         []
@@ -131,8 +116,8 @@ defmodule Loka.Content.Quests do
   end
 
   # Toolbox row W23: each stage's minutes strictly ascend; real minutes need the real_elapsed time
-  # policy (INVALID_TIME_POLICY); hints need kernel_api 1.46; an empty hints object is
-  # too_few_items (the subset has no minProperties). Twin of cartridge_quests.ts hints.
+  # policy (INVALID_TIME_POLICY); an empty hints object is
+  # too_few_items (the subset has no minProperties).
   defp hints(rel, %{"journal" => %{"hints" => h}}, _) when h == %{},
     do: [diag("SCHEMA_VIOLATION", at(rel, ["journal", "hints"]), %{"error" => "too_few_items"})]
 
@@ -153,21 +138,10 @@ defmodule Loka.Content.Quests do
         do: [diag("INVALID_TIME_POLICY", at(rel, ["journal", "hints"]))],
         else: []
 
-    floor =
-      if api(m) < [1, 46],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    order ++ policy ++ floor
+    order ++ policy
   end
 
   defp hints(_, _, _), do: []
-
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 
   defp item(rel, %{"item_acquired" => _} = o, m, defs),
     do: reference(rel, ["objective"], {"item_acquired", "item"}, o, m, defs)

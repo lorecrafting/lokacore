@@ -18,7 +18,6 @@ const F = 'ferry_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'ferry_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 const ALWAYS = { policy_version: 1, root: { op: 'all', items: [] } };
-const O = `.cartridge.dialogues["${F}:dialogue/bram_offer"].choices.accept`;
 const load = (f: (c: any) => void = () => {}) => {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
   c.dialogues[`${F}:dialogue/bram_offer`] = {
@@ -127,59 +126,4 @@ test("an accept is invalid_state while its quest's offer policy fails", () => {
   const s = accept(w);
   assert.deepEqual(s.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.equal(s.world, w);
-});
-
-const fails = (f: (c: any) => void, code: string, path: string, data = {}) =>
-  assert.deepEqual(load(f), {
-    ok: false,
-    diagnostic: {
-      severity: 'error',
-      code,
-      path,
-      message_key: `diagnostics.${code.toLowerCase()}`,
-      data,
-      suggested_capabilities: [],
-    },
-  });
-const offer = (c: any) => c.dialogues[`${F}:dialogue/bram_offer`];
-
-// Breaks (twin of test/loka/content_ferry_test.exs:267): the loader admitting an accept of a quest
-// that does not exist, an accept in a dialogue that also resolves a quest (accepting would resolve
-// it at once), or an accept with a hand_over (activation and acquisition in one decision fault
-// conflicting_write).
-test('the loader checks each accept: a quest, no dialogue quest, no hand_over', () => {
-  fails(
-    (c) => (offer(c).choices.accept.accept = ref('quest', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${O}.accept`,
-    { target: `${F}:quest/missing` },
-  );
-  fails((c) => (offer(c).quest = ref('quest', 'lantern')), 'OUTCOME_MISMATCH', `${O}.accept`);
-  fails(
-    (c) => {
-      offer(c).roles.lantern = { role: 'item', item: ref('item', 'lantern') };
-      offer(c).choices.accept.hand_over = { item: 'lantern', to: 'bram' };
-    },
-    'OUTCOME_MISMATCH',
-    `${O}.hand_over`,
-  );
-});
-
-// Breaks (loka-x6t.5, twin of test/loka/content_ferry_test.exs): the loader admitting, in a
-// dialogue that reopens after each answer (no quest, two choices), an answer without the once-only
-// accept that receives an item, which a player could give back and receive again.
-test('a reopening dialogue rejects a repeatable receive', () => {
-  const G = `.cartridge.dialogues["${F}:dialogue/bram_offer"].choices.give`;
-  fails(
-    (c) => {
-      offer(c).roles.lantern = { role: 'item', item: ref('item', 'lantern') };
-      offer(c).choices.give = {
-        label: 'dialogue.bram.leave',
-        narration: 'narration.bram.leave',
-        receive: { item: 'lantern', from: 'bram' },
-      };
-    },
-    'OUTCOME_MISMATCH',
-    `${G}.receive`,
-  );
 });

@@ -14,17 +14,15 @@ defmodule Loka.ContentTerrainTest do
   end
 
   # Breaks (row 43a): the compiler admits a terrain key outside the Tag vocabulary, a percent
-  # over 1000, or terrain below kernel_api 1.106 (the TS loader refuses them too).
-  test "terrain keys are tags, percents 0..1000, and terrain needs 1.106" do
+  # or over 1000.
+  test "terrain keys are tags, percents 0..1000" do
     dir = Loka.ContentSource.copy(@dir)
-    api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.105")}
 
     for {edits, expected} <- [
           {[world(["terrain"], %{"lava" => 50})],
            [{"SCHEMA_VIOLATION", "cartridge.world.movement.terrain.lava"}]},
           {[world(["terrain"], %{"road" => 1001})],
-           [{"SCHEMA_VIOLATION", "cartridge.world.movement.terrain.road"}]},
-          {[api], [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]}
+           [{"SCHEMA_VIOLATION", "cartridge.world.movement.terrain.road"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

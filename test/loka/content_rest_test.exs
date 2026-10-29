@@ -174,8 +174,6 @@ defmodule Loka.ContentRestTest do
        fn m, p -> {update_in(m, ["requires", "capabilities"], &Map.delete(&1, "position")), p} end},
       {"INVALID_TIME_POLICY", "resources.resources.mv.regen",
        fn m, p -> {Map.delete(m, "time_policy"), p} end},
-      {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least",
-       fn m, p -> {put_in(m, ["requires", "kernel_api", "at_least"], "1.1"), p} end},
       {"RESOURCE_SPEC_INVALID", "resources.resources.mv.regen",
        fn m, p ->
          {m,

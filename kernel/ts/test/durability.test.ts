@@ -205,38 +205,3 @@ test('the forge sets a fine or crude band by strength, once', () => {
     assert.ok(!shown.actions.some((a) => a.action_key === 'forge'), 'not offered again');
   }
 });
-
-// Twin of test/loka/content_durability_test.exs. Breaks: the loader admits durability or repair
-// below API 1.69, a durability fact that is not per_subject, is an npc_pair or is unbounded, a repair of a fact no
-// weapon uses, or a repair service without its refusal text.
-test('the loader keeps durability to API 1.69, a bounded entity fact and its repair texts', () => {
-  const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(base, edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const MEND = `.cartridge.services["${S}:service/mend"]`;
-  // The stick names the same fact and sorts first.
-  const at = `.cartridge.items["${S}:item/stick"].weapon.durability.fact`;
-  const cases: [(c: any) => void, unknown][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.68'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-    ],
-    [(c) => delete c.facts[`${S}:fact/edge`].per_subject, ['SCHEMA_VIOLATION', at]],
-    [(c) => (c.facts[`${S}:fact/edge`].scopes = ['player']), ['SCHEMA_VIOLATION', at]],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.89';
-        c.facts[`${S}:fact/edge`].npc_pair = true; // row FD4: durability reads no partner
-      },
-      ['SCHEMA_VIOLATION', at],
-    ],
-    [(c) => delete c.facts[`${S}:fact/edge`].value_type.maximum, ['SCHEMA_VIOLATION', at]],
-    [
-      (c) => (c.services[`${S}:service/mend`].benefit.fact = ref('fact', 'quality')),
-      ['SCHEMA_VIOLATION', `${MEND}.benefit.fact`],
-    ],
-    [(c) => delete c.text['service.nothing_to_repair'], ['UNRESOLVED_REFERENCE', `${MEND}.target`]],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
-});

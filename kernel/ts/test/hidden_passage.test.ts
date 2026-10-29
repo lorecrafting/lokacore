@@ -13,8 +13,6 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { fragment } from './fragment.ts';
-import * as patrol from './patrol_fixture.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-hidden-sampler-'));
@@ -80,72 +78,6 @@ test('a forged Move through the panel is not_found until the search; then the ex
   assert.deepEqual((send({ type: 'move', direction: 'west' }) as any).narration[0].bindings, {
     from: 'east',
   });
-});
-
-// Breaks: the loader drops a hidden_until check, so an unknown or mistyped fact, a hidden face with
-// a barrier (a door verb would find it) or an old API floor loads.
-test('the loader refuses each unsound hidden_until declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const face = `.cartridge.rooms["${P}:room/hall"].exits.east.hidden_until`;
-  const until = (c: any) => c.rooms[`${P}:room/hall`].exits.east.hidden_until;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.44'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [(c) => (until(c).fact.key = 'panel_lost'), 'UNRESOLVED_REFERENCE', `${face}.fact`],
-    [(c) => (until(c).equals = 1), 'FACT_TYPE_MISMATCH', `${face}.equals`],
-    [
-      (c) => {
-        // A well-formed door on both faces, so only the hidden face's own rule refuses it.
-        const door = { ...until(c).fact, kind: 'barrier', key: 'panel' };
-        c.barriers = {
-          [`${P}:barrier/panel`]: {
-            key: 'panel',
-            keywords: ['panel'],
-            short: 'detail.panel',
-            initial: 'open',
-          },
-        };
-        c.lock.capabilities.barrier = c.manifest.requires.capabilities.barrier = 1;
-        c.rooms[`${P}:room/hall`].exits.east.barrier = door;
-        c.rooms[`${P}:room/study`].exits.west.barrier = door;
-      },
-      'BARRIER_MISMATCH',
-      face,
-    ],
-  ];
-  for (const [change, code, path] of rows)
-    assert.deepEqual(refusal(source, change), [code, path], path);
-});
-
-// Breaks: the loader admits a patrol leg or expedition edge over a hidden face, so the leader walks
-// it or the quest journal names its direction (twin of content_hidden_passage_test.exs).
-test('the loader refuses a patrol or expedition route over a hidden face', () => {
-  const expedition = fragment('protocol/fixtures/expedition_sampler_hash.json');
-  // Hide the west face out of `room` until `fact`; the patrol source rises to the 1.45 face floor.
-  const hide = (prefix: string, room: string, fact: string) => (c: any) => {
-    if (prefix === patrol.prefix) c.manifest.requires.kernel_api.at_least = '1.45';
-    const to = c.rooms[`${prefix}:room/${room}`].exits.west.to;
-    c.rooms[`${prefix}:room/${room}`].exits.west.hidden_until = {
-      fact: { ...to, kind: 'fact', key: fact },
-      equals: true,
-    };
-  };
-  const refused = (r: ReturnType<typeof patrol.load>) =>
-    r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  const P = patrol.prefix,
-    E = expedition.source.manifest;
-  assert.deepEqual(refused(patrol.load(hide(P, 'watch_post', 'watch_gate_trusts_player'))), [
-    'OUTCOME_MISMATCH',
-    `.cartridge.quests["${P}:quest/watch_rounds"].patrol.route[0]`,
-  ]);
-  const X = `${E.id}@${E.version}`;
-  assert.deepEqual(refused(expedition.load(hide(X, 'trailhead', 'night_survived'))), [
-    'OUTCOME_MISMATCH',
-    `.cartridge.quests["${X}:quest/night_walk"].expedition.route[0]`,
-  ]);
 });
 
 function refusal(source: object, change: (c: any) => void) {

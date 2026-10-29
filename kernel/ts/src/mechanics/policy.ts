@@ -230,7 +230,7 @@ function furnished(world: World, actor: CharacterId, tag: Tag, steps: { n: numbe
   return false;
 }
 
-// `item` is inside `holder`, directly or through the items it is in (the loader and compose
+// `item` is inside `holder`, directly or through the items it is in (the compiler and compose
 // keep containers acyclic, so the climb ends at a room).
 export function held(world: World, item: string, holder: string | undefined): boolean {
   for (let at = world.state.containers[item]; at !== undefined; at = world.state.containers[at])

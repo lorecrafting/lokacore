@@ -13,7 +13,6 @@ import { test } from 'node:test';
 import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
-import { fragment } from './fragment.ts';
 import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-doors-'));
@@ -184,24 +183,4 @@ test('f. without walks the thief jumps into the locked hut', () => {
     at(8.5),
   );
   assert.equal(where(w, 'thief'), room('hut'));
-});
-
-// Breaks: the loader's 1.81 floor for walks is missing or 1.80 (twin of content_doors_test.exs):
-// walks on a schedule case here, and on the expedition sampler's population plan lowered to 1.80.
-test('g. walks on a case or a plan below kernel_api 1.81 does not load', () => {
-  const expedition = fragment('protocol/fixtures/expedition_sampler_hash.json');
-  const { id, version } = expedition.source.manifest;
-  const at180 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.80');
-  for (const r of [
-    reload(source, at180),
-    expedition.load((c) => {
-      at180(c);
-      c.populations[`${id}@${version}:population/hounds`].walks = true;
-    }),
-  ])
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ]);
-  assert.ok(expedition.load(at180).ok);
 });

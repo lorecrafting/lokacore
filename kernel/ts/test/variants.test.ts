@@ -16,7 +16,6 @@ import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { detail, room } from '../play/text.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
-import { variants } from '../src/content/cartridge_variants.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { noticeAction } from './notice_action.ts';
 import { ctx } from './harness.ts';
@@ -145,68 +144,6 @@ test('the shove at the guard is offered only while the guard is in the taproom a
   } as World;
   assert.equal(offered(dead), false);
   assert.equal(shove(dead).kind, 'rejected');
-});
-
-// Breaks: the loader's kernel_api floor misses a new variant list or leaf, or wrongly refuses an
-// item's room_line_variants, which predate row W6 (items_sampler declares one at 1.0).
-test('row W6 fields and leaves need kernel_api 1.46; an item room-line variant does not', () => {
-  const v = [{ when: { policy_version: 1, root: { op: 'target_present' } }, description: 't' }];
-  const leaf = (op: object) => ({ policies: { p: { root: op } } });
-  const rows: [object, boolean][] = [
-    [{ npcs: { a: { short_variants: v } } }, true],
-    [{ npcs: { a: { room_line_variants: v } } }, true],
-    [{ npcs: { a: { description_variants: v } } }, true],
-    [{ items: { a: { short_variants: v } } }, true],
-    [{ items: { a: { description_variants: v } } }, true],
-    [{ items: { a: { room_line_variants: v } } }, false],
-    [leaf({ op: 'not', item: { op: 'status_active', subject: 'target', status: {} } }), true],
-    [leaf({ op: 'npc_present', npc: {} }), true],
-  ];
-  for (const [part, refused] of rows) {
-    const c = (api: string) => ({
-      manifest: { requires: { kernel_api: { at_least: api } } },
-      actions: {},
-      policies: {},
-      ...part,
-    });
-    assert.equal(variants(c('1.45')).length, refused ? 1 : 0, JSON.stringify(part));
-    assert.deepEqual(variants(c('1.46')), []);
-  }
-});
-
-// Breaks: the loader stops walking an NPC's or item's new variant lists, so a variant naming an
-// undeclared status or text key loads and fails in play (twin of content_variants_test.exs).
-test("the loader checks a new variant list's references and text keys", () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const maud = `${C}:npc/maud`;
-  const sword = `${C}:item/sword`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.npcs[maud].description_variants[0].when.root.status.key = 'ghost'),
-      `.cartridge.npcs[${JSON.stringify(maud)}].description_variants[0].when.root.status`,
-      `${C}:status/ghost`,
-    ],
-    [
-      (c) => (c.items[sword].short_variants[0].description = 'item.sword.gone'),
-      `.cartridge.items[${JSON.stringify(sword)}].short_variants[0].description`,
-      'item.sword.gone',
-    ],
-  ];
-  for (const [change, path, target] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data], [
-      'UNRESOLVED_REFERENCE',
-      path,
-      { target },
-    ]);
-  }
 });
 
 // Breaks (twin of test/loka/content_variants_test.exs): a status kind (loka-x6t.64) outside buff
