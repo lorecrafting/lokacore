@@ -1,6 +1,6 @@
 #!/bin/sh
 # Merge a reviewed slice and its review record into a batch worktree, resolving the known additive
-# conflicts (bin/merge_resolve.py), run the post-merge checks (bin/prepush.sh plus only the tests the
+# conflicts (the batch's own bin/merge_resolve.py, then bin/regen.sh), run the post-merge checks (bin/prepush.sh plus only the tests the
 # merge touched), and push the batch if everything passes.
 # Usage: pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch> "<subject>" <reviewed-sha>
 # Refuses unless ci.yml and book-e2e.yml concluded success on the reviewed sha.
@@ -8,7 +8,6 @@
 # the worktree to its start head, so a rerun re-checks the whole slice.
 # ponytail: runs only the test files the merge touched; hosted CI on the batch head runs the rest.
 set -u
-here=$(cd "$(dirname "$0")" && pwd)
 wt=$1 batch=$2 slice=${3#origin/} rec=$4 subj=$5 sha=$6
 cd "$wt" || exit 2
 tr="Co-Authored-By: ${COAUTHOR:-Claude Opus 5.5} <noreply@anthropic.com>"
@@ -31,12 +30,14 @@ merge() { # <ref> <message>
   if git -c merge.conflictStyle=diff3 merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
   c=$(git diff --name-only --diff-filter=U)
   # The known additive conflicts (bin/merge_resolve.py: mechanics.md sections, toolbox rows, the kernel_api
-  # line, generated files, docs/reviews/README.md and whitespace-only review records) are resolved; any other conflict stops the merge.
-  if [ -n "$c" ] && python3 "$here/merge_resolve.py" >"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 &&
+  # line, generated files, docs/reviews/README.md and whitespace-only review records) are resolved by the batch's own
+  # resolver (a batch can add globs); regen.sh rebuilds the generated families it took theirs on. Any other conflict stops the merge.
+  if [ -n "$c" ] && python3 bin/merge_resolve.py >"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 &&
+    nice -n 10 sh bin/regen.sh >>"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 && git add -u &&
     git commit -q --no-edit >/dev/null 2>&1; then
     echo "MERGED $1 (resolved: $(echo $c))"; return 0
   fi
-  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git merge --abort 2>/dev/null; return 1
+  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git reset -q --hard; return 1 # also drops a failed regen's edits, which merge --abort keeps
 }
 merge "$sha" "Merge $slice: $subj" || exit 1
 merge "$rec" "Merge review record for $subj" || { git reset -q --hard "$pre"; exit 1; }
