@@ -16,7 +16,7 @@ type Draft = {
   entityResourceSpecs?: Record<string, World['resourceSpecs'][string]>;
 };
 
-/** A created corpse stays fixed; a spawned pelt uses ordinary item custody. */
+/** A created corpse stays fixed; spawned loot uses ordinary item custody. */
 export function movable(world: World, id: EntityId): boolean {
   const origin = world.state.created?.[id]?.origin;
   return !origin || (origin.kind === 'spawned' && origin.role === 'loot');
