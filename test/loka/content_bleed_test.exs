@@ -3,7 +3,7 @@ defmodule Loka.ContentBleedTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/bleed_sampler")}
 
   # Breaks: a non-hound source or mismatched bandage is compiled as a real C5 producer, or a
-  # plan missing area crashes the compiler.
+  # plan missing area crashes the compiler, or a hound no plan spawns bleeds.
   test "hound and bandage declarations keep exact effect, skill and item boundaries", %{
     dir: dir
   } do
@@ -14,7 +14,9 @@ defmodule Loka.ContentBleedTest do
       {"items/bandage.json", &Map.put(&1, "container", true)},
       {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")},
       # an unexpanded (schema-refused) plan is refused, not a crash
-      {"populations/hounds.json", &Map.delete(&1, "area")}
+      {"populations/hounds.json", &Map.delete(&1, "area")},
+      # a hound no population plan spawns is not a producer
+      {"npcs/stray.json", JSON.decode!(File.read!(Path.join(dir, "npcs/hound.json")))}
     ]
 
     for {file, change} <- cases do
