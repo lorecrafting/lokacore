@@ -331,7 +331,7 @@ adjacent-sight projection, rule, content artifact or saved state
 
 EntityView, ContentView and the combat opponent (`combat` and each `active_opponents`
 member) carry `words` copied from the definition while the selected short is the base
-`short`; a holding `short_variants` entry omits them (loka-6qi, kernel_api 1.118).
+`short`; a holding `short_variants` entry omits them (loka-6qi).
 
 NoticeView and NoticeBoardView carry `key`, the authored detail Key, so a presenter can match
 a touch link ([cartridge.md](cartridge.md#compiler)) in the selected description to the
@@ -703,7 +703,7 @@ and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
 valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
 paid, full MV, sold out and unavailable exact payment without changing error codes.
 `GameError` and `UnavailableReason` may also carry `cause`, a closed `RefusalCause`
-(`error.schema.json`; kernel_api 1.111, owner Q13 option A): the one reason a shared code
+(`error.schema.json`, owner Q13 option A): the one reason a shared code
 stands for, so a client can tell the player. `not_standing` is a move while the actor is not
 standing (`invalid_state`, position@1); `cursed` is a remove a curse holds on (`invalid_state`,
 equipment@1, loka-x6t.38). The code stays the contract; a
@@ -825,7 +825,7 @@ Item definitions opt into `fuel`: a supply declares `kind: supply`, positive
 `supply` reference and the `ignited`, `doused`, `refueled` narration keys. Runtime
 immutable `fuel_specs` bind these specifications to their actual item instances;
 mutable `fuel` rows are keyed by item ID. A room's optional `dark_description`
-is its authored darkness opt-in; the optional `dark: true` flag (kernel_api 1.114)
+is its authored darkness opt-in; the optional `dark: true` flag
 darkens a room with no text of its own, read as the engine key `place.dark`. Actual
 fuel or darkness fields require a `requires.kernel_api.at_least` floor of 1.19 (1.114
 for `dark`) in both compiler and loader;
