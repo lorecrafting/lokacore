@@ -1,6 +1,6 @@
 #!/bin/sh
 # bin/merge_resolve.py (bin/pm_merge.sh) resolves a mechanics.md tail (a section both sides appended
-# kept once), a kernel_api line and a generated-file conflict, and leaves unresolved: a tail that
+# kept once), a kernel_api line and a generated-file conflict (a hash fixture included), and leaves unresolved: a tail that
 # repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of mechanics.md, a review record that differs
 # beyond whitespace, an edit of the last mechanics.md line and a conflict in a TypeScript source.
 set -eu
@@ -13,13 +13,14 @@ git clone -q --shared "$src" "$t/r"
 cd "$t/r"
 g() { git -c user.name=t -c user.email=t@t -c merge.conflictStyle=diff3 "$@"; }
 fail() { echo "merge_resolve control failed: $*" >&2; exit 1; }
-m=docs/system/mechanics.md w=kernel/ts/src/runtime/world.ts s=docs/system-graph.gen.json f=kernel/ts/src/runtime/fresh.ts
+m=docs/system/mechanics.md w=kernel/ts/src/runtime/world.ts s=docs/system-graph.gen.json hf=protocol/fixtures/cartridge_hash.json f=kernel/ts/src/runtime/fresh.ts
 base=$(git rev-parse HEAD)
 side() { # <branch> <section> <kernel_api>
   g checkout -q -b "$1" "$base"
   printf '\n## Shared\n\nshared line\n\n## %s\n\n%s text\n' "$2" "$2" >> $m
   perl -pi -e "s/kernel_api: '[0-9.]+'/kernel_api: '$3'/" $w
   echo "$1" > $s
+  echo "{\"side\": \"$1\"}" > $hf
   g commit -qam "$1"
 }
 side a A 1.9
@@ -30,6 +31,7 @@ g merge -q b >/dev/null 2>&1 && fail 'the sides did not conflict'
 python3 "$src/bin/merge_resolve.py" >/dev/null || fail 'additive conflicts not resolved'
 cmp -s $m "$t/expected.md" || fail 'mechanics.md tail is not ours then theirs'
 grep -q "kernel_api: '1.10'," $w || fail 'kernel_api is not the higher version'
+[ "$(cat $hf)" = '{"side": "b"}' ] || fail "$hf (a regenerated family) is not theirs"
 mise exec -- elixir bin/contracts.exs --check >/dev/null || fail "$s not regenerated"
 [ -z "$(git diff --name-only --diff-filter=U)" ] || fail 'a file is left unmerged'
 g merge --abort
