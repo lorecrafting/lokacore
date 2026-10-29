@@ -1,5 +1,5 @@
 {
-  "title": "room.antechamber.title",
+  "name": "room.antechamber.title",
   "description": "room.antechamber.description",
   "exits": {
     "north": {

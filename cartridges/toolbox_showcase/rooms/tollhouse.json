@@ -1,5 +1,5 @@
 {
-  "title": "room.tollhouse.title",
+  "name": "room.tollhouse.title",
   "description": "room.tollhouse.description",
   "exits": {
     "west": {

@@ -6,7 +6,7 @@ defmodule Loka.Content.Entities do
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
 
-  @text ~w(short room_line description)
+  @text ~w(name room_line description)
 
   @doc "The schema-valid NPCs and items as `{kind, rel, definition}`."
   @spec all(map()) :: [{String.t(), String.t(), map()}]
@@ -182,7 +182,7 @@ defmodule Loka.Content.Entities do
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
   @doc """
-  Every text of each entity as `{rel, entity key, steps, text key}`: short, room_line and
+  Every text of each entity as `{rel, entity key, steps, text key}`: name, room_line and
   description, then each text variant's description.
   """
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]

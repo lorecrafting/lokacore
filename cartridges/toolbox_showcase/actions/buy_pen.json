@@ -1,5 +1,5 @@
 {
-  "label": "service.buy_pen",
+  "name": "service.buy_pen",
   "command": "use_service",
   "target": {
     "kind": "entity",

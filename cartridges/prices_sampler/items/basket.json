@@ -2,7 +2,7 @@
   "keywords": [
     "basket"
   ],
-  "short": "item.basket.short",
+  "name": "item.basket.short",
   "room_line": "item.basket.room",
   "description": "item.basket.description",
   "mass_grams": 300,

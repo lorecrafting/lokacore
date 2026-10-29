@@ -1,5 +1,5 @@
 {
-  "label": "transport.ride_south",
+  "name": "transport.ride_south",
   "command": "use_transport",
   "target": {
     "kind": "entity",

@@ -235,7 +235,7 @@ test('allows lists intersect; a blocked move shows the exit unavailable with the
 test('an alias of a blocked command is withheld from view and invocation alike', () => {
   const chant = {
     key: 'chant',
-    label: 'action.chant',
+    name: 'action.chant',
     target: { kind: 'none' },
     input: ['word'],
     priority: 0,

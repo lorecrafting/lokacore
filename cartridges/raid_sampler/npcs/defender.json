@@ -2,7 +2,7 @@
   "keywords": [
     "defender"
   ],
-  "short": "npc.defender.short",
+  "name": "npc.defender.short",
   "room_line": "npc.defender.room",
   "description": "npc.defender.description",
   "room": "village",

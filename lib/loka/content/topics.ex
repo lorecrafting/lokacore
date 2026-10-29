@@ -15,8 +15,8 @@ defmodule Loka.Content.Topics do
 
   defp topic({rel, d}, ts, m, defs, text) do
     fact(rel, [], d, m, defs) ++
-      if(text != :unknown and not is_map_key(text, d["label"]),
-        do: [diag("UNRESOLVED_REFERENCE", at(rel, ["label"]), %{"target" => d["label"]})],
+      if(text != :unknown and not is_map_key(text, d["name"]),
+        do: [diag("UNRESOLVED_REFERENCE", at(rel, ["name"]), %{"target" => d["name"]})],
         else: []
       ) ++
       if(Enum.count(ts, fn {_, other} -> other["fact"] == d["fact"] end) > 1,

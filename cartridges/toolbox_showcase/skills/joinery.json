@@ -1,5 +1,5 @@
 {
-  "label": "skill.joinery.label",
+  "name": "skill.joinery.label",
   "requirement": "skill.joinery.requirement",
   "prerequisite": {
     "op": "skill_compare",

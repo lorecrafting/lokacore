@@ -43,7 +43,7 @@ const status = (key: string, extra: object) => ({
   duration: 600,
   tick_every: 60,
   resource: ref('resource', 'hp'),
-  label: `condition.${key}`,
+  name: `condition.${key}`,
   narration: { applied: 'x', tick: 'x', expired: 'x' },
   ...extra,
 });

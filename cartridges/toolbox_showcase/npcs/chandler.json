@@ -2,7 +2,7 @@
   "keywords": [
     "chandler"
   ],
-  "short": "npc.chandler.short",
+  "name": "npc.chandler.short",
   "room_line": "npc.chandler.room",
   "description": "npc.chandler.description",
   "room": "market_row",

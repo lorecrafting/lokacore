@@ -1,5 +1,5 @@
 {
-  "title": "room.forge_stall.title",
+  "name": "room.forge_stall.title",
   "description": "room.forge_stall.description",
   "exits": {
     "south": {

@@ -2,7 +2,7 @@
   "keywords": [
     "scarf"
   ],
-  "short": "item.scarf.short",
+  "name": "item.scarf.short",
   "room_line": "item.scarf.room",
   "description": "item.scarf.description",
   "location": {

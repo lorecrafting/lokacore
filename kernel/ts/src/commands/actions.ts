@@ -119,7 +119,7 @@ function engine(world: World, actor: CharacterId): ActionSet {
 // whose key is an action's, a recipe's, a quest's or a registered command's (DUPLICATE_DEFINITION).
 function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = keyed(world).map((recipe): [string, Offered] => {
-    const { key, label, priority, policy } = recipe;
+    const { key, name: label, priority, policy } = recipe;
     // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
     const target: TargetSpec =
       recipe.target.kind === 'use'
@@ -128,10 +128,9 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const command = 'perform' as Key;
     return [key, { key, label, target, input: [], priority, policy, command, recipe }];
   });
-  const actions = Object.values(world.cartridge.actions).map((a): [string, Offered] => [
-    a.key,
-    { ...a, label: a.label as TextKey },
-  ]);
+  const actions = Object.values(world.cartridge.actions).map(
+    ({ name, ...a }): [string, Offered] => [a.key, { ...a, label: name as TextKey }],
+  );
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const quests = Object.values(world.cartridge.quests ?? {}).flatMap(({ key, offer }) => {
     const quest = { cartridge_id, cartridge_version, kind: 'quest', key } as DefinitionRef;

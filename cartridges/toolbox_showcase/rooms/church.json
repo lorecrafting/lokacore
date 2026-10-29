@@ -1,5 +1,5 @@
 {
-  "title": "room.church.title",
+  "name": "room.church.title",
   "description": "room.church.description",
   "exits": {
     "east": {

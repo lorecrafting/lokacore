@@ -2,7 +2,7 @@
   "keywords": [
     "bed"
   ],
-  "short": "item.bed.short",
+  "name": "item.bed.short",
   "room_line": "item.bed.room",
   "description": "item.bed.description",
   "location": {

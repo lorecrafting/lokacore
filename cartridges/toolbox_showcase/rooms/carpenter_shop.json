@@ -1,5 +1,5 @@
 {
-  "title": "room.carpenter_shop.title",
+  "name": "room.carpenter_shop.title",
   "description": "room.carpenter_shop.description",
   "exits": {
     "east": {

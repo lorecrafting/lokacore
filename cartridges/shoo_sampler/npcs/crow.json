@@ -3,7 +3,7 @@
   "keywords": [
     "crow"
   ],
-  "short": "npc.crow.short",
+  "name": "npc.crow.short",
   "room_line": "npc.crow.room",
   "description": "npc.crow.description",
   "room": "green"

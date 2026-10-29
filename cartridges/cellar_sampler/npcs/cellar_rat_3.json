@@ -3,7 +3,7 @@
     "rat",
     "cellar_rat_3"
   ],
-  "short": "npc.cellar_rat.short",
+  "name": "npc.cellar_rat.short",
   "room_line": "npc.cellar_rat_3.room",
   "description": "npc.cellar_rat.description",
   "room": "lantern_cellar",

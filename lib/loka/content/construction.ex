@@ -3,7 +3,7 @@ defmodule Loka.Content.Construction do
   Built rooms S1 (construction@1; cartridge.md Structure and site declarations): a room's site
   names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only structures of this
   cartridge (UNRESOLVED_REFERENCE); a structure, its tags and description variants are owned by
-  their capabilities, and its title and descriptions have catalog entries; a site or
+  their capabilities, and its name and descriptions have catalog entries; a site or
   world.construction needs construction@1. Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """
@@ -159,7 +159,7 @@ defmodule Loka.Content.Construction do
   defp texts({rel, b}, text) do
     keys = for {s, v} <- RoomParts.variants(b), do: {s ++ ["description"], v["description"]}
 
-    for {s, k} <- [{["title"], b["title"]}, {["description"], b["description"]} | keys],
+    for {s, k} <- [{["name"], b["name"]}, {["description"], b["description"]} | keys],
         text != :unknown and not is_map_key(text, k),
         do: diag("UNRESOLVED_REFERENCE", at(rel, s), %{"target" => k})
   end

@@ -3,6 +3,6 @@
     "lid",
     "coffer_lid"
   ],
-  "short": "barrier.coffer_lid.short",
+  "name": "barrier.coffer_lid.short",
   "initial": "closed"
 }

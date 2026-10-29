@@ -8,7 +8,7 @@
       "modifier": 3
     }
   ],
-  "label": "condition.might",
+  "name": "condition.might",
   "narration": {
     "applied": "narration.might.applied",
     "tick": "narration.might.tick",

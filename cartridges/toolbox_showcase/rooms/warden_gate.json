@@ -1,5 +1,5 @@
 {
-  "title": "room.warden_gate.title",
+  "name": "room.warden_gate.title",
   "description": "room.warden_gate.description",
   "exits": {
     "west": {

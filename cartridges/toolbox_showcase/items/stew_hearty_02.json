@@ -3,7 +3,7 @@
     "stew",
     "hearty"
   ],
-  "short": "item.stew_hearty_02.short",
+  "name": "item.stew_hearty_02.short",
   "room_line": "item.stew_hearty_02.room",
   "description": "item.stew_hearty_02.description",
   "mass_grams": 500,

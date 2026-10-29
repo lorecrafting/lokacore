@@ -4,7 +4,7 @@
     "cellar_skin",
     "bitters"
   ],
-  "short": "item.bitters_skin.short",
+  "name": "item.bitters_skin.short",
   "room_line": "item.cellar_skin.room",
   "description": "item.bitters_skin.description",
   "location": {

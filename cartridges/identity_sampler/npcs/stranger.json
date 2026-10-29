@@ -2,7 +2,7 @@
   "keywords": [
     "stranger"
   ],
-  "short": "npc.stranger.short",
+  "name": "npc.stranger.short",
   "short_variants": [
     {
       "when": {

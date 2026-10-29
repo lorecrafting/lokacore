@@ -2,12 +2,17 @@ import {
   LIMITS,
   type CharacterId,
   type EntityId,
-  type NpcDefinition,
   type ShopItemView,
   type ShopOffer,
   type TextKey,
 } from '../../contracts.gen.ts';
-import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
+import {
+  bodyOf,
+  refString,
+  type Steps,
+  type World,
+  type NpcEntity,
+} from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { transfer } from '../resource.ts';
@@ -23,7 +28,7 @@ function buyPrice(world: World, actor: CharacterId, npc: EntityId, o: ShopOffer,
   const held = o.stock ? selected(world, o.stock.items, npc, o.stock.items.length, steps) : [];
   if (typeof held === 'string') return held;
   const base = held.length ? o.stock!.buy[held.length - 1] : o.buy;
-  const d = (world.entities[npc] as NpcDefinition).shop!.buy_discount;
+  const d = (world.entities[npc] as NpcEntity).shop!.buy_discount;
   return d &&
     (d.friendly
       ? disposition(world, actor, npc, steps) === 'friendly'

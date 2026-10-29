@@ -3,7 +3,7 @@
     "trout",
     "fish"
   ],
-  "short": "item.trout_02.short",
+  "name": "item.trout_02.short",
   "room_line": "item.trout_02.room",
   "description": "item.trout_02.description",
   "mass_grams": 500,

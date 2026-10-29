@@ -3,7 +3,7 @@
   "tick_every": 600,
   "resource": "mv",
   "per_tick": 5,
-  "label": "condition.blessed",
+  "name": "condition.blessed",
   "narration": {
     "applied": "narration.blessing.applied",
     "tick": "narration.blessing.tick",

@@ -153,7 +153,7 @@ defmodule Loka.ContentItemsTest do
                 undeclared.("items/lantern.room_line_variants[0].when.op"),
                 undeclared.("items/satchel"),
                 undeclared.("npcs/bram"),
-                d("UNRESOLVED_REFERENCE", "npcs/bram.short", %{"target" => "npc.bram.short"})
+                d("UNRESOLVED_REFERENCE", "npcs/bram.name", %{"target" => "npc.bram.short"})
               ]}
   end
 

@@ -1,5 +1,5 @@
 {
-  "label": "skill.intimidate.label",
+  "name": "skill.intimidate.label",
   "requirement": "skill.intimidate.requirement",
   "growth": [
     1,

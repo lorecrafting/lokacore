@@ -1,5 +1,5 @@
 {
-  "label": "actions.walk",
+  "name": "actions.walk",
   "aliases": [
     "walk"
   ],

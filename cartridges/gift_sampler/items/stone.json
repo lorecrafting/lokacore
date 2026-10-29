@@ -2,7 +2,7 @@
   "keywords": [
     "stone"
   ],
-  "short": "item.stone.short",
+  "name": "item.stone.short",
   "room_line": "item.stone.room",
   "description": "item.stone.description",
   "location": {

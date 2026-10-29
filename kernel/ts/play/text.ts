@@ -161,7 +161,7 @@ export function scan(cartridge: Cartridge, world: World): string {
     if (!s.entities)
       return `${s.direction}: ${door(cartridge, world, s.direction)}${BARRED[s.code]}.`;
     const seen = s.entities.map((id) => say(cartridge, world.entities[id].short)).join(', ');
-    return `${s.direction} (${say(cartridge, world.rooms[s.room!].title)})${seen && `: ${seen}`}.`;
+    return `${s.direction} (${say(cartridge, world.rooms[s.room!].name)})${seen && `: ${seen}`}.`;
   });
   return lines.length ? `${lines.join('\n')}\n` : 'You see no exits.\n';
 }
@@ -169,7 +169,7 @@ export function scan(cartridge: Cartridge, world: World): string {
 /** The short description of the barrier on the current room's exit in `direction`, if any. */
 export function door(cartridge: Cartridge, world: World, direction: string): string {
   const b = barrierAt(cartridge, world, direction);
-  return b ? say(cartridge, b.short) : 'it';
+  return b ? say(cartridge, b.name) : 'it';
 }
 
 /** The barrier on the current room's exit in `direction`, if any. */
@@ -311,5 +311,5 @@ export function locationLine(world: World, location: LocatedNpc): string {
   const name = say(world.cartridge, world.entities[location.target_id].short);
   return location.status === 'here'
     ? `${name}: here.\n`
-    : `${name}: last seen at ${say(world.cartridge, world.rooms[location.room_id].title)} at ${location.at}s.\n`;
+    : `${name}: last seen at ${say(world.cartridge, world.rooms[location.room_id].name)} at ${location.at}s.\n`;
 }

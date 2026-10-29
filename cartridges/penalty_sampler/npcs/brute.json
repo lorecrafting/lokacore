@@ -2,7 +2,7 @@
   "keywords": [
     "brute"
   ],
-  "short": "npc.brute.short",
+  "name": "npc.brute.short",
   "room_line": "npc.brute.room",
   "description": "npc.brute.description",
   "room": "yard",

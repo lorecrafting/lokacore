@@ -3,7 +3,7 @@
     "salmon",
     "salmon_01"
   ],
-  "short": "item.salmon.short",
+  "name": "item.salmon.short",
   "room_line": "item.salmon.room",
   "description": "item.salmon.description",
   "mass_grams": 500,

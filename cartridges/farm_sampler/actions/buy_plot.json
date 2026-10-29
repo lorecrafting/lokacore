@@ -1,5 +1,5 @@
 {
-  "label": "service.buy_plot",
+  "name": "service.buy_plot",
   "command": "use_service",
   "target": {
     "kind": "entity",

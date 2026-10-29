@@ -1,5 +1,5 @@
 {
-  "title": "room.flats.title",
+  "name": "room.flats.title",
   "description": "room.flats.description",
   "tags": [
     "exposed"

@@ -39,7 +39,7 @@ const fresh = () =>
   });
 const names = (w: World) =>
   Object.values(w.state.visited_rooms ?? {})
-    .map((v) => w.rooms[v.room_id].title)
+    .map((v) => w.rooms[v.room_id].name)
     .sort();
 
 // Break: projection/Look discovers adjacent rooms, or accepted body entry forgets its durable visit.

@@ -2,7 +2,7 @@
   "keywords": [
     "boar"
   ],
-  "short": "npc.tilt_boar.short",
+  "name": "npc.tilt_boar.short",
   "room_line": "npc.tilt_boar.room",
   "description": "npc.tilt_boar.description",
   "room": "tilt_yard",

@@ -3,7 +3,7 @@
     "quern",
     "millstone"
   ],
-  "short": "item.quern.short",
+  "name": "item.quern.short",
   "room_line": "item.quern.room",
   "description": "item.quern.description",
   "location": {

@@ -1,5 +1,5 @@
 {
-  "label": "skill.carving.label",
+  "name": "skill.carving.label",
   "requirement": "skill.carving.requirement",
   "prerequisite": {
     "op": "skill_compare",

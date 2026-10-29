@@ -1,5 +1,5 @@
 {
-  "title": "room.inn_rooms.title",
+  "name": "room.inn_rooms.title",
   "description": "room.inn_rooms.description",
   "exits": {
     "up": {

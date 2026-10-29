@@ -407,13 +407,13 @@
       ]
     },
     "RoomDefinition": {
-      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A navigable place (21 §5 Place/Room): its key, its name and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "type": "object",
       "properties": {
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "title": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "description": {
@@ -539,7 +539,7 @@
       },
       "required": [
         "key",
-        "title",
+        "name",
         "description",
         "exits"
       ],
@@ -547,7 +547,7 @@
       "examples": [
         {
           "key": "ferry_landing",
-          "title": "room.ferry_landing.title",
+          "name": "room.ferry_landing.title",
           "description": "room.ferry_landing.description",
           "exits": {
             "north": {
@@ -562,13 +562,13 @@
         },
         {
           "key": "cell",
-          "title": "room.cell.title",
+          "name": "room.cell.title",
           "description": "room.cell.description",
           "exits": {}
         },
         {
           "key": "well_lane",
-          "title": "room.well_lane.title",
+          "name": "room.well_lane.title",
           "description": "room.well_lane.description",
           "exits": {},
           "details": {
@@ -583,7 +583,7 @@
         },
         {
           "key": "reed_path",
-          "title": "room.reed_path.title",
+          "name": "room.reed_path.title",
           "description": "room.reed_path.description",
           "exits": {},
           "variants": [
@@ -607,7 +607,7 @@
         },
         {
           "key": "belfry",
-          "title": "room.belfry.title",
+          "name": "room.belfry.title",
           "description": "room.belfry.description",
           "exits": {},
           "actions": [
@@ -666,7 +666,7 @@
       ]
     },
     "BarrierDefinition": {
-      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); short, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "type": "object",
       "properties": {
         "key": {
@@ -680,7 +680,7 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "short": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "initial": {
@@ -706,7 +706,7 @@
       "required": [
         "key",
         "keywords",
-        "short",
+        "name",
         "initial"
       ],
       "additionalProperties": false,
@@ -717,7 +717,7 @@
             "door",
             "cell_door"
           ],
-          "short": "barrier.cell_door",
+          "name": "barrier.cell_door",
           "initial": "locked",
           "key_item": {
             "cartridge_id": "gate_sampler",
@@ -731,7 +731,7 @@
           "keywords": [
             "gate"
           ],
-          "short": "barrier.gate",
+          "name": "barrier.gate",
           "initial": "open"
         }
       ]

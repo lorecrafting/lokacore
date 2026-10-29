@@ -3,7 +3,7 @@
     "antidote",
     "vial"
   ],
-  "short": "item.antidote.short",
+  "name": "item.antidote.short",
   "room_line": "item.antidote.room",
   "description": "item.antidote.description",
   "mass_grams": 50,

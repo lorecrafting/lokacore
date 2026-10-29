@@ -127,7 +127,7 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
   const lit = { ...room, dark_description: undefined };
   return {
     id: here,
-    title: text(room.title),
+    title: text(room.name),
     description: text(
       unseen
         ? (room.dark_description ?? ('place.dark' as TextKey))
@@ -230,7 +230,7 @@ const viewOf = (
   ...(e.kind === 'item' &&
     e.weapon && {
       weapon: e.weapon,
-      skill_label: world.cartridge.skills![refString(e.weapon.skill)].label,
+      skill_label: world.cartridge.skills![refString(e.weapon.skill)].name,
       skill_requirement: world.cartridge.skills![refString(e.weapon.skill)].requirement,
     }),
   ...(e.kind === 'item' && e.block_chance !== undefined && { block_chance: e.block_chance }),
@@ -271,7 +271,7 @@ function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: 
       ...(wet?.entering && { warning: world.cartridge.world!.water!.warning }),
       ...(barrier && {
         door: {
-          name: world.cartridge.barriers![refString(barrier)].short,
+          name: world.cartridge.barriers![refString(barrier)].name,
           state: barrierState(world, barrier),
           actions: door(direction),
         },
@@ -279,7 +279,7 @@ function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: 
       ...(seen.entities && {
         sight: {
           room: seen.room!,
-          title: world.rooms[seen.room!].title,
+          title: world.rooms[seen.room!].name,
           entities: seen.entities.map((id) => ({
             id,
             name: describeEntity(world, actor_id, id, 'short', steps),

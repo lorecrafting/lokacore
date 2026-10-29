@@ -2,7 +2,7 @@
   "keywords": [
     "bucket"
   ],
-  "short": "item.loft_bucket.short",
+  "name": "item.loft_bucket.short",
   "room_line": "item.loft_bucket.room",
   "description": "item.loft_bucket.description",
   "mass_grams": 500,

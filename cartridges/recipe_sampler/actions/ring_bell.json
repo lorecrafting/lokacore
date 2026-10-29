@@ -1,5 +1,5 @@
 {
-  "label": "actions.ring_bell",
+  "name": "actions.ring_bell",
   "aliases": [
     "ring"
   ],

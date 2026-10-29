@@ -2,7 +2,7 @@
   "keywords": [
     "chest"
   ],
-  "short": "item.chest.short",
+  "name": "item.chest.short",
   "room_line": "item.chest.room",
   "description": "item.chest.description",
   "location": {

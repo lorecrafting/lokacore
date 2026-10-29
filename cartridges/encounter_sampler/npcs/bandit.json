@@ -2,7 +2,7 @@
   "keywords": [
     "bandit"
   ],
-  "short": "npc.bandit.short",
+  "name": "npc.bandit.short",
   "room_line": "npc.bandit.room",
   "description": "npc.bandit.description",
   "room": "road",

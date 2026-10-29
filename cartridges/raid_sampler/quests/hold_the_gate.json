@@ -1,5 +1,5 @@
 {
-  "title": "quest.hold_the_gate.title",
+  "name": "quest.hold_the_gate.title",
   "objective": {
     "evidence": "current_state",
     "policy": {

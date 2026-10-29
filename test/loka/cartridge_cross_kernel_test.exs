@@ -91,7 +91,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
     look =
       Map.merge(read("actions/talk.json"), %{
-        "label" => "actions.look",
+        "name" => "actions.look",
         "command" => "look",
         "accessibility" => "actions.look.a11y",
         "policy" => root

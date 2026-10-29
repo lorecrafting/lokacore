@@ -41,7 +41,7 @@ function mightCon(modifier: number) {
     ...anvil,
     keywords: ['tonic'],
     mass_grams: 10,
-    edible: { ...edible, cures, label: anvil.short, narration: anvil.short },
+    edible: { ...edible, cures, label: anvil.name, narration: anvil.name },
   };
   return c as Cartridge;
 }
@@ -143,7 +143,7 @@ test('a flask of water curing a refreshed might with con -6 at 10 of 10: hp read
   c.liquids = {
     'derived_sampler@0.0.1:liquid/water': {
       key: 'water',
-      label: 'item.anvil.short',
+      name: 'item.anvil.short',
       unit_label: 'item.anvil.short',
       grams_per_unit: 250,
       drink_amount: 1,

@@ -1,5 +1,5 @@
 {
-  "title": "room.golem_yard.title",
+  "name": "room.golem_yard.title",
   "description": "room.golem_yard.description",
   "exits": {
     "east": {

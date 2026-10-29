@@ -1,5 +1,5 @@
 {
-  "label": "skill.whittling.label",
+  "name": "skill.whittling.label",
   "requirement": "skill.whittling.requirement",
   "growth": [
     1,

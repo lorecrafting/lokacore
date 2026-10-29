@@ -2,7 +2,7 @@
   "keywords": [
     "cart"
   ],
-  "short": "item.cart.short",
+  "name": "item.cart.short",
   "room_line": "item.cart.room",
   "description": "item.cart.description",
   "mass_grams": 200000,

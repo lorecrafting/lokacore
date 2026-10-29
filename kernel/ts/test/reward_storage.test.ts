@@ -192,7 +192,7 @@ test('received identity completes an already-active acquisition quest in the sam
   let w = world((c) => {
     c.quests[`${prefix}:quest/receive_key`] = {
       key: 'receive_key',
-      title: 'fixture.quest',
+      name: 'fixture.quest',
       offer: {
         label: 'fixture.accept',
         policy: { op: 'all', items: [] },

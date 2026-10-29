@@ -16,7 +16,7 @@ defmodule Loka.ContentGiftTest do
          "provider" => "trader",
          "currency" => "pennies",
          "action" => "barter",
-         "label" => "service.barter",
+         "name" => "service.barter",
          "narration" => "service.barter.used",
          "price" => 1,
          "benefit" => %{"kind" => "claim", "service" => "knife_for_pelts"}

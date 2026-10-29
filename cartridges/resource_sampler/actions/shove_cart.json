@@ -1,5 +1,5 @@
 {
-  "label": "actions.shove_cart",
+  "name": "actions.shove_cart",
   "aliases": [
     "shove"
   ],

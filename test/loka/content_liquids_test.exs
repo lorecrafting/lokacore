@@ -14,7 +14,7 @@ defmodule Loka.ContentLiquidsTest do
     File.mkdir_p!(Path.join(dir, "liquids"))
 
     write(dir, "liquids/water.json", %{
-      "label" => "water.label",
+      "name" => "water.label",
       "unit_label" => "water.units",
       "grams_per_unit" => 250,
       "drink_amount" => 1
@@ -119,7 +119,7 @@ defmodule Loka.ContentLiquidsTest do
            "SCHEMA_VIOLATION"},
           {"missing unit", "items/lantern.json",
            &put_in(&1, ["vessel", "unit_label"], "missing.units"), "UNRESOLVED_REFERENCE"},
-          {"missing label", "liquids/water.json", &Map.put(&1, "label", "missing.label"),
+          {"missing label", "liquids/water.json", &Map.put(&1, "name", "missing.label"),
            "UNRESOLVED_REFERENCE"},
           {"zero density", "liquids/water.json", &Map.put(&1, "grams_per_unit", 0),
            "SCHEMA_VIOLATION"},

@@ -188,12 +188,12 @@ const variant = build((dir) => {
     'quest.errand': 'Errand.',
   }));
   put(dir, 'skills/pick.json', {
-    label: 'skill.pick',
+    name: 'skill.pick',
     requirement: 'skill.pick',
     qualification: all,
   });
   put(dir, 'quests/errand.json', {
-    title: 'quest.errand',
+    name: 'quest.errand',
     offer: { label: 'quest.errand', policy: all },
     objective: { evidence: 'current_state', policy: all },
     deadline: { after: 120000, outcome: 'late' },

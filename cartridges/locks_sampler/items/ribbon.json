@@ -2,7 +2,7 @@
   "keywords": [
     "ribbon"
   ],
-  "short": "item.ribbon.short",
+  "name": "item.ribbon.short",
   "room_line": "item.ribbon.room",
   "description": "item.ribbon.description",
   "location": {

@@ -1,5 +1,5 @@
 {
-  "title": "room.moot_hall.title",
+  "name": "room.moot_hall.title",
   "description": "room.moot_hall.description",
   "exits": {
     "north": {

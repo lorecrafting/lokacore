@@ -1,5 +1,5 @@
 {
-  "title": "room.bell_tower.title",
+  "name": "room.bell_tower.title",
   "description": "room.bell_tower.description",
   "exits": {
     "up": {

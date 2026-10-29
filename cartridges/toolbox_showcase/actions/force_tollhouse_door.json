@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_tollhouse_door",
+  "name": "actions.force_tollhouse_door",
   "aliases": [
     "force"
   ],

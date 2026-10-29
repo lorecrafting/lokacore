@@ -1,6 +1,6 @@
 {
   "keywords": ["horse"],
-  "short": "npc.horse.short",
+  "name": "npc.horse.short",
   "room_line": "npc.horse.room",
   "description": "npc.horse.description",
   "description_variants": [

@@ -25,7 +25,7 @@ const begin = (c: any) => {
   details.notice = { aliases: ['notice'], description: 'detail.mooring_post' };
   c.recipes[`${prefix}:recipe/begin`] = {
     key: 'begin',
-    label: 'actions.coil_rope',
+    name: 'actions.coil_rope',
     aliases: ['begin'],
     target: { kind: 'detail', room, detail: 'mooring_post' },
     priority: 10,

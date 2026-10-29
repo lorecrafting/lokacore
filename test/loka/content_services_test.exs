@@ -45,7 +45,7 @@ defmodule Loka.ContentServicesTest do
     File.write!(
       Path.join(dir, "liquids/ale.json"),
       JSON.encode!(%{
-        "label" => "liquid.draught",
+        "name" => "liquid.draught",
         "unit_label" => "liquid.doses",
         "grams_per_unit" => 250,
         "drink_amount" => 1
@@ -56,7 +56,7 @@ defmodule Loka.ContentServicesTest do
       Path.join(dir, "items/kitchen_cask.json"),
       JSON.encode!(%{
         "keywords" => ["kitchen_cask"],
-        "short" => "item.cask.short",
+        "name" => "item.cask.short",
         "room_line" => "item.cask.room",
         "description" => "item.cask.description",
         "mass_grams" => 500,
@@ -94,7 +94,7 @@ defmodule Loka.ContentServicesTest do
       File.write!(
         Path.join(dir, "actions/#{action}.json"),
         JSON.encode!(%{
-          "label" => label,
+          "name" => label,
           "command" => "use_service",
           "target" => %{"kind" => "entity", "scopes" => ["room_occupants"]},
           "input" => ["service", "quoted_price"],
@@ -110,7 +110,7 @@ defmodule Loka.ContentServicesTest do
           "provider" => "cook",
           "currency" => "pennies",
           "action" => action,
-          "label" => label,
+          "name" => label,
           "narration" => label <> ".used",
           "price" => price,
           "benefit" => benefit

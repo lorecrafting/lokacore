@@ -48,7 +48,7 @@ test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed quer
     const w = world('gate', (c) => {
       c.actions['gate_sampler@0.0.1:action/unlock'] = {
         key: 'unlock',
-        label: 'room.cell.title', // any key of the catalog
+        name: 'room.cell.title', // any key of the catalog
         accessibility: 'room.cell.title',
         target: { kind: 'none' },
         command: 'unlock',

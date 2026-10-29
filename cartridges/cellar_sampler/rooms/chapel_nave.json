@@ -1,5 +1,5 @@
 {
-  "title": "room.chapel_nave.title",
+  "name": "room.chapel_nave.title",
   "description": "room.chapel_nave.description",
   "exits": {
     "south": {

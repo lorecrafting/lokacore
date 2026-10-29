@@ -60,14 +60,14 @@ defmodule Loka.ContentLintTest do
     titled = put_in(room, ["details", "slate", "readable", "title"], "detail.slate.title")
     assert lint(%{"rooms/lever_hall.json" => titled, "text.json" => linked}) == []
 
-    talk = "text.json: action.talk has no text, yet a dialogue has no label of its own"
+    talk = "text.json: action.talk has no text, yet a dialogue has no name of its own"
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{}}) == [talk]
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => ""}}) == [talk]
 
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => "Talk to"}}) ==
              []
 
-    assert lint(%{"dialogues/bram.json" => %{"label" => "action.bram"}, "text.json" => %{}}) == []
+    assert lint(%{"dialogues/bram.json" => %{"name" => "action.bram"}, "text.json" => %{}}) == []
     assert lint(%{"dialogues/bram.json" => %{"keyword" => "ember"}, "text.json" => %{}}) == []
   end
 
@@ -112,11 +112,11 @@ defmodule Loka.ContentLintTest do
     for ok <- ["Hire him", "Wait...", "\"Aye,\" he says.", "“Aye,” he says."],
         do: assert(Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => ok})) == [])
 
-    act = %{"actions/walk.json" => %{"label" => "l"}, "text.json" => %{"l" => "Walk."}}
+    act = %{"actions/walk.json" => %{"name" => "l"}, "text.json" => %{"l" => "Walk."}}
     assert Lint.findings(act) == ["actions/walk.json: label l ends in a period"]
 
     st = fn key, text ->
-      Lint.findings(%{"statuses/s.json" => %{"label" => key}, "text.json" => %{key => text}})
+      Lint.findings(%{"statuses/s.json" => %{"name" => key}, "text.json" => %{key => text}})
     end
 
     assert st.("condition.wet", "Wet") == [
@@ -125,6 +125,12 @@ defmodule Loka.ContentLintTest do
 
     assert st.("condition.wet", "wet") == []
     assert st.("condition.bleeding", "Bleeding") == []
+  end
+
+  # F6. Breaks: the label rules read a dialogue's own `label`, so its displayed `name` goes unlinted.
+  test "the label rules read a dialogue's own name with today's message" do
+    d = %{"dialogues/hal.json" => %{"name" => "n"}, "text.json" => %{"n" => "Hire him."}}
+    assert Lint.findings(d) == ["dialogues/hal.json: label n ends in a period"]
   end
 
   test "a do-nothing Leave or Close choice is refused in a talk with more than one choice" do
@@ -306,7 +312,7 @@ defmodule Loka.ContentLintTest do
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["lamp_oil"]}})},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
           {"dialogues/d.json",
-           %{"label" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
+           %{"name" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
           {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})}
         ],
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)

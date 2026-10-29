@@ -2,7 +2,7 @@
   "keywords": [
     "gil"
   ],
-  "short": "npc.gil.short",
+  "name": "npc.gil.short",
   "room_line": "npc.gil.room",
   "description": "npc.gil.description",
   "room": "gate_yard",

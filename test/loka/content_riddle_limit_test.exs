@@ -35,7 +35,7 @@ defmodule Loka.ContentRiddleLimitTest do
       {"npcs/sphinx.json",
        %{
          "keywords" => ["sphinx"],
-         "short" => "npc.sphinx.short",
+         "name" => "npc.sphinx.short",
          "description" => "npc.sphinx.description",
          "room_line" => "npc.sphinx.room",
          "room" => "ferry_landing"

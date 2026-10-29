@@ -1,5 +1,5 @@
 {
-  "label": "actions.raise_timbered_hut",
+  "name": "actions.raise_timbered_hut",
   "aliases": [
     "raise"
   ],

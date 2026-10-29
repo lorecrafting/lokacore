@@ -2,7 +2,7 @@
   "provider": "cook",
   "currency": "pennies",
   "action": "commission",
-  "label": "service.stew",
+  "name": "service.stew",
   "narration": "service.stew.used",
   "price": 0,
   "benefit": {

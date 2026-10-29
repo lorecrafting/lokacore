@@ -1,5 +1,5 @@
 {
-  "title": "room.well_lane.title",
+  "name": "room.well_lane.title",
   "description": "room.well_lane.description",
   "exits": {
     "south": {

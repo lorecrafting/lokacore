@@ -2,7 +2,7 @@
   "provider": "smith",
   "currency": "pennies",
   "action": "claim",
-  "label": "service.claim",
+  "name": "service.claim",
   "narration": "service.claim.used",
   "price": 1,
   "benefit": {

@@ -1,5 +1,5 @@
 {
-  "title": "room.reed_path.title",
+  "name": "room.reed_path.title",
   "description": "room.reed_path.description",
   "exits": {
     "north": {

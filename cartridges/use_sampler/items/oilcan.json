@@ -2,7 +2,7 @@
   "keywords": [
     "oilcan"
   ],
-  "short": "item.oilcan.short",
+  "name": "item.oilcan.short",
   "room_line": "item.oilcan.room",
   "description": "item.oilcan.description",
   "mass_grams": 500,

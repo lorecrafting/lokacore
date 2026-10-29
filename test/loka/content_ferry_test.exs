@@ -136,7 +136,7 @@ defmodule Loka.ContentFerryTest do
   # Breaks: an action built on run_job compiling (authority-internal, 04 §1: a dead action).
   test "an action's command is never run_job", %{dir: dir} do
     action = %{
-      "label" => "actions.coil_rope",
+      "name" => "actions.coil_rope",
       "accessibility" => "actions.coil_rope",
       "target" => %{"kind" => "none"},
       "command" => "run_job",
@@ -400,7 +400,7 @@ defmodule Loka.ContentFerryTest do
     files = elapsed_files()
 
     action = %{
-      "label" => "actions.coil_rope",
+      "name" => "actions.coil_rope",
       "accessibility" => "actions.coil_rope",
       "target" => %{"kind" => "none"},
       "priority" => 0,

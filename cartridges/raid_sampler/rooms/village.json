@@ -1,5 +1,5 @@
 {
-  "title": "room.village.title",
+  "name": "room.village.title",
   "description": "room.village.description",
   "exits": {
     "south": {

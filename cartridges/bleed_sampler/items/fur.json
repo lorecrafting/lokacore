@@ -2,7 +2,7 @@
   "keywords": [
     "fur"
   ],
-  "short": "item.fur.short",
+  "name": "item.fur.short",
   "room_line": "item.fur.room",
   "description": "item.fur.description",
   "mass_grams": 10,

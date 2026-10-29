@@ -1,5 +1,5 @@
 {
-  "label": "actions.pray",
+  "name": "actions.pray",
   "aliases": [
     "pray"
   ],

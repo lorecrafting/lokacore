@@ -2,7 +2,7 @@
   "keywords": [
     "golem"
   ],
-  "short": "npc.attic_golem.short",
+  "name": "npc.attic_golem.short",
   "room_line": "npc.attic_golem.room",
   "description": "npc.attic_golem.description",
   "room": "loft_attic",

@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_iron",
+  "name": "actions.force_iron",
   "aliases": [
     "force"
   ],

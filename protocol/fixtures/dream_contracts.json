@@ -101,7 +101,7 @@
             "text": "scene.bell_rung.bell"
           }
         ],
-        "title": "room.ferry_landing.title",
+        "name": "room.ferry_landing.title",
         "description": "room.ferry_landing.title",
         "on_end": {
           "assign": [
@@ -1382,9 +1382,9 @@
     },
     {
       "base": "SceneDefinition::presentation_only",
-      "name": "SceneDefinition::presentation_only/ required title",
+      "name": "SceneDefinition::presentation_only/ required name",
       "path": [
-        "title"
+        "name"
       ],
       "valid": false,
       "omit": true

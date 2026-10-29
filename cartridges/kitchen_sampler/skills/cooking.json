@@ -1,5 +1,5 @@
 {
-  "label": "skill.cooking.label",
+  "name": "skill.cooking.label",
   "requirement": "skill.cooking.requirement",
   "growth": [
     2,

@@ -2,7 +2,7 @@
   "keywords": [
     "guard"
   ],
-  "short": "npc.guard.short",
+  "name": "npc.guard.short",
   "short_variants": [
     {
       "when": {

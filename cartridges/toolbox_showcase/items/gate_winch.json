@@ -2,7 +2,7 @@
   "keywords": [
     "winch"
   ],
-  "short": "item.gate_winch.short",
+  "name": "item.gate_winch.short",
   "room_line": "item.gate_winch.room",
   "description": "item.gate_winch.description",
   "mass_grams": 200000,

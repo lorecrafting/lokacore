@@ -82,7 +82,7 @@ defmodule Loka.ContentChaptersTest do
     assert compile(dir, %{
              "text.json" => Map.delete(src("text.json"), "chapter.dusk")
            }) ==
-             {:error, [d("UNRESOLVED_REFERENCE", "[1].title", %{"target" => "chapter.dusk"})]}
+             {:error, [d("UNRESOLVED_REFERENCE", "[1].name", %{"target" => "chapter.dusk"})]}
   end
 
   # Breaks: the same quest/choice in another dialogue silently reaches a marker, or rejecting

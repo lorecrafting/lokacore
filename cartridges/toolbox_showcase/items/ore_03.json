@@ -2,7 +2,7 @@
   "keywords": [
     "ore"
   ],
-  "short": "item.ore_03.short",
+  "name": "item.ore_03.short",
   "room_line": "item.ore_03.room",
   "description": "item.ore_03.description",
   "mass_grams": 500,

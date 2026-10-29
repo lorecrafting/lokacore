@@ -40,7 +40,7 @@
   },
   "ancestries": {
     "woodfolk": {
-      "label": "ancestry.woodfolk.label",
+      "name": "ancestry.woodfolk.label",
       "description": "ancestry.woodfolk.description",
       "attribute": "str",
       "modifier": 1,

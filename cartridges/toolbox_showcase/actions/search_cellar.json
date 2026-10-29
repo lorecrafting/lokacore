@@ -1,5 +1,5 @@
 {
-  "label": "actions.search_cellar",
+  "name": "actions.search_cellar",
   "aliases": [
     "search"
   ],

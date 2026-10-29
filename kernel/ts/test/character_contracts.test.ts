@@ -26,7 +26,7 @@ test('character creation wire contracts reject absent and malformed identities a
   const ancestry = {
     attribute: ref,
     description: 'ancestry.strong.description',
-    label: 'ancestry.strong.label',
+    name: 'ancestry.strong.label',
     modifier: 1,
   };
   for (const [contract, valid, bad] of [
@@ -64,10 +64,10 @@ test('character creation wire contracts reject absent and malformed identities a
       ancestry,
       [
         { description: ancestry.description, attribute: ref, modifier: 1 },
-        { label: ancestry.label, attribute: ref, modifier: 1 },
+        { name: ancestry.name, attribute: ref, modifier: 1 },
         { ...ancestry, modifier: 0 },
-        { label: ancestry.label, description: ancestry.description, attribute: ref },
-        { label: ancestry.label, description: ancestry.description, modifier: 1 },
+        { name: ancestry.name, description: ancestry.description, attribute: ref },
+        { name: ancestry.name, description: ancestry.description, modifier: 1 },
         { ...ancestry, dark_sight: false },
         { ...ancestry, faction: { value: -2 } },
         { ...ancestry, faction: { fact: ref } },

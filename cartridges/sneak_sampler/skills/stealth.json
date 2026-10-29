@@ -1,5 +1,5 @@
 {
-  "label": "skill.stealth.label",
+  "name": "skill.stealth.label",
   "requirement": "skill.stealth.requirement",
   "growth": [
     1,

@@ -17,7 +17,7 @@
           "key": "pennies"
         },
         "action": "rent_lantern_room",
-        "label": "service.room",
+        "name": "service.room",
         "narration": "service.room.used",
         "price": 3,
         "benefit": {
@@ -48,7 +48,7 @@
           "key": "pennies"
         },
         "action": "eat_lantern_meal",
-        "label": "service.meal",
+        "name": "service.meal",
         "narration": "service.meal.used",
         "price": 2,
         "benefit": {
@@ -87,7 +87,7 @@
           "key": "pennies"
         },
         "action": "drink_lantern_ale",
-        "label": "service.ale",
+        "name": "service.ale",
         "narration": "service.ale.used",
         "price": 1,
         "benefit": {
@@ -183,7 +183,7 @@
           "widow",
           "innkeeper"
         ],
-        "short": "npc.maud.short",
+        "name": "npc.maud.short",
         "room_line": "npc.maud.room",
         "description": "npc.maud.description",
         "room": {
@@ -421,9 +421,9 @@
     {
       "base": "room",
       "path": [
-        "label"
+        "name"
       ],
-      "name": "room missing label",
+      "name": "room missing name",
       "valid": false,
       "omit": true
     },
@@ -502,9 +502,9 @@
     {
       "base": "meal",
       "path": [
-        "label"
+        "name"
       ],
-      "name": "meal missing label",
+      "name": "meal missing name",
       "valid": false,
       "omit": true
     },
@@ -583,9 +583,9 @@
     {
       "base": "drink",
       "path": [
-        "label"
+        "name"
       ],
-      "name": "drink missing label",
+      "name": "drink missing name",
       "valid": false,
       "omit": true
     },

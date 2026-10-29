@@ -1,5 +1,5 @@
 {
-  "label": "actions.play_fold_song",
+  "name": "actions.play_fold_song",
   "aliases": [
     "play"
   ],

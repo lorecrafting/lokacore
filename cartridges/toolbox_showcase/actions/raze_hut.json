@@ -1,5 +1,5 @@
 {
-  "label": "service.raze_hut",
+  "name": "service.raze_hut",
   "command": "use_service",
   "target": {
     "kind": "entity",

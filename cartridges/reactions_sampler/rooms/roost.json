@@ -1,5 +1,5 @@
 {
-  "title": "room.roost.title",
+  "name": "room.roost.title",
   "description": "room.roost.description",
   "exits": {
     "down": {

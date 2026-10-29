@@ -89,7 +89,8 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   )
     return false;
   draft.entities ??= { ...world.entities };
-  draft.entities[id] = { ...template, kind: member ? 'npc' : 'item' } as Entity;
+  const { name, ...rest } = template;
+  draft.entities[id] = { ...rest, short: name, kind: member ? 'npc' : 'item' } as Entity;
   draft.knownEntities ??= { ...world.knownEntities };
   const entity = draft.entities[id];
   draft.knownEntities[id] = {

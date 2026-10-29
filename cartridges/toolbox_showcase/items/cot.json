@@ -2,7 +2,7 @@
   "keywords": [
     "cot"
   ],
-  "short": "item.cot.short",
+  "name": "item.cot.short",
   "room_line": "item.cot.room",
   "description": "item.cot.description",
   "mass_grams": 1500,

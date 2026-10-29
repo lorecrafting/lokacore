@@ -2,7 +2,7 @@
   "keywords": [
     "jailer"
   ],
-  "short": "npc.jailer.short",
+  "name": "npc.jailer.short",
   "room_line": "npc.jailer.room",
   "description": "npc.jailer.description",
   "room": "cell",

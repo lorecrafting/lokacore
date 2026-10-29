@@ -3,7 +3,7 @@
     "idony",
     "watcher"
   ],
-  "short": "npc.idony.short",
+  "name": "npc.idony.short",
   "room_line": "npc.idony.room",
   "description": "npc.idony.description",
   "room": "cliff_path",

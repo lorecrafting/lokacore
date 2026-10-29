@@ -3,7 +3,7 @@
   "tick_every": 60,
   "resource": "hp",
   "fear": true,
-  "label": "condition.afraid",
+  "name": "condition.afraid",
   "narration": {
     "applied": "narration.afraid.applied",
     "tick": "narration.afraid.tick",

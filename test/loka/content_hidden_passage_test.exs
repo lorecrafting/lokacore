@@ -27,7 +27,7 @@ defmodule Loka.ContentHiddenPassageTest do
       {[
          {"cartridge.json", &put_in(&1, ["requires", "capabilities", "barrier"], 1)},
          {"barriers/panel.json",
-          %{"keywords" => ["panel"], "short" => "detail.panel", "initial" => "open"}},
+          %{"keywords" => ["panel"], "name" => "detail.panel", "initial" => "open"}},
          {"rooms/hall.json", &door.(&1, "east")},
          {"rooms/study.json", &door.(&1, "west")}
        ], {"BARRIER_MISMATCH", face}}

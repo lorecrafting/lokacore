@@ -1,6 +1,6 @@
 {
   "zones": ["priory"],
-  "title": "room.road.title",
+  "name": "room.road.title",
   "description": "room.road.description",
   "exits": { "north": { "to": "hall" } }
 }

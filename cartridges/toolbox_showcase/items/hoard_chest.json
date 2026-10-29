@@ -2,7 +2,7 @@
   "keywords": [
     "chest"
   ],
-  "short": "item.hoard_chest.short",
+  "name": "item.hoard_chest.short",
   "room_line": "item.hoard_chest.room",
   "description": "item.hoard_chest.description",
   "mass_grams": 20000,

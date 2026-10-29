@@ -2,7 +2,7 @@
   "keywords": [
     "fence"
   ],
-  "short": "npc.fence.short",
+  "name": "npc.fence.short",
   "room_line": "npc.fence.room",
   "description": "npc.fence.description",
   "room": "alley",

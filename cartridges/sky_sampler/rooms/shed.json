@@ -1,5 +1,5 @@
 {
-  "title": "room.shed.title",
+  "name": "room.shed.title",
   "description": "room.shed.description",
   "exits": {
     "west": {

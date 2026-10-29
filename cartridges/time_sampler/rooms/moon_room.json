@@ -1,5 +1,5 @@
 {
-  "title": "room.moon_room.title",
+  "name": "room.moon_room.title",
   "description": "room.moon_room.description",
   "exits": {
     "south": {

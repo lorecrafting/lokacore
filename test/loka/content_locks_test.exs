@@ -60,7 +60,7 @@ defmodule Loka.ContentLocksTest do
       {"barriers/hatch.json",
        %{
          "keywords" => ["hatch"],
-         "short" => "barrier.box_lid.short",
+         "name" => "barrier.box_lid.short",
          "initial" => "locked",
          "key_item" => "brass_key"
        }},

@@ -1,5 +1,5 @@
 {
-  "title": "room.coop.title",
+  "name": "room.coop.title",
   "description": "room.coop.description",
   "exits": {
     "west": {

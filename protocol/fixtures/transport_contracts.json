@@ -38,7 +38,7 @@
         "fare": 2,
         "recovery_rooms": [],
         "action": "board_ferry",
-        "label": "transport.board",
+        "name": "transport.board",
         "narration": "transport.crossed"
       }
     },
@@ -289,10 +289,10 @@
     },
     {
       "base": "endpoint",
-      "name": "endpoint missing label",
+      "name": "endpoint missing name",
       "valid": false,
       "path": [
-        "label"
+        "name"
       ],
       "omit": true
     },

@@ -2,7 +2,7 @@
   "keywords": [
     "drover"
   ],
-  "short": "npc.drover.short",
+  "name": "npc.drover.short",
   "room_line": "npc.drover.room",
   "description": "npc.drover.description",
   "room": "the_fold",

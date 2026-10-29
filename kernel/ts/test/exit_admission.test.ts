@@ -43,7 +43,7 @@ test('exit availability follows an offered movement action whose policy fails', 
   const w = world((c) => {
     c.actions[`${F}:action/move`] = {
       key: 'move',
-      label: 'actions.coil_rope',
+      name: 'actions.coil_rope',
       accessibility: 'actions.coil_rope',
       target: { kind: 'none' },
       input: ['direction'],

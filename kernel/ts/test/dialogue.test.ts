@@ -217,7 +217,7 @@ test("the rule enforces the target's dialogue policy whatever talk admitted it",
   const alias = world((c) => {
     c.actions[`${F}:action/chat`] = {
       key: 'chat',
-      label: 'action.talk',
+      name: 'action.talk',
       accessibility: 'action.talk',
       target: { kind: 'entity', scopes: ['room_occupants'] },
       command: 'talk',

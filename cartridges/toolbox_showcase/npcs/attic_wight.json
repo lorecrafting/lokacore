@@ -2,7 +2,7 @@
   "keywords": [
     "wight"
   ],
-  "short": "npc.attic_wight.short",
+  "name": "npc.attic_wight.short",
   "room_line": "npc.attic_wight.room",
   "description": "npc.attic_wight.description",
   "room": "loft_attic",

@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_grate",
+  "name": "actions.force_grate",
   "aliases": [
     "force"
   ],

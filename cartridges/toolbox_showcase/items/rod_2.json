@@ -2,7 +2,7 @@
   "keywords": [
     "rod"
   ],
-  "short": "item.rod_2.short",
+  "name": "item.rod_2.short",
   "room_line": "item.rod_2.room",
   "description": "item.rod_2.description",
   "mass_grams": 400,

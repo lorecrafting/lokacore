@@ -8,7 +8,7 @@
       "modifier": 1
     }
   ],
-  "label": "condition.warm",
+  "name": "condition.warm",
   "narration": {
     "applied": "narration.warm.applied",
     "tick": "narration.warm.tick",

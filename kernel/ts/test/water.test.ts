@@ -392,7 +392,7 @@ test('water exit projection checks its exact move key despite a differently keye
   const w = learned(
     fresh((c) => {
       const a = {
-        label: 'action.recover_corpse',
+        name: 'action.recover_corpse',
         accessibility: 'action.recover_corpse',
         command: 'move',
         target: { kind: 'none' },

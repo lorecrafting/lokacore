@@ -3,7 +3,7 @@
     "moon_door",
     "door"
   ],
-  "short": "barrier.moon_door.short",
+  "name": "barrier.moon_door.short",
   "initial": "closed",
   "opens_when": {
     "op": "sky",

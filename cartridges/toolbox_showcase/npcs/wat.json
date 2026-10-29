@@ -3,7 +3,7 @@
     "wat",
     "shepherd"
   ],
-  "short": "npc.wat.short",
+  "name": "npc.wat.short",
   "room_line": "npc.wat.room",
   "description": "npc.wat.description",
   "room": "shepherd_hut",

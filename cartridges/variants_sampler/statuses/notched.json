@@ -4,7 +4,7 @@
   "resource": "hp",
   "per_tick": 1,
   "kind": "debuff",
-  "label": "condition.notched",
+  "name": "condition.notched",
   "narration": {
     "applied": "narration.notched.applied",
     "tick": "narration.notched.tick",

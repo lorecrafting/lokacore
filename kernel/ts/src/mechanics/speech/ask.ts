@@ -7,7 +7,6 @@ import type {
   DefinitionRef,
   EntityId,
   ErrorCode,
-  NpcDefinition,
 } from '../../contracts.gen.ts';
 import {
   accepted,
@@ -18,6 +17,7 @@ import {
   type Mint,
   type Steps,
   type World,
+  type NpcEntity,
 } from '../../runtime/decision.ts';
 import { npcsIn } from '../death/shared.ts';
 import { pending } from '../dialogue/shared.ts';
@@ -37,7 +37,7 @@ export function askRefused(
   if (!room || pending(world, actor)) return 'invalid_state';
   if (world.knownEntities[target]?.kind !== 'npc') return 'not_found';
   if (!npcsIn(world, [room]).includes(target)) return 'not_present';
-  if (!(world.entities[target] as NpcDefinition | undefined)?.ask) return 'invalid_target';
+  if (!(world.entities[target] as NpcEntity | undefined)?.ask) return 'invalid_target';
   if (disposition(world, actor, target, steps) === 'hostile') return 'invalid_state';
 }
 
@@ -60,6 +60,6 @@ export function ask(
   const run = { ops: [], facts: {}, position: 1 }; // the asked event holds position 1
   const ops = answer?.grants ? grant(world, actor_id, run, answer.grants).ops : [];
   const asked = { type: 'asked', entity_id: target_id, topic, answered: !!answer } as const;
-  const text = answer?.text ?? (world.entities[target_id] as NpcDefinition).ask!.unknown;
+  const text = answer?.text ?? (world.entities[target_id] as NpcEntity).ask!.unknown;
   return accepted(world, 'asked', ops, [event(world, command, mint, 1, asked)], [{ key: text }]);
 }

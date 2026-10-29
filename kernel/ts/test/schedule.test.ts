@@ -389,7 +389,7 @@ test("an item participant is pinned to the item's EntityId", () => {
       [`${F}:item/rope`]: {
         key: 'rope',
         keywords: ['rope'],
-        short,
+        name: short,
         room_line,
         description,
         location,

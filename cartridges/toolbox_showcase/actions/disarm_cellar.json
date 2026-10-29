@@ -1,5 +1,5 @@
 {
-  "label": "actions.disarm_cellar",
+  "name": "actions.disarm_cellar",
   "aliases": [
     "disarm"
   ],

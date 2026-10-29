@@ -3,7 +3,7 @@
   "tick_every": 7200,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.windburnt",
+  "name": "condition.windburnt",
   "narration": {
     "applied": "narration.windburnt.applied",
     "tick": "narration.windburnt.tick",

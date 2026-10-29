@@ -575,7 +575,7 @@ test('a Take alias advertises too_heavy and cannot evade the view admission inva
   const base = massed({ lantern: 0, satchel: 1000, lamp_oil: 2000 }, 2000);
   const alias = {
     key: 'lift',
-    label: 'item.satchel.short',
+    name: 'item.satchel.short',
     accessibility: 'item.satchel.short',
     target: { kind: 'entity', scopes: ['room_contents'] },
     input: [],

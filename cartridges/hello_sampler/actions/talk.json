@@ -1,5 +1,5 @@
 {
-  "label": "actions.talk",
+  "name": "actions.talk",
   "target": {
     "kind": "entity",
     "scopes": [

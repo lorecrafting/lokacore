@@ -53,7 +53,7 @@ function session(cartridge: Cartridge) {
     send,
     world: () => w,
     edit: (change: (x: World) => World) => void (w = change(w)),
-    at: () => w.rooms[w.state.containers[w.body]].title,
+    at: () => w.rooms[w.state.containers[w.body]].name,
     hp: () => level(w, w.body, resourceRef(w, 'hp')),
   };
 }

@@ -3,7 +3,7 @@
     "roll",
     "hall_roll"
   ],
-  "short": "item.hall_roll.short",
+  "name": "item.hall_roll.short",
   "room_line": "item.hall_roll.room",
   "description": "item.hall_roll.description",
   "location": {

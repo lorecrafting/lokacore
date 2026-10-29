@@ -1,5 +1,5 @@
 {
-  "title": "room.barracks.title",
+  "name": "room.barracks.title",
   "description": "room.barracks.description",
   "exits": {
     "south": {

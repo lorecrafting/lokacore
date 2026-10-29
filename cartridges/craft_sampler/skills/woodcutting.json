@@ -1,5 +1,5 @@
 {
-  "label": "skill.woodcutting.label",
+  "name": "skill.woodcutting.label",
   "requirement": "skill.woodcutting.requirement",
   "growth": [
     2

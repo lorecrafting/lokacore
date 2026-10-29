@@ -1,14 +1,7 @@
 // schedule@1 (capability_registry.json definitions; 06 §13 Behavior/schedule profiles; 21 §10):
 // an NPC's daily location schedule (entity.schema.json NpcDefinition daily_schedule), read by
 // world creation and by schedule@1's run_job (mechanics/schedule/rule.ts); and the world's calendar job below.
-import type {
-  Command,
-  DefinitionRef,
-  DomainEvent,
-  EntityId,
-  JobId,
-  NpcDefinition,
-} from '../../contracts.gen.ts';
+import type { Command, DefinitionRef, DomainEvent, EntityId, JobId } from '../../contracts.gen.ts';
 import {
   accepted,
   refString,
@@ -17,6 +10,7 @@ import {
   type Mint,
   type Steps,
   type World,
+  type NpcEntity,
 } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
 import { cmp } from '../../foundation/validate.ts';
@@ -43,7 +37,7 @@ export const jobId = (mint: Mint) => mint() as JobId;
  * room; `walks` when the case walks (toolbox row W26).
  */
 export function placeOf(world: World, npc: EntityId, due: number, steps: Steps) {
-  const e = world.entities[npc] as NpcDefinition;
+  const e = world.entities[npc] as NpcEntity;
   const hour = String(hourOf(world.cartridge, due));
   const at = { ...world, state: { ...world.state, clock: due } };
   const ctx = { target: npc, steps };

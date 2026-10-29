@@ -2,7 +2,7 @@
   "keywords": [
     "reeve"
   ],
-  "short": "npc.reeve.short",
+  "name": "npc.reeve.short",
   "room_line": "npc.reeve.room",
   "description": "npc.reeve.description",
   "room": "village_green",

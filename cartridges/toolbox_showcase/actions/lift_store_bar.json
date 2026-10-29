@@ -1,5 +1,5 @@
 {
-  "label": "actions.lift_store_bar",
+  "name": "actions.lift_store_bar",
   "aliases": [
     "lift"
   ],

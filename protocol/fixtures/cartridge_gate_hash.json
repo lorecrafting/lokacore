@@ -16,7 +16,7 @@
           "door",
           "cell_door"
         ],
-        "short": "barrier.cell_door.short"
+        "name": "barrier.cell_door.short"
       },
       "gate_sampler@0.0.1:barrier/oak_door": {
         "initial": "closed",
@@ -25,7 +25,7 @@
           "door",
           "oak_door"
         ],
-        "short": "barrier.oak_door.short"
+        "name": "barrier.oak_door.short"
       }
     },
     "entry": {
@@ -67,7 +67,7 @@
           }
         },
         "room_line": "item.iron_key.room",
-        "short": "item.iron_key.short"
+        "name": "item.iron_key.short"
       }
     },
     "lock": {
@@ -121,7 +121,7 @@
           "knock"
         ],
         "key": "knock_door",
-        "label": "actions.knock_door",
+        "name": "actions.knock_door",
         "outcomes": {
           "success": {
             "narration": {
@@ -197,7 +197,7 @@
           }
         },
         "key": "cell",
-        "title": "room.cell.title"
+        "name": "room.cell.title"
       },
       "gate_sampler@0.0.1:room/courtyard": {
         "description": "room.courtyard.description",
@@ -218,7 +218,7 @@
           }
         },
         "key": "courtyard",
-        "title": "room.courtyard.title"
+        "name": "room.courtyard.title"
       },
       "gate_sampler@0.0.1:room/gatehouse": {
         "description": "room.gatehouse.description",
@@ -277,7 +277,7 @@
           }
         },
         "key": "gatehouse",
-        "title": "room.gatehouse.title"
+        "name": "room.gatehouse.title"
       }
     },
     "text": {
@@ -298,6 +298,6 @@
       "room.gatehouse.title": "Gatehouse"
     }
   },
-  "canonical": "{\"actions\":{},\"barriers\":{\"gate_sampler@0.0.1:barrier/cell_door\":{\"initial\":\"locked\",\"key\":\"cell_door\",\"key_item\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"iron_key\",\"kind\":\"item\"},\"keywords\":[\"door\",\"cell_door\"],\"short\":\"barrier.cell_door.short\"},\"gate_sampler@0.0.1:barrier/oak_door\":{\"initial\":\"closed\",\"key\":\"oak_door\",\"keywords\":[\"door\",\"oak_door\"],\"short\":\"barrier.oak_door.short\"}},\"entry\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"},\"facts\":{\"gate_sampler@0.0.1:fact/knocked\":{\"key\":\"knocked\",\"meaning\":\"Someone knocked on the gatehouse's oak door.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"gate_sampler@0.0.1:item/iron_key\":{\"description\":\"item.iron_key.description\",\"key\":\"iron_key\",\"keywords\":[\"key\",\"iron_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"courtyard\",\"kind\":\"room\"}},\"room_line\":\"item.iron_key.room\",\"short\":\"item.iron_key.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"barrier\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"gate_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"barrier\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Gate Sampler\",\"version\":\"0.0.1\"},\"recipes\":{\"gate_sampler@0.0.1:recipe/knock_door\":{\"aliases\":[\"knock\"],\"key\":\"knock_door\",\"label\":\"actions.knock_door\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.knock_door.actor\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"knocked\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"priority\":5,\"target\":{\"detail\":\"oak_door\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}}},\"resources\":{\"gate_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"gate_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"gate_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"gate_sampler@0.0.1:room/cell\":{\"description\":\"room.cell.description\",\"exits\":{\"west\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}},\"key\":\"cell\",\"title\":\"room.cell.title\"},\"gate_sampler@0.0.1:room/courtyard\":{\"description\":\"room.courtyard.description\",\"exits\":{\"south\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}},\"key\":\"courtyard\",\"title\":\"room.courtyard.title\"},\"gate_sampler@0.0.1:room/gatehouse\":{\"description\":\"room.gatehouse.description\",\"details\":{\"oak_door\":{\"aliases\":[\"oak_door\",\"door\"],\"description\":\"detail.oak_door\",\"variants\":[{\"description\":\"detail.oak_door.open\",\"when\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"equals\":\"open\",\"op\":\"barrier_state\"}}]}},\"exits\":{\"east\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell\",\"kind\":\"room\"}},\"north\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"courtyard\",\"kind\":\"room\"}}},\"key\":\"gatehouse\",\"title\":\"room.gatehouse.title\"}},\"text\":{\"actions.knock_door\":\"Knock on the oak door\",\"barrier.cell_door.short\":\"the cell door\",\"barrier.oak_door.short\":\"the oak door\",\"detail.oak_door\":\"A heavy oak door, banded with iron and shut fast.\",\"detail.oak_door.open\":\"The heavy oak door stands open to the courtyard.\",\"item.iron_key.description\":\"A heavy iron key, its bow shaped like a ring.\",\"item.iron_key.room\":\"An [iron key] lies among the weeds.\",\"item.iron_key.short\":\"an iron key\",\"narration.knock_door.actor\":\"You rap on the oak door. The knocks echo in the courtyard beyond; no one answers.\",\"room.cell.description\":\"A cramped cell. Old straw rots in one corner, and a chain hangs from the wall.\",\"room.cell.title\":\"Cell\",\"room.courtyard.description\":\"Weeds push up between the flagstones of a small walled courtyard.\",\"room.courtyard.title\":\"Courtyard\",\"room.gatehouse.description\":\"Arrow slits light a draughty stone gatehouse. An [oak door](oak_door) leads north to the courtyard; a squat iron-bound door stands to the east.\",\"room.gatehouse.title\":\"Gatehouse\"}}",
-  "sha256": "5c75cb8fcdb4eb8356aafbc08d826d1dca9e0c7ffc3a35e0401afadc5240bb6a"
+  "canonical": "{\"actions\":{},\"barriers\":{\"gate_sampler@0.0.1:barrier/cell_door\":{\"initial\":\"locked\",\"key\":\"cell_door\",\"key_item\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"iron_key\",\"kind\":\"item\"},\"keywords\":[\"door\",\"cell_door\"],\"name\":\"barrier.cell_door.short\"},\"gate_sampler@0.0.1:barrier/oak_door\":{\"initial\":\"closed\",\"key\":\"oak_door\",\"keywords\":[\"door\",\"oak_door\"],\"name\":\"barrier.oak_door.short\"}},\"entry\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"},\"facts\":{\"gate_sampler@0.0.1:fact/knocked\":{\"key\":\"knocked\",\"meaning\":\"Someone knocked on the gatehouse's oak door.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"gate_sampler@0.0.1:item/iron_key\":{\"description\":\"item.iron_key.description\",\"key\":\"iron_key\",\"keywords\":[\"key\",\"iron_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"courtyard\",\"kind\":\"room\"}},\"name\":\"item.iron_key.short\",\"room_line\":\"item.iron_key.room\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"barrier\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"gate_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"barrier\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Gate Sampler\",\"version\":\"0.0.1\"},\"recipes\":{\"gate_sampler@0.0.1:recipe/knock_door\":{\"aliases\":[\"knock\"],\"key\":\"knock_door\",\"name\":\"actions.knock_door\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.knock_door.actor\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"knocked\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"priority\":5,\"target\":{\"detail\":\"oak_door\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}}},\"resources\":{\"gate_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"gate_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"gate_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"gate_sampler@0.0.1:room/cell\":{\"description\":\"room.cell.description\",\"exits\":{\"west\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}},\"key\":\"cell\",\"name\":\"room.cell.title\"},\"gate_sampler@0.0.1:room/courtyard\":{\"description\":\"room.courtyard.description\",\"exits\":{\"south\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}},\"key\":\"courtyard\",\"name\":\"room.courtyard.title\"},\"gate_sampler@0.0.1:room/gatehouse\":{\"description\":\"room.gatehouse.description\",\"details\":{\"oak_door\":{\"aliases\":[\"oak_door\",\"door\"],\"description\":\"detail.oak_door\",\"variants\":[{\"description\":\"detail.oak_door.open\",\"when\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"equals\":\"open\",\"op\":\"barrier_state\"}}]}},\"exits\":{\"east\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell\",\"kind\":\"room\"}},\"north\":{\"barrier\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"gate_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"courtyard\",\"kind\":\"room\"}}},\"key\":\"gatehouse\",\"name\":\"room.gatehouse.title\"}},\"text\":{\"actions.knock_door\":\"Knock on the oak door\",\"barrier.cell_door.short\":\"the cell door\",\"barrier.oak_door.short\":\"the oak door\",\"detail.oak_door\":\"A heavy oak door, banded with iron and shut fast.\",\"detail.oak_door.open\":\"The heavy oak door stands open to the courtyard.\",\"item.iron_key.description\":\"A heavy iron key, its bow shaped like a ring.\",\"item.iron_key.room\":\"An [iron key] lies among the weeds.\",\"item.iron_key.short\":\"an iron key\",\"narration.knock_door.actor\":\"You rap on the oak door. The knocks echo in the courtyard beyond; no one answers.\",\"room.cell.description\":\"A cramped cell. Old straw rots in one corner, and a chain hangs from the wall.\",\"room.cell.title\":\"Cell\",\"room.courtyard.description\":\"Weeds push up between the flagstones of a small walled courtyard.\",\"room.courtyard.title\":\"Courtyard\",\"room.gatehouse.description\":\"Arrow slits light a draughty stone gatehouse. An [oak door](oak_door) leads north to the courtyard; a squat iron-bound door stands to the east.\",\"room.gatehouse.title\":\"Gatehouse\"}}",
+  "sha256": "baed1c09f8cce969cd769a1a0ebe2de6bd421cc9147bd0c480d7ac36943bc95d"
 }

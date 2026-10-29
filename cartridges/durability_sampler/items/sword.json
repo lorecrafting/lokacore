@@ -3,7 +3,7 @@
     "sword",
     "iron"
   ],
-  "short": "item.sword.short",
+  "name": "item.sword.short",
   "short_variants": [
     {
       "when": {

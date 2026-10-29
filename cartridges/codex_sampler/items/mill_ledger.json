@@ -1,6 +1,6 @@
 {
   "keywords": ["mill_ledger", "book"],
-  "short": "item.mill_ledger.short",
+  "name": "item.mill_ledger.short",
   "room_line": "item.mill_ledger.room",
   "description": "item.mill_ledger.description",
   "location": { "in": "room", "room": "study" },

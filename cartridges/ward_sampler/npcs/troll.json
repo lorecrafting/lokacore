@@ -2,7 +2,7 @@
   "keywords": [
     "troll"
   ],
-  "short": "npc.troll.short",
+  "name": "npc.troll.short",
   "room_line": "npc.troll.room",
   "description": "npc.troll.description",
   "room": "den",

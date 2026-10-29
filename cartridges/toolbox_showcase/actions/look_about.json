@@ -1,5 +1,5 @@
 {
-  "label": "actions.look_about",
+  "name": "actions.look_about",
   "aliases": [
     "gaze"
   ],

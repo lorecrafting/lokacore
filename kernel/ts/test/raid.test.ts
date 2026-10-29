@@ -317,7 +317,7 @@ const shaken = (c: any) => {
       tick_every: 600,
       per_tick: -1,
       resource: R('resource', 'mv'),
-      label: 'band.hurt',
+      name: 'band.hurt',
       narration: { applied: 'band.hurt', tick: 'band.hurt', expired: 'band.hurt' },
     },
   };

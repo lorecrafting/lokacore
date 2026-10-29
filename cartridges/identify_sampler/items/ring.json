@@ -2,7 +2,7 @@
   "keywords": [
     "ring"
   ],
-  "short": "item.ring.short",
+  "name": "item.ring.short",
   "short_variants": [
     {
       "when": {

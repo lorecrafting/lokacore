@@ -3,7 +3,7 @@
     "bread",
     "loaf"
   ],
-  "short": "item.bread.short",
+  "name": "item.bread.short",
   "room_line": "item.bread.room",
   "description": "item.bread.description",
   "mass_grams": 200,

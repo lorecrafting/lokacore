@@ -60,7 +60,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
     c.actions[`${prefix}:action/bite`] = {
       key: 'bite',
       command: 'eat',
-      label: 'action.eat',
+      name: 'action.eat',
       accessibility: 'action.eat',
       priority: 10,
       target: { kind: 'entity', scopes: ['inventory'] },

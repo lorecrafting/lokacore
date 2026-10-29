@@ -1,5 +1,5 @@
 {
-  "label": "walk.action.shelter",
+  "name": "walk.action.shelter",
   "command": "expedition",
   "target": {
     "kind": "entity",

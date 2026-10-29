@@ -12,7 +12,7 @@ function item(c: any, name: string, more: object) {
   c.items[`${prefix}:item/${name}`] = {
     key: name,
     keywords: [name],
-    short: `item.${name}.short`,
+    name: `item.${name}.short`,
     description: `item.${name}.description`,
     room_line: `item.${name}.room`,
     mass_grams: 10,
@@ -43,7 +43,7 @@ function withCrow(c: any) {
       initial: 'open',
       key: 'crow_nest_lid',
       keywords: ['lid'],
-      short: 'barrier.crow_nest_lid.short',
+      name: 'barrier.crow_nest_lid.short',
     },
   };
   c.npcs[`${prefix}:npc/crow`] = {
@@ -54,7 +54,7 @@ function withCrow(c: any) {
     keywords: ['crow'],
     room: at('burrow'),
     room_line: 'npc.crow.room',
-    short: 'npc.crow.short',
+    name: 'npc.crow.short',
     spawn_template: true,
   };
   c.populations = {};

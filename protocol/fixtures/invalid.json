@@ -101,7 +101,7 @@
       "keywords": [
         "ring"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -123,7 +123,7 @@
       "keywords": [
         "ring"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -145,7 +145,7 @@
       "keywords": [
         "letter"
       ],
-      "short": "item.letter.short",
+      "name": "item.letter.short",
       "room_line": "item.letter.room",
       "description": "item.letter.description",
       "location": {
@@ -344,7 +344,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "ring_bell",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -410,7 +410,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "ring_bell",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -558,7 +558,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "ring_bell",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -624,7 +624,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "ring_bell",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -700,7 +700,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "ring_bell",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -1802,7 +1802,7 @@
     "contract": "ActionDefinition",
     "value": {
       "key": "talk",
-      "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "target": {
         "kind": "entity",
         "scopes": [
@@ -1829,7 +1829,7 @@
         "code": "not_in_enum"
       },
       {
-        "path": "/label",
+        "path": "/name",
         "code": "too_long"
       },
       {
@@ -3454,7 +3454,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/label",
+        "path": "/name",
         "code": "missing_property"
       },
       {
@@ -6332,7 +6332,7 @@
       "actions": {
         "hello_sampler@0.0.1:talk": {
           "key": "talk",
-          "label": "actions.talk",
+          "name": "actions.talk",
           "target": {
             "kind": "entity",
             "scopes": [
@@ -7863,7 +7863,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "fen",
-      "title": "room.fen.title",
+      "name": "room.fen.title",
       "description": "room.fen.description",
       "exits": {},
       "tags": [
@@ -7895,7 +7895,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/title",
+        "path": "/name",
         "code": "missing_property"
       }
     ]
@@ -7904,7 +7904,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "Bad",
-      "title": "T",
+      "name": "T",
       "description": "d",
       "exits": {
         "northeast": {
@@ -7937,7 +7937,7 @@
         "code": "unknown_property"
       },
       {
-        "path": "/title",
+        "path": "/name",
         "code": "pattern_mismatch"
       }
     ]
@@ -8023,7 +8023,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "details": {
@@ -8048,7 +8048,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "details": {
@@ -8486,7 +8486,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "variants": []
@@ -8502,7 +8502,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "variants": [
@@ -9325,11 +9325,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/room_line",
+        "path": "/name",
         "code": "missing_property"
       },
       {
-        "path": "/short",
+        "path": "/room_line",
         "code": "missing_property"
       }
     ]
@@ -9339,7 +9339,7 @@
     "value": {
       "key": "k",
       "keywords": [],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -9395,7 +9395,7 @@
         "k",
         "k"
       ],
-      "short": "S",
+      "name": "S",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -9540,12 +9540,12 @@
         "code": "too_many_items"
       },
       {
-        "path": "/room_line_variants",
-        "code": "too_many_items"
+        "path": "/name",
+        "code": "pattern_mismatch"
       },
       {
-        "path": "/short",
-        "code": "pattern_mismatch"
+        "path": "/room_line_variants",
+        "code": "too_many_items"
       }
     ]
   },
@@ -9612,15 +9612,15 @@
         "code": "missing_property"
       },
       {
+        "path": "/name",
+        "code": "missing_property"
+      },
+      {
         "path": "/room",
         "code": "missing_property"
       },
       {
         "path": "/room_line",
-        "code": "missing_property"
-      },
-      {
-        "path": "/short",
         "code": "missing_property"
       }
     ]
@@ -9630,7 +9630,7 @@
     "value": {
       "key": "k",
       "keywords": [],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "room": {
@@ -9680,7 +9680,7 @@
         "k",
         "k"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "room": {
@@ -10061,7 +10061,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/label",
+        "path": "/name",
         "code": "missing_property"
       },
       {
@@ -10082,7 +10082,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "k",
-      "label": "l",
+      "name": "l",
       "aliases": [],
       "target": {
         "kind": "detail",
@@ -10116,7 +10116,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "k",
-      "label": "l",
+      "name": "l",
       "aliases": [
         "a"
       ],
@@ -10154,7 +10154,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "k",
-      "label": "l",
+      "name": "l",
       "aliases": [
         "a"
       ],
@@ -10195,7 +10195,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "k",
-      "label": "l",
+      "name": "l",
       "aliases": [
         "a",
         "a",
@@ -10410,7 +10410,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "actions": []
@@ -10426,7 +10426,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "actions": [
@@ -10706,7 +10706,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pry_lid",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -10782,7 +10782,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pry_lid",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -10859,7 +10859,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pry_lid",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -10936,7 +10936,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pry_lid",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -11012,7 +11012,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pry_lid",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -11092,7 +11092,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pry_lid",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -11400,7 +11400,7 @@
         "code": "too_few_items"
       },
       {
-        "path": "/short",
+        "path": "/name",
         "code": "missing_property"
       },
       {
@@ -11432,7 +11432,7 @@
         "d",
         "d"
       ],
-      "short": "s",
+      "name": "s",
       "initial": "open"
     },
     "errors": [
@@ -11446,7 +11446,7 @@
     "contract": "BarrierDefinition",
     "value": {
       "key": "d",
-      "short": "s"
+      "name": "s"
     },
     "errors": [
       {
@@ -11563,11 +11563,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/objective",
+        "path": "/name",
         "code": "missing_property"
       },
       {
-        "path": "/title",
+        "path": "/objective",
         "code": "missing_property"
       },
       {
@@ -11580,7 +11580,7 @@
     "contract": "QuestDefinition",
     "value": {
       "key": "K",
-      "title": "T",
+      "name": "T",
       "offer": {
         "x": 1
       },
@@ -11598,16 +11598,16 @@
         "code": "pattern_mismatch"
       },
       {
+        "path": "/name",
+        "code": "pattern_mismatch"
+      },
+      {
         "path": "/offer/label",
         "code": "missing_property"
       },
       {
         "path": "/offer/x",
         "code": "unknown_property"
-      },
-      {
-        "path": "/title",
-        "code": "pattern_mismatch"
       }
     ]
   },
@@ -11971,7 +11971,7 @@
       "keywords": [
         "k"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "room": {
@@ -12008,7 +12008,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -12033,7 +12033,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -12140,7 +12140,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -12171,7 +12171,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -12206,7 +12206,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -12241,7 +12241,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -12276,7 +12276,7 @@
       "keywords": [
         "rat"
       ],
-      "short": "npc.rat.short",
+      "name": "npc.rat.short",
       "room_line": "npc.rat.room",
       "description": "npc.rat.description",
       "room": {
@@ -14712,7 +14712,7 @@
       "keywords": [
         "k"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -14740,7 +14740,7 @@
       "keywords": [
         "k"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -15244,7 +15244,7 @@
     "value": {},
     "errors": [
       {
-        "path": "/title",
+        "path": "/name",
         "code": "missing_property"
       }
     ]
@@ -15252,7 +15252,7 @@
   {
     "contract": "Chapter",
     "value": {
-      "title": "chapter.landing",
+      "name": "chapter.landing",
       "extra": 0
     },
     "errors": [
@@ -16426,7 +16426,7 @@
       "actions": {},
       "rooms": {
         "scene_sampler@0.0.1:room/ferry_landing": {
-          "title": "room.ferry_landing.title",
+          "name": "room.ferry_landing.title",
           "description": "room.ferry_landing.description",
           "exits": {
             "north": {
@@ -16450,7 +16450,7 @@
           "key": "ferry_landing"
         },
         "scene_sampler@0.0.1:room/village_green": {
-          "title": "room.village_green.title",
+          "name": "room.village_green.title",
           "description": "room.village_green.description",
           "exits": {
             "south": {
@@ -16471,7 +16471,7 @@
             "bram",
             "ferryman"
           ],
-          "short": "npc.bram.short",
+          "name": "npc.bram.short",
           "room_line": "npc.bram.room",
           "description": "npc.bram.description",
           "room": {
@@ -16499,7 +16499,7 @@
       },
       "recipes": {
         "scene_sampler@0.0.1:recipe/coil_rope": {
-          "label": "actions.coil_rope",
+          "name": "actions.coil_rope",
           "aliases": [
             "coil"
           ],
@@ -16613,7 +16613,7 @@
             "lantern",
             "brass_lantern"
           ],
-          "short": "item.lantern.short",
+          "name": "item.lantern.short",
           "room_line": "item.lantern.room",
           "description": "item.lantern.description",
           "location": {
@@ -16630,7 +16630,7 @@
       },
       "quests": {
         "scene_sampler@0.0.1:quest/lantern": {
-          "title": "quest.lantern.title",
+          "name": "quest.lantern.title",
           "offer": {
             "label": "quest.lantern.accept",
             "policy": {
@@ -17370,7 +17370,7 @@
     "contract": "ActionDefinition",
     "value": {
       "key": "read",
-      "label": "Invalid label",
+      "name": "Invalid label",
       "target": {
         "kind": "none"
       },
@@ -17389,7 +17389,7 @@
         "code": "pattern_mismatch"
       },
       {
-        "path": "/label",
+        "path": "/name",
         "code": "pattern_mismatch"
       }
     ]
@@ -17398,7 +17398,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "try",
-      "label": "try.label",
+      "name": "try.label",
       "aliases": [
         "try"
       ],
@@ -17450,7 +17450,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "try",
-      "label": "try.label",
+      "name": "try.label",
       "aliases": [
         "try"
       ],
@@ -17687,7 +17687,7 @@
       "keywords": [
         "belt"
       ],
-      "short": "item.belt.short",
+      "name": "item.belt.short",
       "room_line": "item.belt.room",
       "description": "item.belt.description",
       "location": {
@@ -17710,7 +17710,7 @@
       "keywords": [
         "belt"
       ],
-      "short": "item.belt.short",
+      "name": "item.belt.short",
       "room_line": "item.belt.room",
       "description": "item.belt.description",
       "location": {
@@ -19054,7 +19054,7 @@
       "keywords": [
         "stick"
       ],
-      "short": "item.stick.short",
+      "name": "item.stick.short",
       "room_line": "item.stick.room",
       "description": "item.stick.description",
       "location": {
@@ -19077,7 +19077,7 @@
       "keywords": [
         "stick"
       ],
-      "short": "item.stick.short",
+      "name": "item.stick.short",
       "room_line": "item.stick.room",
       "description": "item.stick.description",
       "location": {
@@ -19100,7 +19100,7 @@
       "keywords": [
         "stick"
       ],
-      "short": "item.stick.short",
+      "name": "item.stick.short",
       "room_line": "item.stick.room",
       "description": "item.stick.description",
       "location": {
@@ -19122,7 +19122,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "hall",
-      "title": "room.hall.title",
+      "name": "room.hall.title",
       "description": "room.hall.description",
       "exits": {},
       "tags": "wooden"
@@ -19139,7 +19139,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "hall",
-      "title": "room.hall.title",
+      "name": "room.hall.title",
       "description": "room.hall.description",
       "exits": {},
       "dark": false
@@ -19156,7 +19156,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "hall",
-      "title": "room.hall.title",
+      "name": "room.hall.title",
       "description": "room.hall.description",
       "exits": {},
       "tags": [
@@ -19178,7 +19178,7 @@
       "keywords": [
         "door"
       ],
-      "short": "barrier.door.short",
+      "name": "barrier.door.short",
       "initial": "closed",
       "tags": "metal"
     },
@@ -19197,7 +19197,7 @@
       "keywords": [
         "door"
       ],
-      "short": "barrier.door.short",
+      "name": "barrier.door.short",
       "initial": "closed",
       "tags": [
         "gold"
@@ -19215,7 +19215,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "pick",
-      "label": "skill.pick.label",
+      "name": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
         "op": "all",
@@ -19235,7 +19235,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "pick",
-      "label": "skill.pick.label",
+      "name": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
         "op": "all",
@@ -19265,7 +19265,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "pick",
-      "label": "skill.pick.label",
+      "name": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
         "op": "all",
@@ -19287,7 +19287,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "pick",
-      "label": "skill.pick.label",
+      "name": "skill.pick.label",
       "requirement": "skill.pick.requirement",
       "qualification": {
         "op": "all",
@@ -19400,7 +19400,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -19461,7 +19461,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -19534,7 +19534,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -20483,7 +20483,7 @@
       "keywords": [
         "golem"
       ],
-      "short": "npc.golem.short",
+      "name": "npc.golem.short",
       "room_line": "npc.golem.room",
       "description": "npc.golem.description",
       "room": {
@@ -20509,7 +20509,7 @@
       "keywords": [
         "door"
       ],
-      "short": "item.door.short",
+      "name": "item.door.short",
       "room_line": "item.door.room",
       "description": "item.door.description",
       "location": {
@@ -20635,7 +20635,7 @@
       "keywords": [
         "door"
       ],
-      "short": "item.door.short",
+      "name": "item.door.short",
       "room_line": "item.door.room",
       "description": "item.door.description",
       "location": {
@@ -20768,7 +20768,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -20844,7 +20844,7 @@
       "keywords": [
         "golem"
       ],
-      "short": "npc.golem.short",
+      "name": "npc.golem.short",
       "room_line": "npc.golem.room",
       "description": "npc.golem.description",
       "room": {
@@ -20949,7 +20949,7 @@
     "contract": "QuestDefinition",
     "value": {
       "key": "deliver",
-      "title": "quest.deliver.title",
+      "name": "quest.deliver.title",
       "objective": {
         "evidence": "current_state",
         "policy": {
@@ -20973,7 +20973,7 @@
     "contract": "QuestDefinition",
     "value": {
       "key": "deliver",
-      "title": "quest.deliver.title",
+      "name": "quest.deliver.title",
       "objective": {
         "evidence": "current_state",
         "policy": {
@@ -20997,7 +20997,7 @@
     "contract": "QuestDefinition",
     "value": {
       "key": "deliver",
-      "title": "quest.deliver.title",
+      "name": "quest.deliver.title",
       "objective": {
         "evidence": "current_state",
         "policy": {
@@ -21020,7 +21020,7 @@
     "contract": "QuestDefinition",
     "value": {
       "key": "deliver",
-      "title": "quest.deliver.title",
+      "name": "quest.deliver.title",
       "objective": {
         "evidence": "current_state",
         "policy": {
@@ -21243,7 +21243,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -21271,7 +21271,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -21453,7 +21453,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -21482,7 +21482,7 @@
     "contract": "LiquidDefinition",
     "value": {
       "key": "water",
-      "label": "liquid.water",
+      "name": "liquid.water",
       "unit_label": "liquid.units",
       "grams_per_unit": 250,
       "drink_amount": 1,
@@ -22159,7 +22159,7 @@
       "keywords": [
         "maud"
       ],
-      "short": "npc.maud.short",
+      "name": "npc.maud.short",
       "room_line": "npc.maud.room",
       "description": "npc.maud.description",
       "room": {
@@ -22425,7 +22425,7 @@
       "keywords": [
         "guard"
       ],
-      "short": "npc.guard.short",
+      "name": "npc.guard.short",
       "room_line": "npc.guard.room",
       "description": "npc.guard.description",
       "room": {
@@ -23300,7 +23300,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23328,7 +23328,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23356,7 +23356,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23450,7 +23450,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23480,7 +23480,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23508,7 +23508,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23602,7 +23602,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23632,7 +23632,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23662,7 +23662,7 @@
         "key": "mv"
       },
       "per_tick": 1,
-      "label": "condition.mighty",
+      "name": "condition.mighty",
       "narration": {
         "applied": "narration.might.applied",
         "tick": "narration.might.tick",
@@ -23691,7 +23691,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.blind",
+      "name": "condition.blind",
       "narration": {
         "applied": "narration.blind.applied",
         "tick": "narration.blind.tick",
@@ -23720,7 +23720,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.blind",
+      "name": "condition.blind",
       "narration": {
         "applied": "narration.blind.applied",
         "tick": "narration.blind.tick",
@@ -23749,7 +23749,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.blind",
+      "name": "condition.blind",
       "narration": {
         "applied": "narration.blind.applied",
         "tick": "narration.blind.tick",
@@ -23778,7 +23778,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.blind",
+      "name": "condition.blind",
       "narration": {
         "applied": "narration.blind.applied",
         "tick": "narration.blind.tick",
@@ -23805,7 +23805,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.blind",
+      "name": "condition.blind",
       "narration": {
         "applied": "narration.blind.applied",
         "tick": "narration.blind.tick",
@@ -23832,7 +23832,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.wet",
+      "name": "condition.wet",
       "narration": {
         "applied": "narration.wet.applied",
         "tick": "narration.wet.tick",
@@ -23859,7 +23859,7 @@
         "kind": "resource",
         "key": "hp"
       },
-      "label": "condition.wet",
+      "name": "condition.wet",
       "narration": {
         "applied": "narration.wet.applied",
         "tick": "narration.wet.tick",
@@ -23905,7 +23905,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "details": {
@@ -23942,7 +23942,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "details": {
@@ -23981,7 +23981,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "details": {
@@ -24419,7 +24419,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24448,7 +24448,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24477,7 +24477,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24506,7 +24506,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24535,7 +24535,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24569,7 +24569,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24600,7 +24600,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24629,7 +24629,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -24658,7 +24658,7 @@
         "kind": "resource",
         "key": "mv"
       },
-      "label": "condition.flying",
+      "name": "condition.flying",
       "narration": {
         "applied": "narration.flying.applied",
         "tick": "narration.flying.tick",
@@ -26597,7 +26597,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "locks": {
@@ -26622,7 +26622,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "locks": {
@@ -26666,7 +26666,7 @@
       "keywords": [
         "chest"
       ],
-      "short": "s",
+      "name": "s",
       "room_line": "r",
       "description": "d",
       "location": {
@@ -28317,7 +28317,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -28384,7 +28384,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -28445,7 +28445,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "pick_gate",
-      "label": "actions.pick_gate",
+      "name": "actions.pick_gate",
       "aliases": [
         "pick"
       ],
@@ -28955,7 +28955,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "asides": []
@@ -29026,7 +29026,7 @@
       "keywords": [
         "hal"
       ],
-      "short": "npc.hal.short",
+      "name": "npc.hal.short",
       "room_line": "npc.hal.room",
       "description": "npc.hal.description",
       "room": {
@@ -29118,7 +29118,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/title",
+        "path": "/name",
         "code": "missing_property"
       },
       {
@@ -29131,7 +29131,7 @@
     "contract": "StructureDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "variants": [],
       "tags": [],
@@ -29158,7 +29158,7 @@
     "contract": "StructureDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "variants": [
         {
@@ -29316,7 +29316,7 @@
     "contract": "StructureDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "max_per_owner": 0
     },
@@ -29331,7 +29331,7 @@
     "contract": "StructureDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "max_per_owner": 1001
     },
@@ -29346,7 +29346,7 @@
     "contract": "StructureDefinition",
     "value": {
       "key": "hut",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "max_per_owner": 1.5
     },
@@ -29671,7 +29671,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "site": {
@@ -29698,7 +29698,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "site": {
@@ -29719,7 +29719,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "site": {
@@ -29744,7 +29744,7 @@
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
-      "title": "t",
+      "name": "t",
       "description": "d",
       "exits": {},
       "site": {
@@ -29927,7 +29927,7 @@
     "contract": "ActionRecipe",
     "value": {
       "key": "ring_bell",
-      "label": "actions.ring_bell",
+      "name": "actions.ring_bell",
       "aliases": [
         "ring",
         "pull"
@@ -30784,7 +30784,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "carving",
-      "label": "skill.carving.label",
+      "name": "skill.carving.label",
       "requirement": "skill.carving.requirement",
       "qualification": {
         "op": "all",
@@ -30804,7 +30804,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "carving",
-      "label": "skill.carving.label",
+      "name": "skill.carving.label",
       "requirement": "skill.carving.requirement",
       "qualification": {
         "op": "all",
@@ -30828,7 +30828,7 @@
     "contract": "SkillDefinition",
     "value": {
       "key": "carving",
-      "label": "skill.carving.label",
+      "name": "skill.carving.label",
       "requirement": "skill.carving.requirement",
       "qualification": {
         "op": "all",
@@ -30994,7 +30994,7 @@
         "kind": "resource"
       },
       "key": "knife_for_pelts",
-      "label": "service.barter",
+      "name": "service.barter",
       "narration": "service.barter.used",
       "price": -1,
       "provider": {
@@ -31171,7 +31171,7 @@
       "keywords": [
         "guard"
       ],
-      "short": "npc.guard.short",
+      "name": "npc.guard.short",
       "room_line": "npc.guard.room",
       "description": "npc.guard.description",
       "room": {
@@ -31238,7 +31238,7 @@
       "keywords": [
         "guard"
       ],
-      "short": "npc.guard.short",
+      "name": "npc.guard.short",
       "room_line": "npc.guard.room",
       "description": "npc.guard.description",
       "room": {
@@ -31314,7 +31314,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31342,7 +31342,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31370,7 +31370,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31408,7 +31408,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31439,7 +31439,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31469,7 +31469,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31500,7 +31500,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31531,7 +31531,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {
@@ -31562,7 +31562,7 @@
       "keywords": [
         "horse"
       ],
-      "short": "npc.horse.short",
+      "name": "npc.horse.short",
       "room_line": "npc.horse.room",
       "description": "npc.horse.description",
       "room": {

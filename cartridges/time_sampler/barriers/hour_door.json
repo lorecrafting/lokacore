@@ -3,7 +3,7 @@
     "hour_door",
     "door"
   ],
-  "short": "barrier.hour_door.short",
+  "name": "barrier.hour_door.short",
   "initial": "closed",
   "opens_when": {
     "op": "time_window",

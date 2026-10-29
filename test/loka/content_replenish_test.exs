@@ -93,7 +93,7 @@ defmodule Loka.ContentReplenishTest do
          |> update_in(["requires", "capabilities"], caps))},
       {"actions/dig.json",
        %{
-         "label" => "action.mine",
+         "name" => "action.mine",
          "aliases" => ["dig"],
          "target" => %{"kind" => "detail", "room" => "mine", "detail" => "seam"},
          "priority" => 10,

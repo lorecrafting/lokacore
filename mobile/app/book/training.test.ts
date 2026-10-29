@@ -332,7 +332,7 @@ test('Book interaction teaches swords then dodge in the teacher detail and recov
       const choice = c.dialogues[at('dialogue', `learn_${skill}`)].choices.learn;
       choice.label = `learn.${skill}`;
       choice.narration = `learned.${skill}`;
-      c.skills[at('skill', skill)].label = `skill.${skill}`;
+      c.skills[at('skill', skill)].name = `skill.${skill}`;
       c.text[`learn.${skill}`] = `Learn ${skill}`;
       c.text[`learned.${skill}`] = `The teacher teaches you ${skill}.`;
       c.text[`skill.${skill}`] = skill === 'swords' ? 'Swords' : 'Dodge';

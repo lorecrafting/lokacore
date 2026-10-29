@@ -95,7 +95,7 @@ defmodule Loka.ContentStandingTest do
       Map.new(~w(active objectives_met resolved failed abandoned), &{&1, "npc.maud.short"})
 
     lead = %{
-      "title" => "npc.maud.short",
+      "name" => "npc.maud.short",
       "objective" => %{"evidence" => "current_state", "policy" => always},
       "journal" => journal
     }

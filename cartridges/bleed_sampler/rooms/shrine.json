@@ -1,5 +1,5 @@
 {
-  "title": "room.shrine.title",
+  "name": "room.shrine.title",
   "description": "room.shrine.description",
   "exits": {
     "south": {

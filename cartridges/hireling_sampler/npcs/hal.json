@@ -2,7 +2,7 @@
   "keywords": [
     "hal"
   ],
-  "short": "npc.hal.short",
+  "name": "npc.hal.short",
   "room_line": "npc.hal.room",
   "description": "npc.hal.description",
   "room": "yard",

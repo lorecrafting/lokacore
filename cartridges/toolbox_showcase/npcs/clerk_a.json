@@ -2,7 +2,7 @@
   "keywords": [
     "clerk"
   ],
-  "short": "npc.clerk_a.short",
+  "name": "npc.clerk_a.short",
   "room_line": "npc.clerk_a.room",
   "description": "npc.clerk_a.description",
   "room": "counting_house",

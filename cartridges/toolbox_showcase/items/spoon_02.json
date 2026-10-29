@@ -3,7 +3,7 @@
     "spoon",
     "spoon_02"
   ],
-  "short": "item.spoon.short",
+  "name": "item.spoon.short",
   "room_line": "item.spoon.room",
   "description": "item.spoon.description",
   "mass_grams": 100,

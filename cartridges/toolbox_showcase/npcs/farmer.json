@@ -2,7 +2,7 @@
   "keywords": [
     "farmer"
   ],
-  "short": "npc.farmer.short",
+  "name": "npc.farmer.short",
   "room_line": "npc.farmer.room",
   "description": "npc.farmer.description",
   "room": "farm_yard",

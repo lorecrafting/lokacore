@@ -2,7 +2,7 @@
   "keywords": [
     "warden"
   ],
-  "short": "npc.warden.short",
+  "name": "npc.warden.short",
   "room_line": "npc.warden.room",
   "description": "npc.warden.description",
   "room": "warden_gate",

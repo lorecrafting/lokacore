@@ -52,7 +52,7 @@ export function knowledgeView(
   const at = positions(world, world.cartridge.map_positions);
   const rooms = [...at]
     .flatMap(([id, p]) =>
-      visited.has(id) ? [{ id, title: world.rooms[id].title, x: p.x, y: p.y, z: p.z }] : [],
+      visited.has(id) ? [{ id, title: world.rooms[id].name, x: p.x, y: p.y, z: p.z }] : [],
     )
     .sort((a, b) => cmp(a.id, b.id));
   const links = rooms.flatMap(({ id }) =>

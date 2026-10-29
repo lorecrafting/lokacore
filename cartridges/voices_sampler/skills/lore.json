@@ -1,5 +1,5 @@
 {
-  "label": "skill.lore.label",
+  "name": "skill.lore.label",
   "requirement": "skill.lore.requirement",
   "growth": [1, 2]
 }

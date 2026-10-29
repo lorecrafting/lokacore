@@ -98,7 +98,7 @@ test('a closed door carries cues', () => {
     'senses_sampler@0.0.1:barrier/door': {
       key: 'door',
       keywords: ['door'],
-      short: 'x',
+      name: 'x',
       initial: 'closed',
     },
   };
