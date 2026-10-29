@@ -2,7 +2,7 @@
 
 **PM rulings, reported to the owner on 2026-10-08.** They settle the PM questions in the
 [E2 slice plan](../briefs/chapter-one/chapter-one-e2-slice-plan-2026-10-07.md) and the
-[E1 closure review](../reviews/2026-10-07-e1-closure-fable-review.md) notes.
+[E1 closure review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-07-e1-closure-fable-review.md) notes.
 
 - **E2 S1 fixture names** stay `r9c_interactions_hash.json` and `r9c_interactions_ids.json`, outside
   the simulator's default `cartridge_*hash.json` corpus.

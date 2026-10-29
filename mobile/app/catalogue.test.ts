@@ -1,7 +1,7 @@
 // E1 (storybook-plan-2026-10-08.md): every exported Book UI component carries its doc comment, has
 // its catalogue index line, and is imported by some story.
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { specs } from './stories/specs.ts';
 
@@ -25,6 +25,7 @@ const EXEMPT: Record<string, string> = {
 const files = [
   ...readdirSync(new URL('book/', app))
     .filter((f) => f.endsWith('.tsx'))
+    .sort() // one table order on every filesystem
     .map((f) => `book/${f}`),
   'SaveError.tsx',
 ];
@@ -49,17 +50,17 @@ test('the scan reports an export form it cannot read', () => {
 });
 
 // Breaks: the catalogue index drops, duplicates or misfiles a component, or its Story column
-// disagrees with the doc comment.
-test('the catalogue index lists each exported component once, with its file and story', () => {
-  const md = read('../../docs/BOOK-UI-COMPONENTS.md');
-  const [start, end] = [md.indexOf('## Component catalogue'), md.indexOf('## Page turn')];
-  assert.ok(start >= 0 && end > start, 'the index sits between its heading and Page turn');
-  const index = md.slice(start, end);
-  const rows = [...index.matchAll(/^\| `(\w+)` \| `([\w/.]+)` \| (\w+) \|$/gm)];
-  assert.deepEqual(
-    rows.map(([, name, file, s]) => `${file}:${name}:${s}`).sort(),
-    exported.map((c) => `${c.file}:${c.name}:${story(c)}`).sort(),
-  );
+// disagrees with the doc comment. `LOKA_WRITE_GEN=1` (bin/regen.sh) rewrites the table from the scan.
+test('the catalogue index is the table generated from the exported components', () => {
+  const path = '../../docs/BOOK-UI-COMPONENTS.md';
+  const md = read(path);
+  const table = /(?<=## Component catalogue\n[^|]*)\| Component \|.*\n(?:\|.*\n)*/.exec(md);
+  assert.ok(table && table.index < md.indexOf('## Page turn'), 'the index sits under its heading');
+  const rows = exported.map((c) => `| \`${c.name}\` | \`${c.file}\` | ${story(c)} |\n`);
+  const text = `| Component | File | Story |\n|---|---|---|\n${rows.join('')}`;
+  if (process.env.LOKA_WRITE_GEN)
+    return writeFileSync(new URL(path, app), md.replace(table[0], text));
+  assert.equal(table[0], text, 'stale: rerun bin/regen.sh');
 });
 
 // A story or a story helper (stories/screen.tsx) imports it, named or as the default.

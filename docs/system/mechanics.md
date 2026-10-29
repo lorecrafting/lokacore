@@ -346,7 +346,7 @@ unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILIT
 
 ## D11 character choice (selected contract)
 
-The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#chapters-scenes-and-recovery) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
+The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#character-choice-recovery) owns durable choice identity; [Book](book-ui.md#chapters-scenes-and-recovery) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
 
 Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal, after a zero-amount hp settle when the hp maximum is derived ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
 
@@ -549,7 +549,7 @@ The installed subset of archived 06 §33–§37 and 21 §3.6 has two closed cont
 A `modal` SceneDefinition starts from a declared story-point, quest outcome or bound
 accepted action, and has n≥1 `narrate {text}` steps followed by `await_ack`, then `end`.
 It is not skippable or restartable. Its optional validated `on_end` atomically assigns
-declared player facts and reaches one story point; [A3](cartridge.md#a3-green-finale)
+declared player facts and reaches one story point; [A3](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#a3-green-finale)
 consumes this completion. B9 adds the anchored, resumable `presentation_only` Rest dream,
 with its bounded choice/branch and final quest acknowledgement; its exact step and
 availability rules live in [S10](#s10-lantern-rest-and-dream-b9-selected-contract).
@@ -930,7 +930,7 @@ and existing due-before-input order; player Wait and clock skips remain unavaila
 ## Peg's immediate shop (B3 selected contract)
 
 At the chandler, the original living Peg offers the finite, authored
-[B3 shelf](cartridge.md#pegs-b3-shelf). Buy and Sell bind Peg, one exact item EntityId and
+[B3 shelf](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#pegs-b3-shelf). Buy and Sell bind Peg, one exact item EntityId and
 the displayed price. The offer is rechecked against current co-location, direct custody,
 catalog eligibility, price, balances and carrying load when executed; a stale view or
 forged command has no authority. Reading the shop does not pause the clock. No hours gate
@@ -960,7 +960,7 @@ participating balances must reopen as valid current-build truth.
 
 [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 adds the first skills and armed/defense consumer to the installed combat above.
-The [cartridge](cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
+The [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
 profile and chance. Qualification is current policy truth, never stored mastery.
 
 `skills@1` owns acquired membership by CharacterId and declared skill reference.
@@ -1019,7 +1019,7 @@ the authority remains the sole transaction/adoption owner.
 
 This consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
 It composes containment, carrying, dialogue, quest,
-bounded fact adjustment and receipts. [Cartridge stock](cartridge.md#b5-herb-and-bandage-stock)
+bounded fact adjustment and receipts. [Cartridge stock](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b5-herb-and-bandage-stock)
 contains the exact quantities; no engine literal identifies Wick, fenwort or S9.
 
 Chapel Nave north↔Cloister south and Cloister east↔Infirmary west are
@@ -1087,7 +1087,7 @@ Selected under the [B4 PM adoption](../decisions/pm-decision-b4-light-2026-10-05
 the first consumer is the optional Well Shaft detail,
 using the real B3 torch and oil; no chapter-required route gains a light gate.
 The torch is a reusable oil-soaked wick on a handle, with unchanged B3 identity,
-prices, mass and light slot. [Cartridge tuning](cartridge.md#b4-well-and-fuel)
+prices, mass and light slot. [Cartridge tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b4-well-and-fuel)
 owns every fuel value. Light adds only per-item fuel history and one effective
 illumination query; it composes equipment, custody, confirmed time and details.
 
@@ -1100,6 +1100,10 @@ intervals; compare exhaustion before multiplying an unsafe interval. A query wri
 nothing. Effective `lit` requires stored lit and positive effective fuel.
 Ignite, Douse and Refuel first settle the old interval to now, then write the new
 row. There is no expiry job, per-second write, UI timer or automatic ignition.
+
+Compiler and loader require `light@1` for any fuel declaration. Initial charge never exceeds
+capacity, and a template item cannot carry fuel. A source's `supply` names a supply item with
+the same unit.
 
 Ignite requires a fueled source directly body-held or in the actor's light slot,
 and refuses an already effectively lit source. Douse requires that same custody
@@ -1151,9 +1155,9 @@ shrine teleport or forced-overload recovery operation is added.
 
 B7 supplies the first `liquid@1` consumer:
 Fill at Well Lane's authored well detail, Pour between two real obtainable
-waterskins, and Drink water. [Tuning](cartridge.md#b7-water-and-vessels) supplies
-units, capacity, density and drink amount. [Composition](protocol.md#b7-liquid-composition),
-[recovery](save.md#b7-liquid-recovery) and [Book](book-ui.md#item-details-and-takedrop)
+waterskins, and Drink water. [Tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b7-water-and-vessels) supplies
+units, capacity, density and drink amount. [Composition](protocol.md#liquid-composition),
+[recovery](save.md#liquid-recovery) and [Book](book-ui.md#item-details-and-takedrop)
 govern their shared boundary. No hunger/thirst clock, HP/MV benefit, spill, oil
 conversion or finite environmental reservoir is selected. B8 must amend this
 contract before adding its actual consumption benefit or ale consumer.
@@ -1199,11 +1203,18 @@ ceiling. Pour within actor custody is neutral even when overloaded, and Drink
 reduces load. Take, Buy and incoming transfer must include current liquid mass;
 Drop and recovery move the same contents without refilling them.
 
+Any liquid declaration, vessel or source requires `liquid@1` and kernel API 1.20 or later.
+A vessel's initial row is empty (`kind` null, quantity 0) or names a declared liquid with
+positive quantity, and never exceeds capacity. A template item cannot be a vessel: no writer
+creates liquid rows for newly instantiated items. A vessel item declares an integer
+`mass_grams`. `liquid_source` exists only on a room detail and names a declared liquid. Liquid
+`label` and `unit_label` and a vessel's `unit_label` are declared text keys.
+
 ## S3 finite watch patrol (C2 selected contract)
 
 [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
 selects an all-hours, player-started patrol led by the original noncombatant Tobin.
-The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
+The [cartridge route](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c2-watch-route-and-trust) supplies its finite
 walk and checkpoints. This is player-follow-leader behavior; it does not change
 [escort@1](#escort1)'s NPC-follow-player relation or occupy its actor-keyed row.
 
@@ -1258,10 +1269,24 @@ trust and nonterminal attempt failure have retained causal evidence, not room-co
 inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
 are outside this selected consumer.
 
+Compiler and loader validate a patrol quest. It requires `patrol@1`, `movement@1`, `quest@1`,
+`dialogue@1`, `fact@1` and `death@1`; its objective evidence is `patrol` (that evidence requires a
+`patrol` declaration), and it has no offer, repeat, deadline or exchange. The initial cursor lies
+within the route, and each leg, including the last back to the first, is an exit to a different
+room with no hidden or climb face. Checkpoints are unique route rooms, and the required count is
+at most their number. The leader has no HP, attack or daily schedule and starts in the initial
+cursor's room. The trust fact is a player-scoped Boolean defaulting to false, and the narration
+is a declared text key. Two patrols cannot share a leader or trust fact, and no escort choice
+binds the leader. No dialogue `quest`, reaction `apply` step or choice without a `start`
+transition may accept, activate or resolve the patrol quest. A patrol choice names a patrol quest
+led by its dialogue role's NPC, in a dialogue with no `quest` of its own; a `start` transition
+accepts exactly that quest, any other accepts nothing, and the choice carries no escort,
+sequence, payment, lesson payment, receive or hand-over.
+
 ## S4 all-hours wisp (B6 selected contract)
 
 Installed under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
-using the selected contract. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
+using the selected contract. [Cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b6-marsh-route-and-tuning)
 owns the route, attribute, answer, limit and topic. S4 is optional and one-shot;
 no night, tide, purchase, fuel, herb, bell, faction or Q2-completion gate applies.
 
@@ -1310,7 +1335,7 @@ conversation graph or a promise of all historical topics.
 ## C3 bounded living hounds (selected contract)
 
 [PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
-selects the first dynamic population consumer; [cartridge](cartridge.md#c3-hound-population-and-loot)
+selects the first dynamic population consumer; [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c3-hound-population-and-loot)
 owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
 Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and
 enemy flight; C5 owns actual bleeding. No hound is a required quest objective.
@@ -1340,7 +1365,8 @@ handles all slots, in slot order. Its successor is due at the earliest next wand
 boundary, day/night target boundary or eligible replacement time, strictly after
 this occurrence. Ignore past due times for night-only slots while ineligible;
 the next night boundary reconsideration prevents a zero-time loop. Require wander
-interval <= replacement delay. The current plan job is no later than the next
+interval <= replacement delay. The night window wraps midnight: `night_end < night_start`,
+and `night_start` falls within the day's hours. The current plan job is no later than the next
 wander boundary, hence no later than a newly fatal member's replacement due. Death
 writes only that slot's eligibility; it never reschedules or writes plan control.
 Existing due ordering, segmentation and shared command budgets apply; plan work
@@ -1357,7 +1383,7 @@ slots, never unchanged living or not-yet-eligible dead slots. Thus population-fi
 skips the engaged hound before fatal combat; combat-first leaves a dead slot whose
 new due is strictly later, which population skips. Both advance the separate plan
 control once and conserve the same fatal slot/corpse/pelt. No whole-plan slot rewrite
-or cross-writer exception is permitted; see [targets](protocol.md#c3-spawned-bundles-and-population-composition).
+or cross-writer exception is permitted; see [targets](protocol.md#spawned-bundles-and-population-composition).
 
 At a wander boundary each living, unengaged member alternates between the two
 adjacent declared rooms through ordinary legal movement. A blocked edge leaves it
@@ -1420,7 +1446,7 @@ clock in the same group. It creates no corpse, kill credit, loot or replacement.
 Nonselected injured members wait only for their bounded rotating opportunity;
 no extra timer or player Wait is introduced. Voluntary wandering stays suppressed
 for active members and at the exact last-flight boundary; see
-[composition](protocol.md#c4-pack-encounter-and-flight-composition).
+[composition](protocol.md#pack-encounter-and-flight-composition).
 
 After departure/death, repair primary/cursor as above and narrate the new exact
 primary. With no remaining members close once and cancel/complete the current job.
@@ -1621,7 +1647,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
 
 Installed under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
 D2 completes the ten public Priory rooms through the reciprocal
-[authored route](cartridge.md#d2-public-priory-and-book-authoring). Movement retains
+[authored route](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d2-public-priory-and-book-authoring). Movement retains
 its ordinary cost and position rules; no key, light, topic, bell/faction outcome,
 NPC schedule, fare, water skill or time window gates this extension. These are
 safe walking rooms, not a new hazard. Aldric remains public in Chapel Nave;
@@ -1716,10 +1742,22 @@ Boolean is the durable local memory `player.dream_seen`; no second export marker
 Exact accepted replay retains its receipt before current-state admission; new
 stale controls cannot skip a beat, change the branch or repeat the consequence.
 
+Compiler and loader validate the dream scene. It requires `position@1`, `scene@1`, `quest@1`,
+`dialogue@1`, `reaction@1`, `fact@1`, `resource@1`, `death@1` and `service@1`, and kernel API
+1.25 or later. Its Rest trigger names a room detail whose bed entitlement is the trigger's
+entitlement, which a service benefit produces; entitlement and credit are distinct player-scoped
+Booleans defaulting to false. Its steps are exactly three narrations, a choice of two distinct
+options, a branch, an acknowledgement and an end. The end resolves the trigger's quest and
+assigns exactly one player Boolean true, neither the credit nor the entitlement. The quest's
+objective is that fact's current state equal to true, and the quest has no offer, repeat,
+deadline, exchange or patrol. No other presentation-only scene owns the same credit, quest or
+memory fact, and no dialogue or reaction activates or resolves the quest. Its title,
+description, narrations, prompt and choice texts are declared text keys.
+
 ## D4 homes, finite apples and Eat (selected contract)
 
 **D4 source contract.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
-selects the [chapter declarations](cartridge.md#d4-homes-and-orchard-declarations).
+selects the [chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d4-homes-and-orchard-declarations).
 The orchard detail reuses B5 Harvest over three actual authored item identities.
 Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
 resource node, random roll, regrowth job or seasonal availability gate is added.
@@ -1739,6 +1777,12 @@ clock, settle recovery and use checked arithmetic to cap the authored positive
 increment at the current maximum; atomically transfer the same item to terminal consumed custody and
 adjust the pool in one writer group. D4 adds no currency, time skip, RNG, hunger, HP
 healing, acquisition event or new consumable issuance.
+
+Compiler and loader require `food@1`, `containment@1` and `resource@1` for an edible item,
+and kernel API 1.27 or later (1.101 when any edible declares `applies`). Its recovery pool is
+the MV resource with a positive standing regeneration rate. An edible item is never a container
+and declares no capacity, slot, weapon, block chance, fuel or vessel. Its `label` and
+`narration` are declared text keys.
 
 Ordinary transfer alone cannot express consumption: existing destinations retain
 recoverable custody and permit a later transfer back. There is no installed item
@@ -1766,7 +1810,7 @@ keyed-action admission. Ordinary uneaten food custody and death remain unchanged
 
 Selected under the [D5 PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
 Five optional rooms reuse ordinary reciprocal movement, detail Read and Q2 escort.
-[Cartridge authoring](cartridge.md#d5-deep-fen-route-and-details) declares the exact
+[Cartridge authoring](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d5-deep-fen-route-and-details) declares the exact
 route. Every new room is dry traversable ground and naturally lit at all hours,
 including the shallow fox den; none declares `dark_description`. No swim, tide,
 light, time, topic, bell, faction or quest gate applies. The existing B4 dark-room
@@ -1802,7 +1846,7 @@ Living actors below surface for 0 MV regardless of current skill/load/MV/posture
 light. Both directions use existing `move` and normal room-entry evidence.
 
 One water occupancy generation binds one absolute submersion deadline and one
-due job. The selected chapter duration is in [cartridge](cartridge.md#d6-bottom-rooms-and-water-tuning-selected-contract).
+due job. The selected chapter duration is in [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-contract).
 There is no periodic drain: MV 0 alone never drowns, and ordinary fractional
 resource recovery remains unchanged. Surface and every death invalidate water
 occupancy; stale/canceled/re-entry jobs cannot affect a later occupancy.
@@ -1824,6 +1868,13 @@ identity, allow forced overload, never auto-equip/copy or restore rewards/
 deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings at Chapel.
 Ordinary physical corpse recovery remains available, including D1's fare-waived
 isle return. No general remote Take or replacement-gear system.
+
+Compiler and loader validate `world.water`. It requires `water@1`, `skills@1`, `resource@1`,
+`schedule@1`, `death@1`, `containment@1`, `movement@1` and `position@1`, the `real_elapsed`
+time policy and the world's death and carry settings. Each route's surface room has a down exit
+to its bottom and the bottom an up exit back, neither through a barrier, and a bottom has no
+other exit. No room belongs to two routes. The swim skill is a declared skill, and the warning
+and drowned texts are declared text keys.
 
 <a id="d9-village-consequences-and-prior-study-access-selected-pending-implementation"></a>
 
@@ -1869,7 +1920,7 @@ Bell Tower, Belfry or any mandatory route. See the [D9 decision](../decisions/pm
 
 ## D12 practical skill consumers (selected contract)
 
-The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
+The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
 
 Original living, co-located Sedge and Peg teach their respective skills through bound Talk/Choose, typed `skill.acquire` and conserved `lesson_payment` in one proposal. Acquisition is independent of current qualification. Already acquired refuses before any new fee or grant; exact invocation replay returns the existing accepted receipt. Lessons are optional and all-hours; neither learning nor either benefit gates ferry, recovery, ordinary Harvest, S9 or chapter completion. Sedge's existing free swim choice remains separate and available.
 
@@ -1881,19 +1932,19 @@ Peg's opted Buy quote uses current usable haggle after normal elapsed settlement
 
 ## D7 bounded deer and delayed sight flight
 
-[D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](cartridge.md#d7-deer-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
+[D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#d7-deer-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
 
-The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
+The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#sight-flight-composition). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
 
 The plan's ordinary wander still skips engaged members and the member transferred by sight flight at that same clock, using C4's last-flight guard. At equal sight/combat/population deadlines preserve normal `(due_time, job_id)` order and distinct writer groups: a fatal round cancels its bound sight job; sight first moves the deer and makes a later round harmless; a surviving round first can hand off its exact successor for sight flight; an intervening population job sees engagement and may skip. Only the checked matching encounter closure and successor cancellation use the preceding round group in that handoff. Other same-target conflicts still fault atomically. No priority override, global sight scan or per-hound job is added.
 
 ## C5 hound bleeding and bandage (selected contract)
 
-[C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#live-combat-response-m6-a) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. The generic status interpreter of [toolbox row 1](#status-effects-over-time-toolbox-row-1) runs beside C5 and does not replace it.
+[C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#bleed-and-bandage-composition), [recovery](save.md#bleed-and-bandage-recovery) and [Book](book-ui.md#live-combat-response-m6-a) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. The generic status interpreter of [toolbox row 1](#status-effects-over-time-toolbox-row-1) runs beside C5 and does not replace it.
 
 Only an actual C3 hound's positive HP loss to the surviving player body during its combat opportunity applies bleeding. Miss, successful defense, clamped zero loss, fatal hit, other opponents and forged event/name matches do not. The existing combat writer group adds one typed body/effect instance with source hound identity, generation, `ends_at`, `next_tick_at` and current owned job. A second qualifying hit while active refreshes `ends_at = now + authored duration` but retains the generation and pending next tick; it neither stacks nor postpones that tick. A new application after cure/expiry uses a fresh generation. The hound's later death or flight does not cancel its already inflicted effect.
 
-At a current tick strictly before `ends_at`, lose the authored fixed HP amount, clamped by current HP, through the existing resource/death sequence. Schedule the next tick if it is strictly before end, otherwise schedule one expiry delivery at end; expiry removes the active instance without damage. Every due job rechecks body, generation, current job, life and time. Cure/expiry/death inactivate the instance and cancel or complete its work in the same writer group; the retained generation makes stale jobs harmless. Player death clears this bleed before same-body Chapel return and closes the entire pack encounter. Equal-time jobs retain canonical `(due_time, job_id)` order; only the [exact current bleed/round pair](protocol.md#c5-bleed-and-bandage-composition) shares a writer group, while unrelated jobs retain ordinary conflict refusal. Each delivery revalidates the hydrated prefix. Already-due work settles before player treatment at the same clock.
+At a current tick strictly before `ends_at`, lose the authored fixed HP amount, clamped by current HP, through the existing resource/death sequence. Schedule the next tick if it is strictly before end, otherwise schedule one expiry delivery at end; expiry removes the active instance without damage. Every due job rechecks body, generation, current job, life and time. Cure/expiry/death inactivate the instance and cancel or complete its work in the same writer group; the retained generation makes stale jobs harmless. Player death clears this bleed before same-body Chapel return and closes the entire pack encounter. Equal-time jobs retain canonical `(due_time, job_id)` order; only the [exact current bleed/round pair](protocol.md#bleed-and-bandage-composition) shares a writer group, while unrelated jobs retain ordinary conflict refusal. Each delivery revalidates the hydrated prefix. Already-due work settles before player treatment at the same clock.
 
 Wick's optional all-hours bound lesson uses C1 `skill.acquire`; acquisition is permanent, while use requires current qualification. Exact held bandage treatment is immediate, costs no HP/MA/MV or clock, spends no combat round/opportunity and gives no HP. It atomically transfers that one item to D4's terminal consumed holder, removes the current bleed and cancels its job, then returns a typed result. Refuse without any change if the actor is dead, unlearned/unqualified, another body/effect/generation is targeted, the bandage is not directly held and opted in, or the selected bleed is absent. Normal prerequisite due settlement can cause that last refusal. No remote, nested, worn or corpse-held treatment; retrieve the bandage through ordinary custody first.
 
@@ -1950,7 +2001,7 @@ An absent Aldric yields the authored no-answer response, without asserting his l
 
 ## C6 S27 Night in the Marsh (selected contract)
 
-The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
+The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#expedition-composition), [recovery](save.md#expedition-recovery) and [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
 
 At any hour a standing living player at Hound Run deliberately starts S27 once. Starting binds an actor-owned quest occurrence and a five-entry ordered route attempt with cursor zero. Each later **accepted actual player Move or Flee** along the next authored edge advances that cursor exactly once. Starting co-location, NPC movement, replayed/refused movement, revisiting a room without the next edge, transport and pre-start visits earn nothing. The fifth accepted entry resolves the same quest and awards its selected consequences atomically. There is no idle survival timer, night boundary, arbitrary room-tag counter or new global objective interpreter.
 
@@ -2314,7 +2365,7 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 [Toolbox row 6a](../MECHANICS-TOOLBOX.md#ranked-toolbox); the PM brief is in Beads `loka-kgd.63` (2026-10-10). It amends the [C4 primary rule](#c4-hound-response-pack-assistance-and-flight-selected-contract) for opted-in cartridges only.
 
 - **Choosing.** Attack's `target_id` already picks the foe that opens an encounter. With `world.combat.target_choice`, Attack also works inside an open roster (pack) encounter: a target that is another active member of the player's own encounter (not the current primary) becomes the primary. The command shape is unchanged. Every other Attack admission holds (body, life, standing, co-location, sanctuary, scene); the current primary, a non-member and any target without the opt-in are refused `invalid_state`, as before.
-- **Effect.** One `encounter.target` delta ([protocol](protocol.md#c4-pack-encounter-and-flight-composition)) writes the new primary; no round, RNG draw, job or event. The next round's player opportunity strikes the new primary; the rotating opponent opportunity, the cursor, the round order and the job are unchanged, so a switch never moves or delays a round. Removal repair (dead or departed primary) is unchanged. The receipt carries the pack's `primary_changed` note naming the new primary.
+- **Effect.** One `encounter.target` delta ([protocol](protocol.md#pack-encounter-and-flight-composition)) writes the new primary; no round, RNG draw, job or event. The next round's player opportunity strikes the new primary; the rotating opponent opportunity, the cursor, the round order and the job are unchanged, so a switch never moves or delays a round. Removal repair (dead or departed primary) is unchanged. The receipt carries the pack's `primary_changed` note naming the new primary.
 - **Offer.** While the player fights a roster with two or more members still here (living and in the encounter room; the row itself is pruned only at round end), the encounter ActionSet keeps Attack beside Flee, Stand, Look, Scan and Bandage; the GameView lists one Attack per present attackable NPC, available on the other roster members and unavailable (`invalid_state`) on the current primary, by the same admission the rule uses. A single-foe fight, or a cartridge without the opt-in, keeps today's ActionSet. Wording of the choice is pending the designer (Beads `loka-x6t.14`).
 - **General target model.** The choice is the encounter's `npc_id` (the player's target); the opponent who strikes is still the rotating cursor. Rows 6b (allies) and 6c (several foes on one pack plan) widen who may be in the roster and who strikes, not this field. _Known limit:_ the pending round job keeps the old primary's definition ref, which round dispatch checks against the primary (`kernel/ts/src/mechanics/combat/round.ts`); this holds while a roster shares one definition (one population bundle), so a row that admits mixed definitions must re-point the job on a switch. [Row 6b](#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b) keeps allies out of the roster, so no row admits mixed definitions yet.
 - **Opt-in.** `target_choice` needs `kernel_api` 1.48. A cartridge without it keeps its bytes, hash, receipts and GameView; Chapter 1 declares none, so its fen hound pack keeps "primary stays until it leaves".
@@ -2558,7 +2609,7 @@ One rule says when the actor holds a tool, for [G4 use tools](#use-x-on-y-toolbo
 
 ## Command blocks and resistances on a status (toolbox rows SR4 and SR5)
 
-[Toolbox rows SR4 and SR5](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern them; the PM brief is in Beads `loka-kgd.89` and `loka-kgd.90` (2026-10-10), from the status survey (`docs/reviews/2026-10-10-status-effects-survey.md` on `main`, G, H, J). Two more readers of a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row; the row itself is unchanged.
+[Toolbox rows SR4 and SR5](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern them; the PM brief is in Beads `loka-kgd.89` and `loka-kgd.90` (2026-10-10), from the [status survey](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-status-effects-survey.md) (rows G, H, J). Two more readers of a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row; the row itself is unchanged.
 
 - **Blocks and allows (SR4).** A status may declare `blocks` and `allows`, each a list of Command types (`CommandPayload` `type`). While statuses are active on the actor's body, it may not issue a type any of them blocks, and where any declares `allows`, only a type every such list names (several `allows` lists intersect). A modal answer (dialogue's `choose` and `close_choice`, a scene's `continue`) and `wait` are always admitted, so no status traps the player in a conversation or scene, or stops time in a cartridge where only `wait` moves it. A permanent status that bars its own cure (`blocks: [eat]` with an edible cure) is the author's to avoid. Silence is `blocks: [say, shout, whisper, cast]`; stun, paralysis and sleep `allows: [look]`; entangle `blocks: [move, flee]`; berserk `allows: [attack, flee]`; fear on the player `blocks: [attack]`.
 - **Where.** One filter at the end of the actor's action set (`resolved` in `kernel/ts/src/commands/actions.ts`, beside the fight restriction, through `permits` in `kernel/ts/src/mechanics/status/permits.ts`, which adds the modal and `wait` exemption to `statusAllows` in `kernel/ts/src/mechanics/status/shared.ts`), so the GameView, invocation and step read the same set: a barred verb is not listed and a barred exit is listed unavailable with the step's code (`gameview_agrees_with_admission` is checked for a hushed `say` under an alias, `kernel/ts/test/status_readers.test.ts`). The type is what is barred, whatever the action's key: a cartridge action keyed `chant` whose command is `say` is withheld with `say`.
@@ -2576,7 +2627,7 @@ One rule says when the actor holds a tool, for [G4 use tools](#use-x-on-y-toolbo
 
 ## Perception and concealment on a status (toolbox rows SR6 and SR8)
 
-[Toolbox rows SR6 and SR8](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern them; the PM brief is in Beads `loka-kgd.91` and `loka-kgd.93` (2026-10-11), from the status survey (`docs/reviews/2026-10-10-status-effects-survey.md` on `main`, D and E). Two more readers of a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row; the row itself is unchanged. One scan serves both (`perceives` and `concealed`, `kernel/ts/src/mechanics/status/shared.ts`), and it runs only when some status of the cartridge declares `perception` or `concealment`.
+[Toolbox rows SR6 and SR8](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern them; the PM brief is in Beads `loka-kgd.91` and `loka-kgd.93` (2026-10-11), from the [status survey](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-status-effects-survey.md) (rows D and E). Two more readers of a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row; the row itself is unchanged. One scan serves both (`perceives` and `concealed`, `kernel/ts/src/mechanics/status/shared.ts`), and it runs only when some status of the cartridge declares `perception` or `concealment`.
 
 - **Blind (SR6).** `perception: {sight: blind}` on the player's body makes `dark()` true in every room (`kernel/ts/src/mechanics/light/shared.ts`), whatever a held light or dark sight says: the room shows its `dark_description` where it has one, and its contents and the next rooms' contents on scan vanish as in an [unlit room](#b4-light-and-darkness-selected-contract); beyond darkness, `visible()` hides every NPC (a discovered one too) and a self-luminous detail. A room without a `dark_description` reads the engine line `place.dark` while blind (loka-x6t.36, [dark rooms](#b4-light-and-darkness-selected-contract)).
 - **Dark sight (SR6).** `perception: {sight: dark_sight}` sees in an unlit room as an ancestry's `dark_sight` does (`darkSight`, `kernel/ts/src/mechanics/attributes/shared.ts`, read by `dark()` and scan). Blindness wins over it.
@@ -2591,7 +2642,7 @@ One rule says when the actor holds a tool, for [G4 use tools](#use-x-on-y-toolbo
 
 ## A room as a status holder (status reader 9)
 
-[Status survey](../reviews/2026-10-10-status-effects-survey.md) row P (reader 9); [declarations](cartridge.md#status-declarations) govern it; the PM brief is in Beads `loka-kgd.94` (2026-10-11). A room may hold a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row: the row, its key (the room's EntityId as `body_id`), its job and its events are G3's.
+[Status survey](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-status-effects-survey.md) row P (reader 9); [declarations](cartridge.md#status-declarations) govern it; the PM brief is in Beads `loka-kgd.94` (2026-10-11). A room may hold a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row: the row, its key (the room's EntityId as `body_id`), its job and its events are G3's.
 
 - **Producer.** A reaction's `status.apply` may name `room` (a room of the cartridge): the status lands on that room, at most once per delivery, refreshed while active as on any holder. Never with `item`, `npc` or `co_present` (compiler and loader SCHEMA_VIOLATION at `room`). A `status_ticked` or `status_expired` on a room has the room as its subject, so a reaction's unnamed `status.apply` or `status.cure` lands on the room.
 - **Tick.** A room has no pools: its tick changes nothing, never kills, and still emits `status_ticked` (`amount`, `kernel/ts/src/mechanics/status/job.ts`); expiry is row 1's. Ticks and expiry run through the ordinary status job, sub-steps included. A room never dies, so nothing clears its statuses but expiry and a cure step.
@@ -2674,7 +2725,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 
 ## Movement on a status (toolbox row SR7)
 
-[Toolbox row SR7](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern it; the PM brief is in Beads `loka-kgd.92` (2026-10-11), from the status survey (`docs/reviews/2026-10-10-status-effects-survey.md` on `main`, F). One more reader of a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row.
+[Toolbox row SR7](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern it; the PM brief is in Beads `loka-kgd.92` (2026-10-11), from the [status survey](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-status-effects-survey.md) (rows F). One more reader of a [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) status row.
 
 - **Cost.** A status may declare `movement.cost_percent` (0 to 1000). A move's fare (`world.movement.cost`, else 1 mv, times the flee multiplier while engaged) is multiplied by each active status's percent in turn, in definition order, each step rounded down (`fare` in `kernel/ts/src/mechanics/movement/shared.ts`), then by the destination's terrain percents (row 43a) and last by a ridden mount's `cost_percent` (row 43b). With the default 1 mv fare, 50 makes a move free (a fare of 0 writes no mv op): content that wants haste to cost something sets a larger fare. Water entry (D6 `entry_cost`) is not scaled.
 - **Terrain.** A room tagged `air`, `chasm` or `water` (`TERRAIN`) admits a move into it only when the mover's active statuses together `pass` each such tag (`crossable`, read in `movementPlan` in `kernel/ts/src/mechanics/movement/sequence.ts` right after the barrier check). Step and flee refuse `invalid_state`; the GameView lists the exit unavailable with the same reason, since it reads `movementPlan`. Leaving such a room is never barred. The check runs before D6 water edges, so a water-tagged D6 room also needs a pass.
@@ -2706,7 +2757,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 
 ## Durability, crafting quality and repair (toolbox row 21)
 
-[Toolbox row 21](../MECHANICS-TOOLBOX.md#ranked-toolbox): "wear per use, a quality band from the forge check, and a repair service (`mechanics/service/`) that restores durability for a fee (review 3)"; [mechanics review 3](../reviews/2026-10-10-mechanics-review-3.md) merged repair into this row; the archived plan's C3-M03 ([LATER-MECHANICS](../archive/LATER-MECHANICS.md)) asks for "two committed uses→0" and leaves "quality bands/salvage" to their own consumer. [Declarations](cartridge.md#durability-declarations) govern it; the PM brief is in Beads `loka-kgd.111` (2026-10-12). Durability is a [row W2](#entity-and-pair-facts-toolbox-row-w2) entity fact on the weapon, not a new pool; the cartridge owns every number (maximum, default, wear, repair amount and price; [owner decision](../decisions/owner-decision-world-parameters-2026-10-02.md)).
+[Toolbox row 21](../MECHANICS-TOOLBOX.md#ranked-toolbox): "wear per use, a quality band from the forge check, and a repair service (`mechanics/service/`) that restores durability for a fee (review 3)"; [mechanics review 3](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-10-mechanics-review-3.md) merged repair into this row; the archived plan's C3-M03 ([LATER-MECHANICS](../archive/LATER-MECHANICS.md)) asks for "two committed uses→0" and leaves "quality bands/salvage" to their own consumer. [Declarations](cartridge.md#durability-declarations) govern it; the PM brief is in Beads `loka-kgd.111` (2026-10-12). Durability is a [row W2](#entity-and-pair-facts-toolbox-row-w2) entity fact on the weapon, not a new pool; the cartridge owns every number (maximum, default, wear, repair amount and price; [owner decision](../decisions/owner-decision-world-parameters-2026-10-02.md)).
 
 - **Declaration.** An item's `weapon` may declare `durability {fact, wear}`: `fact` names a bounded int entity fact (`per_subject`, scopes `["instance"]`, a safe integer minimum and maximum); its default is a new weapon's value; `wear` is 1 to 2^31-1.
 - **Wear.** In a [combat@1](#combat1--first-live-encounter-m6-a) round, when the player's attack hits (`attack_result.hit`, a fully resisted `loss: 0` included) with the wielded weapon's own durable attack, the round writes one `fact.assign` on that item (subject the weapon's EntityId): the current value minus `wear`, clamped to the fact's minimum (`bounded`, `kernel/ts/src/mechanics/fact.ts`). A miss, an unarmed blow, an NPC's or an ally's blow wears nothing. The write (`wear` in `kernel/ts/src/mechanics/combat/durability.ts`) goes through `assigned` in the round's writer group and leaves the next causal position free for the host's `fact_changed` (subject the weapon); the next round reads the committed value.
@@ -2938,7 +2989,7 @@ Homestead row hs-4 (Beads `loka-kgd.108.2`): hens in an owned pen; fill the trou
 - **Price.** `buyPrice` (`kernel/ts/src/mechanics/commerce/shared.ts`) takes the table's entry for the count held (the flat `buy`, which equals `buy[0]`, when none is held), then applies the shop's `buy_discount` on top, as before. The shelf and the rule share it (view = use), so a price that moved between view and press is the existing stale quote: `invalid_state`. Sell keeps the offer's flat `sell`.
 - **Exchange.** The view keeps one row per offer, its `item_id` the offer's `item`, and a stock offer's Buy and Sell name that id. Buy moves the first held instance of the set in `selected` order (lowest EntityId first, not necessarily `items[0]`) from the shopkeeper to the actor; none held refuses `not_owned`, as a sold-out B3 offer. Sell moves the first instance of the set directly in the actor's body to the shopkeeper; none refuses `not_owned`. The receipt's `entity.transfer` and `item_acquired` name the moved instance. Every other B3 check is unchanged.
 - **Trade jobs.** [Replenish](#replenish-toolbox-row-19b) already admits an NPC as `from` and `to`, so NPC-to-NPC trade is content: an entry whose `items` is an offer's set, `from` another NPC and `to` the shopkeeper moves stock on its fixed grid, and the price follows the count. No engine change.
-- **Save.** [B3 shop recovery](save.md#b3-shop-recovery) keeps tracking each plain offer's item by receipt. A stock offer's Buy quote and moved item are not compared with static values: a cartridge with a stock offer replays its accepted receipts at their original revisions (`receiptHistory`), which recomputes each price and each moved instance. Set instances are not tracked by commerce custody, so a trade job may move them.
+- **Save.** [B3 shop recovery](save.md#shop-recovery) keeps tracking each plain offer's item by receipt. A stock offer's Buy quote and moved item are not compared with static values: a cartridge with a stock offer replays its accepted receipts at their original revisions (`receiptHistory`), which recomputes each price and each moved instance. Set instances are not tracked by commerce custody, so a trade job may move them.
 - **Known limits.** Sell price is flat. Stock is counted on the shopkeeper's body only, not a stall or chest. One table per offer. A set item named in two offers' sets counts for both.
 - **Opt-in.** Any `stock` needs `kernel_api` 1.82 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.82. Chapter 1 and every existing shop declare none and keep their bytes and hash.
 - **Book.** No new element and no [Book UI](book-ui.md) change: the offer's price changes in place.
@@ -3432,7 +3483,7 @@ Homestead row hs-5 (Beads `loka-kgd.108.4`): a cook turns two caught fish into a
 
 - **Command.** None new: Eat ([D4](#d4-homes-finite-apples-and-eat-selected-contract)) and `use_service` with an [escrow](#escrow-custody-toolbox-row-20a) and a [timed claim](#timed-job-claim-and-cancel-toolbox-row-20b).
 - **Admission.** A meal with no `applies` that restores nothing and cures nothing is `invalid_state`, as before. At the pool maximum a meal with `applies` is eaten only when at least one listed status would newly land (not `immune`, not already active): its statuses apply and the capped restore writes nothing; otherwise it is refused `invalid_state` as a plain meal.
-- **Effect** (`decide` in `kernel/ts/src/mechanics/food/rule.ts`). After the restore and the cures, each `applies` status lands on the eater's body through `statusStep` (`mechanics/status/shared.ts`), as a reaction step would: one writer group with the meal, `status_applied` only while a reaction listens for it, `immune` holds, and a refresh while active is silent. No `ate` event. The narration is the meal's line, then each first-applied status's `applied` line in `applies` order; a reaction on `status_applied` may add its own lines after them. The mobile local-story Eat receipt binds only line 0, the meal's authored key ([save.md](save.md#d4-finite-food-and-terminal-custody-recovery); `mobile/authority/local-story/food-receipt.ts`), so reaction and `alternates` lines reopen.
+- **Effect** (`decide` in `kernel/ts/src/mechanics/food/rule.ts`). After the restore and the cures, each `applies` status lands on the eater's body through `statusStep` (`mechanics/status/shared.ts`), as a reaction step would: one writer group with the meal, `status_applied` only while a reaction listens for it, `immune` holds, and a refresh while active is silent. No `ate` event. The narration is the meal's line, then each first-applied status's `applied` line in `applies` order; a reaction on `status_applied` may add its own lines after them. The mobile local-story Eat receipt binds only line 0, the meal's authored key ([save.md](save.md#finite-food-and-terminal-custody-recovery); `mobile/authority/local-story/food-receipt.ts`), so reaction and `alternates` lines reopen.
 - **Gate.** A listed status must not modify an attribute that is a `world.derived.hp_max` term (loka-kgd.50): the compiler (`lib/loka/content/status.ex` `meals`) and the loader (`kernel/ts/src/content/cartridge_food.ts`) refuse it with SCHEMA_VIOLATION at `edible.applies[i]`.
 - **Realm seams** (owner decision 2026-10-13, brief checklist).
   1. Actor: met; Eat and the order read `p.actor_id`. One open order per service is row 20b's known limit.

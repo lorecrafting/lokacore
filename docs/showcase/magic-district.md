@@ -101,7 +101,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   `fire_spreads` and `quench` (tool `{tag: liquid_holding, liquid: water}` on a burning item) serve
   the crypt unchanged.
 - Use pair `oil_winch`: `target {kind: use, tool: {liquid: oil}}`, policy `has_tag {subject:
-  target, tag: metal}`, success `fact.assign gate_oiled true` at the recipe's target (a pair fact, so oiling the lantern or the axe writes their row and the gate reads only the winch's) (`use_sampler/recipes/oil.json`).
+  target, tag: metal}`, success `fact.assign gate_oiled true` at the recipe's target (a pair fact, so oiling the lantern or the axe writes their row and the gate reads only the winch's) (`use_sampler/actions/oil.json`).
 
 ## Guided loop and expected outcomes
 

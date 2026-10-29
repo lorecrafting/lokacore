@@ -11,8 +11,8 @@ and the review records. Slices: S1 [#309](https://github.com/lorecrafting/lokaco
 
 | # | Criterion | Proof |
 |---|---|---|
-| 1 | Admission | S1 #309 ([review](../../reviews/2026-10-08-e2-s1-synthetic-cartridge-review.md)); S0 #312 for the runner side ([review](../../reviews/2026-10-08-e2-s0-runner-candidate-review.md), [second opinion](../../reviews/2026-10-08-e2-s0-runner-candidate-second-opinion.md)) |
-| 2 | Seven families, kernel and authority | S2 #314 ([review](../../reviews/2026-10-08-e2-s2-custody-terminal-review.md)), S3 #316 ([review](../../reviews/2026-10-08-e2-s3-elapsed-jobs-review.md)), S4 #319 ([review](../../reviews/2026-10-08-e2-s4-creatures-transport-review.md)) |
+| 1 | Admission | S1 #309 ([review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s1-synthetic-cartridge-review.md)); S0 #312 for the runner side ([review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s0-runner-candidate-review.md), [second opinion](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s0-runner-candidate-second-opinion.md)) |
+| 2 | Seven families, kernel and authority | S2 #314 ([review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s2-custody-terminal-review.md)), S3 #316 ([review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s3-elapsed-jobs-review.md)), S4 #319 ([review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s4-creatures-transport-review.md)) |
 | 3 | Runner report | S5 #321: [report and coverage table](../../evidence/2026-10-08-e2-r9c/README.md) (sections 1, 2, 4) |
 | 4 | Planted defect | S5 #321: found, `mechanics/policy.ts:44-48` ([section 3](../../evidence/2026-10-08-e2-r9c/README.md)) |
 | 5 | Guard sensitivity | [table below](#criterion-5-guard-breaks) |
@@ -20,8 +20,8 @@ and the review records. Slices: S1 [#309](https://github.com/lorecrafting/lokaco
 | 7 | Browser rows | Named pending (owner answer (a)); Hermes and native pending: [section 6](../../evidence/2026-10-08-e2-r9c/README.md) |
 | 8 | Standing corpus in CI | The `r9c_*` files run in the `typescript` job and `bin/check_all.sh`; exact-head CI on #321 is the merge condition |
 
-Reviews of S5: [Opus](../../reviews/2026-10-08-e2-s5-closing-proof-review.md), [second opinion](../../reviews/2026-10-08-e2-s5-closing-proof-second-opinion.md).
-Gate audit of S0-S4: [Fable, PASS WITH NOTES](../../reviews/2026-10-08-e2-gate-fable-audit.md).
+Reviews of S5: [Opus](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s5-closing-proof-review.md), [second opinion](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-s5-closing-proof-second-opinion.md).
+Gate audit of S0-S4: [Fable, PASS WITH NOTES](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-gate-fable-audit.md).
 
 ## Criterion 5 guard breaks
 

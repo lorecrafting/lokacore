@@ -17,21 +17,19 @@ Merged 2026-10-28: #481 (loka-x6t.127), #482 (loka-ivjq.16 E1 harness), #483 (lo
 gates), #484 (loka-ivjq.18/.19/.21 role files, guard rules, stage labels dropped), #480 (Authoring batch A:
 loka-kgd.194.12/.13/.14/.16/.18/.22/.17/.9). In flight; each verdict lands as a PR comment, read those first:
 
-- #485 batch P (`housekeeping/batch-p`; loka-ivjq.26/.22/.13): fix round 2 at f261bd73 (SURVIVED rows clear
-  like NO-TESTS); scoped re-check by the same reviewer running. On APPROVE and green CI:
-  `bin/merge_pr.sh 485 loka-ivjq.26,loka-ivjq.22,loka-ivjq.13`.
-- #486 (`housekeeping/batch-t-ex`, loka-ivjq.24) at f7988690 and #487 (`housekeeping/batch-t-ts`, loka-ivjq.15;
-  both close loka-ivjq.14) at 906453e6: batch review APPROVE WITH NOTES, one should-fix each, fixed; scoped
-  re-check of both by the batch-T reviewer running (#487 open point: pre-commit no longer catches new
-  `as never`, CI lint does). Merge #485, #486, #487, then `bin/sync_pr.sh housekeeping/batch-docs`.
-  Pre-existing test gap filed: loka-83pq.
-- Batch Docs (`housekeeping/batch-docs`; loka-ivjq.1/.17/.23/.10/.9): developer building; brief "BRIEF
-  DOCS" in loka-ivjq.1 notes; the PR body is the record. One review on the final head.
-- Batch C1 (S7 loka-ivjq.20, F2 loka-ivjq.2): plan and briefs in loka-ivjq.20 notes ("C1 PLAN", PM
-  amendments at its top). Starts after #485-#487 merge: cut `simplify/c1-loader`, wave 1 = F2-Ex, B1, D1
-  (first developer also does slice 0 prep); wave 2 = B2, D2, F2-docs (F2-docs after batch Docs merges);
-  wave 3 = C1, C2; then F; per-slice reviews, Fable final-head review. Starred decisions D1 D2 D4 D5 D6
-  are PM defaults inside the owner's yes; owner ratifies on return.
+- Merged this session: #486, #487 (batch T; loka-ivjq.24/.15/.14), #485 (batch P; loka-ivjq.26/.22/.13).
+  Follow-ups filed: loka-83pq (compose_knowledge test gap), loka-qik8 (check_as_never nits).
+  `gh` token lacks `workflow` scope: a PR touching .github/workflows merges only after `bin/sync_pr.sh`
+  (worked for #485); if refused, the owner runs `gh auth refresh -s workflow`.
+- #488 batch Docs (`housekeeping/batch-docs`; closes loka-ivjq.1/.17/.23/.10; F9 .9 stays open): designer
+  APPROVE WITH NOTES; batch review CHANGES REQUIRED (F1 cut live liquids/fuel/food/population rules from
+  cartridge.md); fix round 1 with a fresh developer. Then scoped re-check, merge.
+- Batch C1 (S7 loka-ivjq.20, F2 loka-ivjq.2): plan in loka-ivjq.20 notes ("C1 PLAN", PM amendments on
+  top). Integration branch `simplify/c1-loader` (worktree simplify-c1-loader) cut at 801a9a20. Wave 1
+  running: slice 0 prep then B1 (one developer, `simplify/c1-prep`, `simplify/c1-b1`), F2-Ex
+  (`simplify/c1-f2-ex`); D1 starts from the prep head. Per-slice review, PM merges sub-branches
+  `--no-ff`; wave 2 = B2, D2, F2-docs (after #488); wave 3 = C1, C2; then F; Fable final-head review.
+  Starred decisions D1 D2 D4 D5 D6 are PM defaults inside the owner's yes; owner ratifies on return.
 - B5 (loka-ivjq.28) reopened: Beads sync redesign (Fable brief); #484 review found three failure states
   (AmbiguousBase after a mid-run death, br's --force-db hint reverting main rows, base rebuild dropping
   rows). Old refuse-then-manual sync stays: on `after_merge` "Sync conflict", run `br sync --merge`, then

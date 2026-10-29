@@ -39,6 +39,8 @@ portable foundation contracts, `kernel/ts/src/runtime/proposal.ts`, or closes a 
 gate; the PM may add one for a concrete risk found in the first review. Small content,
 copy and docs changes receive one short review. A second opinion supplements the
 independent reviewer; it never replaces that reviewer.
+PM ruling 2026-10-28, under owner delegation (paraphrased): housekeeping batches P, T and Docs get one
+review per batch, on its final head; contract batches C1-C3 get a review per slice plus a Fable review of the final head.
 
 ## Loop
 

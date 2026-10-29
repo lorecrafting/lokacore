@@ -1,7 +1,7 @@
 # Owner decision: re-rank the mechanics toolbox, vocabulary first — 2026-10-09
 
 (paraphrased) The owner adopted the re-rank proposed by the
-[mechanics roadmap review](../reviews/2026-10-09-mechanics-roadmap-review.md) (Beads `loka-kgd.14`).
+[mechanics roadmap review](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-09-mechanics-roadmap-review.md) (Beads `loka-kgd.14`).
 
 ## Effect
 

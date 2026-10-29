@@ -645,7 +645,7 @@
     "implemented_in": "Q2-C rescue (TypeScript)"
   },
   "commerce": {
-    "spec": "docs/system/mechanics.md B3; docs/system/protocol.md B3 shop composition",
+    "spec": "docs/system/mechanics.md B3; docs/system/protocol.md Shop composition",
     "contracts": [
       "Shop",
       "ShopOffer",
@@ -667,7 +667,7 @@
     "implemented_in": "B3 finite Peg Buy/Sell (TypeScript)"
   },
   "light": {
-    "spec": "docs/system/mechanics.md B4 light and darkness; docs/system/protocol.md B4 fuel composition",
+    "spec": "docs/system/mechanics.md B4 light and darkness; docs/system/protocol.md Fuel composition",
     "contracts": [
       "FuelRow",
       "FuelSpec",
@@ -686,7 +686,7 @@
     "implemented_in": "B4 useful light"
   },
   "skills": {
-    "spec": "docs/system/mechanics.md C1 training and armed defense; docs/system/protocol.md C1 composition",
+    "spec": "docs/system/mechanics.md C1 training and armed defense; docs/system/protocol.md Training and defense composition",
     "contracts": [
       "SkillDefinition",
       "DialogueChoice",
@@ -731,7 +731,7 @@
     "implemented_in": "TypeScript story semantics; Elixir and TypeScript portable composition"
   },
   "population": {
-    "spec": "docs/system/mechanics.md C3 Living hounds; docs/system/protocol.md C3 spawned bundles and population composition; docs/system/cartridge.md C3 hound population and loot; docs/system/mechanics.md D8 crow scavenging",
+    "spec": "docs/system/mechanics.md C3 Living hounds; docs/system/protocol.md Spawned bundles and population composition; docs/system/cartridge.md C3 hound population and loot (retired, at 9b94cb5f); docs/system/mechanics.md D8 crow scavenging",
     "contracts": [
       "PopulationPlan",
       "PopulationBundle",
@@ -767,7 +767,7 @@
     "implemented_in": "C3 Living hounds: TypeScript story semantics and portable Elixir/TypeScript composition"
   },
   "topics": {
-    "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md B6 composition",
+    "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md Bounded sitting and topic composition",
     "contracts": [
       "TopicDefinition",
       "DialogueChoice",
@@ -786,7 +786,7 @@
     "implemented_in": "B6 declared Ward knowledge and public Aldric consumer; D2 held books compose Ward and Bell"
   },
   "liquid": {
-    "spec": "docs/system/mechanics.md B7; docs/system/protocol.md B7 liquid composition",
+    "spec": "docs/system/mechanics.md B7; docs/system/protocol.md Liquid composition",
     "contracts": [
       "LiquidDefinition",
       "LiquidRow",
@@ -815,7 +815,7 @@
     "implemented_in": "B7 finite Well Lane source and two waterskins (TypeScript; portable liquid.set twins)"
   },
   "service": {
-    "spec": "docs/system/mechanics.md B8; docs/system/protocol.md B8 immediate service composition",
+    "spec": "docs/system/mechanics.md B8; docs/system/protocol.md Immediate service composition",
     "contracts": [
       "ServiceDefinition",
       "ServiceOffer",
@@ -841,7 +841,7 @@
     "implemented_in": "B8 exact Maud room, meal and finite B7 ale services"
   },
   "transport": {
-    "spec": "docs/system/mechanics.md D1; docs/system/protocol.md D1 ferry transport composition",
+    "spec": "docs/system/mechanics.md D1; docs/system/protocol.md Ferry transport composition",
     "contracts": [
       "TransportDefinition",
       "TransportOffer",
@@ -867,7 +867,7 @@
     "implemented_in": "D1 paid ferry, owned-corpse waiver and bound free swim lesson; release pin provisional"
   },
   "food": {
-    "spec": "docs/system/mechanics.md D4; docs/system/protocol.md D4 held-food composition",
+    "spec": "docs/system/mechanics.md D4; docs/system/protocol.md Held-food composition",
     "contracts": [
       "CommandPayload",
       "DecisionResult",
@@ -896,7 +896,7 @@
     "implemented_in": "D4 finite held-food Eat with terminal custody over published C3/D1"
   },
   "bleed": {
-    "spec": "docs/system/mechanics.md C5 hound bleeding and bandage; docs/system/protocol.md C5 composition",
+    "spec": "docs/system/mechanics.md C5 hound bleeding and bandage; docs/system/protocol.md Bleed and bandage composition",
     "contracts": [
       "BleedRow",
       "BleedDefinition",
@@ -952,7 +952,7 @@
     "implemented_in": "Toolbox row 1 status sampler: timed statuses, ticks, expiry, cure by Eat and fatal return"
   },
   "water": {
-    "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md D6 water movement and corpse selection",
+    "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md Water movement and corpse selection",
     "contracts": [
       "WaterSettings",
       "WaterOccupancy",
@@ -984,7 +984,7 @@
     "implemented_in": "D6 provisional TypeScript water semantics; portable Elixir/TypeScript occupancy and bound-job composition"
   },
   "expedition": {
-    "spec": "docs/system/mechanics.md C6 S27 Night in the Marsh; docs/system/protocol.md C6 expedition composition; docs/system/save.md C6 expedition recovery",
+    "spec": "docs/system/mechanics.md C6 S27 Night in the Marsh; docs/system/protocol.md Expedition composition; docs/system/save.md Expedition recovery",
     "contracts": [
       "ExpeditionAttempt",
       "QuestDefinition",
@@ -1014,7 +1014,7 @@
     "implemented_in": "C6 candidate v041/API1.36 over published D9 v040: ordered marsh route, optional shelter, immediate retry, fatal recovery and one bounded reward; publication pending final review"
   },
   "knowledge": {
-    "spec": "docs/system/mechanics.md D10 discovered places, observations and Knock; docs/system/protocol.md D10 knowledge and Knock composition; docs/system/save.md D10 recovery",
+    "spec": "docs/system/mechanics.md D10 discovered places, observations and Knock; docs/system/protocol.md Knowledge and Knock composition; docs/system/save.md Discovered-place and observation recovery",
     "contracts": [
       "VisitedRoom",
       "ObservedNpc",

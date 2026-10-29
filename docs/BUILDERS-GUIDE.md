@@ -24,7 +24,7 @@ This is a route through the installed system, not a second specification. The
 
 The [glossary](system/glossary.md) distinguishes a blueprint from a live entity. A compiled
 cartridge is an immutable release; changing source and recompiling creates a different content
-hash. The [retired first chapter](system/cartridge.md#retired-first-chapter-e1-candidate) owns its
+hash. The [retired first chapter](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#retired-first-chapter-e1-candidate) owns its
 release and oracle identity. Existing saves remain pinned to the release that created
 them ([save model](system/save.md)).
 

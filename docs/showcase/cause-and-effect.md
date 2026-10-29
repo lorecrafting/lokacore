@@ -39,7 +39,7 @@ unit less, as the compiler requires it below `duration`) to retune.
   `{key: force_strongbox, kind: opposed, attribute: str}` (str 10 beats 1: forcing a cheap lock is
   easy and loud; picking is the quiet skill), policy `all(strongbox_picked false, strongbox_forced
   false)`, success `fact.assign strongbox_forced true`, a failure outcome with its line
-  (`recipes/force_tollhouse_door.json`). `pick_strongbox`'s policy adds `strongbox_forced false`;
+  (`actions/force_tollhouse_door.json`). `pick_strongbox`'s policy adds `strongbox_forced false`;
   `barriers/strongbox_lid.json` `opens_when any(strongbox_picked, strongbox_forced)`.
 - Status `word_travels`: `duration` 86400, `tick_every` 86399 (the compiler refuses a tick at or past the end), `resource` hp, `per_tick` -1, label and
   three narration keys (required, never shown: an item's status says nothing,

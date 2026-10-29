@@ -2,7 +2,7 @@
 
 Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts the [S4 contract](../system/mechanics.md#s4-all-hours-wisp-b6-selected-contract)
-and [route/tuning](../system/cartridge.md#b6-marsh-route-and-tuning).
+and [route/tuning](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#b6-marsh-route-and-tuning).
 The [brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
 assigns later implementation; this is planning, not source or gameplay proof.
 
@@ -21,8 +21,8 @@ The [owner reward decision](owner-decision-chapter-one-content-2026-10-02.md)
 excludes the light spell word. No faction, attribute gain, resource reward, broad
 puzzle/dialogue framework, population or new time mechanism is adopted.
 
-The [composition](../system/protocol.md#b6-bounded-sitting-and-topic-composition),
-[save](../system/save.md#b6-discovery-sitting-and-ward-recovery) and
+The [composition](../system/protocol.md#bounded-sitting-and-topic-composition),
+[save](../system/save.md#discovery-sitting-and-ward-recovery) and
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b6-seek-retry-and-ward-details) clauses require an owned
 typed continuation counter, exact historical evidence and current-row reconciliation,
 shared projection/admission and real SQLite proof. Portable choice-operation changes
