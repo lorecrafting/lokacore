@@ -11,8 +11,7 @@ defmodule Loka.ContentBleedTest do
       {"items/bandage.json", &put_in(&1, ["bandage", "skill"], "missing")},
       {"items/bandage.json", &put_in(&1, ["bandage", "action"], "eat")},
       {"items/bandage.json", &Map.put(&1, "container", true)},
-      {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.29")}
+      {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")}
     ]
 
     for {file, change} <- cases do

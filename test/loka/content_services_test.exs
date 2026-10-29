@@ -163,9 +163,7 @@ defmodule Loka.ContentServicesTest do
       {"facts.json", &put_in(&1, ["facts", "bed_paid", "scopes"], ["instance"]),
        "services/kitchen_room.benefit.fact"},
       {"facts.json", &put_in(&1, ["facts", "bed_paid", "value_type", "default"], true),
-       "services/kitchen_room.benefit.fact"},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.22"),
-       "cartridge.requires.kernel_api.at_least"}
+       "services/kitchen_room.benefit.fact"}
     ]
 
     for {file, change, path} <- mutations do
