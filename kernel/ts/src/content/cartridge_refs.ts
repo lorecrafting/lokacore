@@ -3,7 +3,6 @@ import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
 import { replenish } from './cartridge_replenish.ts';
-import { trails } from './cartridge_trails.ts';
 import { fuel } from './cartridge_fuel.ts';
 import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
@@ -37,9 +36,7 @@ import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
-import { theft } from './cartridge_theft.ts';
-import { mounts } from './cartridge_mounts.ts';
-import { answerRoots, asks } from './cartridge_asks.ts';
+import { answerRoots } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots, locks } from './cartridge_locks.ts';
 import { holders } from './cartridge_holders.ts';
@@ -238,10 +235,6 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...barriers(c, check.named));
   out.push(...links(c));
   // -- B2
-  out.push(...trails(c, check));
-  out.push(...theft(c, named));
-  out.push(...mounts(c, named));
-  out.push(...asks(c, check));
   // -- C1
   out.push(...exchanges(c, check));
   out.push(...recipes(c, check));

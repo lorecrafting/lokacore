@@ -1,40 +1,12 @@
-// size: allow 306, one statement per family until batch C1 removes them; construction joins the declaration stage
-// Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
-// kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
+// Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): integrity, generated shape, hash, map
+// keys, lock and installed host; the first failing stage's first diagnostic, or the cartridge.
 import { scopedFacts } from './cartridge_scoped_facts.ts';
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
-import {
-  ARTIFACT_MAX_BYTES,
-  CAPABILITY_OWNERS,
-  type CompiledCartridge,
-  type Diagnostic,
-} from '../contracts.gen.ts';
-import {
-  diag,
-  isObj,
-  nodes,
-  parts,
-  refStage,
-  step,
-  type Data,
-  type Obj,
-} from './cartridge_refs.ts';
-import { uses as dialogueUses } from './cartridge_dialogues.ts';
-import { tipUses as tips } from './cartridge_recipes.ts';
-import { trailUses } from './cartridge_trails.ts';
-import { scenes } from './cartridge_scenes.ts';
-import { uses } from './cartridge_reactions.ts';
+import { ARTIFACT_MAX_BYTES, type CompiledCartridge, type Diagnostic } from '../contracts.gen.ts';
+import { diag, isObj, refStage, step, type Data, type Obj } from './cartridge_refs.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
-import { calendarStage } from './cartridge_calendar.ts';
-import { variety } from './cartridge_variety.ts';
-import { exposure } from './cartridge_exposure.ts';
-import { delayed } from './cartridge_delayed.ts';
-import { senses } from './cartridge_senses.ts';
-import { variants } from './cartridge_variants.ts';
-import { schedules } from './cartridge_schedules.ts';
 import { standing } from './cartridge_standing.ts';
-import { construction } from './cartridge_construction.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
@@ -42,7 +14,7 @@ import { bleed } from './cartridge_bleed.ts';
 import { status } from './cartridge_status.ts';
 import { liquids } from './cartridge_liquids.ts';
 import { population } from './cartridge_population.ts';
-import { apiCmp, installedStage, type Installed } from './cartridge_installed.ts';
+import { installedStage, type Installed } from './cartridge_installed.ts';
 export type { Installed } from './cartridge_installed.ts';
 
 export type LoadResult =
@@ -84,10 +56,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
             }),
           ],
     () => keyStage(c),
-    () => timeStage(c),
-    () => calendarStage(c),
-    () => lockStage(c),
-    () => scenes(c),
+    () => lockDiagnostics(c.lock.capabilities, c.manifest.requires.capabilities),
     () => declarations(c),
     () => installedStage(c, installed),
   ];
@@ -171,85 +140,7 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// Elapsed releases expose only authority time; legacy releases retain Wait and durations.
-function timeStage(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  if (c.manifest.time_policy) {
-    if (!Object.hasOwn(c.lock.capabilities, 'schedule'))
-      out.push(
-        diag(
-          'UNDECLARED_CAPABILITY',
-          '.cartridge.manifest.time_policy',
-          { capability: 'schedule' },
-          ['schedule@1'],
-        ),
-      );
-    // The away recap threshold is toolbox row W27 (API 1.47).
-    const floor = c.manifest.time_policy.recap_after_minutes ? '1.47' : '1.1';
-    if (apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-  }
-  for (const [ref, a] of Object.entries(c.actions as Obj))
-    if (a.command === 'elapsed' || (a.command === 'wait' && c.manifest.time_policy))
-      out.push(diag('UNKNOWN_COMMAND', `.cartridge.actions${step(ref)}.command`));
-  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj))
-    if (c.manifest.time_policy && r.duration)
-      out.push(diag('INVALID_TIME_POLICY', `.cartridge.recipes${step(ref)}.duration`));
-  return out;
-}
-
-// The lock equals requires.capabilities (mismatched), every action's command is owned and none is
-// run_job (authority-internal, 04 §1; checked as an unowned name), and every command, policy op,
-// definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar,
-// recipe, resource, attribute, barrier), recipe check (by the events it produces, check@1's), recipe step
-// of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
-// event.emit, row 29b entity_died for damage; light.ignite by the ignite command; a resource.adjust
-// through the resource it names, a status.cure or status.apply through its status), quest (by its
-// quest_activated), daily schedule (also by the run_job that runs it, schedule@1's), reaction
-// (also by its trigger's event and each fact.assign's fact_changed), dialogue (also by each
-// fact.assign's fact_changed) and story point (by its story_point_reached) the cartridge uses has
-// its owner in the lock.
-function lockStage(c: Obj): Diagnostic[] {
-  const locked: Obj = c.lock.capabilities;
-  const out = lockDiagnostics(locked, c.manifest.requires.capabilities);
-  const use = (kind: 'command' | 'policy' | 'definition' | 'event', name: string, path: string) => {
-    const owners = CAPABILITY_OWNERS[kind];
-    // The schema closes policy ops, so only a command can be unowned.
-    if (!Object.hasOwn(owners, name)) return void out.push(diag('UNKNOWN_COMMAND', path));
-    const [owner] = owners[name].split('@');
-    if (!Object.hasOwn(locked, owner))
-      out.push(diag('UNDECLARED_CAPABILITY', path, { capability: owner }, [owners[name]]));
-  };
-  for (const [ref, { command: k }] of Object.entries(c.actions as Obj))
-    use('command', k === 'run_job' ? '' : k, `.cartridge.actions${step(ref)}.command`);
-  for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
-  for (const [kind, , at] of parts(c)) {
-    use('definition', kind, at);
-    if (kind === 'schedule') use('command', 'run_job', at);
-  }
-  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
-    const at = `.cartridge.recipes${step(ref)}`;
-    use('definition', 'recipe', at);
-    if (r.check) use('event', 'check_passed', `${at}.check`);
-    for (const [name, o] of Object.entries(r.outcomes as Obj))
-      o.sequence.forEach((s: Obj, i: number) => {
-        const [kind, owned] = STEP_USE[s.op] ?? [];
-        if (kind) use(kind, owned!, `${at}.outcomes.${name}.sequence[${i}].op`);
-      });
-  }
-  for (const kind of ['resource', 'attribute', 'scene', 'skill', 'topic'])
-    for (const ref of Object.keys((c[`${kind}s`] ?? {}) as Obj))
-      use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
-  for (const ref of Object.keys((c.quests ?? {}) as Obj))
-    use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
-  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c), ...tips(c), ...trailUses(c)])
-    use(kind, name, at);
-  return out;
-}
-
-// Lock/manifest mismatches and the engine fact dependency of position and scene.
+// Lock/manifest mismatches.
 function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const key of new Set([...Object.keys(locked), ...Object.keys(required)])) {
@@ -259,38 +150,12 @@ function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
     if (Object.hasOwn(locked, key)) data.locked = locked[key];
     out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
   }
-  for (const capability of ['position', 'scene'])
-    if (Object.hasOwn(locked, capability) && locked.fact !== 1)
-      out.push(
-        diag(
-          'UNDECLARED_CAPABILITY',
-          `.cartridge.lock.capabilities.${capability}`,
-          {
-            capability: 'fact',
-          },
-          ['fact@1'],
-        ),
-      );
   return out;
 }
-
-const STEP_USE: Readonly<Record<string, ['event' | 'command', string]>> = {
-  'fact.assign': ['event', 'fact_changed'],
-  'event.emit': ['event', 'custom_event'],
-  damage: ['event', 'entity_died'],
-  'light.ignite': ['command', 'ignite'],
-};
 
 function declarations(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [...refStage(c)];
   // -- B2
-  out.push(...variety(c));
-  out.push(...exposure(c));
-  out.push(...senses(c));
-  out.push(...delayed(c));
-  out.push(...variants(c));
-  out.push(...schedules(c));
-  out.push(...construction(c));
   // -- D1
   out.push(...liquids(c));
   out.push(...food(c));
