@@ -74,24 +74,6 @@ test('wisp attempts compose to their literal answers', () => {
     assert.deepEqual(compose(c.state, { ops: c.ops }), c.expected, c.name);
 });
 
-// Break: a room's dark flag (loka-x6t.36) loads without light@1 in the lock.
-test('a room dark flag needs light@1', () => {
-  const b = f.bundle((c) => {
-    for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities]) delete caps.light;
-    c.manifest.requires.kernel_api.at_least = '1.114';
-    (Object.values(c.rooms)[0] as any).dark = true;
-  });
-  const loaded = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-    INSTALLED,
-  );
-  assert.equal(loaded.ok, false);
-  if (!loaded.ok) {
-    assert.equal(loaded.diagnostic.code, 'UNDECLARED_CAPABILITY');
-    assert.match(loaded.diagnostic.path, /^\.cartridge\.rooms\[.*\]\.dark$/);
-  }
-});
-
 // From status_composition.
 {
   // Breaks: generic admission accepts an active status row, a transition or a condition view

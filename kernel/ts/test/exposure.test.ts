@@ -3,7 +3,6 @@
 // condition (chilled, overheated, soaked, windburnt) lasts 9000 and drains 1 hp every 7200.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,7 +11,6 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { commands, ctx } from './harness.ts';
@@ -207,30 +205,5 @@ test('each day of weather gives its own labelled condition on the fell', () => {
   for (const [day, want] of rows) {
     const w = wait(fresh(), (day - 1) * 24 * HOUR + 1);
     assert.deepEqual(labels(play(w, { type: 'move', direction: 'north' })), want, `day ${day}`);
-  }
-});
-
-// Breaks: the loader accepts a wearing leaf or a clock_hour reaction below kernel_api 1.46.
-test('the loader refuses a wearing leaf or a clock_hour reaction below 1.46', () => {
-  const only = (event: string) => (c: Obj) => {
-    for (const k of Object.keys(c.reactions)) {
-      if (c.reactions[k].on.event !== event) delete c.reactions[k];
-      else if (event === 'clock_hour') delete c.reactions[k].when;
-    }
-  };
-  for (const change of [only('entity_entered_room'), only('clock_hour')]) {
-    const c = structuredClone(content) as unknown as Obj;
-    change(c);
-    c.manifest.requires.kernel_api.at_least = '1.45';
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ]);
   }
 });

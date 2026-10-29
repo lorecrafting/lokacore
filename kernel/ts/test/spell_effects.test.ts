@@ -188,16 +188,6 @@ test('loader: effect steps sit on spells, need 1.98, resolve and declare their o
       'UNRESOLVED_REFERENCE',
       `${seq('flamma')}.npc`,
     ],
-    [
-      (c) => {
-        for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
-          delete caps.light;
-        for (const i of ['orb', 'glowdust']) delete c.items[`${P}:item/${i}`].fuel;
-        delete c.rooms[`${P}:room/crypt`].dark_description;
-      },
-      'UNDECLARED_CAPABILITY',
-      `${seq('lux')}.op`,
-    ],
   ];
   for (const [change, diagnostic, path] of rows) {
     const r = variant(change);

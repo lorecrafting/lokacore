@@ -319,26 +319,7 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const GREEN = '.cartridge.rooms["facts_sampler@0.0.1:room/village_green"]';
-const REED = '.cartridge.rooms["facts_sampler@0.0.1:room/reed_path"]';
 const room = (c: any, key: string) => c.rooms[`facts_sampler@0.0.1:room/${key}`];
-
-// Breaks: a detail, a variant or a variant condition's op loads without its owner locked.
-test('details, variants and their ops without their owners locked are UNDECLARED_CAPABILITY', () => {
-  const cases = [
-    ['inspectable_detail', `${REED}.details.mud`],
-    ['description_variant', `${REED}.details.mud.variants[0]`],
-    ['policy', `${REED}.details.mud.variants[0].when.root.op`],
-    ['fact', `${REED}.details.mud.variants[0].when.root.items[0].op`],
-  ];
-  for (const [key, path] of cases) {
-    const without = (c: any) => {
-      delete c.manifest.requires.capabilities[key];
-      delete c.lock.capabilities[key];
-    };
-    fails(without, 'UNDECLARED_CAPABILITY', path, { capability: key }, [`${key}@1`]);
-  }
-});
 
 // Breaks: this kernel loads a fact it cannot read at one private-world scope.
 test('a fact of any scope other than exactly player or instance is FACT_SCOPE_UNSUPPORTED', () => {

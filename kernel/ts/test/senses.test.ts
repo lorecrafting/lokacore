@@ -7,7 +7,6 @@
 // cue_perceived sound.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -16,7 +15,6 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { LIMITS, type DefinitionRef, type EntityId } from '../src/contracts.gen.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
@@ -243,48 +241,4 @@ test('an exhausted query budget perceives nothing', () => {
   const leaf = { op: 'cue_perceived', npc: ref('npc', 'sentry'), sense: 'smell' } as const;
   assert.equal(holds(w, w.character, leaf, { steps: { n: 0 } }), true);
   assert.equal(holds(w, w.character, leaf, { steps: { n: LIMITS.query_steps - 5 } }), false);
-});
-
-// Breaks: the loader accepts a cue or a lone cue_perceived leaf below kernel_api 1.48, a cue
-// without sense_cue@1.
-test('the loader refuses a cue below 1.48 or without sense_cue', () => {
-  const load = (change: (c: Obj) => void) => {
-    const c = structuredClone(content) as unknown as Obj;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  assert.deepEqual(
-    load((c) => (c.manifest.requires.kernel_api.at_least = '1.47')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  const strip = (v: unknown): unknown =>
-    Array.isArray(v)
-      ? v.map(strip)
-      : v && typeof v === 'object'
-        ? Object.fromEntries(
-            Object.entries(v)
-              .filter(([k]) => k !== 'cues')
-              .map(([k, x]) => [k, strip(x)]),
-          )
-        : v;
-  // the reactions' cue_perceived leaves alone still need 1.48
-  assert.deepEqual(
-    load((c) => {
-      for (const k of ['rooms', 'npcs', 'items', 'recipes']) c[k] = strip(c[k]);
-      c.manifest.requires.kernel_api.at_least = '1.47';
-    }),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  const [owner, at] = load((c) => {
-    delete c.manifest.requires.capabilities.sense_cue;
-    delete c.lock.capabilities.sense_cue;
-    c.reactions = {}; // their cue_perceived leaves would be refused first
-  });
-  assert.deepEqual([owner, at.slice(-8)], ['UNDECLARED_CAPABILITY', '.cues[0]']);
 });

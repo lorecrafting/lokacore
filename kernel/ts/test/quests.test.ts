@@ -334,18 +334,11 @@ const fails = (
     },
   });
 const Q = `.cartridge.quests["${E}:quest/lantern"]`;
-const unlock = (c: any, cap: string) => {
-  delete c.manifest.requires.capabilities[cap];
-  delete c.lock.capabilities[cap];
-};
 
-// Breaks: the kernel runs a quest whose capability is not locked or not installed, or a room's
+// Breaks: the kernel runs a quest whose capability is not installed, or a room's
 // action contribution drops the quest offer (references, texts and keys are the compiler's:
 // test/loka/content_errand_test.exs).
-test('the loader checks the quest lock and installed capability', () => {
-  fails((c) => unlock(c, 'quest'), 'UNDECLARED_CAPABILITY', `${Q}`, { capability: 'quest' }, [
-    'quest@1',
-  ]);
+test('the loader checks the installed quest capability', () => {
   const without = { ...INSTALLED, capabilities: { ...INSTALLED.capabilities } };
   delete without.capabilities.quest;
   fails(

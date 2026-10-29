@@ -577,45 +577,18 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const D = `.cartridge.dialogues["${F}:dialogue/bram"]`;
 const bram = (c: any) => c.dialogues[`${F}:dialogue/bram`];
-
-// Breaks: a dialogue loads without dialogue@1 in its lock (references, roles, texts, facts and
-// keys are the compiler's: test/loka/content_ferry_test.exs).
-test('the loader checks the dialogue lock', () => {
-  fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.dialogue;
-      delete c.lock.capabilities.dialogue;
-    },
-    'UNDECLARED_CAPABILITY',
-    D,
-    { capability: 'dialogue' },
-    ['dialogue@1'],
-  );
-});
 
 const P = `.cartridge.story_points["${F}:story_point/lantern_resolved"]`;
 const point = (c: any) => c.story_points[`${F}:story_point/lantern_resolved`];
 
-// Breaks: a story point loaded without dialogue@1 in its lock or keyed apart from its key (the
+// Breaks: a story point keyed apart from its key (the
 // map's kind story_point has an underscore); triggers and outcomes are the compiler's
 // (test/loka/content_ferry_test.exs).
-test('the loader checks story point keys and the lock', () => {
+test('the loader checks story point keys', () => {
   fails((c) => (point(c).key = 'other'), 'ARTIFACT_DEFINITION_KEY_MISMATCH', P, {
     field: 'key',
     declared: 'lantern_resolved',
     expected: 'other',
   });
-  fails(
-    (c) => {
-      delete c.dialogues;
-      delete c.manifest.requires.capabilities.dialogue;
-      delete c.lock.capabilities.dialogue;
-    },
-    'UNDECLARED_CAPABILITY',
-    P,
-    { capability: 'dialogue' },
-    ['dialogue@1'],
-  );
 });

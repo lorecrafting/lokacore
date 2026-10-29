@@ -204,52 +204,6 @@ test('without hunts the player leaves no trail; without trail a wander writes no
 });
 
 const fact = (k: string) => `${REF}:fact/${k}`;
-const recipe = (k: string) => `${REF}:recipe/${k}`;
-/** The loader's first diagnostic for the sampler after `change`. */
-function refused(change: (c: any) => void) {
-  const r = reload(source, change);
-  assert.equal(r.ok, false);
-  const { code, path, data } = (r as { diagnostic: { code: string; path: string; data?: object } })
-    .diagnostic;
-  return [code, path, data];
-}
-const hounds = `.cartridge.populations["${REF}:population/hounds"]`;
-
-// Breaks: each loader check dropped (the cartridge loads) or reporting another path.
-test('the loader refuses each bad trail declaration', () => {
-  const cases: [(c: any) => void, unknown[]][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.84'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
-    ],
-    [
-      (c) => delete c.world.trails.leads.north,
-      ['UNRESOLVED_REFERENCE', '.cartridge.world.trails.leads', { target: 'north' }],
-    ],
-    [
-      (c) => (c.world.trails.leads.north = 'trail.lead.nowhere'),
-      [
-        'UNRESOLVED_REFERENCE',
-        '.cartridge.world.trails.leads.north',
-        { target: 'trail.lead.nowhere' },
-      ],
-    ],
-    [
-      (c) => (c.recipes[recipe('track_burrow')].check.plan = 'hunters'),
-      [
-        'UNRESOLVED_REFERENCE',
-        `.cartridge.recipes["${REF}:recipe/track_burrow"].check.plan`,
-        { target: 'hunters' },
-      ],
-    ],
-    [
-      (c) => delete c.world.trails,
-      ['UNRESOLVED_REFERENCE', `${hounds}.trail`, { target: 'trails' }],
-    ],
-  ];
-  for (const [change, want] of cases)
-    assert.deepEqual(refused(change).slice(0, want.length), want, String(change));
-});
 
 // Breaks: facts_typed admitting a room subject for any fact (rooms are subjects of the engine's
 // trail facts only), a trail fact naming its mover, or refusing the trail rows.

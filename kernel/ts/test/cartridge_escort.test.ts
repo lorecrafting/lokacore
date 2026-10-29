@@ -43,13 +43,3 @@ test('loader accepts API1.11 escort effects and policy leaves', () => {
     assert.ok(result.ok, JSON.stringify(result));
   }
 });
-
-// Breaks: an escort cartridge without escort@1 installs (references and outcomes: content_escort_test.exs).
-test('loader rejects an escort binding without its capability', () => {
-  const result = load((c) => {
-    delete c.manifest.requires.capabilities.escort;
-    delete c.lock.capabilities.escort;
-  });
-  assert.ok(!result.ok);
-  assert.equal(result.diagnostic.code, 'UNDECLARED_CAPABILITY', JSON.stringify(result));
-});

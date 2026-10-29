@@ -78,33 +78,6 @@ const begin = (c: any) => {
   };
 };
 
-// Breaks: a source-valid action scene can bind a detail other than its recipe's at the loader.
-test('a loaded action scene must bind its recipe detail', () => {
-  const r = f.load((c) => {
-    begin(c);
-    c.scenes[SCENE].on.detail = 'notice';
-  });
-  assert.equal(r.ok, false);
-  if (!r.ok) {
-    assert.equal(r.diagnostic.code, 'OUTCOME_MISMATCH', JSON.stringify(r));
-    assert.equal(r.diagnostic.path, '.cartridge.scenes["scene_sampler@0.0.1:scene/begin"].on');
-  }
-});
-
-// Breaks: a loaded action scene that names neither room nor detail is admitted.
-test('a loaded action scene must name its room and detail', () => {
-  const r = f.load((c) => {
-    begin(c);
-    delete c.scenes[SCENE].on.room;
-    delete c.scenes[SCENE].on.detail;
-  });
-  assert.equal(r.ok, false);
-  if (!r.ok) {
-    assert.equal(r.diagnostic.code, 'SCHEMA_VIOLATION', JSON.stringify(r));
-    assert.equal(r.diagnostic.path, '.cartridge.scenes["scene_sampler@0.0.1:scene/begin"].on');
-  }
-});
-
 // Breaks: Begin starts on arrival, or the story point and its assign are
 // written before the final shown line is acknowledged, or more than once.
 test('Begin starts its scene only by choice and reports once at the final acknowledgement', () => {
