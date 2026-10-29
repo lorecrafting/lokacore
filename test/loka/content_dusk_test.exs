@@ -1,6 +1,6 @@
 defmodule Loka.ContentDuskTest do
   # Luck checks, failure outcomes, durations and time_window in the compiler (R5 S6a;
-  # action.schema.json ScriptedAction, ActionCheck; policy.schema.json time_window). Expected
+  # action.schema.json ScriptedAction; step.schema.json Check; policy.schema.json time_window). Expected
   # diagnostics are hand-written from protocol/cartridge.schema.json DiagnosticCode; the known
   # answer is protocol/fixtures/cartridge_dusk_hash.json (Python).
   use ExUnit.Case, async: true

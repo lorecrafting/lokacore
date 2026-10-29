@@ -83,7 +83,7 @@ export function level(world: World, entity: EntityId, resource: DefinitionRef): 
 /**
  * The resource.adjust of `resource` by `by` (checked arithmetic), from its value as `levels`
  * left it in this decision (else its current value), and the levels after it. `saturate` (a
- * scripted action step, ActionStep: add by, stopping at the bounds) stops the result at the resource's
+ * scripted action step, Step: add by, stopping at the bounds) stops the result at the resource's
  * bounds; otherwise a result out of bounds is left for composition to fault. The op itself is
  * always exact.
  */

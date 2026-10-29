@@ -224,7 +224,7 @@ test('regeneration adds gain per hour boundary crossed, stopping at the maximum'
   ]);
 });
 
-// Breaks: a resource.adjust step not stopping at the resource's bounds (ActionStep: add by,
+// Breaks: a resource.adjust step not stopping at the resource's bounds (Step: add by,
 // stopping at the bounds), or emitting a no-op adjust at full value.
 test('a resource.adjust step stops at the maximum; at full value it changes nothing', () => {
   // pray at 0 (hp 15), at 3600 (hp 15 + 5 regen = 20, + 5 = 25), then at 7200 hp is 25 already.

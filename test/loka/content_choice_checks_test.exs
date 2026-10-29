@@ -57,6 +57,6 @@ defmodule Loka.ContentChoiceChecksTest do
       }
     }
 
-    assert Loka.Content.ScriptedActions.shared_checks(defs) == MapSet.new(["k"])
+    assert Loka.Content.CheckKinds.shared_checks(defs) == MapSet.new(["k"])
   end
 end

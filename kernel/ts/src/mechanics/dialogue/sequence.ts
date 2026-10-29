@@ -9,6 +9,7 @@ import type {
   EntityId,
   EventPayload,
 } from '../../contracts.gen.ts';
+import { KernelError } from '../../foundation/error.ts';
 import { same } from '../../foundation/compose.ts';
 import {
   accepted,
@@ -39,6 +40,13 @@ export function sequence(
     facts: {},
   };
   for (const step of option.sequence ?? []) {
+    if (
+      step.op !== 'topic.grant' &&
+      step.op !== 'skill.acquire' &&
+      step.op !== 'fact.adjust' &&
+      step.op !== 'fact.assign'
+    )
+      throw new KernelError('precondition_failed'); // steps.ex: the choice context's ops
     const next =
       step.op === 'topic.grant'
         ? grant(world, actor, run, step.topic)
@@ -78,6 +86,9 @@ export function checked(
 ) {
   const { actor_id, continuation_id, choice_id } = command.payload;
   const check = d.choices[choice_id]!.check!;
+  // check_kinds.ex: a choice's check is opposed and has a failure.
+  if (check.kind !== 'opposed' || check.failure === undefined)
+    throw new KernelError('precondition_failed');
   const subject_id = check.npc
     ? world.entityIds[refString(check.npc)]!
     : row.roles.find((r) => {
