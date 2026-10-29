@@ -481,9 +481,6 @@
           "properties": {
             "traverse": { "$ref": "#/$defs/VersionedPolicy" }
           },
-          "required": [
-            "traverse"
-          ],
           "type": "object"
         },
         "to": { "$ref": "#/$defs/DefinitionRef" }
@@ -695,7 +692,6 @@
         "when": { "$ref": "#/$defs/VersionedPolicy" }
       },
       "required": [
-        "when",
         "description"
       ],
       "type": "object"
@@ -2125,7 +2121,6 @@
               "when": { "$ref": "#/$defs/VersionedPolicy" }
             },
             "required": [
-              "when",
               "text"
             ],
             "type": "object"
@@ -2209,8 +2204,7 @@
             "policy": { "$ref": "#/$defs/VersionedPolicy" }
           },
           "required": [
-            "evidence",
-            "policy"
+            "evidence"
           ],
           "type": "object"
         },
@@ -4773,7 +4767,6 @@
               "when": { "$ref": "#/$defs/VersionedPolicy" }
             },
             "required": [
-              "when",
               "text"
             ],
             "type": "object"
@@ -7625,7 +7618,6 @@
         "command",
         "priority",
         "input",
-        "policy",
         "accessibility"
       ],
       "type": "object"
@@ -7826,7 +7818,6 @@
         "aliases",
         "target",
         "priority",
-        "policy",
         "outcomes"
       ],
       "type": "object"
@@ -7967,7 +7958,6 @@
       },
       "required": [
         "npc",
-        "policy",
         "prompt",
         "roles",
         "choices"
@@ -8071,22 +8061,6 @@
         "location": { "$ref": "#/$defs/ItemLocation" },
         "locks": {
           "additionalProperties": false,
-          "allOf": [
-            {
-              "anyOf": [
-                {
-                  "required": [
-                    "put"
-                  ]
-                },
-                {
-                  "required": [
-                    "get"
-                  ]
-                }
-              ]
-            }
-          ],
           "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
           "properties": {
             "get": { "$ref": "#/$defs/VersionedPolicy" },
@@ -8383,9 +8357,6 @@
           "properties": {
             "get": { "$ref": "#/$defs/VersionedPolicy" }
           },
-          "required": [
-            "get"
-          ],
           "type": "object"
         },
         "mount": {
@@ -8837,8 +8808,7 @@
             "policy": { "$ref": "#/$defs/VersionedPolicy" }
           },
           "required": [
-            "label",
-            "policy"
+            "label"
           ],
           "type": "object"
         },
@@ -9724,9 +9694,6 @@
           "properties": {
             "enter": { "$ref": "#/$defs/VersionedPolicy" }
           },
-          "required": [
-            "enter"
-          ],
           "type": "object"
         },
         "sanctuary": { "type": "boolean" },
@@ -10003,8 +9970,7 @@
       },
       "required": [
         "label",
-        "requirement",
-        "qualification"
+        "requirement"
       ],
       "type": "object"
     },
@@ -10238,9 +10204,6 @@
           "properties": {
             "enter": { "$ref": "#/$defs/VersionedPolicy" }
           },
-          "required": [
-            "enter"
-          ],
           "type": "object"
         },
         "max_per_owner": {
