@@ -226,7 +226,7 @@
               "minimum": -100,
               "maximum": -1
             },
-            "hound_population": {
+            "population": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "narration": {
@@ -288,7 +288,7 @@
             "survived_fact",
             "faction",
             "faction_delta",
-            "hound_population",
+            "population",
             "narration",
             "actions"
           ],

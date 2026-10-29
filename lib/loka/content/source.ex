@@ -4,7 +4,7 @@ defmodule Loka.Content.Source do
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Behaviours, Bundles, Extends, Prose, Signals, Zones}
+  alias Loka.Content.{Areas, Behaviours, Extends, Prose, Signals, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -12,7 +12,7 @@ defmodule Loka.Content.Source do
   @type location :: String.t() | {String.t(), steps()}
   @type file ::
           :manifest
-          | :bundle
+          | :area
           | :facts
           | :text
           | :resources
@@ -49,8 +49,8 @@ defmodule Loka.Content.Source do
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
-    {files, opened} = Bundles.split(files, dirs())
-    {files, repeats} = Bundles.unique(files)
+    {files, opened} = Areas.split(files, dirs())
+    {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
     {files, located} = shortcuts(files, opened ++ repeats)
     {files, diags ++ located ++ Enum.map(faults, &extends_diag/1)}
@@ -160,7 +160,7 @@ defmodule Loka.Content.Source do
 
   defp classify(rel) do
     case Path.split(rel) do
-      ["areas", _] -> :bundle
+      ["areas", _] -> :area
       [dir, file] when is_map_key(@dirs, dir) -> {@dirs[dir], Path.rootname(file), []}
       _ -> :unknown
     end

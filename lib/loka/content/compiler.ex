@@ -61,7 +61,7 @@ defmodule Loka.Content.Compiler do
   # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
   # bundles), except an action's own: an action refused by its extends must not build.
   defp split(lists, files) do
-    bundle? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+    bundle? = Enum.any?(files, &match?({_, :area, :invalid}, &1))
     actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel) <> "."
     held? = &(bundle? or (actions != [] and not String.starts_with?(&1, actions)))
 

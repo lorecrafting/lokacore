@@ -44,7 +44,7 @@
     "survived_fact": "night_survived",
     "faction": "wild_standing",
     "faction_delta": -1,
-    "hound_population": "hounds",
+    "population": "hounds",
     "narration": {
       "start": "walk.start",
       "restart": "walk.restart",
