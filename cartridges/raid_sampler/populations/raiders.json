@@ -1,5 +1,7 @@
 {
-  "bundle": "raiders",
+  "npc": "raider",
+  "item": "knife",
+  "corpse": "npc_corpse",
   "home": "village",
   "area": [
     "village",

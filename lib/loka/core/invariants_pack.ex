@@ -131,7 +131,7 @@ defmodule Loka.Core.InvariantsPack do
       if is_map(origin) and origin["kind"] == "spawned",
         do: get_in(state, ["population_specs", Compose.key(origin["by"])])
 
-    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hound" and
+    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hunter" and
       is_map(spec) and is_map(get_in(spec, ["plan", "pack"])) and
       roster_shape?(ids, op, spec["cap"]) and
       Enum.all?(ids, &pack_member?(&1, op["room_id"], origin["by"], state, containers))
@@ -152,7 +152,7 @@ defmodule Loka.Core.InvariantsPack do
 
   defp member_provenance?(member, id, plan),
     do:
-      is_map(member) and member["kind"] == "spawned" and member["role"] == "hound" and
+      is_map(member) and member["kind"] == "spawned" and member["role"] == "hunter" and
         member["member_id"] == id and member["by"] == plan
 
   defp slot_membership?(member, id, state) do

@@ -714,7 +714,6 @@
     "spec": "docs/system/mechanics.md C3 Living hounds; docs/system/protocol.md Spawned bundles and population composition; docs/system/cartridge.md C3 hound population and loot (retired, at 9b94cb5f); docs/system/mechanics.md D8 crow scavenging",
     "contracts": [
       "PopulationPlan",
-      "PopulationBundle",
       "PopulationControl",
       "PopulationSlot",
       "EntityOrigin",

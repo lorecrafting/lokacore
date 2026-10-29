@@ -144,7 +144,7 @@ export function packMembers(op: Any, state: Any, containers: Map<string, Any>) {
   )
     return false;
   const origin = state.created?.[op.npc_id]?.origin;
-  if (origin?.kind !== 'spawned' || origin.role !== 'hound') return false;
+  if (origin?.kind !== 'spawned' || origin.role !== 'hunter') return false;
   const spec = state.population_specs?.[key(origin.by)];
   if (!spec?.plan?.pack || !Number.isSafeInteger(spec.cap) || ids.length > spec.cap) return false;
   return ids.every((id: string) => {
@@ -158,7 +158,7 @@ export function packMembers(op: Any, state: Any, containers: Map<string, Any>) {
       state.known_entities?.[id]?.kind === 'npc' &&
       containers.get(id) === op.room_id &&
       member?.kind === 'spawned' &&
-      member.role === 'hound' &&
+      member.role === 'hunter' &&
       member.member_id === id &&
       same(member.by, origin.by) &&
       slot?.member_id === id &&

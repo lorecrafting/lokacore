@@ -141,14 +141,10 @@ export type World = {
     Record<
       string,
       {
-        readonly bundle: DefinitionRef;
-        readonly hound?: DefinitionRef;
-        readonly pelt?: DefinitionRef;
-        readonly deer?: DefinitionRef;
-        readonly hide?: DefinitionRef;
-        readonly member_role: 'hound' | 'deer';
-        readonly loot_role: 'pelt' | 'hide';
-
+        readonly hunter?: DefinitionRef;
+        readonly prey?: DefinitionRef;
+        readonly loot?: DefinitionRef;
+        readonly member_role: 'hunter' | 'prey';
         readonly corpse: DefinitionRef;
         readonly home: EntityId;
         readonly cap: number;

@@ -1,5 +1,7 @@
 {
-  "bundle": "tilt_goblins",
+  "npc": "tilt_goblin",
+  "item": "ear",
+  "corpse": "npc_corpse",
   "home": "tilt_yard",
   "area": [
     "tilt_yard",

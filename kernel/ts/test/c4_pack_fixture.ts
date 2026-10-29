@@ -53,7 +53,7 @@ export const bundle = (change: (c: any) => void = () => {}) =>
   });
 
 /** The generation-1 entity of `slot` with spawn `role` (the member role or the loot role). */
-export const spawned = (w: World, slot: number, role = 'hound') =>
+export const spawned = (w: World, slot: number, role = 'hunter') =>
   Object.keys(w.state.created ?? {}).find((e) => {
     const o = w.state.created![e]!.origin;
     return o.kind === 'spawned' && o.slot === slot && o.role === role && o.generation === 1;

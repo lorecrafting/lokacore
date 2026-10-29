@@ -104,7 +104,6 @@ defmodule Loka.CartridgeCrossKernelTest do
           ["facts"],
           Map.merge(facts["facts"], %{"bram.mood" => mood, "lantern.oil" => oil})
         ),
-      "policies/gate.json" => %{"policy_version" => 1, "root" => root},
       "actions/look.json" => look
     })
   end

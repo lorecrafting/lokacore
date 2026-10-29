@@ -82,7 +82,7 @@ export const decideAt = (
         ? expire(world, command, payload.job_id, row, mint)
         : deadlineJob(world, payload.job_id, row);
     }
-    if (row.job.kind === 'population_bundle')
+    if (row.crow_phase !== undefined)
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
     if (row.sight) return runSight(world, payload.job_id, row, steps);
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);

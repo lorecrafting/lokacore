@@ -1039,7 +1039,7 @@ player-accessible population verb.
 Story admission remains TypeScript; added state/delta/precondition semantics and
 creation validation retain both-kernel literal conformance then differential proof.
 
-Each immutable spawned identity binds declared plan and bundle, slot, generation,
+Each immutable spawned identity binds declared plan, slot, generation,
 creation occurrence and hound member ID, with role hound or pelt. The hound binds
 itself; its one pelt binds that exact hound, with matching origin fields. Allocate
 hound before pelt in slot order using the existing occurrence allocator. IDs must

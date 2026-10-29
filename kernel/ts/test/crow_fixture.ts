@@ -57,18 +57,12 @@ function withCrow(c: any) {
     short: 'npc.crow.short',
     spawn_template: true,
   };
-  c.population_bundles = {
-    [`${prefix}:population_bundle/crow`]: {
-      key: 'crow',
-      npc: ref('npc', 'crow'),
-      corpse: ref('item', 'crow_corpse'),
-    },
-  };
   c.populations = {};
   for (const slot of ['crow_1', 'crow_2'])
     c.populations[`${prefix}:population/${slot}`] = {
       area: [at('burrow'), at('den')],
-      bundle: ref('population_bundle', 'crow'),
+      npc: ref('npc', 'crow'),
+      corpse: ref('item', 'crow_corpse'),
       cap: 1,
       day_target: 1,
       home: at('burrow'),

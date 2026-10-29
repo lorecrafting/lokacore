@@ -1,5 +1,7 @@
 {
-  "bundle": "hens",
+  "npc": "hen",
+  "item": "feather",
+  "corpse": "npc_corpse",
   "home": "pen",
   "area": [
     "pen",

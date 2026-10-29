@@ -16,12 +16,10 @@ type Draft = {
   entityResourceSpecs?: Record<string, World['resourceSpecs'][string]>;
 };
 
-/** A created corpse stays fixed; a spawned pelt uses ordinary item custody. */
+/** A created corpse stays fixed; spawned loot uses ordinary item custody. */
 export function movable(world: World, id: EntityId): boolean {
   const origin = world.state.created?.[id]?.origin;
-  return (
-    !origin || (origin.kind === 'spawned' && (origin.role === 'pelt' || origin.role === 'hide'))
-  );
+  return !origin || (origin.kind === 'spawned' && origin.role === 'loot');
 }
 
 export function hydrate(world: World, state: State, loading = false): World | undefined {
@@ -33,7 +31,7 @@ export function hydrate(world: World, state: State, loading = false): World | un
       if (
         loading &&
         identity.origin.kind === 'spawned' &&
-        identity.origin.role === 'hound' &&
+        identity.origin.role === 'hunter' &&
         !houndValid(world, state, id, identity, draft)
       )
         return undefined;
@@ -59,7 +57,7 @@ function ordered(state: State) {
     !i?.origin
       ? 3
       : i.origin.kind === 'spawned'
-        ? i.origin.role === 'hound' || i.origin.role === 'deer'
+        ? i.origin.role === 'hunter' || i.origin.role === 'prey'
           ? 0
           : 1
         : 2;

@@ -1021,10 +1021,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/resources/c@1.0.0:recipe~1x",
         "code": "invalid_type"
       },
@@ -4731,10 +4727,6 @@
     },
     "errors": [
       {
-        "path": "/bundle",
-        "code": "missing_property"
-      },
-      {
         "path": "/by",
         "code": "missing_property"
       },
@@ -6401,21 +6393,6 @@
           "meaning": "The lantern was fetched for Bram; the village green reads differently."
         }
       },
-      "policies": {
-        "hello_sampler@0.0.1:fact/village_arrived": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "hello_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "village_arrived"
-            },
-            "equals": true
-          }
-        }
-      },
       "actions": {
         "hello_sampler@0.0.1:talk": {
           "key": "talk",
@@ -6455,10 +6432,6 @@
       {
         "path": "/manifest",
         "code": "missing_property"
-      },
-      {
-        "path": "/policies/hello_sampler@0.0.1:fact~1village_arrived",
-        "code": "pattern_mismatch"
       }
     ]
   },
@@ -9317,9 +9290,6 @@
       "facts": {
         "c@1.0.0:fact/x": 1
       },
-      "policies": {
-        "c@1.0.0:policy/x": 1
-      },
       "actions": {
         "c@1.0.0:action/x": 1
       }
@@ -9340,10 +9310,6 @@
       {
         "path": "/manifest",
         "code": "missing_property"
-      },
-      {
-        "path": "/policies/c@1.0.0:policy~1x",
-        "code": "invalid_type"
       }
     ]
   },
@@ -9374,10 +9340,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -9393,9 +9355,6 @@
       "format": "loka-cartridge-v2",
       "facts": {
         "c@1.0.0:policy/x": 1
-      },
-      "policies": {
-        "c@1.0.0:fact/x": 1
       },
       "actions": {
         "c@1.0.0:room/x": 1
@@ -9440,14 +9399,6 @@
       {
         "path": "/manifest",
         "code": "missing_property"
-      },
-      {
-        "path": "/policies/c@1.0.0:fact~1x",
-        "code": "invalid_type"
-      },
-      {
-        "path": "/policies/c@1.0.0:fact~1x",
-        "code": "pattern_mismatch"
       },
       {
         "path": "/rooms/c@1.0.0:action~1x",
@@ -10016,7 +9967,6 @@
     "value": {
       "format": "loka-cartridge-v2",
       "facts": {},
-      "policies": {},
       "actions": {},
       "rooms": {},
       "text": {},
@@ -10080,10 +10030,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       }
     ]
@@ -10836,7 +10782,6 @@
     "value": {
       "format": "loka-cartridge-v2",
       "facts": {},
-      "policies": {},
       "actions": {},
       "rooms": {},
       "text": {},
@@ -11852,10 +11797,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -12007,10 +11948,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
@@ -13774,10 +13711,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -13894,10 +13827,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
@@ -14983,10 +14912,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -15674,7 +15599,6 @@
           "key": "search_plan"
         }
       },
-      "policies": {},
       "actions": {},
       "entry": {
         "cartridge_id": "chapters_sampler",
@@ -16762,7 +16686,6 @@
           "meaning": "Whether bell_rung has ended (scene@1 reaction composition)."
         }
       },
-      "policies": {},
       "actions": {},
       "rooms": {
         "scene_sampler@0.0.1:room/ferry_landing": {
@@ -17229,10 +17152,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -17282,10 +17201,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -17324,10 +17239,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
@@ -26429,11 +26340,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",
@@ -26475,11 +26392,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",
@@ -26520,11 +26443,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",
@@ -26566,11 +26495,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",
@@ -26613,11 +26548,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",
@@ -26660,11 +26601,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",
@@ -29200,11 +29147,17 @@
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
-      "bundle": {
+      "npc": {
         "cartridge_id": "encounter_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "population_bundle",
+        "kind": "npc",
         "key": "bandits"
+      },
+      "corpse": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "bandits_corpse"
       },
       "home": {
         "cartridge_id": "encounter_sampler",

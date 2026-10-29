@@ -32,7 +32,7 @@ function walkToWillow(w: World) {
 }
 function deer(w: World, home: string) {
   return Object.entries(w.state.created ?? {}).find(
-    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'deer' && i.definition.key === home,
+    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'prey' && i.definition.key === home,
   )?.[0] as never;
 }
 function elapsed(w: World, until: number, n = 5) {
@@ -78,7 +78,7 @@ test('three independent fresh deer each hold one typed hide at their authored ho
     const hides = Object.entries(w.state.created ?? {}).filter(
       ([item, i]) =>
         i.origin.kind === 'spawned' &&
-        i.origin.role === 'hide' &&
+        i.origin.role === 'loot' &&
         i.origin.member_id === id &&
         w.state.containers[item] === id,
     );
@@ -89,7 +89,7 @@ test('three independent fresh deer each hold one typed hide at their authored ho
   }
   assert.equal(
     Object.values(w.state.created ?? {}).filter(
-      (i) => i.origin.kind === 'spawned' && i.origin.role === 'deer',
+      (i) => i.origin.kind === 'spawned' && i.origin.role === 'prey',
     ).length,
     3,
   );
@@ -116,7 +116,7 @@ test('unengaged +300 sight flight preserves the same live deer and held hide', (
   assert.equal(slot(w, id).replacement_due, null);
   assert.equal(Object.keys(w.state.created ?? {}).length, before);
   const hide = Object.entries(w.state.created ?? {}).find(
-    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'hide' && i.origin.member_id === id,
+    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'loot' && i.origin.member_id === id,
   )![0];
   assert.equal(w.state.containers[hide], id);
 });
@@ -132,7 +132,7 @@ test('+150 death transfers the one hide to the corpse and replacement waits unti
     death.decision.kind === 'accepted' &&
     death.decision.delta.ops.filter((o) => {
       const origin = o.op === 'entity.transfer' && w.state.created?.[o.entity_id]?.origin;
-      return origin && origin.kind === 'spawned' && origin.role === 'hide';
+      return origin && origin.kind === 'spawned' && origin.role === 'loot';
     });
   assert.equal(hideTransfers && hideTransfers.length, 1);
   const row = slot(w, id);
@@ -141,7 +141,7 @@ test('+150 death transfers the one hide to the corpse and replacement waits unti
     ([, i]) => i.origin.kind === 'death' && i.origin.victim_id === id,
   )![0];
   const hide = Object.entries(w.state.created ?? {}).find(
-    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'hide' && i.origin.member_id === id,
+    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'loot' && i.origin.member_id === id,
   )![0];
   assert.equal(w.state.containers[hide], corpse);
   assert.equal(w.state.created![corpse]!.definition.key, 'deer_corpse');
@@ -160,7 +160,7 @@ test('+150 death transfers the one hide to the corpse and replacement waits unti
   assert.equal(
     Object.values(w.state.population_slots ?? {}).filter((s) => {
       const origin = s.member_id && w.state.created?.[s.member_id]?.origin;
-      return s.replacement_due === null && origin?.kind === 'spawned' && origin.role === 'deer';
+      return s.replacement_due === null && origin?.kind === 'spawned' && origin.role === 'prey';
     }).length,
     2,
   );
@@ -372,7 +372,7 @@ test('intervening population at the sight deadline transfers at most once', () =
   );
   assert.equal(
     Object.values(r.world.state.created ?? {}).filter(
-      (i) => i.origin.kind === 'spawned' && i.origin.role === 'hide' && i.origin.member_id === id,
+      (i) => i.origin.kind === 'spawned' && i.origin.role === 'loot' && i.origin.member_id === id,
     ).length,
     1,
   );
@@ -430,7 +430,7 @@ test('dead deer replacement appears at its exact two-day due time with a new pai
     Object.entries(w.state.created ?? {}).filter(
       ([item, i]) =>
         i.origin.kind === 'spawned' &&
-        i.origin.role === 'hide' &&
+        i.origin.role === 'loot' &&
         i.origin.member_id === live &&
         w.state.containers[item] === live,
     ).length,
@@ -447,20 +447,20 @@ test('thirty-day replay conserves three live deer and one hide per actual birth'
   w = advance(w, 64800 + 30 * 86400);
   const slots = Object.values(w.state.population_slots ?? {}).filter((s) => {
     const origin = s.member_id && w.state.created?.[s.member_id]?.origin;
-    return origin && origin.kind === 'spawned' && origin.role === 'deer';
+    return origin && origin.kind === 'spawned' && origin.role === 'prey';
   });
   assert.equal(slots.length, 3);
   assert.equal(slots.filter((s) => s.replacement_due === null).length, 3);
   assert.equal(slots.filter((s) => s.generation === 2).length, 1);
   assert.equal(
     Object.values(w.state.created ?? {}).filter(
-      (i) => i.origin.kind === 'spawned' && i.origin.role === 'deer',
+      (i) => i.origin.kind === 'spawned' && i.origin.role === 'prey',
     ).length,
     4,
   );
   assert.equal(
     Object.values(w.state.created ?? {}).filter(
-      (i) => i.origin.kind === 'spawned' && i.origin.role === 'hide',
+      (i) => i.origin.kind === 'spawned' && i.origin.role === 'loot',
     ).length,
     4,
   );

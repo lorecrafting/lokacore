@@ -19,7 +19,6 @@ defmodule Loka.Content.Artifact do
         "capabilities" => m["requires"]["capabilities"]
       },
       "facts" => keyed(m, "fact", defs),
-      "policies" => keyed(m, "policy", defs),
       "actions" => keyed(m, "action", defs)
     }
   end
@@ -41,7 +40,6 @@ defmodule Loka.Content.Artifact do
     service
     transport
     population
-    population_bundle
     bleed
     status
     replenish
@@ -60,7 +58,6 @@ defmodule Loka.Content.Artifact do
           into: %{},
           do:
             {%{
-               "population_bundle" => "population_bundles",
                "status" => "statuses",
                "replenish" => "replenish"
              }[k] || k <> "s", keyed(m, k, defs)}

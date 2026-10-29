@@ -61,7 +61,7 @@ defmodule Loka.Content.Compiler do
   # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
   # bundles), except an action's own: an action refused by its extends must not build.
   defp split(lists, files) do
-    bundle? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+    bundle? = Enum.any?(files, &match?({_, :area, :invalid}, &1))
     actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel) <> "."
     held? = &(bundle? or (actions != [] and not String.starts_with?(&1, actions)))
 
@@ -127,7 +127,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population population_bundle replenish structure),
+         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population replenish structure),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -205,7 +205,6 @@ defmodule Loka.Content.Compiler do
   end
 
   @kinds [
-    {"policy", :policy, "VersionedPolicy"},
     {"action", :action, "ActionDefinition"},
     {"room", :room, "RoomDefinition"},
     {"item", :item, "ItemDefinition"},
@@ -220,7 +219,6 @@ defmodule Loka.Content.Compiler do
     {"topic", :topic, "TopicDefinition"},
     {"liquid", :liquid, "LiquidDefinition"},
     {"population", :population, "PopulationPlan"},
-    {"population_bundle", :population_bundle, "PopulationBundle"},
     {"replenish", :replenish, "ReplenishPlan"},
     {"service", :service, "ServiceDefinition"},
     {"transport", :transport, "TransportDefinition"},
@@ -339,7 +337,7 @@ defmodule Loka.Content.Compiler do
   defp definition(_, _, _, :invalid, _), do: {:error, []}
 
   defp definition(rel, steps, key, value, contract) do
-    keyed = if contract == "VersionedPolicy", do: value, else: with_key(value, key)
+    keyed = with_key(value, key)
 
     case authored_key(rel, steps, value) ++
            validated(rel, steps, "Key", key) ++ body(rel, steps, contract, keyed) do

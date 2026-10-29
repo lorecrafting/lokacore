@@ -46,7 +46,7 @@ const undeclared = (() => {
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
 const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
 const LANTERN = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
-const HASH = 'ecb0eaab9deff32366b3f5a0a8e3b27e8daaefa2b1d7d7424450591bc5108536'; // the fixture's
+const HASH = 'f40217fc8ba4a83e0258dfa92a0dec87e481b8c9a5950a84fad529fb10109e51'; // the fixture's
 const [A, B, C] = ['a', 'b', 'c'].map((x) => `${x.repeat(8)}-1111-4222-8333-444444444444`);
 /** The n-th id a test's allocator hands out. */
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;

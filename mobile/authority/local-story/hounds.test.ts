@@ -31,7 +31,6 @@ function populationOnly() {
     c.items = keep(c.items, ['ear', 'npc_corpse', 'player_corpse']);
     for (const item of Object.values(c.items) as any[]) delete item.immune;
     c.npcs = keep(c.npcs, ['goblin']);
-    c.population_bundles = keep(c.population_bundles, ['goblins']);
     c.resources = keep(c.resources, ['hp', 'mv']);
     for (const section of [
       'actions',
@@ -159,7 +158,7 @@ test('a real goblin kill and pelt Take cold-reopen with conserved custody and ev
   const pelt = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
       identity.origin.kind === 'spawned' &&
-      identity.origin.role === 'pelt' &&
+      identity.origin.role === 'loot' &&
       identity.origin.member_id === member,
   )![0];
   invoke('attack', [member]);

@@ -48,7 +48,7 @@ export function transitionBleed(
       next.ends_at > now &&
       next.next_tick_at >= now &&
       known[next.source_id]?.kind === 'npc' &&
-      created[next.source_id]?.origin?.role === 'hound'
+      created[next.source_id]?.origin?.role === 'hunter'
     : Object.keys(next).length === 2;
   const generation = prior?.active
     ? next.generation === prior.generation

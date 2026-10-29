@@ -29,7 +29,7 @@ value = {
    "scopes": ["player"],
    "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).",
    "key": "search_plan"}},
- "policies": {}, "actions": {},
+ "actions": {},
  "rooms": {
    k("room","landing"): room("landing", {"north": {"to": ref("room","green")}, "west": gate("shelter")},
                              [plan("player_led"), plan("party_led")]),
@@ -89,7 +89,7 @@ DESC = ("Known answer for the loka-cartridge-v2 content hash of cartridges/lante
  "setting player_led with narration proof.carry, leave setting party_led, handing the lantern to Bram, narration proof.leave); "
  "the story point proof_terminal (outcomes carry and leave, Bram's dialogue choice of that name). "
  "resources.json (owner decision, untimed Lantern record): hp 10 of 10, ma 100 of 100, mv 100 of 100, the default gains. Assembled by hand from the "
- "source files (manifest without entry and calendar plus resource@1 and schedule@1, the lock, empty policies and actions, each "
+ "source files (manifest without entry and calendar plus resource@1 and schedule@1, the lock, empty actions, each "
  "fact, room, barrier, NPC, item, quest, dialogue and story point with key added and short references expanded, the pools "
  "(resources.json over the defaults), entry, text, calendar) before the compiler was run, its canonical bytes by Python json.dumps(sort_keys=True, "
  "separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers "

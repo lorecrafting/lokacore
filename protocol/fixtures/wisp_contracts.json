@@ -1758,7 +1758,6 @@
         }
       },
       "facts": {},
-      "policies": {},
       "actions": {},
       "rooms": {
         "rooms_sampler@0.0.1:room/boathouse": {

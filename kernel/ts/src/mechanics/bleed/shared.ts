@@ -61,7 +61,7 @@ export function wound(world: World, source_id: EntityId, body: EntityId, mint: M
   const effect =
     npc?.kind === 'npc' &&
     spawned?.origin.kind === 'spawned' &&
-    spawned.origin.role === 'hound' &&
+    spawned.origin.role === 'hunter' &&
     spawned.origin.member_id === source_id
       ? npc.attack?.on_positive_hit?.effect
       : undefined;

@@ -4,6 +4,9 @@ import { read } from './read.ts';
 import { compose } from '../src/foundation/compose.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { movable } from '../src/runtime/created.ts';
+import type { World } from '../src/runtime/decision.ts';
+import type { EntityId } from '../src/contracts.gen.ts';
 const fixture = read('protocol/fixtures/corpse_creation.json');
 
 // Breaks: absent-source upsert, orphan identity, collision, wrong owner/group or lost identity row.
@@ -42,4 +45,22 @@ test('independent invariants reject counterfeit success with matching identity r
         false,
         `${c.id}: ${id}`,
       );
+});
+
+// Breaks: a created corpse or hunter becomes takeable, or spawned loot stays fixed.
+test('only spawned loot and uncreated entities move', () => {
+  const at = (origin?: object) =>
+    movable(
+      { state: { created: origin ? { x: { origin } } : {} } } as unknown as World,
+      'x' as EntityId,
+    );
+  assert.deepEqual(
+    [
+      at(),
+      at({ kind: 'spawned', role: 'loot' }),
+      at({ kind: 'spawned', role: 'hunter' }),
+      at({ kind: 'corpse', role: 'loot' }),
+    ],
+    [true, true, false, false],
+  );
 });

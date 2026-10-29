@@ -22,7 +22,7 @@ defmodule Loka.ContentBehavioursTest do
     {:ok, artifact, []} = Loka.Content.compile(@fishing)
 
     assert Base.encode16(:crypto.hash(:sha256, artifact), case: :lower) ==
-             "df64a9a2fe29ad1037ea24176a58a1e1964390f06b0f837d7d45e13b5b00a482"
+             "79d26ca12bfd052df142f7fb7ccfa805698ecdaaeeb550b9bd23e28daf503bcc"
   end
 
   # Breaks: a malformed list, an unknown name, a bad behaviour or a clashing copy passing

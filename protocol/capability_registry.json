@@ -340,8 +340,7 @@
     "portability": "portable",
     "residency": "portable_capability",
     "definitions": [
-      "population",
-      "population_bundle"
+      "population"
     ],
     "commands": [
       "shoo"

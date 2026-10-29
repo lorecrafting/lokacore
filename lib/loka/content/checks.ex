@@ -10,8 +10,8 @@ defmodule Loka.Content.Checks do
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
-  def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
-    do: Loka.Content.Population.expand(value, m, &expand/2)
+  def expand(%{"home" => _, "area" => _} = plan, m),
+    do: Loka.Content.Population.expand(plan, m, &expand/2)
 
   # Toolbox row G6: a definition's cues, whatever clause expands the rest of it (an NPC or a
   # status does not recurse), so a short reference in a cue's condition always expands.
@@ -419,7 +419,6 @@ defmodule Loka.Content.Checks do
   @doc "Every located policy root from the source definitions."
   def trees(defs) do
     Enum.concat([
-      for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
       for({rel, a} <- actions(defs), do: {rel, ["policy", "root"], a["policy"]["root"]}),
       RoomParts.conditions(defs),
       Entities.conditions(defs),

@@ -553,7 +553,7 @@ test('raze is refused for a non-owner, and while a corpse lies in the hut', () =
   const spawned = (value: number) => {
     const c = inHut(hound, {
       definition: ref('npc', 'seller'),
-      origin: { kind: 'spawned', role: 'hound' },
+      origin: { kind: 'spawned', role: 'hunter' },
     });
     c.entities[hound].hp = true;
     c.state.resources[key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: hound })] =

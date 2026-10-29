@@ -6,7 +6,7 @@ defmodule Loka.Content.Zones do
   returns faults; Source builds the diagnostics, so this module never calls Source.
   """
 
-  alias Loka.Content.Bundles
+  alias Loka.Content.Areas
   alias Loka.Core.Contracts
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
@@ -21,7 +21,7 @@ defmodule Loka.Content.Zones do
     {good, bad} = files |> rooms() |> Enum.split_with(&keys?(elem(&1, 3)))
     zones = members(good)
     {files, refused} = files |> Enum.map(&rule(&1, zones)) |> Enum.unzip()
-    {files, repeats} = Bundles.unique(List.flatten(files))
+    {files, repeats} = Areas.unique(List.flatten(files))
     {files, Enum.map(bad, &malformed/1) ++ List.flatten(refused) ++ repeats}
   end
 

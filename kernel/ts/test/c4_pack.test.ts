@@ -305,7 +305,7 @@ test('player-first selected death skips retaliation and repairs to the surviving
       result.decision.events.filter((event) => event.payload.type === 'attack_result').length,
     1,
   );
-  const corpse = result.world.state.containers[spawned(w, 2, 'pelt')];
+  const corpse = result.world.state.containers[spawned(w, 2, 'loot')];
   assert.equal(result.world.state.created?.[corpse]?.definition.key, 'npc_corpse');
 });
 

@@ -12,7 +12,8 @@ const r = (kind: string, key: string) => ({
 });
 const pack = {
   key: 'pack',
-  bundle: r('population_bundle', 'pack'),
+  npc: r('npc', 'wolf'),
+  corpse: r('item', 'wolf_corpse'),
   home: r('room', 'den'),
   area: [r('room', 'den'), r('room', 'yard')],
   cap: 2,

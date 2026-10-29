@@ -221,16 +221,13 @@
           "additionalProperties": false
         },
         {
-          "description": "Created by the definition `by` (a spawn bundle or population plan).",
+          "description": "Created by the population plan `by`.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "spawned"
             },
             "by": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "bundle": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "slot": {
@@ -250,17 +247,15 @@
             },
             "role": {
               "enum": [
-                "hound",
-                "pelt",
-                "deer",
-                "hide"
+                "hunter",
+                "prey",
+                "loot"
               ]
             }
           },
           "required": [
             "kind",
             "by",
-            "bundle",
             "slot",
             "generation",
             "occurrence_id",
@@ -345,17 +340,11 @@
             "kind": "population",
             "key": "fen_wisps"
           },
-          "bundle": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "population_bundle",
-            "key": "fen_hounds"
-          },
           "slot": 1,
           "generation": 1,
           "occurrence_id": "00000000-0000-0000-0000-000000000000",
           "member_id": "11111111-1111-4111-8111-111111111111",
-          "role": "hound"
+          "role": "hunter"
         }
       ]
     },

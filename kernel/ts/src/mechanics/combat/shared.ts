@@ -41,7 +41,7 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
   const origin = world.state.created?.[target]?.origin;
   if (
     origin?.kind === 'spawned' &&
-    origin.role === 'hound' &&
+    origin.role === 'hunter' &&
     world.populationSpecs[key(origin.by)]?.plan.pack &&
     suppressed(world, origin.by)
   )
@@ -126,7 +126,7 @@ export function npcRef(world: World, id: EntityId) {
   const created = world.state.created?.[id];
   if (
     created?.origin.kind === 'spawned' &&
-    (created.origin.role === 'hound' || created.origin.role === 'deer') &&
+    (created.origin.role === 'hunter' || created.origin.role === 'prey') &&
     created.origin.member_id === id
   )
     return created.definition;

@@ -49,7 +49,7 @@ export const schedule = (
   op: 'job.schedule',
   writer_group: 0,
   job_id,
-  job: b.spec.bundle,
+  job: b.plan,
   due_time,
   crow_member_id: b.row.member_id,
   crow_generation: b.row.generation,
@@ -76,7 +76,7 @@ export function binding(world: World, job_id: JobId): Binding | undefined {
     const origin = world.state.created?.[row.member_id]?.origin;
     if (
       origin?.kind !== 'spawned' ||
-      origin.role !== 'hound' ||
+      origin.role !== 'hunter' ||
       target(origin.by, origin.slot) !== at ||
       origin.generation !== row.generation
     )

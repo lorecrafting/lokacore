@@ -100,14 +100,14 @@ defmodule Loka.Content.Death do
     item_ref = ref(i["key"], "item", m)
     corpse = death != nil and item_ref in [death["player_corpse"], death["npc_corpse"]]
 
-    bundle_roles =
-      for {_, {_, _, b}} <- defs["population_bundle"] || %{},
+    population_roles =
+      for {_, {_, _, b}} <- defs["population"] || %{},
           b != :invalid,
           b["item"] == item_ref or b["corpse"] == item_ref,
-          do: if(b["corpse"] == item_ref, do: :corpse, else: :pelt)
+          do: if(b["corpse"] == item_ref, do: :corpse, else: :loot)
 
-    if(corpse or bundle_roles != [], do: [], else: [bad(at(rel, ["location"]))]) ++
-      if(corpse or :corpse in bundle_roles,
+    if(corpse or population_roles != [], do: [], else: [bad(at(rel, ["location"]))]) ++
+      if(corpse or :corpse in population_roles,
         do: if(i["container"] == true, do: [], else: [bad(at(rel, ["container"]))]),
         else: if(i["container"] == nil, do: [], else: [bad(at(rel, ["container"]))])
       ) ++

@@ -1,5 +1,7 @@
 {
-  "bundle": "hounds",
+  "npc": "hound",
+  "item": "tuft",
+  "corpse": "npc_corpse",
   "home": "hollow",
   "area": [
     "hollow",

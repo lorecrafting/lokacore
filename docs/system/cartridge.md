@@ -14,7 +14,7 @@ world's definitions and text:
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 | `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ActionRecipe, `action_recipe@1`, [mechanics](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `recipes` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
@@ -29,7 +29,7 @@ definition may sit in an area bundle, may name a parent of its own kind with `"e
 be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
 ([Source shortcuts](#source-shortcuts)). A
 source with rooms, text or an entry compiles to
-`loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
+`loka-cartridge-v2`; v1 (manifest, facts, actions) is the R4 form.
 
 ## Current bundled chapter
 
@@ -1031,7 +1031,7 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Drop declarations
 
-[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; requires `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (populations keep their `loot_role`). The compiler (`lib/loka/content/death.ex`) refuses an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
+[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; requires `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (population members carry their plan's `item`). The compiler (`lib/loka/content/death.ex`) refuses an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
 
 ## NPC attribute declarations
 

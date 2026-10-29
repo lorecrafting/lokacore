@@ -1,5 +1,7 @@
 {
-  "bundle": "deer",
+  "npc": "deer",
+  "item": "tuft",
+  "corpse": "npc_corpse",
   "home": "fen",
   "area": [
     "fen",
