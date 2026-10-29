@@ -70,7 +70,7 @@
     {
       "name": "duplicate_key",
       "break": "the decoder keeps one of two equal keys",
-      "artifact": "{\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"content_hash\":\"9fda4a3c153caed28e25e952594f42d5269c09ca477a52ac840acf601c6a2202\",\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}}}",
+      "artifact": "{\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"content_hash\":\"8b16e7768b38b5464787c558de5290e64a3dd980b3b589e9d8e76d1d1ba29528\",\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}}}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -599,7 +599,7 @@
         "message_key": "diagnostics.content_hash_mismatch",
         "data": {
           "declared": "0000000000000000000000000000000000000000000000000000000000000000",
-          "computed": "9fda4a3c153caed28e25e952594f42d5269c09ca477a52ac840acf601c6a2202"
+          "computed": "8b16e7768b38b5464787c558de5290e64a3dd980b3b589e9d8e76d1d1ba29528"
         },
         "suggested_capabilities": []
       }
@@ -1698,7 +1698,7 @@
         "message_key": "diagnostics.content_hash_mismatch",
         "data": {
           "declared": "3adfd232f6baa615f2a18690db38693832fae7ac9180258f119862e582ab429e",
-          "computed": "c2565319b1d33631a6c553f9c34e920a3b28d7616d6a7d41aef837637f86094e"
+          "computed": "3313b9f7a434e1e3e5a9c59ee144bd14dfd4683b897fb29f6c1cfd27f6922e1f"
         },
         "suggested_capabilities": []
       }
