@@ -7,21 +7,11 @@ defmodule Loka.ContentScarsTest do
     Enum.map(diags, &{&1["code"], &1["path"]})
   end
 
-  # Breaks (row W8; twin of the loader rows in kernel/ts/test/scars.test.ts): a permanent status
-  # compiles under kernel_api 1.48 or with a per_tick, or one modifying an attribute the derived
+  # Breaks (row W8): a permanent status
+  # compiles with a per_tick, or one modifying an attribute the derived
   # hp maximum reads compiles (loka-kgd.50).
-  test "a permanent status keeps its floor, never ticks, never moves the hp maximum", %{dir: dir} do
+  test "a permanent status never ticks, never moves the hp maximum", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-    api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.47")
-
-    # The scar's kind (1.102, loka-x6t.64) dropped, so it cannot shadow the 1.48 floor.
-    unkinded = {"statuses/scar.json", &Map.delete(&1, "kind")}
-    assert {:error, ds} = Loka.ContentSource.compile(dir, [{"cartridge.json", api}, unkinded])
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in Enum.map(
-             ds,
-             &{&1["code"], &1["path"]}
-           )
 
     assert {"SCHEMA_VIOLATION", "statuses/scar.per_tick"} in diags(
              dir,

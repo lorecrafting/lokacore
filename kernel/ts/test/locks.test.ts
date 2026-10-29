@@ -12,7 +12,6 @@ import type { Command, EntityView, GameView } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { resolved } from '../src/commands/actions.ts';
-import { refStage } from '../src/content/cartridge_refs.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
@@ -262,76 +261,4 @@ test('the GameView shows a lid, the verbs step accepts on it and what is in reac
   const doors = ['open', 'close', 'lock', 'unlock'];
   for (const s of [w, open, keyless, keyed, unlocked, inside, both])
     assert.ok(!gameView(s).actions.some((a) => doors.includes(a.action_key)));
-});
-
-// The first loader diagnostic of the locks value changed by `f`.
-const first = (f: (c: any) => void) => {
-  const r = load(f);
-  return r.ok ? 'loaded' : (r as any).diagnostic;
-};
-const item = (c: any, key: string) => c.items[`${L}:item/${key}`];
-const barrier = (c: any, key: string) => c.barriers[`${L}:barrier/${key}`];
-const inItem = (key: string) => ({ in: 'item', item: { ...lid(key), kind: 'item' } });
-const diag = (code: string, path: string, data = {}) => ({
-  severity: 'error',
-  code,
-  path,
-  message_key: `diagnostics.${code.toLowerCase()}`,
-  data,
-  suggested_capabilities: [],
-});
-const unreachable = (key: string) =>
-  diag('BARRIER_UNREACHABLE_KEY', `.cartridge.barriers["${L}:barrier/${key}"]`);
-
-// Breaks: lockout treating a locked chest's contents as in reach, skipping item barriers or a
-// missing key_item, rejecting keys that are reachable, or the item's barrier not a checked
-// reference with one site.
-test('the loader rejects only keys that can never be reached, and checks an item barrier', () => {
-  assert.equal(
-    first(() => {}),
-    'loaded',
-  ); // a key in a closed, unlocked chest
-  const ownKey = (c: any) => (item(c, 'brass_key').location = inItem('trunk'));
-  assert.deepEqual(first(ownKey), unreachable('trunk_lid'));
-  const circular = (c: any) => {
-    Object.assign(barrier(c, 'box_lid'), { initial: 'locked', key_item: inItem('letter').item });
-  };
-  const all = (f: (c: any) => void) => {
-    const c = JSON.parse(read('protocol/fixtures/containers_cartridge_locks_hash.json').canonical);
-    f(c);
-    return refStage(c).filter((d) => d.code === 'BARRIER_UNREACHABLE_KEY');
-  };
-  assert.deepEqual(all(circular), [unreachable('box_lid'), unreachable('trunk_lid')]);
-  const keyless = (c: any) => (barrier(c, 'coffer_lid').initial = 'locked');
-  assert.deepEqual(first(keyless), unreachable('coffer_lid'));
-  const keyed = (c: any) =>
-    Object.assign(barrier(c, 'coffer_lid'), { initial: 'locked', key_item: inItem('penny').item });
-  assert.deepEqual(first(keyed), unreachable('coffer_lid')); // penny is Maud's
-  const reachable = (c: any) =>
-    Object.assign(barrier(c, 'coffer_lid'), { initial: 'locked', key_item: inItem('letter').item });
-  assert.equal(first(reachable), 'loaded'); // letter is in the trunk, whose key is in reach
-  // A locked hatch up whose key is in the box, locked with the letter in the attic beyond it.
-  const hatch = (c: any) => {
-    const b = { key: 'hatch', keywords: ['hatch'], short: 'barrier.box_lid.short' };
-    c.barriers[`${L}:barrier/hatch`] = {
-      ...b,
-      initial: 'locked',
-      key_item: inItem('brass_key').item,
-    };
-    c.rooms[`${L}:room/inn_rooms`].exits.up.barrier = lid('hatch');
-    c.rooms[`${L}:room/inn_attic`].exits.down.barrier = lid('hatch');
-    Object.assign(barrier(c, 'box_lid'), { initial: 'locked', key_item: inItem('letter').item });
-  };
-  assert.deepEqual(all(hatch), [unreachable('hatch'), unreachable('box_lid')]);
-  const shared = (c: any) => {
-    c.rooms[`${L}:room/inn_rooms`].exits.up.barrier = lid('trunk_lid');
-    c.rooms[`${L}:room/inn_attic`].exits.down.barrier = lid('trunk_lid');
-  };
-  const trunk = `.cartridge.items["${L}:item/trunk"].barrier`;
-  assert.deepEqual(first(shared), diag('BARRIER_MISMATCH', trunk));
-  const unknown = (c: any) => (item(c, 'trunk').barrier = lid('nope'));
-  assert.deepEqual(
-    first(unknown),
-    diag('UNRESOLVED_REFERENCE', trunk, { target: `${L}:barrier/nope` }),
-  );
 });

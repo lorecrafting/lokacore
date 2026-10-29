@@ -4,7 +4,7 @@
   "description": "Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 §23; 00 §4.4; 00a §5, §12), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 §23); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. An item's equipment slot joins with equipment@1 (chapter-one slice c1-equipment); stacking, weight and put join with their capabilities as optional fields.",
   "$defs": {
     "NameWords": {
-      "description": "Name words (loka-6qi; kernel_api at least 1.118): bare, the text key of the name with no article (\"lantern\"); optionally article, the article a presenter puts before bare (a, an or the); optionally plural, the text key of the plural (\"lanterns\"). short stays the phrase narration binds; words exist for presenters that compose a sentence from several names. Each key is in the text catalog.",
+      "description": "Name words (loka-6qi): bare, the text key of the name with no article (\"lantern\"); optionally article, the article a presenter puts before bare (a, an or the); optionally plural, the text key of the plural (\"lanterns\"). short stays the phrase narration binds; words exist for presenters that compose a sentence from several names. Each key is in the text catalog.",
       "type": "object",
       "additionalProperties": false,
       "required": ["bare"],
@@ -162,7 +162,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1, kernel_api at least 1.41); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its short and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi; kernel_api at least 1.118).",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its short and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "type": "object",
       "properties": {
         "key": {
@@ -209,7 +209,7 @@
           "$ref": "#/$defs/SlotKey"
         },
         "equip": {
-          "description": "Authored wear and remove words (toolbox row 6a, loka-x6t.20; kernel_api at least 1.116): the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog.",
+          "description": "Authored wear and remove words (toolbox row 6a, loka-x6t.20): the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog.",
           "type": "object",
           "additionalProperties": false,
           "required": ["wear", "remove", "worn", "removed"],
@@ -229,11 +229,11 @@
           }
         },
         "identified": {
-          "description": "Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects, kernel_api at least 1.68).",
+          "description": "Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "intended_level": {
-          "description": "Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects, kernel_api at least 1.72; the engine ignores it at runtime).",
+          "description": "Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects; the engine ignores it at runtime).",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -288,7 +288,7 @@
           }
         },
         "immune": {
-          "description": "Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status (kernel_api 1.46).",
+          "description": "Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -300,7 +300,7 @@
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "locks": {
-          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
           "type": "object",
           "properties": {
             "get": {
@@ -388,7 +388,7 @@
       ]
     },
     "Tag": {
-      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7, kernel_api at least 1.62) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent (kernel_api at least 1.106 for a room, item or barrier tagged road or marsh). Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target (kernel_api at least 1.119 for a room, item or barrier tagged lamp).",
+      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent. Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target.",
       "enum": [
         "air",
         "bed",
@@ -443,7 +443,7 @@
       ]
     },
     "Resistances": {
-      "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
+      "description": "Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
       "type": "object",
       "properties": {
         "cold": {
@@ -538,7 +538,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi; kernel_api at least 1.118).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "type": "object",
       "properties": {
         "key": {
@@ -582,7 +582,7 @@
           "maximum": 1024
         },
         "daily_schedule": {
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler and loader check it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(0|[1-9][0-9]*)$"
@@ -592,7 +592,7 @@
           }
         },
         "disposition": {
-          "description": "Toolbox row G11 (kernel_api at least 1.47): how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount. Toolbox row 35 (kernel_api at least 1.105): with arrest instead of engage, a hostile NPC stops a player who walks in and the body goes to arrest.to, saying arrest.narration; no encounter opens.",
+          "description": "Toolbox row G11: how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount. Toolbox row 35: with arrest instead of engage, a hostile NPC stops a player who walks in and the body goes to arrest.to, saying arrest.narration; no encounter opens.",
           "type": "object",
           "properties": {
             "hostile": {
@@ -618,14 +618,14 @@
               "additionalProperties": false
             },
             "refuse": {
-              "description": "Book hostile refusal (kernel_api at least 1.104): the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal.",
+              "description": "Book hostile refusal: the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "additionalProperties": false
         },
         "ask": {
-          "description": "Toolbox row FD7 (speech@1 with topics@1; kernel_api at least 1.96): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
+          "description": "Toolbox row FD7 (speech@1 with topics@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
           "type": "object",
           "properties": {
             "unknown": {
@@ -660,7 +660,7 @@
           "additionalProperties": false
         },
         "schedule_cases": {
-          "description": "Toolbox row W10 (kernel_api at least 1.47): conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler and the loader); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
+          "description": "Toolbox row W10: conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(0|[1-9][0-9]*)$"
@@ -711,7 +711,7 @@
           "maxItems": 8
         },
         "drops": {
-          "description": "Toolbox row 8 loot table (docs/system/mechanics.md loot tables; kernel_api at least 1.43, world.death): in order, an item this NPC holds at genesis and its percent chance of passing to the corpse when combat kills the NPC; a failed item stays with the dead NPC.",
+          "description": "Toolbox row 8 loot table (docs/system/mechanics.md loot tables, world.death): in order, an item this NPC holds at genesis and its percent chance of passing to the corpse when combat kills the NPC; a failed item stays with the dead NPC.",
           "type": "array",
           "items": {
             "type": "object",
@@ -738,7 +738,7 @@
           "$ref": "entity.schema.json#/$defs/Resistances"
         },
         "immune": {
-          "description": "Toolbox row G3: statuses that status.apply skips on this NPC's instance; each names a declared status (kernel_api 1.46).",
+          "description": "Toolbox row G3: statuses that status.apply skips on this NPC's instance; each names a declared status.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -747,7 +747,7 @@
           }
         },
         "attributes": {
-          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1, kernel_api 1.46), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -772,7 +772,7 @@
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "locks": {
-          "description": "Toolbox row 33 (kernel_api at least 1.94; mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
+          "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
           "type": "object",
           "properties": {
             "get": {
@@ -785,7 +785,7 @@
           "additionalProperties": false
         },
         "mount": {
-          "description": "Toolbox row 43b (kernel_api at least 1.108; needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
+          "description": "Toolbox row 43b (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
           "type": "object",
           "properties": {
             "terrain": {
@@ -839,7 +839,7 @@
       ]
     },
     "TextVariants": {
-      "description": "Toolbox row W6: variants of one entity text (short, room_line or description), the first whose condition holds replacing it (DescriptionVariant, as for a room's description); the base text stays mandatory. Each condition reads with the entity itself as the target (status_active subject target). An item's room_line_variants predate the row; every other entity variant needs kernel_api at least 1.46.",
+      "description": "Toolbox row W6: variants of one entity text (short, room_line or description), the first whose condition holds replacing it (DescriptionVariant, as for a room's description); the base text stays mandatory. Each condition reads with the entity itself as the target (status_active subject target).",
       "type": "array",
       "items": {
         "$ref": "room.schema.json#/$defs/DescriptionVariant"
@@ -884,7 +884,7 @@
           },
           "walks": {
             "const": true,
-            "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
+            "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
           }
         },
         "required": [
@@ -953,7 +953,7 @@
           "$ref": "entity.schema.json#/$defs/DamageKind"
         },
         "crit": {
-          "description": "Toolbox row G2 (kernel_api at least 1.44): a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
+          "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "type": "object",
           "properties": {
             "chance": {
@@ -1019,7 +1019,7 @@
           "maximum": 2147483647
         },
         "stock": {
-          "description": "Toolbox row W11 (kernel_api at least 1.82): sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
+          "description": "Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
           "type": "object",
           "properties": {
             "items": {
@@ -1048,7 +1048,7 @@
           "additionalProperties": false
         },
         "stolen": {
-          "description": "Toolbox row 34 (kernel_api at least 1.94): this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer.",
+          "description": "Toolbox row 34: this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer.",
           "const": true
         }
       },
@@ -1105,7 +1105,7 @@
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "buy_discount": {
-          "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15, kernel_api at least 1.47) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
+          "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "type": "object",
           "properties": {
             "skill": {
@@ -1414,7 +1414,7 @@
           "minItems": 1
         },
         "applies": {
-          "description": "Toolbox row hs-5 (kernel_api at least 1.101): statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
+          "description": "Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -1487,7 +1487,7 @@
       "additionalProperties": false
     },
     "Cue": {
-      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1; needs kernel_api at least 1.48. Its source is the room, detail, item or NPC, lit fuel source, active status or recipe outcome that declares it.",
+      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or recipe outcome that declares it.",
       "examples": [
         {
           "sense": "sound",

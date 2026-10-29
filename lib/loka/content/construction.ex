@@ -4,9 +4,7 @@ defmodule Loka.Content.Construction do
   names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints of this
   cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
   their capabilities, and its title and descriptions have catalog entries; a site or
-  world.construction needs construction@1; a blueprint, a site, world.construction or (S4) a
-  `status_active` leaf with subject `room` needs kernel_api 1.99, (S5) a raze service 1.102. Twin of kernel/ts/src/content/cartridge_construction.ts
-  (the TS loader checks blueprint parts in cartridge_refs.ts). Variant and enter-lock conditions
+  world.construction needs construction@1. Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4, ref: 3]
@@ -21,9 +19,8 @@ defmodule Loka.Content.Construction do
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
       owned_blueprints(blueprints, m, defs, text, registry) ++
-      requirements(m, defs, blueprints, sites, settings) ++
-      builds(m, defs, text, settings) ++
-      razes(m, defs)
+      requirements(m, sites, settings) ++
+      builds(m, defs, text, settings)
   end
 
   defp owned_blueprints(blueprints, m, defs, text, registry) do
@@ -37,7 +34,7 @@ defmodule Loka.Content.Construction do
 
   # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
   # blueprint and direction, at most one per sequence, with world.construction, the build refusal
-  # texts and kernel_api 1.102 (twin of builds in cartridge_construction.ts). The listed blueprint
+  # texts. The listed blueprint
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
     for {_, {rel, [], r}} <- defs["recipe"] || %{},
@@ -57,17 +54,7 @@ defmodule Loka.Content.Construction do
       true <- [misplaced?(sequence, i, name, site, settings)],
       do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
     ) ++
-      for(true <- [api(m) < [1, 102]], do: floor_diag()) ++
       refusal_texts(text, op) ++ on_site(site, s, rel, path)
-  end
-
-  # Built rooms S5: a raze service needs kernel_api 1.102 (one diagnostic however many).
-  defp razes(m, defs) do
-    raze? = &match?({_, {_, [], %{"benefit" => %{"kind" => "raze"}}}}, &1)
-
-    if Enum.any?(defs["service"] || %{}, raze?) and api(m) < [1, 102],
-      do: [floor_diag()],
-      else: []
   end
 
   # A second build in the sequence, a build outside success, off a site or without world.construction.
@@ -100,9 +87,8 @@ defmodule Loka.Content.Construction do
         do: diag("SCHEMA_VIOLATION", at(rel, path ++ [f]), %{"error" => "invalid_value"})
   end
 
-  # A site or world.construction needs construction@1 (a blueprint is owned through the registry);
-  # any construction content needs kernel_api 1.99.
-  defp requirements(m, defs, blueprints, sites, settings) do
+  # A site or world.construction needs construction@1 (a blueprint is owned through the registry).
+  defp requirements(m, sites, settings) do
     world =
       if get_in(settings, ["world", "construction"]),
         do: ["cartridge.world.construction"],
@@ -111,20 +97,8 @@ defmodule Loka.Content.Construction do
     for p <- for({rel, _, _} <- sites, do: at(rel, ["site"])) ++ world,
         m["requires"]["capabilities"]["construction"] != 1 do
       diag("UNDECLARED_CAPABILITY", p, %{"capability" => "construction"}, ["construction@1"])
-    end ++
-      floor(
-        m,
-        blueprints != [] or sites != [] or room_leaf?(defs) or room_leaf?(settings),
-        settings["world"] || %{}
-      )
+    end
   end
-
-  # Built rooms S4: status_active read at the actor's room (status reader 9).
-  defp room_leaf?(%{"op" => "status_active", "subject" => "room"}), do: true
-  defp room_leaf?(v) when is_map(v), do: Enum.any?(Map.values(v), &room_leaf?/1)
-  defp room_leaf?(v) when is_list(v), do: Enum.any?(v, &room_leaf?/1)
-  defp room_leaf?(v) when is_tuple(v), do: room_leaf?(Tuple.to_list(v))
-  defp room_leaf?(_), do: false
 
   defp blueprints(defs), do: for({_, {rel, [], b}} <- defs["blueprint"] || %{}, do: {rel, b})
 
@@ -189,19 +163,4 @@ defmodule Loka.Content.Construction do
         text != :unknown and not is_map_key(text, k),
         do: diag("UNRESOLVED_REFERENCE", at(rel, s), %{"target" => k})
   end
-
-  defp floor(m, used, world) do
-    if (used or is_map_key(world, "construction")) and api(m) < [1, 99],
-      do: [floor_diag()],
-      else: []
-  end
-
-  defp floor_diag,
-    do: diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})
-
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 end

@@ -28,8 +28,6 @@ defmodule Loka.Content.Commerce do
     resource = Refs.resolve(s["resource"], "resource", m, defs)
     ids = Enum.map(s["offers"], & &1["item"])
 
-    api = api_check(m, path)
-
     duplicate =
       if length(Enum.uniq(ids)) != length(ids), do: [diag("DUPLICATE_DEFINITION", path)], else: []
 
@@ -38,15 +36,14 @@ defmodule Loka.Content.Commerce do
     items =
       for o <- s["offers"], not stocked?(o, npc, m, defs), do: diag("UNRESOLVED_REFERENCE", path)
 
-    api ++ duplicate ++ funds ++ items ++ discount(m, defs, npc, s, path)
+    duplicate ++ funds ++ items ++ discount(m, defs, npc, s, path)
   end
 
   # Toolbox row W11: a price per count of a set of distinct items led by the offer's own.
   defp stocks(m, defs, rel, offers) do
     plain = for o <- offers, !o["stock"], do: o["item"]
 
-    stock_api(m, offers) ++
-      stolen(rel, offers) ++
+    stolen(rel, offers) ++
       for {%{"stock" => %{"items" => items, "buy" => buy}} = o, i} <- Enum.with_index(offers),
           path = at(rel, ["shop", "offers", i, "stock"]),
           d <- unresolved(items, path, m, defs) ++ stock_shape(o, items, buy, path, plain),
@@ -79,12 +76,6 @@ defmodule Loka.Content.Commerce do
           })
   end
 
-  defp stock_api(m, offers) do
-    if Enum.any?(offers, & &1["stock"]) and version(m) < [1, 82],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
   defp discount(m, defs, npc, %{"buy_discount" => d, "offers" => offers}, path) do
     valid =
       condition?(m, defs, npc, d) and
@@ -110,15 +101,6 @@ defmodule Loka.Content.Commerce do
       offers
       |> Enum.flat_map(&[&1["buy"] | (&1["stock"] || %{})["buy"] || []])
       |> Enum.all?(&(&1 >= minimum and &1 * numerator <= 9_007_199_254_740_991))
-
-  defp api_check(manifest, path),
-    do: if(version(manifest) < [1, 16], do: [diag("KERNEL_API_RANGE_INVALID", path)], else: [])
-
-  defp version(manifest),
-    do:
-      manifest["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 
   defp funded?({_, _, resource}, npc) do
     resource["gain"] == 0 and resource["regen"] == nil and

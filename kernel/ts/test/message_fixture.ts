@@ -13,7 +13,7 @@ const branch = (equals: string) => ({ op: 'fact_compare', fact: ref('fact', 'bra
 const role = (kind: string, key: string) => ({ role: kind, [kind]: ref(kind, key) });
 
 export function messageSource(c: any) {
-  c.manifest.requires.kernel_api.at_least = '1.10'; // the give_allowed floor (cartridge_quests.ts)
+  c.manifest.requires.kernel_api.at_least = '1.10'; // the give_allowed floor
   for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities])
     Object.assign(caps, { fact: 1, dialogue: 1 });
   c.world = { carry: { max_grams: 1000 } };

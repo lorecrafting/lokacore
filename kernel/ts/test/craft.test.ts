@@ -184,9 +184,7 @@ test('reopening between the two carves gives the same ids', () => {
   assert.equal(b.world.state.containers[ordered(w, 'spoon_01', 'spoon_02')[0]!], b.world.body);
 });
 
-// Breaks: the loader admits a template or non-container holder, an unresolved item, holder or
-// reason, a duplicate item, or a craft on a spell (twin of test/loka/content_craft_test.exs;
-// the floor is loader_floors.json's "a craft" case).
+// Loads the compiled craft cartridge after an edit, re-hashed.
 const reload = (edit: (c: any) => void) => {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   edit(c);
@@ -202,78 +200,12 @@ const loadEdited = (edit: (c: any) => void) => {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
-test('loader: a craft needs resolved, placed holders, distinct items, a catalog reason, a station', () => {
-  const R = (kind: string, key: string) => ({
-    cartridge_id: 'craft_sampler',
-    cartridge_version: '0.0.1',
-    kind,
-    key,
-  });
-  const at = `.cartridge.recipes["${P}recipe/carve_spoon"].craft`;
-  const load = (edit: (r: any, c: any) => void) =>
-    loadEdited((c) => edit(c.recipes[`${P}recipe/carve_spoon`], c));
-  const cases: [(r: any, c: any) => void, string, string][] = [
-    [(r) => (r.craft.consume.to = { in: 'template' }), 'SCHEMA_VIOLATION', '.consume.to'],
-    [
-      (r) => (r.craft.yield.from = { in: 'item', item: R('item', 'stick_02') }),
-      'SCHEMA_VIOLATION',
-      '.yield.from',
-    ],
-    [
-      (r) => (r.craft.consume.items = [R('item', 'nothing')]),
-      'UNRESOLVED_REFERENCE',
-      '.consume.items[0]',
-    ],
-    [
-      (r) => (r.craft.yield.from = { in: 'room', room: R('room', 'nowhere') }),
-      'UNRESOLVED_REFERENCE',
-      '.yield.from.room',
-    ],
-    [
-      (r) => (r.craft.yield.items = [R('item', 'spoon_01'), R('item', 'spoon_01')]),
-      'DUPLICATE_DEFINITION',
-      '.yield.items',
-    ],
-    [(r) => (r.craft.consume.reason = 'craft.unknown'), 'UNRESOLVED_REFERENCE', '.consume.reason'],
-    [
-      (r, c) => {
-        const known = { ...c.facts[`${P}fact/spoon_carved`], key: 'known', scopes: ['player'] };
-        c.facts[`${P}fact/known`] = known; // a valid learned fact, so only the craft refuses
-        delete r.check;
-        r.target = { kind: 'spell', word: 'carve', learned: R('fact', 'known') };
-      },
-      'SCHEMA_VIOLATION',
-      '',
-    ],
-  ];
-  assert.equal(
-    load(() => {}),
-    'loaded',
-  );
-  for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
-});
-
 // Breaks: the loader admits a storylet target again (FD3 retired by the owner, 2026-10-23).
 test('loader: a storylet target is refused', () => {
   const key = `${P}recipe/carve_spoon`;
   const edit = (c: any) => (c.recipes[key].target = { kind: 'storylet' });
   const at = `.cartridge.recipes["${key}"].target.kind`;
   assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
-});
-
-// Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill, or an
-// unknown skill, loads. The floor is loader_floors.json's "a skill prerequisite" case.
-test('loader: a skill prerequisite resolves and never names its own skill', () => {
-  const at = `.cartridge.skills["${P}skill/carving"].prerequisite`;
-  // The leaf sits under all and not, so a walker that skips nesting misses it.
-  const naming = (key: string) => (c: any) => {
-    const p = c.skills[`${P}skill/carving`].prerequisite;
-    const leaf = { ...p.root, skill: { ...p.root.skill, key } };
-    p.root = { op: 'all', items: [{ op: 'not', item: leaf }] };
-  };
-  const leaf = at + '.root.items[0].item.skill';
-  assert.deepEqual(loadEdited(naming('carving')), ['SCHEMA_VIOLATION', at]);
-  assert.deepEqual(loadEdited(naming('nothing')), ['UNRESOLVED_REFERENCE', leaf]);
 });
 
 // A stick held, a carry limit of 100 g and 200 g spoons: the carve's exchange is too heavy.
@@ -489,56 +421,6 @@ test('a concealed lesson is left out of the opened choices and refused', () => {
   assert.deepEqual(ids(opened(carve(secret(true)).world)), ['learn', 'leave']); // whittling 2
 });
 
-// Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
-// dialogue policy reading a hidden skill loads, a labeled talk or a riddle dialogue (its letter
-// bank shows) teaching one loads, or a hidden skill's own qualification reading one is refused.
-test('loader: no shown qualification, dialogue policy, talk label or riddle reveals a hidden skill', () => {
-  const S = (k: string) => `${P}skill/${k}`;
-  const D = (k: string) => `${P}dialogue/${k}`;
-  const hide = (c: any) => ['carving', 'joinery'].forEach((k) => (c.skills[S(k)].hidden = true));
-  const reading = (policy: (c: any) => any) => (c: any) => {
-    const skill = { ...c.skills[S('carving')].prerequisite.root.skill, key: 'carving' };
-    hide(c);
-    policy(c).root = { op: 'all', items: [{ op: 'skill_compare', skill, at_least: 1 }] };
-  };
-  const at = (path: string) => ['SCHEMA_VIOLATION', `.cartridge.${path}`];
-  const whittling = reading((c) => c.skills[S('whittling')].qualification);
-  assert.deepEqual(loadEdited(whittling), at(`skills["${S('whittling')}"].qualification`));
-  const carpentry = reading((c) => c.dialogues[D('old_carver_carpentry')].policy);
-  assert.deepEqual(loadEdited(carpentry), at(`dialogues["${D('old_carver_carpentry')}"].policy`));
-  assert.equal(loadEdited(reading((c) => c.skills[S('joinery')].qualification)), 'loaded');
-  const wrong = 'old_carver.carving.prompt';
-  for (const [field, value] of Object.entries({
-    label: wrong,
-    riddle: { choice_id: 'learn', answer: 'a', bank: ['A'], wrong },
-  })) {
-    const set = (c: any) => (c.dialogues[D('old_carver_carving')][field] = value);
-    const hidden = (c: any) => (hide(c), set(c));
-    assert.deepEqual(loadEdited(hidden), at(`dialogues["${D('old_carver_carving')}"].${field}`));
-    assert.equal(loadEdited(set), 'loaded'); // carving shown
-  }
-});
-
-// Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
-// skill loads, a hidden skill reading a hidden one is refused, or an unknown profession text
-// loads. The floor is loader_floors.json's "a skill profession" case.
-test('loader: a shown prerequisite never reads a hidden skill; a profession resolves', () => {
-  const S = (k: string) => `${P}skill/${k}`;
-  const hide =
-    (...keys: string[]) =>
-    (c: any) =>
-      keys.forEach((k) => (c.skills[S(k)].hidden = true));
-  assert.deepEqual(loadEdited(hide('carving')), [
-    'SCHEMA_VIOLATION',
-    `.cartridge.skills["${S('joinery')}"].prerequisite`,
-  ]);
-  assert.equal(loadEdited(hide('carving', 'joinery')), 'loaded');
-  assert.deepEqual(
-    loadEdited((c) => (c.skills[S('whittling')].profession = 'profession.nothing')),
-    ['UNRESOLVED_REFERENCE', `.cartridge.skills["${S('whittling')}"].profession`],
-  );
-});
-
 // Homestead hs-12 (Built rooms S6): the axe lies in the workshop; chop at the glade's oak yields a
 // log from the sealed woodpile (woodcutting, growth [2]); the old carver teaches carpentry at
 // woodcutting 2; saw at the sawhorse turns two logs into a timber (carpentry, growth [2]); raise at
@@ -691,60 +573,4 @@ test('chop needs woodcutting 1; a raise counts max_per_owner 1 and max_total 2',
   assert.equal(built(w).length, 2);
   assert.deepEqual(offer(w, 'raise_south').reason, refusal('service.construction_full'));
   assert.equal(code(perform(w, 'raise_south')), 'invalid_state');
-});
-
-// Breaks (Built rooms S6; twin of test/loka/content_craft_test.exs): a build step loads off a
-// detail target, on a room that is no site, twice in one sequence, without world.construction or
-// the refusal texts, or naming a blueprint or direction the site does not list.
-// The floor is loader_floors.json's "a build step" case.
-test('loader: a build step needs a site detail, its listed blueprint and direction, once, on success', () => {
-  const at = `.cartridge.recipes["${P}recipe/raise_timbered_hut"].outcomes.`;
-  const lane = `${P}room/lane`;
-  const load = (edit: (r: any, c: any) => void) =>
-    loadEdited((c) => edit(c.recipes[`${P}recipe/raise_timbered_hut`], c));
-  const build = (r: any) => r.outcomes.success.sequence[0];
-  const cases: [(r: any, c: any) => void, string, string][] = [
-    [
-      (r) => {
-        delete r.check; // an unchecked use, so only the build step refuses
-        delete r.outcomes.failure;
-        r.target = { kind: 'use', tool: { tag: 'metal' } };
-      },
-      'SCHEMA_VIOLATION',
-      'success.sequence[0].op',
-    ],
-    [
-      (r) => (r.target = { kind: 'detail', room: R('room', 'glade'), detail: 'oak' }),
-      'SCHEMA_VIOLATION',
-      'success.sequence[0].op',
-    ],
-    [
-      (r) => r.outcomes.success.sequence.push(build(r)),
-      'SCHEMA_VIOLATION',
-      'success.sequence[1].op',
-    ],
-    [(_, c) => delete c.world.construction, 'SCHEMA_VIOLATION', 'success.sequence[0].op'],
-    [
-      (_, c) => delete c.text['service.site_taken'],
-      'UNRESOLVED_REFERENCE',
-      'success.sequence[0].op',
-    ],
-    [
-      (_, c) => delete c.text['service.construction_full'],
-      'UNRESOLVED_REFERENCE',
-      'success.sequence[0].op',
-    ],
-    [
-      (_, c) => c.rooms[lane].site.blueprints.pop(),
-      'SCHEMA_VIOLATION',
-      'success.sequence[0].blueprint',
-    ],
-    [(r) => (build(r).direction = 'east'), 'SCHEMA_VIOLATION', 'success.sequence[0].direction'],
-    [
-      (r) => r.outcomes.failure.sequence.push(build(r)),
-      'SCHEMA_VIOLATION',
-      'failure.sequence[0].op',
-    ],
-  ];
-  for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
 });

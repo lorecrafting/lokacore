@@ -21,9 +21,9 @@ defmodule Loka.ContentSchedulesTest do
   end
 
   # Breaks: the compiler skips a case list's rooms, goal texts or conditions (an unknown one
-  # compiles and fails at load), accepts the fallback before a case, or accepts a case list
-  # below kernel_api 1.47 (twin of schedule_cases.test.ts).
-  test "a case list's references, texts, order and the 1.47 floor are checked" do
+  # compiles and fails at load), or accepts the fallback before a case
+  # (twin of schedule_cases.test.ts).
+  test "a case list's references, texts and order are checked" do
     dir = Loka.ContentSource.copy("cartridges/schedule_sampler")
     hour = &update_in(&1, ["daily_schedule", "8"], &2)
     case0 = fn f -> &hour.(&1, fn [c, r] -> [f.(c), r] end) end
@@ -42,14 +42,6 @@ defmodule Loka.ContentSchedulesTest do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/maud.json", change}])
       assert Enum.any?(diags, &(&1["code"] == code and &1["path"] == path)), inspect(diags)
     end
-
-    api = fn m -> put_in(m, ["requires", "kernel_api", "at_least"], "1.46") end
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"cartridge.json", api}])
-
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in Enum.map(
-             diags,
-             &{&1["code"], &1["path"]}
-           )
   end
 
   # Breaks (Realm seam 5): a case `when` reading a player-scope fact (a job has no player) compiles;

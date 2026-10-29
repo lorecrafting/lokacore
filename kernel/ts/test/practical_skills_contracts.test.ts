@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { practicalBundle, ref, prefix } from './practical_skills_fixture.ts';
+import { practicalBundle, prefix } from './practical_skills_fixture.ts';
 const source = practicalBundle().value;
 const load = (c: any) =>
   loadCartridge(
@@ -45,20 +45,11 @@ test('method is literal and optional declarations enforce every new field and nu
   const mutants = [
     (c: any) => (patch(c).harvest.careful.count = 1),
     (c: any) => (patch(c).harvest.careful.count = 65),
-    (c: any) => (patch(c).harvest.careful.count = 4), // three ores in stock
-    (c: any) => (patch(c).harvest.careful.skill = ref('skill', 'absent')),
-    (c: any) => (patch(c).harvest.careful.narration = 'absent'),
-    (c: any) => (patch(c).harvest.careful.action = 'harvest'),
+    // stock count, skill, narration and action refs: compiler rows in
+    // test/loka/content_practical_skills_test.exs
     (c: any) => (patch(c).harvest.careful.extra = true),
     (c: any) => delete c.manifest.requires.capabilities.skills,
-    (c: any) => (shop(c).buy_discount.skill = ref('skill', 'absent')),
     (c: any) => (shop(c).buy_discount.extra = true),
-    (c: any) => (shop(c).buy_discount.numerator = 11),
-    (c: any) => (shop(c).buy_discount.minimum = 2), // above the 1p buy
-    (c: any) => {
-      shop(c).offers[0].buy = 2147483647;
-      shop(c).buy_discount.numerator = shop(c).buy_discount.denominator = 2147483647;
-    },
   ];
   for (const field of ['numerator', 'denominator', 'minimum'])
     for (const n of [0, 2147483648]) {

@@ -2,32 +2,13 @@ defmodule Loka.ContentSpellsTest do
   use ExUnit.Case, async: true
 
   @dir "cartridges/spells_sampler"
-  @floor {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row 29a): the compiler accepts a spell or a level_compare policy leaf below
-  # kernel_api 1.51, an opposed check on a spell (no detail rating), two spells sharing one word,
-  # or a room contribution naming a spell's key (the TS loader refuses them too; spells.test.ts).
-  test "spells and the level_compare leaf need 1.51; spell words are unique" do
+  # Breaks (toolbox row 29a): the compiler accepts an opposed check on a spell (no detail rating), two spells sharing one word,
+  # or a room contribution naming a spell's key.
+  test "spell words are unique" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
-
-    below = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.50")}
-    open = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
-    # Spells without a level leaf.
-    spells = [below, {"actions/ward.json", &Map.put(&1, "policy", open)}]
-    assert {:error, diags} = Loka.ContentSource.compile(dir, spells)
-    assert pairs(diags) == [@floor]
-
-    # A level_compare leaf without spells.
-    level = %{"policy_version" => 1, "root" => %{"op" => "level_compare", "at_least" => 1}}
-
-    leaf =
-      [below, {"actions/gather_ash.json", &Map.put(&1, "policy", level)}] ++
-        for k <- ~w(lux ward noctis), do: {"actions/#{k}.json", nil}
-
-    assert {:error, diags} = Loka.ContentSource.compile(dir, leaf)
-    assert pairs(diags) == [@floor]
 
     # An opposed check on a spell: no detail rating, and no npc named.
     opposed = [
@@ -59,9 +40,8 @@ defmodule Loka.ContentSpellsTest do
   end
 
   # Breaks (word bar S2): the compiler accepts a spell with no learned fact, one naming a fact this
-  # cartridge lacks, a non-bool one, an instance or per_subject one, or a spell below kernel_api 1.98 (the TS loader refuses them
-  # too; spells.test.ts).
-  test "a spell's learned names a bool player fact of this cartridge; spells need 1.98" do
+  # cartridge lacks, a non-bool one, an instance or per_subject one.
+  test "a spell's learned names a bool player fact of this cartridge" do
     dir = Loka.ContentSource.copy(@dir)
     learned = &{"actions/ward.json", fn r -> update_in(r, ["target"], &1) end}
 
@@ -87,9 +67,7 @@ defmodule Loka.ContentSpellsTest do
           {fact.("world", Map.put(bool, "scopes", ["instance"])),
            {"FACT_SCOPE_UNSUPPORTED", "actions/ward.target.learned"}},
           {fact.("pair", Map.merge(bool, %{"scopes" => ["player"], "per_subject" => true})),
-           {"FACT_SCOPE_UNSUPPORTED", "actions/ward.target.learned"}},
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.97")}],
-           @floor}
+           {"FACT_SCOPE_UNSUPPORTED", "actions/ward.target.learned"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == [expected]
@@ -97,20 +75,16 @@ defmodule Loka.ContentSpellsTest do
   end
 
   # Breaks: the recipe reason check dropped, or 1.100 read as a string (below 1.99).
-  test "a recipe reason names a text key and needs 1.100, which is above 1.99" do
+  test "a recipe reason names a text key; 1.100 is above 1.99" do
     dir = Loka.ContentSource.copy(@dir)
     api = &{"cartridge.json", fn m -> put_in(m, ["requires", "kernel_api"], &1) end}
     reason = &{"actions/ward.json", &1}
     at_199 = api.(%{"at_least" => "1.99", "below" => "1.100"})
 
-    for {edits, expected} <- [
-          {[reason.(&Map.put(&1, "reason", "reason.nope"))],
-           [{"UNRESOLVED_REFERENCE", "actions/ward.reason"}]},
-          {[at_199], [@floor]}
-        ] do
-      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
-      assert pairs(diags) == expected
-    end
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [reason.(&Map.put(&1, "reason", "reason.nope"))])
+
+    assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "actions/ward.reason"}]
 
     assert {:ok, _, []} =
              Loka.ContentSource.compile(dir, [at_199, reason.(&Map.delete(&1, "reason"))])

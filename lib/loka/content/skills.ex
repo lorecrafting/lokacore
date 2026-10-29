@@ -1,4 +1,3 @@
-# size: allow 340, skill loading keeps the hs-11 prerequisite and hs-14 secret checks beside the tree they read
 defmodule Loka.Content.Skills do
   @moduledoc "Reserved skill acquisition facts and equipment/lesson references."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -70,8 +69,6 @@ defmodule Loka.Content.Skills do
       &(definition(&1, caps, text) ++ growth(&1) ++ itself(m, &1, hidden))
     ) ++
       secret(m, defs) ++
-      floor(m, defs) ++
-      prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
 
@@ -100,7 +97,7 @@ defmodule Loka.Content.Skills do
 
   defp growth(_), do: []
 
-  # Homestead hs-11: a box never requires itself (its own full ref, as cartridge_skills.ts).
+  # Homestead hs-11: a box never requires itself (its own full ref).
   # Homestead hs-14: a shown box never requires a hidden one.
   defp itself(m, {key, {rel, _, %{"prerequisite" => p} = s}}, hidden) do
     me = ref(m, key)
@@ -118,7 +115,7 @@ defmodule Loka.Content.Skills do
   defp itself(_, _, _), do: []
 
   # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
-  # skill, and no labeled talk or riddle dialogue teaches one (cartridge_skills.ts).
+  # skill, and no labeled talk or riddle dialogue teaches one.
   defp secret(m, defs) do
     hidden? =
       &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
@@ -169,46 +166,6 @@ defmodule Loka.Content.Skills do
       "key" => key
     }
 
-  # Homestead hs-11: a skill prerequisite needs API 1.101; hs-14: a profession or a hidden skill 1.102.
-  defp prerequisite_floor(m, defs) do
-    has = fn k -> Enum.any?(defs["skill"], &match?({_, {_, _, %{^k => _}}}, &1)) end
-
-    floor =
-      cond do
-        has.("profession") or has.("hidden") -> [1, 102]
-        has.("prerequisite") -> [1, 101]
-        true -> nil
-      end
-
-    if floor && version(m) < floor,
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
-  defp floor(m, defs) do
-    used =
-      Enum.any?(defs["skill"], &match?({_, {_, _, %{"growth" => _}}}, &1)) or
-        Enum.any?(defs["recipe"], &match?({_, {_, _, %{"check" => %{"kind" => "opposed"}}}}, &1)) or
-        Enum.any?(defs["room"], fn
-          {_, {_, _, %{"details" => %{} = ds}}} ->
-            Enum.any?(Map.values(ds), &is_map_key(&1, "rating"))
-
-          _ ->
-            false
-        end)
-
-    if used and version(m) < [1, 44],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp version(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
   defp capability(rel, caps),
     do:
       if(caps["skills"] == 1 and caps["fact"] == 1 and caps["policy"] == 1,
@@ -232,7 +189,7 @@ defmodule Loka.Content.Skills do
 
   defp weapon(_, _, _, _), do: []
 
-  # Toolbox row 21: a durability names a bounded int entity fact and needs API 1.69.
+  # Toolbox row 21: a durability names a bounded int entity fact.
   defp durability(_, _, _, nil), do: []
 
   defp durability(m, defs, rel, d) do
@@ -248,10 +205,7 @@ defmodule Loka.Content.Skills do
       end
 
     reference(rel, steps, {"fact", "fact"}, d, m, defs) ++
-      shape ++
-      if version(m) < [1, 69],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
+      shape
   end
 
   defp entity_int?(%{"value_type" => t} = f),
@@ -295,7 +249,7 @@ defmodule Loka.Content.Skills do
           e <- reference(rel, steps ++ ["sequence", i], {"skill", "skill"}, s, ctx.m, ctx.defs),
           do: e
 
-    refs ++ lesson(rel, steps, o, d, ctx) ++ fee_api(o, ctx.m)
+    refs ++ lesson(rel, steps, o, d, ctx)
   end
 
   defp lesson(rel, steps, %{"lesson_payment" => p} = o, d, ctx) do
@@ -317,15 +271,6 @@ defmodule Loka.Content.Skills do
   end
 
   defp grants(o), do: Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire"))
-
-  # Row 22b: a fee without a skill (a hire fee) needs kernel_api 1.75.
-  defp fee_api(%{"lesson_payment" => _} = o, m) do
-    if grants(o) == 0 and version(m) < [1, 75],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp fee_api(_, _), do: []
 
   defp funded?(%{"role" => "npc", "npc" => ref}, resource, ctx) do
     case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do

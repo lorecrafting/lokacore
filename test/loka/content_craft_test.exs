@@ -11,9 +11,9 @@ defmodule Loka.ContentCraftTest do
 
   defp part(part, key, v), do: &put_in(&1, ["craft", part, key], v)
 
-  # Break (Homestead hs-10; twin of the loader rows in kernel/ts/test/craft.test.ts): a craft
+  # Break (Homestead hs-10): a craft
   # compiles with a template or non-container holder, an unresolved item, holder or reason, a
-  # duplicate item, or on a spell. The floor is loader_floors.json's "a craft" case.
+  # duplicate item, or on a spell.
   test "a craft needs resolved, placed holders, distinct items, a catalog reason, a station",
        %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -58,9 +58,8 @@ defmodule Loka.ContentCraftTest do
     assert [{"SCHEMA_VIOLATION", "actions/carve_spoon.target.kind"}] = codes(dir, storylet)
   end
 
-  # Break (hs-11; twin of the loader test in kernel/ts/test/craft.test.ts): a skill prerequisite
-  # naming its own skill, or an unknown skill, compiles. The floor is loader_floors.json's
-  # "a skill prerequisite" case.
+  # Break (hs-11): a skill prerequisite
+  # naming its own skill, or an unknown skill, compiles.
   test "a skill prerequisite resolves and never names its own skill", %{dir: dir} do
     # The leaf sits under all and not, so a walker that skips nesting misses it.
     nested = fn key ->
@@ -84,7 +83,7 @@ defmodule Loka.ContentCraftTest do
            )
   end
 
-  # Homestead hs-11 (twin of craft_raze.test.ts). Break: an ancestry grants at birth a skill whose
+  # Homestead hs-11. Break: an ancestry grants at birth a skill whose
   # prerequisite was never met (woodfolk's woodcutting takes one here).
   test "an ancestry never grants a skill with a prerequisite", %{dir: dir} do
     prerequisite = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
@@ -99,10 +98,9 @@ defmodule Loka.ContentCraftTest do
            ]
   end
 
-  # Break (hs-14; twin of the loader test in kernel/ts/test/craft.test.ts): a shown skill whose
+  # Break (hs-14): a shown skill whose
   # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
-  # or an unknown profession text compiles. The floor is loader_floors.json's
-  # "a skill profession" case.
+  # or an unknown profession text compiles.
   test "nothing shown reads or names a hidden skill; a profession resolves", %{dir: dir} do
     edit = fn edits ->
       case Loka.ContentSource.compile(dir, edits) do
@@ -119,7 +117,7 @@ defmodule Loka.ContentCraftTest do
     assert edit.([{"skills/whittling.json", &Map.put(&1, "profession", "profession.nothing")}]) ==
              [{"UNRESOLVED_REFERENCE", "skills/whittling.profession"}]
 
-    # hs-14 secret (twin of craft.test.ts "loader: no shown qualification, ..."): a shown skill's
+    # hs-14 secret: a shown skill's
     # qualification, any dialogue policy, or a talk label or riddle on a dialogue teaching a hidden skill.
     reads = %{
       "policy_version" => 1,
@@ -158,10 +156,10 @@ defmodule Loka.ContentCraftTest do
     assert edit.([riddle]) == :ok
   end
 
-  # Break (Built rooms S6; twin of the loader test in kernel/ts/test/craft.test.ts): a build step
+  # Break (Built rooms S6): a build step
   # compiles off a detail target, on a room that is no site, twice in one sequence, without
   # world.construction or the refusal texts, or naming a blueprint or direction the site does not
-  # list. The floor is loader_floors.json's "a build step" case.
+  # list.
   test "a build step needs a site detail, its listed blueprint and direction, once, on success",
        %{dir: dir} do
     seq = "actions/raise_timbered_hut.outcomes.success.sequence"

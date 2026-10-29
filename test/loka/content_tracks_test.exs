@@ -39,8 +39,6 @@ defmodule Loka.ContentTracksTest do
     write = %{"op" => "fact.assign", "fact" => "trail_hounds_at", "value" => 1}
 
     for {changes, want} <- [
-          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.84")}],
-           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
           {[{"facts.json", &put_in(&1, ["facts", "trail_hounds_exit"], &1["facts"]["tracked"])}],
            {"RESERVED_FACT", "facts.facts.trail_hounds_exit"}},
           {[

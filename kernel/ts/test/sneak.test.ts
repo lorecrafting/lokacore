@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { concealed, statusKey } from '../src/mechanics/status/shared.ts';
-import { cartridgeOf, ctx, verdict } from './harness.ts';
+import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sneak-sampler-'));
 let artifact: Uint8Array;
@@ -117,53 +117,4 @@ test('a hidden NPC stays concealed from an alert player', () => {
   const hiddenRow = { [statusKey(sentry, HIDDEN)]: { generation: 1, active: true } };
   w = { ...w, state: { ...w.state, statuses: { ...w.state.statuses, ...hiddenRow } } } as World;
   assert.equal(concealed(w, sentry, w.body), true);
-});
-
-const base = cartridgeOf(artifact);
-
-// Breaks (twin of the row 16 case in test/loka/content_status_test.exs): pierced_by loading without
-// a concealment, naming no skill or attribute, or under API 1.92; an entry reaction applying a
-// concealment loading (the engage cure then faults conflicting_write on that move).
-test('loader: pierced_by needs a concealment, a real skill and attribute, API 1.93, no entry concealment', () => {
-  const S = `${C.cartridge_id}@${C.cartridge_version}:status/hidden`;
-  const at = `.cartridge.statuses["${S}"].pierced_by`;
-  assert.equal(
-    verdict(base, () => {}),
-    'loaded',
-  );
-  assert.deepEqual(
-    verdict(base, (c) => {
-      delete c.statuses[S].concealment;
-      c.statuses[S].per_tick = -1;
-    }),
-    ['SCHEMA_VIOLATION', at],
-  );
-  assert.deepEqual(
-    verdict(
-      base,
-      (c) => (c.statuses[S].pierced_by.skill = { ...c.statuses[S].pierced_by.skill, key: 'none' }),
-    ),
-    ['UNRESOLVED_REFERENCE', `${at}.skill`],
-  );
-  assert.deepEqual(
-    verdict(
-      base,
-      (c) =>
-        (c.statuses[S].pierced_by.attribute = {
-          ...c.statuses[S].pierced_by.attribute,
-          key: 'none',
-        }),
-    ),
-    ['UNRESOLVED_REFERENCE', `${at}.attribute`],
-  );
-  const R = `${C.cartridge_id}@${C.cartridge_version}:reaction/hide`;
-  const keep = { ...C, kind: 'room', key: 'keep' };
-  assert.deepEqual(
-    verdict(base, (c) => (c.reactions[R].on = { event: 'entity_entered_room', room: keep })),
-    ['OUTCOME_MISMATCH', `.cartridge.reactions["${R}"].apply[0].op`],
-  );
-  assert.deepEqual(
-    verdict(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.92')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
 });

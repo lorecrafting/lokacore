@@ -203,87 +203,22 @@ test('no engage in a sanctuary or on a flight into a hostile room; a walk-in eng
   assert.equal(engaged(w, w.body)?.row.npc_id, id(w, 'npc', 'peg'));
 });
 
-// Breaks: the loader admits row 15 or G11 below 1.47, a reaction fact.adjust on a non-int fact,
-// an engage line on an NPC without an attack, a refuse line naming no text or on an NPC that is
-// never hostile, a disposition on a
-// spawn template (its walk-in encounter has no active_ids, so the save would not reopen), or a
-// friendly discount without a friendly disposition, or one with a skill too (the schema's
-// exactlyOneRequired).
-test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a friendly NPC', () => {
-  const guard = `.cartridge.npcs[${JSON.stringify(`${S}:npc/guard`)}]`;
+// Breaks: the loader admits a friendly discount that names a skill too (the schema's
+// exactlyOneRequired). The row 15 and G11 reference checks are the compiler's
+// (content_standing_test.exs).
+test('a friendly discount names no skill', () => {
   const peg = `.cartridge.npcs[${JSON.stringify(`${S}:npc/peg`)}]`;
-  const gift = `.cartridge.reactions[${JSON.stringify(`${S}:reaction/gift_apple`)}]`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => {
-        // Without W2's pair fact, whose own floor would report the same diagnostic.
-        delete c.facts[`${S}:fact/trust`].per_subject;
-        c.dialogues[`${S}:dialogue/maud_greet`].policy.root = { op: 'all', items: [] };
-        const hostile = c.npcs[`${S}:npc/guard`].disposition.hostile;
-        hostile.root = hostile.root.items[0];
-        c.manifest.requires.kernel_api.at_least = '1.46';
-      },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => {
-        const value_type = { type: 'bool', default: false };
-        c.facts[`${S}:fact/flag`] = {
-          key: 'flag',
-          meaning: 'A flag.',
-          scopes: ['instance'],
-          value_type,
-          version: 1,
-        };
-        c.reactions[`${S}:reaction/gift_apple`].apply[0].fact.key = 'flag';
-      },
-      'FACT_TYPE_MISMATCH',
-      `${gift}.apply[0].fact`,
-    ],
-    [(c) => delete c.npcs[`${S}:npc/guard`].attack, 'SCHEMA_VIOLATION', `${guard}.disposition`],
-    [
-      (c) => (c.npcs[`${S}:npc/guard`].spawn_template = true),
-      'SCHEMA_VIOLATION',
-      `${guard}.disposition`,
-    ],
-    [
-      (c) => delete c.npcs[`${S}:npc/peg`].disposition.friendly,
-      'RESOURCE_SPEC_INVALID',
-      `${peg}.shop.buy_discount`,
-    ],
-    [
-      (c) =>
-        (c.npcs[`${S}:npc/peg`].shop.buy_discount.skill = {
-          cartridge_id: 'standing_sampler',
-          cartridge_version: '0.0.1',
-          kind: 'skill',
-          key: 'haggle',
-        }),
-      'SCHEMA_VIOLATION',
-      `${peg}.shop.buy_discount`,
-    ],
-    [
-      (c) => {
-        c.npcs[`${S}:npc/guard`].disposition.refuse = 'npc.guard.missing';
-        c.manifest.requires.kernel_api.at_least = '1.104';
-      },
-      'UNRESOLVED_REFERENCE',
-      `${guard}.disposition.refuse`,
-    ],
-    [
-      (c) => {
-        const d = c.npcs[`${S}:npc/peg`].disposition;
-        delete d.hostile;
-        d.refuse = 'npc.peg.short';
-        c.manifest.requires.kernel_api.at_least = '1.104';
-      },
-      'SCHEMA_VIOLATION',
-      `${peg}.disposition`,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const r = reload(change);
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
+  const r = reload(
+    (c) =>
+      (c.npcs[`${S}:npc/peg`].shop.buy_discount.skill = {
+        cartridge_id: 'standing_sampler',
+        cartridge_version: '0.0.1',
+        kind: 'skill',
+        key: 'haggle',
+      }),
+  );
+  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
+    'SCHEMA_VIOLATION',
+    `${peg}.shop.buy_discount`,
+  ]);
 });

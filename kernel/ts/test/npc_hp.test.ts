@@ -136,29 +136,17 @@ test('explicit override queries refuse absent or malformed rows', () => {
     );
 });
 
-// Breaks: compiler/loader shape or cross-field validation drifts, or older kernels ignore the addition.
-test('loader rejects invalid NPC HP and enforces API 1.4', () => {
-  const change = (hp: unknown, api = '1.4') => {
+// Breaks: an NPC hp outside the entity_resource schema loads, or an older kernel loads the cartridge.
+test('loader rejects invalid NPC HP and an unsupported kernel', () => {
+  const change = (hp: unknown) => {
     const c = structuredClone(kat.value);
     c.npcs['cellar_sampler@0.0.7:npc/cellar_rat_1'].hp = hp;
-    c.manifest.requires.kernel_api.at_least = api;
     return c;
   };
-  for (const hp of [
-    { minimum: 7, maximum: 6, start: 6, gain: 0 },
-    { minimum: 0, maximum: 6, start: 7, gain: 0 },
-  ]) {
-    const result = load(change(hp));
-    assert.equal(result.ok, false);
-    if (!result.ok) assert.equal(result.diagnostic.code, 'RESOURCE_SPEC_INVALID');
-  }
   for (const c of read('protocol/fixtures/entity_resource.json').contracts.filter(
     (c: any) => !c.valid,
   ))
     assert.equal(load(change(c.value)).ok, false, c.id);
-  const old = load(change({ minimum: 0, maximum: 6, start: 6, gain: 0 }, '1.3'));
-  assert.equal(old.ok, false);
-  if (!old.ok) assert.equal(old.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
   const unsupported = load(kat.value, { ...INSTALLED, kernel_api: '1.3' });
   assert.equal(unsupported.ok, false);
   if (!unsupported.ok) assert.equal(unsupported.diagnostic.code, 'KERNEL_API_UNSUPPORTED');

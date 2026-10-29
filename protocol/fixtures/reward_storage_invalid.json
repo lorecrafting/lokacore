@@ -67,8 +67,7 @@
         "amount": 5
       }
     ],
-    "code": "RESERVED_FACT",
-    "loader_code": "FACT_TYPE_MISMATCH"
+    "code": "RESERVED_FACT"
   },
   {
     "path": [

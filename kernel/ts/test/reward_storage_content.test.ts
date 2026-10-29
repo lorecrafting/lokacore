@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import { read } from './read.ts';
-import { bundle, prefix, ref } from './reward_storage_fixture.ts';
+import { bundle, prefix } from './reward_storage_fixture.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
@@ -18,82 +18,20 @@ const load = (change: (c: any) => void) => {
   );
 };
 
-// Breaks: the loader omits semantic role/type/reserved-write checks.
-test('portable loader rejects malformed reward roles, types and reserved writes', () => {
+// Breaks: the loader admits a malformed receive shape (roles, types and reserved writes are the
+// compiler's: content_reward_storage_test.exs).
+test('portable loader rejects a malformed reward receive', () => {
+  assert.ok(load(() => {}).ok);
   for (const c of read('protocol/fixtures/reward_storage_invalid.json')) {
+    if (c.code !== 'SCHEMA_VIOLATION') continue;
     const result = load((v) => {
       v.barriers[`${prefix}:barrier/reward_lid`].initial = 'open';
       const d = v.dialogues[`${prefix}:dialogue/maud_turn_in`];
       let at = d;
       for (const k of c.path.slice(0, -1)) at = at[k];
-      const value = structuredClone(c.value);
-      if (c.path.at(-1) === 'sequence')
-        for (const step of value) step.fact = ref('fact', step.fact);
-      at[c.path.at(-1)] = value;
+      at[c.path.at(-1)] = structuredClone(c.value);
     });
     assert.equal(result.ok, false, JSON.stringify(c));
-    if (!result.ok)
-      assert.equal(result.diagnostic.code, c.loader_code ?? c.code, JSON.stringify(result));
+    if (!result.ok) assert.equal(result.diagnostic.code, c.code, JSON.stringify(result));
   }
-  for (const field of ['minimum', 'maximum']) {
-    const result = load((c) => {
-      delete c.facts[`${prefix}:fact/maud_trust`].value_type[field];
-    });
-    assert.ok(!result.ok);
-    assert.equal(result.diagnostic.code, 'FACT_TYPE_MISMATCH');
-  }
-});
-
-// Breaks: NPC keys are accepted without matching receive custody or with an inaccessible speaker.
-test('static reward-key potential retains wrong-custody and inaccessible-speaker lockouts', () => {
-  for (const variant of ['custody', 'speaker', 'room'] as const) {
-    const result = load((c) => {
-      if (variant === 'custody') {
-        c.items[`${prefix}:item/reward_key`].location.npc = ref('npc', 'bram');
-        c.npcs[`${prefix}:npc/bram`].room = ref('room', 'drowned_lantern');
-      }
-      if (variant === 'speaker')
-        c.dialogues[`${prefix}:dialogue/maud_turn_in`].npc = ref('npc', 'bram');
-      if (variant === 'room') {
-        c.npcs[`${prefix}:npc/maud`].room = ref('room', 'inn_attic');
-        delete c.rooms[`${prefix}:room/inn_rooms`].exits.up;
-      }
-    });
-    assert.ok(!result.ok);
-    assert.equal(result.diagnostic.code, 'BARRIER_UNREACHABLE_KEY');
-  }
-});
-
-// Breaks: either transfer feature bypasses API1.10 or legacy terminal receive stops loading.
-test('each transfer feature requires API1.10 without changing terminal receive', () => {
-  assert.ok(load(() => {}).ok);
-  for (const feature of ['receive', 'give_allowed']) {
-    const change = (c: any) => {
-      if (feature === 'receive') delete c.dialogues[`${prefix}:dialogue/maud_turn_in`].quest;
-      else c.items[`${prefix}:item/reward_key`].give_allowed = false;
-    };
-    const current = load((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.10';
-      change(c);
-    });
-    assert.ok(current.ok, JSON.stringify(current));
-    const old = load((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.9';
-      change(c);
-    });
-    assert.ok(!old.ok);
-    assert.equal(old.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
-  }
-});
-
-// Breaks: API1.10 silently admits a receive-and-accept choice that needs bound activation.
-test('receive with accept requires API1.14', () => {
-  const result = load((c) => {
-    c.manifest.requires.kernel_api.at_least = '1.10';
-    const d = c.dialogues[`${prefix}:dialogue/maud_turn_in`];
-    delete d.quest;
-    d.choices.done.accept = ref('quest', 'mauds_cellar');
-  });
-  assert.ok(!result.ok);
-  assert.equal(result.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
 });

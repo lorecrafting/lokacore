@@ -119,7 +119,7 @@ defmodule Loka.Content.Compiler do
         Loka.Content.Spells.check(manifest, defs, registry, elem(located, 1)) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
-        Loka.Content.Floors.check(manifest, defs, located) ++
+        Loka.Content.Standing.check(manifest, defs) ++
         Loka.Content.Replenish.check(manifest, defs) ++
         Loka.Content.Delayed.check(manifest, defs, Checks.trees(defs)) ++
         Loka.Content.Construction.check(manifest, defs, v2, located, registry)

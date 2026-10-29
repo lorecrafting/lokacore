@@ -146,9 +146,9 @@ test('an oversized scaled fare is refused, not thrown', () => {
 
 const built = cartridgeOf(artifact);
 
-// Breaks (twin of test/loka/content_status_movement_test.exs): a status movement, a room's air,
-// chasm or water tag, an item's water tag or a barrier's chasm tag loads under API 1.61, or a movement status without per_tick is refused.
-test('loader: movement and terrain tags need API 1.62; movement stands in for per_tick', () => {
+// Breaks (twin of test/loka/content_status_movement_test.exs): a movement status without per_tick,
+// a terrain-tagged room, item or barrier is refused at API 1.62.
+test('loader: movement and terrain tags load at API 1.62; movement stands in for per_tick', () => {
   const api = (v: string) => (c: any) => (c.manifest.requires.kernel_api.at_least = v);
   const moving = (c: any) => {
     const { resistances: _, ...plain } = c.statuses[S('warded')];
@@ -158,7 +158,6 @@ test('loader: movement and terrain tags need API 1.62; movement stands in for pe
     c.rooms[DEN].tags = [tag];
     c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
   };
-  const floor = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
   const item = (c: any) => {
     c.items[Object.keys(c.items)[0]].tags = ['water'];
     c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
@@ -177,18 +176,9 @@ test('loader: movement and terrain tags need API 1.62; movement stands in for pe
     c.text['barrier.mist_gate.short'] = 'a mist gate';
     c.manifest.requires.capabilities.barrier = c.lock.capabilities.barrier = 1;
   };
-  for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water'), item, barrier]) {
+  for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water'), item, barrier])
     assert.equal(
       verdict(built, (c) => (api('1.62')(c), edit(c))),
       'loaded',
     );
-    assert.deepEqual(
-      verdict(built, (c) => (api('1.61')(c), edit(c))),
-      floor,
-    );
-  }
-  assert.equal(
-    verdict(built, (c) => (api('1.61')(c), tagged('wooden')(c))),
-    'loaded',
-  );
 });

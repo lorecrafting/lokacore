@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import type { World } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { entity, genesis, load, prefix, ref, runner } from './riddle_fixture.ts';
+import { entity, genesis, prefix, ref, runner } from './riddle_fixture.ts';
 
 // An unbounded riddle: no wrong_limit and no quest, so the answer is offered at once.
 const unbounded = (c: any) => {
@@ -133,41 +133,4 @@ test('either original participant leaving or dying disables Choose while Close s
       r.run({ type: 'close_choice', continuation_id: choice.continuation_id });
       assert.equal(solved(r.world()), false);
     }
-});
-
-// Breaks (loka-x6t.5 save re-check): a reopening hub answer that directly assigns a bounded riddle's
-// answer fact (riddle-save proves it by one receipt) loads, so repeating it turns the save corrupt;
-// or the check flags an unbounded riddle's fact or any other fact.
-test('a reopening dialogue rejects a direct assignment of a bounded riddle answer fact', () => {
-  const at = `.cartridge.dialogues["${prefix}:dialogue/chat"].choices.ask.sequence[0].op`;
-  for (const [fact, bounded, code] of [
-    ['riddle_solved', true, 'OUTCOME_MISMATCH'],
-    ['riddle_solved', false, undefined],
-    ['bell_heard', true, undefined],
-  ] as const) {
-    const loaded = load((c) => {
-      if (!bounded) unbounded(c);
-      // No quest, no riddle, two choices: Bram's chat reopens after each answer.
-      c.dialogues[`${prefix}:dialogue/chat`] = {
-        key: 'chat',
-        npc: ref('npc', 'bram'),
-        prompt: 'dialogue.bram.prompt',
-        policy: c.dialogues[`${prefix}:dialogue/bram`].policy,
-        roles: { bram: { role: 'npc', npc: ref('npc', 'bram') } },
-        choices: {
-          ask: {
-            label: 'dialogue.bram.carry',
-            narration: 'narration.bram.carry',
-            sequence: [{ op: 'fact.assign', fact: ref('fact', fact), value: true }],
-          },
-          bye: { label: 'dialogue.bram.leave', narration: 'narration.bram.leave' },
-        },
-      };
-    });
-    assert.deepEqual(
-      loaded.ok ? undefined : [loaded.diagnostic.code, loaded.diagnostic.path],
-      code && [code, at],
-      `${fact} ${bounded}`,
-    );
-  }
 });

@@ -59,7 +59,7 @@ function harvestRemaining(world: World, detail: World['details'][string], here: 
   return { remaining: typeof ids === 'string' ? 0 : ids.length };
 }
 
-// Membership is compiler/loader-validated; the current room has at most 64 details.
+// Membership is compiler-validated; the current room has at most 64 details.
 function noticeBoards(
   world: World,
   actor: CharacterId,

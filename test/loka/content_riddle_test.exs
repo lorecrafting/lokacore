@@ -100,20 +100,4 @@ defmodule Loka.ContentRiddleTest do
       File.write!(path, original)
     end
   end
-
-  # Breaks: either optional feature independently bypasses API1.9 gating.
-  test "each API1.9 feature requires its declared minimum", %{tmp_dir: dir} do
-    for feature <- ["riddle", "active_variants"] do
-      sub = Path.join(dir, feature)
-      source(sub)
-      update(sub, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.8"))
-
-      if feature == "riddle",
-        do: update(sub, "quests/lantern.json", &Map.delete(&1, "journal")),
-        else: update(sub, "dialogues/bram.json", &Map.delete(&1, "riddle"))
-
-      assert {:error, diagnostics} = Loka.Content.compile(sub)
-      assert Enum.any?(diagnostics, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
-    end
-  end
 end

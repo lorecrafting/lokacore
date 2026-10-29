@@ -246,7 +246,7 @@
       ]
     },
     "TimePolicy": {
-      "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires kernel API >=1.1 and schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
+      "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
       "type": "object",
       "properties": {
         "profile": {
@@ -257,7 +257,7 @@
           "minimum": 1
         },
         "recap_after_minutes": {
-          "description": "Toolbox row W27, opt-in (kernel API >=1.47): an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080).",
+          "description": "Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080).",
           "type": "integer",
           "minimum": 1,
           "maximum": 10080

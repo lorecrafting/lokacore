@@ -75,8 +75,6 @@ defmodule Loka.ContentEscortTest do
     source(dir)
 
     for {rel, change, code} <- [
-          {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.10"),
-           "KERNEL_API_RANGE_INVALID"},
           {"cartridge.json",
            &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "escort") end),
            "UNDECLARED_CAPABILITY"},

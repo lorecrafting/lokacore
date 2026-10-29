@@ -134,10 +134,8 @@ test('without variety@1 a re-entry records nothing and the row has no count', ()
   );
 });
 
-// Breaks (loader twin of the compiler checks): an alternate missing from the catalog accepted,
-// alternates without variety@1 accepted, alternates or visited_count below kernel_api 1.45, or an
-// empty alternates list, a key or an alternate not shaped as a TextKey accepted.
-test('the loader refuses unknown alternates, an unlocked owner and an old kernel_api', () => {
+// Breaks: an empty alternates list, or a key or an alternate not shaped as a TextKey, loads.
+test('the loader refuses malformed alternates', () => {
   const doc = JSON.parse(new TextDecoder().decode(artifact)) as Obj;
   const load = (change: (c: Obj) => void) => {
     const c = structuredClone(doc.cartridge);
@@ -148,22 +146,6 @@ test('the loader refuses unknown alternates, an unlocked owner and an old kernel
     const r = loadCartridge(bytes, INSTALLED);
     return r.ok ? 'ok' : `${r.diagnostic.code} ${r.diagnostic.path}`;
   };
-  const old = (c: Obj) => (c.manifest.requires.kernel_api.at_least = '1.44');
-  const floor = 'KERNEL_API_RANGE_INVALID .cartridge.manifest.requires.kernel_api.at_least';
-  const garden = 'variety_sampler@0.0.1:room/garden';
-  assert.equal(
-    load((c) => (c.alternates['narration.walk'][1] = 'narration.walk_d')),
-    'UNRESOLVED_REFERENCE .cartridge.alternates["narration.walk"][1]',
-  );
-  assert.equal(
-    load((c) => {
-      delete c.lock.capabilities.variety;
-      delete c.manifest.requires.capabilities.variety;
-      delete c.rooms[garden].variants;
-    }),
-    'UNDECLARED_CAPABILITY .cartridge.alternates',
-  );
-  assert.equal(load(old), floor);
   assert.match(
     load((c) => (c.alternates['narration.walk'] = [])),
     /^SCHEMA_VIOLATION /,
@@ -175,19 +157,5 @@ test('the loader refuses unknown alternates, an unlocked owner and an old kernel
   assert.match(
     load((c) => (c.alternates['narration.walk'] = ['Walk'])),
     /^SCHEMA_VIOLATION /,
-  );
-  assert.equal(
-    load((c) => {
-      old(c);
-      delete c.alternates;
-    }),
-    floor,
-  );
-  assert.equal(
-    load((c) => {
-      old(c);
-      delete c.rooms[garden].variants;
-    }),
-    floor,
   );
 });

@@ -342,13 +342,7 @@ test('a root over a job budget names its limit, pending_jobs before due_jobs_per
   assert.deepEqual([missing.decision.kind, 'limit' in missing], ['fault', false]);
 });
 
-const fails = (
-  f: (c: any) => void,
-  code: string,
-  path: string,
-  data = {},
-  suggested: string[] = [],
-) =>
+const fails = (f: (c: any) => void, code: string, path: string, data = {}) =>
   assert.deepEqual(load(f), {
     ok: false,
     diagnostic: {
@@ -357,64 +351,9 @@ const fails = (
       path,
       message_key: `diagnostics.${code.toLowerCase()}`,
       data,
-      suggested_capabilities: suggested,
+      suggested_capabilities: [],
     },
   });
-const unlock = (c: any, cap: string) => {
-  delete c.manifest.requires.capabilities[cap];
-  delete c.lock.capabilities[cap];
-};
-
-// Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): a
-// schedule naming a room the cartridge lacks (run_job would move Bram nowhere), a schedule or
-// calendar whose owner (behavior@1, calendar@1) is not locked, or a schedule without schedule@1
-// (the drain would run its jobs under a capability the cartridge never declared), or an action
-// built on run_job (authority-internal, 04 §1: a dead action).
-test('the loader checks schedule rooms and the schedule and calendar owners', () => {
-  const bram = `.cartridge.npcs["${F}:npc/bram"]`;
-  fails(
-    (c) => (c.npcs[`${F}:npc/bram`].daily_schedule['19'] = ref('room', 'shed')),
-    'UNRESOLVED_REFERENCE',
-    `${bram}.daily_schedule.19`,
-    { target: `${F}:room/shed` },
-  );
-  fails(
-    (c) => unlock(c, 'behavior'),
-    'UNDECLARED_CAPABILITY',
-    `${bram}.daily_schedule`,
-    { capability: 'behavior' },
-    ['behavior@1'],
-  );
-  fails(
-    (c) => unlock(c, 'schedule'),
-    'UNDECLARED_CAPABILITY',
-    `${bram}.daily_schedule`,
-    { capability: 'schedule' },
-    ['schedule@1'],
-  );
-  fails(
-    (c) =>
-      (c.actions[`${F}:action/hurry`] = {
-        key: 'hurry',
-        label: 'actions.coil_rope',
-        accessibility: 'actions.coil_rope',
-        target: { kind: 'none' },
-        command: 'run_job',
-        priority: 0,
-        input: [],
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
-      }),
-    'UNKNOWN_COMMAND',
-    `.cartridge.actions["${F}:action/hurry"].command`,
-  );
-  fails(
-    (c) => unlock(c, 'calendar'),
-    'UNDECLARED_CAPABILITY',
-    '.cartridge.calendar',
-    { capability: 'calendar' },
-    ['calendar@1'],
-  );
-});
 
 // Narration participants (Early R7/R8 N; 06 §43 "pinned text keys and bindings"): ferry's
 // coil_rope names the actor and Bram. BODY is ordinal 1 under the nil CommandId (runtime/fresh.ts).
@@ -466,23 +405,9 @@ test("an item participant is pinned to the item's EntityId", () => {
   });
 });
 
-// Breaks: the kernel would pin an undefined EntityId because the loader let in a participant
-// naming no definition, or one of another kind than its role says; or a participant's field
-// outside its role's branch (cartridge.schema.json DiagnosticCode UNKNOWN_FIELD) let in.
-test('the loader rejects a narration participant naming no npc or item of its role', () => {
-  const npc = (r: DefinitionRef) => (c: any) => (coil(c).participants.bram.npc = r);
-  fails(npc(ref('npc', 'ada')), 'UNRESOLVED_REFERENCE', `${COIL}.bram.npc`, {
-    target: `${F}:npc/ada`,
-  });
-  fails(npc(ref('room', 'ferry_landing')), 'UNRESOLVED_REFERENCE', `${COIL}.bram.npc`, {
-    target: `${F}:room/ferry_landing`,
-  });
-  fails(
-    (c) => (coil(c).participants.bram = { role: 'item', item: BRAM }),
-    'UNRESOLVED_REFERENCE',
-    `${COIL}.bram.item`,
-    { target: `${F}:npc/bram` },
-  );
+// Breaks: a participant's field outside its role's branch (cartridge.schema.json DiagnosticCode
+// UNKNOWN_FIELD) let in. Unresolved participants are the compiler's (content_ferry_test.exs).
+test("the loader rejects a narration participant's field outside its role", () => {
   fails(
     (c) => (coil(c).participants.actor = { role: 'actor', npc: BRAM }),
     'UNKNOWN_FIELD',

@@ -1,5 +1,5 @@
 defmodule Loka.Content.Death do
-  @moduledoc "Corpse templates and shrine settings; twin of content/cartridge_death.ts."
+  @moduledoc "Corpse templates and shrine settings."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
   alias Loka.Content.Entities
@@ -60,12 +60,7 @@ defmodule Loka.Content.Death do
   defp drops(m, defs, death) do
     tables = for {key, {rel, _, %{"drops" => _} = npc}} <- defs["npc"] || %{}, do: {key, rel, npc}
 
-    api =
-      if tables == [] or version(m) >= [1, 43],
-        do: [],
-        else: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
-
-    api ++ Enum.flat_map(tables, &drop_table(&1, m, defs, death))
+    Enum.flat_map(tables, &drop_table(&1, m, defs, death))
   end
 
   defp drop_table({key, rel, %{"drops" => list} = npc}, m, defs, death) do
@@ -134,7 +129,7 @@ defmodule Loka.Content.Death do
           error <- reference("cartridge.json", ["world", "death"], {field, kind}, d, m, defs),
           do: error
 
-    requirements(m, d) ++ refs ++ values(m, defs, d)
+    requirements(m) ++ refs ++ values(m, defs, d)
   end
 
   defp values(m, defs, d) do
@@ -158,32 +153,14 @@ defmodule Loka.Content.Death do
         do: bad("cartridge.world.death.restore." <> pool)
   end
 
-  defp version(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-  defp requirements(m, d) do
-    api =
-      if version(m) < api_floor(d),
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    owners =
-      for c <- ~w(death containment position),
-          m["requires"]["capabilities"][c] != 1,
-          do:
-            diag("UNDECLARED_CAPABILITY", "cartridge.world.death", %{"capability" => c}, [
-              c <> "@1"
-            ])
-
-    api ++ owners
+  defp requirements(m) do
+    for c <- ~w(death containment position),
+        m["requires"]["capabilities"][c] != 1,
+        do:
+          diag("UNDECLARED_CAPABILITY", "cartridge.world.death", %{"capability" => c}, [
+            c <> "@1"
+          ])
   end
-
-  defp api_floor(%{"narration" => _}), do: [1, 117]
-  defp api_floor(%{"penalty" => _}), do: [1, 109]
-  defp api_floor(_), do: [1, 5]
 
   defp restore_valid?({_, _, spec}, amount),
     do: amount >= spec["minimum"] and amount <= spec["maximum"]

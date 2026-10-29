@@ -1,4 +1,4 @@
-// Toolbox row 29b: a spell's effects, steps only a spell recipe holds (the loaders refuse them on
+// Toolbox row 29b: a spell's effects, steps only a spell recipe holds (the compiler refuses them on
 // any other): status.apply through status@1's shared step (so a first application emits
 // status_applied), damage of a G2 kind after the NPC's resistances, and light.ignite through
 // light@1's ignite transition. The holders are the named NPC's or item's instance, else the caster.

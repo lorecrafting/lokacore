@@ -16,7 +16,7 @@ defmodule Loka.Content.Population do
   @gates ~w(birth_when wander_when)
   @actorless ~w(all any not population_count time_window sky barrier_state)
 
-  @doc "Each plan gate's located policy root (row W12; twin of the TS loader's nodes/1)."
+  @doc "Each plan gate's located policy root (row W12)."
   def conditions(defs),
     do:
       for(
@@ -68,42 +68,10 @@ defmodule Loka.Content.Population do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
-    floor(manifest, defs, plans) ++
-      for {_key, {rel, steps, plan}} <- plans,
-          is_map(plan),
-          error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
-          do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
-  end
-
-  # Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
-  # (a plan only population.spawn fills) needs 1.84; row W12: a floor, a plan gate or a
-  # population_count leaf anywhere needs 1.86.
-  defp floor(m, defs, plans) do
-    list = for {_, {_, _, p}} <- plans, is_map(p), do: p
-
-    floor =
-      cond do
-        w12?(list, defs) ->
-          [1, 86]
-
-        Enum.any?(list, &(&1["day_target"] == 0)) ->
-          [1, 84]
-
-        Enum.any?(list, &Map.has_key?(&1, "chance")) ->
-          [1, 74]
-
-        true ->
-          [0]
-      end
-
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if api < floor,
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
+    for {_key, {rel, steps, plan}} <- plans,
+        is_map(plan),
+        error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
+        do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
   end
 
   # ponytail: report this finite plan's linked source errors together; split on another plan shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
@@ -152,17 +120,6 @@ defmodule Loka.Content.Population do
     do: Enum.all?(p["items"] || [], &actorless?/1)
 
   defp actorless?(_), do: false
-
-  defp w12?(plans, defs),
-    do:
-      Enum.any?(plans, &Enum.any?(["floor" | @gates], fn k -> Map.has_key?(&1, k) end)) or
-        counts?(defs)
-
-  defp counts?(%{"op" => "population_count"}), do: true
-  defp counts?(v) when is_map(v), do: Enum.any?(Map.values(v), &counts?/1)
-  defp counts?(v) when is_list(v), do: Enum.any?(v, &counts?/1)
-  defp counts?(v) when is_tuple(v), do: counts?(Tuple.to_list(v))
-  defp counts?(_), do: false
 
   defp pack_valid?(nil, _, _, _), do: true
 

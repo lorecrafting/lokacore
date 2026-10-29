@@ -126,9 +126,8 @@ test('case 6: without cost the 1 mv default scales: 0, 0, then 3', () => {
   assert.deepEqual([paid, mv(w)], [[0, 0, 3], 7]);
 });
 
-// Breaks: the schema admits an unknown tag or a percent outside 0..1000, or the loader admits
-// the sampler under kernel_api 1.105.
-test('case 7: the loader refuses an unknown tag, a bad percent and API 1.105', () => {
+// Breaks: the schema admits an unknown tag or a percent outside 0..1000.
+test('case 7: the loader refuses an unknown tag and a bad percent', () => {
   const terrain = (t: object) => (c: any) => (c.world.movement.terrain = t);
   const schema = (at: string) => ['SCHEMA_VIOLATION', `.cartridge.world.movement.terrain${at}`];
   assert.deepEqual(refused(terrain({ lava: 50 })), schema('.lava'));
@@ -142,10 +141,6 @@ test('case 7: the loader refuses an unknown tag, a bad percent and API 1.105', (
   assert.equal(
     refused(() => {}),
     'loaded',
-  );
-  assert.deepEqual(
-    refused((c) => (c.manifest.requires.kernel_api.at_least = '1.105')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
 });
 

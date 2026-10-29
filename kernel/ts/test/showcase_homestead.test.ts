@@ -26,7 +26,6 @@ import {
   pool,
   ref,
   refused,
-  reload,
   room,
   take,
   talk,
@@ -322,14 +321,6 @@ test('homestead 7 lane branch: rest with the cot on the lane floor', () => {
   // Five ticks in the hour; one elapsed decision's narration folds them into one line.
   assert.equal(after.events.filter((e) => e.type === 'status_ticked').length, 5);
   assert.deepEqual(labels(after.world), []);
-});
-
-// Breaks (hs-14 load check): the dialogue schema admitting a label on the hidden-lesson dialogue.
-test('a label on carpenter_lessons is a schema violation', () => {
-  assert.equal(
-    reload((c) => (c.dialogues[ref('dialogue', 'carpenter_lessons')].label = 'x')),
-    'SCHEMA_VIOLATION .cartridge.dialogues["toolbox_showcase@0.0.1:dialogue/carpenter_lessons"].label',
-  );
 });
 
 const farmer = (w: World, service: string, quoted_price: number) => ({

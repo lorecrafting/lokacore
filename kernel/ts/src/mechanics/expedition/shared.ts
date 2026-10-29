@@ -71,8 +71,8 @@ export function refused(
     return now.quest.state === 'active' && now.attempt?.status === 'failed'
       ? undefined
       : ('invalid_state' as const);
-  // Shelter is offered once route[2] is walked: both loaders pin route[2].to to shelter_room
-  // (content/cartridge_expedition.ts, lib/loka/content/expedition.ex); an earlier edge may enter it.
+  // Shelter is offered once route[2] is walked: the compiler pins route[2].to to shelter_room
+  // (lib/loka/content/expedition.ex); an earlier edge may enter it.
   const shelter = 3;
   return now.quest.state === 'active' &&
     now.attempt?.status === 'active' &&

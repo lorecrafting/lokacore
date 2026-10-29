@@ -256,12 +256,3 @@ test('expedition command, transition and journal contracts fail closed with indi
     assert.deepEqual(validate(contract, invalid, mutant), [], `${field}.enum red control`);
   }
 });
-
-// Breaks: a structurally valid route claims a transfer that its source room's exit cannot make.
-test('C6 loader refuses an independently rehashed impossible physical route', () => {
-  const loaded = sampler.load((c) => (c.quests[questKey].expedition.route[0].direction = 'north'));
-  assert.equal(loaded.ok, false);
-  if (loaded.ok) throw Error('impossible physical route loaded');
-  assert.equal(loaded.diagnostic.code, 'OUTCOME_MISMATCH');
-  assert.ok(loaded.diagnostic.path.endsWith('.expedition.route[0]'));
-});

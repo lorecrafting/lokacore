@@ -2,7 +2,6 @@
 // against a chest rated 3, a gate rated 5 and a vault rated 7; STR 8 (mechanics.md skill growth).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,7 +9,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { ctx } from './harness.ts';
 
@@ -107,61 +105,4 @@ test('a taught pick opens the rating 5 gate on the fifth attempt', () => {
     outcomes.push((r.decision as { outcome?: unknown }).outcome);
   }
   assert.deepEqual(outcomes, ['failure', 'failure', 'failure', 'failure', 'success']);
-});
-
-// Breaks: the loader drops a rows 5/G5 check, so growth that does not increase, an opposed check
-// against an unrated detail, an unknown skill, an authored write of the count or an old API floor
-// loads.
-test('the loader refuses each unsound growth or opposed declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const skill = `.cartridge.skills["${P}:skill/pick"]`;
-  const gate = `.cartridge.recipes["${P}:recipe/pick_gate"]`;
-  const api = '.cartridge.manifest.requires.kernel_api.at_least';
-  const room = (c: any) => c.rooms[`${P}:room/vault_room`];
-  const rows: [(c: any) => void, string, string][] = [
-    [(c) => (c.manifest.requires.kernel_api.at_least = '1.43'), 'KERNEL_API_RANGE_INVALID', api],
-    [
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.43'; // a rating alone still needs 1.44
-        delete c.skills[`${P}:skill/pick`].growth;
-        delete c.facts[`${P}:fact/uses_pick`];
-        c.recipes = {};
-      },
-      'KERNEL_API_RANGE_INVALID',
-      api,
-    ],
-    [(c) => (c.skills[`${P}:skill/pick`].growth[2] = 2), 'SCHEMA_VIOLATION', `${skill}.growth`],
-    [(c) => delete room(c).details.gate.rating, 'SCHEMA_VIOLATION', `${gate}.check`],
-    [
-      (c) => (c.recipes[`${P}:recipe/pick_gate`].check.skill.key = 'climb'),
-      'UNRESOLVED_REFERENCE',
-      `${gate}.check.skill`,
-    ],
-    [
-      (c) =>
-        (c.recipes[`${P}:recipe/pick_gate`].outcomes.success.sequence[0] = {
-          op: 'fact.assign',
-          fact: {
-            cartridge_id: P.split('@')[0],
-            cartridge_version: '0.0.1',
-            kind: 'fact',
-            key: 'uses_pick',
-          },
-          value: 5,
-        }),
-      'RESERVED_FACT',
-      `${gate}.outcomes.success.sequence[0].fact`,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path], path);
-  }
 });

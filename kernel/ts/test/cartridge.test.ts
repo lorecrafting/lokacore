@@ -4,8 +4,6 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { loadCartridge, type Installed } from '../src/content/cartridge.ts';
-import { encode } from '../src/foundation/canonical.ts';
-import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
@@ -46,102 +44,6 @@ const load = (cartridge: any) => {
     installed,
   );
 };
-const withFactType = (value_type: object) => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  cartridge.facts['hello_sampler@0.0.1:fact/village_arrived'].value_type = value_type;
-  return load(cartridge);
-};
-
-// Breaks: a hand-built artifact drops the implicit fact@1 dependency of position@1 or scene@1.
-test('position and scene artifacts require fact@1 in their effective lock', () => {
-  for (const [fixture, capability] of [
-    ['rest', 'position'],
-    ['rooms', 'scene'],
-  ]) {
-    const c = structuredClone(read(`protocol/fixtures/cartridge_${fixture}_hash.json`).value);
-    if (capability === 'scene')
-      for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities])
-        Object.assign(caps, { scene: 1, fact: 1 });
-    const artifact = () => {
-      const canonical = encode(c);
-      const content_hash = createHash('sha256').update(canonical).digest('hex');
-      return loadCartridge(bytes(JSON.stringify({ cartridge: c, content_hash })), INSTALLED);
-    };
-    assert.equal(artifact().ok, true, fixture);
-    delete c.manifest.requires.capabilities.fact;
-    delete c.lock.capabilities.fact;
-    assert.deepEqual(artifact(), {
-      ok: false,
-      diagnostic: {
-        ...diagnostic('UNDECLARED_CAPABILITY', `.cartridge.lock.capabilities.${capability}`, {
-          capability: 'fact',
-        }),
-        suggested_capabilities: ['fact@1'],
-      },
-    });
-  }
-});
-
-// Breaks: an artifact bypasses the compiler and boots with an impossible enum default.
-test('the loader rejects an enum fact default outside its values', () =>
-  assert.deepEqual(withFactType({ type: 'enum', values: ['missing'], default: 'rescued' }), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
-      {},
-    ),
-  }));
-
-// Breaks: an artifact bypasses the compiler and boots with an out-of-bounds numeric default.
-test('the loader rejects a bounded integer fact default outside its bounds', () =>
-  assert.deepEqual(withFactType({ type: 'int', minimum: 0, maximum: 1, default: 2 }), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
-      {},
-    ),
-  }));
-
-// Breaks (row FD1; twin of test/loka/content_raid_test.exs): a time_since leaf loads under API
-// 1.0 in a cartridge with no world content.
-test('the loader keeps API 1.90 for a time_since policy without world content', () => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  const fact = cartridge.facts['hello_sampler@0.0.1:fact/village_arrived'];
-  fact.value_type = { type: 'int', default: 0 };
-  const policy = cartridge.policies['hello_sampler@0.0.1:policy/village_arrived'];
-  policy.root = { op: 'time_since', fact: policy.root.fact, at_least: 600 };
-  assert.deepEqual(load(cartridge), {
-    ok: false,
-    diagnostic: diagnostic(
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-      {},
-    ),
-  });
-});
-
-// Breaks: default validation is accidentally limited to v1, leaving a v2 artifact with an
-// impossible unwritten fact default loadable.
-test('the loader rejects an invalid v2 fact default', () => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_facts_hash.json').value);
-  cartridge.facts['facts_sampler@0.0.1:fact/review_default'] = {
-    key: 'review_default',
-    version: 1,
-    value_type: { type: 'enum', values: ['missing'], default: 'rescued' },
-    scopes: ['instance'],
-    meaning: 'Controlled loader default.',
-  };
-  assert.deepEqual(load(cartridge), {
-    ok: false,
-    diagnostic: diagnostic(
-      'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["facts_sampler@0.0.1:fact/review_default"].value_type.default',
-      {},
-    ),
-  });
-});
 
 // Breaks: the hash is taken over other bytes (the artifact, a re-ordered encoding), or a valid
 // artifact is rejected by some stage.

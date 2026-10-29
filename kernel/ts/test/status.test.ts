@@ -2,7 +2,6 @@
 // cures, the shrine blesses, and a fatal tick runs the ordinary death return.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,7 +11,6 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from 
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -330,58 +328,4 @@ test("a status reaction applies to its event's subject", () => {
   // reader 9) faulting the delivery.
   const nobody = 'ffffffff-0000-4000-8000-000000000000';
   assert.deepEqual(holders({ ...fact, subject_id: nobody }), [], 'no holder');
-});
-
-// Breaks: the loader drops one of its status checks, so the artifact loads and fails in play.
-test('the loader refuses each unsound status declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const poison = `.cartridge.statuses[${JSON.stringify(poisonRef)}]`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.37'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => {
-        delete c.manifest.requires.capabilities.death;
-        delete c.lock.capabilities.death;
-      },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => (c.statuses[poisonRef].resource.key = 'mana'),
-      'UNRESOLVED_REFERENCE',
-      `${poison}.resource`,
-    ],
-    [(c) => (c.statuses[poisonRef].tick_every = 300), 'SCHEMA_VIOLATION', `${poison}.tick_every`],
-    [(c) => (c.statuses[poisonRef].per_tick = 0), 'SCHEMA_VIOLATION', `${poison}.per_tick`],
-    [
-      (c) => (c.statuses[poisonRef].label = 'condition.none'),
-      'SCHEMA_VIOLATION',
-      `${poison}.label`,
-    ],
-    [
-      (c) => (c.statuses[poisonRef].narration.tick = 'narration.none'),
-      'SCHEMA_VIOLATION',
-      `${poison}.narration`,
-    ],
-    [
-      (c) => (c.items[antidoteRef].edible.cures[0].key = 'plague'),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.items[${JSON.stringify(antidoteRef)}].edible.cures[0]`,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });

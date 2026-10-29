@@ -140,55 +140,6 @@ test('a protected input is refused as Give would refuse it', () => {
   assert.deepEqual([count(w, w.body), pennies(w), ordered(w)], [2, 10, false]);
 });
 
-// Twin of test/loka/content_escrow_test.exs. Breaks: the loader admits escrow below API 1.79, an
-// input that is not an item, a custody that is not a room, a quantity above the inputs, a shop
-// offer as an input, or a repeated input, or an escrow without its refusal text.
-test('the loader keeps escrow to API 1.79, item inputs, a room custody and its texts', () => {
-  const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(base, edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = `.cartridge.services["${S}:service/commission"]`;
-  const escrow = (c: any) => c.services[`${S}:service/commission`].benefit.escrow;
-  const cases: [(c: any) => void, unknown][] = [
-    [() => {}, 'loaded'],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.78'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-    ],
-    [
-      (c) => (escrow(c).items[0] = ref('item', 'nowhere')),
-      ['UNRESOLVED_REFERENCE', `${at}.benefit.escrow.items[0]`],
-    ],
-    [
-      (c) => (escrow(c).custody = ref('item', 'ore_a')),
-      ['UNRESOLVED_REFERENCE', `${at}.benefit.escrow.custody`],
-    ],
-    [(c) => (escrow(c).quantity = 5), ['SCHEMA_VIOLATION', `${at}.benefit.escrow.quantity`]],
-    [
-      (c) => {
-        c.manifest.requires.capabilities.commerce = 1;
-        c.lock.capabilities.commerce = 1;
-        c.npcs[`${S}:npc/smith`].shop = {
-          resource: ref('resource', 'pennies'),
-          offers: [{ item: ref('item', 'ore_d'), buy: 2, sell: 1 }],
-          bought: 'service.unaffordable',
-          sold: 'service.unaffordable',
-        };
-        c.items[`${S}:item/ore_d`].location = { in: 'npc', npc: ref('npc', 'smith') };
-      },
-      ['SCHEMA_VIOLATION', `${at}.benefit.escrow.items[3]`],
-    ],
-    [
-      (c) => (escrow(c).items[3] = ref('item', 'ore_a')),
-      ['DUPLICATE_DEFINITION', `${at}.benefit.escrow.items`],
-    ],
-    [(c) => delete c.text['service.order_open'], ['UNRESOLVED_REFERENCE', `${at}.headroom`]],
-    [(c) => delete c.text['service.missing_inputs'], ['UNRESOLVED_REFERENCE', `${at}.inputs`]],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
-});
-
 // Toolbox row 20b (mechanics.md "Timed job claim and cancel"): `commission` also carries
 // `ready_after 3600, output sword`; `claim` and `cancel` cost 1 penny each.
 const sword = (w: World) => w.entityIds[`${S}:item/sword`]!;
@@ -285,59 +236,4 @@ test('a new order after a cancel waits for its own job', () => {
   w = elapse(w, c0 + 5400);
   w = used(w, 'claim');
   assert.equal(w.state.containers[sword(w)], w.body);
-});
-
-// Twin of test/loka/content_escrow_test.exs. Breaks: the loader admits claim, cancel or a timed
-// escrow below API 1.80, a claim naming a service with no ready_after, an output outside custody,
-// a timed escrow without the schedule capability, another entitlement naming the timed order's
-// fact (it would open an order with no ore and no job), or a claim or cancel without its texts.
-test('the loader keeps claim and cancel to API 1.80, a timed commission and its texts', () => {
-  const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(base, edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = (k: string) => `.cartridge.services["${S}:service/${k}"]`;
-  const svc = (c: any, k: string) => c.services[`${S}:service/${k}`];
-  const cases: [(c: any) => void, unknown][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.79'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-    ],
-    [
-      (c) => (svc(c, 'claim').benefit.service = ref('service', 'cancel')),
-      ['SCHEMA_VIOLATION', `${at('claim')}.benefit.service`],
-    ],
-    [
-      (c) => (svc(c, 'cancel').benefit.service = ref('service', 'nowhere')),
-      ['UNRESOLVED_REFERENCE', `${at('cancel')}.benefit.service`],
-    ],
-    [
-      (c) => (c.items[`${S}:item/sword`].location.room = ref('room', 'forge')),
-      ['SCHEMA_VIOLATION', `${at('commission')}.benefit.escrow.output`],
-    ],
-    [
-      (c) => (svc(c, 'commission').benefit.escrow.output = ref('item', 'nowhere')),
-      ['UNRESOLVED_REFERENCE', `${at('commission')}.benefit.escrow.output`],
-    ],
-    [
-      (c) => {
-        delete c.lock.capabilities.schedule;
-        delete c.manifest.requires.capabilities.schedule;
-        delete c.manifest.time_policy;
-      },
-      ['UNDECLARED_CAPABILITY', `${at('commission')}.benefit.escrow.ready_after`],
-    ],
-    [
-      (c) => {
-        svc(c, 'cancel').benefit = { kind: 'entitlement', fact: ref('fact', 'ordered') };
-        c.text['service.already_paid'] = 'Already paid.';
-      },
-      ['SCHEMA_VIOLATION', `${at('cancel')}.benefit.fact`],
-    ],
-    [(c) => delete c.text['service.not_ready'], ['UNRESOLVED_REFERENCE', `${at('claim')}.wait`]],
-    [(c) => delete c.text['service.no_output'], ['UNRESOLVED_REFERENCE', `${at('claim')}.output`]],
-    [(c) => delete c.text['service.ready'], ['UNRESOLVED_REFERENCE', `${at('cancel')}.ready`]],
-    [(c) => delete c.text['service.no_order'], ['UNRESOLVED_REFERENCE', `${at('cancel')}.order`]],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
 });

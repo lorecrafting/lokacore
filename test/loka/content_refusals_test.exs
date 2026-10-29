@@ -52,6 +52,12 @@ defmodule Loka.ContentRefusalsTest do
              {"cartridge.json", &put_in(&1, ["ancestries", "strong", "attribute"], "missing")}
            ])
 
+    for {field, value} <- [{"description", "ancestry.absent"}, {"skill", "str"}] do
+      assert {"UNRESOLVED_REFERENCE", "cartridge.ancestries.strong.#{field}"} in codes(dir, [
+               {"cartridge.json", &put_in(&1, ["ancestries", "strong", field], value)}
+             ])
+    end
+
     instance = [{"facts.json", %{"facts" => %{"axis" => %{@axis | "scopes" => ["instance"]}}}}]
 
     assert {"SCHEMA_VIOLATION", "cartridge.ancestries.strong.faction.fact"} in codes(
@@ -203,6 +209,32 @@ defmodule Loka.ContentRefusalsTest do
     assert {"OUTCOME_MISMATCH", "quests/herbs.exchange"} in codes(
              dir,
              quest.(&put_in(&1, ["exchange", "increment"], 3))
+           )
+
+    # Breaks: an exchange loads with a repeated outgoing item, a reward not held by its NPC, a
+    # massless stock item, no harvest detail stocking its outgoing items, or an unknown fact.
+    assert {"DUPLICATE_DEFINITION", "quests/herbs.exchange"} in codes(
+             dir,
+             quest.(&put_in(&1, ["exchange", "outgoing", Access.at(1)], "ore_01"))
+           )
+
+    for {file, change} <- [
+          {"items/bandage_01.json",
+           &Map.put(&1, "location", %{"in" => "room", "room" => "mine"})},
+          {"items/ore_01.json", &Map.put(&1, "mass_grams", 0)},
+          {"rooms/mine.json", &update_in(&1, ["details"], fn d -> Map.delete(d, "seam") end)}
+        ],
+        do:
+          assert(
+            {"OUTCOME_MISMATCH", "quests/herbs.exchange"} in codes(
+              dir,
+              exchange ++ [{file, change}]
+            )
+          )
+
+    assert {"UNRESOLVED_REFERENCE", "quests/herbs.exchange.contribution"} in codes(
+             dir,
+             quest.(&put_in(&1, ["exchange", "contribution"], "missing"))
            )
   end
 

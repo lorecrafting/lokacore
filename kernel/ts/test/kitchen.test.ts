@@ -218,34 +218,13 @@ test('a claimed stew keeps until it is next acquired, then films and lands in th
   assert.equal(w.state.containers[stew], room(w, 'midden'));
 });
 
-// Breaks (one row per new loader check): an unresolved `applies` ref, an empty list (minItems), a meal status that moves
-// the derived hp maximum (loka-kgd.50). The 1.101 floor row is in loader_floors.json.
-test('the loader refuses an unresolved applies and a meal that moves hp_max', () => {
-  const at = `.cartridge.items["${S}:item/stew_plain_01"].edible.applies[0]`;
-  const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(base, edit);
-    assert.equal(r.ok, false);
-    return r.ok ? [] : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const stew = (c: any) => c.items[`${S}:item/stew_plain_01`].edible;
-  assert.deepEqual(
-    diagnostic((c) => (stew(c).applies = [ref('status', 'nothing')])),
-    ['UNRESOLVED_REFERENCE', at],
-  );
-  assert.deepEqual(
-    diagnostic((c) => (stew(c).applies = [])),
-    ['SCHEMA_VIOLATION', at.slice(0, -3)],
-  );
-  const hpMax = { terms: [{ attribute: ref('attribute', 'str'), per_point: 1, pivot: 10 }] };
-  assert.deepEqual(
-    diagnostic((c) => {
-      c.world.derived = { hp_max: hpMax };
-      // hs-13's hearty dishes move hp_max too; keep this row on the stew it pins.
-      for (const k of ['stew_hearty_01', 'stew_hearty_02', 'stew_hearty_03', 'feast_01'])
-        delete c.items[`${S}:item/${k}`].edible;
-    }),
-    ['SCHEMA_VIOLATION', at],
-  );
+// Breaks: an empty edible `applies` list (minItems) loads.
+test('the loader refuses an empty applies list', () => {
+  const r = reload(base, (c) => (c.items[`${S}:item/stew_plain_01`].edible.applies = []));
+  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
+    'SCHEMA_VIOLATION',
+    `.cartridge.items["${S}:item/stew_plain_01"].edible.applies`,
+  ]);
 });
 
 // Homestead hs-13 (mechanics.md "Self-cooking"): the cook teaches `cooking` (growth [2, 4]) free;

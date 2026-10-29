@@ -15,7 +15,6 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { moveItem } from '../src/mechanics/containment/react.ts';
-import { uses } from '../src/content/cartridge_reactions.ts';
 import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
@@ -209,26 +208,6 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
   w = ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, ++stream.n));
   assert.deepEqual(activeStatuses(w, item(w, 'fish')), []);
   assert.equal(w.state.containers[item(w, 'fish')], w.consumed);
-});
-
-// Breaks: the loader's item.move floor is missing or low, or its room is never resolved.
-test('the loader refuses item.move below 1.77 or with an unknown room', () => {
-  const spoil = `${S}reaction/spoil`;
-  const old = reload(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.76'));
-  assert.deepEqual(old.ok ? undefined : [old.diagnostic.code, old.diagnostic.path], [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
-  const nowhere = reload(base, (c) => (c.reactions[spoil].apply[0].room = ref('room', 'nowhere')));
-  assert.deepEqual(nowhere.ok ? undefined : [nowhere.diagnostic.code, nowhere.diagnostic.path], [
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.reactions["${spoil}"].apply[0].room`,
-  ]);
-  // Break: item.move counted as a fact_changed writer (it emits no event, so needs no fact@1).
-  const steps = uses(JSON.parse(new TextDecoder().decode(artifact)).cartridge).filter(([, , p]) =>
-    /(spoil|sweep)"\]\.apply/.test(p),
-  );
-  assert.deepEqual(steps, []);
 });
 
 // Break: replenish.run ignores the item's earlier group (hs-1: the spoil move and the same-event

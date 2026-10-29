@@ -14,7 +14,6 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { replenish } from '../src/content/cartridge_replenish.ts';
 import { commands, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -128,97 +127,24 @@ test('a container target full of other items takes nothing and time still advanc
   assert.equal(w.state.containers[id(w, 'item', 'apple_01')], id(w, 'item', 'crate'));
 });
 
-// Breaks: the loader admits replenish under kernel_api 1.70, a template, spawn-template,
-// template-item or self-move holder, a non-container item target or one beside a listed
-// container (which may be or hold it), an unresolved item or holder, or a duplicate item; or
-// drops the harvest allowance, so the seam's ore in the store is refused (twin of
-// test/loka/content_replenish_test.exs).
-test('loader: replenish needs kernel_api 1.71 and resolved, distinct holders and items', () => {
+// Breaks: the loader refuses a listed container as an item reserve.
+test('loader: a container reserve loads', () => {
   const reload = (edit: (c: any) => void) => {
     const r = edited(edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
-  const at = '.cartridge.replenish["replenish_sampler@0.0.1:replenish/seam_regrowth"]';
-  const seam = (c: any) => c.replenish['replenish_sampler@0.0.1:replenish/seam_regrowth'];
-  assert.deepEqual(
-    reload((c) => (c.manifest.requires.kernel_api.at_least = '1.70')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).from = { in: 'template' })),
-    ['SCHEMA_VIOLATION', `${at}.from`],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).from = seam(c).to)),
-    ['SCHEMA_VIOLATION', `${at}.from`],
-  );
-  const shelf = `.cartridge.replenish["${S}replenish/shelf"]`;
-  assert.deepEqual(
-    reload((c) => (c.npcs[`${S}npc/trader`].spawn_template = true)),
-    ['SCHEMA_VIOLATION', `${shelf}.to`],
-  );
-  // A lone template item is refused first elsewhere (cartridge_death.ts); check this row alone.
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  c.items[`${S}item/crate`].location = { in: 'template' };
-  assert.deepEqual(
-    replenish(c, { named: () => {} } as never).map((d) => [d.code, d.path]),
-    [['SCHEMA_VIOLATION', `${shelf}.from`]],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).to = { in: 'item', item: ref('item', 'stone') })),
-    ['SCHEMA_VIOLATION', `${at}.to`],
-  );
-  assert.deepEqual(
-    reload((c) => {
-      seam(c).items[4] = ref('item', 'crate');
-      seam(c).to = { in: 'item', item: ref('item', 'crate') };
-    }),
-    ['SCHEMA_VIOLATION', `${at}.to`],
-  );
-  // A listed container leaves an item reserve alone (only a target can nest), but not a target
-  // it holds: the move would put it inside itself.
   assert.equal(
     reload((c) => (c.items[`${S}item/apple_01`].container = true)),
     'loaded',
-  );
-  assert.deepEqual(
-    reload((c) => {
-      c.items[`${S}item/apple_01`].container = true;
-      Object.assign(c.replenish[`${S}replenish/shelf`], {
-        items: [ref('item', 'crate')],
-        from: { in: 'room', room: ref('room', 'store') },
-        to: { in: 'item', item: ref('item', 'apple_01') },
-      });
-    }),
-    ['SCHEMA_VIOLATION', `${shelf}.to`],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).to = { in: 'npc', npc: ref('npc', 'nobody') })),
-    ['UNRESOLVED_REFERENCE', `${at}.to.npc`],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).items[4] = ref('item', 'nothing'))),
-    ['UNRESOLVED_REFERENCE', `${at}.items[4]`],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).items[4] = seam(c).items[0])),
-    ['DUPLICATE_DEFINITION', `${at}.items`],
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).to = { in: 'npc', npc: ref('npc', 'trader') })),
-    [
-      'OUTCOME_MISMATCH',
-      '.cartridge.rooms["replenish_sampler@0.0.1:room/mine"].details.seam.harvest.items[2]',
-    ],
   );
 });
 
 // Homestead hs-1: the sampler with a `dig` recipe on the seam whose custom_event `dig` runs `apply`.
 const RUN = { op: 'replenish.run', key: ref('replenish', 'seam_regrowth') };
 const digging =
-  (apply: object[] = [RUN], at_least = '1.101') =>
+  (apply: object[] = [RUN]) =>
   (c: any) => {
-    c.manifest.requires.kernel_api.at_least = at_least;
+    c.manifest.requires.kernel_api.at_least = '1.101';
     for (const k of ['action_recipe', 'reaction'])
       c.manifest.requires.capabilities[k] = c.lock.capabilities[k] = 1;
     // The step emits no event: it needs no fact@1 (which owns fact_changed).
@@ -269,32 +195,6 @@ test('a dig event moves one ore from the store at once, up to the cap; the job s
   assert.deepEqual(w.state.jobs, jobs);
   w = waitUntil(w, 3600);
   assert.deepEqual(ore(w), [2, 1]);
-});
-
-// Breaks: a stale key loads (both kernels: test/loka/content_replenish_test.exs), the step's
-// 1.101 floor, its refusal under `after` (as item.move's, row FD1) or of a repeated key is dropped.
-test('loader: replenish.run needs kernel_api 1.101, a replenish entry, no after, one run a key', () => {
-  const reload = (edit: (c: any) => void) => {
-    const r = edited(edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = `.cartridge.reactions["${S}reaction/dig"]`;
-  assert.deepEqual(reload(digging([{ ...RUN, key: ref('replenish', 'gone') }])), [
-    'UNRESOLVED_REFERENCE',
-    `${at}.apply[0].key`,
-  ]);
-  assert.deepEqual(reload(digging([RUN], '1.100')), [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
-  assert.deepEqual(
-    reload((c) => {
-      digging()(c);
-      c.reactions[`${S}reaction/dig`].after = 60;
-    }),
-    ['SCHEMA_VIOLATION', `${at}.apply[0].op`],
-  );
-  assert.deepEqual(reload(digging([RUN, RUN])), ['DUPLICATE_DEFINITION', `${at}.apply[1].key`]);
 });
 
 // Break: replenish.run ignores the root command's write of the item (hs-1 fix round 1): the drop

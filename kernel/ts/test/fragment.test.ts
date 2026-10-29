@@ -14,18 +14,17 @@ test('an unchanged fragment re-encodes to its KAT bytes and loads', () => {
 });
 
 // Breaks: the change misses the loaded bytes (loads ok) or the re-hash (CONTENT_HASH_MISMATCH).
-test('a fragment with a dangling exit is refused by the loader', () => {
+test('a fragment whose room key disagrees with its map key is refused by the loader', () => {
   const [room] = Object.keys(f.source.rooms);
-  const [dir] = Object.keys(f.source.rooms[room].exits);
-  const loaded = f.load((c) => (c.rooms[room].exits[dir].to = f.ref('room', 'nowhere')));
+  const loaded = f.load((c) => (c.rooms[room].key = 'nowhere'));
   assert.ok(!loaded.ok);
   const { code, path, data } = loaded.diagnostic;
   assert.deepEqual(
     { code, path, data },
     {
-      code: 'UNRESOLVED_REFERENCE',
-      path: `.cartridge.rooms["${room}"].exits.${dir}.to`,
-      data: { target: `${f.prefix}:room/nowhere` },
+      code: 'ARTIFACT_DEFINITION_KEY_MISMATCH',
+      path: `.cartridge.rooms["${room}"]`,
+      data: { field: 'key', declared: room.split('/')[1], expected: 'nowhere' },
     },
   );
 });

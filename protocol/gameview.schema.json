@@ -488,7 +488,7 @@
     "EntityView": {
       "properties": {
         "hostile": {
-          "description": "Book hostile refusal (kernel_api at least 1.104): present while this NPC's disposition toward the viewer is hostile (toolbox row G11), a derived read; absent otherwise.",
+          "description": "Book hostile refusal: present while this NPC's disposition toward the viewer is hostile (toolbox row G11), a derived read; absent otherwise.",
           "enum": [true]
         },
         "refusal": {
@@ -523,7 +523,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
         },
         "shop": {
           "type": "array",
@@ -677,7 +677,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
         },
         "container_id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
@@ -1259,7 +1259,7 @@
           "$ref": "#/$defs/SceneView"
         },
         "spell_words": {
-          "description": "Word bar S2 (toolbox row 29a): one entry per unaimed spell whose learned fact reads true for the actor (an aimed spell, kernel_api 1.119, is offered on its targets' entries as command cast instead), in recipe key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the recipe's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
+          "description": "Word bar S2 (toolbox row 29a): one entry per unaimed spell whose learned fact reads true for the actor (an aimed spell, is offered on its targets' entries as command cast instead), in recipe key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the recipe's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -1436,7 +1436,7 @@
             "additionalProperties": false
           },
           "minItems": 1,
-          "description": "Lore deductions (toolbox row 46, kernel_api at least 1.47): each recipe, in key order, whose policy is an all that requires at least two topics' facts true and whose success assigns another topic's fact true, while the actor knows those topics and not that one; action is the recipe's key, label its label, from the known topics' labels. Absent when none."
+          "description": "Lore deductions (toolbox row 46): each recipe, in key order, whose policy is an all that requires at least two topics' facts true and whose success assigns another topic's fact true, while the actor knows those topics and not that one; action is the recipe's key, label its label, from the known topics' labels. Absent when none."
         },
         "bleeding": {
           "$ref": "gameview.schema.json#/$defs/BleedingView"
@@ -2144,7 +2144,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
         },
         "band": {
           "$ref": "action.schema.json#/$defs/Key",
@@ -2165,7 +2165,7 @@
               },
               "words": {
                 "$ref": "entity.schema.json#/$defs/NameWords",
-                "description": "Name words copied from the definition (kernel_api at least 1.118, loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+                "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
               },
               "band": {
                 "$ref": "action.schema.json#/$defs/Key",
