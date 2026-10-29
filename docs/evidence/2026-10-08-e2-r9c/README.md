@@ -1,6 +1,6 @@
 # E2 closing proof on `r9c_interactions@0.0.1` (S5)
 
-Governing: [E1 exact candidate proof policy](../../system/e1-certification.md#e1-exact-candidate-proof-policy),
+Governing: [E1 exact candidate proof policy](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/e1-certification.md#e1-exact-candidate-proof-policy),
 [Commit, fence, reconcile](../../system/save.md#commit-fence-reconcile), E2 brief acceptance 3, 4, 6 and 7
 ([brief](../../briefs/chapter-one/chapter-one-e2-r9c-interactions-brief-2026-10-05.md)), and
 [owner decision E2 plan](../../decisions/owner-decision-e2-plan-2026-10-07.md) (a) and (b). The claim is
@@ -133,7 +133,7 @@ scan, sell, give, lock, unlock, remove, sit, sleep, close_choice, accept_quest.
 
 **Paired-job completion invariant (S3 acceptance).** Not an E2 row: held by focused tests, which are red
 for the `proposal.ts:278-279`, `:260` and `:253` breaks that stay green in every `r9c_*` file
-([audit](../../reviews/2026-10-08-e2-gate-fable-audit.md)): `kernel/ts/test/bleed_composition.test.ts`,
+([audit](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/reviews/2026-10-08-e2-gate-fable-audit.md)): `kernel/ts/test/bleed_composition.test.ts`,
 `c5_bleed_early_expiry.test.ts`, `job_completion_invariant.test.ts`, `deer.test.ts`, `deer_contracts.test.ts`,
 `schedule.test.ts`.
 

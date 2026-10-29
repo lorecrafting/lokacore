@@ -3,7 +3,7 @@
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts a finite, identity-conserving Peg shop for the real Missing Child
 chapter. The normative mechanic is in [mechanics](../system/mechanics.md#pegs-immediate-shop-b3-selected-contract),
-the exact shelf and tuning in [cartridge](../system/cartridge.md#pegs-b3-shelf),
+the exact shelf and tuning in [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#pegs-b3-shelf),
 and the re-pinned developer assignment in the [B3 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b3-pegs-shop-brief-2026-10-05.md).
 This is a planning decision, not implementation or proof.
 

@@ -2,9 +2,9 @@
 
 Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [C3 population and deliberate fight](../system/mechanics.md#c3-bounded-living-hounds-selected-contract),
-[chapter parameters](../system/cartridge.md#c3-hound-population-and-loot),
-[typed creation/composition](../system/protocol.md#c3-spawned-bundles-and-population-composition),
-[save integrity](../system/save.md#c3-living-population-recovery),
+[chapter parameters](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c3-hound-population-and-loot),
+[typed creation/composition](../system/protocol.md#spawned-bundles-and-population-composition),
+[save integrity](../system/save.md#living-population-recovery),
 [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c3-living-hound-and-loot-details) and the
 [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md).
 This is planning adoption, not source GO, independent approval or executed proof.

@@ -42,7 +42,7 @@
           "additionalProperties": false
         },
         "hidden_until": {
-          "description": "Toolbox row 11 (docs/system/mechanics.md hidden passages; kernel_api at least 1.45): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH).",
+          "description": "Toolbox row 11 (docs/system/mechanics.md hidden passages): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH).",
           "type": "object",
           "properties": {
             "fact": {
@@ -59,7 +59,7 @@
           "additionalProperties": false
         },
         "climb": {
-          "description": "Toolbox row 30 (docs/system/mechanics.md rope and climb; kernel_api at least 1.45): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face.",
+          "description": "Toolbox row 30 (docs/system/mechanics.md rope and climb): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face.",
           "type": "object",
           "properties": {
             "item": {
@@ -84,7 +84,7 @@
           "$ref": "room.schema.json#/$defs/KnockResponse"
         },
         "locks": {
-          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
           "type": "object",
           "properties": {
             "traverse": {
@@ -150,7 +150,7 @@
           "maxItems": 16
         },
         "rating": {
-          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks; kernel_api at least 1.44): the value an opposed recipe check against this detail must reach.",
+          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed recipe check against this detail must reach.",
           "type": "integer"
         },
         "readable": {
@@ -311,7 +311,7 @@
           "additionalProperties": false
         },
         "title": {
-          "description": "Optional page title the Book shows for this detail (kernel_api at least 1.120 (loka-x6t.120); docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description.",
+          "description": "Optional page title the Book shows for this detail (loka-x6t.120; docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "transport": {
@@ -479,7 +479,7 @@
           "type": "boolean"
         },
         "dark": {
-          "description": "The room is dark (light@1, kernel_api at least 1.114): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line.",
+          "description": "The room is dark (light@1): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line.",
           "const": true
         },
         "dark_description": {
@@ -499,7 +499,7 @@
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "site": {
-          "description": "Built rooms S1 (kernel_api at least 1.99; construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "type": "object",
           "properties": {
             "directions": {
@@ -533,7 +533,7 @@
           "additionalProperties": false
         },
         "locks": {
-          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "type": "object",
           "properties": {
             "enter": {
@@ -715,7 +715,7 @@
           }
         },
         "opens_when": {
-          "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. Needs kernel_api at least 1.45.",
+          "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected.",
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         }
       },

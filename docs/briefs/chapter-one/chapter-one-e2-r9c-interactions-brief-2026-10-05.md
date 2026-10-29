@@ -86,7 +86,7 @@ synthetic candidate. Playback alone does not re-check a failed invariant.
 
 Candidate bytes/hash/allocation, engine SHA, schema/locks, policy/check revision and
 host/toolchain/evidence digests must remain distinct. Browser receipts name the actual adapter;
-real SQLite fault receipts remain separate. E1 must disposition the [baseline audit follow-up](../../ROADMAP.md#baseline-audit-follow-up)
+real SQLite fault receipts remain separate. E1 must disposition the [baseline audit follow-up](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/ROADMAP.md#baseline-audit-follow-up)
 and planning applicability omissions. Missing obligations cannot become skipped green rows.
 
 Synthetic identity, authored parameters/literal answers, shared topology, E1 interfaces,

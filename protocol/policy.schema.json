@@ -155,7 +155,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact (toolbox row W2, kernel_api at least 1.47) is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
+          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact (toolbox row W2) is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
           "type": "object",
           "properties": {
             "op": {
@@ -176,7 +176,7 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "with": {
-              "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC, read at the pair (subject toward with).",
+              "description": "Toolbox row FD4: an npc_pair fact's second NPC, read at the pair (subject toward with).",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "equals": {
@@ -256,7 +256,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29a (kernel_api at least 1.51): the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -275,7 +275,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39 (kernel_api at least 1.87): subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -380,7 +380,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Needs kernel_api at least 1.45. Owned by calendar@1.",
+          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -415,7 +415,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's body wears an item whose definition declares tag (toolbox row W25): an item in one of the body's slot holders (equipment@1). False without a body. Needs kernel_api at least 1.46. Owned by equipment@1.",
+          "description": "The actor's body wears an item whose definition declares tag (toolbox row W25): an item in one of the body's slot holders (equipment@1). False without a body. Owned by equipment@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -432,7 +432,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Owned by variety@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -454,7 +454,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Needs kernel_api at least 1.91. Owned by skills@1.",
+          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skills@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -476,7 +476,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Needs kernel_api at least 1.86. Owned by population@1.",
+          "description": "The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Owned by population@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -498,7 +498,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Needs kernel_api at least 1.46, 1.53 for self or subject, and 1.99 for room. Owned by status@1.",
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Owned by status@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -524,7 +524,7 @@
           "additionalProperties": false
         },
         {
-          "description": "An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Needs kernel_api at least 1.102. Owned by containment@1.",
+          "description": "An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Owned by containment@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -541,7 +541,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.",
+          "description": "The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Owned by target_resolution@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -558,7 +558,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1. Needs kernel_api at least 1.48.",
+          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -583,7 +583,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1. Needs kernel_api at least 1.90.",
+          "description": "Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1.",
           "type": "object",
           "properties": {
             "op": { "const": "time_since" },

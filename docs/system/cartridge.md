@@ -20,6 +20,8 @@ world's definitions and text:
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
+`requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). No field carries its own floor; a cartridge released later states the API it was compiled against here.
+
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
 file outside these recognized root files and definition directories is `UNKNOWN_FIELD`. A
@@ -44,122 +46,6 @@ are never deleted.
 The app opens only the chapter file and offers no story picker. Missing pins follow
 [explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
 
-### Retired first chapter (E1 candidate)
-
-The chapter is deleted in [retirement](../decisions/owner-decision-retire-first-chapter-2026-10-21.md)
-phase 2; this section is its history.
-
-Until 2026-10-21 the shared app bundled the chapter at `0.0.42` (v042), titled
-**The Missing Child**, requiring kernel API1.37. Its independently derived
-content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
-with 57 rooms, 10 quests, 54 dialogues, 8 scenes, 38 locked capabilities and 211 initial IDs. Its artifact and allocation oracles left with the chapter; the
-[independent derivation review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) establishes those answers.
-D10 is published in [PR #263](https://github.com/lorecrafting/lokacore/pull/263), with
-[source review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) and
-[save/protocol review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-save-protocol-review.md). A–D source is
-installed; E1–E3 acceptance remains open in the [roadmap](../ROADMAP.md), including
-chapter review and the browser/UI consistency gate. Native verification and known blur
-remain deferred under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
-
-The app used its own chapter save under the
-[actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
-The chapter retains the village and inn routes and playable Maud S1 (five rats,
-earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
-Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
-— in progress”; Q1, The First Lead, and both Q2 return paths are playable. The temporary Lantern
-errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
-absent. Four connected fen rooms form the first south search route: Ferry Landing south to
-Reed Path, south to Reed Bank, west to Willow Shade, south to Drowned Oak. Each exit has
-its reciprocal; a visible fox-prints detail at Reed Path and tracks at Reed Bank can be
-inspected without accepting a quest or waiting for the clock. This inspection grants no Q2 discovery credit and adds no swim/tide gate, item or
-population ([FEN-01 decision](../decisions/pm-decision-fen01-south-search-2026-10-05.md)).
-FEN-02 extends that route: Reed Bank south ↔ Mire Crossing north, Drowned Oak east ↔
-Mire Crossing west, and Mire Crossing south ↔ Fox Hollow north. The plank and firm path
-use the ordinary move at every hour, before and after Q1, after shrine return and cold
-reopen; no tide, daylight, swimming or equipment gate applies. Visible plank and hollow
-details open the installed Book detail pages with noun titles and descriptive inspection
-only. These two details grant no Q2 credit; items, populations and exits to
-unbuilt rooms remain deferred ([FEN-02 decision](../decisions/pm-decision-fen02-mire-hollow-2026-10-05.md)).
-The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
-keeps Old Bram outside the active cast.
-
-The child's mother stands at Ferry Landing at every hour. Her opening conversation
-introduces the child and directs newcomers north through Well Lane to Village Green, or east
-from Well Lane to the Drowned Lantern and Maud. Her selectable NPC detail uses the existing
-[Book dialogue flow](book-ui.md#npc-dialogue-and-action-details); directions remain in that
-detail's history rather than the World log. The informational replies grant no quest, fact or reward, and Leave preserves the north route. This fixed placement supersedes the
-archived Green/cottage schedule for the current opening
-([opening NPC decision](../decisions/owner-decision-opening-npc-2026-10-05.md)).
-
-Q1-A follows the [PM first-lead decision](../decisions/pm-decision-q1-a-first-lead-2026-10-05.md).
-The mother's always-eligible guide includes an explicit accept choice for **The First Lead**;
-only acceptance starts Q1. A unique 20g `fox_drawing` lies at Village Green by the elm,
-using ordinary item detail with authored identity/description, Take and Leave under
-[detail-page order](book-ui.md#detail-page-order). Its `current_state`/`has_item` objective
-shows the active journal until held, then the ready text. Taking it before acceptance starts
-nothing; acceptance while holding it is ready immediately. Dropping removes readiness,
-and retaking restores it. The separate report dialogue sorts before the guide
-and is eligible only with Q1 active and the drawing held. Reporting resolves Q1 once,
-retains the drawing, and says it could be the child's, suggesting reeds south of the landing
-without proof of his route. The guide remains available before and after report; Maud's
-S1 offer and turn-in remain independently usable in every Q1 state. No hour or wait gates
-apply. This village clue neither moves nor duplicates the child's archived boot or tracks.
-Its Q2 activation consumer is [the staged first search lead below](#source-layout).
-
-The chapter retains its authored calendar/status, typed bell reaction and scene composition,
-real_elapsed rate50/start64800, HP10, MV100, carrying ceiling12000, move cost1 and
-position recovery18/36 per3600 logical seconds. Its release and independent
-answers are [above](#retired-first-chapter-e1-candidate). Historical sampler/proof sources,
-release pins and [sampler evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-sampler/README.md) remain labeled
-with their actual release and are not bundled.
-
-Q2-A — the first Missing Child search lead — consumes that report: exact `first_lead/report`
-automatically starts the search quest in the same receipt. Its current-state objective is the
-player fact `fen.tracks_found`, default false. Only **Study tracks** at Reed Bank assigns it,
-with Q2 active and the fact false; arrival, examine and Read never grant credit. Study has no
-check, cost, duration or cooldown. The journal directs the player to Reed Bank, then toward
-Fox Hollow and explicitly says the child remains unfound. The quest remains **active**; this staged
-objective adds no objectives-complete transition, turn-in, rescue or reward. The all-hours
-Mire/Hollow route remains unchanged. See [Q2-A adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
-
-Q2-B places the child and Vesper at Fox Hollow at every hour, without attack profiles or
-light/PER requirements. Descriptive visits before Q2 activation or Study grant no progress.
-The first eligible Vesper conversation requires active Q2 and studied tracks; accepting
-the meeting binds both living NPCs and assigns the player's met fact. Arrival, Look and
-opening Talk do not. The next ordered conversation offers the letter-bank riddle: answer
-`lantern`, bank `R N A O L T E N S`. Only its correct choice assigns player fact
-`fen.vesper_riddle_answered`. The subsequent conversation offers the message return below, and the child
-has an informational reply. All progress uses the saved, original role identities.
-The journal stages are seek tracks → tracks found/child unfound → child met/riddle pending →
-riddle accepted/return decision pending. Q2 remains active through those stages.
-[Q2-B adoption](../decisions/pm-decision-q2-b-riddle-2026-10-05.md) records this boundary.
-
-API1.9 `QuestJournal.active_variants` is an optional ordered list of 1–16
-`{when: VersionedPolicy, text: TextKey}` entries. For an active quest only, the first holding
-policy supplies its journal text; no match uses ordinary active/objectives_met selection.
-This reuses policy evaluation and never changes objective truth or lifecycle. Compiler and
-loader validate each policy/reference/text and require API1.9 for this field or a dialogue
-riddle. Riddle choice references and bank multiplicity are checked before loading.
-
-Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
-`apply: quest.activate {quest}`, which (Beads `loka-kgd.150.2`) both kernels admit only under
-`quest_resolved`, `rested` or `entity_entered_room`, the triggers whose subject can be a character
-(OUTCOME_MISMATCH at the step's `op` elsewhere); an NPC entrant activates nothing. Both quest references expand from
-source short keys, resolve to local quest definitions, and require the quest event owner in
-the capability lock. These trigger/consequence forms require kernel API at least 1.8.
-Existing fact/room triggers retain their semantics.
-From API1.12, reactions may apply typed `quest.resolve {quest, outcome}`
-and `quest.fail {quest, outcome}`, since `loka-kgd.150.2` on any trigger (for each holder). Both require a local quest reference and quest capability;
-resolve emits the quest-owned `quest_resolved` event. A scene may start on exact
-`quest_resolved {quest, outcome}` instead of a story point, with the same actor/instance
-evidence check as reaction delivery. The compiler expands these short quest references.
-Toolbox row W1: `on.event` may be any registered event kind, with the optional filters of the
-[reaction@1 table](mechanics.md#reaction1-kerneltssrcmechanicsreactionts); no new `kernel_api`
-floor. The compiler expands each short definition filter (`item`, `room`, `quest`, `story_point`,
-`barrier`, `scene`, `kind`, `victim`) and both kernels refuse one that names no local definition
-of its kind. `cartridges/reactions_sampler` is the sampler: dropping the bone in the yard sets
-`crow_drawn`, whose room variant shows the crow; dropping the pebble does not.
-
 ## Carrying settings and item mass
 
 An authored `world.carry = {max_grams: nonnegative safe integer}` opts a v2 cartridge into
@@ -172,8 +58,7 @@ validation rejects malformed, negative or out-of-range mass and carry settings. 
 loader enforce the same requirement before any world or save mutation. Without carry, old
 content, hashes and carrying behavior retain their existing meaning.
 
-Carry requires `containment@1` and `requires.kernel_api.at_least >= 1.3`; compiler and loader
-reject an older minimum, and the existing installed API gate rejects an older implementation. This extension
+Carry requires `containment@1`. This extension
 uses the existing containment capability and source/world settings seams, without a new
 capability or format tag.
 
@@ -220,9 +105,7 @@ An optional `NpcDefinition.hp` contains exactly `minimum`, `maximum`, `start`, a
 for the cartridge's existing hp pool. Bounds/start are ResourceInt; gain is a nonnegative
 ResourceInt. Compiler and loader require `minimum <= start <= maximum`
 (`RESOURCE_SPEC_INVALID`). No bands, regen, key or arbitrary pool map is accepted.
-Missing hp preserves legacy behavior. Presence requires resource@1 and an authored
-`requires.kernel_api.at_least >= 1.4` (`KERNEL_API_RANGE_INVALID` otherwise); this field was introduced in API 1.4. Generic manifest range validation remains, but
-older-development compatibility is not required under the [owner policy](../decisions/owner-decision-forward-development-2026-10-05.md). Runtime definition and
+Missing hp preserves legacy behavior. Presence requires resource@1. Older-development compatibility is not required under the [owner policy](../decisions/owner-decision-forward-development-2026-10-05.md). Runtime definition and
 row semantics live in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
 
 
@@ -230,10 +113,9 @@ A ResourceSpec may opt into `regen {every, by_position}`. `every` is a positive 
 `by_position` requires all four keys `standing`, `sitting`, `resting`, `sleeping`, each a
 nonnegative ResourceInt gain per interval (zero allowed). Both compiler and loader enforce
 `every <= floor(9007199254740991 / (max_authored_rate + 1))` (`RESOURCE_SPEC_INVALID` at
-the pool's `regen`) and require `position@1` (`UNDECLARED_CAPABILITY` at `regen`),
-`time_policy.profile=real_elapsed` (`INVALID_TIME_POLICY` at `regen`), and an additive
-recovery API lower bound1.2 (`KERNEL_API_RANGE_INVALID` at
-`requires.kernel_api.at_least`). `gain` remains required for
+the pool's `regen`) and require `position@1` (`UNDECLARED_CAPABILITY` at `regen`)
+and `time_policy.profile=real_elapsed` (`INVALID_TIME_POLICY` at `regen`).
+`gain` remains required for
 legacy compatibility and is ignored for opted recovery; no new capability or numeric
 profile version is introduced. The active chapter consumes this opt-in under the
 [M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
@@ -342,10 +224,10 @@ potential check, not proof that quest/policy/carry conditions will be met. Unrea
 wrong custody, and keys behind inaccessible rooms or lids retain the lockout diagnostic.
 
 Dialogue `receive` role references must name an item and NPC and exclude accept/hand_over.
-API1.10 also permits receive without a resolving quest; earlier APIs require that quest.
-Optional item `give_allowed: false` also requires API1.10; absence preserves ordinary Give. Dialogue `fact.adjust` must name a bounded integer fact, never
+A receive needs no resolving quest.
+Optional item `give_allowed: false` refuses Give; absence preserves ordinary Give. Dialogue `fact.adjust` must name a bounded integer fact, never
 a reserved engine fact. Both validators enforce references, types and ownership; source short
-fact references expand for this new spelling. The original M20-B reward/storage release declared API1.7; current bundled content follows the [chapter pin](#current-bundled-chapter).
+fact references expand for this new spelling. Current bundled content follows the [chapter pin](#current-bundled-chapter).
 there is no per-feature minimum-version detector for legacy quest-resolving receive, fact.adjust or Put under the
 [pre-production policy](../decisions/owner-decision-forward-development-2026-10-05.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
@@ -491,15 +373,14 @@ inline; its artifact equals the hand-keyed one byte for byte.
 **Signals.** A message from one reaction to others, lowered to a counter fact.
 1. In a reaction's `apply`, `{"op": "signal", "signal": "<name>"}` lowers to
    `{"op": "fact.adjust", "fact": "signal_<name>", "amount": 1}` at the same index, so a check on
-   the lowered step (capability, floor) reports at the author's step (`reactions/ring.apply[0].op`).
+   the lowered step (capability) reports at the author's step (`reactions/ring.apply[0].op`).
 2. The trigger `"on": {"event": "signal", "signal": "<name>"}` lowers to
    `{"event": "fact_changed", "fact": "signal_<name>"}`.
 3. Each name sent adds `signal_<name>` to `facts.json` (created when absent; an undecodable one
    takes nothing, its `INVALID_JSON` fails the build): version 1, `int` 0 to 9007199254740990,
    default 0, scope `player` (a listener runs for the sending character), meaning
    `Signal <name> (compiler-generated).`
-4. The pass adds nothing to `cartridge.json`: the author declares `fact@1` and `reaction@1` and a
-   `kernel_api` floor of at least 1.47, and the existing checks report what is missing.
+4. The pass adds nothing to `cartridge.json`: the author declares `fact@1` and `reaction@1`, and the existing checks report what is missing.
 5. Limits:
    - After 9007199254740990 sends the counter is full: the adjust clamps, writes nothing new and
      the listeners stay silent (`kernel/ts/src/mechanics/fact.ts:254`). The maximum is one below
@@ -962,44 +843,48 @@ source, a line may be written in place and lowered to a generated key
 
 ## Development cartridges
 
-`cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets):
-three narrate lines start on `lantern_resolved/carry`; a fact_changed reaction hears
-that the scene ended. Its source uses short story-point and fact references, and has
-an independent known answer; existing cartridges remain unchanged.
+`cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets),
+`cartridges/chapters_sampler` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts) and
+`cartridges/journal_sampler` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets).
+These are development proofs, not a retained-release or save migration requirement; forward-development
+policy is in the [owner decision](../decisions/owner-decision-forward-development-2026-10-05.md); preserve
+saved bytes and exact mismatch refusal.
 
-`cartridges/chapters_sampler` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts):
-opening Landing, Dusk after either lantern story-point outcome, and Reeds after `carry`,
-whose trigger choice is `take_it` (the other choice is `leave_it`). This independent source
-has its own identity and frozen known answer; all preexisting cartridges remain unchanged.
-
-`cartridges/journal_sampler` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
-the Lantern's current possession changes its active text, while the oar's post-activation
-acquisition keeps its earned text after drop; terminal states select an outcome text or their
-stage's fallback. These are historical development proofs, not a retained-release or save
-migration requirement. Current bundled content and forward-development policy are in the
-[current chapter](#current-bundled-chapter) and [owner decision](../decisions/owner-decision-forward-development-2026-10-05.md); preserve saved bytes and exact mismatch refusal.
-
-The slice samplers (`cartridges/{hello,rooms,details,facts,items,gate,errand,ferry,green}_sampler`
-and others) each exercise one slice; most carry replayable transcripts
-(`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
+The slice samplers (`cartridges/<name>_sampler`) each exercise one slice; most carry replayable
+transcripts (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
 `kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
-Ferryman's Lantern": four rooms, Bram, one lantern, one quest with a `current_state`
-objective and no offer, two dialogues of Bram's: `bram_offer` while the player has no instance of
-the quest (one choice, `accept`, which accepts it) and `bram` while it is active (two choices,
-`carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
-(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundled the
-[retired Missing Child chapter](#retired-first-chapter-e1-candidate) until 2026-10-21.
+Ferryman's Lantern" (its stats and gate: [owner rules](owner-rules.md#product-and-scope)); its
+known answer remains historical proof.
+
+## Skill and bleed declarations
+
+A skill source `skills/<key>.json` supplies `label`, `requirement` and `qualification`
+(`SkillDefinition`, capability `skills@1`, with `attributes@1`); its key comes from its file.
+The compiler creates the exact reserved player Boolean `skill_<key>`, default false, reserved
+to `skills@1`. No writable stat, progression or skill-percentage field is introduced. A teacher
+dialogue's typed acquisition step identifies the declared skill; its payment binds a live NPC
+role, penny resource and positive amount.
+
+A [bleed](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) attacker opts in with
+`on_positive_hit: {effect}`; the effect declares `{duration, tick_every, hp_loss, narration:
+{applied, refreshed, tick, expired}}`, each narration a required local TextKey; a bandage item
+declares `bandage: {effect, skill, action, narration}`. These are content values; the engine
+encodes no default. Compiler and loader validate the closed positive safe-integer duration,
+interval and loss, interval < duration, local HP pool, supported producer/effect reference,
+required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible
+opt-in; they reject unknown fields, an absent effect or an invalid skill qualification.
+`cartridges/bleed_sampler` exercises it.
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). The installed API follows the [current bundled chapter](#current-bundled-chapter); current requirement ranges are validated; obsolete development fixtures follow the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1`. The installed API follows the [current bundled chapter](#current-bundled-chapter); current requirement ranges are validated; obsolete development fixtures follow the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 
 ## Corpse templates and shrine settings (M5-B)
 
-`world.death` requires `death@1`, `containment@1`, `position@1`, and kernel API at least
-1.5. It names `player_corpse` and `npc_corpse` item templates, the existing `shrine` room,
+`world.death` requires `death@1`, `containment@1`, `position@1`. It
+names `player_corpse` and `npc_corpse` item templates, the existing `shrine` room,
 and `restore {hp, mv}` values within the corresponding declared pools. References accept
 source short keys. A corpse template has `location: {in: "template"}` and ordinary item
 text/mass and `container: true`; it has no capacity, slot or barrier. Templates are never minted or placed at
@@ -1007,34 +892,33 @@ birth, cannot hold authored children, and must be the configured corpse template
 Both compiler and loader validate these constraints and reference kinds.
 
 The sampler's 0.0.8 release binds chapel_nave, HP10/MV100 and two corpse templates.
-This is a foundation release: the first live lethal producer remains M6. Older kernels
-refuse API1.5 content; older bundled release lists refuse its unknown content pin.
+This is a foundation release: the first live lethal producer remains M6. Older bundled release lists
+refuse its unknown content pin.
 
 ### Death penalty declarations
 
 [Death penalties](mechanics.md#death-penalties-toolbox-row-47) read the optional
-`world.death.penalty` (`DeathSettings.penalty`; kernel API at least **1.109**):
+`world.death.penalty` (`DeathSettings.penalty`):
 `experience {percent, narration}`, percent an integer 1 to 100 and narration a TextKey, and
 `items`, `corpse` or `kept`. The compiler (`lib/loka/content/death.ex`) and the loader
 (`kernel/ts/src/content/cartridge_death.ts`) refuse an `experience` without `world.levelling`
 (SCHEMA_VIOLATION at `world.death.penalty.experience`), an unknown narration key
-(UNRESOLVED_REFERENCE at its `narration`) and an older API floor (KERNEL_API_RANGE_INVALID);
+(UNRESOLVED_REFERENCE at its `narration`);
 the schema refuses the bounds and any other field. `cartridges/penalty_sampler` is the sampler.
 
 ### Death narration declarations
 
 [Death lines](mechanics.md#death-lines-outside-a-combat-round-loka-3w3q) read the optional
-`world.death.narration` (`DeathSettings.narration`; kernel API at least **1.117**, Beads
+`world.death.narration` (`DeathSettings.narration`, Beads
 `loka-3w3q`): `player_died` and `woke`, each an optional TextKey. The compiler
 (`lib/loka/content/death.ex`) and the loader (`kernel/ts/src/content/cartridge_death.ts`) refuse
-an unknown key (UNRESOLVED_REFERENCE at `world.death.narration.<field>`) and an older API floor
-(KERNEL_API_RANGE_INVALID); the schema refuses any other field. The toolbox showcase declares
+an unknown key (UNRESOLVED_REFERENCE at `world.death.narration.<field>`); the schema refuses any other field. The toolbox showcase declares
 `woke`.
 
 ## First encounter authoring (M6-A)
 
 `world.combat` requires combat@1, schedule@1, death@1, valid `world.death`
-corpse/shrine settings and kernel API1.6. It owns
+corpse/shrine settings. It owns
 `player_attack {chance, damage_min, damage_max}`, positive `interval`,
 `sleep_multiplier` and `flee_multiplier`, and `narration` text keys for player_hit,
 player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
@@ -1044,16 +928,13 @@ Chances are integers 0..100, damage bounds positive and ordered, multipliers pos
 Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
 
 Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)
-(toolbox row 6a): it needs `kernel_api` at least **1.48**, or the compiler
-(`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`)
-report KERNEL_API_RANGE_INVALID at the manifest's `at_least`. `cartridges/targets_sampler` is the sampler.
+(toolbox row 6a). `cartridges/targets_sampler` is the sampler.
 
 Optional `world.combat.allies` lists NPC DefinitionRefs (short keys in source, at least one) that
 fight [beside the player](mechanics.md#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)
 (toolbox row 6b). Each must resolve to an authored NPC (not a `spawn_template`) with an `attack`,
 and the combat narration must name `ally_hit` and `ally_miss`; otherwise SCHEMA_VIOLATION (or
-UNRESOLVED_REFERENCE) at the entry. Allies need `kernel_api` at least **1.48**, under the same
-diagnostic as target choice. `cartridges/targets_sampler`'s yard is the sampler.
+UNRESOLVED_REFERENCE) at the entry. `cartridges/targets_sampler`'s yard is the sampler.
 
 Optional `world.death_credit` is a list of `{npc, room, fact}` DefinitionRefs, expanded
 from normal short references. Each NPC/fact appears once; NPC is an authored attackable
@@ -1066,643 +947,31 @@ The sampler release after0.0.8 adds five distinct rat credit facts and these pro
 preserving the five finite rats. It removes cellar_door from both reciprocal exits and
 removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
 shrine recovery requires no equipment/key. Other barriers and owner prose remain.
-The historical0.0.8 fixture retains its original answer; the
-[retired first chapter](#retired-first-chapter-e1-candidate) has its own independent oracle.
+The historical0.0.8 fixture retains its original answer.
 
-## Maud’s Cellar content (M20-B2)
+## Stock price declarations
 
-The bundled sampler consumes the [atomic reward and storage
-mechanics](mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts)
-under kernel API1.7. Widow Maud is a passive innkeeper in `drowned_lantern`. Her offer
-accepts `mauds_cellar` only before any instance exists and gives no item. The quest has
-no standalone offer; its current-state objective requires all five separate player
-facts `rat_1_killed` through `rat_5_killed`. Eligible lethal combat before acceptance
-counts through the existing [death-credit producer](#first-encounter-authoring-m6-a).
-Its journal supplies active, objectives-met and terminal fallback texts.
+[Stock-sensitive prices](mechanics.md#stock-sensitive-prices-toolbox-row-w11) add one optional ShopOffer field (`protocol/entity.schema.json`): `stock {items, buy}`, no other keys. `items` are 2 to 16 item refs (short keys in source) and `buy` 2 to 16 prices of at least 1, one per count held. The compiler (`lib/loka/content/commerce.ex`) and the loader (`kernel/ts/src/content/cartridge_commerce.ts`) refuse a `buy` whose length differs from `items`, an `items[0]` other than the offer's `item` or a flat `buy` other than `stock.buy[0]` (SCHEMA_VIOLATION `invalid_value` at the offer's `stock`), an item named twice or the `item` of a plain offer of the same shop (DUPLICATE_DEFINITION at `stock.items`: commerce save tracks a plain offer's item by receipt, and stock and trade jobs move set items) and an entry that names no item (UNRESOLVED_REFERENCE at `stock.items[i]`). Only the offer's `item` must start with the shopkeeper; the other set items may start in any authored holder. A `buy_discount`'s bounds cover every table entry. Sampler: `cartridges/prices_sampler`.
 
-Maud’s bound turn-in resolves the quest and pending choice while transferring the
-original `cellar_key` entity from Maud to the player, adding5 to player-scoped
-`maud_trust` (default0, bounded−100..100), and assigning instance-scoped
-`inn_cellar_cleared` true (defaultfalse). The key weighs100g. These changes commit
-atomically through ordinary dialogue, fact and containment mechanics; acceptance and
-completion never mint a replacement key. In-game text follows the [delegated copy
-rule](owner-rules.md#product-and-scope).
+## Fast travel declarations
 
-The separate `storage_chest` starts empty in `inn_rooms`, weighs8000g, and holds12
-immediate items. Its `storage_chest_lid` starts locked and names `cellar_key`; reward
-does not unlock it. Ordinary Unlock, Open, Put, Close and Take govern storage, capacity
-and carrying admission. The attic trunk still uses the brass key and contains the
-whistle. Cellar access and corpse recovery stay free of key requirements. There is no
-money, free room, loot, respawn or new failure/abandon transition.
-
-The independent sampler answer and actual App bundle pin this release. The0.0.10
-known answer is retained as history, not added to the bundled release list: an unmatched
-pin follows the established [missing-pin refusal](save.md#opening-a-story). Pre-production
-releases have no compatibility adapter or migration. Native evidence must identify the
-exact release; older fight captures do not prove this reward/storage consumer.
-The [M20-B2 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
-0.0.10 Release quest/storage walk, independent pin and behavior red controls.
-
-## Q2-C stays return
-
-[The adopted return plan](../decisions/pm-decision-q2-c-stays-2026-10-05.md) completes
-the message path; [rescue below](#q2-c-rescue-return) adds its complete alternative. After the accepted
-riddle, active Q2 offers carrying Vesper's original message to the mother while the child
-stays. The message starts directly with Vesper; it cannot be Taken or Read there.
-The branch choice binds living, co-located Vesper, the child and the original item, requires
-player fact `fen.return_branch=unselected` and instance `village.child_status=missing`,
-and atomically receives that same item and assigns branch `stays`. Capacity refusal
-leaves custody, branch and pending continuation unchanged. Q2 stays active.
-
-The bounded player branch has values unselected/stays/rescue, default unselected. The instance
-status has missing/rescued/stays/lost, default missing. Only the mother's turn-in writes
-status in this release. The message's authored `give_allowed: false` prevents ordinary
-Give of it or a container holding it; ordinary Drop/Take, legal Put/Take and corpse
-recovery retain the original identity.
-
-The mother's ordered turn-in requires active actor-owned Q2, branch stays, status missing,
-the original message directly in the actor body and the bound living mother present.
-Acceptance hands that item to the mother, resolves Q2 outcome stays and assigns status stays
-in one proposal. Arrival, nested custody and historical possession never resolve Q2.
-The retained branch row binds the original item and participants; terminal binding must
-agree with it. Active journal text requests delivery or recovery without claiming direct
-custody; the resolved text says the child stays and his mother received the message. The mother's
-response and Village Green's description derive from committed status. Lost and dawn
-scenes remain deferred. Q1, Maud S1 and the
-reciprocal all-hours fen route remain usable.
-
-## Q2-C rescue return
-
-[Rescue adoption](../decisions/pm-decision-q2-c-rescue-2026-10-05.md) adds the complete
-alternative to the stays path. After active Q2 and the accepted riddle, the child's ordered
-conversation offers escorting the original child to the mother. It binds the child and Vesper,
-requires unselected branch/missing status, and atomically assigns player branch rescue
-and starts the typed escort. It binds no message item; that original item stays with
-Vesper throughout rescue. A stale stays choice cannot overwrite the selected branch.
-The player-scoped branch enum becomes unselected/stays/rescue.
-
-The child follows accepted Move and Flee on the real reciprocal all-hours route. Player death
-leaves the child in the death room and separates the escort; ordinary travel back and an
-explicit co-located child Rejoin conversation resume the same relation. Return alone
-does not resume it. The rescued turn-in to the mother requires active Q2, rescue branch, missing
-status and original living child following beside the living mother and player. It completes
-the relation, resolves Q2 as rescued and assigns status rescued in one proposal. The child
-remains physically beside the mother after later player movement. Arrival alone cannot finish.
-The journal distinguishes following/separated/completed; Green and the mother read committed
-rescued/stays truth. Both terminal guides retain directions; Q1 and Maud remain independent.
-Bell-first loss and the prior allegiance are specified by the Q3 adoption below.
-
-## Q3-B bell-first prior and lost
-
-[Q3-B adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md) adds public
-Aldric and the all-hours Chapel Nave → Bell Tower → Belfry path. Aldric offers the
-actor-owned bell quest after active Q2 with studied tracks, or either completed Q2
-return. Only Ring on the Belfry bell detail with active Q3 and an eligible Q2 writes
-the bell and prior allegiance. Its fact-change reaction resolves Q3/prior; another
-guarded reaction fails still-active Q2/lost and writes instance child status lost only
-when the accepted child meeting is absent. Ring after that meeting preserves active Q2
-and either return. Rescued and stays remain terminal. The Q3 resolution starts one
-three-line bell scene; Ring emits no story point. Lost has honest journal, the mother and
-Green text. The fox choice is specified separately below; no finale is present yet.
-
-## Q3-F fox and silent bell
-
-[Q3-F adoption](../decisions/pm-decision-q3-fox-silence-2026-10-05.md) governs
-the bundled chapter. It adds **Leave the
-bell silent** on the same Belfry bell detail. It is offered only to the actor with
-active Q3, resolved Q2/rescued or Q2/stays, an unrung bell and unknown allegiance.
-The recipe rechecks those conditions when performed. It assigns only the player-scope
-allegiance from unknown to fox; it does not ring the bell, change Q2 or write a
-story point. Q3's current-state objective accepts prior or fox, while the existing
-Ring and the new Silence recipes retain their distinct admission policies. A
-fact-change reaction on the fox allegiance resolves Q3/fox once; the resolved
-quest event starts one two-line `bell_silenced` modal scene through scene@1.
-The final Continue acknowledges and ends it. The scene carries Aldric's cold
-response as narration; he remains present and the chapel route remains open.
-The first accepted Q3 terminal choice closes both recipes. No lost/fox outcome,
-later allegiance switch, dawn scene or export is part of Q3-F.
-
-<a id="a3-green-finale-planned"></a>
-
-## A3 Green finale
-
-[A3 adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md) selects one
-explicit **Begin epilogue** action at Village Green after actor-owned terminal Q2
-rescued/stays/lost, terminal Q3 prior/fox, and the corresponding bell scene's final
-acknowledgement. The five legal pairs are rescued/prior, rescued/fox, stays/prior,
-stays/fox and lost/prior. The Q2 and Q3 receipt-backed terminals, bell fact and
-allegiance must agree; lost/fox is refused. Eligibility is derived from those durable
-rows and the unseen epilogue scene, without a separate armed flag. Arrival, already
-being at Green, display, elapsed settlement and reopen never start it. Ordinary
-movement and recovery remain available before Begin; no side quest is required.
-
-The existing Green gains an inspectable, non-readable `market_cross` detail, already
-described in its room text. Five exact pair-bound recipes target that detail. Under
-the current recipe projection they appear as ordinary World actions while the actor
-is at Green; no targetless recipe shape is added. The accepted Begin's
-`action_completed` must name that detail as its subject before it can start only its
-selected fixed, three-line modal scene. Begin writes no continuity export. The
-selected scene identity freezes the pair. Its final shown-line acknowledgement ends
-that scene and atomically assigns the following declared player memories and reaches
-`prologue_completed` with the listed outcome. Defaults are `unreached`. The dotted
-memory names express continuity semantics; the declared source fact keys are
-`memory_village_ending`, `memory_fox_fate` and `memory_chapter_1_guild_tilt`.
-
-| Q2 / Q3 | Bell rung | village ending | fox fate | guild tilt | completion outcome |
-|---|---|---|---|---|---|
-| rescued / prior | true | rescued | stilled | prior | rescued_prior |
-| rescued / fox | false | rescued | free | fox | rescued_fox |
-| stays / prior | true | stays | stilled | prior | stays_prior |
-| stays / fox | false | stays | free | fox | stays_fox |
-| lost / prior | true | lost | stilled | prior | lost_prior |
-
-Guild tilt is a categorical continuity preference, not faction points or membership;
-fox fate records the selected bell intent, not NPC removal. These memories are local
-durable facts in A3; cross-cartridge or account transport awaits a consumer. The
-compiler owns a reserved player fact marker for the story point's selected outcome.
-Only the story-point reach writes it. Compiler and loader validate the exact scene-end
-trigger, references, unique ownership, marker vocabulary and required API capability.
-The chapter's source copy is delegated to the content author under the owner's copy
-direction. This section adopts semantics and values, not final prose, IDs or hashes.
-
-<a id="selected-s2-authoring-pending-implementation"></a>
-
-## Selected S2 authoring
-
-B2 authors Peg and her one ledger at the chandler, plus the storeroom,
-while reusing the existing public Aldric in the Chapel Nave. Peg's offer has no hours
-gate. Source declares S2's fixed absolute deadlines through the authored chapter
-calendar, 10-penny payout, 20-penny player start, Aldric's explicit 10-penny funding,
-the 0..1000 penny resource bound, and the typed fact bounds and outcomes. The
-[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract)
-owns timing, identity and atomic consequences. Compiler and loader must validate the
-receive-plus-accept choice, bound original participants/item, absolute due time,
-resource ownership and exact participating balances. Source may use a narrow typed
-expiry declaration; it must not encode the job as a free-form Effect interpreter.
-B2 is installed in the [current bundled chapter](#current-bundled-chapter).
-
-## Peg's B3 shelf
-
-The [selected shop mechanic](mechanics.md#pegs-immediate-shop-b3-selected-contract)
-uses four separately authored, directly Peg-held items. Each item definition has one
-fresh-world instance; these are the whole initial stock. B3 adds no issuance or restock.
-The prices, masses and capacity below are chapter values, not engine defaults.
-
-| Item | Buy | Sell | Shell mass | Current use |
-|---|---:|---:|---:|---|
-| torch | 3p | 1p | 100g | Wear/Remove in the light slot; B4 adds fuel and light. |
-| lamp_oil | 2p | 1p | 200g | Held supply; B4 adds refill use. |
-| waterskin | 4p | 2p | 500g | Held vessel; B7 adds liquid use. |
-| satchel | 5p | 2p | 100g | Portable `container: true`, capacity four direct items. |
-
-Peg starts with an explicit 20-penny balance under B2's 0..1000 chapter resource
-bound. The player starts with B2's 20p and Aldric keeps his separate 10p funding.
-Shop source declares the four exact eligible item references and both prices; their
-fresh-world IDs are derived from the pinned release, not authored in source.
-Compiler and loader reject duplicate offers, absent/non-Peg starting items, invalid
-prices or missing participating balance declarations. The shop never treats Peg's
-S2 ledger or an item later given to her as an offer. B4/B7 may add use metadata to
-these definitions in their own releases without changing B3's item identities or
-shop rules. The satchel has no lid and its contents count toward the ordinary load.
-
-### Stock price declarations
-
-[Stock-sensitive prices](mechanics.md#stock-sensitive-prices-toolbox-row-w11) add one optional ShopOffer field (`protocol/entity.schema.json`): `stock {items, buy}`, no other keys. `items` are 2 to 16 item refs (short keys in source) and `buy` 2 to 16 prices of at least 1, one per count held. The compiler (`lib/loka/content/commerce.ex`) and the loader (`kernel/ts/src/content/cartridge_commerce.ts`) refuse a `buy` whose length differs from `items`, an `items[0]` other than the offer's `item` or a flat `buy` other than `stock.buy[0]` (SCHEMA_VIOLATION `invalid_value` at the offer's `stock`), an item named twice or the `item` of a plain offer of the same shop (DUPLICATE_DEFINITION at `stock.items`: commerce save tracks a plain offer's item by receipt, and stock and trade jobs move set items), an entry that names no item (UNRESOLVED_REFERENCE at `stock.items[i]`) and a floor below **1.82** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Only the offer's `item` must start with the shopkeeper; the other set items may start in any authored holder. A `buy_discount`'s bounds cover every table entry. Sampler: `cartridges/prices_sampler`.
-
-## C1 Tobin and equipment
-
-**API1.18 source contract.** The [C1 mechanic](mechanics.md#c1-training-and-armed-defense-selected-contract)
-adds `skills@1` and the existing `attributes@1` dependency. Skill definitions declare
-their label and current VersionedPolicy qualification; the compiler creates their
-unique reserved player acquisition facts. Swords and dodge are the only new skills.
-The source `skills/<key>.json` supplies `label`, `requirement` and `qualification`;
-its key comes from its file. The acquisition fact is the exact player Boolean
-`skill_<key>`, default false, reserved to `skills@1`. No writable stat, progression
-or skill-percentage field is introduced.
-
-| Chapter parameter | Selected value |
-|---|---|
-| STR / DEX attribute starts | 10 / 10 |
-| swords qualification | `stat_compare`: STR at least 10 |
-| dodge qualification | `stat_compare`: DEX at least 10 |
-| Each lesson payment | 2 pennies, actor → Tobin |
-| Tobin penny start | 0, under the existing penny bounds |
-| Lesson duration / cooldown | 0 / 0; ordinary authority elapsed settlement still runs |
-| rusty_sword | 500g, `wield`, chance95, fixed damage3; initially Tobin-held |
-| iron_sword | 600g, `wield`, chance95, fixed damage4; initially Peg-held, Buy8p/Sell4p |
-| wooden_shield | 400g, `off_hand`, block chance25; initially Peg-held, Buy4p/Sell2p |
-| Qualified dodge chance | 50 |
-
-Place passive Tobin at reachable `north_gate`, with no attack profile or schedule.
-An ordered swords dialogue receives the single rusty sword while teaching; a later
-dodge dialogue teaches without item roles. A teacher dialogue's typed acquisition
-step identifies the declared skill; its payment binds a live NPC role, penny
-resource and positive amount. The original teacher and item identities are bound
-by ordinary dialogue/receive, not minted on Choose. Learned-status policies use the
-generated typed fact; user content cannot counterfeit an acquired grant.
-
-The iron sword and shield extend [Peg's finite shelf](#pegs-b3-shelf) through its
-existing Buy/Sell contract. Preserve the four B3 definitions and their within-save
-identities; each new release independently derives its own fresh IDs. Gift swords
-are not a shop offer. No renewal/replacement/restock is needed for these optional
-consumers. Add item combat eligibility and the two defense narration keys to the
-smallest current cartridge shape; chance bounds remain integers0..100 and weapon
-damage positive/ordered. Compile and load reject undeclared skills, absent or
-non-Boolean generated facts, unresolved qualification refs, wrong equipment slots,
-invalid profiles/fees, missing teacher balance, collisions and unknown fields.
-
-Production unarmed/rat profiles, combat interval, recovery, carrying ceiling and
-main-story routes stay as currently authored. Training and shop equipment are
-optional; every possession-recovery and required story route stays free of a skill,
-weapon, shield, hour or next-day stock gate. C2 owns Tobin's reachable watch
-post/patrol. C1 and its B4 consumer are installed in the
-[current bundled chapter](#current-bundled-chapter).
-
-## B5 herb and bandage stock
-
-The [B5 mechanic](mechanics.md#s9-infirmary-herbs-b5-selected-contract) uses finite
-existing authored item instances. Because the current compiler instantiates one
-item per definition, declare twelve individually keyed fenwort definitions and
-twelve individually keyed bandage definitions, with shared visible family names
-and independent exact references. They are real items, not stacks or templates.
-Fenwort starts directly in Willow Shade; bandages start directly with Wick.
-The patch references only those twelve fenwort definitions; S9 references those
-same eligible herbs and twelve reward definitions. Derived release IDs remain
-unknown until the new cartridge is built.
-
-| Chapter setting | Selected value |
-|---|---:|
-| Initial fenwort supply | 12 distinct items |
-| Initial Wick reward supply | 12 distinct bandages |
-| Herbs per turn-in | 3 |
-| Bandages per turn-in | 3 |
-| Fenwort mass | 20g each |
-| Bandage mass | 10g each |
-| S9 Priory increment | +1 |
-| Cumulative S9 contribution cap | +3 |
-| Initial player-scoped S9 contribution | 0 |
-
-The patch and Wick have no hour gate, respawn, restock or cooldown. Four optional
-exchanges are funded in a fresh chapter, and the fourth demonstrates the cap.
-All item definitions retain ordinary custody, storage and death behavior. Wick
-has no finite carrying/custody capacity that could reject the authored incoming
-herbs. Public reciprocal Cloister/Infirmary routes cannot depend on private study
-access, a bell choice, key or timed door. The patch is immediately reachable via
-the existing Willow Shade route. C5 owns bandage use; D12 owns learned herbalism;
-neither is advertised as a selectable unfinished action in B5.
-
-Compiler and loader independently reject duplicate/overlapping eligible and
-reward references, wrong kinds or starting holders, absent patch room/Wick,
-nonpositive or unequal exchange quantities, insufficient initial stock, invalid
-mass, missing bounded contribution declaration, increment outside its cap and
-incompatible B2 faction bounds. The exchange quantities are equal for this
-consumer, not a generic barter language. Definitions and all tuning belong to
-this cartridge; no engine or Book fenwort count/faction literal is permitted.
-
-## B4 well and fuel
-
-B4 introduced the chapter at `0.0.21`, API1.19; its oracle files left with the chapter.
-B4 is reviewed; its successor pins are retained as frozen answers.
-
-The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
-adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
-stairs are public at every hour. Its ordinary description exposes an authored
-inspectable `masonry` detail; its separate dark description names only darkness
-and the return stair, with no hidden-object links. The detail is optional flavor.
-Other installed rooms retain their current visibility; sunlight phases do not
-silently darken them. No lantern, cottage, water or enemy is added.
-
-The chapter's source metadata declares the B3 torch as refillable oil wick:
-capacity7200 fuel units, initial7200, burn1 fuel unit per logical clock unit,
-compatible supply `lamp_oil`. The exact B3 oil bottle starts with7200 units,
-capacity7200 and no burn. These give two game hours of torch light per full
-charge under B1's3600 units/hour; they are tuning, never engine defaults.
-The bottle persists at zero and retains its B3 sell eligibility and shell mass;
-prices never depend on charge. Partial refill preserves excess in the same bottle.
-The satchel still has no lid; nesting alone excludes its source from illumination.
-
-Compiler and loader validate exact source/supply references, nonnegative safe
-integer initial charge within positive bounded capacity, positive source burn rate,
-matching fuel units and authored dark text on opted rooms. A supply cannot be lit
-or illuminate. Missing fuel rows are not an implicit fresh charge. Metadata belongs
-to the exact item definitions; fuel state belongs to their real instances, never to
-the player, room or merchant. No generic stacking, destruction, stock or liquid API.
-
-## B7 water and vessels
-
-The [B7 mechanic](mechanics.md#b7-well-and-waterskin-selected-contract)
-authors `water` in integer quarter-litre units: **250 grams/unit**, Drink **1 unit**.
-Both waterskins have capacity **4 units**, shell mass **500 grams**, and initial
-`null/0` contents. A full skin therefore weighs **1500 grams**, with no rounded
-fractional quantity. Water has no declared resource benefit in B7.
-
-Keep B3's original `waterskin` offer and add one separately authored
-`spare_waterskin`, directly Peg-held, Buy **4p**, Sell **2p**, with the same vessel
-metadata. Its distinct name/keywords and exact identity support Book target
-selection; these are two finite real item offers, not a stack or restock mode.
-This explicitly extends the four-item B3 shelf for B7's real Pour consumer.
-All prior offers and starts stay governed by their existing declarations;
-release-derived IDs must be re-pinned, not copied from another release.
-Two skins cost **8p** from the authored **20p** player start, leaving **12p**;
-with Peg's **20p** start her balance becomes **28p**. Filled skins may be sold
-and bought back for the same authored prices with their contents intact.
-
-Add one actual `well` detail to Well Lane, accessible at all hours with no
-light, quest, bell, combat, tide or room descent requirement. It declares an
-inexhaustible source of the `water` reference; only Fill may introduce its units.
-The B4 well-shaft plan is independent; preserve its exits if already merged.
-No new room or route is counted for B7. The well cannot be carried or targeted
-as a Pour receiver, and cannot be drunk from directly in this slice.
-
-Vessel metadata opts only authored initial item instances into B7. A template
-cannot be a vessel: no liquid-row creation writer exists for newly instantiated
-items. Ordinary non-vessel corpse templates remain unchanged.
-
-Source/compiler/loader validate positive integer opted vessel capacity, exact
-initial row, kind references, positive integer drink amount and grams/unit,
-source kind/room binding and safe maximum effective mass. Short DefinitionRefs expand through
-the existing compiler path. Reject initial contents over capacity, null with
-positive quantity, unknown kind, unsafe density product and source declarations
-on non-detail entities. Non-opted items and historical frozen artifacts retain
-their existing representation; B4's fuel rows are not liquid vessels.
-## C2 watch route and trust
-
-[C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
-adds four village rooms with reciprocal, all-hours exits: North Gate east ↔
-Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
-down; Village Green east ↔ East Gate west. The cell is vacant with an open,
-unlocked door: no missing-key producer. Gate Tower uses existing adjacent sight;
-no far scan is promised. Watch Post's duty roster and East Gate's flooded-road
-sign use installed readable details. The sign explains that the King's Road is
-outside this chapter; no dangling exit or higher-chapter room is added.
-
-Move the same original C1 Tobin spawn from North Gate to Watch Post, retaining
-his pennies, lesson definitions and exact rusty sword identity. He is a passive
-noncombatant with no attack profile, daily schedule or other location writer.
-His C1 lessons remain available at his current reachable location, including
-between patrol legs; after completion he stays at the terminal checkpoint.
-No paid training, skill, trust, equipment, light or hour condition gates S3.
-
-| Chapter parameter | Selected value |
-|---|---|
-| Cyclic route cursor0..5, initial0 | Watch Post → North Gate → Village Green → East Gate → Village Green → North Gate → Watch Post |
-| Distinct checkpoints | North Gate, Village Green, East Gate, Watch Post |
-| Required new checkpoint entries per attempt | 4; starting co-presence earns0 |
-| Leader movement trigger | One explicit Continue rounds per edge |
-| Patrol duration, deadline, cooldown | 0, none, 0; authority elapsed settlement still applies |
-| S3 success outcome | `completed` |
-| `watch.gate_trusts_player` | Reserved player Boolean, initially false, true only on S3 success |
-| S3 other reward | None; C1 owns swords teaching and the rusty gift |
-
-The closing Watch Post is cursor0 again, not a seventh route occurrence. Route
-cursor denotes the leader's current occurrence, including the repeated Green/North
-Gate positions. On Restart it is retained, not reconstructed
-from room alone. Completing four unique post-start entries takes at most six edges
-from any cursor; repeated connecting rooms count once. Open all North Gate–chapel
-and village/fen/cellar/corpse routes at every hour, without a trust barrier. Watch
-Post, Cell and Tower are safe, equipment-free optional destinations, with usable
-return exits. No hound producer or survive timer is introduced.
-
-Compiler/loader validate the bounded finite adjacent route, unique nonempty declared
-checkpoint subset and achievable checkpoint count, original NPC/quest references,
-shared location-writer exclusion, reserved trust ownership and complete room/link/
-readable definitions. Reject malformed cursors, duplicate/unknown checkpoint credit,
-wrong row identities and ordinary writes to reserved state.
-The patrol Start choice owns activation and its final causal join owns resolution:
-ordinary quest-linked dialogue and reaction activation/resolution/failure cannot
-write a patrol quest independently of its row. World route/count values are
-cartridge data, never presenter/engine chapter literals; existing safety budgets
-bound all validation/traversal. C2 is installed in the
-[current bundled chapter](#current-bundled-chapter); original selection and
-proof remain in the [C2 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
-
-## B6 marsh route and tuning
-
-B6 is installed in the [current bundled chapter](#current-bundled-chapter).
-Its original release derivation remains in the dated
-[B6 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b6-wisp/README.md).
-
-
-The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
-adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
-public path on existing firm footing; preserve the already always-passable mire
-and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
-east ↔ Tide Flats west are public reciprocal dry walking routes. Tide Flats is
-its public edge, with no swimming, low-tide charm, fare or water hazard in B6.
-C3 now installs the Hound Run connection; see the [current chapter](#current-bundled-chapter) and [C3 population declarations](#c3-hound-population-and-loot).
-Return to Aldric through Mire Crossing → Reed Bank → Reed Path → Ferry Landing
-→ Well Lane → Village Green → North Gate → Chapel Steps → Chapel Nave.
-His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
-
-Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
-self-luminous Seek marker and discovered wisp have explicit visibility metadata;
-other details have no exemption. Old Causeway's carved fox is flavor in B6 and
-must not silently grant ward before the riddle;
-[D2 held books](#d2-public-priory-and-book-authoring) own the later Ward grant.
-[D5's stone](#d5-deep-fen-route-and-details) remains descriptive.
-Bind one actual authored wisp, resident at every hour, not a timed population.
-
-| Chapter setting | Selected value |
-|---|---:|
-| Immutable attribute key/start | `per` / 5 |
-| Seek attribute difficulty | 5 |
-| Seek duration, costs and cooldown | 0 / none / none |
-| S4 answer / ordered bank | `tide` / `TIDE` |
-| Wrong answers per sitting | 3 |
-| Seek discovery fact | player Boolean `fen_wisp_discovered`, false |
-| Answered fact | player Boolean `fen_wisp_answered`, false |
-| Ward topic key / knowledge fact | `ward` / player Boolean `topic_ward_known`, false |
-
-Add `attributes@1`, `check@1`, `topics@1` and the actual light dependency to the
-chapter lock. The topic definition maps key, localized label and exact knowledge
-fact; no separate membership row or nineteen-topic catalog. Source `topic.grant`
-references that definition and lowers once through fact ownership. Chapter values
-never become engine or presenter defaults. All current fresh characters pass;
-D11 must preserve an immediate passing discovery path before changing attributes.
-
-Compiler and loader independently reject unresolved/wrong-kind attribute/topic/
-fact/role refs, non-Boolean or non-player topic facts, duplicate knowledge mappings,
-invalid threshold integers, nonpositive or non-safe-integer wrong limits, malformed
-bank or answer and an unresolved answer choice. Continuation/load validation rejects
-missing opted attempt fields.
-Short references expand in every new field. Existing bounded answer lengths apply;
-new schemas need their actual negative fixtures and planted guard controls.
-
-## C3 hound population and loot
-
-The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
-adds one instance-scoped `fen_hounds` plan and one fixed bundle. These are PM-selected
-chapter values, not engine/presenter constants or claimed owner preferences.
-
-| Parameter | Selected chapter value |
-|---|---|
-| Live cap / ordered slot count | 6 / 6 |
-| Daytime / nighttime eligible slot targets | 4 / 6 |
-| Night window | calendar hours [20,6), wrapping midnight |
-| Replacement delay | one authored world day (currently 86400 units) after death |
-| Wander interval | one authored world hour (currently 3600 units), aligned from time0 |
-| Home / allowed area | Hound Run / Hound Run and Adder Nest only |
-| Bundle | one hound and one pelt directly held by that new hound |
-| Hound HP minimum / maximum / start / gain | 0 / 8 / 8 / 0 |
-| Hound attack chance / fixed damage | 80 / 1 |
-| Pelt mass / equipment / sale offer | 250g / none / none |
-| Hound corpse | new room-fixed, public NPC corpse template, mass0, ordinary unbounded container |
-
-Add Reed Bank east ↔ Hound Run west and Hound Run east ↔ Adder Nest west,
-with gnawed-bones and empty-nest noun details. All exits are free of gates, light,
-skill and hour requirements; Adder Nest contains no live adder or harvest node in
-C3. No exit points at unbuilt Marsh Light. Other room connections stay deferred
-to their owning slices. The existing Reed Bank–Mire–Fox Hollow main story route
-remains usable at all hours without entering the population area.
-
-Hound/pelt definitions are bundle templates, not additional authored birth spawns.
-The plan binds its exact NPC, item and NPC corpse definitions, home and ordered
-allowed rooms, eligible slot targets, time window and periods. Require resolved
-correct-kind short references, distinct allowed rooms connected by legal reciprocal
-edges, positive safe calendar products/periods, a night window that wraps midnight
-(`night_end < night_start`), wander interval <= replacement delay, targets <= cap,
-and the exact bounded bundle shape. Hound HP/attack obey existing profile validation; pelt has ordinary
-item metadata and no lid, slot, children or capacity; corpse obeys M5 room-container
-validation. Unknown fields and malformed origin/job/state declarations refuse at
-compile/load; inspect actual slot bounds before traversal or allocation.
-
-No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
-in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
-S1 credits retain their declared consumer. Additional installed consumers are
-[C4 pack response/flight](#c4-pack-response-and-wounded-flight),
-[D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
-and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
-The [retired first chapter](#retired-first-chapter-e1-candidate) owns release answers;
-[C3's publication review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md)
-retains its original independent source/save proof.
-
-## C4 pack response and wounded flight
-
-[C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
-opts the existing C3 `fen_hounds` plan into same-plan, admission-time pack assistance
-and strict below25% HP flight. These are cartridge declarations, not template-name
-checks or engine/presenter world constants. Enemy flight has zero fare, chooses
-the first canonical legal direction without RNG, and remains within Hound Run and
-Adder Nest. Reuse C3's cap6, HP8 and attack profile; do not add spawns, population
-jobs, slots, routes or loot. Exact same-generation slot `last_flight_at` belongs
-to the [transition contract](protocol.md#c4-pack-encounter-and-flight-composition).
-
-Compiler/loader validate the plan's pack/flight declarations and correct-kind
-refs, integer percentage1..100 with positive HP maximum, declared zero animal
-fare, bounded unique connected area and registered committed narration for helper
-admission, enemy flight, primary change and final withdrawal. Unknown or malformed
-fields refuse. Hounds cannot cross the existing west edge into Reed Bank when
-fleeing: it is outside their declared area. No gate can be bypassed and no player
-key is spent on an animal's behalf. With no legal area exit the selected hound
-retains its ordinary attack opportunity; no retry loop is authored.
-
-Deliberate Attack alone begins hostility, at every hour. The archived aggressive
-night rule and provisional unsolicited night initiation are deferred explicitly.
-Required Reed Bank/Mire/Fox Hollow routes and actual corpse recovery are safe even
-inside the optional hound rooms unless the player elects another Attack. No corpse
-immunity flag, temporary safe mode, extra return action or night wait is needed.
-C1's taught rusty sword can kill HP8 through successful fixed3 hits (8→5→2→0),
-without crossing the strict below25% live flight threshold; misses/defenses retain
-their actual resolver semantics. No weapon/loot is required by the main story.
-C4 is installed in the [current bundled chapter](#current-bundled-chapter).
-
-## D1 ferry and Isle declarations
-
-Add exactly six chapter rooms: Boathouse, Fen Isle Landing, Isle Hut, Hut Loft,
-Herb Garden and Isle Shrine. Ferry Landing west/east connects to Boathouse;
-Fen Isle Landing east/west connects to Isle Hut and south/north to Isle Shrine;
-Isle Hut east/west connects to Herb Garden and up/down to Hut Loft. The
-Boathouse–Fen Isle Landing crossing is declared only as the two boarding-detail
-transport endpoints, never as a free compass exit. The Boathouse–Old Mill edge
-is opened by [D3](#d3-western-village-declarations). Isle Shrine is descriptive sanctuary/foreshadow;
-`chapel_nave` remains the actual death shrine.
-
-The cartridge declares an unattended rope ferry, outbound **2p**, return **0p**,
-the exact destination and Mother Sedge as the conserved fare recipient. Sedge is
-in Isle Hut at all hours and has an explicit bounded pennies balance to receive
-payment. Source definitions own fares, room links, text and balances. D1 adds
-`swim` to the C1 skill definitions with a vacuous `all: []` qualification
-policy: D1 has no water action or new attribute to qualify. Sedge's direct
-free dialogue choice uses `skill.acquire` and does not issue D6 water access
-early. D1 defines no underwater admission. [D6's selected admission](mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-contract)
-uses acquired swim plus current load/MV, without an attribute floor;
-D6 is installed in the [current bundled chapter](#current-bundled-chapter). The optional
-dark Hut Loft retains B4's
-known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
-herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
-
-The narrow `transports/<key>.json` endpoint declares `room`, keyed `detail`,
-`destination`, reciprocal `reverse` transport reference, `recipient`, `currency`,
-integer `fare`, `recovery_rooms`, exact `action`, `label` and `narration`. Each
-boarding detail declares `transport: {route, title}`. The outbound recovery room
-list names the four isle rooms plus Fen Isle Landing; the free return declares
-an empty list. These paired routes add no ordinary compass connection.
-
-Compiler and loader reject a missing/nonreciprocal endpoint, unknown destination,
-wrong fare/recipient reference, unbounded recipient balance, forged transport
-action, or ordinary exit that bypasses the declared ferry. D1 is installed in the [current bundled chapter](#current-bundled-chapter).
-### Fast travel declarations
-
-[Fast travel](mechanics.md#fast-travel-toolbox-row-32) reuses these declarations
-unchanged: a reciprocal route pair between two waypoint rooms that share no exit,
+[Fast travel](mechanics.md#fast-travel-toolbox-row-32) reuses the transport endpoint declarations
+(`protocol/transport.schema.json` `TransportDefinition`) unchanged: a reciprocal route pair between two waypoint rooms that share no exit,
 each with its own `use_transport` action whose `policy` root is
 `{"op": "visited_count", "room": "<destination>", "at_least": 1}`.
 
-## B8 Maud's service declarations
+## Escrow declarations
 
-The [selected services](mechanics.md#b8-mauds-immediate-services-selected-contract)
-add no rooms. The original Maud remains all-hours in `drowned_lantern`, declares
-an explicit **10p** initial balance within the existing **0..1000** pennies
-bounds, and offers the following finite chapter values. Values are source-owned,
-never kernel/presenter defaults.
+[Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `ServiceBenefit`): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
 
-| Service | Price | Immediate benefit | Finite source |
-|---|---:|---|---|
-| Room | 3p | actor `lantern_bed_paid=true`; paid bed detail/Rest at Inn Rooms | once per actor/save lineage |
-| Bread meal | 2p | up to +12 MV, capped at current authored maximum | Maud `lantern_meals`, 0..4, start4, gain0; debit1 |
-| Ale serving | 1p | up to +4 MV, capped at current authored maximum | exact Maud-held `lantern_ale_cask`; debit1 liquid unit |
-
-Declare `lantern_bed_paid` Boolean/player/default false. Add one actual `bed`
-detail at `inn_rooms` with free/paid description variants and a paid ordinary
-Rest action. S10 facts/quest/dream remain B9 work. The meal stock is an ordinary
-bounded ResourceSpec initialized only for Maud, not a second inventory count.
-Add one real provider-held ale vessel with capacity4, initial ale4 and shell
-mass500g; declare liquid kind `ale` with drink_amount1 and density250g/unit
-(the B7 quarter-litre unit). The serving amount is liquid-kind metadata, as in
-the installed B7 contract, not a vessel field.
-Empty shell persists as null/0; no Fill source for ale is authored. The cask is
-Maud's stock, not a shop offer or actor-issued mug. It stays Maud-held in this
-slice. No dead Maud stock resurrection/refill occurs.
-
-Declare the three finite offers as `services/<key>.json` definitions, referenced
-by Maud; the typed immediate benefit alternatives are entitlement, meal-stock
-recovery and provider-vessel recovery. No free-form operations list is authored.
-Compiler and loader check typed service keys/labels/narration, original provider
-binding, positive integer quote/benefit/stock debit, resource declarations and
-bounds, Boolean fact scope, exact directly provider-held opted ale vessel/kind,
-compatible complete serving and short-reference expansion. Reject duplicate
-service keys, absent balances, regenerating stock/currency, mismatched stock
-owner, non-MV recovery declarations and unbounded/unknown consequences. The
-minimal service subset covers only these consumed consequences, not an arbitrary
-Effect interpreter. Independently re-pin the integrated bundled release/API and
-known answers after the shared-source scheduling predecessors integrate.
-
-B8 is installed in the [current bundled chapter](#current-bundled-chapter);
-its source and real SQLite acceptance are recorded in the
-[B8 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b8-maud-services/README.md).
-
-### Escrow declarations
-
-[Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `ServiceBenefit`): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. It needs `kernel_api` at least **1.79**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
-
-### Claim and cancel declarations
+## Claim and cancel declarations
 
 [Timed job claim and cancel](mechanics.md#timed-job-claim-and-cancel-toolbox-row-20b) adds two optional fields to `escrow`:
 
 - `ready_after`: an integer, 1 to 31536000.
 - `output`: an item ref.
 
-`ready_after` needs `output`; an `output` alone is a [barter](#barter-declarations). It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
+`ready_after` needs `output`; an `output` alone is a [barter](#barter-declarations). It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source).
 
 The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
 
@@ -1719,18 +988,18 @@ Required cartridge text:
 - A cancel: `service.no_order` and `service.ready`.
 - A commission with `ready_after`: also `service.no_output`.
 
-### Barter declarations
+## Barter declarations
 
-[Barter](mechanics.md#barter-toolbox-row-kgd70) admits a service `price` of 0 (`protocol/service.schema.json`; `quoted_price` minimum 0 in `protocol/command.schema.json` and `protocol/action.schema.json`, GameView `ServiceOffer.price` minimum 0) and an escrow `output` without `ready_after`. Either needs `kernel_api` at least **1.102**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+[Barter](mechanics.md#barter-toolbox-row-kgd70) admits a service `price` of 0 (`protocol/service.schema.json`; `quoted_price` minimum 0 in `protocol/command.schema.json` and `protocol/action.schema.json`, GameView `ServiceOffer.price` minimum 0) and an escrow `output` without `ready_after`. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
 
 - `price` 0 on a service that is not an `entitlement` with `escrow`: SCHEMA_VIOLATION `invalid_value` at `.price`.
 - A claim or cancel naming a commission with no `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service` (nothing is left to claim).
 
 Required cartridge text: an escrow with `output`: `service.no_output`.
 
-### Property and bank declarations
+## Property and bank declarations
 
-[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two `ServiceBenefit` kinds (`protocol/service.schema.json`), `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Either needs `kernel_api` at least **1.83**. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
+[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two `ServiceBenefit` kinds (`protocol/service.schema.json`), `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
 
 The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
 
@@ -1744,431 +1013,61 @@ The account is engine-written: an authored write to it (a dialogue, reaction or 
 
 Required cartridge text: `service.unaffordable`, and `service.no_funds` for either kind.
 
-## D2 public Priory and book authoring
-
-[D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
-`prior_study`, `spire`, `scriptorium`, `kitchen_garden` to the six existing public
-rooms. Every row below is reciprocal and ungated; preserve existing exits.
-
-| Room / outward direction | Neighbor / return direction | Delivery |
-|---|---|---|
-| North Gate / north | Chapel Steps / south | existing public approach |
-| Chapel Steps / north | Chapel Nave / south | existing |
-| Chapel Nave / up | Bell Tower / down | A1 |
-| Bell Tower / up | Belfry / down | A1 |
-| Chapel Nave / north | Cloister / south | B5 |
-| Cloister / east | Infirmary / west | B5 |
-| Chapel Nave / west | Prior Study / east | D2 |
-| Belfry / up | Spire / down | D2 |
-| Cloister / west | Scriptorium / east | D2 |
-| Scriptorium / west | Kitchen Garden / east | D2 |
-
-Spire's view and Kitchen Garden's herbs are descriptive; no far Scan, rue harvest,
-new quest or unfinished action is advertised. Study has no functional quest ledger
-or bell key. This implements archived 00a §§2/4/5/8 with current public/no-wait rules.
-The selected book instances start directly in Scriptorium with ordinary custody.
-
-| Book key | Title / single page | Declared topic / Boolean fact | Mass |
-|---|---|---|---:|
-| `ward_of_the_fen` | The Ward of the Fen / `readable.ward_of_the_fen` | `ward` / B6 `topic_ward_known` | 100g |
-| `bell_rites` | Bell Rites / `readable.bell_rites` | `bell` / `topic_bell_known`, initially false | 100g |
-
-Both facts are player-scoped; reuse B6's ward definition rather than duplicate its
-knowledge mapping. Author localized topic labels and book noun headings. Item
-readable metadata references catalog label/text and an optional topic DefinitionRef;
-compiler short-ref expansion and loader require a local declared topic mapped to a
-unique player Boolean. Reject unresolved/wrong-kind refs, non-Boolean or non-player
-facts, duplicate mappings, missing text/label, malformed metadata and missing opted-in
-mass. Update actual API/capability requirements with the consumed extension; do not
-invent successor version, hash or allocation answers in this plan.
-
-Ash and Hale are distinct original NPCs with distinct descriptions, noun headings,
-flavor Talk and shared `novice` keyword. Under [owner content decision 5](../decisions/owner-decision-chapter-one-content-2026-10-02.md), Ash is in
-Scriptorium 06:00–12:00 and 20:00–06:00, Cloister 12:00–20:00; Hale is in Kitchen
-Garden 06:00–18:00, Cloister 18:00–06:00. Intervals are start-inclusive/end-exclusive.
-At 19:00 both are in Cloister; neither waits for a player or grants topics. All
-scheduled destinations exist. Initial placement must agree with the selected launch
-clock; existing schedule machinery owns departures and saved locations.
-
-## B9 Lantern dream declarations
-
-The [S10 contract](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
-adds no rooms, payment or entitlement writer. Reuse the actual B8 `bed` detail
-at `inn_rooms` and declared `lantern_bed_paid`. Declare player Boolean
-`slept_at_lantern` and `dream_seen`, both default false; the latter is the local
-continuity memory `player.dream_seen`. Define quest `a_room_at_the_lantern` with
-no manual offer, no repeat/failure reward, objective `dream_seen=true`, and honest
-active/resolved journal text. It is optional for the Green ending, while E3's ten
-playable quests must still exercise it.
-
-Declare one exact room/entitlement/first-Rest/S10 binding and scene
-`dream_of_the_fen`, `presentation_only`, anchored at `inn_rooms`. Source-owned
-beats are: 1 opening, 2 fen, 3 fox; after Continue at3, a choice at4 offers exactly
-`follow_fox` and `wake`; the selected branch shows its authored final line at5;
-Continue at5 acknowledges/end. Both branches assign the same `dream_seen=true`
-and resolve S10 as `acknowledged`. Three opening lines, two choices and two final
-texts are content values; final prose is delegated, not an engine constant.
-Choice resolution must retain its branch after end in its existing durable row.
-No reward, additional story point, chapter index advance or ambient sound system
-is implied. Resume is a local route over the exact scene checkpoint at the bed;
-no new gameplay Start/Resume command is added.
-
-Compiler and loader validate this consumed source subset in both languages:
-full/short references, exact anchor/detail membership, Boolean player fact
-scopes/defaults, unique trigger and consequence ownership, position/scene/quest
-capability dependencies, bounded reachable beat graph, exactly declared choices,
-choice source/actor/anchor bindings and final-only memory/quest consequence.
-A Rest trigger is identified by its room/detail pair, independently of entitlement,
-credit, memory or quest references; different room/detail pairs remain distinct.
-Reject unknown targets/branches, repeated/unreachable consequence beats, modal
-choice mixing, body/container operations and a dream end declaring a completion
-report. Reserve engine cursor/choice ownership as for existing scenes; content
-cannot assign their state. Extend A3's terminal consequence only enough to admit
-memory assignment plus typed quest resolution without a story-point declaration.
-B9 is installed in the [current bundled chapter](#current-bundled-chapter). Its
-original predecessor and provisional answers remain dated
-[source evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b9-lantern-dream/README.md).
-
-## D4 homes and orchard declarations
-
-**D4 source declarations.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
-uses these three public reciprocal additions from archived
-[00a §§2/4/5/10/11](../archive/spec/00a-chapter-one-content.md):
-
-| Existing/new room and exit | Reciprocal destination and exit |
-|---|---|
-| Village Green / west | Smithy / east |
-| Smithy / west | Orchard / east |
-| North Gate / west | Mother's Cottage / east |
-
-Forge/anvil/tools, apple trees/beehive and cot/hearth are inspectable details.
-The forge is cold; no repair, honey, property, seasonal system or extra quest is
-advertised. Cottage adds no lantern: B4's actual torch/oil source remains the
-only adopted light supply. The mother's Q1/Q2 conversations stay at Ferry Landing.
-Gareth follows smithy 08–18, Drowned Lantern 18–22, smithy 22–08; Ada follows
-orchard 07–17 and cottage 17–07. At the current 64800 dusk start, initialize
-Gareth at Drowned Lantern and Ada at the cottage, then use existing next-hour
-schedule jobs. Neither actor controls orchard food or a required story action.
-
-Author `apple_01`, `apple_02`, `apple_03` initially directly in orchard, each
-**100g**, noncontainer, nonwearable and edible. These three apples are the only
-opted food in this slice; B8 meals remain immediate services. The trees' Harvest label is
-**Forage** and binds exactly these three IDs; it transfers one lowest eligible
-EntityId as B5 does. Ordinary Take shares their supply. Each apple declares
-`edible {resource: mv, amount: 6, label: action.eat,
-narration: narration.eat_apple}`: one whole apple gives up to **6 MV** with no
-partial fruit. Full MV refuses without consuming. No restock or promised future
-nutrition model is required; the finite B8 meal remains a separate optional supply.
-
-Compiler and loader require `food@1` plus API1.27 for edible fields,
-local declared MV recovery-pool references, positive safe-integer amount and valid
-catalog keys, and reject edible containers, equipment (slot, weapon or block metadata), fuel or liquid vessels.
-Expand source short references at the real new field. Edibility belongs to an
-immutable item definition; the terminal holder is generated metadata, never
-cartridge-authored. The integrated v031/API1.27 answers are independently derived over
-published C3/D1 in the [D4 integration evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d4-published-integration/README.md).
-
-Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
-Green's installed terminal variants. Missing means the search is unfinished;
-rescued acknowledges return to the mother at the landing; stays acknowledges the
-living child's choice with Vesper and delivered message; lost acknowledges grief.
-Cot prose never asserts current bodily presence. Q2/A1 alone own outcome/location:
-a rescued child remains at Ferry Landing, a staying child remains at Fox Hollow, and lost
-neither deletes nor relocates the original Fox Hollow actor. Missing can include
-following/separated escort intermediates anywhere on the route. Do not teleport
-the child on cottage arrival or turn an unfinished escort into a returned child.
-
-## D5 Deep Fen route and details
-
-The [D5 contract](mechanics.md#d5-dry-deep-fen-exploration-selected-contract)
-selects these additions; preserve all installed Oak/Hollow/Mire/B6 exits.
-
-| Room / outward direction | Neighbor / return direction |
-|---|---|
-| Drowned Oak / up | Oak Branches / down |
-| Oak Branches / up | Oak Crown / down |
-| Drowned Oak / south | Black Pool / north |
-| Black Pool / east | Fox Hollow / west |
-| Black Pool / south | Fishing Shallows / north |
-| Fox Hollow / down | Fox Den Deep / up |
-
-New keys are `oak_branches`, `oak_crown`, `black_pool`, `fox_den_deep`,
-`fishing_shallows`. Pool and shallows mean the dry bank and reed edge; prose makes
-that footing explicit. The shallow den admits natural light at all hours and has
-no dark metadata. This deliberately supersedes archived 00a §§2/5/8/11 darkness,
-Vesper relocation, duplicate readable message, stone topic, far Scan, crow nest
-and next-day water-drift candidates for D5. The child/Vesper retain their original
-instances and installed locations except for existing legal child escort travel.
-
-Author one `ward_stone` room detail with aliases `stone`, `ward`, `ward_stone`
-(the existing target normalization resolves player words `ward stone` to that
-last key), a noun title, description and ordinary readable label/text/title. Its fixed
-inscription describes the worn carving without asserting who holds the message,
-which return was selected or what the child has done. Use the installed Fox Hollow
-readable detail shape, not an item-readable/topic extension or conditional page.
-Other landscape details are descriptive and advertise only projected actions.
-Do not add a bottom exit, room placeholder, underwater loot, fishing operation,
-crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
-D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
-current location. D5 is installed in the [current bundled chapter](#current-bundled-chapter).
-
-## D3 western village declarations
-
-Selected under the [approved D3 brief](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one) (the retired chapter's D3 brief at that commit),
-with archived [chapter map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11
-as the content basis. Boathouse south/north connects to Old Mill while retaining
-its east Ferry Landing exit and outbound ferry detail. Old Mill south/north
-connects to Empty Cottage, up/down to Mill Loft and down/up to Mill Cellar;
-Empty Cottage up/down connects to Cottage Loft. No exit names an unbuilt place.
-
-Mill Loft and Mill Cellar declare ordinary and dark descriptions and consume
-[B4 perception and owned-corpse recovery](mechanics.md#b4-light-and-darkness-selected-contract).
-Rat holes are descriptive: the five original Lantern Cellar rats remain the
-only S1 rats. Owl, loose board and ghost traces are flavor/foreshadow, without
-an enemy, hidden route or chapter-two quest. The cottage sign offers no property
-purchase. The ledger and sign are standalone readable details with noun titles,
-confirmed bodies and no topic, quest, fact, money or loot write.
-
-Original Hob uses ordinary daily scheduling: Old Mill 06:00–18:00, Mill Loft
-18:00–06:00. At the chapter's 64800 launch clock he starts in Mill Loft;
-his first job is due at 108000, followed by 151200. Both destinations exist.
-Flavor dialogue grants nothing and gates no required story action; darkness
-and scheduled departure retain existing admission. Movement, readable details,
-light perception and schedule jobs keep their existing state writers. No new
-command, capability or save shape is selected.
-
-The [final D3 integration proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-final-integration/README.md)
-records the independently pinned successor and checks; the
-[provisional proof](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence) (the retired chapter's D3 provisional evidence at that commit) is historical.
-
-<a id="d6-bottom-rooms-and-water-tuning-selected-pending-implementation"></a>
-
-## D6 bottom rooms and water tuning (selected contract)
-
-Reciprocal exits:
-`well_shaft` down ↔ `well_bottom` up and `black_pool` down ↔ `pool_bottom` up.
-Only bottoms have water occupancy. Both are dark under B4 with known Up; ordinary
-loot needs B4 light. Well Bottom owns one actual old coin and carved initials;
-Pool Bottom owns one actual sunken chest containing one silver ring. No extra
-sunken lantern, wet-fuel system, swim lesson, the child's route, fish or tide.
-
-Selected world values: entry maximum 6000g, entry 10 MV, surface 0 MV and submersion
-duration 6000 logical seconds, **120 real seconds** at current real-elapsed rate 50.
-No periodic drain or regeneration override. The deadline is entry clock plus
-duration; do not renew it through actions, movement refusal, posture or reopen.
-D1's `swim` declaration remains vacuous `all: []`; no new attribute. The
-[adopted item table](../decisions/pm-decision-d6-water-depths-2026-10-06.md#adopted-items-and-remaining-unknowns)
-defines mass/capacity; chest capacity uses direct-item count, not grams, and
-ordinary container eligibility preserves 100% descendant mass.
-
-D6 is installed in the [current bundled chapter](#current-bundled-chapter). Chapel Nave
-remains the death shrine; Isle Shrine is descriptive only.
-
-## D11 ancestry declarations (selected contract)
-
-Source `cartridge.json.ancestries` is a closed choice map with label, description, attribute/modifier and optional skill, faction and dark-sight effects. The compiler expands short refs and the loader validates them independently. The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
-
-| Ancestry | Selected attribute | Actual Chapter 1 effect |
-|---|---|---|
-| fen-born | PER6 | acquired Swim, `priory.fen_axis` −2 |
-| road-born | DEX11 | acquired Haggle; Crown points deferred |
-| hill-folk | CON11 | B4 dark-sight; mining deferred |
-| fey-touched | SPI11 | `priory.fen_axis` −2; spell word deferred |
-
-All other values retain their starts. The Priory/Fen axis starts at 0 for road-born and hill-folk; its selected −2 value is within the existing −10..10 bound and means Fen favor. Fen and fey share that numeric starting side but have different skill, sight and attribute outcomes. STR/DEX C1, INT/D12, DEX/D12 and PER/B6 consumers keep their authored thresholds; B6's PER5 difficulty remains immediately passable. D6 Swim has no CON floor. CON/SPI have no Chapter 1 stat-check consumer, so their selected values are truthful character data rather than a fabricated threshold. This preserves the [owner's fey content ruling](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
-
-The closed `ancestries` source declaration maps the four keys to these values/effects
-with authored labels and descriptions. Compiler and loader reject missing/extra keys,
-unknown attributes/skills/faction references, unsupported sight effects, unsafe or
-out-of-range values, absent capabilities and effects that cannot apply atomically.
-The [D11 command and changed row](mechanics.md#d11-character-choice-selected-contract)
-consume this shape; the [retired first chapter identity](#retired-first-chapter-e1-candidate) owns release answers.
-
-<a id="d9-village-reaction-content-selected-pending-implementation"></a>
-
-## D9 village reaction content (selected contract)
-
-The five valid child/allegiance pairs and the Study rule are defined in
-[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
-Author distinct child responses for the mother, five truthful Maud rumor
-variants and Green descriptions, prior/fox Aldric and Vesper responses, and
-bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave. Explicit labelled dialogue bindings keep the ledger handoff and Maud's cellar offer/turn-in independently selectable alongside terminal reaction profiles. Old Bram remains outside the real cast under the [D9 clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md).
-The Study remains the existing reciprocal Nave-west/Study-east edge; no new
-door/barrier definition or key is authored. Only its west ingress gets the
-conditional fox policy. No new room, NPC, token relationship fact or synthetic
-ferryman instance is needed.
-
-The audible area is the existing **25 village rooms and ten public Priory
-rooms**, excluding Fen and isle rooms. Bell Read, immediate narration and cast
-responses must not claim audible sound in those excluded rooms. Author the area as explicit chapter
-room references with loader validation; a room's ordinary descriptive tags do
-not become sound authority. Flood variants affect Reed Path and Mire text only.
-The bell's hound suppression duration is **172800 logical seconds**, owned by
-the cartridge. Author its population-plan reference and resume bound against
-the existing hound plan; no new population cap, catch-up count or creature is
-declared. The cue source is a Boolean fact. A suppression declaration requires
-API1.35, a Boolean fact-change source and a population plan with the installed pack behavior; compiler and
-loader reject an unresolved or non-pack plan rather than admitting a runtime fault. The integrated D9 release follows published D8 v039/API1.34. Its independent
-v040/API1.35 hash and209 allocation answers are retained with
-[the integration proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d9-integration/README.md).
-
-## D12 practical skill declarations
-
-The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
-
-| Chapter parameter | Selected value |
-|---|---|
-| Herbalism qualification | `all`: INT `stat_compare` at least 10 and MV `resource_compare` at least 5 |
-| Haggle qualification | `all`: DEX `stat_compare` at least 10 and MV `resource_compare` at least 5 |
-| Each new lesson | 2 pennies, actor→original bound teacher; all-hours, no duration/cooldown |
-| Herbalism teacher | Sedge in Isle Hut, existing declared penny start |
-| Haggle teacher | Peg in Chandler, existing declared penny start |
-| Careful yield | 2 existing eligible fenwort IDs from Willow Shade |
-| Buy discount | numerator 9 / denominator 10, minimum 1 penny |
-
-Add `dialogues/sedge_herbalism.json` and `dialogues/peg_haggle.json`, each binding the original teacher, with a direct `learn` choice, `skill.acquire`, and existing `lesson_payment`; the dialogue policy offers learning only while its reserved acquired fact is false, never based on qualification. No item gift or extra teacher registry is declared. Their text describes the actual fee/qualification/benefit without promising a ferry or story gate.
-
-The optional closed `harvest.careful` object on Willow Shade's existing `fenwort_patch` is `{skill: "herbalism", count: 2, action: "gather_carefully", narration: "narration.gather_carefully"}` in source. `skill` expands to the declared skill DefinitionRef, `count` is the required eligible-item count, `action` is the declared action key, and `narration` is a TextKey. Retain the existing `harvest.items`, ordinary label/title/narration and all twelve authored herb definitions. Define `actions/gather_carefully.json` with `command: "harvest"`, `target: {kind: "entity", scopes: ["inspectable_details"]}`, `input: ["method"]`, priority 0, declared label/accessibility, and vacuous `all` action policy; the shared method-aware Harvest admission owns skill, patch, stock and carrying eligibility. No other patch opts in. The [wire contract](protocol.md#d12-harvest-method-and-buy-quote-composition) binds only literal `method: "careful"` to this declaration.
-
-The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerator: 9, denominator: 10, minimum: 1}` in Peg's existing shop. `skill` expands to the declared skill DefinitionRef; the other fields are positive ResourceInts. It applies to all that shop's declared Buy offers, and never Sell. Existing bases torch3/oil2/waterskin4/satchel5/sword8/shield4/spare-waterskin4 therefore quote2/1/3/4/7/3/3 when usable; unchanged Sell is1/1/2/2/4/2/2. Existing exact items, balances and currency bounds remain in their owning B3/C1/B7 declarations.
-
-Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
-
-D12 is installed in the [current bundled chapter](#current-bundled-chapter). Its
-[final primary review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d12-final-primary-review.md) and
-[save/protocol opinion](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d12-final-save-review.md) record the
-independent source, pin and recovery proof. Current-behavior conformance guards remain required; obsolete development fixtures follow the
-[forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md). Explicit incompatible-pin refusal preserves saves without an
-adapter, migration or deletion.
-
-<a id="d7-deer-planning-declarations"></a>
-
-## D7 deer declarations
-
-The [D7 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
-
-| Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
-|---|---|---|---|---|---|---|
-| Willow deer | Willow Shade | Willow Shade, Drowned Oak | 1 / 1 day and night | 172800 | 3600 | 300 |
-| Oak deer | Drowned Oak | Drowned Oak, Willow Shade | 1 / 1 day and night | 172800 | 3600 | 300 |
-| Orchard deer | Orchard | Orchard, Smithy | 1 / 1 day and night | 172800 | 3600 | 300 |
-
-The aggregate fresh and live cap is three. Each plan declares `night_start: 20` and `night_end: 6`, reusing the chapter hound window; equal day/night targets make that window neutral to deer count. Each bundle has one HP1 attackable deer with `attack {chance: 0, damage_min: 1, damage_max: 1}`, one directly held 100g hide and one public fixed-room corpse template. The zero chance satisfies the existing attack-profile schema and C1 strict roll `< chance`, so deer never land a retaliatory hit; the positive damage bounds satisfy schema but are unreachable. The player can still Attack the deer. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
-
-Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. D7 is installed in the [current bundled chapter](#current-bundled-chapter). No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
-
-## C5 bleed and bandage declarations
-
-[C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1, narration: {applied, refreshed, tick, expired}}` with each narration value a required local TextKey, and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.
-
-Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
-
-Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef. C5 is installed in the
-[current bundled chapter](#current-bundled-chapter).
-
-<a id="d10-map-positions-and-chapel-door-selected-pending-implementation"></a>
-
-## D10 map positions and Chapel door (selected contract)
-
-D10 is installed in the [current bundled chapter](#current-bundled-chapter).
-
-The chapter declares one static position `{x, y, z}` for each current room.
-These integer drawing coordinates are content, not an engine inference from compass
-directions: the room graph contains ferry links and loops. Compilation and loading
-require exact room-key coverage, unique `(x, y, z)` positions and declared room refs;
-the rendered links still come only from real exits. Unknown map fields or duplicate
-positions fail before play. No coordinate changes movement cost, sight or reachability.
-
-The first chapter physical door is one barrier shared by Chapel Steps north and Chapel
-Nave south, starting open with no key. It admits ordinary existing Open/Close behavior
-and a declared Knock response on the Steps north face keyed to actual Aldric presence
-in the Nave. The public
-chapel remains reachable by opening a closed door. This differs from the archive's
-keyed Watch Cell candidate: the current Watch Cell is expressly open and optional, so
-D10 does not add Tobin-key or jail access machinery. The D9 Study restriction is an
-exact-edge predicate, not a barrier or Knock target. The child's one boot is an actual
-recoverable Reed Bank item. Add ordinary `leather_boots` as a recoverable item in
-Chandler, with no sale or armor modifier in this slice. Both carry the `boot` keyword
-and can be held together for real resolver ambiguity; touch selects an exact item ID.
-Neither replaces Q2 drawing or message credit.
-
-## C6 S27 expedition declarations
-
-S27 `a_night_in_the_marsh` starts by an explicit no-cost/no-duration action on Hound Run's existing gnawed-bones detail. Its bounded route is five ordered accepted player entries: Hound Run **west→Reed Bank**, Reed Bank **west→Willow Shade**, Willow Shade **south→Drowned Oak**, Drowned Oak **north→Willow Shade**, Willow Shade **east→Reed Bank**. Add one inspectable Drowned Oak shelter detail with optional Use shelter at cursor3, without Rest, healing or clock advance; the final Reed Bank is a safe return boundary. Ordinary reciprocal exits already exist. The allowed attempt footprint is Hound Run, Adder Nest, Reed Bank, Willow Shade and Drowned Oak; Adder Nest accommodates a legal C4 Flee/deviation but earns no route credit. Any accepted exit to a room outside this set before completion fails the attempt. Other travel inside the footprint leaves the cursor unchanged until the exact next edge is later taken.
-
-The chapter names one original player-scoped quest and one original player Boolean `fen.night_survived`, initially false. Completion sets that fact true and applies **−1** to the existing bounded Priory/Fen axis at most once. It offers a Sedge acknowledgement of surviving the marsh; her D1 swim lesson remains free, independently accessible before S27 and idempotent if already acquired. No duplicate `skill.acquire`, second swim lesson, fee, item or attribute reward is granted by S27. Sedge's recognition is a fact-selected dialogue/text variant at her existing all-hours location, not a new NPC schedule or persistent behavior profile.
-
-At Start, if any current C3 plan-owned live unengaged hound is co-present, select the lowest current EntityId and use C4's already declared roster/encounter/round rules. If none is eligible, Start succeeds without hostility. The route does not wait for replacement or require an attack win, bandage, light, ferry, swim, food, tide or night. The existing safe main-story corridor and every corpse path remain traversable when no S27 attempt is active. All counts, rooms, rewards and narration are authored here or in the quest/dialogue definitions; engine and presenter hold no S27 literals. Compiler and loader reject missing/wrong-kind room edges, unknown route refs, noncontiguous steps, unreachable finish, invalid footprint, unresolved quest/fact/faction/hound/Sedge refs or an attempted generic room-tag shortcut. Bound route length and footprint before traversal. C6 is installed in the [current bundled chapter](#current-bundled-chapter).
-
-<a id="d8-crows-coin-and-reachable-nest-selected-planning-contract"></a>
-
-## D8 crows, coin and reachable nest (selected contract)
-
-D8 is installed in the [current bundled chapter](#current-bundled-chapter). The sole `old_coin` is a 10g room item at dark Well Bottom, with reciprocal Up to Well Shaft; Pool Bottom instead holds the chest/ring. D5's Oak Branches route and all seven reciprocal dry corridor legs remain installed. D8's allowlist names that exact item definition in the compiled chapter.
-
-Declare four C3-style **cap-one two-room plans**: two with Green home and Well Lane as ordinary wander neighbor; one with Drowned Oak home and Willow Shade neighbor; one with Oak Branches home and Drowned Oak neighbor. Thus genesis has two Green, one Oak and one Branches crow. Each plan has day/night target one, no aggression window, **86400 logical second** replacement after actual death and **3600** ordinary wander interval. Existing two-room wander remains two-room; a crow on an evidenced transport or return excursion keeps its living slot while that plan skips its wander. After deposit, fallback or Shoo, a checked return job takes one adjacent corridor leg toward the member's authored home every **150 logical seconds** and finishes there in at most seven legs; ordinary wander resumes on a later boundary. Accepted combat pauses return until the encounter closes with the crow alive. This is a narrow crow corridor/location admission, not an N-room wander redesign. Crows have authored HP **1**, attack chance **0** and damage range **1..1**, so they do not initiate a fight. Their exact plan/bundle/corpse references, runtime generation, HP and room must be validated as for C3; one direct held coin goes to the crow's public corpse on death, without crow loot or player credit. Cap is the sum of the four cap-one plans, never historical dead identities.
-
-The C3 bundle currently requires and mints a directly held pelt. Crow bundles instead require the same NPC/corpse roles with the companion item **absent**; birth creates only the crow and HP. Compiler, loader, genesis, population invariants and save validate this closed optional shape. Do not mint a fake feather, marker or duplicate coin. Two Green plans may share the Green template/bundle; Oak and Branches use home-matched crow templates under the current home validation. No unrelated hound/deer bundle changes are selected.
-
-The one permitted transport corridor is Village Green → Well Lane → Ferry Landing → Reed Path → Reed Bank → Willow Shade → Drowned Oak → Oak Branches, using actual reciprocal exits one leg at a time; no path into underwater rooms. A selected acquisition or transport leg has an authored **150 logical second** delay. The nest is one real portable **250g** item, initially empty in Oak Branches, explicitly `container: true` with **8 direct-item roots** capacity and an authored lid initially open. Its text/barrier use the ordinary item declaration; do not create a detail-only or remote holder. If taken or moved, the original nest identity remains the target, but delivery falls back to the present dry room until it is again open in Oak Branches. The player can reach Branches and Take the delivered original coin by ordinary controls.
-
-Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonempty ordered reciprocal corridor with every declared adjacent edge, positive safe integer delays, each referenced plan's legal slot/home/bundle shape, container eligibility and declared capacity, and the allowlisted item's safe role. They validate this D8 declaration's actual references and relationships, without an engine rule that all cartridges have four cap-one plans, an eight-root nest or one shiny definition. Controlled chapter behavior and simulation assert the selected **4/8/one-coin** answers. D8 does not revise D6's coin source or frozen fixtures. These selected world values belong to this cartridge; no engine defaults or migration are added.
-
 ## Status declarations
 
-[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence, `kernel_api` at least **1.38**): `{duration, tick_every, resource, per_tick, label, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `label` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) and the loader (`kernel/ts/src/content/cartridge_status.ts`) refuse each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds, each needing `kernel_api` at least **1.46**: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. Both kernels refuse an unresolved name (`UNRESOLVED_REFERENCE`) and the lower floor (`KERNEL_API_RANGE_INVALID`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`, `kernel_api` at least **1.46**): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. Both kernels refuse an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`) and the lower floor (KERNEL_API_RANGE_INVALID). A status with `modifies` may omit `per_tick` and then never ticks; both kernels refuse a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one, `kernel_api` at least **1.101**), applied to the eater's body after the meal and its cures. Both kernels refuse an unresolved name (UNRESOLVED_REFERENCE at the entry), the lower floor (KERNEL_API_RANGE_INVALID) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"` (`kernel_api` at least **1.102**), the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. Both kernels refuse another value (SCHEMA_VIOLATION at `kind`) and the lower floor (KERNEL_API_RANGE_INVALID). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey, `kernel_api` at least **1.110**), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). Both kernels refuse a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys) and the lower floor (KERNEL_API_RANGE_INVALID). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey, `kernel_api` at least **1.115**): told when the status bars a combat blow, in place of the engine's `combat.skipped`; both kernels refuse a missing key and a lower floor.
+[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence): `{duration, tick_every, resource, per_tick, label, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `label` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) and the loader (`kernel/ts/src/content/cartridge_status.ts`) refuse each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. Both kernels refuse an unresolved name (`UNRESOLVED_REFERENCE`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. Both kernels refuse an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`). A status with `modifies` may omit `per_tick` and then never ticks; both kernels refuse a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one), applied to the eater's body after the meal and its cures. Both kernels refuse an unresolved name (UNRESOLVED_REFERENCE at the entry) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"`, the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. Both kernels refuse another value (SCHEMA_VIOLATION at `kind`). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). Both kernels refuse a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey): told when the status bars a combat blow, in place of the engine's `combat.skipped`; both kernels refuse a missing key.
 
-[Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>` (`kernel_api` at least **1.46**): an NPC of this cartridge, whose authored instance takes the status. Both kernels refuse an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`) and the lower floor (KERNEL_API_RANGE_INVALID). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
+[Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>`: an NPC of this cartridge, whose authored instance takes the status. Both kernels refuse an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
 
-[Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"` (`kernel_api` at least **1.48**): such a status declares no `per_tick` and is exempt from `tick_every < duration`; its `modifies` may not name an attribute the derived hp maximum reads. Both kernels refuse each violation (SCHEMA_VIOLATION at `per_tick` or at `modifies[i].attribute`) and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/scars_sampler` is the sampler.
+[Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"`: such a status declares no `per_tick` and is exempt from `tick_every < duration`; its `modifies` may not name an attribute the derived hp maximum reads. Both kernels refuse each violation (SCHEMA_VIOLATION at `per_tick` or at `modifies[i].attribute`). `cartridges/scars_sampler` is the sampler.
 
-[Row W21](mechanics.md#fear-and-morale-for-npcs-toolbox-row-w21) adds a status's optional `fear: true` and a `status.apply` step's optional `co_present: true` (each `kernel_api` at least **1.50**): such a status may omit `per_tick`, as one with `modifies` may; such a step names no holder. Both kernels refuse the lower floor (KERNEL_API_RANGE_INVALID) and a `co_present` step that also names `item` or `npc` (SCHEMA_VIOLATION at that field); the schema refuses any other value. `cartridges/fear_sampler` is the sampler.
+[Row W21](mechanics.md#fear-and-morale-for-npcs-toolbox-row-w21) adds a status's optional `fear: true` and a `status.apply` step's optional `co_present: true`: such a status may omit `per_tick`, as one with `modifies` may; such a step names no holder. Both kernels refuse a `co_present` step that also names `item` or `npc` (SCHEMA_VIOLATION at that field); the schema refuses any other value. `cartridges/fear_sampler` is the sampler.
 
-[The status readers](mechanics.md#status-readers-toolbox-rows-sr1-sr2-and-sr3) add, each needing `kernel_api` at least **1.53**: a `status_active` leaf's `subject: "self"` or `"subject"`; the trigger `{event: "status_applied"}` with an optional `status: <key>` filter; and the reaction step `{op: "status.cure", status: <key>}`, which names a declared status and no holder. Both kernels refuse an unresolved status (UNRESOLVED_REFERENCE at the step's `status`) and the lower floor (KERNEL_API_RANGE_INVALID); the schema refuses a cure step naming `item`, `npc` or `co_present`. `cartridges/elements_sampler` is the sampler.
+[The status readers](mechanics.md#status-readers-toolbox-rows-sr1-sr2-and-sr3) add: a `status_active` leaf's `subject: "self"` or `"subject"`; the trigger `{event: "status_applied"}` with an optional `status: <key>` filter; and the reaction step `{op: "status.cure", status: <key>}`, which names a declared status and no holder. Both kernels refuse an unresolved status (UNRESOLVED_REFERENCE at the step's `status`); the schema refuses a cure step naming `item`, `npc` or `co_present`. `cartridges/elements_sampler` is the sampler.
 
-[Rows SR4 and SR5](mechanics.md#command-blocks-and-resistances-on-a-status-toolbox-rows-sr4-and-sr5) add a status's optional `blocks` and `allows` (each 1 to 64 Command type names) and `resistances` (`Resistances`, as on an NPC); any of them needs `kernel_api` at least **1.54**, and such a status may omit `per_tick`. Both kernels (`lib/loka/content/status.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse a name that is no registered command, or is `run_job` or `elapsed` (UNKNOWN_COMMAND at `blocks[i]` or `allows[i]`), and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/ward_sampler` is the sampler.
+[Rows SR4 and SR5](mechanics.md#command-blocks-and-resistances-on-a-status-toolbox-rows-sr4-and-sr5) add a status's optional `blocks` and `allows` (each 1 to 64 Command type names) and `resistances` (`Resistances`, as on an NPC), and such a status may omit `per_tick`. Both kernels (`lib/loka/content/status.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse a name that is no registered command, or is `run_job` or `elapsed` (UNKNOWN_COMMAND at `blocks[i]` or `allows[i]`). `cartridges/ward_sampler` is the sampler.
 
-[Rows SR6 and SR8](mechanics.md#perception-and-concealment-on-a-status-toolbox-rows-sr6-and-sr8) add a status's optional `perception` (`sight`: `blind`, `dark_sight` or `see_invisible`; `hearing`: `deaf`; at least one) and `concealment` (`invisible` or `hidden`); either needs `kernel_api` at least **1.61**, and such a status may omit `per_tick`. Both kernels (`lib/loka/content/status.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse an empty `perception` (SCHEMA_VIOLATION at `perception`) and the lower floor (KERNEL_API_RANGE_INVALID).
+[Rows SR6 and SR8](mechanics.md#perception-and-concealment-on-a-status-toolbox-rows-sr6-and-sr8) add a status's optional `perception` (`sight`: `blind`, `dark_sight` or `see_invisible`; `hearing`: `deaf`; at least one) and `concealment` (`invisible` or `hidden`), and such a status may omit `per_tick`. Both kernels (`lib/loka/content/status.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse an empty `perception` (SCHEMA_VIOLATION at `perception`).
 
-[Row 16](mechanics.md#sneak-and-hide-toolbox-row-16) adds a concealing status's optional `pierced_by: {skill, attribute}` (both required), needing `kernel_api` at least **1.93**. Both kernels refuse it without `concealment` (SCHEMA_VIOLATION at `pierced_by`), a skill or attribute naming nothing (UNRESOLVED_REFERENCE at `pierced_by.skill` or `.attribute`) and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/sneak_sampler` is the sampler.
+[Row 16](mechanics.md#sneak-and-hide-toolbox-row-16) adds a concealing status's optional `pierced_by: {skill, attribute}` (both required). Both kernels refuse it without `concealment` (SCHEMA_VIOLATION at `pierced_by`), a skill or attribute naming nothing (UNRESOLVED_REFERENCE at `pierced_by.skill` or `.attribute`). `cartridges/sneak_sampler` is the sampler.
 
-[Row SR7](mechanics.md#movement-on-a-status-toolbox-row-sr7) adds a status's optional `movement`: `cost_percent` (0 to 1000) and `passes` (1 to 3 of `air`, `chasm`, `water`); it needs `kernel_api` at least **1.62**, and such a status may omit `per_tick`. A room, item or barrier tagged `air`, `chasm` or `water` (new `Tag` members) needs **1.62** too. Both kernels refuse the lower floor (KERNEL_API_RANGE_INVALID): `lib/loka/content/status.ex` and `lib/loka/content/barriers.ex`, `kernel/ts/src/content/cartridge_status.ts` and `kernel/ts/src/content/cartridge_knowledge.ts`.
+[Row SR7](mechanics.md#movement-on-a-status-toolbox-row-sr7) adds a status's optional `movement`: `cost_percent` (0 to 1000) and `passes` (1 to 3 of `air`, `chasm`, `water`), and such a status may omit `per_tick`. `air`, `chasm` and `water` are `Tag` members a room, item or barrier may carry.
 
-[Status reader 9](mechanics.md#a-room-as-a-status-holder-status-reader-9) adds an optional `room` (a DefinitionRef of a room of the cartridge) to a reaction's `status.apply` step; it needs `kernel_api` at least **1.65**. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse an unknown room (UNRESOLVED_REFERENCE), `room` beside `item`, `npc` or `co_present` (SCHEMA_VIOLATION at `room`) and the lower floor (KERNEL_API_RANGE_INVALID).
+[Status reader 9](mechanics.md#a-room-as-a-status-holder-status-reader-9) adds an optional `room` (a DefinitionRef of a room of the cartridge) to a reaction's `status.apply` step. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse an unknown room (UNRESOLVED_REFERENCE), `room` beside `item`, `npc` or `co_present` (SCHEMA_VIOLATION at `room`).
 
-[Fire](mechanics.md#fire-toolbox-row-w22) adds, each needing `kernel_api` at least **1.56**: a `co_present` `status.apply` step's optional `tag: <Tag>` (the schema refuses a `tag` without `co_present`, missing_property at `co_present`), and the reaction step `{op: "barrier.set", to: <BarrierState>}` with exactly one of `barrier: <key>` or `tag: <Tag>` (the schema refuses both or neither). Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse the lower floor (KERNEL_API_RANGE_INVALID), an unresolved `barrier` (UNRESOLVED_REFERENCE at the step's `barrier`) and a `to: "locked"` step whose named barrier, or any barrier carrying its `tag` on an exit (of the trigger's `room` filter when it has one), has no `key_item` (BARRIER_UNREACHABLE_KEY at the step's `to`): no key could ever unlock it. A `barrier.set` uses `barrier_changed`, so its cartridge requires `barrier@1`. `cartridges/toolbox_showcase` (the smithy) is the sampler.
+[Fire](mechanics.md#fire-toolbox-row-w22) adds: a `co_present` `status.apply` step's optional `tag: <Tag>` (the schema refuses a `tag` without `co_present`, missing_property at `co_present`), and the reaction step `{op: "barrier.set", to: <BarrierState>}` with exactly one of `barrier: <key>` or `tag: <Tag>` (the schema refuses both or neither). Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse an unresolved `barrier` (UNRESOLVED_REFERENCE at the step's `barrier`) and a `to: "locked"` step whose named barrier, or any barrier carrying its `tag` on an exit (of the trigger's `room` filter when it has one), has no `key_item` (BARRIER_UNREACHABLE_KEY at the step's `to`): no key could ever unlock it. A `barrier.set` uses `barrier_changed`, so its cartridge requires `barrier@1`. `cartridges/toolbox_showcase` (the smithy) is the sampler.
 
-[Decay](mechanics.md#decay-toolbox-row-41) adds the reaction step `{op: "item.move", room: <key>}` (a short room key the compiler expands, `Loka.Content.LeafRefs.steps/0`), needing `kernel_api` at least **1.77**. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse the lower floor (KERNEL_API_RANGE_INVALID) and an unresolved room (UNRESOLVED_REFERENCE at the step's `room`); the schema refuses a step without `room` or with another key. The step emits no event, so it needs no owner capability. `cartridges/decay_sampler` is the sampler.
+[Decay](mechanics.md#decay-toolbox-row-41) adds the reaction step `{op: "item.move", room: <key>}` (a short room key the compiler expands, `Loka.Content.LeafRefs.steps/0`). Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse an unresolved room (UNRESOLVED_REFERENCE at the step's `room`); the schema refuses a step without `room` or with another key. The step emits no event, so it needs no owner capability. `cartridges/decay_sampler` is the sampler.
 
-[Phased world events](mechanics.md#phased-world-events-toolbox-row-37a) add the reaction step `{op: "population.spawn", plan: <key>}` (a short population plan key the compiler expands, `Loka.Content.LeafRefs.steps/0`), needing `kernel_api` at least **1.84**, on any trigger. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse the lower floor (KERNEL_API_RANGE_INVALID) and a plan that names no population plan of the cartridge (UNRESOLVED_REFERENCE at the step's `plan`); the schema refuses a step without `plan` or with another key. The step emits no event, so it needs no owner capability beyond the plan's own `population`. The same row lowers a plan's `day_target` and `night_target` minimum to 0 (a plan only the step fills); a plan with `day_target` 0 needs `kernel_api` at least **1.84** in both kernels (`lib/loka/content/population.ex`, `kernel/ts/src/content/cartridge_population.ts`; KERNEL_API_RANGE_INVALID), and the schema refuses a negative target (below_minimum). `cartridges/raid_sampler` is the sampler.
+[Phased world events](mechanics.md#phased-world-events-toolbox-row-37a) add the reaction step `{op: "population.spawn", plan: <key>}` (a short population plan key the compiler expands, `Loka.Content.LeafRefs.steps/0`), on any trigger. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse a plan that names no population plan of the cartridge (UNRESOLVED_REFERENCE at the step's `plan`); the schema refuses a step without `plan` or with another key. The step emits no event, so it needs no owner capability beyond the plan's own `population`. The same row lowers a plan's `day_target` and `night_target` minimum to 0 (a plan only the step fills), and the schema refuses a negative target (below_minimum). `cartridges/raid_sampler` is the sampler.
 
-[Replenish on an event](mechanics.md#replenish-on-an-event-homestead-hs-1) adds the reaction step `{op: "replenish.run", key: <key>}` (a short replenish entry key the compiler expands, `Loka.Content.LeafRefs.steps/0`), needing `kernel_api` at least **1.101**, on any trigger. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse the lower floor (KERNEL_API_RANGE_INVALID) and a key that names no replenish entry of the cartridge (UNRESOLVED_REFERENCE at the step's `key`) and a second step with the same key in one rule (DUPLICATE_DEFINITION at that step's `key`); the schema refuses a step without `key` or with another key, and a rule with `after` carrying the step is SCHEMA_VIOLATION `invalid_value` at its `op`. The step emits no event, so it needs no owner capability.
+[Replenish on an event](mechanics.md#replenish-on-an-event-homestead-hs-1) adds the reaction step `{op: "replenish.run", key: <key>}` (a short replenish entry key the compiler expands, `Loka.Content.LeafRefs.steps/0`), on any trigger. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse a key that names no replenish entry of the cartridge (UNRESOLVED_REFERENCE at the step's `key`) and a second step with the same key in one rule (DUPLICATE_DEFINITION at that step's `key`); the schema refuses a step without `key` or with another key, and a rule with `after` carrying the step is SCHEMA_VIOLATION `invalid_value` at its `op`. The step emits no event, so it needs no owner capability.
 
-[Population plans reading populations](mechanics.md#population-plans-reading-populations-toolbox-row-w12) add the policy leaf `population_count {plan, at_least}` (a short population plan key the compiler expands, `Loka.Content.LeafRefs`) and three optional population plan fields: `floor` (1 to `day_target`, refused with `chance`), `birth_when` and `wander_when` (versioned policies whose trees may use only `all`, `any`, `not`, `population_count`, `time_window`, `sky` and `barrier_state`; SCHEMA_VIOLATION otherwise). Any of them needs `kernel_api` at least **1.86** in both kernels (`lib/loka/content/population.ex`, `kernel/ts/src/content/cartridge_population.ts`; KERNEL_API_RANGE_INVALID); a `plan` naming no population plan of the cartridge is UNRESOLVED_REFERENCE at the leaf's `plan`. `cartridges/fen_sampler` is the sampler.
+[Population plans reading populations](mechanics.md#population-plans-reading-populations-toolbox-row-w12) add the policy leaf `population_count {plan, at_least}` (a short population plan key the compiler expands, `Loka.Content.LeafRefs`) and three optional population plan fields: `floor` (1 to `day_target`, refused with `chance`), `birth_when` and `wander_when` (versioned policies whose trees may use only `all`, `any`, `not`, `population_count`, `time_window`, `sky` and `barrier_state`; SCHEMA_VIOLATION otherwise). A `plan` naming no population plan of the cartridge is UNRESOLVED_REFERENCE at the leaf's `plan`. `cartridges/fen_sampler` is the sampler.
 
-[The attacker filter](mechanics.md#attacker-filter-loka-kgd79) adds an optional `attacker: <key>` filter to the `attack_result` trigger (a short NPC key the compiler expands, `Loka.Content.Reactions.filters/0`), needing `kernel_api` at least **1.58**. Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse the lower floor (KERNEL_API_RANGE_INVALID), an unresolved NPC (UNRESOLVED_REFERENCE at `reactions/<key>.on.attacker`) and a spawn template (SCHEMA_VIOLATION `invalid_value` there: a template has no authored instance to attack). `cartridges/toolbox_showcase` (the boars' gore) is the sampler.
+[The attacker filter](mechanics.md#attacker-filter-loka-kgd79) adds an optional `attacker: <key>` filter to the `attack_result` trigger (a short NPC key the compiler expands, `Loka.Content.Reactions.filters/0`). Both kernels (`lib/loka/content/reactions.ex`, `kernel/ts/src/content/cartridge_reactions.ts`) refuse an unresolved NPC (UNRESOLVED_REFERENCE at `reactions/<key>.on.attacker`) and a spawn template (SCHEMA_VIOLATION `invalid_value` there: a template has no authored instance to attack). `cartridges/toolbox_showcase` (the boars' gore) is the sampler.
 
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Terrain declarations
 
-[Terrain movement costs](mechanics.md#terrain-movement-costs-toolbox-row-43a) (row 43a) read cartridge.json's `world.movement.terrain`: an object whose keys are `Tag` values and whose values are integer percents, 0 to 1000 (`protocol/cartridge.schema.json` `WorldSettings`). A move into a room scales its fare by the percent of each tag the room carries, in the room's tag order, each step rounded down: on the default 1 mv fare any percent under 100 makes the move free, and stacked tags floor per step (`[road, marsh]` at 50 then 300 costs 0). A room's tags are unique (SCHEMA_VIOLATION `duplicate_items`). `world.movement.cost` is now optional: without it the 1 mv default is scaled. Row 43a adds the tags `road` and `marsh`. An unknown tag or a percent out of range is SCHEMA_VIOLATION at `world.movement.terrain.<key>`. `world.movement.terrain`, a `world.movement` without `cost`, or a room, item or barrier tagged `road` or `marsh` needs `kernel_api` at least **1.106** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`; movement: `lib/loka/content/resources.ex`, `kernel/ts/src/content/cartridge_pools.ts`; tags: `lib/loka/content/barriers.ex`, `kernel/ts/src/content/cartridge_knowledge.ts`). An empty `movement: {}` or `terrain: {}` is accepted and does nothing.
+[Terrain movement costs](mechanics.md#terrain-movement-costs-toolbox-row-43a) (row 43a) read cartridge.json's `world.movement.terrain`: an object whose keys are `Tag` values and whose values are integer percents, 0 to 1000 (`protocol/cartridge.schema.json` `WorldSettings`). A move into a room scales its fare by the percent of each tag the room carries, in the room's tag order, each step rounded down: on the default 1 mv fare any percent under 100 makes the move free, and stacked tags floor per step (`[road, marsh]` at 50 then 300 costs 0). A room's tags are unique (SCHEMA_VIOLATION `duplicate_items`). `world.movement.cost` is now optional: without it the 1 mv default is scaled. Row 43a adds the tags `road` and `marsh`. An unknown tag or a percent out of range is SCHEMA_VIOLATION at `world.movement.terrain.<key>`. An empty `movement: {}` or `terrain: {}` is accepted and does nothing.
 
 ## Derived stat declarations
 
-[Derived stats](mechanics.md#stats-derived-from-attributes-toolbox-row-2) read the optional `world.derived` in `cartridge.json` (`WorldSettings.derived`, owned by `attributes@1`, `kernel_api` at least **1.39**, **1.40** with `hp_max`): up to four tables, `hit_chance`, `damage`, `carry_grams` and `hp_max`, each `{terms: [{attribute, per_point, pivot}, ...], divisor?}` (`DerivedStat`). `attribute` names an attribute of this cartridge; `per_point` and `pivot` are ResourceInts; `divisor` is a positive integer, 1 when absent. `hit_chance` and `damage` need `world.combat`; `carry_grams` needs `world.carry`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an unresolved attribute (UNRESOLVED_REFERENCE at the term's `attribute`), a missing `attributes@1` (UNDECLARED_CAPABILITY at `world.derived`), an older API floor (KERNEL_API_RANGE_INVALID) and a table without its settings (SCHEMA_VIOLATION at the table). `cartridges/derived_sampler` is the sampler. A cartridge without `world.derived` keeps its bytes, hash and behavior.
+[Derived stats](mechanics.md#stats-derived-from-attributes-toolbox-row-2) read the optional `world.derived` in `cartridge.json` (`WorldSettings.derived`, owned by `attributes@1`): up to four tables, `hit_chance`, `damage`, `carry_grams` and `hp_max`, each `{terms: [{attribute, per_point, pivot}, ...], divisor?}` (`DerivedStat`). `attribute` names an attribute of this cartridge; `per_point` and `pivot` are ResourceInts; `divisor` is a positive integer, 1 when absent. `hit_chance` and `damage` need `world.combat`; `carry_grams` needs `world.carry`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an unresolved attribute (UNRESOLVED_REFERENCE at the term's `attribute`), a missing `attributes@1` (UNDECLARED_CAPABILITY at `world.derived`) and a table without its settings (SCHEMA_VIOLATION at the table). `cartridges/derived_sampler` is the sampler. A cartridge without `world.derived` keeps its bytes, hash and behavior.
 
 ## Item affect declarations
 
-[Item affects](mechanics.md#item-slots-and-affects-toolbox-row-3) read an item's optional `affects` (`ItemDefinition.affects`, a list of 1 to 16 `ItemAffect {attribute, modifier}`, the shape of an ancestry's modifier; `kernel_api` at least **1.41**). `attribute` names an attribute of this cartridge (source: its short key); `modifier` is a ResourceInt. The item needs a `slot` (`finger` is the thirteenth key). The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an affect without a slot (SCHEMA_VIOLATION at `affects`), an unresolved attribute (UNRESOLVED_REFERENCE at the affect's `attribute`), a missing `attributes@1` (UNDECLARED_CAPABILITY at `affects`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/affects_sampler` is the sampler. A cartridge without affects or finger items keeps its bytes, hash and behavior.
+[Item affects](mechanics.md#item-slots-and-affects-toolbox-row-3) read an item's optional `affects` (`ItemDefinition.affects`, a list of 1 to 16 `ItemAffect {attribute, modifier}`, the shape of an ancestry's modifier). `attribute` names an attribute of this cartridge (source: its short key); `modifier` is a ResourceInt. The item needs a `slot` (`finger` is the thirteenth key). The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an affect without a slot (SCHEMA_VIOLATION at `affects`), an unresolved attribute (UNRESOLVED_REFERENCE at the affect's `attribute`), a missing `attributes@1` (UNDECLARED_CAPABILITY at `affects`). `cartridges/affects_sampler` is the sampler. A cartridge without affects or finger items keeps its bytes, hash and behavior.
 
-[Unidentified items](mechanics.md#unidentified-items-toolbox-row-27) read an item's optional `identified` (`ItemDefinition.identified`, a DefinitionRef naming a fact of this cartridge, source: its short key; `kernel_api` at least **1.68**). The fact is a `bool` and not per_subject, and the item declares `affects`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an unresolved fact (UNRESOLVED_REFERENCE at `identified`), a fact that is not a `bool` (FACT_TYPE_MISMATCH at `identified`), `identified` without `affects` (SCHEMA_VIOLATION at `identified`) and an older API floor (KERNEL_API_RANGE_INVALID); the loader also refuses a per_subject fact there (FACT_SCOPE_UNSUPPORTED at `identified`, the [entity and pair fact](#entity-and-pair-fact-declarations) site walk). `cartridges/identify_sampler` is the sampler. A cartridge without `identified` keeps its bytes, hash and behavior.
+[Unidentified items](mechanics.md#unidentified-items-toolbox-row-27) read an item's optional `identified` (`ItemDefinition.identified`, a DefinitionRef naming a fact of this cartridge, source: its short key). The fact is a `bool` and not per_subject, and the item declares `affects`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an unresolved fact (UNRESOLVED_REFERENCE at `identified`), a fact that is not a `bool` (FACT_TYPE_MISMATCH at `identified`), `identified` without `affects` (SCHEMA_VIOLATION at `identified`); the loader also refuses a per_subject fact there (FACT_SCOPE_UNSUPPORTED at `identified`, the [entity and pair fact](#entity-and-pair-fact-declarations) site walk). `cartridges/identify_sampler` is the sampler. A cartridge without `identified` keeps its bytes, hash and behavior.
 
-Gear budget (balance tool 6b, [study](../rnd/balance-diagnostics-2026-10-11.md) §1 I2; Beads `loka-kgd.107.17`; `kernel_api` at least **1.72**) is two optional declarations the engine ignores at runtime; they stay in the compiled cartridge, and only the [power report](#content-reports) reads them. `world.gear_budget` in `cartridge.json` (`WorldSettings.gear_budget`, owned by `attributes@1`) is `{per_slot, per_level}`, both required: `per_slot` maps SlotKeys (at least one of the 13) to the signed affect total an item in that slot may carry at its intended level 1, each an integer 0..2147483647; `per_level` is what each level above 1 adds, an integer 0..2147483647. An item's optional `intended_level` (`ItemDefinition.intended_level`, an integer 1..2147483647) is the level it is meant for; it needs `affects` and is valid without `world.gear_budget`; nothing checks it against `world.levelling`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse `world.gear_budget` without `attributes@1` (UNDECLARED_CAPABILITY at `world.gear_budget`), an empty `per_slot` (SCHEMA_VIOLATION `too_few_items` at `world.gear_budget.per_slot`: the schema subset has no minProperties), `intended_level` without `affects` (SCHEMA_VIOLATION at `intended_level`) and either field under the API floor (KERNEL_API_RANGE_INVALID). A cartridge without either keeps its bytes, hash and behavior.
+Gear budget (balance tool 6b, [study](../rnd/balance-diagnostics-2026-10-11.md) §1 I2; Beads `loka-kgd.107.17`) is two optional declarations the engine ignores at runtime; they stay in the compiled cartridge, and only the [power report](#content-reports) reads them. `world.gear_budget` in `cartridge.json` (`WorldSettings.gear_budget`, owned by `attributes@1`) is `{per_slot, per_level}`, both required: `per_slot` maps SlotKeys (at least one of the 13) to the signed affect total an item in that slot may carry at its intended level 1, each an integer 0..2147483647; `per_level` is what each level above 1 adds, an integer 0..2147483647. An item's optional `intended_level` (`ItemDefinition.intended_level`, an integer 1..2147483647) is the level it is meant for; it needs `affects` and is valid without `world.gear_budget`; nothing checks it against `world.levelling`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse `world.gear_budget` without `attributes@1` (UNDECLARED_CAPABILITY at `world.gear_budget`), an empty `per_slot` (SCHEMA_VIOLATION `too_few_items` at `world.gear_budget.per_slot`: the schema subset has no minProperties), `intended_level` without `affects` (SCHEMA_VIOLATION at `intended_level`). A cartridge without either keeps its bytes, hash and behavior.
 
-Equip words (row 6a, Beads `loka-x6t.20`; `kernel_api` at least **1.116**) are an item's optional `equip` (`ItemDefinition.equip`, `{wear, remove, worn, removed}`, all four TextKeys and all four required). `wear` and `remove` are the item's Wear and Remove labels, `worn` and `removed` the lines [equipment@1](mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) tells when it is worn or removed. The item needs a `slot`. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/entities.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse `equip` without a slot (SCHEMA_VIOLATION at `equip`), a key outside the text catalog (UNRESOLVED_REFERENCE at `equip.<field>`) and an older API floor (KERNEL_API_RANGE_INVALID). A cartridge without `equip` keeps its bytes, hash and behavior.
+Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemDefinition.equip`, `{wear, remove, worn, removed}`, all four TextKeys and all four required). `wear` and `remove` are the item's Wear and Remove labels, `worn` and `removed` the lines [equipment@1](mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) tells when it is worn or removed. The item needs a `slot`. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/entities.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse `equip` without a slot (SCHEMA_VIOLATION at `equip`), a key outside the text catalog (UNRESOLVED_REFERENCE at `equip.<field>`). A cartridge without `equip` keeps its bytes, hash and behavior.
 
-[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attributes@1`, `kernel_api` at least **1.42**): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` must exist in the text catalog. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) and the loader (`kernel/ts/src/content/cartridge_levelling.ts`) refuse thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attributes@1` (UNDECLARED_CAPABILITY at `world.levelling`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
+[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attributes@1`): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` must exist in the text catalog. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) and the loader (`kernel/ts/src/content/cartridge_levelling.ts`) refuse thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attributes@1` (UNDECLARED_CAPABILITY at `world.levelling`). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
 
 ## Tag declarations
 
@@ -2176,212 +1075,212 @@ Equip words (row 6a, Beads `loka-x6t.20`; `kernel_api` at least **1.116**) are a
 
 ## Drop declarations
 
-[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; `kernel_api` at least **1.43**, and `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (populations keep their `loot_role`). The compiler (`lib/loka/content/death.ex`) and the loader (`kernel/ts/src/content/cartridge_death.ts`) refuse an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
+[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; requires `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (populations keep their `loot_role`). The compiler (`lib/loka/content/death.ex`) and the loader (`kernel/ts/src/content/cartridge_death.ts`) refuse an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
 
 ## NPC attribute declarations
 
-[Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) reads an NPC's optional `attributes` (`NpcDefinition.attributes`, a list of 1 to 16 `{attribute, value}`; `kernel_api` at least **1.46**) and an opposed action check's optional `npc` (only beside `attribute`; the schema's `dependentRequired`). `attribute` names an attribute of this cartridge and `npc` an NPC of it (source: short keys, expanded by `lib/loka/content/npc_fields.ex` and `lib/loka/content/checks.ex`); `value` is a ResourceInt. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/recipes.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`, `kernel/ts/src/content/cartridge_recipes.ts`) refuse an unresolved attribute or NPC (UNRESOLVED_REFERENCE at the member), an attribute listed twice (SCHEMA_VIOLATION at the repeat's `attribute`), a check `npc` that is a `spawn_template` or does not list the check's attribute (SCHEMA_VIOLATION at `check.npc`) and an older API floor (KERNEL_API_RANGE_INVALID). A check with `npc` needs no detail `rating`. Under `world.derived`, an NPC that declares `attributes` also takes the `hit_chance` and `damage` tables on its attack. `cartridges/npc_attr_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
+[Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) reads an NPC's optional `attributes` (`NpcDefinition.attributes`, a list of 1 to 16 `{attribute, value}`) and an opposed action check's optional `npc` (only beside `attribute`; the schema's `dependentRequired`). `attribute` names an attribute of this cartridge and `npc` an NPC of it (source: short keys, expanded by `lib/loka/content/npc_fields.ex` and `lib/loka/content/checks.ex`); `value` is a ResourceInt. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/recipes.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`, `kernel/ts/src/content/cartridge_recipes.ts`) refuse an unresolved attribute or NPC (UNRESOLVED_REFERENCE at the member), an attribute listed twice (SCHEMA_VIOLATION at the repeat's `attribute`), a check `npc` that is a `spawn_template` or does not list the check's attribute (SCHEMA_VIOLATION at `check.npc`). A check with `npc` needs no detail `rating`. Under `world.derived`, an NPC that declares `attributes` also takes the `hit_chance` and `damage` tables on its attack. `cartridges/npc_attr_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
 
 ## Damage declarations
 
-[Damage kinds, resistances and critical hits](mechanics.md#damage-kinds-resistances-and-critical-hits-toolbox-row-g2) read an attack profile's optional `kind` (a `DamageKind`) and `crit` (`{chance 1..100, multiplier 2..10}`), on `world.combat.player_attack`, an NPC's `attack` or an item's `weapon.attack`, and an NPC's optional `resistances` (`Resistances`: each member a `DamageKind` or `Tag` name, an integer -100 to 100). Any of them needs `kernel_api` at least **1.44**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. The schema closes the names and bounds; the compiler copies the fields unchanged. `cartridges/damage_sampler` is the sampler.
+[Damage kinds, resistances and critical hits](mechanics.md#damage-kinds-resistances-and-critical-hits-toolbox-row-g2) read an attack profile's optional `kind` (a `DamageKind`) and `crit` (`{chance 1..100, multiplier 2..10}`), on `world.combat.player_attack`, an NPC's `attack` or an item's `weapon.attack`, and an NPC's optional `resistances` (`Resistances`: each member a `DamageKind` or `Tag` name, an integer -100 to 100). The schema closes the names and bounds; the compiler copies the fields unchanged. `cartridges/damage_sampler` is the sampler.
 
 ## Ranged weapon declarations
 
-[Ranged first strike](mechanics.md#ranged-first-strike-toolbox-row-17) reads an item's optional `weapon.ranged {ammo}` (`protocol/entity.schema.json` `WeaponProfile`, no other field): `ammo` is a resource DefinitionRef (a short key in source, named like allies) of the body pool each shot spends; an unknown pool is UNRESOLVED_REFERENCE at `weapon.ranged.ammo`. When any item declares `weapon.ranged`, the combat narration must name `shot_hit` and `shot_miss` (optional TextKeys otherwise); a missing one is SCHEMA_VIOLATION at `.cartridge.world.combat.narration.shot_hit` (or `shot_miss`), as for `ally_hit` and `ally_miss`. `weapon.ranged` needs `kernel_api` at least **1.67**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. `cartridges/ranged_sampler` is the sampler.
+[Ranged first strike](mechanics.md#ranged-first-strike-toolbox-row-17) reads an item's optional `weapon.ranged {ammo}` (`protocol/entity.schema.json` `WeaponProfile`, no other field): `ammo` is a resource DefinitionRef (a short key in source, named like allies) of the body pool each shot spends; an unknown pool is UNRESOLVED_REFERENCE at `weapon.ranged.ammo`. When any item declares `weapon.ranged`, the combat narration must name `shot_hit` and `shot_miss` (optional TextKeys otherwise); a missing one is SCHEMA_VIOLATION at `.cartridge.world.combat.narration.shot_hit` (or `shot_miss`), as for `ally_hit` and `ally_miss`. `cartridges/ranged_sampler` is the sampler.
 
 ## Skill growth and rating declarations
 
-[Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the action check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). Each needs `kernel_api` at least **1.44**. The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/recipes.ex`) and the loader (`kernel/ts/src/content/cartridge_skills.ts`, `kernel/ts/src/content/cartridge_recipes.ts`) synthesize the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
+[Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the action check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/recipes.ex`) and the loader (`kernel/ts/src/content/cartridge_skills.ts`, `kernel/ts/src/content/cartridge_recipes.ts`) synthesize the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
 
 ## Hidden passage declarations
 
-[Hidden passages](mechanics.md#hidden-passages-and-search-toolbox-row-11) read an exit's optional `hidden_until` (`Connection.hidden_until`, `{fact, equals}`; `kernel_api` at least **1.45**). `fact` names a fact of this cartridge (source: its short key), normally a `player`-scoped bool so discovery belongs to the character; `equals` is a value of its type (FACT_TYPE_MISMATCH otherwise). A hidden face has no `barrier` (BARRIER_MISMATCH at `hidden_until`), so no door verb can name it; its reciprocal face is an ordinary exit or hidden by its own declaration. The search that reveals it is an ordinary [action with outcomes](mechanics.md#action_recipe1-mechanicsaction_reciperulets49) whose outcome assigns the fact. A patrol route leg with any hidden face to its next room, or an expedition route edge through a hidden face, is OUTCOME_MISMATCH at the route. Both the compiler and the loader refuse each case.
+[Hidden passages](mechanics.md#hidden-passages-and-search-toolbox-row-11) read an exit's optional `hidden_until` (`Connection.hidden_until`, `{fact, equals}`). `fact` names a fact of this cartridge (source: its short key), normally a `player`-scoped bool so discovery belongs to the character; `equals` is a value of its type (FACT_TYPE_MISMATCH otherwise). A hidden face has no `barrier` (BARRIER_MISMATCH at `hidden_until`), so no door verb can name it; its reciprocal face is an ordinary exit or hidden by its own declaration. The search that reveals it is an ordinary [action with outcomes](mechanics.md#action_recipe1-mechanicsaction_reciperulets49) whose outcome assigns the fact. A patrol route leg with any hidden face to its next room, or an expedition route edge through a hidden face, is OUTCOME_MISMATCH at the route. Both the compiler and the loader refuse each case.
 
 ## Time gate declarations
 
-[Time windows](mechanics.md#time-windows-hour-and-moon-gates-toolbox-row-10): a barrier source file may declare `opens_when`, a VersionedPolicy, and any policy may use the `sky {lunar}` leaf (`calendar@1` in `requires.capabilities`). Both need `kernel_api` at least **1.45** (KERNEL_API_RANGE_INVALID). The compiler (`lib/loka/content/calendar.ex`, policy roots in `lib/loka/content/barriers.ex` `conditions`) and the loader (`kernel/ts/src/content/cartridge_calendar.ts`, roots in `cartridge_refs.ts` `nodes`) check `opens_when` like every other policy (owners, references, windows) and refuse a `sky` field naming a phase its calendar table does not author, or a table the calendar lacks (SCHEMA_VIOLATION at that field; [row 31](#sky-declarations) adds `weather`, `season` and `tide`). Sampler: `cartridges/time_sampler`.
+[Time windows](mechanics.md#time-windows-hour-and-moon-gates-toolbox-row-10): a barrier source file may declare `opens_when`, a VersionedPolicy, and any policy may use the `sky {lunar}` leaf (`calendar@1` in `requires.capabilities`). The compiler (`lib/loka/content/calendar.ex`, policy roots in `lib/loka/content/barriers.ex` `conditions`) and the loader (`kernel/ts/src/content/cartridge_calendar.ts`, roots in `cartridge_refs.ts` `nodes`) check `opens_when` like every other policy (owners, references, windows) and refuse a `sky` field naming a phase its calendar table does not author, or a table the calendar lacks (SCHEMA_VIOLATION at that field; [row 31](#sky-declarations) adds `weather`, `season` and `tide`). Sampler: `cartridges/time_sampler`.
 
 ## Climb declarations
 
-[Rope and climb](mechanics.md#rope-and-climb-toolbox-row-30) reads an exit's optional `climb` (`Connection.climb`, `{item, damage, fell}`; `kernel_api` at least **1.45**). `item` names an item of this cartridge (source: its short key), the aid a climber must hold; `damage` is the fall's HP loss, an integer of at least 1 (a cartridge number); `fell` is a text key (UNRESOLVED_REFERENCE without a catalog entry), the fall's narration. The loader also refuses a climb in an artifact without an `hp` pool (RESOURCE_SPEC_INVALID at `climb`); the compiler always emits the default `hp` pool. Declare `climb` only on the face that descends; the way back up is an ordinary exit. A patrol route leg with any climb face to its next room is OUTCOME_MISMATCH at the route; an expedition route may cross one (it is the player's own travel). Both the compiler and the loader refuse each case.
+[Rope and climb](mechanics.md#rope-and-climb-toolbox-row-30) reads an exit's optional `climb` (`Connection.climb`, `{item, damage, fell}`). `item` names an item of this cartridge (source: its short key), the aid a climber must hold; `damage` is the fall's HP loss, an integer of at least 1 (a cartridge number); `fell` is a text key (UNRESOLVED_REFERENCE without a catalog entry), the fall's narration. The loader also refuses a climb in an artifact without an `hp` pool (RESOURCE_SPEC_INVALID at `climb`); the compiler always emits the default `hp` pool. Declare `climb` only on the face that descends; the way back up is an ordinary exit. A patrol route leg with any climb face to its next room is OUTCOME_MISMATCH at the route; an expedition route may cross one (it is the player's own travel). Both the compiler and the loader refuse each case.
 
 ## Narration variety declarations
 
-[Narration variety](mechanics.md#narration-variety-and-visit-tiers-toolbox-row-w7): `cartridge.json` may declare `alternates`, a map from a text key to a nonempty list of text keys (`CompiledCartridge.alternates`), and any policy may use the `visited_count {room, at_least}` leaf. Both need `variety@1` in `requires.capabilities` (UNDECLARED_CAPABILITY at `alternates` or at the leaf's `op`) and `kernel_api` at least **1.45** (KERNEL_API_RANGE_INVALID). Every key and every alternate must be in the text catalog (UNRESOLVED_REFERENCE). `room` names a room of this cartridge (source: its short key). The compiler (`lib/loka/content/variety.ex`) and the loader (`kernel/ts/src/content/cartridge_variety.ts`) refuse each case. A `visited_count` leaf without `knowledge@1` in `requires.capabilities` never holds; the compiler warns (VISITS_UNRECORDED at `cartridge.requires.capabilities`, compiler only, the build succeeds). Sampler: `cartridges/variety_sampler`.
+[Narration variety](mechanics.md#narration-variety-and-visit-tiers-toolbox-row-w7): `cartridge.json` may declare `alternates`, a map from a text key to a nonempty list of text keys (`CompiledCartridge.alternates`), and any policy may use the `visited_count {room, at_least}` leaf. Both need `variety@1` in `requires.capabilities` (UNDECLARED_CAPABILITY at `alternates` or at the leaf's `op`). Every key and every alternate must be in the text catalog (UNRESOLVED_REFERENCE). `room` names a room of this cartridge (source: its short key). The compiler (`lib/loka/content/variety.ex`) and the loader (`kernel/ts/src/content/cartridge_variety.ts`) refuse each case. A `visited_count` leaf without `knowledge@1` in `requires.capabilities` never holds; the compiler warns (VISITS_UNRECORDED at `cartridge.requires.capabilities`, compiler only, the build succeeds). Sampler: `cartridges/variety_sampler`.
 
 ## Sky declarations
 
-[Derived sky](mechanics.md#derived-sky-weather-season-and-tide-toolbox-row-31): `calendar.season` and `calendar.tide` are `CalendarCycle`s checked like `calendar.lunar` (ordered cuts below the period, the first at 0, unique phases, origin + period a safe integer); `calendar.weather` lists 1 to 32 `{phase, weight 1..1000, wet?}` entries with unique phases. A `sky` leaf's `weather`, `season` or `tide` must name a phase its table authors (SCHEMA_VIOLATION at that field otherwise). Any of the three tables needs the calendar units (`units_per_hour`, `hours_per_day`, `subdivisions_per_hour`; SCHEMA_VIOLATION at `calendar` otherwise), since the status line that shows them needs them, and `kernel_api` at least **1.45** (KERNEL_API_RANGE_INVALID), as a `sky` leaf does. A room declares `exposed` in its `tags` (`tags@1`). The compiler (`lib/loka/content/calendar.ex`) and the loader (`kernel/ts/src/content/cartridge_calendar.ts`) refuse each case. Sampler: `cartridges/sky_sampler`.
+[Derived sky](mechanics.md#derived-sky-weather-season-and-tide-toolbox-row-31): `calendar.season` and `calendar.tide` are `CalendarCycle`s checked like `calendar.lunar` (ordered cuts below the period, the first at 0, unique phases, origin + period a safe integer); `calendar.weather` lists 1 to 32 `{phase, weight 1..1000, wet?}` entries with unique phases. A `sky` leaf's `weather`, `season` or `tide` must name a phase its table authors (SCHEMA_VIOLATION at that field otherwise). Any of the three tables needs the calendar units (`units_per_hour`, `hours_per_day`, `subdivisions_per_hour`; SCHEMA_VIOLATION at `calendar` otherwise), since the status line that shows them needs them, as a `sky` leaf does. A room declares `exposed` in its `tags` (`tags@1`). The compiler (`lib/loka/content/calendar.ex`) and the loader (`kernel/ts/src/content/cartridge_calendar.ts`) refuse each case. Sampler: `cartridges/sky_sampler`.
 
 ## Pick and force declarations
 
-[Pick and force a barrier](mechanics.md#pick-and-force-a-barrier-toolbox-rows-13-and-g12) adds no field: a barrier source file declares `initial: "closed"` (a keyless `locked` barrier in reach is BARRIER_UNREACHABLE_KEY) and an `opens_when` reading an instance bool fact; the pick or force is an action on a room detail with a `rating` and an `opposed` check, as the [time gate](#time-gate-declarations), [skill growth and rating](#skill-growth-and-rating-declarations) and [tag](#tag-declarations) declarations already check. `kernel_api` at least **1.45** (for `opens_when`). Sampler: `cartridges/barrier_sampler`.
+[Pick and force a barrier](mechanics.md#pick-and-force-a-barrier-toolbox-rows-13-and-g12) adds no field: a barrier source file declares `initial: "closed"` (a keyless `locked` barrier in reach is BARRIER_UNREACHABLE_KEY) and an `opens_when` reading an instance bool fact; the pick or force is an action on a room detail with a `rating` and an `opposed` check, as the [time gate](#time-gate-declarations), [skill growth and rating](#skill-growth-and-rating-declarations) and [tag](#tag-declarations) declarations already check. Sampler: `cartridges/barrier_sampler`.
 
 ## Trap declarations
 
-[Traps](mechanics.md#traps-trigger-disarm-and-reset-toolbox-row-12) add no field: two instance bool facts, a status, reactions on `entity_entered_room`, `check_failed {check}` and a reset event, and search and disarm actions on a room detail with a `rating`, as the [status](#status-declarations), reaction, [skill growth and rating](#skill-growth-and-rating-declarations) declarations already check. `kernel_api` at least **1.46** when the reset is on `clock_hour`. Sampler: `cartridges/traps_sampler`.
+[Traps](mechanics.md#traps-trigger-disarm-and-reset-toolbox-row-12) add no field: two instance bool facts, a status, reactions on `entity_entered_room`, `check_failed {check}` and a reset event, and search and disarm actions on a room detail with a `rating`, as the [status](#status-declarations), reaction, [skill growth and rating](#skill-growth-and-rating-declarations) declarations already check. Sampler: `cartridges/traps_sampler`.
 
 ## Puzzle declarations
 
-[Order and dial puzzles](mechanics.md#sequence-and-combination-puzzles-toolbox-row-26) add no field: bounded int instance facts, actions on room details, reactions on `action_completed {action}` with `fact.assign` or `fact.adjust`, and a barrier `opens_when` of `fact_compare`s, as the fact, reaction, [standing](#standing-and-disposition-declarations) and barrier declarations already check. `kernel_api` at least **1.47** for a reaction's `fact.adjust`. Sampler: `cartridges/puzzles_sampler`.
+[Order and dial puzzles](mechanics.md#sequence-and-combination-puzzles-toolbox-row-26) add no field: bounded int instance facts, actions on room details, reactions on `action_completed {action}` with `fact.assign` or `fact.adjust`, and a barrier `opens_when` of `fact_compare`s, as the fact, reaction, [standing](#standing-and-disposition-declarations) and barrier declarations already check. Sampler: `cartridges/puzzles_sampler`.
 
 ## Quest deadlines
 
-Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half)). `deadline` is one object; only `outcome` is required by the schema. The loader accepts two shapes: legacy (S2) with `at`, `fact`, `trust_fact` and `trust_amount` and no `after`; generic with exactly one of `after` (logical units from activation, at least 1) or `at`, and none of the legacy fields, needing `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Any other shape is `SCHEMA_VIOLATION` `invalid_value` at the `deadline` member. Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree. A reaction on `quest_failed` also needs 1.46. The legacy debt floor (1.14) applies to legacy deadlines only. Sampler: `cartridges/quest_sampler` (find_key).
+Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half)). `deadline` is one object; only `outcome` is required by the schema. The loader accepts two shapes: legacy (S2) with `at`, `fact`, `trust_fact` and `trust_amount` and no `after`; generic with exactly one of `after` (logical units from activation, at least 1) or `at`, and none of the legacy fields. Any other shape is `SCHEMA_VIOLATION` `invalid_value` at the `deadline` member. Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree. Sampler: `cartridges/quest_sampler` (find_key).
 
 ## Quest stage hints
 
-Toolbox row W23 ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). A quest journal may declare `hints {active?, objectives_met?}`, each 1 to 8 `{after, text}` with `after` whole real minutes (1 to 1440) strictly ascending (else `SCHEMA_VIOLATION` `invalid_value` at the stage list) and `text` a catalog key (`UNRESOLVED_REFERENCE`). Hints need `time_policy.profile = real_elapsed` (`INVALID_TIME_POLICY` at the `hints` member) and `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree.
+Toolbox row W23 ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). A quest journal may declare `hints {active?, objectives_met?}`, each 1 to 8 `{after, text}` with `after` whole real minutes (1 to 1440) strictly ascending (else `SCHEMA_VIOLATION` `invalid_value` at the stage list) and `text` a catalog key (`UNRESOLVED_REFERENCE`). Hints need `time_policy.profile = real_elapsed` (`INVALID_TIME_POLICY` at the `hints` member). Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree.
 
-An action may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.tip`), shown once ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). The compiler adds the player bool fact `seen_tip_<key>` (default false; an authored fact of that name or a write of it is `RESERVED_FACT`), so a tip needs fact@1 (`UNDECLARED_CAPABILITY` at the `tip` member), `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`) and an action key of at most 55 characters (compiler `SCHEMA_VIOLATION` `invalid_value` at `actions/<key>.key`; in the loader the fact's key fails the schema). Compiler (`lib/loka/content/recipes.ex`, `position.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`, `cartridge_position.ts`) agree.
+An action may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.tip`), shown once ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). The compiler adds the player bool fact `seen_tip_<key>` (default false; an authored fact of that name or a write of it is `RESERVED_FACT`), so a tip needs fact@1 (`UNDECLARED_CAPABILITY` at the `tip` member) and an action key of at most 55 characters (compiler `SCHEMA_VIOLATION` `invalid_value` at `actions/<key>.key`; in the loader the fact's key fails the schema). Compiler (`lib/loka/content/recipes.ex`, `position.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`, `cartridge_position.ts`) agree.
 
-An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.reason`), the refusal text when its policy fails ([rules](mechanics.md#spell-cast-admission-toolbox-row-29a)). It needs `requires.kernel_api.at_least >= 1.100` (`KERNEL_API_RANGE_INVALID`, once per cartridge). Compiler (`lib/loka/content/recipes.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`) agree.
+An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.reason`), the refusal text when its policy fails ([rules](mechanics.md#spell-cast-admission-toolbox-row-29a)). Compiler (`lib/loka/content/recipes.ex`) and loader (`kernel/ts/src/content/cartridge_recipes.ts`) agree.
 
 ## Exposure declarations
 
-[Exposure](mechanics.md#exposure-cold-hot-damp-and-windy-toolbox-row-w25) adds no definition field: an item declares `warm`, `cool`, `waterproof` or `windproof` in its `tags` ([tag declarations](#tag-declarations)), a reaction's `on` may be `{"event": "clock_hour"}` (no filters; its owner schedule@1 must be required), and a policy may use `wearing {tag}` (owner equipment@1). Either needs `kernel_api` at least **1.46** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in the compiler (`lib/loka/content/exposure.ex`) and the loader (`kernel/ts/src/content/cartridge_exposure.ts`). Sampler: `cartridges/exposure_sampler`.
+[Exposure](mechanics.md#exposure-cold-hot-damp-and-windy-toolbox-row-w25) adds no definition field: an item declares `warm`, `cool`, `waterproof` or `windproof` in its `tags` ([tag declarations](#tag-declarations)), a reaction's `on` may be `{"event": "clock_hour"}` (no filters; its owner schedule@1 must be required), and a policy may use `wearing {tag}` (owner equipment@1). Sampler: `cartridges/exposure_sampler`.
 
 ## Entity variant declarations
 
-[Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC (`short_variants`, `room_line_variants`, `description_variants`) or an item (`short_variants`, `description_variants`; `room_line_variants` are older), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. A new list or leaf needs `kernel_api` at least **1.46** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in the compiler (`lib/loka/content/variants.ex`) and the loader (`kernel/ts/src/content/cartridge_variants.ts`). Sampler: `cartridges/variants_sampler`.
+[Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC (`short_variants`, `room_line_variants`, `description_variants`) or an item (`short_variants`, `description_variants`; `room_line_variants` are older), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. Sampler: `cartridges/variants_sampler`.
 
 ## Name word declarations
 
-Name words (loka-6qi; kernel_api at least **1.118**): an NPC or item may declare `words {bare, article?, plural?}` (`NameWords`): `bare` and the optional `plural` are text keys checked as `short` (UNRESOLVED_REFERENCE at `words.bare` or `words.plural`), and `article` is one of `a`, `an`, `the`. `short` stays the phrase narration binds; `words` exist for presenters that compose a sentence from several names. Below 1.118 it is KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` in the compiler (`lib/loka/content/variants.ex`) and the loader (`kernel/ts/src/content/cartridge_variants.ts`).
+Name words (loka-6qi): an NPC or item may declare `words {bare, article?, plural?}` (`NameWords`): `bare` and the optional `plural` are text keys checked as `short` (UNRESOLVED_REFERENCE at `words.bare` or `words.plural`), and `article` is one of `a`, `an`, `the`. `short` stays the phrase narration binds; `words` exist for presenters that compose a sentence from several names.
 
 ## Voice declarations
 
-[Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skills@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.room_line_variants[0].when.root.skill`). It needs `kernel_api` at least **1.91** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`), also for a lone leaf. The floor joins the [W6 floor](#entity-variant-declarations) (`lib/loka/content/variants.ex`, `kernel/ts/src/content/cartridge_variants.ts`). Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
+[Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skills@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.room_line_variants[0].when.root.skill`). The checks are in `lib/loka/content/variants.ex`, `kernel/ts/src/content/cartridge_variants.ts`. Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
 
-A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.details.<key>.title`), the page title the Book shows for it; it needs `kernel_api` at least **1.120** in both kernels (KERNEL_API_RANGE_INVALID; `lib/loka/content/variants.ex`, `kernel/ts/src/content/cartridge_variants.ts`). `mix loka.lint` requires it, and a prose link to it, on a detail some action targets (loka-x6t.120).
+A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.details.<key>.title`), the page title the Book shows for it. `mix loka.lint` requires it, and a prose link to it, on a detail some action targets (loka-x6t.120).
 
 ## Cue declarations
 
-[Sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) add one optional field, `cues` (`Cues`: 1 to 4 `Cue {sense, text, range, when?}`, `protocol/entity.schema.json`), on a room, a room's detail, an item or NPC definition, an item's source `fuel`, a status and an action outcome (`outcomes.success` or `.failure`), and one leaf, `cue_perceived {npc, sense}`. Both are owned by `sense_cue@1` (UNDECLARED_CAPABILITY at the cue, `rooms/forge.cues[0]`, or at the leaf's op) and need `kernel_api` at least **1.48** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). A cue's `text` without a catalog entry is UNRESOLVED_REFERENCE at it (`actions/pick_lock.outcomes.failure.cues[0].text`); its `when` is checked and short references in it expand like any condition (`Loka.Content.Checks.expand/2` expands every `cues` list), and the leaf's `npc` takes a short key through `Loka.Content.LeafRefs`. Compiler `lib/loka/content/cues.ex`, loader `kernel/ts/src/content/cartridge_senses.ts`. Sampler: `cartridges/senses_sampler`.
+[Sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) add one optional field, `cues` (`Cues`: 1 to 4 `Cue {sense, text, range, when?}`, `protocol/entity.schema.json`), on a room, a room's detail, an item or NPC definition, an item's source `fuel`, a status and an action outcome (`outcomes.success` or `.failure`), and one leaf, `cue_perceived {npc, sense}`. Both are owned by `sense_cue@1` (UNDECLARED_CAPABILITY at the cue, `rooms/forge.cues[0]`, or at the leaf's op). A cue's `text` without a catalog entry is UNRESOLVED_REFERENCE at it (`actions/pick_lock.outcomes.failure.cues[0].text`); its `when` is checked and short references in it expand like any condition (`Loka.Content.Checks.expand/2` expands every `cues` list), and the leaf's `npc` takes a short key through `Loka.Content.LeafRefs`. Compiler `lib/loka/content/cues.ex`, loader `kernel/ts/src/content/cartridge_senses.ts`. Sampler: `cartridges/senses_sampler`.
 
 ## Need declarations
 
-[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. It needs `kernel_api` at least **1.46**; the compiler (`lib/loka/content/status.ex`) and the loader (`kernel/ts/src/content/cartridge_status.ts`) refuse an unresolved name (UNRESOLVED_REFERENCE at the entry) and the lower floor (KERNEL_API_RANGE_INVALID). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
+[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. The compiler (`lib/loka/content/status.ex`) and the loader (`kernel/ts/src/content/cartridge_status.ts`) refuse an unresolved name (UNRESOLVED_REFERENCE at the entry). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
 
 ## Dialogue check declarations
 
-[Dialogue skill checks](mechanics.md#dialogue-skill-checks-toolbox-row-14) read a dialogue choice's optional `check` (`DialogueChoice.check`, `DialogueCheck`): `{key, kind: "opposed", failure}` with exactly one of `skill` or `attribute` and exactly one of `rating` (an integer) or `npc` (source: short keys, expanded like an action check's). It needs `kernel_api` at least **1.47** and check@1 (`UNDECLARED_CAPABILITY` at the check). The compiler (`lib/loka/content/choice_checks.ex`) and the loader (`kernel/ts/src/content/cartridge_choice_checks.ts`) refuse an unresolved skill, attribute or `failure` text (`UNRESOLVED_REFERENCE`), both or neither of `rating` and `npc` (`SCHEMA_VIOLATION` `invalid_value` at the check), an `npc` as an action check's (row G3), a key shared with an action's or another choice's check (`DUPLICATE_DEFINITION`), and a checked choice with any field but `label`, `narration`, `sequence`, `availability` and `check`, a `skill.acquire` step, or in a dialogue with a quest or riddle (`OUTCOME_MISMATCH` at the check).
+[Dialogue skill checks](mechanics.md#dialogue-skill-checks-toolbox-row-14) read a dialogue choice's optional `check` (`DialogueChoice.check`, `DialogueCheck`): `{key, kind: "opposed", failure}` with exactly one of `skill` or `attribute` and exactly one of `rating` (an integer) or `npc` (source: short keys, expanded like an action check's). It needs check@1 (`UNDECLARED_CAPABILITY` at the check). The compiler (`lib/loka/content/choice_checks.ex`) and the loader (`kernel/ts/src/content/cartridge_choice_checks.ts`) refuse an unresolved skill, attribute or `failure` text (`UNRESOLVED_REFERENCE`), both or neither of `rating` and `npc` (`SCHEMA_VIOLATION` `invalid_value` at the check), an `npc` as an action check's (row G3), a key shared with an action's or another choice's check (`DUPLICATE_DEFINITION`), and a checked choice with any field but `label`, `narration`, `sequence`, `availability` and `check`, a `skill.acquire` step, or in a dialogue with a quest or riddle (`OUTCOME_MISMATCH` at the check).
 
 ## Entity and pair fact declarations
 
-[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Checks`). Any of them needs `kernel_api` at least **1.47** (KERNEL_API_RANGE_INVALID; compiler `lib/loka/content/scoped_facts.ex`, loader `kernel/ts/src/content/cartridge_scoped_facts.ts`); a reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in both. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject; a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the sequence of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
+[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Checks`). A reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in both. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject; a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the sequence of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
 
 ## Group declarations
 
-[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member, stay?, fight?}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required; `stay` and `fight` from [hireling orders](mechanics.md#hireling-orders-toolbox-row-22a)): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. `stay` and `fight` follow the same rules as `member` (a bool pair fact at the player; UNRESOLVED_REFERENCE or SCHEMA_VIOLATION at `.cartridge.world.group.stay` or `.fight`), and either one present raises the floor to **1.73**. [Hireling wages](mechanics.md#hireling-wages-toolbox-row-22b) add the optional `wage {resource, amount, every}` (all three required, no other field; `amount` and `every` integers of at least 1): `resource` is a resource DefinitionRef (a short key in source) naming a conserved resource (`gain` 0, no `regen`); an unknown one is UNRESOLVED_REFERENCE at `.cartridge.world.group.wage.resource`, another shape SCHEMA_VIOLATION there, and `wage` raises the floor to **1.75**. From 1.75 a dialogue choice's `lesson_payment` (a hire fee) needs no `skill.acquire` step; below 1.75 a `lesson_payment` without one is KERNEL_API_RANGE_INVALID at the manifest's `at_least` (compiler `lib/loka/content/skills.ex`, loader `kernel/ts/src/content/cartridge_skills.ts`). Two or more `skill.acquire` steps, or `lesson_payment` with `payment`, stay SCHEMA_VIOLATION at the choice's `lesson_payment`. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` and `cartridges/hireling_sampler` are the samplers.
+[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member, stay?, fight?}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required; `stay` and `fight` from [hireling orders](mechanics.md#hireling-orders-toolbox-row-22a)): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `stay` and `fight` follow the same rules as `member` (a bool pair fact at the player; UNRESOLVED_REFERENCE or SCHEMA_VIOLATION at `.cartridge.world.group.stay` or `.fight`). [Hireling wages](mechanics.md#hireling-wages-toolbox-row-22b) add the optional `wage {resource, amount, every}` (all three required, no other field; `amount` and `every` integers of at least 1): `resource` is a resource DefinitionRef (a short key in source) naming a conserved resource (`gain` 0, no `regen`); an unknown one is UNRESOLVED_REFERENCE at `.cartridge.world.group.wage.resource`, another shape SCHEMA_VIOLATION there. A dialogue choice's `lesson_payment` (a hire fee) needs no `skill.acquire` step. Two or more `skill.acquire` steps, or `lesson_payment` with `payment`, stay SCHEMA_VIOLATION at the choice's `lesson_payment`. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` and `cartridges/hireling_sampler` are the samplers.
 
 ## Mount declarations
 
-[Mounts](mechanics.md#mounts-toolbox-row-43b) add one optional world setting, `world.mount {riding}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field), and one NPC field, `mount {terrain, cost_percent?}` (`protocol/entity.schema.json` `NpcDefinition`, no other field; `terrain` 1 to 8 unique `Tag`s, `cost_percent` an integer 0 to 1000; SCHEMA_VIOLATION otherwise). `riding` is a fact DefinitionRef (a short key in source) naming a bool [pair fact](#entity-and-pair-fact-declarations) (`per_subject: true`, scopes exactly `["player"]`): an unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.mount.riding`, a fact of another shape SCHEMA_VIOLATION there. `world.mount` needs `kernel_api` at least **1.108** (KERNEL_API_RANGE_INVALID at the manifest's `at_least`). An NPC `mount` without `world.mount`, or on a spawn template, is SCHEMA_VIOLATION `invalid_value` at the NPC's `mount`. Compiler `lib/loka/content/mounts.ex`, loader `kernel/ts/src/content/cartridge_mounts.ts`; sampler `cartridges/mount_sampler`.
+[Mounts](mechanics.md#mounts-toolbox-row-43b) add one optional world setting, `world.mount {riding}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field), and one NPC field, `mount {terrain, cost_percent?}` (`protocol/entity.schema.json` `NpcDefinition`, no other field; `terrain` 1 to 8 unique `Tag`s, `cost_percent` an integer 0 to 1000; SCHEMA_VIOLATION otherwise). `riding` is a fact DefinitionRef (a short key in source) naming a bool [pair fact](#entity-and-pair-fact-declarations) (`per_subject: true`, scopes exactly `["player"]`): an unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.mount.riding`, a fact of another shape SCHEMA_VIOLATION there. An NPC `mount` without `world.mount`, or on a spawn template, is SCHEMA_VIOLATION `invalid_value` at the NPC's `mount`. Compiler `lib/loka/content/mounts.ex`, loader `kernel/ts/src/content/cartridge_mounts.ts`; sampler `cartridges/mount_sampler`.
 
 ## Conditional schedule declarations
 
-[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback), goal text or leaf reference, and a list below `kernel_api` **1.47** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); it emits the hour's fallback in `daily_schedule` and its cases in `schedule_cases`, which source may not author. The loader (`kernel/ts/src/content/cartridge_schedules.ts`) checks the artifact's `schedule_cases`: each hour one the `daily_schedule` lists (SCHEMA_VIOLATION `invalid_value`), rooms, goal texts, condition references and owners, and the 1.47 floor. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The loader and the compiler refuse a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `<case>.when…fact`; the compiler at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
+[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and its cases in `schedule_cases`, which source may not author. The loader (`kernel/ts/src/content/cartridge_schedules.ts`) checks the artifact's `schedule_cases`: each hour one the `daily_schedule` lists (SCHEMA_VIOLATION `invalid_value`), rooms, goal texts, condition references and owners. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The loader and the compiler refuse a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `<case>.when…fact`; the compiler at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
 
 ## Standing and disposition declarations
 
-[Standing and disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) add these fields. A reaction step `{op: "fact.adjust", fact, amount, npc?, item?}` (`protocol/reaction.schema.json`) names a bounded int fact (`minimum` and `maximum` declared; else FACT_TYPE_MISMATCH at `apply[<i>].fact`), its `npc` and `item` short keys as a reaction `fact.assign`'s. An NPC's `disposition {hostile?, friendly?, engage?, refuse?}` (`protocol/entity.schema.json`) holds two versioned policies, their references short keys, and two catalog keys (`refuse` needs `kernel_api` at least **1.104**; an unknown key is UNRESOLVED_REFERENCE at `npcs/<key>.disposition.refuse`); the compiler (`lib/loka/content/standing.ex`; expansion in `npc_fields.ex`, conditions and the engage text in `entities.ex`) and the loader (`kernel/ts/src/content/cartridge_standing.ts`, conditions in `cartridge_refs.ts` `nodes`) refuse it on a spawn template, an `engage` present unless the NPC has both `hostile` and an `attack` (or absent when it has both), and a `refuse` without `hostile`: SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.disposition`. A shop's `buy_discount` takes exactly one of `skill` or `friendly: true`; `friendly` needs the same NPC's `disposition.friendly` (else RESOURCE_SPEC_INVALID, `lib/loka/content/commerce.ex`, `cartridge_commerce.ts`). Any of them needs `kernel_api` at least **1.47** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Subject `target` in a disposition condition reads the NPC ([W2](#entity-and-pair-fact-declarations)).
+[Standing and disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) add these fields. A reaction step `{op: "fact.adjust", fact, amount, npc?, item?}` (`protocol/reaction.schema.json`) names a bounded int fact (`minimum` and `maximum` declared; else FACT_TYPE_MISMATCH at `apply[<i>].fact`), its `npc` and `item` short keys as a reaction `fact.assign`'s. An NPC's `disposition {hostile?, friendly?, engage?, refuse?}` (`protocol/entity.schema.json`) holds two versioned policies, their references short keys, and two catalog keys (an unknown key is UNRESOLVED_REFERENCE at `npcs/<key>.disposition.refuse`); the compiler (`lib/loka/content/standing.ex`; expansion in `npc_fields.ex`, conditions and the engage text in `entities.ex`) and the loader (`kernel/ts/src/content/cartridge_standing.ts`, conditions in `cartridge_refs.ts` `nodes`) refuse it on a spawn template, an `engage` present unless the NPC has both `hostile` and an `attack` (or absent when it has both), and a `refuse` without `hostile`: SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.disposition`. A shop's `buy_discount` takes exactly one of `skill` or `friendly: true`; `friendly` needs the same NPC's `disposition.friendly` (else RESOURCE_SPEC_INVALID, `lib/loka/content/commerce.ex`, `cartridge_commerce.ts`). Subject `target` in a disposition condition reads the NPC ([W2](#entity-and-pair-fact-declarations)).
 
-[Arrest](mechanics.md#arrest-and-trial-toolbox-row-35) (row 35) adds `disposition.arrest {to, narration}` (`protocol/entity.schema.json`): `to` a room short key, `narration` a TextKey. It needs `hostile` and no `engage` (else SCHEMA_VIOLATION at the disposition), an unknown room or text is UNRESOLVED_REFERENCE at `disposition.arrest.to` or `.narration`, and it needs `kernel_api` 1.105.
+[Arrest](mechanics.md#arrest-and-trial-toolbox-row-35) (row 35) adds `disposition.arrest {to, narration}` (`protocol/entity.schema.json`): `to` a room short key, `narration` a TextKey. It needs `hostile` and no `engage` (else SCHEMA_VIOLATION at the disposition), an unknown room or text is UNRESOLVED_REFERENCE at `disposition.arrest.to` or `.narration`.
 
 Author rule: an NPC with `disposition.hostile` refuses every dialogue while hostile, so give a quest's accept, hand-over, receive and escort to a speaker who cannot turn hostile, or make that betrayal the design. The compiler warns (HOSTILE_QUEST_SPEAKER, severity warning, at `dialogues/<key>.npc`) when such an NPC speaks a dialogue with a choice carrying `accept`, `hand_over`, `receive` or `escort`; the build succeeds and the loader does not check it.
 
 ## Rumour declarations
 
-[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). It needs `kernel_api` at least **1.47** (KERNEL_API_RANGE_INVALID; compiler `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_reactions.ts`); an unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc` in both, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"policy_version": 1, "root": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
+[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc` in both, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"policy_version": 1, "root": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
 
 ## Lore deduction declarations
 
-[Lore codex and deduction](mechanics.md#lore-codex-and-deduction-toolbox-row-46) adds no field: a deduction is an ordinary action with outcomes whose `policy` is `{op: "all", items}` with at least two `fact_compare` items `equals: true` on declared topics' facts (plus, for once only, a `not` of the granted topic's fact) and whose success `sequence` has a `fact.assign` of another declared topic's fact to `true`. Its target should be a plain detail: an action on a readable or perception detail is listed among that detail's actions, not the place's, so the Journal cannot offer its card. GameView `deductions` is new in `kernel_api` **1.47** (the sampler requires it); no loader check is added, since no declaration changes. A badge is a declared topic whose fact `entity_entered_room` reactions assign under `visited_count` (knowledge@1, variety@1).
+[Lore codex and deduction](mechanics.md#lore-codex-and-deduction-toolbox-row-46) adds no field: a deduction is an ordinary action with outcomes whose `policy` is `{op: "all", items}` with at least two `fact_compare` items `equals: true` on declared topics' facts (plus, for once only, a `not` of the granted topic's fact) and whose success `sequence` has a `fact.assign` of another declared topic's fact to `true`. Its target should be a plain detail: an action on a readable or perception detail is listed among that detail's actions, not the place's, so the Journal cannot offer its card. GameView `deductions` (the sampler requires it); no loader check is added, since no declaration changes. A badge is a declared topic whose fact `entity_entered_room` reactions assign under `visited_count` (knowledge@1, variety@1).
 
 
 ## Away recap declarations
 
-The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound; `kernel_api` at least **1.47**). The schema refuses a value out of range or not an integer; the compiler (`lib/loka/content/requires.ex`) and the loader (`kernel/ts/src/content/cartridge.ts` `timeStage`) refuse an older API floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.
+The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound). The schema refuses a value out of range or not an integer. `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.
 
 ## Speech declarations
 
-[Social verbs](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half) add one dialogue field and one reaction trigger. A dialogue's optional `keyword` (`SpokenKeyword`: 1 to 32 lowercase ASCII letters, `protocol/dialogue.schema.json`) makes a say or whisper of that word open it; talk never offers it. A reaction trigger `{event: "spoken", npc?, word?, loudness?}` (`protocol/reaction.schema.json`; `npc` a short key, `word` a `SpokenKeyword`, `loudness` one of `whisper`, `say`, `shout`) fires once per hearer (without `npc`, two hearers' writes to one shared fact compose in order; [limits](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half)). Both need `speech@1` (UNDECLARED_CAPABILITY at `dialogues/<key>.keyword` or at the trigger's event) and `kernel_api` at least **1.48** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); a keyword dialogue declaring a `riddle` is OUTCOME_MISMATCH at its `keyword` (the riddle's save proof reads a talk receipt). Compiler `lib/loka/content/keywords.ex` and `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_dialogues.ts` and `cartridge_reactions.ts`. A cartridge may declare `speech: {phrases}` (`protocol/cartridge.schema.json`): 1 or more speech@1 `Word`s (1 to 32 ASCII letters, SCHEMA_VIOLATION at `cartridge.speech.phrases[i]`), shown as say's word chips and projected unchanged as the GameView's `phrases`; it needs `kernel_api` at least **1.98** (KERNEL_API_RANGE_INVALID). Sampler: `cartridges/speech_sampler`.
+[Social verbs](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half) add one dialogue field and one reaction trigger. A dialogue's optional `keyword` (`SpokenKeyword`: 1 to 32 lowercase ASCII letters, `protocol/dialogue.schema.json`) makes a say or whisper of that word open it; talk never offers it. A reaction trigger `{event: "spoken", npc?, word?, loudness?}` (`protocol/reaction.schema.json`; `npc` a short key, `word` a `SpokenKeyword`, `loudness` one of `whisper`, `say`, `shout`) fires once per hearer (without `npc`, two hearers' writes to one shared fact compose in order; [limits](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half)). Both need `speech@1` (UNDECLARED_CAPABILITY at `dialogues/<key>.keyword` or at the trigger's event); a keyword dialogue declaring a `riddle` is OUTCOME_MISMATCH at its `keyword` (the riddle's save proof reads a talk receipt). Compiler `lib/loka/content/keywords.ex` and `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_dialogues.ts` and `cartridge_reactions.ts`. A cartridge may declare `speech: {phrases}` (`protocol/cartridge.schema.json`): 1 or more speech@1 `Word`s (1 to 32 ASCII letters, SCHEMA_VIOLATION at `cartridge.speech.phrases[i]`), shown as say's word chips and projected unchanged as the GameView's `phrases`. Sampler: `cartridges/speech_sampler`.
 
 ## Use declarations
 
-[Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4) adds one action target variant and one action step (`protocol/action.schema.json`). An action's `target` may be `{kind: "use", tool}` instead of a detail: `tool` (`UseTool`) names the held tool's properties, `tag` (a `Tag`) and/or `liquid` (a liquid of this cartridge, short reference allowed), at least one. The target item's properties are the action's `policy`, read through `has_tag` and `status_active` with `subject: "target"`. A step `{op: "status.cure", status}` ends that status on the action's target and is allowed only on a use action (SCHEMA_VIOLATION at its `op`: a detail holds no status). A use target needs `kernel_api` at least **1.49** (KERNEL_API_RANGE_INVALID); an unknown liquid or status is UNRESOLVED_REFERENCE; an opposed check on a use action must name an `npc`, since there is no detail rating (SCHEMA_VIOLATION at the check). Both kernels check these (`lib/loka/content/recipes.ex`, `kernel/ts/src/content/cartridge_recipes.ts`); a scene may not start on a use action (OUTCOME_MISMATCH).
+[Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4) adds one action target variant and one action step (`protocol/action.schema.json`). An action's `target` may be `{kind: "use", tool}` instead of a detail: `tool` (`UseTool`) names the held tool's properties, `tag` (a `Tag`) and/or `liquid` (a liquid of this cartridge, short reference allowed), at least one. The target item's properties are the action's `policy`, read through `has_tag` and `status_active` with `subject: "target"`. A step `{op: "status.cure", status}` ends that status on the action's target and is allowed only on a use action (SCHEMA_VIOLATION at its `op`: a detail holds no status). An unknown liquid or status is UNRESOLVED_REFERENCE; an opposed check on a use action must name an `npc`, since there is no detail rating (SCHEMA_VIOLATION at the check). Both kernels check these (`lib/loka/content/recipes.ex`, `kernel/ts/src/content/cartridge_recipes.ts`); a scene may not start on a use action (OUTCOME_MISMATCH).
 
 ## Harvest tool declarations
 
-[Tool-gated harvest](mechanics.md#tool-gated-harvest-toolbox-row-19) adds one optional field to a detail's `harvest` (`protocol/room.schema.json`): `tool: {tag}`, `tag` a `Tag`. It needs `kernel_api` at least **1.52**; the compiler (`lib/loka/content/exchanges.ex`) and the loader (`kernel/ts/src/content/cartridge_exchange.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at the detail's `harvest`), and the field needs `tags@1`, as item tags do (UNDECLARED_CAPABILITY at `harvest.tool`; `lib/loka/content/room_parts.ex`, `kernel/ts/src/content/cartridge_refs.ts`). Sampler: `cartridges/harvest_sampler`.
+[Tool-gated harvest](mechanics.md#tool-gated-harvest-toolbox-row-19) adds one optional field to a detail's `harvest` (`protocol/room.schema.json`): `tool: {tag}`, `tag` a `Tag`. The field needs `tags@1`, as item tags do (UNDECLARED_CAPABILITY at `harvest.tool`; `lib/loka/content/room_parts.ex`, `kernel/ts/src/content/cartridge_refs.ts`). Sampler: `cartridges/harvest_sampler`.
 
 ## Replenish declarations
 
-[Replenish](mechanics.md#replenish-toolbox-row-19b) adds one top-level section (`protocol/cartridge.schema.json` `ReplenishPlan`): `replenish`, keyed `id@version:replenish/key`, one source file per entry under `replenish/` (`<key>.json`). An entry is `{items, from, to, cap, count, every}`: `items` 1 to 64 distinct item refs (short keys in source); `from` and `to` each an `ItemLocation` whose ref is a short key in source (`in` room, npc or item; `template` refused); `cap` 1 to 64, `count` 1 to 64 and `every` at least 1 (clock units). It needs `kernel_api` at least **1.71**. The compiler (`lib/loka/content/replenish.ex`) and the loader (`kernel/ts/src/content/cartridge_replenish.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`), a `template` location, a holder with no placed entity (a spawn-template NPC or a template item) or an item holder that is not a container, and an item `to` when any listed item is a container, which may be or hold `to` (SCHEMA_VIOLATION at that `from` or `to`), `from` equal to `to` (SCHEMA_VIOLATION at the entry's `from`), and an item or holder that names no definition (UNRESOLVED_REFERENCE). A harvest detail's item starts in the detail's room, or in any authored holder when an entry lists it with that room as `to` (`lib/loka/content/exchanges.ex`, `kernel/ts/src/content/cartridge_exchange.ts`). Sampler: `cartridges/replenish_sampler`.
+[Replenish](mechanics.md#replenish-toolbox-row-19b) adds one top-level section (`protocol/cartridge.schema.json` `ReplenishPlan`): `replenish`, keyed `id@version:replenish/key`, one source file per entry under `replenish/` (`<key>.json`). An entry is `{items, from, to, cap, count, every}`: `items` 1 to 64 distinct item refs (short keys in source); `from` and `to` each an `ItemLocation` whose ref is a short key in source (`in` room, npc or item; `template` refused); `cap` 1 to 64, `count` 1 to 64 and `every` at least 1 (clock units). The compiler (`lib/loka/content/replenish.ex`) and the loader (`kernel/ts/src/content/cartridge_replenish.ts`) refuse a `template` location, a holder with no placed entity (a spawn-template NPC or a template item) or an item holder that is not a container, and an item `to` when any listed item is a container, which may be or hold `to` (SCHEMA_VIOLATION at that `from` or `to`), `from` equal to `to` (SCHEMA_VIOLATION at the entry's `from`), and an item or holder that names no definition (UNRESOLVED_REFERENCE). A harvest detail's item starts in the detail's room, or in any authored holder when an entry lists it with that room as `to` (`lib/loka/content/exchanges.ex`, `kernel/ts/src/content/cartridge_exchange.ts`). Sampler: `cartridges/replenish_sampler`.
 
 ## Craft declarations
 
-[Craft](mechanics.md#craft-homestead-hs-10) adds one optional action field (`protocol/action.schema.json` `RecipeCraft`, `kernel_api` 1.101): `craft {consume?, yield?}`, at least one. `consume {items, quantity, to, reason?}`: `items` 1 to 16 distinct item refs (short keys in source), `quantity` 1 to 16, `to` an `ItemLocation`, `reason` a text key in the catalog. `yield {items, from}`: `items` 1 to 64 distinct item refs, `from` an `ItemLocation`. Both kernels check, as for a [replenish entry](#replenish-declarations): an unresolved item or holder is UNRESOLVED_REFERENCE at the field, a repeated item DUPLICATE_DEFINITION at `items`, a `template` holder, a holder item that is placed nowhere or is not a container SCHEMA_VIOLATION at the holder, an unknown `reason` UNRESOLVED_REFERENCE at `consume.reason`. A craft on a storylet or spell target is SCHEMA_VIOLATION at `craft` (`craft` in `kernel/ts/src/content/cartridge_replenish.ts`; `Loka.Content.Replenish.craft/3`). A craft below `kernel_api` 1.101 is KERNEL_API_RANGE_INVALID (`protocol/fixtures/loader_floors.json`).
+[Craft](mechanics.md#craft-homestead-hs-10) adds one optional action field (`protocol/action.schema.json` `RecipeCraft`): `craft {consume?, yield?}`, at least one. `consume {items, quantity, to, reason?}`: `items` 1 to 16 distinct item refs (short keys in source), `quantity` 1 to 16, `to` an `ItemLocation`, `reason` a text key in the catalog. `yield {items, from}`: `items` 1 to 64 distinct item refs, `from` an `ItemLocation`. Both kernels check, as for a [replenish entry](#replenish-declarations): an unresolved item or holder is UNRESOLVED_REFERENCE at the field, a repeated item DUPLICATE_DEFINITION at `items`, a `template` holder, a holder item that is placed nowhere or is not a container SCHEMA_VIOLATION at the holder, an unknown `reason` UNRESOLVED_REFERENCE at `consume.reason`. A craft on a storylet or spell target is SCHEMA_VIOLATION at `craft` (`craft` in `kernel/ts/src/content/cartridge_replenish.ts`; `Loka.Content.Replenish.craft/3`).
 
 ## Skill prerequisite declarations
 
-[Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`, `kernel_api` 1.101): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). A prerequisite below `kernel_api` 1.101 is KERNEL_API_RANGE_INVALID (`protocol/fixtures/loader_floors.json`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView, NPC lessons and talk choices leave the skill out while its prerequisite fails and it is not acquired; a `skill_compare` naming it in a non-hidden skill's `qualification` or any dialogue `policy`, and a dialogue `label` on a dialogue teaching it, are SCHEMA_VIOLATION at that field; below `kernel_api` 1.102 it is KERNEL_API_RANGE_INVALID) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`; below `kernel_api` 1.102 it is KERNEL_API_RANGE_INVALID).
+[Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView, NPC lessons and talk choices leave the skill out while its prerequisite fails and it is not acquired; a `skill_compare` naming it in a non-hidden skill's `qualification` or any dialogue `policy`, and a dialogue `label` on a dialogue teaching it, are SCHEMA_VIOLATION at that field) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`).
 
 ## Recipe build step declarations
 
-[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`, `kernel_api` 1.102): `build {blueprint, direction}`, `blueprint` a blueprint ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) and the loader (`builds` in `kernel/ts/src/content/cartridge_construction.ts`) refuse, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a blueprint or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.blueprint` or `.direction`); and a floor under 1.102 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). The listed blueprint already resolves and owns construction@1.
+[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `build {blueprint, direction}`, `blueprint` a blueprint ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) and the loader (`builds` in `kernel/ts/src/content/cartridge_construction.ts`) refuse, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a blueprint or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.blueprint` or `.direction`). The listed blueprint already resolves and owns construction@1.
 
 ## Durability declarations
 
-[Durability, crafting quality and repair](mechanics.md#durability-crafting-quality-and-repair-toolbox-row-21) adds two fields. An item's `weapon` may declare `durability {fact, wear}` (`protocol/entity.schema.json` `WeaponProfile`): `fact` is a fact DefinitionRef (a short key in source) naming an int fact with `per_subject: true`, scopes exactly `["instance"]` and a safe integer `minimum` and `maximum`; `wear` is an integer 1 to 2^31-1. A service's `benefit` may be `{kind: "repair", fact, amount}` (`protocol/service.schema.json` `ServiceBenefit`): `fact` (a short key in source) must be some item's `weapon.durability.fact`, `amount` an integer 1 to 2^31-1, and the cartridge text must hold the service's refusals `service.unaffordable`, `service.nothing_to_repair` and `service.full_durability`. An unknown fact is UNRESOLVED_REFERENCE; a durability fact of another shape is SCHEMA_VIOLATION at `weapon.durability.fact`, a repair fact no weapon names at `benefit.fact`; a missing refusal text is UNRESOLVED_REFERENCE at the service. `weapon.durability` needs `kernel_api` at least **1.69** (and so does a repair, which needs such a weapon): the compiler (`lib/loka/content/skills.ex`) and the loader (`kernel/ts/src/content/cartridge_skills.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise; the services checks are in `lib/loka/content/services.ex` and `kernel/ts/src/content/cartridge_services.ts`. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/durability_sampler` is the sampler.
+[Durability, crafting quality and repair](mechanics.md#durability-crafting-quality-and-repair-toolbox-row-21) adds two fields. An item's `weapon` may declare `durability {fact, wear}` (`protocol/entity.schema.json` `WeaponProfile`): `fact` is a fact DefinitionRef (a short key in source) naming an int fact with `per_subject: true`, scopes exactly `["instance"]` and a safe integer `minimum` and `maximum`; `wear` is an integer 1 to 2^31-1. A service's `benefit` may be `{kind: "repair", fact, amount}` (`protocol/service.schema.json` `ServiceBenefit`): `fact` (a short key in source) must be some item's `weapon.durability.fact`, `amount` an integer 1 to 2^31-1, and the cartridge text must hold the service's refusals `service.unaffordable`, `service.nothing_to_repair` and `service.full_durability`. An unknown fact is UNRESOLVED_REFERENCE; a durability fact of another shape is SCHEMA_VIOLATION at `weapon.durability.fact`, a repair fact no weapon names at `benefit.fact`; a missing refusal text is UNRESOLVED_REFERENCE at the service. The services checks are in `lib/loka/content/services.ex` and `kernel/ts/src/content/cartridge_services.ts`. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/durability_sampler` is the sampler.
 
 ## Spell declarations
 
-[Spell cast admission](mechanics.md#spell-cast-admission-toolbox-row-29a) adds one action target variant, one command and one policy leaf (`protocol/action.schema.json`, `protocol/command.schema.json`, `protocol/policy.schema.json`). An action's `target` may be `{kind: "spell", word}`: `word` is a `SpokenKeyword` (1 to 32 lowercase ASCII letters) that no other spell of the cartridge has (DUPLICATE_DEFINITION at each one's `target.word`); the player casts it by typing the word (`cast {word}`), never by the action key. Its requirements are the action's own fields: `policy` (a learned `fact_compare`, `level_compare {at_least}`, `stat_compare`, `has_item`), `costs` (mana and reagent pools) and `cooldown`. `level_compare` is owned by attributes@1. A spell target also names `learned` (required since [word bar S2](mechanics.md#spell-cast-admission-toolbox-row-29a)): a bool fact of this cartridge, player scope (UNRESOLVED_REFERENCE, FACT_TYPE_MISMATCH at `target.learned`; a per-subject fact is FACT_SCOPE_UNSUPPORTED). A spell target needs `kernel_api` at least **1.98**, a `level_compare` leaf at least **1.51** (KERNEL_API_RANGE_INVALID); an opposed check on a spell must name an `npc` (SCHEMA_VIOLATION at the check). A room's action contribution that names a spell's key is UNRESOLVED_REFERENCE. Both kernels check these (`lib/loka/content/recipes.ex`, `spells.ex` and `levelling.ex`, `kernel/ts/src/content/cartridge_recipes.ts` and `cartridge_levelling.ts`). Sampler: `cartridges/spells_sampler`. A spell target may add `aimed {scopes}` (`scopes` one or more of `room_occupants`, `room_contents`, `inventory`; any other is SCHEMA_VIOLATION), which needs `kernel_api` at least 1.119 in both kernels (KERNEL_API_RANGE_INVALID); the spell is then [cast at one target](mechanics.md#spell-cast-admission-toolbox-row-29a) (loka-x6t.109).
+[Spell cast admission](mechanics.md#spell-cast-admission-toolbox-row-29a) adds one action target variant, one command and one policy leaf (`protocol/action.schema.json`, `protocol/command.schema.json`, `protocol/policy.schema.json`). An action's `target` may be `{kind: "spell", word}`: `word` is a `SpokenKeyword` (1 to 32 lowercase ASCII letters) that no other spell of the cartridge has (DUPLICATE_DEFINITION at each one's `target.word`); the player casts it by typing the word (`cast {word}`), never by the action key. Its requirements are the action's own fields: `policy` (a learned `fact_compare`, `level_compare {at_least}`, `stat_compare`, `has_item`), `costs` (mana and reagent pools) and `cooldown`. `level_compare` is owned by attributes@1. A spell target also names `learned` (required since [word bar S2](mechanics.md#spell-cast-admission-toolbox-row-29a)): a bool fact of this cartridge, player scope (UNRESOLVED_REFERENCE, FACT_TYPE_MISMATCH at `target.learned`; a per-subject fact is FACT_SCOPE_UNSUPPORTED). An opposed check on a spell must name an `npc` (SCHEMA_VIOLATION at the check). A room's action contribution that names a spell's key is UNRESOLVED_REFERENCE. Both kernels check these (`lib/loka/content/recipes.ex`, `spells.ex` and `levelling.ex`, `kernel/ts/src/content/cartridge_recipes.ts` and `cartridge_levelling.ts`). Sampler: `cartridges/spells_sampler`. A spell target may add `aimed {scopes}` (`scopes` one or more of `room_occupants`, `room_contents`, `inventory`; any other is SCHEMA_VIOLATION); the spell is then [cast at one target](mechanics.md#spell-cast-admission-toolbox-row-29a) (loka-x6t.109).
 
-[Spell effects](mechanics.md#spell-effects-toolbox-row-29b) add three outcome steps a spell's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `status.apply {status, npc?}`, `damage {npc?, kind, amount}` (`kind` a `DamageKind`, `amount` 1 or more) and `light.ignite {item?}` (`npc` and `item` required unless the spell is aimed, SCHEMA_VIOLATION at the field) (an item with a fuel source). Each names this cartridge's status, NPC or item (UNRESOLVED_REFERENCE at the field), sits only on a spell action (SCHEMA_VIOLATION at its `op`); the spell's own floor (1.98) covers it. Its owner must be declared (UNDECLARED_CAPABILITY at its `op`): status@1 for `status.apply` (by `status_applied`), death@1 for `damage` (by `entity_died`), light@1 for `light.ignite` (by the `ignite` command). Both kernels check these (`lib/loka/content/spells.ex` and `recipes.ex`, `kernel/ts/src/content/cartridge_recipes.ts` and `cartridge.ts`). Sampler: `cartridges/spell_effects_sampler`.
+[Spell effects](mechanics.md#spell-effects-toolbox-row-29b) add three outcome steps a spell's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `status.apply {status, npc?}`, `damage {npc?, kind, amount}` (`kind` a `DamageKind`, `amount` 1 or more) and `light.ignite {item?}` (`npc` and `item` required unless the spell is aimed, SCHEMA_VIOLATION at the field) (an item with a fuel source). Each names this cartridge's status, NPC or item (UNRESOLVED_REFERENCE at the field), sits only on a spell action (SCHEMA_VIOLATION at its `op`). Its owner must be declared (UNDECLARED_CAPABILITY at its `op`): status@1 for `status.apply` (by `status_applied`), death@1 for `damage` (by `entity_died`), light@1 for `light.ignite` (by the `ignite` command). Both kernels check these (`lib/loka/content/spells.ex` and `recipes.ex`, `kernel/ts/src/content/cartridge_recipes.ts` and `cartridge.ts`). Sampler: `cartridges/spell_effects_sampler`.
 
 ## Encounter declarations
 
-[Random encounters](mechanics.md#random-encounters-toolbox-row-9) add one optional field to a population plan (`protocol/cartridge.schema.json` `PopulationPlan`): `chance`, an integer 1 to 100. A plan with it is an encounter plan, without it an ecology plan. It needs `kernel_api` at least **1.74**: the compiler (`lib/loka/content/population.ex`) and the loader (`kernel/ts/src/content/cartridge_population.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Every other plan field and check is unchanged. Sampler: `cartridges/encounter_sampler`.
+[Random encounters](mechanics.md#random-encounters-toolbox-row-9) add one optional field to a population plan (`protocol/cartridge.schema.json` `PopulationPlan`): `chance`, an integer 1 to 100. A plan with it is an encounter plan, without it an ecology plan. Every other plan field and check is unchanged. Sampler: `cartridges/encounter_sampler`.
 
 ## Access lock declarations
 
-[Access locks](mechanics.md#access-locks-toolbox-row-g7) add three optional fields, each an object of VersionedPolicy (`protocol/policy.schema.json`) with no other key: a Connection's `locks {traverse}` and a RoomDefinition's `locks {enter}` (`protocol/room.schema.json`), an ItemDefinition's `locks {get?, put?}` with at least one (`protocol/entity.schema.json`). An unknown or misplaced access type, an empty `locks` or a value that is no policy is SCHEMA_VIOLATION (UNKNOWN_FIELD for an unknown key). A `put` lock on an item without `container: true` is SCHEMA_VIOLATION `invalid_value` at its `locks.put` (`items/chest.locks.put`; in the loader `.cartridge.items["..."].locks.put`). Each lock root joins the policy roots the reference stage checks (`nodes` in `kernel/ts/src/content/cartridge_refs.ts`; `Loka.Content.RoomParts.conditions/1` and `Loka.Content.Entities.conditions/1`), so its references and fact types are checked like any condition's (UNRESOLVED_REFERENCE at the leaf's member, `rooms/hut.locks.enter.root.fact`), and short references in it expand. A room or exit lock is read with no target, so in the loader `subject: "target"` under it is FACT_SCOPE_UNSUPPORTED at that `subject`, as in the other targetless sites; an item lock may use it (the target is the item). Any `locks` needs `kernel_api` at least **1.78**: the compiler (`lib/loka/content/locks.ex`) and the loader (`kernel/ts/src/content/cartridge_locks.ts`) report KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` otherwise. Sampler: `cartridges/access_sampler`.
+[Access locks](mechanics.md#access-locks-toolbox-row-g7) add three optional fields, each an object of VersionedPolicy (`protocol/policy.schema.json`) with no other key: a Connection's `locks {traverse}` and a RoomDefinition's `locks {enter}` (`protocol/room.schema.json`), an ItemDefinition's `locks {get?, put?}` with at least one (`protocol/entity.schema.json`). An unknown or misplaced access type, an empty `locks` or a value that is no policy is SCHEMA_VIOLATION (UNKNOWN_FIELD for an unknown key). A `put` lock on an item without `container: true` is SCHEMA_VIOLATION `invalid_value` at its `locks.put` (`items/chest.locks.put`; in the loader `.cartridge.items["..."].locks.put`). Each lock root joins the policy roots the reference stage checks (`nodes` in `kernel/ts/src/content/cartridge_refs.ts`; `Loka.Content.RoomParts.conditions/1` and `Loka.Content.Entities.conditions/1`), so its references and fact types are checked like any condition's (UNRESOLVED_REFERENCE at the leaf's member, `rooms/hut.locks.enter.root.fact`), and short references in it expand. A room or exit lock is read with no target, so in the loader `subject: "target"` under it is FACT_SCOPE_UNSUPPORTED at that `subject`, as in the other targetless sites; an item lock may use it (the target is the item). Sampler: `cartridges/access_sampler`.
 
 ## Theft declarations
 
-[Theft](mechanics.md#theft-fence-and-witnessed-offense-toolbox-rows-33-and-34) adds three optional declarations. `world.theft {skill, attribute, stolen, noticed, narration {seen, unseen}}` (`protocol/cartridge.schema.json` `WorldSettings`), all required: `skill`, `attribute` and `stolen` name definitions of this cartridge (UNRESOLVED_REFERENCE at the field); `stolen` is a bool, per_subject fact at scope `instance` only (FACT_SCOPE_UNSUPPORTED at `world.theft.stolen`), and an authored write to it is RESERVED_FACT; the narration keys resolve (UNRESOLVED_REFERENCE at `world.theft.narration.seen` or `.unseen`). An NpcDefinition's `locks {get}` (`protocol/entity.schema.json`), whose root joins the policy roots the reference stage checks like an item lock's. A ShopOffer's `stolen` (`true` only): SCHEMA_VIOLATION at the offer's `stolen` on a stock offer; such an offer may name an item that starts held by any NPC, while a clean offer naming an item another NPC holds stays UNRESOLVED_REFERENCE at the shop. A shop with a `stolen` offer needs the text key `shop.not_stolen`, the line its shelf shows when it refuses honest goods (UNRESOLVED_REFERENCE at the shop's `offers`, pass-1 GE3). With `world.theft`, a deposit or withdraw service whose `vault` NPC has no `locks.get` is SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.vault`. `world.theft` needs `kernel_api` at least **1.94**: the compiler (`lib/loka/content/theft.ex`) and the loader (`kernel/ts/src/content/cartridge_theft.ts`) report KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` otherwise. Without `world.theft`, an NPC's `locks` or an offer's `stolen` is SCHEMA_VIOLATION `invalid_value` at that field. Sampler: `cartridges/theft_sampler`.
+[Theft](mechanics.md#theft-fence-and-witnessed-offense-toolbox-rows-33-and-34) adds three optional declarations. `world.theft {skill, attribute, stolen, noticed, narration {seen, unseen}}` (`protocol/cartridge.schema.json` `WorldSettings`), all required: `skill`, `attribute` and `stolen` name definitions of this cartridge (UNRESOLVED_REFERENCE at the field); `stolen` is a bool, per_subject fact at scope `instance` only (FACT_SCOPE_UNSUPPORTED at `world.theft.stolen`), and an authored write to it is RESERVED_FACT; the narration keys resolve (UNRESOLVED_REFERENCE at `world.theft.narration.seen` or `.unseen`). An NpcDefinition's `locks {get}` (`protocol/entity.schema.json`), whose root joins the policy roots the reference stage checks like an item lock's. A ShopOffer's `stolen` (`true` only): SCHEMA_VIOLATION at the offer's `stolen` on a stock offer; such an offer may name an item that starts held by any NPC, while a clean offer naming an item another NPC holds stays UNRESOLVED_REFERENCE at the shop. A shop with a `stolen` offer needs the text key `shop.not_stolen`, the line its shelf shows when it refuses honest goods (UNRESOLVED_REFERENCE at the shop's `offers`, pass-1 GE3). With `world.theft`, a deposit or withdraw service whose `vault` NPC has no `locks.get` is SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.vault`. Without `world.theft`, an NPC's `locks` or an offer's `stolen` is SCHEMA_VIOLATION `invalid_value` at that field. Sampler: `cartridges/theft_sampler`.
 
 ## Witness and move declarations
 
-[Witness ledger and reaction moves](mechanics.md#witness-ledger-and-reaction-moves-toolbox-row-fd5-loka-kgd22) add two optional declarations (`protocol/reaction.schema.json`), each needing `kernel_api` at least 1.95 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). A `witness` filter on an `item_acquired`, `item_dropped`, `action_completed`, `check_passed`, `check_failed`, `entity_died` or `attack_result` trigger names an NPC of this cartridge (UNRESOLVED_REFERENCE at `on.witness`), never a spawn template (SCHEMA_VIOLATION at `on.witness`); on any other kind it is UNKNOWN_FIELD. The step `npc.move {npc?, room?}` names an NPC and a room of this cartridge when present (UNRESOLVED_REFERENCE at `apply[i].npc` or `apply[i].room`), the NPC never a spawn template (SCHEMA_VIOLATION at `apply[i].npc`); a delayed rule (`after`) may not carry it (SCHEMA_VIOLATION `invalid_value` at the step's `op`). Both kernels refuse each. Settle S4-1: `npc.move {plan, room}` names a population plan of this cartridge (UNRESOLVED_REFERENCE at `apply[i].plan`), never with `npc` and never without `room` (SCHEMA_VIOLATION `invalid_value` at `apply[i].plan`), and needs `kernel_api` at least 1.103.
+[Witness ledger and reaction moves](mechanics.md#witness-ledger-and-reaction-moves-toolbox-row-fd5-loka-kgd22) add two optional declarations (`protocol/reaction.schema.json`). A `witness` filter on an `item_acquired`, `item_dropped`, `action_completed`, `check_passed`, `check_failed`, `entity_died` or `attack_result` trigger names an NPC of this cartridge (UNRESOLVED_REFERENCE at `on.witness`), never a spawn template (SCHEMA_VIOLATION at `on.witness`); on any other kind it is UNKNOWN_FIELD. The step `npc.move {npc?, room?}` names an NPC and a room of this cartridge when present (UNRESOLVED_REFERENCE at `apply[i].npc` or `apply[i].room`), the NPC never a spawn template (SCHEMA_VIOLATION at `apply[i].npc`); a delayed rule (`after`) may not carry it (SCHEMA_VIOLATION `invalid_value` at the step's `op`). Both kernels refuse each. Settle S4-1: `npc.move {plan, room}` names a population plan of this cartridge (UNRESOLVED_REFERENCE at `apply[i].plan`), never with `npc` and never without `room` (SCHEMA_VIOLATION `invalid_value` at `apply[i].plan`).
 
 ## Identity declarations
 
-[Recognition and earned titles](mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) add one optional declaration, `world.identity {name, name_variants?}` (`protocol/cartridge.schema.json` `WorldSettings`), needing `kernel_api` at least 1.97 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `name` and each variant's `description` are text keys (UNRESOLVED_REFERENCE); `name_variants` are W6 `TextVariants`, owned by `description_variant` (UNDECLARED_CAPABILITY), each condition naming declared definitions (UNRESOLVED_REFERENCE); a `fact_compare` with `subject: "target"` there is FACT_SCOPE_UNSUPPORTED (both kernels). Both kernels refuse the rest.
+[Recognition and earned titles](mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) add one optional declaration, `world.identity {name, name_variants?}` (`protocol/cartridge.schema.json` `WorldSettings`). `name` and each variant's `description` are text keys (UNRESOLVED_REFERENCE); `name_variants` are W6 `TextVariants`, owned by `description_variant` (UNDECLARED_CAPABILITY), each condition naming declared definitions (UNRESOLVED_REFERENCE); a `fact_compare` with `subject: "target"` there is FACT_SCOPE_UNSUPPORTED (both kernels). Both kernels refuse the rest.
 
 ## Ask declarations
 
-[Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7) adds one NPC field and one reaction trigger. `NpcDefinition.ask {unknown, answers}` (`protocol/entity.schema.json`): `unknown` and each answer's `text` are text keys (UNRESOLVED_REFERENCE at the field); 1 to 32 answers `{topic, text, when?, grants?}`, whose `topic` and `grants` name topics of this cartridge (UNRESOLVED_REFERENCE at `npcs/<key>.ask.answers[i].topic` or `.grants`) and whose `when` is checked as every policy is. The NPC's `ask` needs `speech@1` and `topics@1` (UNDECLARED_CAPABILITY at `npcs/<key>.ask`; the loader refuses a missing `topics@1` first at the topic definitions, `.cartridge.topics[...]`). A reaction trigger `{event: "asked", npc?, topic?, answered?}` (`protocol/reaction.schema.json`; `topic` a topic of this cartridge, UNRESOLVED_REFERENCE at `on.topic`) needs `speech@1` like `spoken`. Each needs `kernel_api` at least **1.96** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Compiler `lib/loka/content/asks.ex` and `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_asks.ts` and `cartridge_reactions.ts`. Sampler: `cartridges/ask_sampler`.
+[Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7) adds one NPC field and one reaction trigger. `NpcDefinition.ask {unknown, answers}` (`protocol/entity.schema.json`): `unknown` and each answer's `text` are text keys (UNRESOLVED_REFERENCE at the field); 1 to 32 answers `{topic, text, when?, grants?}`, whose `topic` and `grants` name topics of this cartridge (UNRESOLVED_REFERENCE at `npcs/<key>.ask.answers[i].topic` or `.grants`) and whose `when` is checked as every policy is. The NPC's `ask` needs `speech@1` and `topics@1` (UNDECLARED_CAPABILITY at `npcs/<key>.ask`; the loader refuses a missing `topics@1` first at the topic definitions, `.cartridge.topics[...]`). A reaction trigger `{event: "asked", npc?, topic?, answered?}` (`protocol/reaction.schema.json`; `topic` a topic of this cartridge, UNRESOLVED_REFERENCE at `on.topic`) needs `speech@1` like `spoken`. Compiler `lib/loka/content/asks.ex` and `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_asks.ts` and `cartridge_reactions.ts`. Sampler: `cartridges/ask_sampler`.
 
 ## NPC door declarations
 
-[NPCs use doors](mechanics.md#npcs-use-doors-toolbox-row-w26) add one optional field, `walks` (`true` only), on a schedule case (`protocol/entity.schema.json` `ScheduleCases`) and on a population plan (`protocol/cartridge.schema.json` `PopulationPlan`); a schedule case's `when` becomes optional (absent holds). In source a daily_schedule hour may also be one walking case `{room, walks: true}`, which the compiler splits into the hour's room and a one-case `schedule_cases` entry. A plain hour still names its room by key or full reference (the source validator tries the walking case, then the reference). Any `walks` needs `kernel_api` at least **1.81**: the compiler and the loader report KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` otherwise. Sampler: `cartridges/doors_sampler`.
+[NPCs use doors](mechanics.md#npcs-use-doors-toolbox-row-w26) add one optional field, `walks` (`true` only), on a schedule case (`protocol/entity.schema.json` `ScheduleCases`) and on a population plan (`protocol/cartridge.schema.json` `PopulationPlan`); a schedule case's `when` becomes optional (absent holds). In source a daily_schedule hour may also be one walking case `{room, walks: true}`, which the compiler splits into the hour's room and a one-case `schedule_cases` entry. A plain hour still names its room by key or full reference (the source validator tries the walking case, then the reference). Sampler: `cartridges/doors_sampler`.
 
 ## Trail declarations
 
-[Tracks and trails](mechanics.md#tracks-and-trails-toolbox-row-w13) add three optional declarations. `world.trails {fresh_for, leads}` (`protocol/cartridge.schema.json` `WorldSettings`): `fresh_for` a positive integer of logical seconds; `leads` a TextKey per compass direction, each resolving (UNRESOLVED_REFERENCE at `world.trails.leads.<direction>`), with one for every direction some room's exit uses (UNRESOLVED_REFERENCE at `world.trails.leads`, `target` the direction). A population plan's `trail` and `hunts` (`true` only; `PopulationPlan`), each needing `world.trails` (UNRESOLVED_REFERENCE at the field, `target` `trails`). An action check `{key, kind: "track", plan}` (`protocol/action.schema.json` `ActionRecipe.check`), `plan` the key of a population plan of this cartridge with `trail` (UNRESOLVED_REFERENCE at `check.plan`). Each emits `fact_changed`, so the cartridge needs the `fact` capability (the lock stage). The compiler adds `trail_<P>_exit` and `trail_<P>_at` for each plan `P` with `trail`, and `trail_exit` and `trail_at` when some plan `hunts`; all at scope `instance` and `per_subject`; an authored fact of one of those names, or a write to one, is RESERVED_FACT, and a trailing plan's key over 53 characters is SCHEMA_VIOLATION `invalid_value` at its `key`. Any of them needs `kernel_api` at least **1.85**: the compiler (`lib/loka/content/trails.ex`) and the loader (`kernel/ts/src/content/cartridge_trails.ts`) report KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` otherwise. Sampler: `cartridges/tracks_sampler`.
+[Tracks and trails](mechanics.md#tracks-and-trails-toolbox-row-w13) add three optional declarations. `world.trails {fresh_for, leads}` (`protocol/cartridge.schema.json` `WorldSettings`): `fresh_for` a positive integer of logical seconds; `leads` a TextKey per compass direction, each resolving (UNRESOLVED_REFERENCE at `world.trails.leads.<direction>`), with one for every direction some room's exit uses (UNRESOLVED_REFERENCE at `world.trails.leads`, `target` the direction). A population plan's `trail` and `hunts` (`true` only; `PopulationPlan`), each needing `world.trails` (UNRESOLVED_REFERENCE at the field, `target` `trails`). An action check `{key, kind: "track", plan}` (`protocol/action.schema.json` `ActionRecipe.check`), `plan` the key of a population plan of this cartridge with `trail` (UNRESOLVED_REFERENCE at `check.plan`). Each emits `fact_changed`, so the cartridge needs the `fact` capability (the lock stage). The compiler adds `trail_<P>_exit` and `trail_<P>_at` for each plan `P` with `trail`, and `trail_exit` and `trail_at` when some plan `hunts`; all at scope `instance` and `per_subject`; an authored fact of one of those names, or a write to one, is RESERVED_FACT, and a trailing plan's key over 53 characters is SCHEMA_VIOLATION `invalid_value` at its `key`. Sampler: `cartridges/tracks_sampler`.
 
 ## Boss phase declarations
 
-[Boss phases](mechanics.md#boss-phases-toolbox-row-39) add two optional fields on a `resource_compare` leaf (`protocol/policy.schema.json`): `subject` (`"subject"` only) and `at_least_percent` (integer 1 to 100), with exactly one of `at_least` and `at_least_percent`; and one `attack_result` reaction filter, `target` (an NPC of this cartridge, UNRESOLVED_REFERENCE otherwise; `protocol/reaction.schema.json`). Each needs `kernel_api` 1.87 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`).
+[Boss phases](mechanics.md#boss-phases-toolbox-row-39) add two optional fields on a `resource_compare` leaf (`protocol/policy.schema.json`): `subject` (`"subject"` only) and `at_least_percent` (integer 1 to 100), with exactly one of `at_least` and `at_least_percent`; and one `attack_result` reaction filter, `target` (an NPC of this cartridge, UNRESOLVED_REFERENCE otherwise; `protocol/reaction.schema.json`).
 
 ## Delayed reaction declarations
 
-[Delayed reactions](mechanics.md#delayed-reactions-toolbox-row-fd1) add three optional declarations, each needing `kernel_api` at least 1.90 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`; in the loader at the reference stage). A reaction rule's `after` (`protocol/reaction.schema.json` `ReactionRule`), a positive integer of logical seconds; a rule with `after` carrying a `barrier.set`, `item.move` or `population.suppress` step, or a `status.apply` with `co_present` or `tag`, is SCHEMA_VIOLATION `invalid_value` at that step's `op` (reactions/aftershock.apply[0].op; in the loader .cartridge.reactions["..."].apply[0].op). A reaction step `fact.stamp {fact, npc?, item?}` (owned by fact@1, emits fact_changed) and a policy leaf `time_since {fact, npc?, item?, at_least}` (`protocol/policy.schema.json`, owned by fact@1): each fact resolves (UNRESOLVED_REFERENCE at its `fact`) and is an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at its `fact`); `npc` and `item` follow `fact_compare`'s per_subject rule (FACT_SCOPE_UNSUPPORTED).
+[Delayed reactions](mechanics.md#delayed-reactions-toolbox-row-fd1) add three optional declarations. A reaction rule's `after` (`protocol/reaction.schema.json` `ReactionRule`), a positive integer of logical seconds; a rule with `after` carrying a `barrier.set`, `item.move` or `population.suppress` step, or a `status.apply` with `co_present` or `tag`, is SCHEMA_VIOLATION `invalid_value` at that step's `op` (reactions/aftershock.apply[0].op; in the loader .cartridge.reactions["..."].apply[0].op). A reaction step `fact.stamp {fact, npc?, item?}` (owned by fact@1, emits fact_changed) and a policy leaf `time_since {fact, npc?, item?, at_least}` (`protocol/policy.schema.json`, owned by fact@1): each fact resolves (UNRESOLVED_REFERENCE at its `fact`) and is an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at its `fact`); `npc` and `item` follow `fact_compare`'s per_subject rule (FACT_SCOPE_UNSUPPORTED).
 
 ## Storylet declarations
 
@@ -2389,10 +1288,14 @@ Retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)): `RecipeTa
 
 ## Blueprint and site declarations
 
-Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `blueprints/<key>.json` (`BlueprintDefinition`, `protocol/cartridge.schema.json`): `title` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a blueprint and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`; loader `.cartridge.rooms["<ref>"].site.directions[i]`), and `blueprints`, 1 to 16 blueprints of this cartridge (UNRESOLVED_REFERENCE at `site.blueprints[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Any blueprint, site or `world.construction` needs `kernel_api` at least **1.99** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Compiler `lib/loka/content/construction.ex`, loader `kernel/ts/src/content/cartridge_construction.ts` and `cartridge_refs.ts`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
+Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `blueprints/<key>.json` (`BlueprintDefinition`, `protocol/cartridge.schema.json`): `title` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a blueprint and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`; loader `.cartridge.rooms["<ref>"].site.directions[i]`), and `blueprints`, 1 to 16 blueprints of this cartridge (UNRESOLVED_REFERENCE at `site.blueprints[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Compiler `lib/loka/content/construction.ex`, loader `kernel/ts/src/content/cartridge_construction.ts` and `cartridge_refs.ts`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
 
-Built rooms S2 adds a service benefit `{kind: "build", blueprint, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `blueprint` and `site` resolve to a blueprint and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the blueprint and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.blueprint` or `.benefit.direction`). It needs no floor beyond 1.99. Compiler `lib/loka/content/services.ex`, loader `kernel/ts/src/content/cartridge_services.ts`.
+Built rooms S2 adds a service benefit `{kind: "build", blueprint, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `blueprint` and `site` resolve to a blueprint and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the blueprint and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.blueprint` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`, loader `kernel/ts/src/content/cartridge_services.ts`.
 
 ## Narrate declarations
 
-[Settle S3-1](mechanics.md#settle-s3-1-narrate-n1) adds a reaction step `{op: "narrate", text}` (`protocol/reaction.schema.json` `ReactionRule`), owned by reaction@1, needing `kernel_api` at least 1.103 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `text` is a key of the text catalog (UNRESOLVED_REFERENCE at the step's `text`: reactions/arrival_line.apply[0].text; in the loader .cartridge.reactions["..."].apply[0].text). A rule with `after` may carry it.
+[Settle S3-1](mechanics.md#settle-s3-1-narrate-n1) adds a reaction step `{op: "narrate", text}` (`protocol/reaction.schema.json` `ReactionRule`), owned by reaction@1. `text` is a key of the text catalog (UNRESOLVED_REFERENCE at the step's `text`: reactions/arrival_line.apply[0].text; in the loader .cartridge.reactions["..."].apply[0].text). A rule with `after` may carry it.
+
+## Map position declarations
+
+`map_positions.json` (optional) is a non-empty array of `MapPosition` rows `{room, x, y, z}` (`protocol/cartridge.schema.json`). It needs knowledge@1 (UNDECLARED_CAPABILITY at the file). Every room of the cartridge appears exactly once, at a unique `(x, y, z)` (SCHEMA_VIOLATION at the file). Each `room` resolves (UNRESOLVED_REFERENCE at `[i].room`). Coordinates are drawing data only: the map draws links from real exits, and positions never change movement, sight or reachability. Compiler `lib/loka/content/map_positions.ex`.

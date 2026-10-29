@@ -1,46 +1,15 @@
 # Future plans
 
-Short list; each item links the plan it comes from. Chapter 1's unfinished E1–E3 gates
-and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechanics are
+Short list; each item links the plan it comes from. Current work is in the [ROADMAP](../ROADMAP.md);
+published A–D mechanics are
 [installed contracts](mechanics.md). The historical gate ladder is
 [14](../archive/spec/14-implementation-plan.md) and [R milestones](../archive/spec/R-MILESTONES.md).
 
 ## Next
 
-Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
+Current work: [ROADMAP](../ROADMAP.md#next).
 
 Worldbuilding subproject (Beads loka-ikch): the [stub tree](../worldbuilding/README.md) of every world area to decide, with canon tiers and fill order.
-
-## Chapter one and the proof cartridge
-
-- The release uses [one shared difficulty](../decisions/owner-decision-single-difficulty-2026-10-03.md);
-  the older ladder's selectable difficulty and separate death-mode rules are superseded.
-- The installed time model follows the [fixed-time restriction](../decisions/owner-decision-fixed-time-2026-10-03.md):
-  clock progression is authority-driven elapsed time; gameplay actions offer no time skip.
-- Mechanical planning now follows the [LegendMUD baseline](../decisions/owner-decision-legendmud-baseline-2026-10-03.md),
-  with its [sourced system reference](../reference/legendmud-system.md). The
-  [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
-  selects bounded consumers, recovery-route gates and chapter handoff/finale ordering. The
-  [provisional Story-mechanics proposal](../design/provisional-story-mechanics.md) retains dated,
-  unadopted alternatives; it does not override the current M1/M2/M3/M4/M5 choices. Each consuming
-  implementation amends active clauses and contracts first.
-- Capabilities registered but not installed, with the slice that first needs them:
-  [feature map](../features.gen.md), [release scope](../spec/release-scope.md); chapter-one
-  endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
-- Mechanics: [00 §4](../archive/spec/00-first-cartridge-design.md#4-feature-list) (movement, time,
-  character, items, combat, economy, NPCs, quests, social, touch UI) and
-  [00 §11](../archive/spec/00-first-cartridge-design.md#11-release-ladder-three-chapters-one-world) (the
-  three-chapter ladder); the primitive catalog [21](../archive/spec/21-composable-world-primitives.md),
-  §27 candidates and §28 graduated mechanics; quests, dialogue and scenes
-  [06](../archive/spec/06-quests-dialogue-actions-scripting.md); the content
-  [00a](../archive/spec/00a-chapter-one-content.md).
-- Gates: [14 §R7](../archive/spec/14-implementation-plan.md#r7--quest-dialogue-and-scenes),
-  [§R8](../archive/spec/14-implementation-plan.md#r8--living-world-capability-pack),
-  [§R10](../archive/spec/14-implementation-plan.md#r10--first-real-offline-cartridge);
-  acceptance scenarios [15](../archive/spec/15-acceptance-scenarios.md).
-- Touch UI: [room view](../archive/design/room-view/README.md) GameView needs; the chosen direction.
-
-- **Later chapter mechanics**: [archived Barrow King / King's Road quest-consumer queues](../archive/LATER-MECHANICS.md), superseded by the [mechanics toolbox](../MECHANICS-TOOLBOX.md); Chapters 2 and 3 left release scope ([record](../decisions/owner-decision-showcase-2026-10-10.md)).
 
 ## Authoring and certification
 
@@ -48,9 +17,7 @@ Worldbuilding subproject (Beads loka-ikch): the [stub tree](../worldbuilding/REA
   conformance cartridge (its [14](../archive/spec/14-implementation-plan.md) section),
   Builder API [§R11](../archive/spec/14-implementation-plan.md#r11--builder-api-v1-and-script-surface-generalization);
   specs [08](../archive/spec/08-builder-api-ai-factory.md), [09](../archive/spec/09-cartridge-lab-certification.md).
-- E1 starts with the bounded [exact candidate proof policy](e1-certification.md#e1-exact-candidate-proof-policy)
-  over existing headless and real SQLite tools. The full Lab remains future work; runner
-  implementation alone establishes no E1, browser-human or native certification verdict.
+- [E1 certification](e1-certification.md) is rebuilt with the real chapter; the full Lab remains future work.
 - YAML source after JSON ([record](../archive/decisions/owner-decisions-r4-2026-09-25.md)); downloadable
   content after the store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 

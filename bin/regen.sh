@@ -42,6 +42,7 @@ m elixir bin/contracts.exs
 m elixir bin/contracts.exs # the System graph reads docs/state-sections.gen.json
 m elixir bin/features.exs
 sh bin/review_index.sh
+(cd mobile/app && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot catalogue.test.ts >/dev/null) # docs/BOOK-UI-COMPONENTS.md index
 if touched '^(mobile/|kernel/ts/src/|protocol/)'; then (cd mobile/app && m npm run -s stories:views); fi
 if touched '^(cartridges/toolbox_showcase/|lib/)'; then
   lint=$(m mix loka.lint cartridges/toolbox_showcase 2>&1 >/dev/null | sed 's/^/toolbox_showcase /')

@@ -6,7 +6,7 @@ that no execution can witness in the v042 cartridge (Beads `loka-e1-r9-certifica
 
 1. **Family gaps.** A dispositioned dialogue or choice path also closes that dialogue's or
    choice's coverage gap, so the recorder's `dialogues` and `choices` gap lists subtract it.
-   Rule text: [E1 policy branch evidence](../system/architecture.md#e1-policy-branch-evidence).
+   Rule text: [E1 policy branch evidence](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/architecture.md#e1-policy-branch-evidence).
 2. **Static-evidence rows.** A reviewed citation of kernel code and cartridge lines satisfies a
    disposition for an unreachable or always-false guard. The machine binding of the
    [controlled refusal decision](pm-decision-e1-controlled-refusals-2026-10-07.md) applies to

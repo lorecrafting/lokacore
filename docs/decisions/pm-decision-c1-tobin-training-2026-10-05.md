@@ -3,7 +3,7 @@
 Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts Tobin's immediate swords/dodge lessons and their real cellar-fight
 consumer. The selected contract is in [mechanics](../system/mechanics.md#c1-training-and-armed-defense-selected-contract),
-production values in [cartridge](../system/cartridge.md#c1-tobin-and-equipment), and
+production values in [cartridge](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#c1-tobin-and-equipment), and
 the assignment in the [C1 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
 This is planning adoption, not implementation, review approval or playable proof.
 
