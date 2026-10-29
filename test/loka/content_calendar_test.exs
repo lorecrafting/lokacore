@@ -56,8 +56,7 @@ defmodule Loka.ContentCalendarTest do
   end
 
   # Breaks: the compiler emits a calendar with a partial unit triple (the runtime mixes authored and
-  # default units) or a start + day or cycle span past the largest safe integer (twin of the loader
-  # calendar checks B2 deleted).
+  # default units) or a start + day or cycle span past the largest safe integer.
   test "compiler rejects partial units and calendar spans past 2^53 - 1", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ferry_sampler", dir)
     File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))

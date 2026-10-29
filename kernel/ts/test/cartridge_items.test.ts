@@ -141,8 +141,8 @@ test('item schema enforces its required fields, bounds and literal container aut
     assert.equal(validate('ItemDefinition', row.value).length === 0, row.valid, row.name);
 });
 
-// Breaks: authored name words on an item and an NPC are refused (loka-6qi; the 1.118 floor is a
-// loader_floors.json case, the shape container_contracts.json rows, the catalog keys the compiler's).
+// Breaks: authored name words on an item and an NPC are refused (loka-6qi; the shape is
+// container_contracts.json rows, the catalog keys the compiler's).
 test('name words load at 1.118', () => {
   const worded = (c: any) => {
     c.manifest.requires.kernel_api.at_least = '1.118';

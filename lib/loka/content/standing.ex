@@ -5,7 +5,7 @@ defmodule Loka.Content.Standing do
   has an attack (SCHEMA_VIOLATION). Row 35: an arrest instead of the engage line needs
   `hostile` and no `engage` (SCHEMA_VIOLATION) and a room to move the body to
   (UNRESOLVED_REFERENCE).
-  Twin of kernel/ts/src/content/cartridge_standing.ts; the conditions and the engage text are
+  The conditions and the engage text are
   checked with every entity's (Loka.Content.Entities). A hostile-capable NPC speaking a dialogue
   that accepts, hands over, receives or escorts (refused while hostile): HOSTILE_QUEST_SPEAKER, a
   warning.

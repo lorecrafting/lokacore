@@ -158,7 +158,7 @@
       "type": "object"
     },
     "BandTable": {
-      "description": "A condition band table (04 §15 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler and loader report a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
+      "description": "A condition band table (04 §15 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler reports a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
       "items": { "$ref": "#/$defs/ConditionBand" },
       "maxItems": 101,
       "minItems": 1,
@@ -183,7 +183,7 @@
     },
     "Calendar": {
       "additionalProperties": false,
-      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; compiler and loader check order, cycle bounds and schedule/window hours. Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
+      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "properties": {
         "hours_per_day": {
           "minimum": 1,
@@ -1581,7 +1581,7 @@
           "type": "object"
         }
       ],
-      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The loader reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
+      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
     },
     "NpcHp": {
       "additionalProperties": false,
@@ -1719,7 +1719,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler and loader reject endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
           "properties": {
             "from": {
               "minimum": 0,
@@ -1926,7 +1926,7 @@
               ]
             }
           ],
-          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
+          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler rejects a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
           "properties": {
             "lunar": {
               "pattern": "^[a-z][a-z0-9_]*$",
@@ -2113,7 +2113,7 @@
     },
     "QuestJournal": {
       "additionalProperties": false,
-      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a loader check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a compiler check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
       "properties": {
         "abandoned": { "$ref": "#/$defs/TextKey" },
         "active": { "$ref": "#/$defs/TextKey" },
@@ -2294,7 +2294,7 @@
           ]
         }
       ],
-      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The loader refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
       "properties": {
         "consume": {
           "additionalProperties": false,
@@ -2402,7 +2402,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29b (spell recipes only, compiler and loader SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "description": "Toolbox row 29b (spell recipes only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
           "properties": {
             "npc": { "$ref": "#/$defs/DefinitionRef" },
             "op": { "const": "status.apply" },
@@ -2416,7 +2416,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29b (spell recipes only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler and loader SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "description": "Toolbox row 29b (spell recipes only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
           "properties": {
             "amount": {
               "maximum": 2147483647,
@@ -2436,7 +2436,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29b (spell recipes only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler and loader SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "description": "Toolbox row 29b (spell recipes only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
           "properties": {
             "item": { "$ref": "#/$defs/DefinitionRef" },
             "op": { "const": "light.ignite" }
@@ -2463,7 +2463,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the loader refuses it elsewhere). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
           "properties": {
             "blueprint": { "$ref": "#/$defs/DefinitionRef" },
             "direction": {
@@ -3244,7 +3244,7 @@
         "minLength": 1,
         "type": "string"
       },
-      "description": "The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler and loader report a missing one as UNRESOLVED_REFERENCE.",
+      "description": "The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler reports a missing one as UNRESOLVED_REFERENCE.",
       "propertyNames": { "pattern": "^[a-z][a-z0-9_.]{0,127}$" },
       "type": "object"
     },
@@ -3561,7 +3561,7 @@
                 "minimum": 0,
                 "type": "integer"
               },
-              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler and loader check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
+              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
               "propertyNames": { "pattern": "^(head|neck|body|cloak|arms|hands|finger|waist|legs|feet|wield|off_hand|light)$" },
               "type": "object"
             }
@@ -4412,7 +4412,7 @@
           "type": "object"
         }
       ],
-      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The loader reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
+      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
     },
     "partial.NpcHp": {
       "additionalProperties": false,
@@ -4515,7 +4515,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler and loader reject endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
           "properties": {
             "from": {
               "minimum": 0,
@@ -4619,7 +4619,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
+          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler rejects a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
           "properties": {
             "lunar": {
               "pattern": "^[a-z][a-z0-9_]*$",
@@ -4761,7 +4761,7 @@
     },
     "partial.QuestJournal": {
       "additionalProperties": false,
-      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a loader check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a compiler check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
       "properties": {
         "abandoned": { "$ref": "#/$defs/partial.TextKey" },
         "active": { "$ref": "#/$defs/partial.TextKey" },
@@ -4878,7 +4878,7 @@
     },
     "partial.RecipeCraft": {
       "additionalProperties": false,
-      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The loader refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
       "properties": {
         "consume": {
           "additionalProperties": false,
@@ -5646,7 +5646,7 @@
     },
     "partial.source.DialogueDefinition": {
       "additionalProperties": false,
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a loader check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
+      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "properties": {
         "choices": {
           "additionalProperties": { "$ref": "#/$defs/partial.DialogueChoice" },
@@ -5792,7 +5792,7 @@
         "location": { "$ref": "#/$defs/partial.ItemLocation" },
         "locks": {
           "additionalProperties": false,
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
           "properties": {
             "get": { "$ref": "#/$defs/partial.VersionedPolicy" },
             "put": { "$ref": "#/$defs/partial.VersionedPolicy" }
@@ -5990,7 +5990,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler and loader check it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -6149,7 +6149,7 @@
         },
         "birth_when": {
           "$ref": "#/$defs/partial.VersionedPolicy",
-          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, both kernels)."
+          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
         "bundle": { "$ref": "#/$defs/partial.DefinitionRef" },
         "cap": {
@@ -6170,7 +6170,7 @@
         },
         "extends": { "$ref": "#/$defs/Key" },
         "floor": {
-          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, both kernels).",
+          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, from the compiler).",
           "minimum": 1,
           "type": "integer"
         },
@@ -6303,7 +6303,7 @@
       "properties": {
         "deadline": {
           "additionalProperties": false,
-          "description": "A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The loader refuses any other shape (SCHEMA_VIOLATION).",
+          "description": "A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The compiler (lib/loka/content/quests.ex) refuses any other shape (SCHEMA_VIOLATION).",
           "properties": {
             "after": {
               "minimum": 1,
@@ -6600,7 +6600,7 @@
                 "description": "Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing.",
                 "properties": {
                   "co_present": {
-                    "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION).",
+                    "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION).",
                     "enum": [true]
                   },
                   "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -6608,7 +6608,7 @@
                   "op": { "const": "status.apply" },
                   "room": {
                     "$ref": "#/$defs/DefinitionRef",
-                    "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler and loader SCHEMA_VIOLATION)."
+                    "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION)."
                   },
                   "status": { "$ref": "#/$defs/DefinitionRef" },
                   "tag": {
@@ -6640,7 +6640,7 @@
                     ]
                   }
                 ],
-                "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler and loader BARRIER_UNREACHABLE_KEY at to).",
+                "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).",
                 "properties": {
                   "barrier": { "$ref": "#/$defs/DefinitionRef" },
                   "op": { "const": "barrier.set" },
@@ -7084,7 +7084,7 @@
     },
     "partial.source.ReplenishPlan": {
       "additionalProperties": false,
-      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The loader refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
+      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "properties": {
         "cap": {
           "maximum": 64,
@@ -7379,7 +7379,7 @@
           "type": "array"
         },
         "blocks": {
-          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler and loader UNKNOWN_COMMAND); may stand in for per_tick.",
+          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick.",
           "items": { "$ref": "#/$defs/Key" },
           "maxItems": 64,
           "minItems": 1,
@@ -7408,7 +7408,7 @@
               "type": "string"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler SCHEMA_VIOLATION)."
         },
         "extends": { "$ref": "#/$defs/Key" },
         "fear": {
@@ -7474,14 +7474,14 @@
           "type": "object"
         },
         "per_tick": {
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION).",
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION).",
           "maximum": 2147483647,
           "minimum": -2147483647,
           "type": "integer"
         },
         "perception": {
           "additionalProperties": false,
-          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler and loader SCHEMA_VIOLATION); may stand in for per_tick.",
+          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
           "properties": {
             "hearing": {
               "enum": [
@@ -7523,7 +7523,7 @@
     },
     "partial.source.StoryPointDefinition": {
       "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a loader check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
+      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
         "outcomes": {
@@ -7951,7 +7951,7 @@
     },
     "source.DialogueDefinition": {
       "additionalProperties": false,
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a loader check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
+      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "properties": {
         "choices": {
           "additionalProperties": { "$ref": "#/$defs/DialogueChoice" },
@@ -8129,7 +8129,7 @@
               ]
             }
           ],
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
           "properties": {
             "get": { "$ref": "#/$defs/VersionedPolicy" },
             "put": { "$ref": "#/$defs/VersionedPolicy" }
@@ -8351,7 +8351,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler and loader check it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -8530,7 +8530,7 @@
         },
         "birth_when": {
           "$ref": "#/$defs/VersionedPolicy",
-          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, both kernels)."
+          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
         "bundle": { "$ref": "#/$defs/DefinitionRef" },
         "cap": {
@@ -8550,7 +8550,7 @@
           "type": "integer"
         },
         "floor": {
-          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, both kernels).",
+          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, from the compiler).",
           "minimum": 1,
           "type": "integer"
         },
@@ -8724,7 +8724,7 @@
       "properties": {
         "deadline": {
           "additionalProperties": false,
-          "description": "A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The loader refuses any other shape (SCHEMA_VIOLATION).",
+          "description": "A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The compiler (lib/loka/content/quests.ex) refuses any other shape (SCHEMA_VIOLATION).",
           "properties": {
             "after": {
               "minimum": 1,
@@ -9102,7 +9102,7 @@
                 "description": "Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing.",
                 "properties": {
                   "co_present": {
-                    "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION).",
+                    "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION).",
                     "enum": [true]
                   },
                   "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -9110,7 +9110,7 @@
                   "op": { "const": "status.apply" },
                   "room": {
                     "$ref": "#/$defs/DefinitionRef",
-                    "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler and loader SCHEMA_VIOLATION)."
+                    "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION)."
                   },
                   "status": { "$ref": "#/$defs/DefinitionRef" },
                   "tag": {
@@ -9142,7 +9142,7 @@
                     ]
                   }
                 ],
-                "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler and loader BARRIER_UNREACHABLE_KEY at to).",
+                "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).",
                 "properties": {
                   "barrier": { "$ref": "#/$defs/DefinitionRef" },
                   "op": { "const": "barrier.set" },
@@ -9690,7 +9690,7 @@
     },
     "source.ReplenishPlan": {
       "additionalProperties": false,
-      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The loader refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
+      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "properties": {
         "cap": {
           "maximum": 64,
@@ -10062,7 +10062,7 @@
           "type": "array"
         },
         "blocks": {
-          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler and loader UNKNOWN_COMMAND); may stand in for per_tick.",
+          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick.",
           "items": { "$ref": "#/$defs/Key" },
           "maxItems": 64,
           "minItems": 1,
@@ -10091,7 +10091,7 @@
               "type": "string"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler SCHEMA_VIOLATION)."
         },
         "fear": {
           "const": true,
@@ -10161,14 +10161,14 @@
           "type": "object"
         },
         "per_tick": {
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION).",
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION).",
           "maximum": 2147483647,
           "minimum": -2147483647,
           "type": "integer"
         },
         "perception": {
           "additionalProperties": false,
-          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler and loader SCHEMA_VIOLATION); may stand in for per_tick.",
+          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
           "properties": {
             "hearing": {
               "enum": [
@@ -10220,7 +10220,7 @@
     },
     "source.StoryPointDefinition": {
       "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a loader check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
+      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
       "properties": {
         "outcomes": {
           "additionalProperties": {

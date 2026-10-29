@@ -1,7 +1,7 @@
 import { skillSpec, usesSpec } from './cartridge_skills.ts';
 import { trailFacts } from './cartridge_trails.ts';
-// Engine-owned fact specs (position@1, scene, skill, marker and tip facts), kept for
-// cartridge_services.ts and play/reach.ts; the compiler checks RESERVED_FACT (position.ex).
+// Engine-owned fact specs (position@1, scene, skill, marker and tip facts), read by
+// play/reach.ts; the compiler checks RESERVED_FACT (position.ex).
 import { markerSpec, spec } from './cartridge_scenes.ts';
 import type { Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
@@ -28,36 +28,21 @@ const SPEC = {
   meaning: "The character's position (position@1): only its rule writes it.",
 };
 
-/** The facts a presentation_only scene credits or assigns (dream-owned). */
-const dreams = (c: Obj): string[] =>
-  Object.values((c.scenes ?? {}) as Obj).flatMap((s) =>
-    s.control === 'presentation_only'
-      ? [refString(s.on.rest.credit), ...s.on_end.assign.map((a: Obj) => refString(a.fact))]
-      : [],
-  );
-
 /**
  * Authored facts only the engine writes: each quest patrol's trust_fact, each entitlement service's
- * fact and, with `accounts`, each deposit or withdraw service's account (toolbox row 25).
+ * fact and each deposit or withdraw service's account (toolbox row 25).
  */
-export const engineWrittenRefs = (c: Obj, accounts = true): string[] => [
+export const engineWrittenRefs = (c: Obj): string[] => [
   ...Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
   ),
   ...Object.values((c.services ?? {}) as Obj).flatMap((s) =>
     s.benefit.kind === 'entitlement'
       ? [refString(s.benefit.fact)]
-      : s.benefit.account && accounts
+      : s.benefit.account
         ? [refString(s.benefit.account)]
         : [],
   ),
-];
-
-/** Every fact an engine writer other than the bank owns; no bank account may be one (row 25). */
-export const foreignRefs = (c: Obj): string[] => [
-  ...Object.keys(expectedFacts(c)).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`),
-  ...dreams(c),
-  ...engineWrittenRefs(c, false),
 ];
 
 export function expectedFacts(c: Obj): Obj {

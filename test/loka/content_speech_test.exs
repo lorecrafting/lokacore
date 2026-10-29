@@ -41,8 +41,7 @@ defmodule Loka.ContentSpeechTest do
   end
 
   # Breaks (word bar S2): the compiler accepts a speech.phrases entry that is not a Word, an empty
-  # phrases list, or phrases without speech@1 (the TS loader refuses them
-  # too; speech.test.ts).
+  # phrases list, or phrases without speech@1.
   test "speech.phrases are Words and need speech@1" do
     dir = Loka.ContentSource.copy(@dir)
     phrases = &{"cartridge.json", fn c -> put_in(c, ["speech", "phrases"], &1) end}

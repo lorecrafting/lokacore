@@ -191,7 +191,7 @@
           "additionalProperties": false
         },
         {
-          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler and loader reject endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -380,7 +380,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
+          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler rejects a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.",
           "type": "object",
           "properties": {
             "op": {

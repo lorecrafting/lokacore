@@ -1,7 +1,7 @@
 defmodule Loka.ContentTrialTest do
   use ExUnit.Case, async: true
 
-  # Breaks (toolbox row 35; twin of the loader rows in kernel/ts/test/trial.test.ts): an arrest
+  # Breaks (toolbox row 35): an arrest
   # compiles without hostile or beside engage, on a spawn template, to a room that does not
   # exist, with a line missing from the text.
   test "an arrest needs hostile, no engage, a room and its line" do

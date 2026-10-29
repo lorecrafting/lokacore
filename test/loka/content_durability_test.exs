@@ -2,7 +2,7 @@ defmodule Loka.ContentDurabilityTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/durability_sampler")}
 
-  # Breaks (toolbox row 21; twin of the loader rows in kernel/ts/test/durability.test.ts): a
+  # Breaks (toolbox row 21): a
   # durability fact that is not per_subject, is an
   # npc_pair (row FD4) or is unbounded, a repair of a fact no weapon uses, or a repair without its refusal text.
   test "durability keeps a bounded entity fact and its repair texts", %{dir: dir} do

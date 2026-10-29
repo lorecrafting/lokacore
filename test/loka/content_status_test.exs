@@ -54,7 +54,7 @@ defmodule Loka.ContentStatusTest do
     end
   end
 
-  # Breaks (row 16; twin of the loader case in kernel/ts/test/sneak.test.ts): pierced_by compiles
+  # Breaks (row 16): pierced_by compiles
   # without a concealment, or naming no skill or attribute; an entry reaction applying
   # a concealment compiles (the engage cure then faults conflicting_write on that move).
   test "pierced_by needs a concealment, a real skill and attribute, no entry concealment" do

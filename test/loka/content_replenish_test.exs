@@ -9,7 +9,7 @@ defmodule Loka.ContentReplenishTest do
 
   defp seam(f), do: [{"replenish/seam_regrowth.json", f}]
 
-  # Break (toolbox row 19b; twin of the loader row in kernel/ts/test/replenish.test.ts): replenish
+  # Break (toolbox row 19b): replenish
   # compiles with a template, spawn-template, template-item or self-move holder, a
   # non-container item target or one beside a listed container (which may be or hold it), an
   # unresolved item or holder or a duplicate item; or the harvest allowance is dropped, so the
@@ -113,7 +113,7 @@ defmodule Loka.ContentReplenishTest do
     ]
   end
 
-  # Break (twin of the loader test in kernel/ts/test/replenish.test.ts): replenish.run compiles
+  # Break: replenish.run compiles
   # with an unresolved key, on a rule with `after` (refused as item.move is), or
   # twice with one key in a rule.
   test "replenish.run needs a replenish entry and no after", %{dir: dir} do

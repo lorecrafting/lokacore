@@ -52,13 +52,6 @@ export const bundle = (change: (c: any) => void = () => {}) =>
     change(c);
   });
 
-/** The controlled cartridge, changed further, through the installed loader. */
-export const load = (change: (c: any) => void) =>
-  f.load((c) => {
-    base(c);
-    change(c);
-  });
-
 /** The generation-1 entity of `slot` with spawn `role` (the member role or the loot role). */
 export const spawned = (w: World, slot: number, role = 'hound') =>
   Object.keys(w.state.created ?? {}).find((e) => {

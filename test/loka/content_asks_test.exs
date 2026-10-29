@@ -1,7 +1,7 @@
 defmodule Loka.ContentAsksTest do
   use ExUnit.Case, async: true
 
-  # Breaks (row FD7; twin of the loader test in kernel/ts/test/ask.test.ts): an answer naming no
+  # Breaks (row FD7): an answer naming no
   # topic or grant, a bad ask text or answer condition, an ask without speech@1 or topics@1, or an asked trigger naming no topic
   # compiles.
   test "ask declarations keep their boundaries" do

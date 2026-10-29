@@ -11,7 +11,7 @@ defmodule Loka.ContentShowcaseTest do
     assert Loka.Content.compile("cartridges/toolbox_showcase") == {:ok, expected, []}
   end
 
-  # Row W22 fire (Beads loka-kgd.96; twin of the loader rows in kernel/ts/test/showcase_fire.test.ts).
+  # Row W22 fire (Beads loka-kgd.96).
   # Breaks: a barrier.set to locked on a barrier without key_item compiles (named or by tag), or one with a
   # key_item is refused; a barrier.set naming no barrier compiles.
   describe "fire" do
@@ -66,7 +66,7 @@ defmodule Loka.ContentShowcaseTest do
     end
   end
 
-  # loka-kgd.79, twin of the loader rows in kernel/ts/test/showcase_combat.test.ts. Breaks: an
+  # loka-kgd.79. Breaks: an
   # attacker filter names a spawn template or an NPC the cartridge lacks.
   describe "attacker filter" do
     setup do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}

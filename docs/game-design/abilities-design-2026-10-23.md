@@ -319,7 +319,7 @@ word back; a found spell keeps its own fact.
 |---|---|---|
 | Mana | a pool with regen by position | keep |
 | Stillness (resonance school) | none | a second pool, filled by a meditate recipe at rest; content only |
-| Reagents | pools (`ash`) | stay pools: the loader refuses `craft` on a spell (`kernel/ts/src/content/cartridge_replenish.ts:33-34`); item reagents wait for `loka-kgd.83` (foundation change) |
+| Reagents | pools (`ash`) | stay pools: the compiler refuses `craft` on a spell (`lib/loka/content/replenish.ex`); item reagents wait for `loka-kgd.83` (foundation change) |
 | Fatigue | `mv` pool | a cost on heavy spells; never tied to session length (Koster) |
 | Fizzle | failure outcome, costs still paid | via §3.3 B |
 | Backlash | failure outcome `status.apply` on the caster | content |

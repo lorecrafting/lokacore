@@ -16,8 +16,7 @@ defmodule Loka.ContentConstructionTest do
 
   # Breaks (Built rooms S1): the compiler accepts a site direction the room has an exit in, a site
   # blueprint the cartridge does not define, a blueprint text key, enter-lock fact or (S4)
-  # weathering or ruin status it does not define (the TS
-  # loader refuses them too; construction.test.ts).
+  # weathering or ruin status it does not define.
   test "a site names no exit direction and only defined blueprints" do
     dir = Loka.ContentSource.copy(@dir)
     exit = {"rooms/lane.json", &put_in(&1, ["exits"], %{"north" => %{"to" => "lane"}})}
@@ -60,8 +59,7 @@ defmodule Loka.ContentConstructionTest do
   end
 
   # Breaks (Built rooms S2): the compiler admits a build service whose direction is not in the
-  # site's directions, whose blueprint the site does not list, or whose site does not resolve
-  # (the TS loader refuses them too; construction.test.ts).
+  # site's directions, whose blueprint the site does not list, or whose site does not resolve.
   # Breaks (Built rooms S3): the compiler admits a claim on a build commission or a build fact that
   # is not a false-default player bool (construction.test.ts pins the TS side).
   # Breaks (Built rooms S4): the compiler admits a mend whose direction is not its site's, whose

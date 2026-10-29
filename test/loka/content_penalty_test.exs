@@ -17,7 +17,7 @@ defmodule Loka.ContentPenaltyTest do
 
   # Breaks (row 47): the compiler admits an experience penalty without world.levelling, or an
   # unknown narration key.
-  test "penalty refusals match the TS loader" do
+  test "penalty refusals" do
     dir = Loka.ContentSource.copy(@dir)
     path = "cartridge.world.death.penalty.experience"
 
@@ -38,7 +38,7 @@ defmodule Loka.ContentPenaltyTest do
   end
 
   # Breaks (loka-3w3q): the compiler admits a fall or waking line naming no text key.
-  test "death narration refusals match the TS loader" do
+  test "death narration refusals" do
     dir = Loka.ContentSource.copy(@dir)
     api = edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.117")
 

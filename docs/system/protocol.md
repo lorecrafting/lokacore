@@ -539,7 +539,7 @@ bound-role and direct-custody checks. No GameView shape, command or event is add
 
 API1.11 introduces escort@1's bounded relation branch, actor-keyed mutation target and
 preconditioned escort.transition, plus the authored dialogue effect and escort_state
-policy leaf described in [mechanics](mechanics.md#escort1). Contracts, compiler and loader
+policy leaf described in [mechanics](mechanics.md#escort1). Contracts and the compiler
 validate typed IDs/references, role/quest agreement, supported transitions and feature
 minimum. The portable delta composer in both kernels checks full prior-row equality, legal
 status edges and immutable binding. Runtime adoption and changed-row persistence add only

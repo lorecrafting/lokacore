@@ -1,7 +1,7 @@
 defmodule Loka.ContentRaidTest do
   use ExUnit.Case, async: true
 
-  # Breaks (toolbox row 37a; twin of the loader test in kernel/ts/test/raid.test.ts):
+  # Breaks (toolbox row 37a):
   # the step's plan is never resolved.
   test "the raid step's plan resolves" do
     dir = Loka.ContentSource.copy("cartridges/raid_sampler")
@@ -17,7 +17,7 @@ defmodule Loka.ContentRaidTest do
     end
   end
 
-  # Breaks (toolbox row FD1; twin of the loader test in kernel/ts/test/raid.test.ts): a delayed
+  # Breaks (toolbox row FD1): a delayed
   # rule keeps a step that reads its
   # event (RS-4: a quest step) or a `when` leaf that reads its subject; a stamp or time_since
   # names a fact that cannot hold every clock value.

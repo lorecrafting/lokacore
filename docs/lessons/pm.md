@@ -42,7 +42,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - `br` "WAL index recovery already failed ... database is busy": run `br doctor migrate-schema recover`, then retry.
 - `git cherry-pick -q` printed a usage error and picked nothing: use plain `git cherry-pick <sha>`.
 - Agents share one scratchpad and delete files: keep PM working files under a `pm_` prefix (`loka-xmvu`).
-- `bin/pm_merge.sh` stops on stacked additive conflicts (`loader_floors.json`, `mechanics.md`, the gen files): merge by hand keeping both sides, then `elixir bin/contracts.exs`, `bin/review_index.sh`, focused tests.
+- `bin/pm_merge.sh` stops on stacked additive conflicts (`mechanics.md`, the gen files): merge by hand keeping both sides, then `elixir bin/contracts.exs`, `bin/review_index.sh`, focused tests.
 
 ## Cloud sessions
 

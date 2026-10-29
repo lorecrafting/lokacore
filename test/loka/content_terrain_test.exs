@@ -14,7 +14,7 @@ defmodule Loka.ContentTerrainTest do
   end
 
   # Breaks (row 43a): the compiler admits a terrain key outside the Tag vocabulary, a percent
-  # or over 1000 (the TS loader refuses them too).
+  # or over 1000.
   test "terrain keys are tags, percents 0..1000" do
     dir = Loka.ContentSource.copy(@dir)
 

@@ -2,7 +2,7 @@
 // keys, lock and installed host; the first failing stage's first diagnostic, or the cartridge.
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
 import { ARTIFACT_MAX_BYTES, type CompiledCartridge, type Diagnostic } from '../contracts.gen.ts';
-import { diag, isObj, refStage, step, type Data, type Obj } from './cartridge_refs.ts';
+import { diag, isObj, step, type Data, type Obj } from './cartridge_refs.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { installedStage, type Installed } from './cartridge_installed.ts';
@@ -48,7 +48,6 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
           ],
     () => keyStage(c),
     () => lockDiagnostics(c.lock.capabilities, c.manifest.requires.capabilities),
-    () => declarations(c),
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -141,13 +140,5 @@ function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
     if (Object.hasOwn(locked, key)) data.locked = locked[key];
     out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
   }
-  return out;
-}
-
-function declarations(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [...refStage(c)];
-  // -- B2
-  // -- D1
-  // -- D2
   return out;
 }

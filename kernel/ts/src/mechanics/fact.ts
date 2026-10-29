@@ -217,7 +217,7 @@ export function bounded(
   return Math.min(type.maximum!, Math.max(type.minimum!, add(current as number, amount)));
 }
 
-/** True when `v` is of FactType `t` (the loader checks authored values with it too). */
+/** True when `v` is of FactType `t` (the facts_typed invariant checks fact rows with it too: fact_typed.ts). */
 export const typed = (v: FactValue, t: FactType): boolean =>
   t.type === 'bool'
     ? typeof v === 'boolean'

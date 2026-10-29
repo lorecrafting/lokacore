@@ -1,7 +1,7 @@
 defmodule Loka.Content.Locks do
   @moduledoc """
   Toolbox row G7 (access locks): a `put` lock only a container item may carry (SCHEMA_VIOLATION invalid_value at its locks.put).
-  Twin of kernel/ts/src/content/cartridge_locks.ts; the lock roots join the conditions in
+  The lock roots join the conditions in
   Loka.Content.RoomParts.conditions/1 and Loka.Content.Entities.conditions/1.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]

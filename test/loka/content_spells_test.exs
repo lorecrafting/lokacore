@@ -5,7 +5,7 @@ defmodule Loka.ContentSpellsTest do
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
   # Breaks (toolbox row 29a): the compiler accepts an opposed check on a spell (no detail rating), two spells sharing one word,
-  # or a room contribution naming a spell's key (the TS loader refuses them too; spells.test.ts).
+  # or a room contribution naming a spell's key.
   test "spell words are unique" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
@@ -40,8 +40,7 @@ defmodule Loka.ContentSpellsTest do
   end
 
   # Breaks (word bar S2): the compiler accepts a spell with no learned fact, one naming a fact this
-  # cartridge lacks, a non-bool one, an instance or per_subject one (the TS loader refuses them too;
-  # spells.test.ts).
+  # cartridge lacks, a non-bool one, an instance or per_subject one.
   test "a spell's learned names a bool player fact of this cartridge" do
     dir = Loka.ContentSource.copy(@dir)
     learned = &{"actions/ward.json", fn r -> update_in(r, ["target"], &1) end}

@@ -40,7 +40,7 @@ defmodule Loka.ContentHiddenPassageTest do
   end
 
   # Breaks: a patrol leg or expedition edge over a hidden face compiles, so the NPC walks it or the
-  # quest journal names it (twin of the loader rows in kernel/ts/test/hidden_passage.test.ts).
+  # quest journal names it.
   test "a patrol or expedition route over a hidden face is refused" do
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}
     hide = &put_in(&1, ["exits", "west", "hidden_until"], %{"fact" => &2, "equals" => true})

@@ -1,7 +1,7 @@
 // Toolbox rows W2 and FD4 at the cartridge trust boundary, in the loader only: FACT_SCOPE_UNSUPPORTED
 // where a subject field names what this kernel cannot read (a per_subject or npc_pair fact named
 // only where a subject is known; a subject field of such a fact only; subject "target" only where
-// a target can be; `with` only on an npc_pair op). The compiler checks the rest (scoped_facts.ex).
+// a target can be; `with` only on an npc_pair op). The compiler checks the rest.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';

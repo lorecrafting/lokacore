@@ -2,7 +2,7 @@ defmodule Loka.ContentSettleTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/settle_sampler")}
 
-  # Break (Settle S3-1; twin of the loader test in kernel/ts/test/settle.test.ts): a narrate line
+  # Break (Settle S3-1): a narrate line
   # whose text key is not in the catalog compiles.
   test "a narrate text key resolves in the text catalog", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -27,7 +27,7 @@ defmodule Loka.ContentSettleTest do
            ]
   end
 
-  # Break (Settle S4-1; twin of the loader test in kernel/ts/test/settle.test.ts): a plan move
+  # Break (Settle S4-1): a plan move
   # names an unknown plan, also names an NPC, or names no room, and compiles. The guard is a
   # placed NPC (the raider is a spawn template, refused at .npc on its own).
   test "a plan move names a known plan and a room, never an NPC", %{dir: dir} do

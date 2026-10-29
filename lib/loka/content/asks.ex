@@ -1,8 +1,7 @@
 defmodule Loka.Content.Asks do
   @moduledoc """
   Toolbox row FD7: an NPC's ask names topics of this cartridge, needs speech@1 and topics@1
-  (UNDECLARED_CAPABILITY at the ask). Twin of
-  kernel/ts/src/content/cartridge_asks.ts; the answers' conditions and texts are checked with
+  (UNDECLARED_CAPABILITY at the ask). The answers' conditions and texts are checked with
   every entity's (Loka.Content.Entities).
   """
   import Loka.Content.Source, only: [diag: 4, at: 2]

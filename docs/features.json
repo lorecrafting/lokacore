@@ -323,8 +323,7 @@
       "kernel/ts/src/mechanics/quest/lifecycle.ts",
       "kernel/ts/src/commands/actions.ts",
       "kernel/ts/src/mechanics/policy.ts",
-      "kernel/ts/src/view/view.ts",
-      "kernel/ts/src/content/cartridge_quests.ts"
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_errand_hash.json",
@@ -384,8 +383,7 @@
       "kernel/ts/src/mechanics/reaction.ts",
       "kernel/ts/src/runtime/proposal.ts",
       "kernel/ts/src/runtime/world.ts",
-      "kernel/ts/src/foundation/compose.ts",
-      "kernel/ts/src/content/cartridge_refs.ts"
+      "kernel/ts/src/foundation/compose.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_green_hash.json"
@@ -405,8 +403,7 @@
       "DecisionResult"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/action_recipe/rule.ts",
-      "kernel/ts/src/content/cartridge_refs.ts"
+      "kernel/ts/src/mechanics/action_recipe/rule.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -1025,7 +1022,6 @@
     ],
     "modules": [
       "lib/loka/content/map_positions.ex",
-      "kernel/ts/src/content/cartridge_refs.ts",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
       "kernel/ts/src/foundation/compose_knowledge.ts",
       "lib/loka/core/compose_knowledge.ex",
@@ -1053,7 +1049,6 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
-      "kernel/ts/src/content/cartridge_refs.ts",
       "lib/loka/content/checks.ex",
       "lib/loka/content/policies.ex",
       "lib/loka/content/leaf_refs.ex"

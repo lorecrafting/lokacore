@@ -2,8 +2,7 @@ defmodule Loka.Content.Mounts do
   @moduledoc """
   Toolbox row 43b (mechanics.md Mounts): world.mount names a bool pair
   fact (per_subject, scopes ["player"]) as riding; an NPC's mount needs world.mount and an
-  authored NPC, never a spawn template (SCHEMA_VIOLATION). Twin of
-  kernel/ts/src/content/cartridge_mounts.ts.
+  authored NPC, never a spawn template (SCHEMA_VIOLATION).
   """
   import Loka.Content.Source, only: [diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
