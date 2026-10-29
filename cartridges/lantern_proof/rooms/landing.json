@@ -1,5 +1,5 @@
 {
-  "title": "room.landing.title",
+  "name": "room.landing.title",
   "description": "room.landing.description",
   "exits": {
     "north": {

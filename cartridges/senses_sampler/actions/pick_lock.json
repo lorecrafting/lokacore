@@ -1,5 +1,5 @@
 {
-  "label": "actions.pick_lock",
+  "name": "actions.pick_lock",
   "aliases": [
     "pick"
   ],

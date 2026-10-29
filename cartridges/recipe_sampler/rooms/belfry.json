@@ -1,5 +1,5 @@
 {
-  "title": "room.belfry.title",
+  "name": "room.belfry.title",
   "description": "room.belfry.description",
   "exits": {
     "down": {

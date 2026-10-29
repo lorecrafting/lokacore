@@ -1,5 +1,5 @@
 {
-  "title": "room.shore_steps.title",
+  "name": "room.shore_steps.title",
   "description": "room.shore_steps.description",
   "exits": {
     "west": {

@@ -1,5 +1,5 @@
 {
-  "label": "actions.gather_ash",
+  "name": "actions.gather_ash",
   "aliases": ["gather"],
   "target": { "kind": "detail", "room": "tower", "detail": "hearth" },
   "priority": 5,

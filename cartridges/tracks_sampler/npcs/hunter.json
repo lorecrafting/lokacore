@@ -1,6 +1,6 @@
 {
   "keywords": ["hunter"],
-  "short": "npc.hunter.short",
+  "name": "npc.hunter.short",
   "room_line": "npc.hunter.room",
   "description": "npc.hunter.description",
   "room": "clearing",

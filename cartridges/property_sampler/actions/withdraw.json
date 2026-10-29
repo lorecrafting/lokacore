@@ -1,5 +1,5 @@
 {
-  "label": "service.withdraw",
+  "name": "service.withdraw",
   "command": "use_service",
   "target": {
     "kind": "entity",

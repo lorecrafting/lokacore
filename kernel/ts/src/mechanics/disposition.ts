@@ -1,14 +1,7 @@
 // Toolbox row G11: an NPC's disposition toward the player, derived when read from its declared
 // conditions (NpcDefinition.disposition), never stored; read by talk (dialogue/selection.ts),
 // trade (commerce/shared.ts) and entry (movement/sequence.ts, engage below).
-import type {
-  CharacterId,
-  CommandId,
-  DeltaOp,
-  EntityId,
-  NpcDefinition,
-  Text,
-} from '../contracts.gen.ts';
+import type { CharacterId, CommandId, DeltaOp, EntityId, Text } from '../contracts.gen.ts';
 import { add } from '../foundation/int.ts';
 import { cmp } from '../foundation/validate.ts';
 import {
@@ -19,6 +12,7 @@ import {
   type Mint,
   type Steps,
   type World,
+  type NpcEntity,
 } from '../runtime/decision.ts';
 import { holds } from './policy.ts';
 import { living } from './death/shared.ts';
@@ -42,7 +36,7 @@ export function disposition(
   npc: EntityId | undefined,
   steps: Steps = { n: 0 },
 ): Disposition {
-  const d = npc === undefined ? undefined : (world.entities[npc] as NpcDefinition)?.disposition;
+  const d = npc === undefined ? undefined : (world.entities[npc] as NpcEntity)?.disposition;
   const ctx = { target: npc, steps };
   if (d?.hostile && holds(world, actor, d.hostile, ctx)) return 'hostile';
   return d?.friendly && holds(world, actor, d.friendly, ctx) ? 'friendly' : 'wary';
@@ -69,7 +63,7 @@ export function engage(
 ): { ops: DeltaOp[]; narration: Text[]; events: Event<'entity_entered_room'>[] } {
   const actor = command.payload.actor_id;
   const npc = hostileAt(world, actor, there, steps, arrests);
-  const d = npc && (world.entities[npc] as NpcDefinition).disposition!;
+  const d = npc && (world.entities[npc] as NpcEntity).disposition!;
   const to = d?.arrest && world.roomIds[refString(d.arrest.to)];
   const ops = to
     ? [arrived(body, there, to), ...separate(world, actor, 0)]
@@ -123,7 +117,7 @@ function hostileAt(
   const combat = !!world.cartridge.world?.combat;
   const candidates = Object.keys(world.entities)
     .filter((id) => {
-      const npc = world.entities[id] as NpcDefinition;
+      const npc = world.entities[id] as NpcEntity;
       return (
         world.state.containers[id] === there &&
         ((combat && npc.attack && npc.disposition?.engage) ||

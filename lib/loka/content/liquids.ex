@@ -22,7 +22,7 @@ defmodule Loka.Content.Liquids do
   defp liquid_texts(declarations, text),
     do:
       Enum.flat_map(declarations, fn {rel, steps, d} ->
-        texts(rel, steps, d, ~w(label unit_label), text)
+        texts(rel, steps, d, ~w(name unit_label), text)
       end)
 
   defp declarations(defs), do: for({_, {rel, [], d}} <- defs["liquid"], do: {rel, [], d})

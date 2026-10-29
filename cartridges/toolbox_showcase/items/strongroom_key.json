@@ -3,7 +3,7 @@
     "key",
     "strongroom_key"
   ],
-  "short": "item.strongroom_key.short",
+  "name": "item.strongroom_key.short",
   "room_line": "item.strongroom_key.room",
   "description": "item.strongroom_key.description",
   "mass_grams": 50,

@@ -1,5 +1,5 @@
 {
-  "label": "actions.play_song",
+  "name": "actions.play_song",
   "aliases": [
     "play"
   ],

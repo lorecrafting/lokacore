@@ -2,7 +2,7 @@
   "keywords": [
     "rat"
   ],
-  "short": "item.rat.short",
+  "name": "item.rat.short",
   "room_line": "item.rat.room",
   "description": "item.rat.description",
   "location": {

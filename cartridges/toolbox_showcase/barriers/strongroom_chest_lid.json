@@ -2,6 +2,6 @@
   "keywords": [
     "strongroom_chest_lid"
   ],
-  "short": "barrier.strongroom_chest_lid.short",
+  "name": "barrier.strongroom_chest_lid.short",
   "initial": "closed"
 }

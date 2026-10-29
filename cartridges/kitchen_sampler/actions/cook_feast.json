@@ -1,5 +1,5 @@
 {
-  "label": "actions.cook_feast",
+  "name": "actions.cook_feast",
   "aliases": [
     "feast"
   ],

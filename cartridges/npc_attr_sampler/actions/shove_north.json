@@ -1,5 +1,5 @@
 {
-  "label": "actions.shove_north",
+  "name": "actions.shove_north",
   "aliases": [
     "shove"
   ],

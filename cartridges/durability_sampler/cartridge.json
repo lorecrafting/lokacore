@@ -34,14 +34,14 @@
   },
   "ancestries": {
     "smith": {
-      "label": "ancestry.smith.label",
+      "name": "ancestry.smith.label",
       "description": "ancestry.smith.description",
       "attribute": "str",
       "modifier": 10,
       "skill": "swords"
     },
     "scholar": {
-      "label": "ancestry.scholar.label",
+      "name": "ancestry.scholar.label",
       "description": "ancestry.scholar.description",
       "attribute": "dex",
       "modifier": 1,

@@ -1,5 +1,5 @@
 {
-  "label": "skill.disarm.label",
+  "name": "skill.disarm.label",
   "requirement": "skill.disarm.requirement",
   "growth": [
     1

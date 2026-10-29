@@ -2,7 +2,7 @@
   "keywords": [
     "orb"
   ],
-  "short": "item.orb.short",
+  "name": "item.orb.short",
   "room_line": "item.orb.room",
   "description": "item.orb.description",
   "mass_grams": 100,

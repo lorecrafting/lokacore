@@ -2,7 +2,7 @@
   "keywords": [
     "torch"
   ],
-  "short": "item.attic_torch.short",
+  "name": "item.attic_torch.short",
   "room_line": "item.attic_torch.room",
   "description": "item.attic_torch.description",
   "mass_grams": 500,

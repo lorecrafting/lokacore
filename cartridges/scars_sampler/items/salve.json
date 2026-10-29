@@ -3,7 +3,7 @@
     "salve",
     "jar"
   ],
-  "short": "item.salve.short",
+  "name": "item.salve.short",
   "room_line": "item.salve.room",
   "description": "item.salve.description",
   "mass_grams": 50,

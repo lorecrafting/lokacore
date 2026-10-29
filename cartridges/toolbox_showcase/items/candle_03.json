@@ -2,7 +2,7 @@
   "keywords": [
     "candle"
   ],
-  "short": "item.candle_03.short",
+  "name": "item.candle_03.short",
   "room_line": "item.candle_03.room",
   "description": "item.candle_03.description",
   "mass_grams": 100,

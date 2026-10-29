@@ -3,7 +3,7 @@
     "silver_sword",
     "sword"
   ],
-  "short": "item.silver_sword.short",
+  "name": "item.silver_sword.short",
   "room_line": "item.silver_sword.room",
   "description": "item.silver_sword.description",
   "location": {

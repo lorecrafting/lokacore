@@ -34,14 +34,14 @@
   },
   "chapters": [
     {
-      "title": "chapter.landing"
+      "name": "chapter.landing"
     },
     {
-      "title": "chapter.dusk",
+      "name": "chapter.dusk",
       "story_point": "lantern_resolved"
     },
     {
-      "title": "chapter.reeds",
+      "name": "chapter.reeds",
       "story_point": "lantern_resolved",
       "outcome": "carry"
     }

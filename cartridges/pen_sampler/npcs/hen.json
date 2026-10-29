@@ -2,7 +2,7 @@
   "keywords": [
     "hen"
   ],
-  "short": "npc.hen.short",
+  "name": "npc.hen.short",
   "room_line": "npc.hen.room",
   "description": "npc.hen.description",
   "room": "pen",

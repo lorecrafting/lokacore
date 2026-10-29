@@ -6,7 +6,7 @@ defmodule Loka.Content.Entities do
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
 
-  @text ~w(short room_line description)
+  @text ~w(name room_line description)
 
   @doc "The schema-valid NPCs and items as `{kind, rel, definition}`."
   @spec all(map()) :: [{String.t(), String.t(), map()}]

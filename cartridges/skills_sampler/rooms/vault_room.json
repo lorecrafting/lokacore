@@ -1,5 +1,5 @@
 {
-  "title": "room.vault_room.title",
+  "name": "room.vault_room.title",
   "description": "room.vault_room.description",
   "exits": {},
   "details": {

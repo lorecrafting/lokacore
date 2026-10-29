@@ -254,7 +254,7 @@ defmodule Loka.Content.Recipes do
 
   defp texts(rel, r, %{text: text}) do
     for {steps, key} <- [
-          {["label"], r["label"]}
+          {["name"], r["name"]}
           | for(
               {name, o} <- r["outcomes"],
               {k, v} <- Map.take(o["narration"], ~w(actor observers)),

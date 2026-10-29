@@ -3,7 +3,7 @@
     "water",
     "pond"
   ],
-  "short": "item.pond_water.short",
+  "name": "item.pond_water.short",
   "room_line": "item.pond_water.room",
   "description": "item.pond_water.description",
   "mass_grams": 1000000,

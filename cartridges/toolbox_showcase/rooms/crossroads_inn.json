@@ -1,5 +1,5 @@
 {
-  "title": "room.crossroads_inn.title",
+  "name": "room.crossroads_inn.title",
   "description": "room.crossroads_inn.description",
   "exits": {
     "north": {

@@ -1,5 +1,5 @@
 {
-  "title": "structure.hut.title",
+  "name": "structure.hut.title",
   "description": "structure.hut.description",
   "max_per_owner": 1,
   "variants": [

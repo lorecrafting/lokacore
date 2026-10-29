@@ -2,11 +2,10 @@ import type {
   CharacterId,
   DefinitionRef,
   EntityId,
-  NpcDefinition,
   RoomDefinition,
   Tag,
 } from '../../contracts.gen.ts';
-import { type World } from '../../runtime/decision.ts';
+import { type World, type NpcEntity } from '../../runtime/decision.ts';
 import { barrierState, exitOf } from '../lookups.ts';
 import { bodyOf, refString, type Steps } from '../../runtime/decision.ts';
 import { value } from '../fact.ts';
@@ -182,7 +181,7 @@ export function fare(world: World, actor: CharacterId, body: EntityId, there: En
     if (pct !== undefined) amount = saturate(Math.floor((amount * pct) / 100));
   }
   const horse = mounted(world, actor);
-  const ride = horse && (world.entities[horse] as NpcDefinition).mount!.cost_percent;
+  const ride = horse && (world.entities[horse] as NpcEntity).mount!.cost_percent;
   if (ride !== undefined) amount = saturate(Math.floor((amount * ride) / 100));
   return amount ? pay(world, body, [{ ...cost, amount }]) : { ops: [] };
 }

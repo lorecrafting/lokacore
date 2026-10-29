@@ -21,7 +21,7 @@ export function liquidView(world: World, id: string): { liquid: LiquidView } | u
       ...row,
       capacity: e.vessel.capacity,
       unit_label: e.vessel.unit_label,
-      label: kind ? kind.label : ('liquid.empty' as never),
+      label: kind ? kind.name : ('liquid.empty' as never),
     },
   };
 }

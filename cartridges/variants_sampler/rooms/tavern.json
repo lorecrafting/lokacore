@@ -1,5 +1,5 @@
 {
-  "title": "room.tavern.title",
+  "name": "room.tavern.title",
   "description": "room.tavern.description",
   "exits": {
     "east": {

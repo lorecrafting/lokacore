@@ -2,7 +2,7 @@
   "keywords": [
     "plot"
   ],
-  "short": "item.plot.short",
+  "name": "item.plot.short",
   "room_line": "item.plot.room",
   "description": "item.plot.description",
   "mass_grams": 20000,

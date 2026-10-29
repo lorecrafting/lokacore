@@ -1,5 +1,5 @@
 {
-  "label": "service.raise_hut_plain",
+  "name": "service.raise_hut_plain",
   "command": "use_service",
   "target": {
     "kind": "entity",

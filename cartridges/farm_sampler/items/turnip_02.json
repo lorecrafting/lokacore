@@ -2,7 +2,7 @@
   "keywords": [
     "turnip"
   ],
-  "short": "item.turnip_02.short",
+  "name": "item.turnip_02.short",
   "room_line": "item.turnip_02.room",
   "description": "item.turnip_02.description",
   "location": {

@@ -2,7 +2,7 @@
   "keywords": [
     "kindling"
   ],
-  "short": "item.kindling.short",
+  "name": "item.kindling.short",
   "room_line": "item.kindling.room",
   "description": "item.kindling.description",
   "mass_grams": 1000,

@@ -2,7 +2,7 @@
   "keywords": [
     "penny"
   ],
-  "short": "item.penny.short",
+  "name": "item.penny.short",
   "room_line": "item.penny.room",
   "description": "item.penny.description",
   "location": {

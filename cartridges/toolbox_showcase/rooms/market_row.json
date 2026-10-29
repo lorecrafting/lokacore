@@ -1,5 +1,5 @@
 {
-  "title": "room.market_row.title",
+  "name": "room.market_row.title",
   "description": "room.market_row.description",
   "exits": {
     "south": {

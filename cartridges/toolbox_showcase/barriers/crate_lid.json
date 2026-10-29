@@ -2,6 +2,6 @@
   "keywords": [
     "crate_lid"
   ],
-  "short": "barrier.crate_lid.short",
+  "name": "barrier.crate_lid.short",
   "initial": "closed"
 }

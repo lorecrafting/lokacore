@@ -2,7 +2,7 @@
   "keywords": [
     "cask"
   ],
-  "short": "item.cask.short",
+  "name": "item.cask.short",
   "room_line": "item.cask.room",
   "description": "item.cask.description",
   "location": {

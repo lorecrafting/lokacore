@@ -2,7 +2,7 @@
   "keywords": [
     "lantern"
   ],
-  "short": "item.attic_lantern.short",
+  "name": "item.attic_lantern.short",
   "room_line": "item.attic_lantern.room",
   "description": "item.lantern.description",
   "location": {

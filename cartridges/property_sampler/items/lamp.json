@@ -2,7 +2,7 @@
   "keywords": [
     "lamp"
   ],
-  "short": "item.lamp.short",
+  "name": "item.lamp.short",
   "room_line": "item.lamp.room",
   "description": "item.lamp.description",
   "location": {

@@ -2,7 +2,7 @@
   "keywords": [
     "oilskin"
   ],
-  "short": "item.oilskin.short",
+  "name": "item.oilskin.short",
   "room_line": "item.oilskin.room",
   "description": "item.oilskin.description",
   "location": {

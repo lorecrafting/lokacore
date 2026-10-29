@@ -1,5 +1,5 @@
 {
-  "title": "room.tide_pools.title",
+  "name": "room.tide_pools.title",
   "description": "room.tide_pools.description",
   "exits": {
     "north": {

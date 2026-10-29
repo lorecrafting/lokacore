@@ -2,7 +2,7 @@
   "keywords": [
     "knife"
   ],
-  "short": "item.knife.short",
+  "name": "item.knife.short",
   "room_line": "item.knife.room",
   "description": "item.knife.description",
   "location": {

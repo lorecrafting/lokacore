@@ -3,7 +3,7 @@
     "strongroom_door",
     "door"
   ],
-  "short": "barrier.strongroom_door.short",
+  "name": "barrier.strongroom_door.short",
   "initial": "locked",
   "key_item": "strongroom_key"
 }

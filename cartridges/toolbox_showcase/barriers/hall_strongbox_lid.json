@@ -2,7 +2,7 @@
   "keywords": [
     "hall_strongbox_lid"
   ],
-  "short": "barrier.hall_strongbox_lid.short",
+  "name": "barrier.hall_strongbox_lid.short",
   "initial": "closed",
   "opens_when": {
     "op": "fact_compare",

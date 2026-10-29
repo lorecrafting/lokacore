@@ -2,7 +2,7 @@
   "keywords": [
     "carpenter"
   ],
-  "short": "npc.carpenter.short",
+  "name": "npc.carpenter.short",
   "room_line": "npc.carpenter.room",
   "description": "npc.carpenter.description",
   "room": "carpenter_shop",

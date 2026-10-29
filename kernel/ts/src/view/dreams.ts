@@ -45,7 +45,7 @@ export function dreamView(
   const row = choice(world, actor, scene)?.[1];
   const view = {
     scene: reference(world, scene),
-    title: scene.title,
+    title: scene.name,
     description: scene.description,
     index,
     count: scene.steps.length - 2,

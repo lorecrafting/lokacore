@@ -89,7 +89,7 @@ defmodule Loka.Content.Quests do
   defp texts(rel, q, text) do
     offer = for %{"label" => label} <- [q["offer"]], do: {["offer", "label"], label}
 
-    for {steps, key} <- [{["title"], q["title"]} | offer] ++ journal(q["journal"]),
+    for {steps, key} <- [{["name"], q["name"]} | offer] ++ journal(q["journal"]),
         not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
   end

@@ -1,6 +1,6 @@
 {
   "keywords": ["grimoire", "book"],
-  "short": "item.grimoire.short",
+  "name": "item.grimoire.short",
   "room_line": "item.grimoire.room",
   "description": "item.grimoire.description",
   "location": { "in": "room", "room": "tower" },

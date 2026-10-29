@@ -1,5 +1,5 @@
 {
-  "title": "room.drain.title",
+  "name": "room.drain.title",
   "description": "room.drain.description",
   "exits": {
     "up": {

@@ -1,5 +1,5 @@
 {
-  "title": "room.fell_gate.title",
+  "name": "room.fell_gate.title",
   "description": "room.fell_gate.description",
   "exits": {
     "south": {

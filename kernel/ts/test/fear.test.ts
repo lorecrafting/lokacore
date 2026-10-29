@@ -60,7 +60,7 @@ function round(w: World, by = 150) {
   return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
 }
 const hp = (w: World, e: string) => level(w, e as never, resourceRef(w, 'hp'));
-const room = (w: World, e: string) => w.rooms[w.state.containers[e]!]?.title;
+const room = (w: World, e: string) => w.rooms[w.state.containers[e]!]?.name;
 const npc = (w: World, key: string) => {
   const { id: cartridge_id, version: cartridge_version } = w.cartridge.manifest;
   return w.entityIds[refString({ cartridge_id, cartridge_version, kind: 'npc', key } as never)]!;

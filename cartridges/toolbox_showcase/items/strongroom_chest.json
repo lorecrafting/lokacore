@@ -2,7 +2,7 @@
   "keywords": [
     "chest"
   ],
-  "short": "item.strongroom_chest.short",
+  "name": "item.strongroom_chest.short",
   "room_line": "item.strongroom_chest.room",
   "description": "item.strongroom_chest.description",
   "mass_grams": 20000,

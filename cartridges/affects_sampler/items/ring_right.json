@@ -2,7 +2,7 @@
   "keywords": [
     "ring"
   ],
-  "short": "item.ring_right.short",
+  "name": "item.ring_right.short",
   "room_line": "item.ring_right.room",
   "description": "item.ring_right.description",
   "location": {

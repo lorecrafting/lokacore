@@ -2,7 +2,7 @@
   "keywords": [
     "torch"
   ],
-  "short": "item.torch.short",
+  "name": "item.torch.short",
   "room_line": "item.torch.room",
   "description": "item.torch.description",
   "mass_grams": 500,

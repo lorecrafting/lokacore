@@ -2,7 +2,7 @@
   "keywords": [
     "bone"
   ],
-  "short": "item.bone.short",
+  "name": "item.bone.short",
   "room_line": "item.bone.room",
   "description": "item.bone.description",
   "location": {

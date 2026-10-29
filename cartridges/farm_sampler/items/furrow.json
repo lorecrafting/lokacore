@@ -2,7 +2,7 @@
   "keywords": [
     "furrow"
   ],
-  "short": "item.furrow.short",
+  "name": "item.furrow.short",
   "room_line": "item.furrow.room",
   "description": "item.furrow.description",
   "location": {

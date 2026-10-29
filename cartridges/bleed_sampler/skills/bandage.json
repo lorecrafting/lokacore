@@ -1,5 +1,5 @@
 {
-  "label": "skill.bandage.label",
+  "name": "skill.bandage.label",
   "requirement": "skill.bandage.requirement",
   "qualification": {
     "op": "stat_compare",

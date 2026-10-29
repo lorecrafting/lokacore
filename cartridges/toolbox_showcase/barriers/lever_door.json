@@ -3,7 +3,7 @@
     "lever_door",
     "door"
   ],
-  "short": "barrier.lever_door.short",
+  "name": "barrier.lever_door.short",
   "initial": "closed",
   "opens_when": {
     "op": "any",

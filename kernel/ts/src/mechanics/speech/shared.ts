@@ -1,14 +1,8 @@
 // speech@1 (toolbox row G9): who hears a word and whether it is an authored keyword.
-import type {
-  CharacterId,
-  DefinitionRef,
-  EntityId,
-  NpcDefinition,
-  SpokenKeyword,
-} from '../../contracts.gen.ts';
+import type { CharacterId, DefinitionRef, EntityId, SpokenKeyword } from '../../contracts.gen.ts';
 import { same } from '../../foundation/compose.ts';
 import { cmp } from '../../foundation/validate.ts';
-import { refString, type Steps, type World } from '../../runtime/decision.ts';
+import { refString, type Steps, type World, type NpcEntity } from '../../runtime/decision.ts';
 import { npcsIn } from '../death/shared.ts';
 import { spokenBy } from '../dialogue/shared.ts';
 import { around } from '../senses.ts';
@@ -75,6 +69,6 @@ export const answerTo = (
   topic: DefinitionRef,
   steps: Steps,
 ) =>
-  (w.entities[npc] as NpcDefinition | undefined)?.ask?.answers.find(
+  (w.entities[npc] as NpcEntity | undefined)?.ask?.answers.find(
     (a) => same(a.topic, topic) && (!a.when || holds(w, actor, a.when, { target: npc, steps })),
   );

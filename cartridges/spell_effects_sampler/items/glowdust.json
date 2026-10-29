@@ -2,7 +2,7 @@
   "keywords": [
     "glowdust"
   ],
-  "short": "item.glowdust.short",
+  "name": "item.glowdust.short",
   "room_line": "item.glowdust.room",
   "description": "item.glowdust.description",
   "mass_grams": 10,

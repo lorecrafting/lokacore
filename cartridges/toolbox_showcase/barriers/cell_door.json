@@ -3,7 +3,7 @@
     "door",
     "cell_door"
   ],
-  "short": "barrier.cell_door.short",
+  "name": "barrier.cell_door.short",
   "initial": "closed",
   "opens_when": {
     "op": "fact_compare",

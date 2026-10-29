@@ -1,5 +1,5 @@
 {
-  "label": "skill.smithing.label",
+  "name": "skill.smithing.label",
   "requirement": "skill.smithing.requirement",
   "growth": [
     1,

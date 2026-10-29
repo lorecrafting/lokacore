@@ -1,5 +1,5 @@
 {
-  "label": "actions.deduce_smugglers",
+  "name": "actions.deduce_smugglers",
   "aliases": [
     "think"
   ],

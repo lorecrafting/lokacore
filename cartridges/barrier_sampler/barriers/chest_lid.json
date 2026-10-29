@@ -3,7 +3,7 @@
     "lid",
     "chest_lid"
   ],
-  "short": "barrier.chest_lid.short",
+  "name": "barrier.chest_lid.short",
   "initial": "closed",
   "opens_when": {
     "op": "fact_compare",

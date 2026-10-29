@@ -2,7 +2,7 @@
   "keywords": [
     "bandage"
   ],
-  "short": "item.bandage.short",
+  "name": "item.bandage.short",
   "room_line": "item.bandage.room",
   "description": "item.bandage.description",
   "mass_grams": 10,

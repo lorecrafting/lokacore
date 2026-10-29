@@ -1,5 +1,5 @@
 {
-  "label": "actions.pick_vault",
+  "name": "actions.pick_vault",
   "aliases": [
     "pick"
   ],

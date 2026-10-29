@@ -1,5 +1,5 @@
 {
-  "label": "actions.read_glyphs",
+  "name": "actions.read_glyphs",
   "aliases": [
     "decipher"
   ],

@@ -3,7 +3,7 @@
   "keywords": [
     "willow_deer"
   ],
-  "short": "npc.willow_deer.short",
+  "name": "npc.willow_deer.short",
   "room_line": "npc.willow_deer.room",
   "description": "npc.willow_deer.description",
   "room": "willow_shade"

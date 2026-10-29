@@ -2,7 +2,7 @@
   "keywords": [
     "egg"
   ],
-  "short": "item.egg_03.short",
+  "name": "item.egg_03.short",
   "room_line": "item.egg_03.room",
   "description": "item.egg_03.description",
   "mass_grams": 60,

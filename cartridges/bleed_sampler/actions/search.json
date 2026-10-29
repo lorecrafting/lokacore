@@ -1,5 +1,5 @@
 {
-  "label": "actions.search",
+  "name": "actions.search",
   "aliases": [
     "search"
   ],

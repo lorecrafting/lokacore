@@ -3,7 +3,7 @@
   "tick_every": 1800,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.rot",
+  "name": "condition.rot",
   "narration": {
     "applied": "narration.rot.applied",
     "tick": "narration.rot.tick",

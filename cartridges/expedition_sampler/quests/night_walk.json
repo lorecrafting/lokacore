@@ -1,5 +1,5 @@
 {
-  "title": "quest.night_walk.title",
+  "name": "quest.night_walk.title",
   "objective": {
     "evidence": "expedition"
   },

@@ -1,5 +1,5 @@
 {
-  "label": "actions.follow_tracks",
+  "name": "actions.follow_tracks",
   "aliases": ["follow"],
   "target": {
     "kind": "detail",

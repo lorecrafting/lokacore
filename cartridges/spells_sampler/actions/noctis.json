@@ -1,5 +1,5 @@
 {
-  "label": "spell.noctis",
+  "name": "spell.noctis",
   "aliases": ["noctis"],
   "target": { "kind": "spell", "word": "noctis", "learned": "noctis_known" },
   "priority": 0,

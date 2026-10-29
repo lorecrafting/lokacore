@@ -2,7 +2,7 @@
   "keywords": [
     "timber"
   ],
-  "short": "item.timber.short",
+  "name": "item.timber.short",
   "room_line": "item.timber.room",
   "description": "item.timber.description",
   "location": {

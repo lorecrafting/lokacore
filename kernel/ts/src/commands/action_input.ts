@@ -95,7 +95,7 @@ function boundAction(world: World, payload: CommandPayload, fallback: string) {
 /** The learned aimed spells (loka-x6t.109), each offered on its targets and cast by its word. */
 export const aimedOffers = (world: World, actor: CharacterId): [string, Offered][] =>
   Object.values(world.cartridge.recipes ?? {}).flatMap((recipe) => {
-    const { key, label, priority, policy, target: t } = recipe;
+    const { key, name: label, priority, policy, target: t } = recipe;
     if (t.kind !== 'spell' || !t.aimed || factValue(world, actor, t.learned) !== true) return [];
     const target = { kind: 'entity', scopes: t.aimed.scopes } as const;
     return [

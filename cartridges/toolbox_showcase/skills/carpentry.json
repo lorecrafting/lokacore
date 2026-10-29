@@ -1,5 +1,5 @@
 {
-  "label": "skill.carpentry.label",
+  "name": "skill.carpentry.label",
   "requirement": "skill.carpentry.requirement",
   "prerequisite": {
     "op": "skill_compare",

@@ -3,7 +3,7 @@
     "wooden_door",
     "door"
   ],
-  "short": "barrier.wooden_door.short",
+  "name": "barrier.wooden_door.short",
   "initial": "closed",
   "tags": [
     "wooden",

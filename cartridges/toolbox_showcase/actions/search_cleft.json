@@ -1,5 +1,5 @@
 {
-  "label": "actions.search_cleft",
+  "name": "actions.search_cleft",
   "aliases": [
     "search"
   ],

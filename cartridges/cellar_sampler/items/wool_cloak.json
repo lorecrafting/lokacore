@@ -3,7 +3,7 @@
     "cloak",
     "wool_cloak"
   ],
-  "short": "item.wool_cloak.short",
+  "name": "item.wool_cloak.short",
   "room_line": "item.wool_cloak.room",
   "description": "item.wool_cloak.description",
   "location": {

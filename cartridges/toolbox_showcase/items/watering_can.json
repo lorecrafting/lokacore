@@ -2,7 +2,7 @@
   "keywords": [
     "can"
   ],
-  "short": "item.watering_can.short",
+  "name": "item.watering_can.short",
   "room_line": "item.watering_can.room",
   "description": "item.watering_can.description",
   "mass_grams": 500,

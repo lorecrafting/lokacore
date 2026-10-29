@@ -3,7 +3,7 @@
     "tidegate",
     "gate"
   ],
-  "short": "barrier.tidegate.short",
+  "name": "barrier.tidegate.short",
   "initial": "closed",
   "opens_when": {
     "op": "sky",

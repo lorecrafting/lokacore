@@ -1,5 +1,5 @@
 {
-  "title": "quest.carry_letter.title",
+  "name": "quest.carry_letter.title",
   "objective": {
     "evidence": "current_state",
     "policy": {

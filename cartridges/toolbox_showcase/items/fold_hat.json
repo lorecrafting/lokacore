@@ -2,7 +2,7 @@
   "keywords": [
     "hat"
   ],
-  "short": "item.fold_hat.short",
+  "name": "item.fold_hat.short",
   "room_line": "item.fold_hat.room",
   "description": "item.fold_hat.description",
   "location": {

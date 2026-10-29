@@ -2,7 +2,7 @@
   "keywords": [
     "stranger"
   ],
-  "short": "npc.stranger.short",
+  "name": "npc.stranger.short",
   "room_line": "npc.stranger.room",
   "description": "npc.stranger.description",
   "room": "square"

@@ -85,8 +85,8 @@
           "description": "Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle.",
           "$ref": "#/$defs/SpokenKeyword"
         },
-        "label": {
-          "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk.",
+        "name": {
+          "description": "A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },

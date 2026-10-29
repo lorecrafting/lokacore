@@ -3,7 +3,7 @@
     "key",
     "brass_key"
   ],
-  "short": "item.brass_key.short",
+  "name": "item.brass_key.short",
   "room_line": "item.brass_key.room",
   "description": "item.brass_key.description",
   "location": {

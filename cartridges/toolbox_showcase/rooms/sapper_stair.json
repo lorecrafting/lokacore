@@ -1,5 +1,5 @@
 {
-  "title": "room.sapper_stair.title",
+  "name": "room.sapper_stair.title",
   "description": "room.sapper_stair.description",
   "exits": {
     "up": {

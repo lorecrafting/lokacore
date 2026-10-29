@@ -1,5 +1,5 @@
 {
-  "label": "service.barter",
+  "name": "service.barter",
   "command": "use_service",
   "target": {
     "kind": "entity",

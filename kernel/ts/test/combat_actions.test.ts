@@ -30,7 +30,12 @@ function offeredWorld(): World {
       ...w.cartridge,
       actions: {
         ...w.cartridge.actions,
-        retreat: { ...set.move, key: 'retreat' as Key, accessibility: 'actions.move.a11y' },
+        retreat: {
+          ...set.move,
+          name: set.move.label,
+          key: 'retreat' as Key,
+          accessibility: 'actions.move.a11y',
+        },
       },
     },
   };

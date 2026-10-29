@@ -2,7 +2,7 @@
   "keywords": [
     "trunk"
   ],
-  "short": "item.trunk.short",
+  "name": "item.trunk.short",
   "room_line": "item.trunk.room",
   "description": "item.trunk.description",
   "location": {

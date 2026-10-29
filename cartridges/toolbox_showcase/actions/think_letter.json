@@ -1,5 +1,5 @@
 {
-  "label": "actions.think_letter",
+  "name": "actions.think_letter",
   "aliases": [
     "reckon"
   ],

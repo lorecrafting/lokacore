@@ -48,13 +48,13 @@ function offer(
   assertResult(result);
   return {
     service: ref,
-    label: s.label,
+    label: s.name,
     price: s.price,
     benefit: s.benefit,
     action: {
       action_key: s.action,
       command: 'use_service' as Key,
-      label: s.label,
+      label: s.name,
       target: a?.target ?? { kind: 'entity', scopes: ['room_occupants'] },
       input: a?.input ?? ['service', 'quoted_price'],
       target_ids: [provider],

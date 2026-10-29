@@ -2,7 +2,7 @@
   "keywords": [
     "boar"
   ],
-  "short": "npc.boar.short",
+  "name": "npc.boar.short",
   "room_line": "npc.boar.room",
   "description": "npc.boar.description",
   "room": "boar_run",

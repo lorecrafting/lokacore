@@ -54,7 +54,7 @@ test('a forged Move through the panel is not_found until the search; then the ex
   const exits = () => gameView(w).exits.map((e) => e.direction);
   const links = (title: string) =>
     gameView(w)
-      .map!.links.filter((l) => w.rooms[l.from].title === `room.${title}.title`)
+      .map!.links.filter((l) => w.rooms[l.from].name === `room.${title}.title`)
       .map((l) => l.direction);
 
   assert.deepEqual(exits(), ['north']);
@@ -66,7 +66,7 @@ test('a forged Move through the panel is not_found until the search; then the ex
     assert.equal((back = send({ type: 'move', direction })).kind, 'accepted');
   // Break (loka-glj8): the arrival in the hall names its hidden east face back to the study.
   assert.equal(back.narration[0].bindings, undefined);
-  assert.equal(w.rooms[w.state.containers[w.body]].title, 'room.hall.title');
+  assert.equal(w.rooms[w.state.containers[w.body]].name, 'room.hall.title');
   assert.deepEqual(links('hall'), ['north']);
   assert.deepEqual(links('study'), ['north', 'west']);
 
@@ -74,7 +74,7 @@ test('a forged Move through the panel is not_found until the search; then the ex
   assert.deepEqual(exits(), ['east', 'north']);
   assert.deepEqual(links('hall'), ['east', 'north']);
   assert.equal(send({ type: 'move', direction: 'east' }).kind, 'accepted');
-  assert.equal(w.rooms[w.state.containers[w.body]].title, 'room.study.title');
+  assert.equal(w.rooms[w.state.containers[w.body]].name, 'room.study.title');
   assert.deepEqual((send({ type: 'move', direction: 'west' }) as any).narration[0].bindings, {
     from: 'east',
   });

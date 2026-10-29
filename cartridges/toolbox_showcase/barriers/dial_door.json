@@ -3,7 +3,7 @@
     "dial_door",
     "door"
   ],
-  "short": "barrier.dial_door.short",
+  "name": "barrier.dial_door.short",
   "initial": "closed",
   "opens_when": {
     "op": "any",

@@ -1,5 +1,5 @@
 {
-  "title": "room.strongroom.title",
+  "name": "room.strongroom.title",
   "description": "room.strongroom.description",
   "locks": {
     "enter": {

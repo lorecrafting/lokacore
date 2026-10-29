@@ -42,10 +42,10 @@
   },
   "chapters": [
     {
-      "title": "chapter.lantern"
+      "name": "chapter.lantern"
     },
     {
-      "title": "chapter.bank",
+      "name": "chapter.bank",
       "story_point": "lantern_resolved",
       "outcome": "carry"
     }

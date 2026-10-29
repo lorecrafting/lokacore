@@ -159,7 +159,7 @@ defmodule Loka.Content.Construction do
   defp texts({rel, b}, text) do
     keys = for {s, v} <- RoomParts.variants(b), do: {s ++ ["description"], v["description"]}
 
-    for {s, k} <- [{["title"], b["title"]}, {["description"], b["description"]} | keys],
+    for {s, k} <- [{["name"], b["name"]}, {["description"], b["description"]} | keys],
         text != :unknown and not is_map_key(text, k),
         do: diag("UNRESOLVED_REFERENCE", at(rel, s), %{"target" => k})
   end

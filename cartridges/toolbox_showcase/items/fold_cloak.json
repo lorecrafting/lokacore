@@ -2,7 +2,7 @@
   "keywords": [
     "cloak"
   ],
-  "short": "item.fold_cloak.short",
+  "name": "item.fold_cloak.short",
   "room_line": "item.fold_cloak.room",
   "description": "item.fold_cloak.description",
   "location": {

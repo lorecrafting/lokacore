@@ -2,7 +2,7 @@
   "keywords": [
     "poultice"
   ],
-  "short": "item.poultice.short",
+  "name": "item.poultice.short",
   "room_line": "item.poultice.room",
   "description": "item.poultice.description",
   "location": {

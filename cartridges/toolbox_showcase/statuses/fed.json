@@ -8,7 +8,7 @@
       "modifier": 1
     }
   ],
-  "label": "condition.fed",
+  "name": "condition.fed",
   "narration": {
     "applied": "narration.fed.applied",
     "tick": "narration.fed.tick",

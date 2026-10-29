@@ -3,7 +3,7 @@
     "bess",
     "alewife"
   ],
-  "short": "npc.bess.short",
+  "name": "npc.bess.short",
   "room_line": "npc.bess.room",
   "description": "npc.bess.description",
   "room": "moot_hall",

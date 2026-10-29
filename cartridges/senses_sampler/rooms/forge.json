@@ -1,5 +1,5 @@
 {
-  "title": "room.forge.title",
+  "name": "room.forge.title",
   "description": "room.forge.description",
   "exits": {
     "west": {

@@ -2,7 +2,7 @@
   "keywords": [
     "locket"
   ],
-  "short": "item.locket.short",
+  "name": "item.locket.short",
   "room_line": "item.locket.room",
   "description": "item.locket.description",
   "location": {

@@ -62,7 +62,7 @@ export function conditionViews(world: World, body: EntityId | undefined) {
   const conditions = activeStatuses(world, body).map(({ spec, row }) => {
     const kind = polarity(spec);
     return {
-      label: spec.label,
+      label: spec.name,
       ...(row.job_id && {
         ends_at: row.ends_at,
         duration: spec.duration as number, // the ring denominator (loka-x6t.65)

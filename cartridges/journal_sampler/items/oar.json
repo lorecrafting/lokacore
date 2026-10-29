@@ -2,7 +2,7 @@
   "keywords": [
     "oar"
   ],
-  "short": "item.oar.short",
+  "name": "item.oar.short",
   "room_line": "item.oar.room",
   "description": "item.oar.description",
   "location": {

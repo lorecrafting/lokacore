@@ -2,7 +2,7 @@
   "keywords": [
     "vault"
   ],
-  "short": "npc.vault.short",
+  "name": "npc.vault.short",
   "room_line": "npc.vault.room",
   "description": "npc.vault.description",
   "room": "strongroom",

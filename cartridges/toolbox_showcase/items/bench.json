@@ -2,7 +2,7 @@
   "keywords": [
     "bench"
   ],
-  "short": "item.bench.short",
+  "name": "item.bench.short",
   "room_line": "item.bench.room",
   "description": "item.bench.description",
   "mass_grams": 200000,

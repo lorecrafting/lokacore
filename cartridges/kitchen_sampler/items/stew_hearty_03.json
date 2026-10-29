@@ -3,7 +3,7 @@
     "stew",
     "hearty"
   ],
-  "short": "item.stew_hearty.short",
+  "name": "item.stew_hearty.short",
   "short_variants": [
     {
       "when": {

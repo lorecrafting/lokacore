@@ -1,5 +1,5 @@
 {
-  "title": "room.dial_vault.title",
+  "name": "room.dial_vault.title",
   "description": "room.dial_vault.description",
   "exits": {
     "west": {

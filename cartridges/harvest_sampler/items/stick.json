@@ -2,7 +2,7 @@
   "keywords": [
     "stick"
   ],
-  "short": "item.stick.short",
+  "name": "item.stick.short",
   "room_line": "item.stick.room",
   "description": "item.stick.description",
   "location": {

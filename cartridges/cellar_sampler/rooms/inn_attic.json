@@ -1,5 +1,5 @@
 {
-  "title": "room.inn_attic.title",
+  "name": "room.inn_attic.title",
   "description": "room.inn_attic.description",
   "exits": {
     "down": {

@@ -2,7 +2,7 @@
   "provider": "trader",
   "currency": "pennies",
   "action": "barter",
-  "label": "service.barter",
+  "name": "service.barter",
   "narration": "service.barter.used",
   "price": 0,
   "benefit": {

@@ -2,7 +2,7 @@
   "keywords": [
     "forge"
   ],
-  "short": "item.forge.short",
+  "name": "item.forge.short",
   "room_line": "item.forge.room",
   "description": "item.forge.description",
   "location": {

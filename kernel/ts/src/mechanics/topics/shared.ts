@@ -31,7 +31,7 @@ export function knownTopics(world: World, actor: CharacterId) {
                 kind: 'topic',
                 key: d.key,
               } as DefinitionRef,
-              label: d.label,
+              label: d.name,
             },
           ]
         : [],
@@ -65,7 +65,7 @@ export function lore(world: World, actor: CharacterId) {
         grants?.op === 'fact.assign' &&
         from.every((t) => known(t.fact)) &&
         !known(grants.fact)
-        ? [{ action: r.key, label: r.label, from: from.map((t) => t.label) }]
+        ? [{ action: r.key, label: r.name, from: from.map((t) => t.name) }]
         : [];
     });
   return {

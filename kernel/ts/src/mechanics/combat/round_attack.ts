@@ -101,7 +101,7 @@ function skipped(world: World, attacker: EntityId, player: boolean, r: Round) {
   if (spec)
     r.notes.push({
       key: spec.narration.skipped ?? ('combat.skipped' as TextKey),
-      bindings: { status: spec.label },
+      bindings: { status: spec.name },
       ...(!player && { participants: { actor: attacker } }),
     });
   return !!spec;

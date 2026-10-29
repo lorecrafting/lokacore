@@ -1,5 +1,5 @@
 {
-  "title": "room.hour_room.title",
+  "name": "room.hour_room.title",
   "description": "room.hour_room.description",
   "exits": {
     "west": {

@@ -2,7 +2,7 @@
   "keywords": [
     "bram"
   ],
-  "short": "npc.bram.short",
+  "name": "npc.bram.short",
   "room_line": "npc.bram.room",
   "description": "npc.bram.description",
   "room": "yard",

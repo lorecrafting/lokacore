@@ -3,7 +3,7 @@
     "hob",
     "innkeeper"
   ],
-  "short": "npc.hob.short",
+  "name": "npc.hob.short",
   "room_line": "npc.hob.room",
   "description": "npc.hob.description",
   "room": "crossroads_inn",

@@ -3,7 +3,7 @@
     "gate",
     "old_gate"
   ],
-  "short": "barrier.old_gate.short",
+  "name": "barrier.old_gate.short",
   "initial": "locked",
   "key_item": "lantern"
 }

@@ -1,5 +1,5 @@
 {
-  "label": "service.buy_hut",
+  "name": "service.buy_hut",
   "command": "use_service",
   "target": {
     "kind": "entity",

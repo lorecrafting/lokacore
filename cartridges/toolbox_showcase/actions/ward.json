@@ -1,5 +1,5 @@
 {
-  "label": "spell.ward",
+  "name": "spell.ward",
   "aliases": [
     "ward"
   ],

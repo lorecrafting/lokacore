@@ -83,7 +83,7 @@ defmodule Loka.Content.Skills do
   defp texts(rel, s, text),
     do:
       for(
-        field <- ~w(label requirement profession),
+        field <- ~w(name requirement profession),
         is_map_key(s, field),
         text != :unknown and not is_map_key(text, s[field]),
         do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
@@ -138,7 +138,7 @@ defmodule Loka.Content.Skills do
         {_, {rel, [], d}} <- defs["dialogue"] || %{},
         {field, true} <- [
           {"policy", reads?(d["policy"], hidden?)},
-          {"label", !!d["label"] and teaches?(d, hidden?)},
+          {"name", !!d["name"] and teaches?(d, hidden?)},
           {"riddle", !!d["riddle"] and teaches?(d, hidden?)}
         ],
         do: bad(at(rel, [field]))

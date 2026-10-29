@@ -42,7 +42,7 @@
         "action": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "narration": {
@@ -60,7 +60,7 @@
         "fare",
         "recovery_rooms",
         "action",
-        "label",
+        "name",
         "narration"
       ],
       "additionalProperties": false,
@@ -101,7 +101,7 @@
           "fare": 2,
           "recovery_rooms": [],
           "action": "board_ferry",
-          "label": "transport.board",
+          "name": "transport.board",
           "narration": "transport.crossed"
         }
       ],

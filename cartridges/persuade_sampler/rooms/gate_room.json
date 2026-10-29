@@ -1,5 +1,5 @@
 {
-  "title": "room.gate_room.title",
+  "name": "room.gate_room.title",
   "description": "room.gate_room.description",
   "exits": {}
 }

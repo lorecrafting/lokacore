@@ -2,7 +2,7 @@
   "keywords": [
     "chief"
   ],
-  "short": "npc.chief.short",
+  "name": "npc.chief.short",
   "room_line": "npc.chief.room",
   "description": "npc.chief.description",
   "room": "sapper_cellar",

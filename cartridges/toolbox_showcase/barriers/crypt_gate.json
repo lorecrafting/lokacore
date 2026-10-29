@@ -3,7 +3,7 @@
     "crypt_gate",
     "gate"
   ],
-  "short": "barrier.crypt_gate.short",
+  "name": "barrier.crypt_gate.short",
   "initial": "closed",
   "tags": [
     "metal"

@@ -146,7 +146,12 @@ test('composed action restrictions remove Read and raw commands cannot bypass th
     cartridge: {
       ...w.cartridge,
       actions: {
-        read: { ...readAction, accessibility: 'read.a11y', target: { kind: 'none' } },
+        read: {
+          ...readAction,
+          name: readAction.label,
+          accessibility: 'read.a11y',
+          target: { kind: 'none' },
+        },
       },
     },
   };

@@ -3,7 +3,7 @@
   "tick_every": 7200,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.overheated",
+  "name": "condition.overheated",
   "narration": {
     "applied": "narration.overheated.applied",
     "tick": "narration.overheated.tick",

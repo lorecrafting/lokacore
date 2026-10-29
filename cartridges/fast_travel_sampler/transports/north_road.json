@@ -10,6 +10,6 @@
     "south_post"
   ],
   "action": "ride_south",
-  "label": "transport.ride_south",
+  "name": "transport.ride_south",
   "narration": "transport.ride_south.used"
 }

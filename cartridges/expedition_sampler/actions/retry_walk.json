@@ -1,5 +1,5 @@
 {
-  "label": "walk.action.restart",
+  "name": "walk.action.restart",
   "command": "expedition",
   "target": {
     "kind": "entity",

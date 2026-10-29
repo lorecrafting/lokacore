@@ -2,7 +2,7 @@
   "keywords": [
     "feast"
   ],
-  "short": "item.feast.short",
+  "name": "item.feast.short",
   "short_variants": [
     {
       "when": {

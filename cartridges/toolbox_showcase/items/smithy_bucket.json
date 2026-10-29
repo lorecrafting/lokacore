@@ -2,7 +2,7 @@
   "keywords": [
     "bucket"
   ],
-  "short": "item.smithy_bucket.short",
+  "name": "item.smithy_bucket.short",
   "room_line": "item.smithy_bucket.room",
   "description": "item.smithy_bucket.description",
   "mass_grams": 500,

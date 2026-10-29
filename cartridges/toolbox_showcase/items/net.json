@@ -2,7 +2,7 @@
   "keywords": [
     "net"
   ],
-  "short": "item.net.short",
+  "name": "item.net.short",
   "room_line": "item.net.room",
   "description": "item.net.description",
   "location": {

@@ -221,12 +221,12 @@ defmodule Loka.Content.Lint do
 
   defp wants(_, _), do: []
 
-  # A dialogue with no label of its own is offered as the kernel's default action.talk (UH);
+  # A dialogue with no name of its own is offered as the kernel's default action.talk (UH);
   # a keyword dialogue (speech@1) is spoken, not offered.
   defp talk(files, text) do
     bare? =
       Enum.any?(files, fn {rel, d} ->
-        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "label") and
+        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "name") and
           !is_map_key(d, "keyword")
       end)
 
@@ -265,12 +265,12 @@ defmodule Loka.Content.Lint do
   defp label_keys(["dialogues", _], d),
     do:
       Enum.map(
-        [d["label"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
+        [d["name"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
         &{:choice, &1}
       )
 
-  defp label_keys(["actions", _], d), do: [{:choice, d["label"]}]
-  defp label_keys(["statuses", _], d), do: [{:status, d["label"]}]
+  defp label_keys(["actions", _], d), do: [{:choice, d["name"]}]
+  defp label_keys(["statuses", _], d), do: [{:status, d["name"]}]
   defp label_keys(_, _), do: []
 
   defp label_problem(:choice, _, s),
