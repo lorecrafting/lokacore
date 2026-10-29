@@ -7528,20 +7528,6 @@
       },
       "type": "object"
     },
-    "partial.source.VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "extends": { "$ref": "#/$defs/Key" },
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/partial.Policy" },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
     "source.ActionDefinition": {
       "additionalProperties": false,
       "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
@@ -10169,22 +10155,6 @@
       ],
       "type": "object"
     },
-    "source.VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/Policy" }
-      },
-      "required": [
-        "policy_version",
-        "root"
-      ],
-      "type": "object"
-    },
     "source.actions": {
       "else": {
         "else": {
@@ -10267,11 +10237,6 @@
         },
         "npcs": {
           "additionalProperties": { "$ref": "#/$defs/source.npcs" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
-        "policies": {
-          "additionalProperties": { "$ref": "#/$defs/source.policies" },
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
@@ -10630,30 +10595,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.NpcDefinition" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.policies": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.VersionedPolicy" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.VersionedPolicy" }
       },
       "if": {
         "required": [
