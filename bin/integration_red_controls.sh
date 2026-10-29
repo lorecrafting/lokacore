@@ -344,6 +344,7 @@ cc push kernel/ts/test/x.ts 'code=true sim_walk=false'
 cc push kernel/ts/test/sim.test.ts 'code=true sim_walk=true'
 cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
 cc push docs/spec/conformance/x.json 'code=true sim_walk=false'
+cc push docs/spec/x.md 'code=true sim_walk=false'
 cc push docs/contracts.gen.md 'code=true sim_walk=false'
 cc schedule docs/y.md 'code=true sim_walk=true'
 git checkout -qB t main; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' '); [ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: an empty branch diff skipped jobs: '$got'"
