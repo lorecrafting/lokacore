@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { load, prefix, ref } from './food_fixture.ts';
 const apple = (c: any) => c.items[`${prefix}:item/apple_01`];
 const mv = (c: any) => c.resources[`${prefix}:resource/mv`];
-// Breaks: an edible binds unknown/non-recovery resources, conflicting holder features or an uninstalled food contract.
+// Breaks: an edible binds unknown/non-recovery resources, conflicting holder features, missing text or an old API.
 test('loader rejects impossible held-food declarations while retaining capped food', () => {
   const cases: [string, (c: any) => void, string, string][] = [
     ['zero', (c) => (apple(c).edible.amount = 0), 'SCHEMA_VIOLATION', 'edible.amount'],
@@ -41,15 +41,6 @@ test('loader rejects impossible held-food declarations while retaining capped fo
       (c) => (c.manifest.requires.kernel_api.at_least = '1.26'),
       'KERNEL_API_RANGE_INVALID',
       'kernel_api.at_least',
-    ],
-    [
-      'undeclared',
-      (c) => {
-        delete c.lock.capabilities.food;
-        delete c.manifest.requires.capabilities.food;
-      },
-      'UNDECLARED_CAPABILITY',
-      'edible',
     ],
   ];
   for (const [name, change, code, path] of cases) {

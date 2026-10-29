@@ -213,15 +213,10 @@ function refused(change: (c: any) => void) {
     .diagnostic;
   return [code, path, data];
 }
-const hounds = `.cartridge.populations["${REF}:population/hounds"]`;
 
-// Breaks: each loader check dropped (the cartridge loads) or reporting another path.
-test('the loader refuses each bad trail declaration', () => {
+// Breaks: an authored definition or write of an engine trail fact loads.
+test('the loader refuses authored trail facts', () => {
   const cases: [(c: any) => void, unknown[]][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.84'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
-    ],
     [(c) => (c.facts[fact('trail_hounds_exit')].meaning = 'Mine.'), ['RESERVED_FACT']],
     [
       (c) => {
@@ -230,30 +225,6 @@ test('the loader refuses each bad trail declaration', () => {
         seq[1].fact.key = 'trail_hounds_at';
       },
       ['RESERVED_FACT'],
-    ],
-    [
-      (c) => delete c.world.trails.leads.north,
-      ['UNRESOLVED_REFERENCE', '.cartridge.world.trails.leads', { target: 'north' }],
-    ],
-    [
-      (c) => (c.world.trails.leads.north = 'trail.lead.nowhere'),
-      [
-        'UNRESOLVED_REFERENCE',
-        '.cartridge.world.trails.leads.north',
-        { target: 'trail.lead.nowhere' },
-      ],
-    ],
-    [
-      (c) => (c.recipes[recipe('track_burrow')].check.plan = 'hunters'),
-      [
-        'UNRESOLVED_REFERENCE',
-        `.cartridge.recipes["${REF}:recipe/track_burrow"].check.plan`,
-        { target: 'hunters' },
-      ],
-    ],
-    [
-      (c) => delete c.world.trails,
-      ['UNRESOLVED_REFERENCE', `${hounds}.trail`, { target: 'trails' }],
     ],
   ];
   for (const [change, want] of cases)

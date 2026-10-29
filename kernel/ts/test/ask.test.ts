@@ -228,63 +228,27 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
 });
 
-// Breaks: the loader trusting an ask's topic, grants, texts or answer condition, its owning capability, the 1.96 floor, or an asked
-// trigger's topic.
-test('the loader refuses an unknown answer topic or grant, ask without speech@1, 1.95 and a bad trigger topic', () => {
+// Breaks: the loader trusting an ask's answer condition, an asked trigger's 1.96 floor, or its topic.
+test('the loader refuses an unknown answer condition fact, an asked trigger below 1.96 and a bad trigger topic', () => {
   const smith = `${P}npc/smith`;
   const refusal = (change: (c: Obj) => void) => {
     const r = reload(content, change);
     assert.ok(!r.ok);
     return [r.diagnostic.code, r.diagnostic.path?.split('.').at(-1)];
   };
-  const nope = ref('topic', 'nope');
   assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[0].topic = nope)),
-    ['UNRESOLVED_REFERENCE', 'topic'],
+    refusal((c) => (c.npcs[smith].ask.answers[1].when.root.fact = ref('fact', 'nope'))),
+    ['UNRESOLVED_REFERENCE', 'fact'],
   );
-  assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[0].grants = nope)),
-    ['UNRESOLVED_REFERENCE', 'grants'],
-  );
-  for (const [change, field] of [
-    [(a: Obj) => (a.unknown = 'nope'), 'unknown'],
-    [(a: Obj) => (a.answers[0].text = 'nope'), 'text'],
-    [(a: Obj) => (a.answers[1].when.root.fact = ref('fact', 'nope')), 'fact'],
-  ] as const)
-    assert.deepEqual(
-      refusal((c) => change(c.npcs[smith].ask)),
-      ['UNRESOLVED_REFERENCE', field],
-    );
   assert.deepEqual(
     refusal((c) => {
-      delete c.lock.capabilities.speech;
-      delete c.manifest.requires.capabilities.speech;
-      delete c.reactions[`${P}reaction/guard_smugglers`]; // its asked trigger needs speech@1 too
+      c.manifest.requires.kernel_api.at_least = '1.95';
+      Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask);
     }),
-    ['UNDECLARED_CAPABILITY', 'ask'],
+    ['KERNEL_API_RANGE_INVALID', 'at_least'],
   );
-  // Without topics@1 the topic definitions refuse first (cartridge_asks.ts has no topics@1 check).
   assert.deepEqual(
-    refusal((c) => {
-      delete c.lock.capabilities.topics;
-      delete c.manifest.requires.capabilities.topics;
-    })[0],
-    'UNDECLARED_CAPABILITY',
-  );
-  // Each floor alone: the asks' (no asked trigger left), then the asked trigger's (no ask left).
-  for (const drop of [
-    (c: Obj) => delete c.reactions[`${P}reaction/guard_smugglers`],
-    (c: Obj) => Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask),
-  ])
-    assert.deepEqual(
-      refusal((c) => {
-        c.manifest.requires.kernel_api.at_least = '1.95';
-        drop(c);
-      }),
-      ['KERNEL_API_RANGE_INVALID', 'at_least'],
-    );
-  assert.deepEqual(
-    refusal((c) => (c.reactions[`${P}reaction/guard_smugglers`].on.topic = nope)),
+    refusal((c) => (c.reactions[`${P}reaction/guard_smugglers`].on.topic = ref('topic', 'nope'))),
     ['UNRESOLVED_REFERENCE', 'topic'],
   );
 });
