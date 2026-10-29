@@ -27,7 +27,7 @@ These rules hold across every kind:
 - A policy is its condition tree, and it is optional: an absent policy always holds.
 - A story point is `story_point: "<key>/<outcome>"` on the dialogue choice that reaches it (a
   scene's `on_end` may also claim one); there is no story point file.
-- Custom events are the one message between rules: a step `event.emit` emits a `custom_event`,
+- Custom events are the one message between rules: a recipe step `event.emit` emits a `custom_event`,
   and a reaction `on` `custom_event` with `custom: "<key>"` hears it.
 
 The [glossary](system/glossary.md) distinguishes a definition from a live entity. A compiled

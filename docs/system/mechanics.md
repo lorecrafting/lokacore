@@ -688,13 +688,13 @@ history, a save holding such an unvoiced first application re-decides differentl
 
 ## schedule@1, calendar@1 (`mechanics/schedule/rule.ts`, `kernel/ts/src/mechanics/schedule/daily.ts`)
 
-`wait {until}`: not later than now `invalid_state` (`:46`); accepted `waited`, one
+`wait {until}`: not later than now `invalid_state` (`:113`); accepted `waited`, one
 `time.advance`, no event. Any explicit advance (a wait or a recipe's duration) runs every
 pending job due at or before its target, in `(due_time, job_id)` order, each as a `run_job` the
 host builds with the job's CommandId; one that is not accepted is the advance's result
 (`runtime/proposal.ts:253`). `run_job` is authority-internal: a cartridge action may not name it. It
 runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pending
-`invalid_state` (`:23`); the NPC moves to the room listed for the job's hour (or the room of its
+`invalid_state` (`:72`); the NPC moves to the room listed for the job's hour (or the room of its
 first holding case, [row W10](#conditional-schedules-toolbox-row-w10)) unless already
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
 scheduled at the schedule's next listed hour, strictly later (`mechanics/calendar.ts:20`).
