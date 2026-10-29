@@ -1,4 +1,4 @@
-// size: allow 367, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
+// size: allow 359, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
 import { topics } from './cartridge_topics.ts';
 import { trails } from './cartridge_trails.ts';
 import { skills } from './cartridge_skills.ts';

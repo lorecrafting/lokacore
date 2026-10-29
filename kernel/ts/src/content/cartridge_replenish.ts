@@ -27,7 +27,7 @@ export function craft(c: Obj, { named, text }: Checks): Diagnostic[] {
   return out;
 }
 
-// Replenish's item and holder rules, shared with craft: no duplicate item, each item and holder
+// Craft's stock item and holder rules: no duplicate item, each item and holder
 // resolves, and each holder (`ends`, by field) is placed.
 function stock(
   c: Obj,

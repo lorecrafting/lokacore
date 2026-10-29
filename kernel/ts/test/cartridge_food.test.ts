@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { load, prefix, ref } from './food_fixture.ts';
+import { load, prefix } from './food_fixture.ts';
 const apple = (c: any) => c.items[`${prefix}:item/apple_01`];
 // Breaks: a zero edible amount, an equippable edible, an old API or an uninstalled food contract loads.
 test('loader rejects impossible held-food declarations while retaining capped food', () => {
