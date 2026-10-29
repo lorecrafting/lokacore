@@ -1,12 +1,5 @@
-import { topics } from './cartridge_topics.ts';
 import { trails } from './cartridge_trails.ts';
-import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
-import { commerce } from './cartridge_commerce.ts';
-import { combat } from './cartridge_combat.ts';
-import { death } from './cartridge_death.ts';
-import { derived } from './cartridge_derived.ts';
-import { levelling } from './cartridge_levelling.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
 // The loader's reference stage and the definition walks it shares with the lock stage
@@ -207,12 +200,5 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...dialogues(c, check));
   // -- D1
   // -- D2
-  out.push(...skills(c, check));
-  out.push(...topics(c, check));
-  out.push(...death(c, check));
-  out.push(...combat(c, named));
-  out.push(...commerce(c));
-  out.push(...derived(c, check));
-  out.push(...levelling(c, check));
   return out;
 }

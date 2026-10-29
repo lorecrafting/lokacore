@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
 - [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **APPROVE**
 - [Review: C1 slice F2-docs, drop per-field kernel_api floors from docs and schema descriptions (loka-ivjq.2)](2026-10-28-c1-f2-docs-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice D2, characters and economy loader checks (loka-ivjq.20)](2026-10-28-c1-d2-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice D1, entities and supplies loader checks (loka-ivjq.20)](2026-10-28-c1-d1-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice 0 prep and slice B1 references core (loka-ivjq.20)](2026-10-28-c1-b1-review.md): **APPROVE WITH NOTES**
 - [Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)](2026-10-24-narration-log-batch-review.md): **APPROVE WITH NOTES**

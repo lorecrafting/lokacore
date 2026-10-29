@@ -2,7 +2,7 @@ defmodule Loka.ContentTargetsTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/targets_sampler")}
 
-  # Breaks (toolbox row 6b; twin of the loader rows in kernel/ts/test/targets.test.ts): allies
+  # Breaks (toolbox row 6b): allies
   # name a spawn template, an NPC without an attack or nothing, or lack their narration.
   test "allies keep their authored fighters and narration", %{dir: dir} do
     combat = ["world", "combat"]

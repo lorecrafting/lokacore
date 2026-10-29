@@ -1,8 +1,7 @@
 defmodule Loka.Content.Derived do
   @moduledoc """
   Checks toolbox row 2 derived-stat tables (world.derived), row 3 item affects, row 27 identified
-  items, row G3 NPC attributes, balance 6b's gear budget and row 6a's equip words; twin of
-  cartridge_derived.ts.
+  items, row G3 NPC attributes, balance 6b's gear budget and row 6a's equip words.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
   alias Loka.Content.Refs

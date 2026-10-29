@@ -3,8 +3,7 @@ defmodule Loka.ContentSkillGrowthTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/skills_sampler")}
 
   # Breaks: growth that does not increase, an opposed check against an unrated detail or naming an unknown skill or attribute, or an authored
-  # uses_<key> fact compile (toolbox rows 5 and G5; twin of the loader rows in
-  # kernel/ts/test/skill_growth.test.ts).
+  # uses_<key> fact compile (toolbox rows 5 and G5).
   test "growth and opposed checks keep their order, rating and references", %{
     dir: dir
   } do

@@ -83,7 +83,7 @@ defmodule Loka.ContentCraftTest do
            )
   end
 
-  # Homestead hs-11 (twin of craft_raze.test.ts). Break: an ancestry grants at birth a skill whose
+  # Homestead hs-11. Break: an ancestry grants at birth a skill whose
   # prerequisite was never met (woodfolk's woodcutting takes one here).
   test "an ancestry never grants a skill with a prerequisite", %{dir: dir} do
     prerequisite = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
@@ -98,7 +98,7 @@ defmodule Loka.ContentCraftTest do
            ]
   end
 
-  # Break (hs-14; twin of the loader test in kernel/ts/test/craft.test.ts): a shown skill whose
+  # Break (hs-14): a shown skill whose
   # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
   # or an unknown profession text compiles.
   test "nothing shown reads or names a hidden skill; a profession resolves", %{dir: dir} do
@@ -117,7 +117,7 @@ defmodule Loka.ContentCraftTest do
     assert edit.([{"skills/whittling.json", &Map.put(&1, "profession", "profession.nothing")}]) ==
              [{"UNRESOLVED_REFERENCE", "skills/whittling.profession"}]
 
-    # hs-14 secret (twin of craft.test.ts "loader: no shown qualification, ..."): a shown skill's
+    # hs-14 secret: a shown skill's
     # qualification, any dialogue policy, or a talk label or riddle on a dialogue teaching a hidden skill.
     reads = %{
       "policy_version" => 1,

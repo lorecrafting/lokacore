@@ -138,36 +138,6 @@ test('in a pack round the shot hits the primary and the selected goblin waits', 
   );
 });
 
-// Twin of test/loka/content_ranged_test.exs. Breaks: the loader admits `ranged` below API 1.67,
-// a ranged weapon without shot_hit or shot_miss, or an unknown ammo pool.
-test('the loader keeps ranged weapons to API 1.67, their narration and a known pool', () => {
-  const diagnostic = (edit: (c: any) => void) => {
-    const r = reload(base, edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const narration = '.cartridge.world.combat.narration';
-  const ammo = { cartridge_id: 'ranged_sampler', cartridge_version: '0.0.1', kind: 'resource' };
-  const cases: [(c: any) => void, unknown][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.66'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-    ],
-    [
-      (c) => delete c.world.combat.narration.shot_hit,
-      ['SCHEMA_VIOLATION', `${narration}.shot_hit`],
-    ],
-    [
-      (c) => delete c.world.combat.narration.shot_miss,
-      ['SCHEMA_VIOLATION', `${narration}.shot_miss`],
-    ],
-    [
-      (c) => (c.items[BOW].weapon.ranged.ammo = { ...ammo, key: 'quivers' }),
-      ['UNRESOLVED_REFERENCE', `.cartridge.items["${BOW}"].weapon.ranged.ammo`],
-    ],
-  ];
-  for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
-});
-
 // Toolbox row 21 on the bow. Breaks: a hit shot does not wear the bow, or a broken bow still
 // shoots in round 1 (spending an arrow) instead of striking unarmed.
 test('a hit shot wears the bow; a broken bow makes round 1 melee', () => {

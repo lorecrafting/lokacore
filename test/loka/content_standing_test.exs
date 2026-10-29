@@ -8,7 +8,7 @@ defmodule Loka.ContentStandingTest do
     "key" => "maud"
   }
 
-  # Breaks (toolbox rows 15 and G11), twins of the loader's in kernel/ts/test/standing.test.ts: the
+  # Breaks (toolbox rows 15 and G11): the
   # compiler accepts a fact.adjust of a non-int fact, an engage line on an NPC without an attack, a
   # refuse line naming no text or on a never-hostile NPC, a disposition on a spawn template, or a
   # friendly discount without a friendly disposition or (schema) with a skill too; or leaves a

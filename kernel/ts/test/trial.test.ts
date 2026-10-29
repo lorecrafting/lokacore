@@ -304,18 +304,12 @@ test('an arrest shuts a door a visitor left open and reads the charge again', ()
   assert.equal(exit(w, 'west').door?.state, 'closed');
 });
 
-// Break: the loader admits an arrest without hostile or beside engage, a dangling
-// line, or an arrest under a floor below 1.105.
+// Break: the loader admits a zero lesson payment or a barrier write with no reachable key.
+// The disposition shape, arrest and line checks are the compiler's (content_trial_test.exs).
 test('the loader refuses a malformed arrest', () => {
   const npcAt = `.cartridge.npcs[${JSON.stringify(`${S}npc/guard`)}].disposition`;
   const rows: [(c: any) => void, string | string[]][] = [
     [() => {}, 'loaded'],
-    [(c) => delete guardOf(c).disposition.hostile, ['SCHEMA_VIOLATION', npcAt]],
-    [(c) => (guardOf(c).disposition.engage = 'npc.guard.arrest'), ['SCHEMA_VIOLATION', npcAt]],
-    [
-      (c) => (guardOf(c).disposition.arrest.narration = 'nope'),
-      ['UNRESOLVED_REFERENCE', `${npcAt}.arrest.narration`],
-    ],
     [
       (c) => (c.dialogues[`${S}dialogue/jailer_talk`].choices.pay.lesson_payment.amount = 0),
       [
@@ -333,10 +327,6 @@ test('the loader refuses a malformed arrest', () => {
         'BARRIER_UNREACHABLE_KEY',
         `.cartridge.reactions[${JSON.stringify(`${S}reaction/charge`)}].apply[1].to`,
       ],
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.104'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
     ],
   ];
   for (const [change, want] of rows) {

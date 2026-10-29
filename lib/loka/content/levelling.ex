@@ -1,6 +1,6 @@
 defmodule Loka.Content.Levelling do
   @moduledoc """
-  Checks toolbox row 4 world.levelling and experience.grant steps; twin of cartridge_levelling.ts.
+  Checks toolbox row 4 world.levelling and experience.grant steps.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs

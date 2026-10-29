@@ -438,36 +438,3 @@ test('an item without equip words keeps the engine labels and tells the engine l
     line('equipment.removed'),
   );
 });
-
-test('the loader refuses equip words below 1.116, outside the catalog, or without a slot', () => {
-  const load = (f: (c: any) => void) => {
-    const kat = read('protocol/fixtures/cartridge_wear_hash.json');
-    const c = structuredClone(kat.value);
-    equipped(c);
-    f(c);
-    const text = encode(c);
-    const h = createHash('sha256').update(text).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${text},"content_hash":"${h}"}`),
-      INSTALLED,
-    );
-    return r.ok ? [] : [[r.diagnostic.code, r.diagnostic.path]];
-  };
-  const at = `.cartridge.items["${CAP_REF}"].equip`;
-  assert.deepEqual(
-    load(() => {}),
-    [],
-  );
-  assert.deepEqual(
-    load((c) => (c.manifest.requires.kernel_api.at_least = '1.115')),
-    [['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least']],
-  );
-  assert.deepEqual(
-    load((c) => delete c.text['cap.on']),
-    [['UNRESOLVED_REFERENCE', `${at}.wear`]],
-  );
-  assert.deepEqual(
-    load((c) => delete c.items[CAP_REF].slot),
-    [['SCHEMA_VIOLATION', at]],
-  );
-});

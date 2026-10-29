@@ -4,8 +4,7 @@ defmodule Loka.ContentLevellingTest do
 
   # Breaks: world.levelling or an experience.grant step without attributes@1,
   # with thresholds not strictly rising (equal catches < for <=), an unknown kill NPC or level_up
-  # text, or a grant without world.levelling compiles (toolbox row 4; twin of the loader rows in
-  # kernel/ts/test/levelling.test.ts).
+  # text, or a grant without world.levelling compiles (toolbox row 4).
   test "levelling keeps its owner, rising thresholds and references", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     l = ["world", "levelling"]

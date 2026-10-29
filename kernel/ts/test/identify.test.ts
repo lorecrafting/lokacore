@@ -70,9 +70,9 @@ test('a worn dull ring adds PER at once; the sage reveals its name and its worn 
   assert.deepEqual(texts(carried(w)), ['item.ring.short_known', 'item.ring.description_known']);
 });
 
-// Breaks: the loader drops an identified check, so a dangling or non-bool fact, identified on an
-// item without affects, an old API floor or a per_subject fact loads and misreads in play.
-test('the loader refuses each unsound identified item', () => {
+// Breaks: an identified item names a per_subject fact, which the kernel reads at the wrong scope.
+// The reference, type, affects and API checks are the compiler's (content_derived_test.exs).
+test('the loader refuses a per_subject identified fact', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const item = 'identify_sampler@0.0.1:item/ring';
   const at = `.cartridge.items["${item}"].identified`;
@@ -87,14 +87,6 @@ test('the loader refuses each unsound identified item', () => {
     c.items[item].identified.key = 'other';
   };
   const rows: [(c: any) => void, string, string][] = [
-    [(c) => (c.items[item].identified.key = 'nope'), 'UNRESOLVED_REFERENCE', at],
-    [(c) => fact(c, { value_type: { type: 'int', default: 0 } }), 'FACT_TYPE_MISMATCH', at],
-    [(c) => delete c.items[item].affects, 'SCHEMA_VIOLATION', at],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.67'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
     [
       (c) => fact(c, { value_type: { type: 'bool', default: false }, per_subject: true }),
       'FACT_SCOPE_UNSUPPORTED',

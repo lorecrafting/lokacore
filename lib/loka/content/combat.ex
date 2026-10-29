@@ -1,5 +1,5 @@
 defmodule Loka.Content.Combat do
-  @moduledoc "Attack profiles and finite death credit; twin of content/cartridge_combat.ts."
+  @moduledoc "Attack profiles and finite death credit."
   import Loka.Content.Source, only: [diag: 3, diag: 4, at: 2, ref: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
 

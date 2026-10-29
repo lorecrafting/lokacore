@@ -324,14 +324,6 @@ test('homestead 7 lane branch: rest with the cot on the lane floor', () => {
   assert.deepEqual(labels(after.world), []);
 });
 
-// Breaks (hs-14 load check): the dialogue schema admitting a label on the hidden-lesson dialogue.
-test('a label on carpenter_lessons is a schema violation', () => {
-  assert.equal(
-    reload((c) => (c.dialogues[ref('dialogue', 'carpenter_lessons')].label = 'x')),
-    'SCHEMA_VIOLATION .cartridge.dialogues["toolbox_showcase@0.0.1:dialogue/carpenter_lessons"].label',
-  );
-});
-
 const farmer = (w: World, service: string, quoted_price: number) => ({
   ...hire(w, service, quoted_price),
   provider_id: npc(w, 'farmer'),

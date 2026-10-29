@@ -51,14 +51,7 @@ test('method is literal and optional declarations enforce every new field and nu
     (c: any) => (patch(c).harvest.careful.action = 'harvest'),
     (c: any) => (patch(c).harvest.careful.extra = true),
     (c: any) => delete c.manifest.requires.capabilities.skills,
-    (c: any) => (shop(c).buy_discount.skill = ref('skill', 'absent')),
     (c: any) => (shop(c).buy_discount.extra = true),
-    (c: any) => (shop(c).buy_discount.numerator = 11),
-    (c: any) => (shop(c).buy_discount.minimum = 2), // above the 1p buy
-    (c: any) => {
-      shop(c).offers[0].buy = 2147483647;
-      shop(c).buy_discount.numerator = shop(c).buy_discount.denominator = 2147483647;
-    },
   ];
   for (const field of ['numerator', 'denominator', 'minimum'])
     for (const n of [0, 2147483648]) {

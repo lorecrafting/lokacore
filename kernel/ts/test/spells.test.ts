@@ -155,28 +155,18 @@ test('an unknown word and unread noctis are refused alike; noctis works once rea
   assert.deepEqual(narration(cast(w, 'Noctis')), ['narration.noctis']);
 });
 
-// Breaks: the TS loader admits a spell or a level_compare leaf below kernel_api 1.51, an opposed
+// Breaks: the TS loader admits a spell below kernel_api 1.51, an opposed
 // check on a spell (no detail rating), two spells sharing one word, or a room contribution naming
 // a spell's key (both kernels refuse them; content_spells_test.exs).
-test('loader: spells and the level_compare leaf need 1.51; spell words are unique', () => {
+test('loader: spells need 1.51; spell words are unique', () => {
   const R = (key: string) => `spells_sampler@0.0.1:recipe/${key}`;
   const api = '.cartridge.manifest.requires.kernel_api.at_least';
   const below = (c: Record<string, any>) => (c.manifest.requires.kernel_api.at_least = '1.50');
-  const LEVEL = { policy_version: 1, root: { op: 'level_compare', at_least: 1 } };
   const rows: [(c: Record<string, any>) => void, string, string][] = [
     [
       (c) => {
         below(c); // spells without a level_compare leaf
         c.recipes[R('ward')].policy = c.recipes[R('lux')].policy;
-      },
-      'KERNEL_API_RANGE_INVALID',
-      api,
-    ],
-    [
-      (c) => {
-        below(c); // a level_compare leaf without spells
-        for (const k of ['lux', 'ward', 'noctis']) delete c.recipes[R(k)];
-        c.recipes[R('gather_ash')].policy = LEVEL;
       },
       'KERNEL_API_RANGE_INVALID',
       api,
