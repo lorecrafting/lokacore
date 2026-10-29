@@ -22,7 +22,7 @@
       "description_variant": 1,
       "calendar": 1,
       "target_resolution": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "check": 1,
       "attributes": 1,
       "fact": 1,

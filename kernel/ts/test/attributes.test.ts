@@ -114,7 +114,7 @@ test('resource_compare reads the current value of the pool on the actor body', (
 
 // Breaks: the leaf read on something other than the actor's body (its id, a stale start), or the
 // GameView and admission disagreeing on it. Moving east to the wayside pays 1 mv.
-test('a recipe gated on mv at least 2 is offered and admitted at mv 2, refused at mv 1', () => {
+test('a scripted action gated on mv at least 2 is offered and admitted at mv 2, refused at mv 1', () => {
   const perform = {
     id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b',
     world_context_id: CONTEXT,
@@ -126,7 +126,7 @@ test('a recipe gated on mv at least 2 is offered and admitted at mv 2, refused a
   ] as const) {
     const fresh = world((c) => {
       c.resources[`${AT}resource/mv`].start = start;
-      c.recipes[`${AT}recipe/pray`].policy = pool('mv', 2);
+      c.scripted_actions[`${AT}action/pray`].policy = pool('mv', 2);
     });
     const moved = step(
       fresh,

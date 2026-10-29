@@ -6,7 +6,7 @@
     "FeatureKind": {
       "description": "One R3B feature kind (14 §R3B). Exactly the kinds in protocol/feature_registry.json, which gives each one's spec section and freeze milestone; unknown kinds are invalid. A reference to a feature definition is a DefinitionRef whose kind is one of these values (05 §4).",
       "enum": [
-        "action_recipe",
+        "scripted_action",
         "inspectable_detail",
         "description_variant",
         "connection",
@@ -27,7 +27,7 @@
         "world_event_plan"
       ],
       "examples": [
-        "action_recipe",
+        "scripted_action",
         "world_event_plan"
       ]
     },

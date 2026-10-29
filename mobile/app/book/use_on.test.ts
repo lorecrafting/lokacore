@@ -124,7 +124,7 @@ test('a pair with an unprojected target draws no Use on… on the tool', () => {
 });
 
 // Breaks: an accepted pick whose receipt has no narration logs no line, or one without the
-// recipe's label and the pair's names (book-ui.md: the use pair's fallback line).
+// scripted action's label and the pair's names (book-ui.md: the use pair's fallback line).
 test('a pick without narration logs the use line once', () => {
   const b = yard();
   const invoke = b.game.invoke.bind(b.game);

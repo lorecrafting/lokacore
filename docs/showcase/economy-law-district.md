@@ -61,7 +61,7 @@ Sealed: `storeroom` (the crate, lid closed at start, with `candle_04`, `candle_0
 | `drain` | up `cell` through `grate`, south `counting_house` (one way) | none |
 | `forge_stall` | south `market_row` | **the smith**; `ore_01..04` on the floor |
 | `counting_house` | west `undercroft` | **clerk A**; **the vault** (an NPC with `pennies` 20 and `locks.get` that always refuses, `theft_sampler/npcs/vault.json`); `strongroom_key` (`locks.get fact_compare owns_strongroom true`) |
-| `pawn_alley` | east `undercroft` | **the fence** (`pennies` 6; `locks.get` always refuses); detail `barrels` (rating 0; recipe `hide`) |
+| `pawn_alley` | east `undercroft` | **the fence** (`pennies` 6; `locks.get` always refuses); detail `barrels` (rating 0; scripted action `hide`) |
 | `strongroom` | north `undercroft` through `strongroom_door`; `locks.enter fact_compare owns_strongroom true` | `strongroom_chest` (container, lid closed at start; `locks.get` and `locks.put` on `owns_strongroom`) |
 | `vault_yard` (sandbox) | up `undercroft` | **the mark** (holds `yard_purse`, alertness 0); **the watchman** (alertness 1, hostile on `wanted`, chance 0); detail `yard_barrels` (hide); `hoard_chest` (lid closed at start; get and put on `owns_strongroom`); `yard_crate` (lid closed at start) holding `yard_candle_01..02` with a shelf job to a **yard chandler**: stock table [3, 2], sells for 1, purse 5 pennies; once opened the crate refuses every take (`locks.get` always false) and the shelf caps at 1 |
 
@@ -78,7 +78,7 @@ Sealed: `storeroom` (the crate, lid closed at start, with `candle_04`, `candle_0
 > south of this sign: its key, its door and its chest open to the owner alone. The yard below has a
 > purse, a watchman, barrels and a chest for trying it all again.
 
-### NPCs, services, recipes, reactions
+### NPCs, services, scripted actions, reactions
 
 - **The chandler**: offer `{item: candle_01, buy: 5, sell: 1, stock {items: [candle_01..05], buy:
   [5, 3, 2, 1, 1]}}` (`prices_sampler`; one price per set item, `buy[held - 1]` in
@@ -117,7 +117,7 @@ Sealed: `storeroom` (the crate, lid closed at start, with `candle_04`, `candle_0
 - Theft: `reactions/theft_seen.json` `on {event: custom_event, custom: theft_seen}` `apply
   fact.assign wanted true` (`theft_sampler`). The Book's Take on a living NPC's Held list is the
   steal ([row 33](../system/mechanics.md#theft-fence-and-witnessed-offense-toolbox-rows-33-and-34)).
-- Sneak: recipe `hide` at `barrels` (check `{kind: opposed, skill: stealth}` against rating 0,
+- Sneak: scripted action `hide` at `barrels` (check `{kind: opposed, skill: stealth}` against rating 0,
   success `status.apply hidden`; `sneak_sampler`); `yard_hide` at `yard_barrels`.
 
 ## Guided loop and expected outcomes

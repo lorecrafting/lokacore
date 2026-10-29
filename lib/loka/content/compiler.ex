@@ -9,7 +9,7 @@ defmodule Loka.Content.Compiler do
     Dialogues,
     Quests,
     Reactions,
-    Recipes,
+    ScriptedActions,
     Replenish,
     Requires
   }
@@ -95,7 +95,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Asks.check(manifest, defs),
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
       Checks.rooms(manifest, defs, v2, registry),
-      Recipes.check(manifest, defs, v2, registry),
+      ScriptedActions.check(manifest, defs, v2, registry),
       Quests.check(manifest, defs, v2, registry),
       Reactions.check(manifest, defs, v2, registry),
       Dialogues.check(manifest, defs, v2, located, registry),
@@ -127,7 +127,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population replenish structure),
+         ~w(room item npc scripted_action barrier quest reaction dialogue scene liquid service transport population replenish structure),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -209,7 +209,7 @@ defmodule Loka.Content.Compiler do
     {"room", :room, "RoomDefinition"},
     {"item", :item, "ItemDefinition"},
     {"npc", :npc, "NpcDefinition"},
-    {"recipe", :recipe, "ActionRecipe"},
+    {"scripted_action", :scripted_action, "ScriptedAction"},
     {"barrier", :barrier, "BarrierDefinition"},
     {"quest", :quest, "QuestDefinition"},
     {"reaction", :reaction, "ReactionRule"},

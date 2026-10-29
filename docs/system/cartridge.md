@@ -14,7 +14,7 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `replenish/`, `services/`, `transports/`, `bleeds/`, `statuses/`, `structures/` | one file per definition, `<key>.json`, the frozen shape without `key` |
-| `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ActionRecipe, `action_recipe@1`, [mechanics](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `recipes` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
+| `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ScriptedAction, `scripted_action@1`, [mechanics](mechanics.md#scripted_action1-mechanicsscripted_actionrulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `scripted_actions` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
@@ -249,18 +249,18 @@ the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
 names a built-in command and is checked as an ActionDefinition; a file without it carries
-authored `outcomes` and is checked as an ActionRecipe (`Loka.Content.Source.of_kind/2`). One
+authored `outcomes` and is checked as a ScriptedAction (`Loka.Content.Source.of_kind/2`). One
 field decides, so a file never mixes the two shapes: the contract it is routed to refuses the
 other shape's fields. The artifact keeps both maps, so a diagnostic that names a reference shows
-the internal kind (`UNRESOLVED_REFERENCE` `data.target` `"<id>@<version>:recipe/<key>"`); the
+the internal kind (`UNRESOLVED_REFERENCE` `data.target` `"<id>@<version>:action/<key>"`); the
 author still writes the key alone. The refusals:
 
 | Case | Code | Path | data |
 |---|---|---|---|
-| `command` beside `outcomes` or any other scripted-only field (`aliases`, `check`, `costs`, `cooldown`, `duration`, `craft`, `tip`, `reason`) | `UNKNOWN_FIELD` | `actions/<key>.<field>`, one per field | `{}` |
-| the same file then also misses ActionDefinition's own required fields (`accessibility`, `input`) or uses a scripted target (`{kind: "detail"}`) | `SCHEMA_VIOLATION` | `actions/<key>.<field>`, `actions/<key>.target.kind` | `{"error": "missing_property"}`, `{"error": "unknown_variant"}` |
+| `command` beside `outcomes` or any other scripted-action-only field (`aliases`, `check`, `costs`, `cooldown`, `duration`, `craft`, `tip`, `reason`) | `UNKNOWN_FIELD` | `actions/<key>.<field>`, one per field | `{}` |
+| the same file then also misses ActionDefinition's own required fields (`accessibility`, `input`) or uses a scripted action target (`{kind: "detail"}`) | `SCHEMA_VIOLATION` | `actions/<key>.<field>`, `actions/<key>.target.kind` | `{"error": "missing_property"}`, `{"error": "unknown_variant"}` |
 | neither `command` nor `outcomes` | `SCHEMA_VIOLATION` | `actions/<key>.outcomes` | `{"error": "missing_property"}` |
-| a `recipes/` directory (the retired source kind) | `UNKNOWN_FIELD` | `recipes/<key>` | `{}` |
+| a `scripted_actions/` directory (the retired source kind) | `UNKNOWN_FIELD` | `scripted_actions/<key>` | `{}` |
 
 A built-in action and a scripted action cannot share a key: two files cannot, and a bundled
 definition beside a file is `DUPLICATE_DEFINITION` at both sites (`actions/<key>`,
@@ -520,8 +520,8 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
 - Each list is sorted by ref. ponytail: static initial state, rooms reached through exits only (a
-  room reached by travel, a ferry or a recipe shows unreachable, a quest's own `offer` counts
-  without evaluating its policy, and a quest without one that only a recipe, reaction or action
+  room reached by travel, a ferry or a scripted action shows unreachable, a quest's own `offer` counts
+  without evaluating its policy, and a quest without one that only a scripted action, reaction or action
   names shows unreachable), no dialogue choices or reaction chains, and engine read sites with no op are not reads (such a fact may show `write_only`); any
   other engine writer shows its fact `read_only`. A committed graph waits for a consumer (R6, L6).
 
@@ -734,13 +734,13 @@ JSON document. Nothing is committed or checked in CI; only its unit test runs.
   Narration is neither a trace field nor state, so the marked replay must still equal the
   recording, and the byte check above proves it on every transcript. A rule is exercised when its
   key is in an accepted decision's narration: its `when` held and (for `after`) its job ran.
-- **Recipes.** Exercised by a committed `action_completed` whose `action` is the recipe's key (a
+- **Scripted actions.** Exercised by a committed `action_completed` whose `action` is the scripted action's key (a
   cast too); a `failure` outcome emits none.
 - **Dialogue choices.** Exercised by a committed `choice_resolved {continuation_id, choice_id}`,
   attributed to the dialogue named by the `source` of that continuation in the world before the
   step; rows whose source is a scene are not dialogue choices.
 - **Quests.** Exercised by a committed `quest_resolved`; `quest_failed` does not count.
-- **Output** `{cartridge: "<id>@<version>", transcripts, never: {reactions, recipes, choices,
+- **Output** `{cartridge: "<id>@<version>", transcripts, never: {reactions, scripted actions, choices,
   quests}}`: sorted DefinitionRefStrings, and `choices` as `[{dialogue, choice}]` sorted by
   dialogue, then choice. ponytail: firing means steps ran, so a delayed rule whose job never ran
   in a transcript shows unfired; scene choices and cartridge `actions` are out of scope;
@@ -750,19 +750,19 @@ JSON document. Nothing is committed or checked in CI; only its unit test runs.
 
 Beads `loka-kgd.194.3` ([design audit](../rnd/design-audit-abilities-authoring-2026-10-23.md)
 finding 22, approach E, plan phase 4) says why a rule did or did not run at one transcript step.
-`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--action <key> | --dialogue <key>]`
 loads and refuses as `reach.ts` above (exit 1). It reads the transcript with its own pinned
 `content_hash`, so an edited, recompiled artifact still runs. It replays ordinals `1..ordinal-1`
 on the marked copy of Transcript coverage above, comparing each line with the recording; a
 difference exits 1 (`<transcript>: replay differs at ordinal <n>`, the path relative to the
 repository). Step `<ordinal>` itself is decided, never compared, so an edited rule can be
 explained. Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
-1..entries, or a `--recipe`/`--dialogue` key no definition has. Otherwise it prints one canonical
+1..entries, or a `--action`/`--dialogue` key no definition has. Otherwise it prints one canonical
 JSON document. Nothing is committed or checked in CI; only its unit test runs.
 
 - **Output** `{ordinal, command: <payload type>, outcome: <accepted outcome, else the decision
   kind>, reactions: [{rule, causes: [{event, position, filters: {<name>: bool}}], fired, when?}],
-  recipe?: {rule, policy}, dialogue?: {rule, policy}}`. `reactions` holds every rule in rule-key
+  scripted action?: {rule, policy}, dialogue?: {rule, policy}}`. `reactions` holds every rule in rule-key
   order; `rule` is the DefinitionRefString.
 - **Causes.** Each committed event of the step whose type is the rule's `on.event`, with every
   declared filter evaluated on the world before the step, as the proposal matches triggers
@@ -775,13 +775,13 @@ JSON document. Nothing is committed or checked in CI; only its unit test runs.
   the leaf at the rule's own place in rule-key order, reading the writes of the rules and
   deliveries before it in the same command (reaction@1). `all`, `any` and `not` keep their
   shape; every leaf is evaluated, with no short-circuit.
-- **Policy** (on demand). A recipe's or dialogue's `policy`, each leaf with `holds`, read on the
-  world before the step, where admission reads it: the recipe for the command's primary target,
+- **Policy** (on demand). A scripted action's or dialogue's `policy`, each leaf with `holds`, read on the
+  world before the step, where admission reads it: the scripted action for the command's primary target,
   the dialogue for its NPC.
 - ponytail: a leaf's value is its truth (`held`, `holds`), not the fact or stat it read, which
   needs a kernel hook. For a rule delivered more than once in a step, only the first delivery is
   exact. A delayed rule's `fired` shows at its job's step, and a job run's narration can be
-  deduplicated. The recipe target is the payload's primary target, not a detail resolved
+  deduplicated. The scripted action target is the payload's primary target, not a detail resolved
   through `detailAt`; the dialogue target is the authored NPC, not a `choose` row's bound
   speaker (`speakerOf`), which differs only when the binding is not the npc's entity.
 
@@ -797,7 +797,7 @@ module exists without its row. A cartridge locking an uninstalled capability fai
 ## Text
 
 `Text` is `{key, bindings}`; a committed narration line may carry `participants`, each name
-bound to an EntityId at commit (`kernel/ts/src/mechanics/action_recipe/rule.ts:89`), so redisplay and
+bound to an EntityId at commit (`kernel/ts/src/mechanics/scripted_action/rule.ts:89`), so redisplay and
 replay never resolve a name again. Catalog strings carry the touch links above; the phone's
 model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`). In
 source, a line may be written in place and lowered to a generated key
@@ -841,7 +841,7 @@ opt-in; they reject unknown fields, an absent effect or an invalid skill qualifi
 
 Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1`. The installed API follows the [current bundled chapter](#current-bundled-chapter); current requirement ranges are validated; obsolete development fixtures follow the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
 
-The compiler rejects actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+The compiler rejects actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed scripted actions with duration are `INVALID_TIME_POLICY` at the scripted action's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 
 ## Corpse templates and shrine settings (M5-B)
 
@@ -969,7 +969,7 @@ The compiler (`lib/loka/content/services.ex`) refuses:
 - A `vault` without a `resource_starts` entry in the service's currency: SCHEMA_VIOLATION `invalid_value` at `.benefit.vault`.
 - Two deposit or withdraw services naming one `account` with different vaults or currencies: SCHEMA_VIOLATION `invalid_value` at each one's `.benefit.vault`.
 
-The account is engine-written: an authored write to it (a dialogue, reaction or recipe `fact.assign` or `fact.adjust`) is RESERVED_FACT, as for an entitlement fact. Another benefit cannot name it: an entitlement needs a Boolean fact and a repair a durability fact.
+The account is engine-written: an authored write to it (a dialogue, reaction or scripted action `fact.assign` or `fact.adjust`) is RESERVED_FACT, as for an entitlement fact. Another benefit cannot name it: an entitlement needs a Boolean fact and a repair a durability fact.
 
 Required cartridge text: `service.unaffordable`, and `service.no_funds` for either kind.
 
@@ -1039,7 +1039,7 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## NPC attribute declarations
 
-[Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) reads an NPC's optional `attributes` (`NpcDefinition.attributes`, a list of 1 to 16 `{attribute, value}`) and an opposed action check's optional `npc` (only beside `attribute`; the schema's `dependentRequired`). `attribute` names an attribute of this cartridge and `npc` an NPC of it (source: short keys, expanded by `lib/loka/content/npc_fields.ex` and `lib/loka/content/checks.ex`); `value` is a ResourceInt. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/recipes.ex`) refuses an unresolved attribute or NPC (UNRESOLVED_REFERENCE at the member), an attribute listed twice (SCHEMA_VIOLATION at the repeat's `attribute`), a check `npc` that is a `spawn_template` or does not list the check's attribute (SCHEMA_VIOLATION at `check.npc`). A check with `npc` needs no detail `rating`. Under `world.derived`, an NPC that declares `attributes` also takes the `hit_chance` and `damage` tables on its attack. `cartridges/npc_attr_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
+[Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) reads an NPC's optional `attributes` (`NpcDefinition.attributes`, a list of 1 to 16 `{attribute, value}`) and an opposed action check's optional `npc` (only beside `attribute`; the schema's `dependentRequired`). `attribute` names an attribute of this cartridge and `npc` an NPC of it (source: short keys, expanded by `lib/loka/content/npc_fields.ex` and `lib/loka/content/checks.ex`); `value` is a ResourceInt. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/scripted_actions.ex`) refuses an unresolved attribute or NPC (UNRESOLVED_REFERENCE at the member), an attribute listed twice (SCHEMA_VIOLATION at the repeat's `attribute`), a check `npc` that is a `spawn_template` or does not list the check's attribute (SCHEMA_VIOLATION at `check.npc`). A check with `npc` needs no detail `rating`. Under `world.derived`, an NPC that declares `attributes` also takes the `hit_chance` and `damage` tables on its attack. `cartridges/npc_attr_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
 
 ## Damage declarations
 
@@ -1051,11 +1051,11 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Skill growth and rating declarations
 
-[Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the action check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/recipes.ex`) synthesizes the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
+[Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the action check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/scripted_actions.ex`) synthesizes the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
 
 ## Hidden passage declarations
 
-[Hidden passages](mechanics.md#hidden-passages-and-search-toolbox-row-11) read an exit's optional `hidden_until` (`Connection.hidden_until`, `{fact, equals}`). `fact` names a fact of this cartridge (source: its short key), normally a `player`-scoped bool so discovery belongs to the character; `equals` is a value of its type (FACT_TYPE_MISMATCH otherwise). A hidden face has no `barrier` (BARRIER_MISMATCH at `hidden_until`), so no door verb can name it; its reciprocal face is an ordinary exit or hidden by its own declaration. The search that reveals it is an ordinary [action with outcomes](mechanics.md#action_recipe1-mechanicsaction_reciperulets49) whose outcome assigns the fact. A patrol route leg with any hidden face to its next room, or an expedition route edge through a hidden face, is OUTCOME_MISMATCH at the route. The compiler refuses each case.
+[Hidden passages](mechanics.md#hidden-passages-and-search-toolbox-row-11) read an exit's optional `hidden_until` (`Connection.hidden_until`, `{fact, equals}`). `fact` names a fact of this cartridge (source: its short key), normally a `player`-scoped bool so discovery belongs to the character; `equals` is a value of its type (FACT_TYPE_MISMATCH otherwise). A hidden face has no `barrier` (BARRIER_MISMATCH at `hidden_until`), so no door verb can name it; its reciprocal face is an ordinary exit or hidden by its own declaration. The search that reveals it is an ordinary [action with outcomes](mechanics.md#scripted_action1-mechanicsscripted_actionrulets49) whose outcome assigns the fact. A patrol route leg with any hidden face to its next room, or an expedition route edge through a hidden face, is OUTCOME_MISMATCH at the route. The compiler refuses each case.
 
 ## Time gate declarations
 
@@ -1093,9 +1093,9 @@ Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-hal
 
 Toolbox row W23 ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). A quest journal may declare `hints {active?, objectives_met?}`, each 1 to 8 `{after, text}` with `after` whole real minutes (1 to 1440) strictly ascending (else `SCHEMA_VIOLATION` `invalid_value` at the stage list) and `text` a catalog key (`UNRESOLVED_REFERENCE`). Hints need `time_policy.profile = real_elapsed` (`INVALID_TIME_POLICY` at the `hints` member). Compiler: `lib/loka/content/quests.ex`.
 
-An action may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.tip`), shown once ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). The compiler adds the player bool fact `seen_tip_<key>` (default false; an authored fact of that name or a write of it is `RESERVED_FACT`), so a tip needs fact@1 (`UNDECLARED_CAPABILITY` at the `tip` member) and an action key of at most 55 characters (compiler `SCHEMA_VIOLATION` `invalid_value` at `actions/<key>.key`; in the loader the fact's key fails the schema). The compiler (`lib/loka/content/recipes.ex`, `position.ex`) checks it.
+An action may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.tip`), shown once ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). The compiler adds the player bool fact `seen_tip_<key>` (default false; an authored fact of that name or a write of it is `RESERVED_FACT`), so a tip needs fact@1 (`UNDECLARED_CAPABILITY` at the `tip` member) and an action key of at most 55 characters (compiler `SCHEMA_VIOLATION` `invalid_value` at `actions/<key>.key`; in the loader the fact's key fails the schema). The compiler (`lib/loka/content/scripted_actions.ex`, `position.ex`) checks it.
 
-An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.reason`), the refusal text when its policy fails ([rules](mechanics.md#spell-cast-admission-toolbox-row-29a)). The compiler (`lib/loka/content/recipes.ex`) checks it.
+An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `actions/<key>.reason`), the refusal text when its policy fails ([rules](mechanics.md#spell-cast-admission-toolbox-row-29a)). The compiler (`lib/loka/content/scripted_actions.ex`) checks it.
 
 ## Exposure declarations
 
@@ -1170,7 +1170,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Use declarations
 
-[Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4) adds one action target variant and one action step (`protocol/action.schema.json`). An action's `target` may be `{kind: "use", tool}` instead of a detail: `tool` (`UseTool`) names the held tool's properties, `tag` (a `Tag`) and/or `liquid` (a liquid of this cartridge, short reference allowed), at least one. The target item's properties are the action's `policy`, read through `has_tag` and `status_active` with `subject: "target"`. A step `{op: "status.cure", status}` ends that status on the action's target and is allowed only on a use action (SCHEMA_VIOLATION at its `op`: a detail holds no status). An unknown liquid or status is UNRESOLVED_REFERENCE; an opposed check on a use action must name an `npc`, since there is no detail rating (SCHEMA_VIOLATION at the check). The compiler checks these (`lib/loka/content/recipes.ex`); a scene may not start on a use action (OUTCOME_MISMATCH).
+[Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4) adds one action target variant and one action step (`protocol/action.schema.json`). An action's `target` may be `{kind: "use", tool}` instead of a detail: `tool` (`UseTool`) names the held tool's properties, `tag` (a `Tag`) and/or `liquid` (a liquid of this cartridge, short reference allowed), at least one. The target item's properties are the action's `policy`, read through `has_tag` and `status_active` with `subject: "target"`. A step `{op: "status.cure", status}` ends that status on the action's target and is allowed only on a use action (SCHEMA_VIOLATION at its `op`: a detail holds no status). An unknown liquid or status is UNRESOLVED_REFERENCE; an opposed check on a use action must name an `npc`, since there is no detail rating (SCHEMA_VIOLATION at the check). The compiler checks these (`lib/loka/content/scripted_actions.ex`); a scene may not start on a use action (OUTCOME_MISMATCH).
 
 ## Harvest tool declarations
 
@@ -1182,15 +1182,15 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Craft declarations
 
-[Craft](mechanics.md#craft-homestead-hs-10) adds one optional action field (`protocol/action.schema.json` `RecipeCraft`): `craft {consume?, yield?}`, at least one. `consume {items, quantity, to, reason?}`: `items` 1 to 16 distinct item refs (short keys in source), `quantity` 1 to 16, `to` an `ItemLocation`, `reason` a text key in the catalog. `yield {items, from}`: `items` 1 to 64 distinct item refs, `from` an `ItemLocation`. The compiler checks, as for a [replenish entry](#replenish-declarations): an unresolved item or holder is UNRESOLVED_REFERENCE at the field, a repeated item DUPLICATE_DEFINITION at `items`, a `template` holder, a holder item that is placed nowhere or is not a container SCHEMA_VIOLATION at the holder, an unknown `reason` UNRESOLVED_REFERENCE at `consume.reason`. A craft on a storylet or spell target is SCHEMA_VIOLATION at `craft` (`Loka.Content.Replenish.craft/3`).
+[Craft](mechanics.md#craft-homestead-hs-10) adds one optional action field (`protocol/action.schema.json` `ActionCraft`): `craft {consume?, yield?}`, at least one. `consume {items, quantity, to, reason?}`: `items` 1 to 16 distinct item refs (short keys in source), `quantity` 1 to 16, `to` an `ItemLocation`, `reason` a text key in the catalog. `yield {items, from}`: `items` 1 to 64 distinct item refs, `from` an `ItemLocation`. The compiler checks, as for a [replenish entry](#replenish-declarations): an unresolved item or holder is UNRESOLVED_REFERENCE at the field, a repeated item DUPLICATE_DEFINITION at `items`, a `template` holder, a holder item that is placed nowhere or is not a container SCHEMA_VIOLATION at the holder, an unknown `reason` UNRESOLVED_REFERENCE at `consume.reason`. A craft on a storylet or spell target is SCHEMA_VIOLATION at `craft` (`Loka.Content.Replenish.craft/3`).
 
 ## Skill prerequisite declarations
 
 [Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`): `prerequisite`, a Policy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView, NPC lessons and talk choices leave the skill out while its prerequisite fails and it is not acquired; a `skill_compare` naming it in a non-hidden skill's `qualification` or any dialogue `policy`, and a dialogue `name` on a dialogue teaching it, are SCHEMA_VIOLATION at that field) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`).
 
-## Recipe build step declarations
+## Scripted action build step declarations
 
-[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `build {structure, direction}`, `structure` a structure ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) refuses, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a structure or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.structure` or `.direction`). The listed structure already resolves and owns construction@1.
+[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`ActionStep`, `protocol/action.schema.json`): `build {structure, direction}`, `structure` a structure ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) refuses, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a structure or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.structure` or `.direction`). The listed structure already resolves and owns construction@1.
 
 ## Durability declarations
 
@@ -1198,9 +1198,9 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Spell declarations
 
-[Spell cast admission](mechanics.md#spell-cast-admission-toolbox-row-29a) adds one action target variant, one command and one policy leaf (`protocol/action.schema.json`, `protocol/command.schema.json`, `protocol/policy.schema.json`). An action's `target` may be `{kind: "spell", word}`: `word` is a `SpokenKeyword` (1 to 32 lowercase ASCII letters) that no other spell of the cartridge has (DUPLICATE_DEFINITION at each one's `target.word`); the player casts it by typing the word (`cast {word}`), never by the action key. Its requirements are the action's own fields: `policy` (a learned `fact_compare`, `level_compare {at_least}`, `stat_compare`, `has_item`), `costs` (mana and reagent pools) and `cooldown`. `level_compare` is owned by attributes@1. A spell target also names `learned` (required since [word bar S2](mechanics.md#spell-cast-admission-toolbox-row-29a)): a bool fact of this cartridge, player scope (UNRESOLVED_REFERENCE, FACT_TYPE_MISMATCH at `target.learned`; a per-subject fact is FACT_SCOPE_UNSUPPORTED). An opposed check on a spell must name an `npc` (SCHEMA_VIOLATION at the check). A room's action contribution that names a spell's key is UNRESOLVED_REFERENCE. The compiler checks these (`lib/loka/content/recipes.ex`, `spells.ex` and `levelling.ex`). Sampler: `cartridges/spells_sampler`. A spell target may add `aimed {scopes}` (`scopes` one or more of `room_occupants`, `room_contents`, `inventory`; any other is SCHEMA_VIOLATION); the spell is then [cast at one target](mechanics.md#spell-cast-admission-toolbox-row-29a) (loka-x6t.109).
+[Spell cast admission](mechanics.md#spell-cast-admission-toolbox-row-29a) adds one action target variant, one command and one policy leaf (`protocol/action.schema.json`, `protocol/command.schema.json`, `protocol/policy.schema.json`). An action's `target` may be `{kind: "spell", word}`: `word` is a `SpokenKeyword` (1 to 32 lowercase ASCII letters) that no other spell of the cartridge has (DUPLICATE_DEFINITION at each one's `target.word`); the player casts it by typing the word (`cast {word}`), never by the action key. Its requirements are the action's own fields: `policy` (a learned `fact_compare`, `level_compare {at_least}`, `stat_compare`, `has_item`), `costs` (mana and reagent pools) and `cooldown`. `level_compare` is owned by attributes@1. A spell target also names `learned` (required since [word bar S2](mechanics.md#spell-cast-admission-toolbox-row-29a)): a bool fact of this cartridge, player scope (UNRESOLVED_REFERENCE, FACT_TYPE_MISMATCH at `target.learned`; a per-subject fact is FACT_SCOPE_UNSUPPORTED). An opposed check on a spell must name an `npc` (SCHEMA_VIOLATION at the check). A room's action contribution that names a spell's key is UNRESOLVED_REFERENCE. The compiler checks these (`lib/loka/content/scripted_actions.ex`, `spells.ex` and `levelling.ex`). Sampler: `cartridges/spells_sampler`. A spell target may add `aimed {scopes}` (`scopes` one or more of `room_occupants`, `room_contents`, `inventory`; any other is SCHEMA_VIOLATION); the spell is then [cast at one target](mechanics.md#spell-cast-admission-toolbox-row-29a) (loka-x6t.109).
 
-[Spell effects](mechanics.md#spell-effects-toolbox-row-29b) add three outcome steps a spell's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `status.apply {status, npc?}`, `damage {npc?, kind, amount}` (`kind` a `DamageKind`, `amount` 1 or more) and `light.ignite {item?}` (`npc` and `item` required unless the spell is aimed, SCHEMA_VIOLATION at the field) (an item with a fuel source). Each names this cartridge's status, NPC or item (UNRESOLVED_REFERENCE at the field), sits only on a spell action (SCHEMA_VIOLATION at its `op`). Its owner must be declared (UNDECLARED_CAPABILITY at its `op`): status@1 for `status.apply` (by `status_applied`), death@1 for `damage` (by `entity_died`), light@1 for `light.ignite` (by the `ignite` command). The compiler checks these (`lib/loka/content/spells.ex` and `recipes.ex`). Sampler: `cartridges/spell_effects_sampler`.
+[Spell effects](mechanics.md#spell-effects-toolbox-row-29b) add three outcome steps a spell's sequence may hold (`ActionStep`, `protocol/action.schema.json`): `status.apply {status, npc?}`, `damage {npc?, kind, amount}` (`kind` a `DamageKind`, `amount` 1 or more) and `light.ignite {item?}` (`npc` and `item` required unless the spell is aimed, SCHEMA_VIOLATION at the field) (an item with a fuel source). Each names this cartridge's status, NPC or item (UNRESOLVED_REFERENCE at the field), sits only on a spell action (SCHEMA_VIOLATION at its `op`). Its owner must be declared (UNDECLARED_CAPABILITY at its `op`): status@1 for `status.apply` (by `status_applied`), death@1 for `damage` (by `entity_died`), light@1 for `light.ignite` (by the `ignite` command). The compiler checks these (`lib/loka/content/spells.ex` and `scripted_actions.ex`). Sampler: `cartridges/spell_effects_sampler`.
 
 ## Encounter declarations
 
@@ -1232,7 +1232,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Trail declarations
 
-[Tracks and trails](mechanics.md#tracks-and-trails-toolbox-row-w13) add three optional declarations. `world.trails {fresh_for, leads}` (`protocol/cartridge.schema.json` `WorldSettings`): `fresh_for` a positive integer of logical seconds; `leads` a TextKey per compass direction, each resolving (UNRESOLVED_REFERENCE at `world.trails.leads.<direction>`), with one for every direction some room's exit uses (UNRESOLVED_REFERENCE at `world.trails.leads`, `target` the direction). A population plan's `trail` and `hunts` (`true` only; `PopulationPlan`), each needing `world.trails` (UNRESOLVED_REFERENCE at the field, `target` `trails`). An action check `{key, kind: "track", plan}` (`protocol/action.schema.json` `ActionRecipe.check`), `plan` the key of a population plan of this cartridge with `trail` (UNRESOLVED_REFERENCE at `check.plan`). Each emits `fact_changed`, so the cartridge needs the `fact` capability (the lock stage). The compiler adds `trail_<P>_exit` and `trail_<P>_at` for each plan `P` with `trail`, and `trail_exit` and `trail_at` when some plan `hunts`; all at scope `instance` and `per_subject`; an authored fact of one of those names, or a write to one, is RESERVED_FACT, and a trailing plan's key over 53 characters is SCHEMA_VIOLATION `invalid_value` at its `key`. Sampler: `cartridges/tracks_sampler`.
+[Tracks and trails](mechanics.md#tracks-and-trails-toolbox-row-w13) add three optional declarations. `world.trails {fresh_for, leads}` (`protocol/cartridge.schema.json` `WorldSettings`): `fresh_for` a positive integer of logical seconds; `leads` a TextKey per compass direction, each resolving (UNRESOLVED_REFERENCE at `world.trails.leads.<direction>`), with one for every direction some room's exit uses (UNRESOLVED_REFERENCE at `world.trails.leads`, `target` the direction). A population plan's `trail` and `hunts` (`true` only; `PopulationPlan`), each needing `world.trails` (UNRESOLVED_REFERENCE at the field, `target` `trails`). An action check `{key, kind: "track", plan}` (`protocol/action.schema.json` `ScriptedAction.check`), `plan` the key of a population plan of this cartridge with `trail` (UNRESOLVED_REFERENCE at `check.plan`). Each emits `fact_changed`, so the cartridge needs the `fact` capability (the lock stage). The compiler adds `trail_<P>_exit` and `trail_<P>_at` for each plan `P` with `trail`, and `trail_exit` and `trail_at` when some plan `hunts`; all at scope `instance` and `per_subject`; an authored fact of one of those names, or a write to one, is RESERVED_FACT, and a trailing plan's key over 53 characters is SCHEMA_VIOLATION `invalid_value` at its `key`. Sampler: `cartridges/tracks_sampler`.
 
 ## Boss phase declarations
 
@@ -1244,7 +1244,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Storylet declarations
 
-Retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)): `RecipeTarget` has no `storylet` kind, so an action declaring one fails with SCHEMA_VIOLATION at `target.kind`.
+Retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)): `ScriptedTarget` has no `storylet` kind, so an action declaring one fails with SCHEMA_VIOLATION at `target.kind`.
 
 ## Structure and site declarations
 

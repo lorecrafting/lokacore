@@ -16,7 +16,7 @@
       "description_variant": 1,
       "containment": 1,
       "policy": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "schedule": 1,
       "calendar": 1,
       "fact": 1,

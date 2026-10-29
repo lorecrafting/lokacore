@@ -28,7 +28,7 @@ cellars." (`combat-district.md`'s `sign_combat` text; combat 1 pins the key, not
 - `speech.phrases: ["ware", "begone"]` (`speech_sampler/cartridge.json`; needs kernel_api 1.98,
   the showcase is at 1.102). This also puts Gil's `ware` on the Book's Word bar: [matrix row](../SHOWCASE.md#pairwise-mechanic-matrix)
   "say and shout x keyword dialogue" loses its kernel-only note (Beads `loka-kgd.72` closed by #391).
-- Capabilities: none new (movement, inspectable_detail, action_recipe, check, skills, status,
+- Capabilities: none new (movement, inspectable_detail, scripted_action, check, skills, status,
   reaction, population, speech, barrier, liquid, readable are declared).
 - Status `poisoned` ([row 1](../system/mechanics.md#status-effects-over-time-toolbox-row-1);
   `traps_sampler/statuses/poison.json`): `duration` 7200, `tick_every` 1800, `resource` hp,
@@ -55,7 +55,7 @@ cellars." (`combat-district.md`'s `sign_combat` text; combat 1 pins the key, not
 | `lever_vault` | south `lever_hall` through `lever_door` | detail `vault_slate` (readable: "Three. One. Two.") |
 | `dial_vault` | west `lever_hall` through `dial_door` | `bitters_skin` (vessel, 2 doses of `bitters`) |
 | `chief_den` | south `plate_passage` | **the chief**; population `den_goblins` (home) |
-| `sapper_cellar` (sandbox) | up `sapper_stair` | detail `cellar_flags` (rating 1; its own search and disarm recipes on `cellar_*` facts); the cellar plate springs on entering this room; `cellar_skin` (2 doses of `bitters`); **cellar chief**; population `cellar_goblins` (home; area `[sapper_cellar, sapper_stair]`) |
+| `sapper_cellar` (sandbox) | up `sapper_stair` | detail `cellar_flags` (rating 1; its own search and disarm scripted actions on `cellar_*` facts); the cellar plate springs on entering this room; `cellar_skin` (2 doses of `bitters`); **cellar chief**; population `cellar_goblins` (home; area `[sapper_cellar, sapper_stair]`) |
 
 No room is `exposed` and nothing reads the sky. Barriers `lever_door` `initial: closed`,
 `opens_when fact_compare lever_stage equals 3`; `dial_door` `initial: closed`, `opens_when all(wheel_1
@@ -83,11 +83,11 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
   plate_sprung false` (`rearm.json`; the showcase already emits `clock_hour`).
 - Failed disarm `plate_bites`: `on {event: check_failed, check: disarm_plate}`, `when plate_sprung
   false`, `apply status.apply poisoned` (`disarm_failed.json`).
-- Recipes at `flagstones`: `search_floor` (alias `search`, priority 10, policy `plate_found false`,
+- Scripted actions at `flagstones`: `search_floor` (alias `search`, priority 10, policy `plate_found false`,
   success `fact.assign plate_found true`); `disarm_plate` (alias `disarm`, priority 5, policy
   `all(plate_found true, plate_disarmed false)`, check `{key: disarm_plate, kind: opposed, skill:
   disarm}` against the detail's rating 1, success `fact.assign plate_disarmed true`, empty failure;
-  `traps_sampler/recipes`). The sandbox twins on `cellar_flags` and `cellar_*` facts; the cellar
+  `traps_sampler/scripted_actions`). The sandbox twins on `cellar_flags` and `cellar_*` facts; the cellar
   trigger's `room` is `sapper_cellar`.
 - Levers: `pull_a` (alias `pull`), `pull_b`, `pull_c` (success emits `lever`; their steps are
   reactions); reactions in this key order, since a reset

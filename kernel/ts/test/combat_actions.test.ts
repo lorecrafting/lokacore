@@ -65,7 +65,7 @@ test('encounter ActionSet filters ordinary raw verbs and aliases while retaining
     ...['open', 'close', 'lock', 'unlock'].map((type) => ({ type, direction: 'up' })),
     ...['sit', 'rest', 'sleep'].map((type) => ({ type })),
     { type: 'wait', until: 150 },
-    { type: 'perform', action: 'unknown_recipe' },
+    { type: 'perform', action: 'unknown_scripted' },
   ].map((p) => ({ ...p, actor_id: w.character })) as CommandPayload[];
   for (const payload of blocked) {
     const r = step(w, command(w, payload, 10), 2);

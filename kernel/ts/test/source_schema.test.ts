@@ -109,7 +109,7 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
     ],
     [defs + 'Shop/properties/buy_discount', discount, { ...discount, friendly: true }],
     [defs + 'DialogueChoice/properties/story_point', 'lantern_resolved/carry', 'lantern_resolved'],
-    [defs + 'RecipeCraft', { consume }, {}],
+    [defs + 'ActionCraft', { consume }, {}],
     ['facts', { facts: { lit: fact } }, { facts: { lit: { ...fact, colour: 'red' } } }],
   ];
   for (const [kind, good, bad] of pairs) {

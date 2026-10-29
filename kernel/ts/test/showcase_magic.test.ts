@@ -468,7 +468,7 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
   // The spell route: ward retargeted at the golem tells its line only while the golem is seen.
   const warded = (v: World) => {
     const c = structuredClone(v.cartridge) as any;
-    const ward = c.recipes[ref('recipe', 'ward')];
+    const ward = c.scripted_actions[ref('scripted_action', 'ward')];
     ward.costs = []; // the earlier casts spent the ma
     ward.outcomes.success.sequence = [
       { op: 'status.apply', status: status('wet'), npc: { ...C, kind: 'npc', key: 'golem' } },

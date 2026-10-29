@@ -15,7 +15,7 @@
       "inspectable_detail": 1,
       "description_variant": 1,
       "policy": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "knowledge": 1,
       "variety": 1
     },

@@ -71,7 +71,7 @@ test('fire 3b: shut in the woodstore, lifting the bar opens the door again', () 
   assert.equal(door(s), 'open');
 });
 
-// Breaks: the quench recipe does not cure a showcase item (asserted before the fire could burn out).
+// Breaks: the quench scripted action does not cure a showcase item (asserted before the fire could burn out).
 test('fire 4: the bucket puts both out', () => {
   w = take(w, 'smithy_bucket');
   for (const target of ['bench', 'kindling'])

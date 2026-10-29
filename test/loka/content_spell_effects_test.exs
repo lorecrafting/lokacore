@@ -4,7 +4,7 @@ defmodule Loka.ContentSpellEffectsTest do
   @dir "cartridges/spell_effects_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row 29b): the compiler accepts an effect step on a recipe that is not a spell,
+  # Breaks (toolbox row 29b): the compiler accepts an effect step on a scripted action that is not a spell,
   # a damage step naming no NPC of the cartridge, or light.ignite
   # without light@1.
   test "effect steps sit on spells, resolve and declare their owner" do

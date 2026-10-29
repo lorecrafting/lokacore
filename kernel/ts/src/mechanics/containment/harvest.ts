@@ -18,7 +18,7 @@ import {
 import { selected } from './stock.ts';
 import { carryingExchange } from './shared.ts';
 import { status } from '../skills.ts';
-import { fits } from '../action_recipe/shared.ts';
+import { fits } from '../scripted_action/shared.ts';
 import { toolHeld } from '../lookups.ts';
 
 export function harvest(

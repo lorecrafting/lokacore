@@ -216,7 +216,7 @@ const magic = async (r: Walk, steps: Steps) => {
   await take(/^(?:the )?oilcan, open$/i, /^Take the oilcan/);
   await take(/^(?:the )?loft bucket, open$/i, /^Take the loft bucket/);
   await moves('east');
-  await held(/^the oilcan/); // a use recipe is offered on the held tool
+  await held(/^the oilcan/); // a use scripted action is offered on the held tool
   await tap(LABEL.useOn); // the oilcan's Pick list; a pick returns to World
   await tap(/, oil the winch$/);
   await tap('Map');

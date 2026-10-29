@@ -203,7 +203,7 @@ export const other = (
   a.target_ids?.length === 2 &&
   !NOT_USE.includes(commandOf(a)) &&
   (a.target_ids[1] === id ? a.target_ids[0] : commandOf(a) === 'give' && a.target_ids[1]);
-// A use or Give pair is a Pick list row on both its pages (pick.ts), its label the recipe's.
+// A use or Give pair is a Pick list row on both its pages (pick.ts), its label the scripted action's.
 const pickRows = (row: Press, reason: string, ids: string[]) =>
   ids.map((id) => ({ ...row, pick: reason ? { reason } : {}, detail_id: id }));
 

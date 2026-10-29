@@ -153,7 +153,7 @@ defmodule Loka.ContentDreamsTest do
         ["requires", "capabilities"],
         &Map.merge(
           &1,
-          Map.new(~w(scene quest service dialogue inspectable_detail action_recipe), fn k ->
+          Map.new(~w(scene quest service dialogue inspectable_detail scripted_action), fn k ->
             {k, 1}
           end)
         )

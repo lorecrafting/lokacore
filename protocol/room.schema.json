@@ -4,7 +4,7 @@
   "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need; slice 2: inspectable details; slice 3: description variants. Tags and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
   "$defs": {
     "Alias": {
-      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for an ActionRecipe, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
+      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for a ScriptedAction, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9_]*$",
       "maxLength": 64,
@@ -147,7 +147,7 @@
           "maxItems": 16
         },
         "rating": {
-          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed recipe check against this detail must reach.",
+          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach.",
           "type": "integer"
         },
         "readable": {

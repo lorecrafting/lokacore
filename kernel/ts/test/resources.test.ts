@@ -22,8 +22,8 @@ const CHARACTER = 'bd595711-ea5f-89a5-abb0-046cd349d2f9'; // ordinal 0
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157'; // ordinal 1
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const SEED = [1, 2, 3, 4];
-const SHOVE = 'resource_sampler@0.0.1:recipe/shove_cart';
-const PRAY = 'resource_sampler@0.0.1:recipe/pray';
+const SHOVE = 'resource_sampler@0.0.1:action/shove_cart';
+const PRAY = 'resource_sampler@0.0.1:action/pray';
 const YARD = (w: World) => w.roomIds['resource_sampler@0.0.1:room/mill_yard'];
 
 const sorted = (v: any): any =>
@@ -105,10 +105,10 @@ test('a failed threshold check still pays its cost; success runs the outcome', (
   assert.equal(passed.kind === 'accepted' && passed.outcome, 'success');
 });
 
-// Breaks: the threshold reads the value after this recipe's own costs.
-test('a threshold reads the resource before the recipe pays its costs', () => {
+// Breaks: the threshold reads the value after this scripted action's own costs.
+test('a threshold reads the resource before the scripted action pays its costs', () => {
   const w = world((c) => {
-    c.recipes[SHOVE].check = {
+    c.scripted_actions[SHOVE].check = {
       key: 'shove_cart',
       kind: 'threshold',
       resource: ref('mv'),
@@ -124,16 +124,20 @@ test('a threshold reads the resource before the recipe pays its costs', () => {
 // commit either.)
 test('an unaffordable cost is insufficient_resource before any draw, and changes nothing', () => {
   const lucky = world((c) => {
-    c.recipes[SHOVE].check = { key: 'shove_cart', kind: 'luck', chance: 50 };
-    c.recipes[SHOVE].costs = [
+    c.scripted_actions[SHOVE].check = { key: 'shove_cart', kind: 'luck', chance: 50 };
+    c.scripted_actions[SHOVE].costs = [
       { resource: ref('mv'), amount: 2 },
       { resource: ref('mv'), amount: 2 },
     ];
   });
   rejects(lucky, perform('shove_cart'), 'insufficient_resource'); // 3 - 2 - 2 < 0
-  const exact = world((c) => (c.recipes[SHOVE].costs = [{ resource: ref('mv'), amount: 3 }]));
+  const exact = world(
+    (c) => (c.scripted_actions[SHOVE].costs = [{ resource: ref('mv'), amount: 3 }]),
+  );
   assert.deepEqual(ops(exact, perform('shove_cart')), [adjust('mv', 3, 0)]); // down to the minimum
-  const pricey = world((c) => (c.recipes[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]));
+  const pricey = world(
+    (c) => (c.scripted_actions[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]),
+  );
   rejects(run(pricey, move('east')), perform('pray'), 'insufficient_resource');
 });
 
@@ -144,12 +148,12 @@ const short = (key: string, amount: number) => ({
 
 // Pass-1 R1. Breaks: the refusal not naming the unpaid cost, naming a cost the body can pay, or
 // judging each cost alone (50 ma and 51 ma are each affordable from 100, not both).
-test('an unaffordable recipe names the first cost the body cannot pay after the ones before it', () => {
+test('an unaffordable scripted action names the first cost the body cannot pay after the ones before it', () => {
   const pray = (costs: { resource: any; amount: number }[]) =>
     noticeAction(
       gameView(
         run(
-          world((c) => (c.recipes[PRAY].costs = costs)),
+          world((c) => (c.scripted_actions[PRAY].costs = costs)),
           move('east'),
         ),
       ),
@@ -170,7 +174,7 @@ test('an unaffordable recipe names the first cost the body cannot pay after the 
       'GameView',
       gameView(
         run(
-          world((c) => (c.recipes[PRAY].costs = split)),
+          world((c) => (c.scripted_actions[PRAY].costs = split)),
           move('east'),
         ),
       ),
@@ -220,7 +224,7 @@ test('regeneration adds gain per hour boundary crossed, stopping at the maximum'
   ]);
 });
 
-// Breaks: a resource.adjust step not stopping at the resource's bounds (RecipeStep: add by,
+// Breaks: a resource.adjust step not stopping at the resource's bounds (ActionStep: add by,
 // stopping at the bounds), or emitting a no-op adjust at full value.
 test('a resource.adjust step stops at the maximum; at full value it changes nothing', () => {
   // pray at 0 (hp 15), at 3600 (hp 15 + 5 regen = 20, + 5 = 25), then at 7200 hp is 25 already.
@@ -238,7 +242,7 @@ test('a resource.adjust step stops at the maximum; at full value it changes noth
   // Review N4: -10 at hp 3 stops at the minimum, 0.
   const harm = world((c) => {
     c.resources['resource_sampler@0.0.1:resource/hp'].start = 3;
-    c.recipes[PRAY].outcomes.success.sequence[0].by = -10;
+    c.scripted_actions[PRAY].outcomes.success.sequence[0].by = -10;
   });
   assert.deepEqual(ops(run(harm, move('east')), perform('pray'))[1], adjust('hp', 3, 0));
 });
@@ -246,12 +250,12 @@ test('a resource.adjust step stops at the maximum; at full value it changes noth
 // Breaks: the cooldown end computed as last + cooldown, which overflows for a huge cooldown
 // (an evaluator_error fault instead of the cooldown refusal).
 test('a cooldown of 2^53 - 1 refuses with cooldown, not a fault', () => {
-  const once = world((c) => (c.recipes[PRAY].cooldown = Number.MAX_SAFE_INTEGER));
+  const once = world((c) => (c.scripted_actions[PRAY].cooldown = Number.MAX_SAFE_INTEGER));
   rejects(run(once, move('east'), wait(3600), perform('pray')), perform('pray'), 'cooldown');
 });
 
 // Breaks: < and <= swapped at the cooldown boundary, or no cooldown.start.
-test('a cooldown refuses the recipe until exactly its end', () => {
+test('a cooldown refuses the scripted action until exactly its end', () => {
   const w = run(world(), move('east'), perform('pray'));
   assert.deepEqual(Object.values(w.state.cooldowns!), [0]);
   rejects(run(w, wait(3599)), perform('pray'), 'cooldown');
@@ -268,13 +272,13 @@ test('a cooldown refuses the recipe until exactly its end', () => {
 
 // Breaks: a failed attempt not starting the cooldown.
 test('a failed attempt starts the cooldown too', () => {
-  const w = world((c) => (c.recipes[SHOVE].cooldown = 60));
+  const w = world((c) => (c.scripted_actions[SHOVE].cooldown = 60));
   const failed = step(w, perform('shove_cart'), 0);
   assert.equal(failed.decision.kind === 'accepted' && failed.decision.outcome, 'failure');
   rejects(failed.world, perform('shove_cart'), 'cooldown');
 });
 
-// Astra A2. Breaks: the GameView advertising a recipe under cooldown or with unaffordable costs,
+// Astra A2. Breaks: the GameView advertising a scripted action under cooldown or with unaffordable costs,
 // or an exit the body cannot pay for, as available (the same world rejects them).
 test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavailable', () => {
   const pray = (w: World) => noticeAction(gameView(w), 'pray');
@@ -288,7 +292,9 @@ test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavail
     reason: { code: 'cooldown' },
   });
   assert.equal(pray(run(prayed, wait(3600)))!.available, true);
-  const poor = world((c) => (c.recipes[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]));
+  const poor = world(
+    (c) => (c.scripted_actions[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]),
+  );
   assert.deepEqual(pray(run(poor, move('east')))!, {
     ...pray(prayed)!,
     reason: { code: 'insufficient_resource', message: short('ma', 101) },

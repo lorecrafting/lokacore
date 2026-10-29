@@ -223,8 +223,9 @@ test('a failed attempt and a rejection persist; their retries draw nothing', () 
 test('a fault changes nothing and gets no receipt', () => {
   const ok = world('cartridge_bell_hash.json', [1, 2, 3, 4]);
   const cartridge = structuredClone(ok.fresh.cartridge) as any;
-  cartridge.recipes['recipe_sampler@0.0.1:recipe/ring_bell'].outcomes.success.sequence[0].value =
-    'yes';
+  cartridge.scripted_actions[
+    'recipe_sampler@0.0.1:action/ring_bell'
+  ].outcomes.success.sequence[0].value = 'yes';
   const p = processOn(save(), { ...ok, fresh: { ...ok.fresh, cartridge } });
   const before = p.story.world();
   const ring = invocation(4, 'ring_bell', []);
@@ -514,9 +515,9 @@ test('jobs survive a restart: waiting to 19:00 after it moves Bram as without it
   assert.deepEqual(Object.keys(after.jobs).sort(), [J1, J0]);
 });
 
-// Breaks (04 §5.4; 03 §14): a recipe's time cost not running the job due inside it, or its retry
+// Breaks (04 §5.4; 03 §14): a scripted action's time cost not running the job due inside it, or its retry
 // deciding again (running the job twice) instead of replaying the receipt.
-test('a recipe whose time cost runs a job replays its receipt on retry', () => {
+test('a scripted action whose time cost runs a job replays its receipt on retry', () => {
   const a = processOn(save(), ferry);
   a.story.invoke(waitUntil(1, 18 * 3600 + 1800));
   const coil = invocation(2, 'coil_rope', []);
@@ -552,7 +553,7 @@ test('a move whose reactions commit replays its events byte for byte after a res
 // Breaks (06 §43; 03 §14): a narration's participants dropped from the stored receipt or its
 // replay, or resolved again from the reopened world (here one whose Bram ref names the body)
 // instead of returned as committed.
-test("a recipe narration's pinned participants survive a restart and replay unchanged", () => {
+test("a scripted action narration's pinned participants survive a restart and replay unchanged", () => {
   const [path, coil, bram] = [
     save(),
     invocation(1, 'coil_rope', []),

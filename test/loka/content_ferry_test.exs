@@ -364,7 +364,7 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: opted-in policy dropped from the compiled artifact, or legacy duration rules
-  # applied to an elapsed release despite removing the recipe's time skip.
+  # applied to an elapsed release despite removing the scripted action's time skip.
   test "elapsed release preserves its policy in its artifact", %{dir: dir} do
     assert {:ok, bytes, []} = compile(dir, elapsed_files())
     artifact = JSON.decode!(bytes)
@@ -395,8 +395,8 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: a cartridge alias can manufacture authority elapsed evidence or skip real time
-  # through Wait; duration recipes likewise cannot opt into elapsed time.
-  test "elapsed release refuses time-skip recipes and player clock aliases", %{dir: dir} do
+  # through Wait; duration scripted actions likewise cannot opt into elapsed time.
+  test "elapsed release refuses time-skip scripted actions and player clock aliases", %{dir: dir} do
     files = elapsed_files()
 
     action = %{

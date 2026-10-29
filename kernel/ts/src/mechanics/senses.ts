@@ -78,16 +78,16 @@ function sources(w: World, steps: Steps): Source[] {
   return out;
 }
 
-// The transient cues of the recipe outcome that caused a reaction, from the actor's room;
-// undefined when the cause is no recipe outcome event.
+// The transient cues of the scripted action outcome that caused a reaction, from the actor's room;
+// undefined when the cause is no scripted action outcome event.
 function outcomeCues(w: World, actor: CharacterId, cause: DomainEvent | undefined) {
   const p = cause?.payload;
   if (p?.type !== 'check_failed' && p?.type !== 'check_passed' && p?.type !== 'action_completed')
     return undefined;
-  const recipe = Object.values(w.cartridge.recipes ?? {}).find((r) =>
+  const scripted = Object.values(w.cartridge.scripted_actions ?? {}).find((r) =>
     p.type === 'action_completed' ? r.key === p.action : r.check?.key === p.check.key,
   );
-  const cues = recipe?.outcomes[p.type === 'check_failed' ? 'failure' : 'success']?.cues ?? [];
+  const cues = scripted?.outcomes[p.type === 'check_failed' ? 'failure' : 'success']?.cues ?? [];
   const body = bodyOf(w, actor);
   const room = body && w.state.containers[body];
   return room ? cues.map((cue): Source => ({ room, cue })) : [];
@@ -142,7 +142,7 @@ export function cueViews(
 }
 
 /**
- * cue_perceived: the living NPC's room is reached by a cue of `sense`; in a reaction to a recipe
+ * cue_perceived: the living NPC's room is reached by a cue of `sense`; in a reaction to a scripted action
  * outcome, only by that outcome's transient cues (the action was heard, not the ambient noise).
  */
 export function perceived(

@@ -28,7 +28,7 @@ export function bellSource(c: any) {
     aliases: ['bell'],
     description: 'detail.bell',
   };
-  c.recipes[`${prefix}:recipe/ring_bell`] = {
+  c.scripted_actions[`${prefix}:action/ring_bell`] = {
     key: 'ring_bell',
     aliases: ['ring'],
     name: 'actions.ring_bell',

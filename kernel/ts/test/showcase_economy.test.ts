@@ -405,7 +405,7 @@ test('economy 9 boundary: with exactly the 3-penny fine the jailer only takes pa
   );
 });
 
-// Breaks: the force recipe or the grate's opens_when, the drain's way out, the escape clearing
+// Breaks: the force scripted action or the grate's opens_when, the drain's way out, the escape clearing
 // wanted, the clerk's fine (gate, price, reset), or the charge not shutting the grate again on
 // the second arrest.
 test('economy 9 escape: force the grate, leave by the drain still wanted; the guard arrests again', () => {

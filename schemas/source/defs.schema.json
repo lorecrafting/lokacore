@@ -3,7 +3,7 @@
   "$defs": {
     "ActionContribution": {
       "additionalProperties": false,
-      "description": "One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge recipe; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and recipes (kernel/ts/src/actions.ts).",
+      "description": "One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge scripted action; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and scripted actions (kernel/ts/src/actions.ts).",
       "properties": {
         "actions": {
           "items": { "$ref": "#/$defs/Key" },
@@ -56,7 +56,7 @@
       ]
     },
     "Alias": {
-      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for an ActionRecipe, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
+      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for a ScriptedAction, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
       "maxLength": 64,
       "pattern": "^[a-z0-9][a-z0-9_]*$",
       "type": "string"
@@ -492,7 +492,7 @@
     },
     "Cue": {
       "additionalProperties": false,
-      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or recipe outcome that declares it.",
+      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or scripted action outcome that declares it.",
       "properties": {
         "range": {
           "maximum": 2,
@@ -719,7 +719,7 @@
           "attribute"
         ]
       },
-      "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a recipe's (action.schema.json ActionRecipe check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no recipe's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
+      "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
       "properties": {
         "attribute": { "$ref": "#/$defs/DefinitionRef" },
         "failure": { "$ref": "#/$defs/TextKey" },
@@ -738,7 +738,7 @@
     },
     "DialogueChoice": {
       "additionalProperties": false,
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (DialogueCheck), an opposed check made when the choice is chosen; a checked choice carries only label, narration, sequence, availability and check, in a dialogue with no quest and no riddle, and its sequence grants no skill (else OUTCOME_MISMATCH at its check).",
+      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (DialogueCheck), an opposed check made when the choice is chosen; a checked choice carries only label, narration, sequence, availability and check, in a dialogue with no quest and no riddle, and its sequence grants no skill (else OUTCOME_MISMATCH at its check).",
       "properties": {
         "accept": { "$ref": "#/$defs/DefinitionRef" },
         "availability": {
@@ -1221,7 +1221,7 @@
           "type": "object"
         },
         "rating": {
-          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed recipe check against this detail must reach.",
+          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach.",
           "type": "integer"
         },
         "readable": {
@@ -1582,7 +1582,7 @@
           "type": "object"
         }
       ],
-      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
+      "description": "An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
     },
     "NpcHp": {
       "additionalProperties": false,
@@ -2069,7 +2069,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.",
+          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a scripted action outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.",
           "properties": {
             "npc": { "$ref": "#/$defs/DefinitionRef" },
             "op": { "const": "cue_perceived" },
@@ -2258,9 +2258,9 @@
         "abandoned"
       ]
     },
-    "RecipeCost": {
+    "ActionCost": {
       "additionalProperties": false,
-      "description": "One resource cost of an ActionRecipe (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
+      "description": "One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
       "properties": {
         "amount": {
           "maximum": 2147483647,
@@ -2275,7 +2275,7 @@
       ],
       "type": "object"
     },
-    "RecipeCraft": {
+    "ActionCraft": {
       "additionalProperties": false,
       "allOf": [
         {
@@ -2293,7 +2293,7 @@
           ]
         }
       ],
-      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
       "properties": {
         "consume": {
           "additionalProperties": false,
@@ -2339,9 +2339,9 @@
       },
       "type": "object"
     },
-    "RecipeNarration": {
+    "ActionNarration": {
       "additionalProperties": false,
-      "description": "A recipe outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
+      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
       "properties": {
         "actor": { "$ref": "#/$defs/TextKey" },
         "observers": { "$ref": "#/$defs/TextKey" },
@@ -2356,7 +2356,7 @@
       ],
       "type": "object"
     },
-    "RecipeStep": {
+    "ActionStep": {
       "anyOf": [
         {
           "additionalProperties": false,
@@ -2388,7 +2388,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row G4: end the recipe target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
+          "description": "Toolbox row G4: end the scripted action target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
           "properties": {
             "op": { "const": "status.cure" },
             "status": { "$ref": "#/$defs/DefinitionRef" }
@@ -2401,7 +2401,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29b (spell recipes only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "description": "Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
           "properties": {
             "npc": { "$ref": "#/$defs/DefinitionRef" },
             "op": { "const": "status.apply" },
@@ -2415,7 +2415,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29b (spell recipes only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "description": "Toolbox row 29b (spell scripted actions only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
           "properties": {
             "amount": {
               "maximum": 2147483647,
@@ -2435,7 +2435,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29b (spell recipes only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "description": "Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
           "properties": {
             "item": { "$ref": "#/$defs/DefinitionRef" },
             "op": { "const": "light.ignite" }
@@ -2462,7 +2462,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise structure at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "description": "Built rooms S6 (detail-target scripted actions only, at most one per sequence, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
           "properties": {
             "direction": {
               "enum": [
@@ -2485,9 +2485,9 @@
           "type": "object"
         }
       ],
-      "description": "One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (RecipeCost)."
+      "description": "One registered operation of a scripted action outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost)."
     },
-    "RecipeTarget": {
+    "ScriptedTarget": {
       "anyOf": [
         {
           "additionalProperties": false,
@@ -2517,7 +2517,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell recipe has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
+          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
           "properties": {
             "aimed": {
               "additionalProperties": false,
@@ -2551,7 +2551,7 @@
           "type": "object"
         }
       ],
-      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
+      "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
     },
     "ReleaseVersion": {
       "description": "A release version (05 §3 version, §12): MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.",
@@ -3317,7 +3317,7 @@
           ]
         }
       ],
-      "description": "Toolbox row G4: what a use recipe's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
+      "description": "Toolbox row G4: what a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
       "properties": {
         "liquid": { "$ref": "#/$defs/DefinitionRef" },
         "tag": { "$ref": "#/$defs/Tag" }
@@ -3661,7 +3661,7 @@
         "movement": {
           "additionalProperties": false,
           "properties": {
-            "cost": { "$ref": "#/$defs/RecipeCost" },
+            "cost": { "$ref": "#/$defs/ActionCost" },
             "terrain": {
               "additionalProperties": {
                 "maximum": 1000,
@@ -3856,7 +3856,7 @@
     },
     "partial.DialogueCheck": {
       "additionalProperties": false,
-      "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a recipe's (action.schema.json ActionRecipe check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no recipe's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
+      "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
       "properties": {
         "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
         "failure": { "$ref": "#/$defs/partial.TextKey" },
@@ -3870,7 +3870,7 @@
     },
     "partial.DialogueChoice": {
       "additionalProperties": false,
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (DialogueCheck), an opposed check made when the choice is chosen; a checked choice carries only label, narration, sequence, availability and check, in a dialogue with no quest and no riddle, and its sequence grants no skill (else OUTCOME_MISMATCH at its check).",
+      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (DialogueCheck), an opposed check made when the choice is chosen; a checked choice carries only label, narration, sequence, availability and check, in a dialogue with no quest and no riddle, and its sequence grants no skill (else OUTCOME_MISMATCH at its check).",
       "properties": {
         "accept": { "$ref": "#/$defs/partial.DefinitionRef" },
         "availability": {
@@ -4192,7 +4192,7 @@
           "type": "object"
         },
         "rating": {
-          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed recipe check against this detail must reach.",
+          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach.",
           "type": "integer"
         },
         "readable": {
@@ -4400,7 +4400,7 @@
           "type": "object"
         }
       ],
-      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
+      "description": "An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
     },
     "partial.NpcHp": {
       "additionalProperties": false,
@@ -4714,7 +4714,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.",
+          "description": "The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a scripted action outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.",
           "properties": {
             "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
             "op": { "const": "cue_perceived" },
@@ -4863,9 +4863,9 @@
       ],
       "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet)."
     },
-    "partial.RecipeCraft": {
+    "partial.ActionCraft": {
       "additionalProperties": false,
-      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
       "properties": {
         "consume": {
           "additionalProperties": false,
@@ -4902,9 +4902,9 @@
       },
       "type": "object"
     },
-    "partial.RecipeNarration": {
+    "partial.ActionNarration": {
       "additionalProperties": false,
-      "description": "A recipe outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
+      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
       "properties": {
         "actor": { "$ref": "#/$defs/partial.TextKey" },
         "observers": { "$ref": "#/$defs/partial.TextKey" },
@@ -4916,7 +4916,7 @@
       },
       "type": "object"
     },
-    "partial.RecipeTarget": {
+    "partial.ScriptedTarget": {
       "anyOf": [
         {
           "additionalProperties": false,
@@ -4937,7 +4937,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell recipe has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
+          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
           "properties": {
             "aimed": {
               "additionalProperties": false,
@@ -4963,7 +4963,7 @@
           "type": "object"
         }
       ],
-      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
+      "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
     },
     "partial.RestBinding": {
       "additionalProperties": false,
@@ -5304,7 +5304,7 @@
     },
     "partial.UseTool": {
       "additionalProperties": false,
-      "description": "Toolbox row G4: what a use recipe's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
+      "description": "Toolbox row G4: what a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
       "properties": {
         "liquid": { "$ref": "#/$defs/partial.DefinitionRef" },
         "tag": { "$ref": "#/$defs/Tag" }
@@ -5382,9 +5382,9 @@
       },
       "type": "object"
     },
-    "partial.source.ActionRecipe": {
+    "partial.source.ScriptedAction": {
       "additionalProperties": false,
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (ActionCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
       "properties": {
         "aliases": {
           "items": { "$ref": "#/$defs/Alias" },
@@ -5396,7 +5396,7 @@
           "anyOf": [
             {
               "additionalProperties": false,
-              "description": "A luck roll (RecipeCheck).",
+              "description": "A luck roll (ActionCheck).",
               "properties": {
                 "chance": {
                   "maximum": 99,
@@ -5410,7 +5410,7 @@
             },
             {
               "additionalProperties": false,
-              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the recipe's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of RecipeCheck apply.",
+              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of ActionCheck apply.",
               "properties": {
                 "difficulty": { "$ref": "#/$defs/ResourceInt" },
                 "key": { "$ref": "#/$defs/Key" },
@@ -5458,12 +5458,12 @@
           "type": "integer"
         },
         "costs": {
-          "items": { "$ref": "#/$defs/RecipeCost" },
+          "items": { "$ref": "#/$defs/ActionCost" },
           "maxItems": 8,
           "minItems": 1,
           "type": "array"
         },
-        "craft": { "$ref": "#/$defs/partial.RecipeCraft" },
+        "craft": { "$ref": "#/$defs/partial.ActionCraft" },
         "duration": {
           "minimum": 1,
           "type": "integer"
@@ -5480,9 +5480,9 @@
                   "$ref": "#/$defs/Cues",
                   "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
                 },
-                "narration": { "$ref": "#/$defs/partial.RecipeNarration" },
+                "narration": { "$ref": "#/$defs/partial.ActionNarration" },
                 "sequence": {
-                  "items": { "$ref": "#/$defs/RecipeStep" },
+                  "items": { "$ref": "#/$defs/ActionStep" },
                   "maxItems": 16,
                   "minItems": 0,
                   "type": "array"
@@ -5497,9 +5497,9 @@
                   "$ref": "#/$defs/Cues",
                   "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
                 },
-                "narration": { "$ref": "#/$defs/partial.RecipeNarration" },
+                "narration": { "$ref": "#/$defs/partial.ActionNarration" },
                 "sequence": {
-                  "items": { "$ref": "#/$defs/RecipeStep" },
+                  "items": { "$ref": "#/$defs/ActionStep" },
                   "maxItems": 16,
                   "minItems": 1,
                   "type": "array"
@@ -5513,7 +5513,7 @@
         "policy": { "$ref": "#/$defs/partial.Policy" },
         "priority": { "type": "integer" },
         "reason": { "$ref": "#/$defs/partial.TextKey" },
-        "target": { "$ref": "#/$defs/partial.RecipeTarget" },
+        "target": { "$ref": "#/$defs/partial.ScriptedTarget" },
         "tip": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
@@ -5584,7 +5584,7 @@
     },
     "partial.source.DialogueDefinition": {
       "additionalProperties": false,
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
+      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, scripted action's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "properties": {
         "choices": {
           "additionalProperties": { "$ref": "#/$defs/partial.DialogueChoice" },
@@ -6222,7 +6222,7 @@
     },
     "partial.source.QuestDefinition": {
       "additionalProperties": false,
-      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, scripted action's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
       "properties": {
         "deadline": {
           "additionalProperties": false,
@@ -7114,7 +7114,7 @@
             "extends": { "$ref": "#/$defs/Key" },
             "on": {
               "additionalProperties": false,
-              "description": "What starts the scene: a story point reached, a quest outcome, or an action recipe's success; an action start names the recipe's room and detail.",
+              "description": "What starts the scene: a story point reached, a quest outcome, or a scripted action's success; an action start names the scripted action's room and detail.",
               "properties": {
                 "action": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "detail": { "$ref": "#/$defs/Key" },
@@ -7526,9 +7526,9 @@
       ],
       "type": "object"
     },
-    "source.ActionRecipe": {
+    "source.ScriptedAction": {
       "additionalProperties": false,
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (ActionCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
       "properties": {
         "aliases": {
           "items": { "$ref": "#/$defs/Alias" },
@@ -7540,7 +7540,7 @@
           "anyOf": [
             {
               "additionalProperties": false,
-              "description": "A luck roll (RecipeCheck).",
+              "description": "A luck roll (ActionCheck).",
               "properties": {
                 "chance": {
                   "maximum": 99,
@@ -7559,7 +7559,7 @@
             },
             {
               "additionalProperties": false,
-              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the recipe's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of RecipeCheck apply.",
+              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of ActionCheck apply.",
               "properties": {
                 "difficulty": { "$ref": "#/$defs/ResourceInt" },
                 "key": { "$ref": "#/$defs/Key" },
@@ -7649,12 +7649,12 @@
           "type": "integer"
         },
         "costs": {
-          "items": { "$ref": "#/$defs/RecipeCost" },
+          "items": { "$ref": "#/$defs/ActionCost" },
           "maxItems": 8,
           "minItems": 1,
           "type": "array"
         },
-        "craft": { "$ref": "#/$defs/RecipeCraft" },
+        "craft": { "$ref": "#/$defs/ActionCraft" },
         "duration": {
           "minimum": 1,
           "type": "integer"
@@ -7670,9 +7670,9 @@
                   "$ref": "#/$defs/Cues",
                   "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
                 },
-                "narration": { "$ref": "#/$defs/RecipeNarration" },
+                "narration": { "$ref": "#/$defs/ActionNarration" },
                 "sequence": {
-                  "items": { "$ref": "#/$defs/RecipeStep" },
+                  "items": { "$ref": "#/$defs/ActionStep" },
                   "maxItems": 16,
                   "minItems": 0,
                   "type": "array"
@@ -7691,9 +7691,9 @@
                   "$ref": "#/$defs/Cues",
                   "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
                 },
-                "narration": { "$ref": "#/$defs/RecipeNarration" },
+                "narration": { "$ref": "#/$defs/ActionNarration" },
                 "sequence": {
-                  "items": { "$ref": "#/$defs/RecipeStep" },
+                  "items": { "$ref": "#/$defs/ActionStep" },
                   "maxItems": 16,
                   "minItems": 1,
                   "type": "array"
@@ -7714,7 +7714,7 @@
         "policy": { "$ref": "#/$defs/Policy" },
         "priority": { "type": "integer" },
         "reason": { "$ref": "#/$defs/TextKey" },
-        "target": { "$ref": "#/$defs/RecipeTarget" },
+        "target": { "$ref": "#/$defs/ScriptedTarget" },
         "tip": { "$ref": "#/$defs/TextKey" }
       },
       "required": [
@@ -7804,7 +7804,7 @@
     },
     "source.DialogueDefinition": {
       "additionalProperties": false,
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
+      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, scripted action's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "properties": {
         "choices": {
           "additionalProperties": { "$ref": "#/$defs/DialogueChoice" },
@@ -8537,7 +8537,7 @@
     },
     "source.QuestDefinition": {
       "additionalProperties": false,
-      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, scripted action's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
       "properties": {
         "deadline": {
           "additionalProperties": false,
@@ -9642,7 +9642,7 @@
                   ]
                 }
               ],
-              "description": "What starts the scene: a story point reached, a quest outcome, or an action recipe's success; an action start names the recipe's room and detail.",
+              "description": "What starts the scene: a story point reached, a quest outcome, or a scripted action's success; an action start names the scripted action's room and detail.",
               "properties": {
                 "action": { "$ref": "#/$defs/DefinitionRef" },
                 "detail": { "$ref": "#/$defs/Key" },
@@ -10093,7 +10093,7 @@
     "source.actions": {
       "else": {
         "else": {
-          "else": { "$ref": "#/$defs/source.ActionRecipe" },
+          "else": { "$ref": "#/$defs/source.ScriptedAction" },
           "if": {
             "required": [
               "command"
@@ -10109,7 +10109,7 @@
           "type": "object"
         },
         "then": {
-          "else": { "$ref": "#/$defs/partial.source.ActionRecipe" },
+          "else": { "$ref": "#/$defs/partial.source.ScriptedAction" },
           "if": {
             "required": [
               "command"

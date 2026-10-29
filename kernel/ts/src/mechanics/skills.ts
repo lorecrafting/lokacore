@@ -9,7 +9,7 @@ import { acquisition, level, membership, practice } from './skill_level.ts';
 export { acquisition, level, membership, practice };
 
 /**
- * `run` with one use of the skill an opposed check (a recipe's, row 5; a choice's, row 14) names, unless the check
+ * `run` with one use of the skill an opposed check (a scripted action's, row 5; a choice's, row 14) names, unless the check
  * names none, the skill has no growth or its count is at the last threshold.
  */
 export function practised<R extends Assigned>(

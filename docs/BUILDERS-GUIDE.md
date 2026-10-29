@@ -29,7 +29,7 @@ These rules hold across every kind:
 - A policy is its condition tree, and it is optional: an absent gate always holds, and an absent trigger (`disposition.hostile`, `friendly`) never fires.
 - A story point is `story_point: "<key>/<outcome>"` on the dialogue choice that reaches it (a
   scene's `on_end` may also claim one); there is no story point file.
-- Custom events are the one message between rules: a recipe step `event.emit` emits a `custom_event`,
+- Custom events are the one message between rules: a scripted action step `event.emit` emits a `custom_event`,
   and a reaction `on` `custom_event` with `custom: "<key>"` hears it.
 
 The [glossary](system/glossary.md) distinguishes a definition from a live entity. A compiled
@@ -122,7 +122,7 @@ the toolbox showcase.
 | An item, container, key or piece of equipment | `items/<key>.json`; [showcase items](../cartridges/toolbox_showcase/items/) | [Containment](system/mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets), [barriers](system/mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets), [equipment](system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) and carrying settings apply. |
 | An NPC definition with HP | `npcs/<key>.json`; [one cellar rat](../cartridges/cellar_sampler/npcs/cellar_rat_1.json) | Its room and text are authored. HP is per entity; [resource rules](system/mechanics.md#resource1-kerneltssrcmechanicsresourcets) govern changes. A schedule is optional. An ordinary NPC definition creates one placement at fresh-world birth; a definition marked `spawn_template` supplies a population/death template and is not placed directly. |
 | A fact or condition | `facts.json`, with each policy inline where it is read; [showcase facts](../cartridges/toolbox_showcase/facts.json) | Typed facts and pure policies drive eligibility; see [policy and fact](system/mechanics.md#target_resolution1-policy1-fact1). |
-| A player action | `actions/<key>.json`; [ring the bell](../cartridges/recipe_sampler/actions/ring_bell.json) | With `command`, the action names a built-in command; without it, a target, policy and success/failure sequences compose registered outcomes; see [scripted actions](system/mechanics.md#action_recipe1-mechanicsaction_reciperulets49). No arbitrary script runs. |
+| A player action | `actions/<key>.json`; [ring the bell](../cartridges/recipe_sampler/actions/ring_bell.json) | With `command`, the action names a built-in command; without it, a target, policy and success/failure sequences compose registered outcomes; see [scripted actions](system/mechanics.md#scripted_action1-mechanicsscripted_actionrulets49). No arbitrary script runs. |
 | A quest and conversations | `quests/<key>.json`, `dialogues/<key>.json`; [the wizard's errand](../cartridges/toolbox_showcase/quests/errand.json), [its offer](../cartridges/toolbox_showcase/dialogues/wizard_errand.json) | A choice can accept or resolve the quest; [quest](system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) and [dialogue](system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts) document the supported objective and choice forms. |
 | Definitions that share most fields | `"extends": "<key>"` and `"abstract": true` in any definition file; [shoo's deer and crow](../cartridges/shoo_sampler/npcs/) | The compiler merges the parent in before anything else reads the source ([Source shortcuts](system/cartridge.md#source-shortcuts)): objects merge, everything else replaces, and the artifact is unchanged. |
 | A family of definitions that differ in a few values | `"params"` on the abstract parent with `{"param": "<name>"}` markers, `"with"` on each child; [the showcase wheel](../cartridges/toolbox_showcase/reactions/wheel_shows.json) and [one child](../cartridges/toolbox_showcase/reactions/wheel_1_x_shows_0.json) | Each marker is replaced whole by the child's value, then the child merges over the parent ([Source shortcuts](system/cartridge.md#source-shortcuts)). |
@@ -140,7 +140,7 @@ other world numbers in cartridge data, not engine code ([world parameters](world
 To check content, replay its transcripts: `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]`
 lists the definitions that no transcript exercises
 ([transcript coverage](system/cartridge.md#transcript-coverage-loka-kgd1942)), and
-`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+`node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--action <key> | --dialogue <key>]`
 says why a rule did or did not run at that step ([rule explainer](system/cartridge.md#rule-explainer-loka-kgd1943)).
 
 ## What the current builder can express

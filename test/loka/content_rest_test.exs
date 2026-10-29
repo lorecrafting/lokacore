@@ -46,10 +46,10 @@ defmodule Loka.ContentRestTest do
     "meaning" => "The cartridge's own."
   }
 
-  # A recipe outcome, a dialogue choice and a reaction writing position, and an authored fact
+  # A scripted action outcome, a dialogue choice and a reaction writing position, and an authored fact
   # named position; with `read` the reaction only reads it.
   defp writes(read \\ false) do
-    recipe =
+    scripted =
       update_in(
         src("actions/coil_rope.json"),
         ["outcomes", "success", "sequence"],
@@ -74,7 +74,7 @@ defmodule Loka.ContentRestTest do
     if read,
       do: %{"reactions/settle.json" => reaction},
       else: %{
-        "actions/coil_rope.json" => recipe,
+        "actions/coil_rope.json" => scripted,
         "dialogues/bram.json" => dialogue,
         "reactions/settle.json" => reaction,
         "facts.json" => facts

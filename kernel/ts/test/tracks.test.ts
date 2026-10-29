@@ -194,7 +194,7 @@ test('without hunts the player leaves no trail; without trail a wander writes no
   const r = reload(source, (c) => {
     for (const p of Object.values(c.populations) as any[]) (delete p.trail, delete p.hunts);
     for (const f of Object.keys(c.facts)) if (f.includes('/trail_')) delete c.facts[f];
-    c.recipes = {};
+    c.scripted_actions = {};
     delete c.world.trails;
   });
   assert.ok(r.ok, JSON.stringify(r));

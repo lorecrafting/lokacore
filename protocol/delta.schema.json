@@ -686,7 +686,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Start an actor's cooldown of an action at the attempt's admission time (21 §4 Time, §7 Cost). Target: cooldown (actor_id, action). Preconditions: the stored start equals `from` (both absent when it never started); `at` equals the base clock. Writes `at`. Whether the action is still cooling down is derived by the rule that owns it (rules/action_recipe.ts), not by composition.",
+          "description": "Start an actor's cooldown of an action at the attempt's admission time (21 §4 Time, §7 Cost). Target: cooldown (actor_id, action). Preconditions: the stored start equals `from` (both absent when it never started); `at` equals the base clock. Writes `at`. Whether the action is still cooling down is derived by the rule that owns it (rules/scripted_action.ts), not by composition.",
           "type": "object",
           "properties": {
             "op": {

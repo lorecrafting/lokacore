@@ -8,7 +8,7 @@ import { wornIn } from '../mechanics/equipment/rule.ts';
 import type { Offered } from './actions.ts';
 import { value as factValue } from '../mechanics/fact.ts';
 import { definition as expeditionDefinition } from '../mechanics/expedition/shared.ts';
-import { spellOf } from '../mechanics/action_recipe/shared.ts';
+import { spellOf } from '../mechanics/scripted_action/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
@@ -39,7 +39,7 @@ const INPUTS: readonly string[] = [
 ];
 
 /** Match the exact command, primary target/scope and input contract.
- * Engine rules own their target checks; recipes, quests and dialogue bind their own identities.
+ * Engine rules own their target checks; scripted actions, quests and dialogue bind their own identities.
  */
 export function accepts(
   world: World,
@@ -58,7 +58,7 @@ export function accepts(
     return false;
   const bound = boundAction(world, payload, a.key);
   if (bound !== a.key) return false;
-  if (a.engine || a.recipe?.target.kind === 'spell') return true;
+  if (a.engine || a.scripted?.target.kind === 'spell') return true;
   const id = primaryTarget(payload);
   if (a.speaker !== undefined && id !== a.speaker) return false;
   const inputs = Object.keys(payload).filter(
@@ -94,12 +94,12 @@ function boundAction(world: World, payload: CommandPayload, fallback: string) {
 
 /** The learned aimed spells (loka-x6t.109), each offered on its targets and cast by its word. */
 export const aimedOffers = (world: World, actor: CharacterId): [string, Offered][] =>
-  Object.values(world.cartridge.recipes ?? {}).flatMap((recipe) => {
-    const { key, name: label, priority, policy, target: t } = recipe;
+  Object.values(world.cartridge.scripted_actions ?? {}).flatMap((scripted) => {
+    const { key, name: label, priority, policy, target: t } = scripted;
     if (t.kind !== 'spell' || !t.aimed || factValue(world, actor, t.learned) !== true) return [];
     const target = { kind: 'entity', scopes: t.aimed.scopes } as const;
     return [
-      [key, { key, label, target, input: [], priority, policy, command: 'cast' as Key, recipe }],
+      [key, { key, label, target, input: [], priority, policy, command: 'cast' as Key, scripted }],
     ];
   });
 

@@ -105,11 +105,15 @@ function transportActions(
   steps: Steps,
 ) {
   const transport = transportOffer(world, actor, id, steps);
-  // A recipe aimed at this detail is offered only here, so the bed and transport pages keep it.
-  const recipes = actions(id).filter((a) => !a.command);
+  // A scripted action aimed at this detail is offered only here, so the bed and transport pages keep it.
+  const scripted_actions = actions(id).filter((a) => !a.command);
   return transport
-    ? { transport, actions: [transport.action, ...recipes] }
-    : offered(detail.bed ? [...bedActions(world, actor, detail, steps), ...recipes] : actions(id));
+    ? { transport, actions: [transport.action, ...scripted_actions] }
+    : offered(
+        detail.bed
+          ? [...bedActions(world, actor, detail, steps), ...scripted_actions]
+          : actions(id),
+      );
 }
 
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});

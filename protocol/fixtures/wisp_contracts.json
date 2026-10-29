@@ -428,7 +428,7 @@
   },
   {
     "name": "attribute check",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -490,7 +490,7 @@
   },
   {
     "name": "attribute check missing check.key",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -551,7 +551,7 @@
   },
   {
     "name": "attribute check missing check.kind",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -612,7 +612,7 @@
   },
   {
     "name": "attribute check missing check.attribute",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -668,7 +668,7 @@
   },
   {
     "name": "attribute check missing check.difficulty",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -729,7 +729,7 @@
   },
   {
     "name": "attribute check invalid check.kind attribute_wrong",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -791,7 +791,7 @@
   },
   {
     "name": "attribute check invalid check.difficulty -9007199254740992",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -853,7 +853,7 @@
   },
   {
     "name": "attribute check invalid check.difficulty 9007199254740992",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",
@@ -915,7 +915,7 @@
   },
   {
     "name": "attribute check invalid check.extra True",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "seek_wisp",
       "name": "actions.seek_wisp",

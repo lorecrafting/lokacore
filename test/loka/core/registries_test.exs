@@ -87,8 +87,8 @@ defmodule Loka.Core.RegistriesTest do
              ])
   end
 
-  # The 14 §R3B list, one kind per named type; ActionRecipe/ComposedAction is one (21 §7).
-  @r3b ~w(action_recipe inspectable_detail description_variant connection barrier reaction_rule
+  # The 14 §R3B list, one kind per named type; ScriptedAction/ComposedAction is one (21 §7).
+  @r3b ~w(scripted_action inspectable_detail description_variant connection barrier reaction_rule
           consequence_operator narration_spec scene_definition scene_instance scene_space
           instance_plan spawn_bundle population_plan commerce_composition service capacity
           service_job world_event_plan)

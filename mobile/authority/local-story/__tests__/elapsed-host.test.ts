@@ -11,7 +11,7 @@ export function elapsedBundle() {
   c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
   c.manifest.requires.kernel_api.at_least = '1.1';
   c.calendar.start = 64800;
-  for (const recipe of Object.values(c.recipes) as any[]) delete recipe.duration;
+  for (const scripted of Object.values(c.scripted_actions) as any[]) delete scripted.duration;
   const canonical = encode(c);
   return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 }

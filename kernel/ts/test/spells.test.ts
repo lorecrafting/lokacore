@@ -1,4 +1,4 @@
-// Toolbox row 29a on the compiled spells sampler: a spell is a recipe cast by its typed word (the
+// Toolbox row 29a on the compiled spells sampler: a spell is a scripted action cast by its typed word (the
 // cast verb). lux costs 2 mana and 1 ash (a reagent pool, gathered at the hearth); ward needs the
 // apprentice quest's word (ward_taught), level 2 and wis 11; noctis needs the word read in the
 // grimoire. An unknown word and a barred spell are refused alike.
@@ -79,11 +79,13 @@ function fresh(): World {
 }
 
 // Breaks: cast is offered in a cartridge without spells: the spells sampler minus its spell
-// recipes still offers it.
-test('cast is not offered once the spells sampler loses its spell recipes', () => {
+// scripted actions still offers it.
+test('cast is not offered once the spells sampler loses its spell scripted actions', () => {
   const r = reload(base, (c) => {
-    c.recipes = Object.fromEntries(
-      Object.entries(c.recipes).filter(([, v]: [string, any]) => v.target.kind !== 'spell'),
+    c.scripted_actions = Object.fromEntries(
+      Object.entries(c.scripted_actions).filter(
+        ([, v]: [string, any]) => v.target.kind !== 'spell',
+      ),
     );
   });
   assert.ok(r.ok, JSON.stringify(!r.ok && r.diagnostic));
@@ -192,7 +194,7 @@ test('spell_words lists learned spells only, with cast admission as availability
 
 // Breaks (loka-j64e): the authored reason is dropped from spell_words or the offered action, the
 // cast refusal and spell_words read different admissions, or an unlearned ward leaks its reason.
-test("a failed recipe policy carries the recipe's reason in the GameView; the command refuses alike", () => {
+test("a failed scripted action policy carries the scripted action's reason in the GameView; the command refuses alike", () => {
   let w = fresh();
   w = ok(play(w, { type: 'accept_quest', quest: ref('quest', 'apprentice') }, 'apprentice'));
   w = ok(play(w, { type: 'perform', action: 'trace_sigil' }));
@@ -202,10 +204,17 @@ test("a failed recipe policy carries the recipe's reason in the GameView; the co
   assert.deepEqual(ward, { word: 'ward', available: false, reason });
   assert.equal(code(cast(w, 'ward')), 'invalid_state');
   assert.deepEqual(cast(fresh(), 'ward').decision, cast(fresh(), 'xyzzy').decision);
-  const key = 'spells_sampler@0.0.1:recipe/trace_sigil';
-  const trace = { ...content.recipes![key as never]!, reason: 'reason.ward' as never };
-  const recipes = { ...content.recipes, [key]: trace } as Cartridge['recipes'];
-  const v = newWorld({ ...content, recipes }, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1]);
+  const key = 'spells_sampler@0.0.1:action/trace_sigil';
+  const trace = { ...content.scripted_actions![key as never]!, reason: 'reason.ward' as never };
+  const scripted_actions = {
+    ...content.scripted_actions,
+    [key]: trace,
+  } as Cartridge['scripted_actions'];
+  const v = newWorld(
+    { ...content, scripted_actions },
+    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never,
+    [1],
+  );
   const offer = noticeAction(gameView(v), 'trace_sigil');
   assert.deepEqual(offer && !offer.available && offer.reason, reason);
   assert.equal(code(play(v, { type: 'perform', action: 'trace_sigil' })), 'invalid_state');
@@ -231,15 +240,15 @@ test('every available spell_words entry casts', () => {
 // Breaks: the TS loader admits a spell without learned or with a per_subject learned fact; the
 // compiler checks the rest (content_spells_test.exs).
 test('loader: a spell names its learned fact, never a per_subject one', () => {
-  const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
+  const at = `.cartridge.scripted_actions[${JSON.stringify('spells_sampler@0.0.1:action/ward')}]`;
   const fact = (c: Record<string, any>, key: string, spec: object) => {
     const taught = c.facts['spells_sampler@0.0.1:fact/ward_taught'];
     c.facts[`spells_sampler@0.0.1:fact/${key}`] = { ...taught, key, ...spec };
-    c.recipes['spells_sampler@0.0.1:recipe/ward'].target.learned = ref('fact', key);
+    c.scripted_actions['spells_sampler@0.0.1:action/ward'].target.learned = ref('fact', key);
   };
   const rows: [(c: Record<string, any>) => void, string, string][] = [
     [
-      (c) => delete c.recipes['spells_sampler@0.0.1:recipe/ward'].target.learned,
+      (c) => delete c.scripted_actions['spells_sampler@0.0.1:action/ward'].target.learned,
       'SCHEMA_VIOLATION',
       `${at}.target.learned`,
     ],

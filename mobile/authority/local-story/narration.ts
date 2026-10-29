@@ -142,10 +142,10 @@ function receiptBellCue(s: Story, r: { command_id: string; command: string }, d:
   const { action, actor_id } = c.payload;
   if (validate('Command', c).length || c.id !== r.command_id || actor_id !== s.world.character)
     throw new Error('malformed JSON: invalid committed bell cue');
-  const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((a) => a.key === action);
-  if (!recipe) throw new Error('malformed JSON: missing bell cue source');
+  const def = Object.values(s.world.cartridge.scripted_actions ?? {}).find((a) => a.key === action);
+  if (!def) throw new Error('malformed JSON: missing bell cue source');
   const room_id =
-    recipe.target.kind === 'detail' ? s.world.roomIds[refString(recipe.target.room)] : undefined;
+    def.target.kind === 'detail' ? s.world.roomIds[refString(def.target.room)] : undefined;
   if (!room_id) throw new Error('malformed JSON: missing bell cue room');
   const cues = d.events.flatMap((e) => {
     const projected = bellCue(s.world, e, c.id, actor_id, room_id);
@@ -266,16 +266,16 @@ function readableDetail(s: Story, r: { command_id: string }, command: Command | 
       throw new Error('malformed JSON: invalid committed Read');
     return command.payload.target_id;
   }
-  return recipeDetail(s, r, command, d);
+  return scriptedDetail(s, r, command, d);
 }
 
-function recipeDetail(s: Story, r: { command_id: string }, command: Command | null, d: Accepted) {
+function scriptedDetail(s: Story, r: { command_id: string }, command: Command | null, d: Accepted) {
   const completed = d.events.filter(
     (e) => e.payload.type === 'action_completed' && e.causation_id === r.command_id,
   );
   const action = command?.payload?.type === 'perform' ? command.payload.action : undefined;
-  const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((r) => r.key === action);
-  const subject = recipe?.target.kind === 'detail' ? detailOf(s.world, recipe.target) : undefined;
+  const def = Object.values(s.world.cartridge.scripted_actions ?? {}).find((a) => a.key === action);
+  const subject = def?.target.kind === 'detail' ? detailOf(s.world, def.target) : undefined;
   const readable = subject && s.world.details[subject]?.readable;
   const readableEvidence = completed.some(
     (e) => e.payload.type === 'action_completed' && s.world.details[e.payload.subject_id]?.readable,
@@ -295,6 +295,6 @@ function recipeDetail(s: Story, r: { command_id: string }, command: Command | nu
       command.payload.target_id !== undefined &&
       command.payload.target_id !== subject)
   )
-    throw new Error('malformed JSON: invalid readable recipe receipt');
+    throw new Error('malformed JSON: invalid readable scripted action receipt');
   return subject;
 }

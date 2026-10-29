@@ -191,11 +191,11 @@ test('a failed pick is heard by the guard next door, not the sentry two rooms aw
   assert.deepEqual([fact('guard_alerted'), fact('sentry_alerted')], [true, false]);
 });
 
-// Breaks: ambient noise counted in a reaction to a recipe outcome: with the rattle removed and the
+// Breaks: ambient noise counted in a reaction to a scripted action outcome: with the rattle removed and the
 // guardroom itself noisy, the guard must still not be alerted by the failed pick.
 test('in a reaction to a failed pick only the outcome cues are heard', () => {
   const c = structuredClone(content) as unknown as Obj;
-  Object.values(c.recipes as Obj)[0].outcomes.failure.cues = undefined;
+  Object.values(c.scripted_actions as Obj)[0].outcomes.failure.cues = undefined;
   const guardroom = Object.values(c.rooms as Obj).find((r) => r.key === 'guardroom');
   guardroom.cues = [{ sense: 'sound', text: 'cue.hammering', range: 0 }];
   const w = play(fresh(c as unknown as Cartridge), { type: 'move', direction: 'west' });
@@ -207,7 +207,7 @@ test('in a reaction to a failed pick only the outcome cues are heard', () => {
 // cue of smell, the guard smells a passed pick and a completed one, and hears no rattle.
 test('a passed check or completed action carries the success cues', () => {
   const c = structuredClone(content) as unknown as Obj;
-  Object.values(c.recipes as Obj)[0].outcomes.success.cues = [
+  Object.values(c.scripted_actions as Obj)[0].outcomes.success.cues = [
     { sense: 'smell', text: 'cue.stew', range: 1 },
   ];
   const w = play(fresh(c as unknown as Cartridge), { type: 'move', direction: 'west' });

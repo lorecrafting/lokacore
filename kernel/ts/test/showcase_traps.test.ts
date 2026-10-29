@@ -434,7 +434,7 @@ test('traps 9: the chief falls to one blow; its fall frightens the pack, which t
 
 // Breaks: the cellar's plate does not spring on entry, a re-entry while sprung or a disarmed
 // cellar plate springs again (cellar_springs's guards), a failed disarm on the rearmed plate does
-// not bite (cellar_bites), search or disarm is offered out of turn, the search or disarm recipe is missing or
+// not bite (cellar_bites), search or disarm is offered out of turn, the search or disarm scripted action is missing or
 // keyed to the passage plate, or the cellar's skin or pack is missing.
 test('traps sandbox: the cellar plate springs, is found and disarmed, then holds', () => {
   let x = fresh(WORLD);

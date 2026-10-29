@@ -3,7 +3,7 @@ defmodule Loka.Content.Position do
   position@1's engine fact (cartridge.md Compiler; mechanics.md position@1): when the manifest
   requires position, the compiler adds the fact `position` (@engine) and fact@1, whose
   fact_changed its rule's fact.assign logs, and content may read the fact but never write it:
-  an authored fact named position, or a fact.assign of it in a recipe outcome, a reaction's
+  an authored fact named position, or a fact.assign of it in a scripted action outcome, a reaction's
   apply, dialogue choice or scene ending, is RESERVED_FACT. The same write-site walk also
   reserves scene_<key>, story-point markers, skill_<key> and seen_tip_<key> facts.
   Its engine fact specs match kernel/ts/src/content/cartridge_position.ts.
@@ -105,7 +105,7 @@ defmodule Loka.Content.Position do
       ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
       for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key),
-      for({key, {_, _, %{"tip" => _}}} <- defs["recipe"], do: "seen_tip_" <> key),
+      for({key, {_, _, %{"tip" => _}}} <- defs["scripted_action"], do: "seen_tip_" <> key),
       Loka.Content.Trails.names(defs)
     ])
   end
@@ -129,7 +129,7 @@ defmodule Loka.Content.Position do
 
   # Each authored step that may fact.assign: {rel, steps to it, step}.
   defp sites(defs) do
-    for kind <- ~w(recipe reaction dialogue scene),
+    for kind <- ~w(scripted_action reaction dialogue scene),
         {_, {rel, steps, v}} <- defs[kind],
         {at, list} <- lists(kind, v),
         {s, i} <- Enum.with_index(list),
@@ -137,7 +137,7 @@ defmodule Loka.Content.Position do
   end
 
   # Each author's write list: {steps, list}.
-  defp lists("recipe", r),
+  defp lists("scripted_action", r),
     do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "sequence"], o["sequence"]})
 
   defp lists("reaction", r), do: [{["apply"], r["apply"]}]

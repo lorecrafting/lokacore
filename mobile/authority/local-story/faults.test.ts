@@ -74,7 +74,7 @@ function invocationOf(world: World, c: Command, k: number) {
     c.payload as Record<string, unknown>;
   const set = resolved(world, world.character);
   const key = Object.keys(set).find(
-    (a) => set[a]!.command === type && (!set[a]!.recipe || set[a]!.key === action),
+    (a) => set[a]!.command === type && (!set[a]!.scripted || set[a]!.key === action),
   );
   const target_ids = [target_id, item_id, recipient_id].filter((t) => t !== undefined);
   return { invocation_id: uuid(1000 + k), action_key: key ?? type, actor_id, target_ids, input };

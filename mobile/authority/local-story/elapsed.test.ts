@@ -22,7 +22,7 @@ function setup(scene = false) {
   );
   c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
   c.manifest.requires.kernel_api.at_least = '1.1';
-  for (const recipe of Object.values(c.recipes) as any[]) delete recipe.duration;
+  for (const scripted of Object.values(c.scripted_actions) as any[]) delete scripted.duration;
   const canonical = encode(c);
   const hash = createHash('sha256').update(canonical).digest('hex');
   const loaded = loadCartridge(

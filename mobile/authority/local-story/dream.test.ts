@@ -242,8 +242,8 @@ test('real elapsed and fatal return preserve the dormant choice until the actor 
     c.lock.capabilities.combat = 1;
     c.resources[`${prefix}:resource/hp`].start = 1;
     c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
-    // real_elapsed refuses the KAT's turn-timed coil_rope recipe; this test never coils.
-    c.recipes = {};
+    // real_elapsed refuses the KAT's turn-timed coil_rope scripted action; this test never coils.
+    c.scripted_actions = {};
     c.resources[`${prefix}:resource/mv`].regen = {
       every: 3600,
       by_position: { standing: 18, sitting: 18, resting: 36, sleeping: 36 },

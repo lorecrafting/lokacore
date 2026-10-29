@@ -1,13 +1,13 @@
-// Toolbox row G4: a use recipe (RecipeTarget kind use, action.schema.json) applies a held tool to
-// another item on the floor or carried, both chosen by the invocation (perform item_id, target_id). The recipe is
+// Toolbox row G4: a use scripted action (ScriptedTarget kind use, action.schema.json) applies a held tool to
+// another item on the floor or carried, both chosen by the invocation (perform item_id, target_id). The scripted action is
 // keyed by the tool's properties (UseTool) and, through its policy, the target's; never by ids.
 import type {
-  ActionRecipe,
+  ScriptedAction,
   CharacterId,
   CommandPayload,
   DeltaOp,
   EntityId,
-  RecipeTarget,
+  ScriptedTarget,
   UnavailableReason,
   UseTool,
   Word,
@@ -25,10 +25,10 @@ import { folded } from '../speech/shared.ts';
 import { living } from '../death/shared.ts';
 import { held } from '../light/shared.ts';
 
-export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
+export type UseTarget = Extract<ScriptedTarget, { kind: 'use' }>;
 
 /**
- * Why `body` may not use `tool` on `target` now, before the recipe's policy, shared by the rule,
+ * Why `body` may not use `tool` on `target` now, before the scripted action's policy, shared by the rule,
  * step's admission and the GameView: invalid_target unless both are distinct items; not_present
  * unless the tool is held (lookups.ts toolHeld, the held-tool rule) and the target is on the
  * room's floor or directly in the body (the offer's target scopes, room_contents and inventory,
@@ -62,29 +62,29 @@ export function fits(world: World, tool: EntityId, { tag, liquid }: UseTool) {
   );
 }
 
-/** step's admission of a use recipe's perform (commands/actions.ts refusal): useRefused. */
+/** step's admission of a use scripted action's perform (commands/actions.ts refusal): useRefused. */
 export function useAdmission(
   world: World,
-  recipe: ActionRecipe | undefined,
+  scripted: ScriptedAction | undefined,
   payload: CommandPayload,
   steps: Steps,
 ) {
-  if (recipe?.target.kind !== 'use' || payload.type !== 'perform') return undefined;
+  if (scripted?.target.kind !== 'use' || payload.type !== 'perform') return undefined;
   const body = bodyOf(world, payload.actor_id);
   const { item_id, target_id } = payload;
   return body
-    ? useRefused(world, recipe.target, body, item_id, target_id, steps)
+    ? useRefused(world, scripted.target, body, item_id, target_id, steps)
     : ('not_found' as const);
 }
 
 /**
- * Toolbox row 29a: the spell recipe whose word is `word`, case-folded (speech/shared.ts folded),
+ * Toolbox row 29a: the spell scripted action whose word is `word`, case-folded (speech/shared.ts folded),
  * while `actor` has learned it (word bar S2: its learned fact reads true); an unlearned spell is
  * no spell to its caster.
  */
 export const spellOf = (world: World, actor: CharacterId, word: unknown) => {
   const w = folded(word);
-  return Object.values(world.cartridge.recipes ?? {}).find(
+  return Object.values(world.cartridge.scripted_actions ?? {}).find(
     (r) =>
       r.target.kind === 'spell' &&
       r.target.word === w &&
@@ -134,30 +134,30 @@ const aimedAt = (
   );
 };
 
-/** Whether a view hides aimed spell `recipe` on `id` (loka-x6t.109): its cast there is refused. */
+/** Whether a view hides aimed spell `scripted` on `id` (loka-x6t.109): its cast there is refused. */
 export const aimedRefused = (
   world: World,
   actor: CharacterId,
-  recipe: ActionRecipe | undefined,
+  scripted: ScriptedAction | undefined,
   id: string,
   steps: Steps,
 ) =>
-  recipe?.target.kind === 'spell' &&
+  scripted?.target.kind === 'spell' &&
   !!castAdmission(
     world,
     {
       type: 'cast',
       actor_id: actor,
-      word: recipe.target.word as string as Word,
+      word: scripted.target.word as string as Word,
       target_id: id as EntityId,
     },
     steps,
   );
 
-/** A failed policy's refusal, carrying the recipe's authored `reason` text when it has one (loka-j64e). */
-export const policyRefusal = (recipe?: ActionRecipe): UnavailableReason =>
-  recipe?.reason
-    ? { code: 'invalid_state', message: { key: recipe.reason } }
+/** A failed policy's refusal, carrying the scripted action's authored `reason` text when it has one (loka-j64e). */
+export const policyRefusal = (scripted?: ScriptedAction): UnavailableReason =>
+  scripted?.reason
+    ? { code: 'invalid_state', message: { key: scripted.reason } }
     : { code: 'invalid_state' };
 
 export type Transfer = Extract<DeltaOp, { op: 'entity.transfer' }>;
@@ -174,7 +174,7 @@ const transfer = (
 });
 
 /**
- * Homestead hs-10: a station recipe's craft, read before any draw. The first `quantity` consume
+ * Homestead hs-10: a station scripted action's craft, read before any draw. The first `quantity` consume
  * items held directly in the body (lowest EntityId, each one Give would let go) move to `to`, and
  * one yield item directly in `from` moves to the body; fewer held refuses invalid_state with the
  * consume reason, a full `to` or an empty `from` without one, a body that cannot carry the
@@ -182,11 +182,11 @@ const transfer = (
  */
 export function crafted(
   world: World,
-  recipe: ActionRecipe,
+  scripted: ScriptedAction,
   body: EntityId,
   steps: Steps,
 ): UnavailableReason | { consumed: Transfer[]; made: Transfer[] } {
-  const { consume, yield: made } = recipe.craft ?? {};
+  const { consume, yield: made } = scripted.craft ?? {};
   const ids = consume ? selected(world, consume.items, body, consume.quantity, steps) : [];
   if (typeof ids === 'string') return { code: ids };
   if (consume && ids.length < consume.quantity)
@@ -218,21 +218,21 @@ export function crafted(
  * so a taken site shows site_taken, not the spent inputs. */
 export const craftRefused = (
   world: World,
-  recipe: ActionRecipe | undefined,
+  scripted: ScriptedAction | undefined,
   actor: CharacterId,
   steps: Steps,
 ) => {
-  const s = recipe?.outcomes.success.sequence.find((x) => x.op === 'build');
+  const s = scripted?.outcomes.success.sequence.find((x) => x.op === 'build');
   const b =
     s &&
-    recipe!.target.kind === 'detail' &&
+    scripted!.target.kind === 'detail' &&
     unbuildable(
       world,
-      { structure: s.structure, site: recipe!.target.room, direction: s.direction },
+      { structure: s.structure, site: scripted!.target.room, direction: s.direction },
       actor,
     );
   if (b) return b;
   const body = bodyOf(world, actor);
-  const c = recipe?.craft && body && crafted(world, recipe, body, steps);
+  const c = scripted?.craft && body && crafted(world, scripted, body, steps);
   return c && 'code' in c ? c : undefined;
 };

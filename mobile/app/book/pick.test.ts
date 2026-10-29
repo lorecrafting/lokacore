@@ -1,4 +1,4 @@
-// pick.ts on controlled views: row labels for mixed recipes, twin notes, the Use on… refusal dedupe.
+// pick.ts on controlled views: row labels for mixed scripted actions, twin notes, the Use on… refusal dedupe.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -27,8 +27,8 @@ const say = (k: string) => k;
 const shown = (k: ReturnType<typeof picks>) =>
   k.map((o) => [o.label, o.rows.map((r) => ('b' in r ? [r.label, r.note] : [r.label, r.reason]))]);
 
-// Breaks: two recipes on one page read as bare tool names, or same-name tools lose their state note.
-test('mixed recipes name their verb; same-name tools carry their state', () => {
+// Breaks: two scripted actions on one page read as bare tool names, or same-name tools lose their state note.
+test('mixed scripted actions name their verb; same-name tools carry their state', () => {
   const buttons = [
     pair('quench', 'cart', 'b1'),
     pair('quench', 'cart', 'b2'),
@@ -72,8 +72,8 @@ test('a resting use is one Use on… note; each resting tool is its own row on t
   ]);
 });
 
-// Breaks: two recipes resting on one tool read as two identical "A bucket: not yet" rows (PM ruling).
-test('two recipes resting on one tool name their verb on the target', () => {
+// Breaks: two scripted actions resting on one tool read as two identical "A bucket: not yet" rows (PM ruling).
+test('two scripted actions resting on one tool name their verb on the target', () => {
   const rest = [pair('quench', 'cart', 'b1', 'not yet'), pair('oil', 'cart', 'b1', 'not yet')];
   assert.deepEqual(shown(picks(view, rest, 'cart', say)), [
     [

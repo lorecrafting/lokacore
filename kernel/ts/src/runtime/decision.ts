@@ -207,18 +207,18 @@ export type Decision<E> =
 export type Mint = () => string;
 /**
  * The capabilities whose events a capability's rule also emits, because it runs them inside its own
- * decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs, checks and
+ * decision: a scripted action resolves its check (check@1) in the perform decision (21 §7: costs, checks and
  * outcomes join one proposal); a scheduled NPC's run_job moves it and reports its
  * entity_entered_room (movement@1's) as a move does, and a status job its tick and expiry
  * (status@1's); reactions activate quest-owned instances and land statuses; a choice resolves its
  * dialogue's quest (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give);
  * a spell (row 29b) lands a status (status_applied) and kills (entity_died), a craft (hs-10) hands its
- * yield over (item_acquired); a seen theft (row 33) reports its notice as action_recipe@1's custom_event;
+ * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event;
  * a meal (row hs-5) lands its `applies`. */
 export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
-  action_recipe: ['check', 'status', 'death', 'containment'],
+  scripted_action: ['check', 'status', 'death', 'containment'],
   food: ['status'],
   // W26 doors; fact: a delayed reaction's fact_changed (row FD1)
   schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status', 'barrier', 'fact'],
@@ -226,7 +226,7 @@ export const COMPOSES = {
   dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],
   commerce: ['containment'],
-  containment: ['action_recipe'],
+  containment: ['scripted_action'],
   scene: ['dialogue', 'quest'],
   reaction: ['quest', 'status', 'barrier', 'movement'], // W22 barrier_changed; FD5 npc.move's entity_entered_room
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)

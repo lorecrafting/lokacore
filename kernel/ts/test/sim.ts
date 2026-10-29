@@ -1,4 +1,4 @@
-// size: allow 561, seed-picked corpus, --cartridge loader and offers incl. notice recipes (reused by play/flows.ts)
+// size: allow 561, seed-picked corpus, --cartridge loader and offers incl. notice scripted actions (reused by play/flows.ts)
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -337,7 +337,7 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
   return as(offered(world, g));
 }
 
-// A command the GameView offers, available or not: each place action (a recipe's perform, a
+// A command the GameView offers, available or not: each place action (a scripted action's perform, a
 // quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each door
 // verb of the set through each exit (the GameView lists only the accepted ones, on their exits),
 // and on each item in the room, held or inside one (c1-locks; listed only where accepted, on the
@@ -358,7 +358,7 @@ export function offers(world: World, view: GameView, g: Gen): Payload[] {
   const npcs = view.entities.filter((e) => e.kind === 'npc').map((e) => e.id);
   const options: Payload[] = view.actions.flatMap((a): Payload[] => {
     const o = set[a.action_key]!;
-    if (o.recipe) return [{ type: 'perform', action: o.key }];
+    if (o.scripted) return [{ type: 'perform', action: o.key }];
     if (o.quest) return [{ type: o.command, quest: o.quest }];
     if (o.input.includes('direction'))
       return exits.map((direction) => ({ type: o.command, direction }));
@@ -367,7 +367,7 @@ export function offers(world: World, view: GameView, g: Gen): Payload[] {
   });
   for (const n of view.notices ?? [])
     for (const a of n.actions ?? [])
-      if (set[a.action_key]?.recipe) options.push({ type: 'perform', action: a.action_key });
+      if (set[a.action_key]?.scripted) options.push({ type: 'perform', action: a.action_key });
       else if (set[a.action_key]?.command === 'fill' && a.target_ids?.length === 2)
         options.push(aimed('fill', a.target_ids[0], a.target_ids[1]));
   for (const e of view.entities)
@@ -435,7 +435,7 @@ function stray(world: World, g: Gen, own: Payload, as: (p: Payload) => Command):
     STALE,
     'constructor',
   ];
-  const recipes = Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
+  const scripted_actions = Object.values(world.cartridge.scripted_actions ?? {}).map((r) => r.key);
   const ref = { cartridge_id: 'x', cartridge_version: '0.0.1', kind: 'quest', key: 'q' };
   const cases: (() => Command)[] = [
     () => as({ type: g.pick(UNKNOWN) }),
@@ -448,7 +448,7 @@ function stray(world: World, g: Gen, own: Payload, as: (p: Payload) => Command):
     () =>
       as({
         type: 'perform',
-        action: g.pick([...recipes, 'nope', 'constructor']),
+        action: g.pick([...scripted_actions, 'nope', 'constructor']),
         target_id: g.pick(ids),
       }),
     () =>
@@ -478,7 +478,7 @@ const [HOUR, DAY, MAX] = [3600, 86400, Number.MAX_SAFE_INTEGER];
 function boundaries(world: World): number[] {
   const c = world.state.clock;
   const up = (m: number) => Math.ceil((c + 1) / m) * m;
-  const ends = Object.values(world.cartridge.recipes ?? {}).flatMap((r) =>
+  const ends = Object.values(world.cartridge.scripted_actions ?? {}).flatMap((r) =>
     Object.values(world.state.cooldowns ?? {}).flatMap((at) =>
       r.cooldown ? [at + r.cooldown - 1, at + r.cooldown] : [],
     ),

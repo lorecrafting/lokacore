@@ -91,7 +91,11 @@ defmodule Loka.Content.Trails do
   end
 
   defp tracks(defs),
-    do: for({_, {rel, _, %{"check" => %{"kind" => "track"} = c}}} <- defs["recipe"], do: {rel, c})
+    do:
+      for(
+        {_, {rel, _, %{"check" => %{"kind" => "track"} = c}}} <- defs["scripted_action"],
+        do: {rel, c}
+      )
 
   defp field({_, _, _, p}, f), do: p[f] == true
 

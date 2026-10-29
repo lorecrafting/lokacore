@@ -151,13 +151,13 @@ test('mend refuses a wielded weapon whose durability is another fact', () => {
   });
 });
 
-// Breaks: the durability owner check is dropped, so a recipe or a reaction writes the edge.
+// Breaks: the durability owner check is dropped, so a scripted action or a reaction writes the edge.
 test('only combat and the smith write the edge', () => {
   const assign = { op: 'fact.assign', fact: ref('fact', 'edge'), value: 0 };
-  const recipe = sampler((c) =>
-    c.recipes[`${S}:recipe/forge`].outcomes.success.sequence.push(assign),
+  const scripted = sampler((c) =>
+    c.scripted_actions[`${S}:action/forge`].outcomes.success.sequence.push(assign),
   );
-  const w = forging(recipe);
+  const w = forging(scripted);
   const forged = send(w, {
     type: 'perform',
     action: 'forge',

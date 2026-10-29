@@ -65,7 +65,7 @@ export function picks(v: GameView, buttons: Button[], id: string, text: (key: st
       const seen = note ? `${shown(b)} ${note}` : shown(b);
       return [{ b, label: shown(b), name: `${seen}, ${phrase(b, name)}`, note }];
     });
-    // Under Use on…, a resting use is one row per recipe, whatever its targets.
+    // Under Use on…, a resting use is one row per scripted action, whatever its targets.
     return {
       label,
       rows: rows.filter(

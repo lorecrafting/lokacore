@@ -32,20 +32,20 @@ box costs a fee and its prerequisites read use counts. Everything below keeps th
 |---|---|---|
 | Skill | A learned bool fact `skill_<key>`, a stat `qualification`, optional `growth` (1-8 use thresholds) | [rows 5/G5](../system/mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) |
 | XP | One use count per skill, `uses_<key>`, +1 per opposed check, pass or fail | same |
-| Check | Deterministic opposed check (level against a detail `rating` or an NPC attribute); also luck, threshold, track | same; `kernel/ts/src/mechanics/action_recipe/rule.ts` |
+| Check | Deterministic opposed check (level against a detail `rating` or an NPC attribute); also luck, threshold, track | same; `kernel/ts/src/mechanics/scripted_action/rule.ts` |
 | Tree | `prerequisite` policy, `hidden`, `profession` text key; learned through a teacher's dialogue with `lesson_payment` | [hs-11](../system/mechanics.md#skill-trees-homestead-hs-11), [hs-14](../system/mechanics.md#skill-tree-view-homestead-hs-14) |
 | Passive voice | `skill_compare` leaf; room and detail `asides` | [FD2](../system/mechanics.md#passive-skill-voices-toolbox-row-fd2) |
 | Social | Dialogue choice `check` (skill or attribute), failure closes the talk | [row 14](../system/mechanics.md#dialogue-skill-checks-toolbox-row-14) |
-| Craft | Recipe `craft {consume, yield}`; custody moves only | [hs-10](../system/mechanics.md#craft-homestead-hs-10) |
-| Spell | A recipe with target `{kind: spell, word, learned}`; `cast {word}`; costs are pools; cooldown; `reason` text | [29a](../system/mechanics.md#spell-cast-admission-toolbox-row-29a) |
+| Craft | Scripted action `craft {consume, yield}`; custody moves only | [hs-10](../system/mechanics.md#craft-homestead-hs-10) |
+| Spell | A scripted action with target `{kind: spell, word, learned}`; `cast {word}`; costs are pools; cooldown; `reason` text | [29a](../system/mechanics.md#spell-cast-admission-toolbox-row-29a) |
 | Spell effects | `status.apply`, `damage`, `light.ignite`, spell-only steps | [29b](../system/mechanics.md#spell-effects-toolbox-row-29b) |
 | Aimed spell | `aimed {scopes}`, `cast {word, target_id}`, offered on the target's entry; kernel_api 1.119 | merged #460 (`loka-x6t.109`, aimed targets); brief `docs/briefs/aimed-targets/README.md` |
 | Levelling | Class-free experience from kills and quests; attribute points | [row 4](../system/mechanics.md#experience-and-levelling-toolbox-row-4) |
 | Titles | A name variant on a fact | [W15/FD9](../system/mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) |
 | Delayed effects | Reaction `after`, `fact.stamp`, `time_since` | [FD1](../system/mechanics.md#delayed-reactions-toolbox-row-fd1) |
 
-Verified in code: a recipe pays its costs before its check, and a failure commits costs,
-cooldown and steps like a success (`action_recipe/rule.ts` header). So a fizzled cast already
+Verified in code: a scripted action pays its costs before its check, and a failure commits costs,
+cooldown and steps like a success (`scripted_action/rule.ts` header). So a fizzled cast already
 costs its mana. That answers the [costs-and-risks](../worldbuilding/02-magic/costs-and-risks.md)
 question "does casting follow the failed-craft rule": yes, by default.
 
@@ -53,8 +53,8 @@ question "does casting follow the failed-craft rule": yes, by default.
 
 A **profession** is a named group of boxes (today a `profession` text key). A **box** is one
 skill definition: learned once from a teacher for a fee, with a level that rises by use. A
-**skill** in play is a recipe or dialogue choice gated on a box's level; using it grows that box.
-A **spell** is a recipe cast by a learned word, paid in pools, gated on a box or a found text.
+**skill** in play is a scripted action or dialogue choice gated on a box's level; using it grows that box.
+A **spell** is a scripted action cast by a learned word, paid in pools, gated on a box or a found text.
 Skills grow by doing; spells are learned whole and get stronger only through higher spells and
 the box that governs them. One shared shape covers targeting, costs, cooldowns and refusals (§4).
 
@@ -106,7 +106,7 @@ it keeps grants honest (the reader is the gate).
 
 | Grant | How (today) | Note |
 |---|---|---|
-| Recipes (schematics, actions) | recipe `policy: skill_compare <box> N` | |
+| Scripted actions (schematics, actions) | scripted action `policy: skill_compare <box> N` | |
 | Spell words | spell `learned` names the box's own acquired fact `skill_<box>` | the compiler merges the engine's `skill_<key>` facts before the spell check (`lib/loka/content/compiler.ex:222-231`, `spells.ex:51-67`); prove in the first sampler ([audit](../rnd/design-audit-abilities-authoring-2026-10-23.md) finding 5) |
 | Dialogue options | dialogue `policy` or choice availability | |
 | Asides (the body learning, hints) | `asides` with `skill_compare` | FD2 |
@@ -193,7 +193,7 @@ names are placeholders):
 |---|---|---|---|---|
 | Warden | the order | Healer Calm III + conduct; or Scholar Lore III + conduct; or Guard Watch III + conduct | resonance words (§3), sensing, calming | vows as blocks; conduct breaks it |
 | Ember school | arcane | Scholar Elemental master; or Wright Stone III + a found text | high coarse spells | weight (§3.4) rises fast |
-| Lodge | craft | Wright master; or Tiller master | top-tier recipes others need | stocks, not power |
+| Lodge | craft | Wright master; or Tiller master | top-tier scripted actions others need | stocks, not power |
 | Steward | civic | an office held, a town need met | town actions | cost 0 (office), outside budget |
 | Deepwalker | wild | Scout master; or Tiller Beasts III + places | mounts, rare harvests, guidance | long absences |
 | Night guild | shadow | Scout stealth + offences; or Guard + fences | theft, disguise | wanted, bounties |
@@ -206,13 +206,13 @@ Recommend shipping two first: Warden and one craft elite, then the rest as the w
 
 | Kind | Played through | Grows today? | Gap |
 |---|---|---|---|
-| Craft | recipe with `craft` and opposed check | yes | none |
-| Lore, picking, searching | recipe check at a detail | yes | none |
+| Craft | scripted action with `craft` and opposed check | yes | none |
+| Lore, picking, searching | scripted action check at a detail | yes | none |
 | Social | dialogue `check` | yes | none |
 | Gathering | D12 careful harvest; luck checks (fishing) | no for careful harvest | growth on harvest |
 | Trade | D12 haggle discount | no | growth on a discounted buy (capped per day or per shop) |
 | Combat | weapon `skill` (G2) in rounds | no | **combat growth** |
-| Spellcasting | spell recipe | no: a spell's opposed check must name an NPC, no fixed rating | **spell rating check** |
+| Spellcasting | spell scripted action | no: a spell's opposed check must name an NPC, no fixed rating | **spell rating check** |
 
 XP kinds:
 
@@ -238,7 +238,7 @@ rating-7 vault. That is UO's bottomfeeding ([Koster](../rnd/koster-design-lesson
 The window shuts both ends: a rating-1 chest stops teaching a level-3 picker, and failing a
 rating-99 vault forever teaches nothing either. Failure costs something only where content says
 so (craft loses inputs, a cast its mana, a failed talk closes); a plain check at a detail costs
-nothing, so the authoring rule (§7) is: every recipe that grows a skill declares a cost or a
+nothing, so the authoring rule (§7) is: every scripted action that grows a skill declares a cost or a
 cooldown.
 
 ### 2.3 Checks
@@ -264,14 +264,14 @@ engine.
 
 ### 2.6 Aimed skills (`loka-x6t.109.6`)
 
-Same field as aimed spells: a plain recipe may declare `aimed {scopes}`; it is offered on each
+Same field as aimed spells: a plain scripted action may declare `aimed {scopes}`; it is offered on each
 admitted target's entry (and on combat foe lines) as `perform` with that `target_id`; its policy
 reads the target. It differs from a `use` pair: a use pair needs a carried tool and two objects;
 an aimed skill needs one target (any tool is a `has_item` in its policy). The aimed-spells slice
-refuses `aimed` on a `use` recipe; keep that.
+refuses `aimed` on a `use` scripted action; keep that.
 
 An aimed skill needs effects: today `status.apply` and `damage` are spell-only. Recommend lifting
-them to any aimed recipe (one effect vocabulary, §4). Engine M.
+them to any aimed scripted action (one effect vocabulary, §4). Engine M.
 
 ## 3. Spells
 
@@ -318,12 +318,12 @@ word back; a found spell keeps its own fact.
 | Cost | Today | Proposal |
 |---|---|---|
 | Mana | a pool with regen by position | keep |
-| Stillness (resonance school) | none | a second pool, filled by a meditate recipe at rest; content only |
+| Stillness (resonance school) | none | a second pool, filled by a meditate scripted action at rest; content only |
 | Reagents | pools (`ash`) | stay pools: the compiler refuses `craft` on a spell (`lib/loka/content/replenish.ex`); item reagents wait for `loka-kgd.83` (foundation change) |
 | Fatigue | `mv` pool | a cost on heavy spells; never tied to session length (Koster) |
 | Fizzle | failure outcome, costs still paid | via §3.3 B |
 | Backlash | failure outcome `status.apply` on the caster | content |
-| Weight (corruption) | none | a bounded int fact the coarse harmful spells raise (recipes have no `fact.adjust` step, so the spell's `event.emit` drives a reaction's `fact.adjust`: content only), read by resonance gates and asides, lowered by deeds; a W8 permanent mark at the top |
+| Weight (corruption) | none | a bounded int fact the coarse harmful spells raise (scripted actions have no `fact.adjust` step, so the spell's `event.emit` drives a reaction's `fact.adjust`: content only), read by resonance gates and asides, lowered by deeds; a W8 permanent mark at the top |
 
 ### 3.5 Aimed and untargeted
 
@@ -333,12 +333,12 @@ acts on the caster or the room (ward, a light without a lamp, a sense).
 
 ### 3.6 Rituals
 
-A recipe `duration` is refused in a fight and in `real_elapsed` cartridges (the showcase), so
+A scripted action `duration` is refused in a fight and in `real_elapsed` cartridges (the showcase), so
 rituals cannot be long casts.
 
 | Option | Engine | Verdict |
 |---|---|---|
-| **A. Content: a start recipe stamps a fact and applies a "channelling" status (blocks attack and cast); a reaction with `after` fires the effect if the status still holds; a room-exit reaction or a fight cures it, so walking away breaks the ritual** | none (FD1, SR4, `sky`, `time_window`) | **Recommended**; consistent with FD1 (the fired rule re-reads `when` for the stored actor; audit finding 9); prove in a sampler |
+| **A. Content: a start scripted action stamps a fact and applies a "channelling" status (blocks attack and cast); a reaction with `after` fires the effect if the status still holds; a room-exit reaction or a fight cures it, so walking away breaks the ritual** | none (FD1, SR4, `sky`, `time_window`) | **Recommended**; consistent with FD1 (the fired rule re-reads `when` for the stored actor; audit finding 9); prove in a sampler |
 | B. Row 20 timed jobs (commission-style claim) | exists | For crafted ritual goods |
 | C. A ritual row with group and site rules | new row | Realm, later |
 
@@ -346,10 +346,10 @@ rituals cannot be long casts.
 
 | Aspect | Skill | Spell | Shared rule |
 |---|---|---|---|
-| Entry | offered action (recipe key) | typed word (untargeted) or offer (aimed) | aimed of either kind: `aimed {scopes}`, offered on the target entry |
+| Entry | offered action (scripted action key) | typed word (untargeted) or offer (aimed) | aimed of either kind: `aimed {scopes}`, offered on the target entry |
 | Targeting | detail, `use` pair, aimed entity | none or aimed entity | scopes: room occupants, room contents, inventory |
-| Costs | pools (mv), held items (`craft.consume`) | pools (mana, stillness, reagents) | `RecipeCost`; paid before the check, kept on failure |
-| Cooldown | recipe `cooldown` | recipe `cooldown` | combat abilities: cooldown at least one `combat.interval` (content rule) |
+| Costs | pools (mv), held items (`craft.consume`) | pools (mana, stillness, reagents) | `ActionCost`; paid before the check, kept on failure |
+| Cooldown | scripted action `cooldown` | scripted action `cooldown` | combat abilities: cooldown at least one `combat.interval` (content rule) |
 | Learning | box from a teacher, fee | grimoire, teacher, box | gate is a fact; the box is the usual one |
 | Growth | box use count, inside the growth window | the school box, inside the window (§3.3) | one rule in skills@1 |
 | Effects | fact, resource, event; + status, damage when aimed (§2.6) | + status, damage, light | one effect vocabulary |
@@ -442,8 +442,8 @@ asides, a title variant. The hs-14 load checks bind this: a non-hidden skill, a 
 stage facts and the player's own non-hidden boxes, never the hidden box, and the elite teacher's
 dialogue carries no label.
 
-Every recipe that grows a skill declares a cost or a cooldown (§2.2). Keep it small: a starter
-tree is about 11 box files, 11 lesson choices, 6-10 recipes, 6 asides.
+Every scripted action that grows a skill declares a cost or a cooldown (§2.2). Keep it small: a starter
+tree is about 11 box files, 11 lesson choices, 6-10 scripted actions, 6 asides.
 
 ## 8. Build order
 
@@ -481,8 +481,8 @@ never paper gamed combat").
 | Spell fixed rating check | action schema | none | yes | S | growth window |
 | Box `cost` + `world.skills.capacity` | cartridge schema, GameView (capacity) | none (derived) | yes | S-M | — |
 | Surrender | command schema (or a dialogue step), GameView offer | **yes**: recovery must accept a surrender receipt and a second grant (`skills-save.ts`) | yes | M | capacity |
-| Aimed skills (`aimed` on recipes) | action, command, GameView | none | yes | M | `loka-x6t.109.2` |
-| Effect steps on aimed recipes | action schema | none | yes | S | aimed skills |
+| Aimed skills (`aimed` on scripted actions) | action, command, GameView | none | yes | M | `loka-x6t.109.2` |
+| Effect steps on aimed scripted actions | action schema | none | yes | S | aimed skills |
 | Combat growth + NPC `rating` | cartridge schema | none | yes | M | growth window |
 | Harvest and haggle growth | none | none | maybe | S each | growth window |
 | Box `unlocks` text | cartridge, GameView | none | yes | S | — |
@@ -589,7 +589,7 @@ descent-stage facts that room variants and the sky read. Either order works; thi
 facts. The first sampler decides.
 
 Gifts and labour are the quest's objectives: hand the teacher what was asked (an existing
-hand-over), or do the work (a recipe whose success sets a fact, counted toward the objective).
+hand-over), or do the work (a scripted action whose success sets a fact, counted toward the objective).
 Each box's quest is short, a task of one to three steps, and the next box's quest opens only once
 the box below has reached its level by use. A learned box is then a requirement of later quests
 (a quest offer or choice policy with `skill_compare`), which is how "the skill is used for other

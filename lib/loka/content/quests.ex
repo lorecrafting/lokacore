@@ -1,8 +1,8 @@
 defmodule Loka.Content.Quests do
   @moduledoc """
   Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8): each quest's owning capability is
-  required (quest@1, by its quest_activated, as a recipe's check by check@1's events), its key is no registered
-  command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
+  required (quest@1, by its quest_activated, as a scripted action's check by check@1's events), its key is no registered
+  command's, action's or scripted action's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
   name, its offer's label (the offer is optional) and all journal texts have catalog entries
   (unless the catalog was rejected, `:unknown`), and a post_activation_event objective names an item of this cartridge. Its policy trees are checked
   with every other (`conditions/1`, `Loka.Content.Checks`).
@@ -34,7 +34,7 @@ defmodule Loka.Content.Quests do
 
   def check(m, defs, {_, text}, registry) do
     events = {m["requires"]["capabilities"], owners(registry, ["events"])}
-    keys = for kind <- ~w(action recipe), {_, {_, [], d}} <- defs[kind], do: d["key"]
+    keys = for kind <- ~w(action scripted_action), {_, {_, [], d}} <- defs[kind], do: d["key"]
     taken = MapSet.new(commands() ++ keys)
 
     Enum.flat_map(

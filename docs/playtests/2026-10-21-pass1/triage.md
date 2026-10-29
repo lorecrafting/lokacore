@@ -65,7 +65,7 @@ Dropped at 390 px: S1-U7 (focus ring; it is `:focus-visible` only) and S1-U10 (c
 |---|---|---|---|---|---|---|
 | M1 | B-B7 | `recipes/flamma.json` has an `npc_present wight` policy with no `reason`, although `ward.json` uses one (loka-j64e). So the refusal reads "not now". | GAMEPLAY-CONTENT | `"reason": "reason.flamma"`, worded "Only where the dead stand". | S | `recipes/flamma.json`, `text.json` |
 | M2a | S1-G8, B (partly) | The sign says lux "lights the lantern on the sill", but `light.ignite` acts only within reach (held), as the brief's 29b says. | GAMEPLAY-CONTENT | Sign: "lights the lantern in your hand". | S | `text.json` (`readable.sign_magic`) |
-| M2b | S1-G8 | The spell keeps the ignite ops but drops their lines (`kernel/ts/src/mechanics/action_recipe/spell.ts:65-70`). The brief says "no ignite line", so this needs an owner yes. | GAMEPLAY-ENGINE | Append the `lit` narration. | S | `spell.ts`, `kernel/ts/test/showcase_magic.test.ts` |
+| M2b | S1-G8 | The spell keeps the ignite ops but drops their lines (`kernel/ts/src/mechanics/scripted_action/spell.ts:65-70`). The brief says "no ignite line", so this needs an owner yes. | GAMEPLAY-ENGINE | Append the `lit` narration. | S | `spell.ts`, `kernel/ts/test/showcase_magic.test.ts` |
 | M3 | S1-G9, B-B6 | Spell damage runs `deathSequence` but writes no hit or kill line. The Book infers "A wight leaves." from the view diff (`words.ts:126-137` `comings`). | GAMEPLAY-ENGINE | Push `combat.npc_died` on a kill. `comings` skips an NPC that leaves a corpse. Add a burn clause to `narration.flamma`. | S | `spell.ts`, `words.ts`, `text.json` |
 | M5 | B-B3 | The trial is a Drop (`reactions/drench.json` etc., `on item_dropped`), per `docs/showcase/magic-district.md` step 9. Nothing hints at Drop, and the "too heavy" refusals are R3 (load). | WAD; the sign misleads | Sign: "set rain down by it, then a spark…". Owner: or author a "Douse the golem" use-pair. | S | `text.json` |
 | M6 | B-B4 | The errand resolves on the read (WAD, brief step 3). `errand_reward.json` sets `ward_taught` with no line. `quest.errand.done` says she "owes you the third word". `reason.ward` is static text, so it says "Needs a second level" even at level 2. | GAMEPLAY-CONTENT | Rewrite `quest.errand.done` ("…she has given you the third: ward") and `reason.ward` ("Needs level 2 and CHA 7"). Add a handover narrate. | S | `text.json`, `reactions/errand_reward.json` |
@@ -138,7 +138,7 @@ Gameplay engine. These are kept apart from the content slices.
 
 | Slice | Rows | Size | Files |
 |---|---|---|---|
-| GE1a Spell kill line | M3 | S | `kernel/ts/src/mechanics/action_recipe/spell.ts`, `mobile/app/book/words.ts`, `showcase_magic.test.ts` |
+| GE1a Spell kill line | M3 | S | `kernel/ts/src/mechanics/scripted_action/spell.ts`, `mobile/app/book/words.ts`, `showcase_magic.test.ts` |
 | GE1b Spell ignite line (BLOCKED on Q11) | M2b | S | `spell.ts`, `showcase_magic.test.ts` |
 | GE2 Item status lines | M7 | M | `kernel/ts/src/mechanics/status/shared.ts`, `statuses/burning.json`, Book item page |
 | GE3 Named refusals (`over_load` part BLOCKED on Q7) | R1, E8, R3 (`over_load` code) | M | `kernel/ts/src/view/{view,invariants_view}.ts`, `commerce/shared.ts`, `containment/shared.ts`, `words.ts`; pairs with loka-x6t.17 |

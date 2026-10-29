@@ -1470,7 +1470,7 @@
       "additionalProperties": false
     },
     "Cue": {
-      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or recipe outcome that declares it.",
+      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or scripted action outcome that declares it.",
       "examples": [
         {
           "sense": "sound",

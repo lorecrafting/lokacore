@@ -1,6 +1,6 @@
 defmodule Loka.ContentRoadTest do
   # Resources, costs, threshold checks and cooldowns in the compiler (R5 S6b; resource.schema.json
-  # ResourceSpec; action.schema.json ActionRecipe). Expected diagnostics are hand-written from
+  # ResourceSpec; action.schema.json ScriptedAction). Expected diagnostics are hand-written from
   # protocol/cartridge.schema.json DiagnosticCode; the known answer is
   # protocol/fixtures/cartridge_road_hash.json (Python).
   use ExUnit.Case, async: true
@@ -127,7 +127,7 @@ defmodule Loka.ContentRoadTest do
              {:error, [d("UNKNOWN_FIELD", "resources.resources.hp.key")]}
   end
 
-  # Breaks: a recipe naming a resource the cartridge lacks compiles (the loader rejects it).
+  # Breaks: a scripted action naming a resource the cartridge lacks compiles (the loader rejects it).
   test "a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE",
        %{tmp_dir: dir} do
     target = %{"target" => "resource_sampler@0.0.1:resource/sp"}

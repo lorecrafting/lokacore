@@ -137,9 +137,12 @@ test('no stick, or no spoon left, refuses with the same code offered', () => {
   assert.equal(offer(w).reason?.message?.key, 'craft.carve_spoon.needs');
   assert.ok(agrees(w, r));
   // With a cooldown running too, step refuses the shortage the offer shows (commands/actions.ts).
-  const k = `${P}recipe/carve_spoon`;
-  const recipes = { ...content.recipes, [k]: { ...content.recipes![k]!, cooldown: 1000 } };
-  const cooled = carve(take(fresh({ ...content, recipes }), 'stick_01')).world;
+  const k = `${P}action/carve_spoon`;
+  const scripted_actions = {
+    ...content.scripted_actions,
+    [k]: { ...content.scripted_actions![k]!, cooldown: 1000 },
+  };
+  const cooled = carve(take(fresh({ ...content, scripted_actions }), 'stick_01')).world;
   r = carve(cooled);
   assert.equal(code(r), 'invalid_state');
   assert.ok(agrees(cooled, r));
@@ -202,9 +205,9 @@ const loadEdited = (edit: (c: any) => void) => {
 
 // Breaks: the loader admits a storylet target again (FD3 retired by the owner, 2026-10-23).
 test('loader: a storylet target is refused', () => {
-  const key = `${P}recipe/carve_spoon`;
-  const edit = (c: any) => (c.recipes[key].target = { kind: 'storylet' });
-  const at = `.cartridge.recipes["${key}"].target.kind`;
+  const key = `${P}action/carve_spoon`;
+  const edit = (c: any) => (c.scripted_actions[key].target = { kind: 'storylet' });
+  const at = `.cartridge.scripted_actions["${key}"].target.kind`;
   assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
 });
 
@@ -242,15 +245,18 @@ test('a craft whose scrap room is full refuses with the same code offered', () =
   assert.ok(agrees(w, r));
 });
 
-// Breaks: the press reads the craft before the recipe's policy, so it refuses too_heavy while
+// Breaks: the press reads the craft before the scripted action's policy, so it refuses too_heavy while
 // the offer (view/action_lists.ts) refuses on the policy.
 test('a craft whose policy fails refuses on the policy, as offered', () => {
-  const key = `${P}recipe/carve_spoon`;
+  const key = `${P}action/carve_spoon`;
   const shut = {
-    ...content.recipes![key]!,
+    ...content.scripted_actions![key]!,
     policy: { op: 'any', items: [] },
   };
-  const w = heavy({ ...content, recipes: { ...content.recipes, [key]: shut } } as never);
+  const w = heavy({
+    ...content,
+    scripted_actions: { ...content.scripted_actions, [key]: shut },
+  } as never);
   const r = carve(w);
   assert.equal(code(r), 'invalid_state'); // not the craft's too_heavy
   assert.ok(agrees(w, r));
@@ -552,14 +558,14 @@ test('chop needs woodcutting 1; a raise counts max_per_owner 1 and max_total 2',
   const wider = (owner_cap: boolean) => {
     const r = reload((c) => {
       c.rooms[`${P}room/lane`].site.directions.push('east', 'south');
-      const raise = c.recipes[`${P}recipe/raise_timbered_hut`];
+      const raise = c.scripted_actions[`${P}action/raise_timbered_hut`];
       for (const direction of ['east', 'south']) {
         const { craft: _, ...free } = structuredClone(raise);
         free.key = `raise_${direction}`;
         free.aliases = [free.key];
         free.check.key = free.key;
         free.outcomes.success.sequence[0].direction = direction;
-        c.recipes[`${P}recipe/raise_${direction}`] = free;
+        c.scripted_actions[`${P}action/raise_${direction}`] = free;
       }
       if (!owner_cap) delete c.structures[`${P}structure/hut_timbered`].max_per_owner;
     });

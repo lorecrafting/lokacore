@@ -47,16 +47,16 @@ defmodule Loka.ContentChoiceChecksTest do
     end
   end
 
-  # Breaks: the duplicate-key scan drops recipes or choices, so a recipe and a dialogue choice
+  # Breaks: the duplicate-key scan drops scripted actions or choices, so a scripted action and a dialogue choice
   # (one check DefinitionRef) both define one key and compile.
-  test "check keys gather every recipe check and every dialogue choice check" do
+  test "check keys gather every scripted action check and every dialogue choice check" do
     defs = %{
-      "recipe" => %{"a" => {"actions/a.json", [], %{"check" => %{"key" => "k"}}}},
+      "scripted_action" => %{"a" => {"actions/a.json", [], %{"check" => %{"key" => "k"}}}},
       "dialogue" => %{
         "d" => {"dialogues/d.json", [], %{"choices" => %{"x" => %{"check" => %{"key" => "k"}}}}}
       }
     }
 
-    assert Loka.Content.Recipes.shared_checks(defs) == MapSet.new(["k"])
+    assert Loka.Content.ScriptedActions.shared_checks(defs) == MapSet.new(["k"])
   end
 end

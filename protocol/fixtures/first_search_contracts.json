@@ -29,7 +29,7 @@
     "valid": true
   },
   {
-    "name": "valid Notice recipe",
+    "name": "valid Notice scripted action",
     "contract": "NoticeView",
     "value": {
       "id": "aaaaaaaa-0000-4000-8000-000000000001",

@@ -328,7 +328,7 @@ test('the loader refuses a zero lesson payment', () => {
 });
 
 // Row 36 (jail, content only): a broke prisoner forces the floor grate and walks out through the
-// drain still wanted. Breaks: the recipe's success assigns nothing (Open stays invalid_state), its
+// drain still wanted. Breaks: the scripted action's success assigns nothing (Open stays invalid_state), its
 // `grate_forced` guard is dropped (force offered again after it worked), or the escape clears
 // `wanted`.
 const escaped = () => {
@@ -371,7 +371,7 @@ test('an escapee walking into the market is arrested again behind a shut grate',
   assert.equal(code(w, { type: 'open', direction: 'down' }), 'invalid_state');
 });
 
-// Break: the recipe's `has_tag fragile` guard is dropped, so a grate without `fragile` is forced.
+// Break: the scripted action's `has_tag fragile` guard is dropped, so a grate without `fragile` is forced.
 // Break: the charge reaction only fires on an arrest, so a wanted escapee climbs back to an open grate.
 test('a wanted escapee who climbs back up is charged again behind a shut grate', () => {
   const d = ok(play(escaped().drain, { type: 'move', direction: 'up' }));
@@ -391,7 +391,7 @@ test('a grate without the fragile tag cannot be forced', () => {
   assert.equal(code(w, FORCE), 'invalid_state');
 });
 
-// Break: the recipe's failure outcome assigns `grate_forced` or narrates the success line.
+// Break: the scripted action's failure outcome assigns `grate_forced` or narrates the success line.
 test('a grate rated above STR 5 holds', () => {
   const r = reload((c) => (c.rooms[`${S}room/cell`].details.grate_lock.rating = 6));
   assert.ok(r.ok, JSON.stringify(r));

@@ -128,16 +128,16 @@ defmodule Loka.ContentCalendarTest do
       end
     )
 
-    recipe = Path.join(dir, "actions/coil_rope.json")
+    scripted = Path.join(dir, "actions/coil_rope.json")
 
     update(
-      recipe,
+      scripted,
       &put_in(&1, ["policy"], %{"op" => "time_window", "from" => 29, "to" => 2})
     )
 
     assert {:ok, _, []} = Loka.Content.compile(dir)
 
-    update(recipe, &put_in(&1, ["policy", "from"], 30))
+    update(scripted, &put_in(&1, ["policy", "from"], 30))
     assert {:error, errors} = Loka.Content.compile(dir)
     assert Enum.any?(errors, &(&1["code"] == "SCHEMA_VIOLATION"))
   end

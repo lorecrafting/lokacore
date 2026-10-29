@@ -111,7 +111,7 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
  *   closes the list, unless an action is pending (nothing sends then, and the list stays); when
  *   the answer leaves the option no row, the option goes and focus moves to the page title.
  *   Rows are inset space.lg; an unavailable row is the unavailable form.
- * - States: closed; open; open with an unavailable row; recipes mixed; pending.
+ * - States: closed; open; open with an unavailable row; scripted actions mixed; pending.
  * - Story: PickList.stories.tsx
  */
 export function PickLists(p: {
