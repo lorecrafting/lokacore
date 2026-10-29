@@ -173,7 +173,7 @@ export function onlyService(c: any) {
     'items',
   ])
     c[section] = {};
-  for (const section of ['alternates', 'speech', 'blueprints', 'map_positions']) delete c[section];
+  for (const section of ['alternates', 'speech', 'structures', 'map_positions']) delete c[section];
   c.world = { carry: { max_grams: 12000 } };
   c.facts = keep(c.facts, ['position', 'bed_paid']);
   c.actions = keep(c.actions, ['rent_kitchen_room']);

@@ -104,7 +104,7 @@ const DEFINITION_MAPS = [
   'bleeds',
   'statuses',
   'replenish',
-  'blueprints',
+  'structures',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];

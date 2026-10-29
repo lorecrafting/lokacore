@@ -1668,7 +1668,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -1697,7 +1697,7 @@
               "definition": {
                 "cartridge_id": "c",
                 "cartridge_version": "1.0.0",
-                "kind": "blueprint",
+                "kind": "structure",
                 "key": "hut"
               },
               "origin": {
@@ -1734,7 +1734,7 @@
               "definition": {
                 "cartridge_id": "c",
                 "cartridge_version": "1.0.0",
-                "kind": "blueprint",
+                "kind": "structure",
                 "key": "hut"
               },
               "origin": {
@@ -1858,7 +1858,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -1904,7 +1904,7 @@
               "definition": {
                 "cartridge_id": "c",
                 "cartridge_version": "1.0.0",
-                "kind": "blueprint",
+                "kind": "structure",
                 "key": "hut"
               },
               "origin": {
@@ -1964,7 +1964,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -2003,7 +2003,7 @@
               "definition": {
                 "cartridge_id": "c",
                 "cartridge_version": "1.0.0",
-                "kind": "blueprint",
+                "kind": "structure",
                 "key": "hut"
               },
               "origin": {
@@ -2023,7 +2023,7 @@
       }
     },
     {
-      "id": "built room of a non-blueprint definition faults",
+      "id": "built room of a non-structure definition faults",
       "state": {
         "clock": 0,
         "containers": {
@@ -2162,7 +2162,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             }
           }

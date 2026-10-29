@@ -26,7 +26,7 @@ import { living } from '../death/shared.ts';
 
 type Build = Pick<
   Extract<ServiceDefinition['benefit'], { kind: 'build' }>,
-  'blueprint' | 'site' | 'direction'
+  'structure' | 'site' | 'direction'
 >; // a build service's or (S6) a recipe build step's
 const refused = (key: string) => ({
   code: 'invalid_state' as const,
@@ -34,7 +34,7 @@ const refused = (key: string) => ({
 });
 
 /** One structure per site direction, at most world.construction.max_total, and at most the
- * blueprint's max_per_owner raised for `owner`; a razed room (S5) counts for none. */
+ * structure's max_per_owner raised for `owner`; a razed room (S5) counts for none. */
 export function unbuildable(world: World, b: Build, owner: CharacterId) {
   const built = Object.entries(world.state.created ?? {}).flatMap(([id, i]) =>
     i.origin.kind === 'built' && !world.state.built?.[id]
@@ -43,20 +43,20 @@ export function unbuildable(world: World, b: Build, owner: CharacterId) {
   );
   if (built.some((o) => same(o.site, b.site) && o.direction === b.direction))
     return refused('service.site_taken');
-  const mine = built.filter((o) => o.owner === owner && same(o.definition, b.blueprint));
-  const cap = world.cartridge.blueprints?.[refString(b.blueprint)]?.max_per_owner ?? Infinity;
+  const mine = built.filter((o) => o.owner === owner && same(o.definition, b.structure));
+  const cap = world.cartridge.structures?.[refString(b.structure)]?.max_per_owner ?? Infinity;
   if (built.length >= (world.cartridge.world?.construction?.max_total ?? 0) || mine.length >= cap)
     return refused('service.construction_full');
   return undefined;
 }
 
-// The created row, then (S4) the blueprint's weathering on the new room. The room is known only
+// The created row, then (S4) the structure's weathering on the new room. The room is known only
 // after hydrate, so the status is applied on a world that already knows it (compose admits a
 // holder created earlier in the same delta).
 export function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaOp[] {
   const origin = { kind: 'built', site: b.site, direction: b.direction, owner } as const;
-  const identity = { id: mint() as EntityId, definition: b.blueprint, origin };
-  const weathering = world.cartridge.blueprints?.[refString(b.blueprint)]?.weathering;
+  const identity = { id: mint() as EntityId, definition: b.structure, origin };
+  const weathering = world.cartridge.structures?.[refString(b.structure)]?.weathering;
   const known = { ...world.knownEntities, [identity.id]: { kind: 'room' as const } };
   return [
     { op: 'entity.create', writer_group: 0, identity },
@@ -79,13 +79,13 @@ const live = (world: World, b: Mend | Raze) =>
       i.origin.direction === b.direction,
   ) ?? [];
 
-/** Built rooms S4: the room built at the mend's site direction while its blueprint's ruin is active
+/** Built rooms S4: the room built at the mend's site direction while its structure's ruin is active
  * on it, else undefined. */
 function ruined(world: World, b: Mend) {
   const [id, room] = live(world, b);
-  const blueprint = room && world.cartridge.blueprints?.[refString(room.definition)];
-  return blueprint?.ruin && currentStatus(world, id as EntityId, blueprint.ruin)
-    ? { id: id as EntityId, blueprint }
+  const structure = room && world.cartridge.structures?.[refString(room.definition)];
+  return structure?.ruin && currentStatus(world, id as EntityId, structure.ruin)
+    ? { id: id as EntityId, structure }
     : undefined;
 }
 
@@ -94,9 +94,9 @@ export const unmendable = (world: World, b: Mend) =>
 
 // The mend cures ruin and weathers the room again from now.
 function mended(world: World, b: Mend, mint: Mint): DeltaOp[] {
-  const { id, blueprint } = ruined(world, b)!;
-  const again = blueprint.weathering ? applyStatus(world, id, blueprint.weathering, 0, mint) : [];
-  return [...cureOps(world, id, [blueprint.ruin!]), ...again];
+  const { id, structure } = ruined(world, b)!;
+  const again = structure.weathering ? applyStatus(world, id, structure.weathering, 0, mint) : [];
+  return [...cureOps(world, id, [structure.ruin!]), ...again];
 }
 
 /** Built rooms S5: only the owner razes the live room, and not while an entity that cannot move

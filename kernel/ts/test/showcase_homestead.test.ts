@@ -262,12 +262,12 @@ test('homestead 6 branch: the plain hut for exactly 5 pennies; a second is site_
 test('homestead 7: the rug variant in the hut; resting there with the cot applies nothing', () => {
   w = walk(w, 'north');
   const hut = here(w);
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut_timbered.description');
+  assert.equal(gameView(w).place.description.key, 'structure.hut_timbered.description');
   w = drop(w, 'rug');
-  assert.equal(gameView(w).place.description.key, 'blueprint.hut_timbered.description.rug');
+  assert.equal(gameView(w).place.description.key, 'structure.hut_timbered.description.rug');
   assert.equal(
     gameView(take(w, 'rug')).place.description.key,
-    'blueprint.hut_timbered.description',
+    'structure.hut_timbered.description',
   );
   w = drop(w, 'cot');
   const rest = play(w, { type: 'rest' });

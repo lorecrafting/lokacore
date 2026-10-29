@@ -39,7 +39,7 @@ defmodule Loka.Content.Source do
              | :bleed
              | :behaviour
              | :status
-             | :blueprint, String.t(), steps()}
+             | :structure, String.t(), steps()}
 
   @doc """
   Each recognised `.json` file under `dir` (dot files too) as `{rel, kind, value}` (`:invalid` if
@@ -152,7 +152,7 @@ defmodule Loka.Content.Source do
     "transports" => :transport,
     "bleeds" => :bleed,
     "statuses" => :status,
-    "blueprints" => :blueprint,
+    "structures" => :structure,
     "behaviours" => :behaviour
   }
 

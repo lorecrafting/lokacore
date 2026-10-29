@@ -127,7 +127,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population population_bundle replenish blueprint),
+         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population population_bundle replenish structure),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -226,7 +226,7 @@ defmodule Loka.Content.Compiler do
     {"transport", :transport, "TransportDefinition"},
     {"bleed", :bleed, "BleedDefinition"},
     {"status", :status, "StatusDefinition"},
-    {"blueprint", :blueprint, "BlueprintDefinition"}
+    {"structure", :structure, "StructureDefinition"}
   ]
 
   @doc false

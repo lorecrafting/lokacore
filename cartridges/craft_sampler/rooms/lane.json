@@ -10,7 +10,7 @@
     "directions": [
       "north"
     ],
-    "blueprints": [
+    "structures": [
       "hut_plain",
       "hut_timbered"
     ]

@@ -301,7 +301,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Built rooms S2 (construction@1; mechanics.md Built rooms): a room raised by a build service. The identity's definition is the BlueprintDefinition; site is the authored room it opens from, direction the site direction it occupies (one of site.directions), owner the character who paid.",
+          "description": "Built rooms S2 (construction@1; mechanics.md Built rooms): a room raised by a build service. The identity's definition is the StructureDefinition; site is the authored room it opens from, direction the site direction it occupies (one of site.directions), owner the character who paid.",
           "type": "object",
           "properties": {
             "kind": {

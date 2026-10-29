@@ -205,7 +205,7 @@ export function homestead(c: any) {
   for (let w = 1; w <= 3; w++)
     for (let k = 0; k <= 9; k++) delete c.reactions[ref('reaction', `wheel_${w}_x_shows_${k}`)];
   const drop = {
-    blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],
+    structures: ['structure/hut_plain', 'structure/hut_timbered'],
     actions: [
       'action/raise_hut_plain',
       'action/raze_hut',

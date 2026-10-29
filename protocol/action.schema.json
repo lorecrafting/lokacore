@@ -831,13 +831,13 @@
           "additionalProperties": false
         },
         {
-          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise structure at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
           "type": "object",
           "properties": {
             "op": {
               "const": "build"
             },
-            "blueprint": {
+            "structure": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "direction": {
@@ -853,7 +853,7 @@
           },
           "required": [
             "op",
-            "blueprint",
+            "structure",
             "direction"
           ],
           "additionalProperties": false

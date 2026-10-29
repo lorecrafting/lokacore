@@ -31,7 +31,7 @@ defmodule Loka.Content.Artifact do
 
     optional =
       for k <-
-            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle bleed status replenish blueprint),
+            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle bleed status replenish structure),
           defs[k] != %{},
           into: %{},
           do:

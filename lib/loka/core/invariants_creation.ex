@@ -293,7 +293,7 @@ defmodule Loka.Core.InvariantsCreation do
   end
 
   defp built_provenance?(s, i, origin) do
-    i["definition"]["kind"] == "blueprint" and
+    i["definition"]["kind"] == "structure" and
       Enum.any?(Map.get(s, "known_entities", %{}), fn {_, e} ->
         e["kind"] == "body" and e["owner_id"] == origin["owner"]
       end)

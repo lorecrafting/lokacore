@@ -2025,7 +2025,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Owned by status@1.",
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or structure's variant. Owned by status@1.",
           "properties": {
             "op": { "const": "status_active" },
             "status": { "$ref": "#/$defs/DefinitionRef" },
@@ -2468,9 +2468,8 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise structure at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
           "properties": {
-            "blueprint": { "$ref": "#/$defs/DefinitionRef" },
             "direction": {
               "enum": [
                 "north",
@@ -2481,11 +2480,12 @@
                 "down"
               ]
             },
-            "op": { "const": "build" }
+            "op": { "const": "build" },
+            "structure": { "$ref": "#/$defs/DefinitionRef" }
           },
           "required": [
             "op",
-            "blueprint",
+            "structure",
             "direction"
           ],
           "type": "object"
@@ -2900,9 +2900,8 @@
               "escrow"
             ]
           },
-          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
           "properties": {
-            "blueprint": { "$ref": "#/$defs/DefinitionRef" },
             "direction": {
               "enum": [
                 "north",
@@ -2945,11 +2944,12 @@
             },
             "fact": { "$ref": "#/$defs/DefinitionRef" },
             "kind": { "const": "build" },
-            "site": { "$ref": "#/$defs/DefinitionRef" }
+            "site": { "$ref": "#/$defs/DefinitionRef" },
+            "structure": { "$ref": "#/$defs/DefinitionRef" }
           },
           "required": [
             "kind",
-            "blueprint",
+            "structure",
             "site",
             "direction"
           ],
@@ -2957,7 +2957,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
           "properties": {
             "direction": {
               "enum": [
@@ -4701,7 +4701,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Owned by status@1.",
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or structure's variant. Owned by status@1.",
           "properties": {
             "op": { "const": "status_active" },
             "status": { "$ref": "#/$defs/partial.DefinitionRef" },
@@ -5128,9 +5128,8 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
           "properties": {
-            "blueprint": { "$ref": "#/$defs/partial.DefinitionRef" },
             "direction": {
               "enum": [
                 "north",
@@ -5167,13 +5166,14 @@
             },
             "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
             "kind": { "const": "build" },
-            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "structure": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
           "properties": {
             "direction": {
               "enum": [
@@ -5613,43 +5613,6 @@
           "minimum": 1,
           "type": "integer"
         },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
-    "partial.source.BlueprintDefinition": {
-      "additionalProperties": false,
-      "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
-      "properties": {
-        "description": { "$ref": "#/$defs/partial.TextKey" },
-        "extends": { "$ref": "#/$defs/Key" },
-        "locks": {
-          "additionalProperties": false,
-          "properties": {
-            "enter": { "$ref": "#/$defs/partial.VersionedPolicy" }
-          },
-          "type": "object"
-        },
-        "max_per_owner": {
-          "maximum": 1000,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "tags": {
-          "items": { "$ref": "#/$defs/Tag" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "title": { "$ref": "#/$defs/partial.TextKey" },
-        "variants": {
-          "items": { "$ref": "#/$defs/DescriptionVariant" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -7170,14 +7133,8 @@
         "sanctuary": { "type": "boolean" },
         "site": {
           "additionalProperties": false,
-          "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "properties": {
-            "blueprints": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 16,
-              "minItems": 1,
-              "type": "array"
-            },
             "directions": {
               "items": {
                 "enum": [
@@ -7190,6 +7147,12 @@
                 ]
               },
               "maxItems": 6,
+              "minItems": 1,
+              "type": "array"
+            },
+            "structures": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 16,
               "minItems": 1,
               "type": "array"
             }
@@ -7527,6 +7490,43 @@
           "minimum": 1,
           "type": "integer"
         },
+        "with": { "type": "object" }
+      },
+      "type": "object"
+    },
+    "partial.source.StructureDefinition": {
+      "additionalProperties": false,
+      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
+      "properties": {
+        "description": { "$ref": "#/$defs/partial.TextKey" },
+        "extends": { "$ref": "#/$defs/Key" },
+        "locks": {
+          "additionalProperties": false,
+          "properties": {
+            "enter": { "$ref": "#/$defs/partial.VersionedPolicy" }
+          },
+          "type": "object"
+        },
+        "max_per_owner": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "tags": {
+          "items": { "$ref": "#/$defs/Tag" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "title": { "$ref": "#/$defs/partial.TextKey" },
+        "variants": {
+          "items": { "$ref": "#/$defs/DescriptionVariant" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -7892,48 +7892,6 @@
         "tick_every",
         "hp_loss",
         "narration"
-      ],
-      "type": "object"
-    },
-    "source.BlueprintDefinition": {
-      "additionalProperties": false,
-      "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
-      "properties": {
-        "description": { "$ref": "#/$defs/TextKey" },
-        "locks": {
-          "additionalProperties": false,
-          "properties": {
-            "enter": { "$ref": "#/$defs/VersionedPolicy" }
-          },
-          "required": [
-            "enter"
-          ],
-          "type": "object"
-        },
-        "max_per_owner": {
-          "maximum": 1000,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "ruin": { "$ref": "#/$defs/DefinitionRef" },
-        "tags": {
-          "items": { "$ref": "#/$defs/Tag" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "title": { "$ref": "#/$defs/TextKey" },
-        "variants": {
-          "items": { "$ref": "#/$defs/DescriptionVariant" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "weathering": { "$ref": "#/$defs/DefinitionRef" }
-      },
-      "required": [
-        "title",
-        "description"
       ],
       "type": "object"
     },
@@ -9762,14 +9720,8 @@
         "sanctuary": { "type": "boolean" },
         "site": {
           "additionalProperties": false,
-          "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "properties": {
-            "blueprints": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 16,
-              "minItems": 1,
-              "type": "array"
-            },
             "directions": {
               "items": {
                 "enum": [
@@ -9784,11 +9736,17 @@
               "maxItems": 6,
               "minItems": 1,
               "type": "array"
+            },
+            "structures": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
             }
           },
           "required": [
             "directions",
-            "blueprints"
+            "structures"
           ],
           "type": "object"
         },
@@ -10206,6 +10164,48 @@
       ],
       "type": "object"
     },
+    "source.StructureDefinition": {
+      "additionalProperties": false,
+      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
+      "properties": {
+        "description": { "$ref": "#/$defs/TextKey" },
+        "locks": {
+          "additionalProperties": false,
+          "properties": {
+            "enter": { "$ref": "#/$defs/VersionedPolicy" }
+          },
+          "required": [
+            "enter"
+          ],
+          "type": "object"
+        },
+        "max_per_owner": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ruin": { "$ref": "#/$defs/DefinitionRef" },
+        "tags": {
+          "items": { "$ref": "#/$defs/Tag" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "title": { "$ref": "#/$defs/TextKey" },
+        "variants": {
+          "items": { "$ref": "#/$defs/DescriptionVariant" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "weathering": { "$ref": "#/$defs/DefinitionRef" }
+      },
+      "required": [
+        "title",
+        "description"
+      ],
+      "type": "object"
+    },
     "source.TopicDefinition": {
       "additionalProperties": false,
       "description": "A declared localized topic mapped to its player Boolean knowledge fact.",
@@ -10339,11 +10339,6 @@
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
-        "blueprints": {
-          "additionalProperties": { "$ref": "#/$defs/source.blueprints" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
         "dialogues": {
           "additionalProperties": { "$ref": "#/$defs/source.dialogues" },
           "propertyNames": { "$ref": "#/$defs/Key" },
@@ -10416,6 +10411,11 @@
         },
         "statuses": {
           "additionalProperties": { "$ref": "#/$defs/source.statuses" },
+          "propertyNames": { "$ref": "#/$defs/Key" },
+          "type": "object"
+        },
+        "structures": {
+          "additionalProperties": { "$ref": "#/$defs/source.structures" },
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
@@ -10503,30 +10503,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.BleedDefinition" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.blueprints": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.BlueprintDefinition" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.BlueprintDefinition" }
       },
       "if": {
         "required": [
@@ -11028,6 +11004,30 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.StatusDefinition" }
+      },
+      "if": {
+        "required": [
+          "abstract"
+        ],
+        "type": "object"
+      },
+      "then": {
+        "properties": {
+          "abstract": { "const": true }
+        },
+        "type": "object"
+      }
+    },
+    "source.structures": {
+      "else": {
+        "else": { "$ref": "#/$defs/source.StructureDefinition" },
+        "if": {
+          "required": [
+            "extends"
+          ],
+          "type": "object"
+        },
+        "then": { "$ref": "#/$defs/partial.source.StructureDefinition" }
       },
       "if": {
         "required": [

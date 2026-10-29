@@ -31,8 +31,8 @@ export function creationValid(identity: Json, state: State): boolean {
           ? origin.member_id === i.id
           : origin.member_id !== i.id)
       : origin.kind === 'built'
-        ? // Built rooms S2: a blueprint raised by a known character (some body's owner)
-          (i.definition as Obj).kind === 'blueprint' &&
+        ? // Built rooms S2: a structure raised by a known character (some body's owner)
+          (i.definition as Obj).kind === 'structure' &&
           Object.values(section(state, 'known_entities')).some(
             (e) => (e as Obj).kind === 'body' && (e as Obj).owner_id === origin.owner,
           )
