@@ -41,7 +41,7 @@
       "sequence": [
         {
           "op": "build",
-          "blueprint": "hut_timbered",
+          "structure": "hut_timbered",
           "direction": "north"
         }
       ],

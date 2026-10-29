@@ -1071,9 +1071,9 @@
     "implemented_in": "toolbox row W7 (loka-kgd.29): narration alternates by command-id hash; visited_count"
   },
   "construction": {
-    "spec": "docs/system/cartridge.md Blueprint and site declarations (Built rooms S1)",
+    "spec": "docs/system/cartridge.md Structure and site declarations (Built rooms S1)",
     "contracts": [
-      "BlueprintDefinition",
+      "StructureDefinition",
       "RoomDefinition",
       "WorldSettings"
     ],
@@ -1087,6 +1087,6 @@
     "invariants": [
       "unknown_types_fail_closed"
     ],
-    "implemented_in": "Built rooms S1 (loka-kgd.109.1): blueprints, room sites and world.construction declared and checked; nothing builds yet"
+    "implemented_in": "Built rooms S1 (loka-kgd.109.1): structures, room sites and world.construction declared and checked; nothing builds yet"
   }
 }

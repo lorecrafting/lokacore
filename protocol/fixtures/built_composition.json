@@ -11,7 +11,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -63,7 +63,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -117,7 +117,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -249,7 +249,7 @@
             "definition": {
               "cartridge_id": "c",
               "cartridge_version": "1.0.0",
-              "kind": "blueprint",
+              "kind": "structure",
               "key": "hut"
             },
             "origin": {
@@ -296,7 +296,7 @@
               "definition": {
                 "cartridge_id": "c",
                 "cartridge_version": "1.0.0",
-                "kind": "blueprint",
+                "kind": "structure",
                 "key": "hut"
               },
               "origin": {

@@ -56,7 +56,7 @@ export function onlyFood(c: any) {
     c[section] = {};
   delete c.alternates;
   delete c.speech;
-  delete c.blueprints;
+  delete c.structures;
   delete c.map_positions;
   c.facts = { [`${prefix}:fact/position`]: position };
   c.world = { carry: { max_grams: 12000 } };

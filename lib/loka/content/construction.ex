@@ -1,8 +1,8 @@
 defmodule Loka.Content.Construction do
   @moduledoc """
-  Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): a room's site
-  names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints of this
-  cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
+  Built rooms S1 (construction@1; cartridge.md Structure and site declarations): a room's site
+  names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only structures of this
+  cartridge (UNRESOLVED_REFERENCE); a structure, its tags and description variants are owned by
   their capabilities, and its title and descriptions have catalog entries; a site or
   world.construction needs construction@1. Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
@@ -15,26 +15,26 @@ defmodule Loka.Content.Construction do
   def check(nil, _, _, _, _), do: []
 
   def check(m, defs, v2, {_, settings}, registry) do
-    {blueprints, sites, text} = {blueprints(defs), sites(defs), text(v2)}
+    {structures, sites, text} = {structures(defs), sites(defs), text(v2)}
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
-      owned_blueprints(blueprints, m, defs, text, registry) ++
+      owned_structures(structures, m, defs, text, registry) ++
       requirements(m, sites, settings) ++
       builds(m, defs, text, settings)
   end
 
-  defp owned_blueprints(blueprints, m, defs, text, registry) do
+  defp owned_structures(structures, m, defs, text, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
     Enum.flat_map(
-      blueprints,
+      structures,
       &(owned_parts(&1, required) ++ texts(&1, text) ++ statuses(&1, m, defs))
     )
   end
 
   # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
-  # blueprint and direction, at most one per sequence, with world.construction, the build refusal
-  # texts. The listed blueprint
+  # structure and direction, at most one per sequence, with world.construction, the build refusal
+  # texts. The listed structure
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
     for {_, {rel, [], r}} <- defs["recipe"] || %{},
@@ -80,14 +80,14 @@ defmodule Loka.Content.Construction do
 
   defp on_site(site, s, rel, path) do
     for {f, ok} <- [
-          {"blueprint", s["blueprint"] in site["blueprints"]},
+          {"structure", s["structure"] in site["structures"]},
           {"direction", s["direction"] in site["directions"]}
         ],
         not ok,
         do: diag("SCHEMA_VIOLATION", at(rel, path ++ [f]), %{"error" => "invalid_value"})
   end
 
-  # A site or world.construction needs construction@1 (a blueprint is owned through the registry).
+  # A site or world.construction needs construction@1 (a structure is owned through the registry).
   defp requirements(m, sites, settings) do
     world =
       if get_in(settings, ["world", "construction"]),
@@ -100,16 +100,16 @@ defmodule Loka.Content.Construction do
     end
   end
 
-  defp blueprints(defs), do: for({_, {rel, [], b}} <- defs["blueprint"] || %{}, do: {rel, b})
+  defp structures(defs), do: for({_, {rel, [], b}} <- defs["structure"] || %{}, do: {rel, b})
 
   defp sites(defs),
     do: for({_, {rel, [], %{"site" => s} = r}} <- defs["room"] || %{}, do: {rel, r, s})
 
-  @doc "A room definition with its site's short blueprint references expanded (other values as given)."
-  def expand(%{"site" => %{"blueprints" => bs} = s} = room, m) when is_list(bs),
-    do: %{room | "site" => %{s | "blueprints" => Enum.map(bs, &ref(&1, "blueprint", m))}}
+  @doc "A room definition with its site's short structure references expanded (other values as given)."
+  def expand(%{"site" => %{"structures" => bs} = s} = room, m) when is_list(bs),
+    do: %{room | "site" => %{s | "structures" => Enum.map(bs, &ref(&1, "structure", m))}}
 
-  # Built rooms S4: a blueprint's weathering and ruin statuses (no other definition has them).
+  # Built rooms S4: a structure's weathering and ruin statuses (no other definition has them).
   def expand(%{} = b, m) when is_map_key(b, "weathering") or is_map_key(b, "ruin"),
     do:
       Map.new(b, fn
@@ -136,10 +136,10 @@ defmodule Loka.Content.Construction do
       is_map_key(exits, d),
       do: diag("SITE_EXIT_CONFLICT", at(rel, ["site", "directions", i]), %{})
     ) ++
-      for {b, i} <- Enum.with_index(s["blueprints"]),
-          resolve(b, "blueprint", m, defs) == :unresolved,
+      for {b, i} <- Enum.with_index(s["structures"]),
+          resolve(b, "structure", m, defs) == :unresolved,
           do:
-            diag("UNRESOLVED_REFERENCE", at(rel, ["site", "blueprints", i]), %{
+            diag("UNRESOLVED_REFERENCE", at(rel, ["site", "structures", i]), %{
               "target" =>
                 "#{b["cartridge_id"]}@#{b["cartridge_version"]}:#{b["kind"]}/#{b["key"]}"
             })
@@ -151,7 +151,7 @@ defmodule Loka.Content.Construction do
   defp owned_parts({rel, b}, required) do
     tags = if b["tags"], do: owned(at(rel, ["tags"]), "tags", required), else: []
 
-    owned(at(rel, []), "blueprint", required) ++
+    owned(at(rel, []), "structure", required) ++
       tags ++
       for {s, _} <- RoomParts.variants(b), d <- owned(at(rel, s), "variant", required), do: d
   end

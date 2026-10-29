@@ -58,7 +58,6 @@ const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [st
 const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [step] };
 const defs = 'defs.schema.json#/$defs/';
 const discount = { numerator: 1, denominator: 2, minimum: 1, skill: 'haggle' };
-const outcome = 'source.StoryPointDefinition/properties/outcomes/additionalProperties';
 const consume = { items: ['log'], quantity: 1, to: { in: 'room', room: 'yard' } };
 const fact = {
   version: 1,
@@ -72,7 +71,7 @@ const fact = {
 // dialogue choice or nested npc member yet. The defs rows pin the contract's
 // exactlyOneRequired and requiredUnless translations.
 test('the schemas refuse a misspelled field and each shortcut written wrong', () => {
-  const pairs: [string, object, object][] = [
+  const pairs: [string, unknown, unknown][] = [
     ['rooms', room, { ...room, titel: 'hall.title' }],
     ['rooms', { ...room, title: { prose: 'Hall' } }, { ...room, title: { prose: '' } }],
     ['rooms', { extends: 'hall' }, { extends: 1 }],
@@ -109,7 +108,7 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
       { extends: 'talk', choices: { ask: { chek: {} } } },
     ],
     [defs + 'Shop/properties/buy_discount', discount, { ...discount, friendly: true }],
-    [defs + outcome, { scene: 'intro' }, { scene: 'intro', dialogue: 'talk', choice: 'ask' }],
+    [defs + 'DialogueChoice/properties/story_point', 'lantern_resolved/carry', 'lantern_resolved'],
     [defs + 'RecipeCraft', { consume }, {}],
     ['facts', { facts: { lit: fact } }, { facts: { lit: { ...fact, colour: 'red' } } }],
   ];

@@ -56,11 +56,9 @@ defmodule Loka.ContentTrainingTest do
       &{"dialogues/carpenter_lessons.json",
        fn d -> update_in(d, ["choices", "carving", "sequence"], &1) end}
 
-    # letter_fate gains a scene-resolved outcome so the scene's on_end write is otherwise valid.
+    # The scene's on_end claims a letter_fate outcome so its write is otherwise valid.
     on_end = fn fact ->
       [
-        {"story_points/letter_fate.json",
-         &put_in(&1, ["outcomes", "read"], %{"scene" => "letter_read"})},
         {"scenes/letter_read.json",
          &Map.put(&1, "on_end", %{
            "story_point" => "letter_fate",

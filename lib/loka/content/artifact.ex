@@ -45,7 +45,7 @@ defmodule Loka.Content.Artifact do
     bleed
     status
     replenish
-    blueprint
+    structure
   )
 
   # items, npcs, recipes, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The

@@ -228,7 +228,7 @@ export const craftRefused = (
     recipe!.target.kind === 'detail' &&
     unbuildable(
       world,
-      { blueprint: s.blueprint, site: recipe!.target.room, direction: s.direction },
+      { structure: s.structure, site: recipe!.target.room, direction: s.direction },
       actor,
     );
   if (b) return b;

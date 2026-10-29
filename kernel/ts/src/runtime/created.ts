@@ -144,17 +144,17 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
 }
 
 type Built = Extract<Identity['origin'], { kind: 'built' }>;
-// Built rooms S2: the room is the blueprint, entered from its site by the origin's direction.
+// Built rooms S2: the room is the structure, entered from its site by the origin's direction.
 function raise(world: World, state: State, id: string, identity: Identity, draft: Draft): boolean {
   const { site, direction } = identity.origin as Built;
-  const blueprint = world.cartridge.blueprints?.[refString(identity.definition)];
+  const structure = world.cartridge.structures?.[refString(identity.definition)];
   const declared = world.cartridge.rooms[refString(site)]?.site;
   const siteId = world.roomIds[refString(site)];
   if (
-    !blueprint ||
+    !structure ||
     !siteId ||
     !declared?.directions.includes(direction) ||
-    !declared.blueprints.some((b) => same(b, identity.definition))
+    !declared.structures.some((b) => same(b, identity.definition))
   )
     return false;
   // A DefinitionRef key is [a-z][a-z0-9_]*, so the room key spells the uuid with underscores.
@@ -168,7 +168,7 @@ function raise(world: World, state: State, id: string, identity: Identity, draft
   const razed = !!state.built?.[id];
   if (!razed) draft.rooms[siteId] = { ...at, exits: { ...at.exits, [direction]: { to: ref } } };
   draft.rooms[id] = {
-    ...blueprint,
+    ...structure,
     key: room,
     exits: razed ? {} : { [OPPOSITE[direction]]: { to: site } },
   };

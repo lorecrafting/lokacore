@@ -172,7 +172,7 @@ function provenance(state: Any, i: Any): boolean {
   }
   if (i.origin.kind === 'built')
     return (
-      i.definition.kind === 'blueprint' &&
+      i.definition.kind === 'structure' &&
       Object.values(state.known_entities ?? {}).some(
         (e: Any) => e.kind === 'body' && e.owner_id === i.origin.owner,
       )

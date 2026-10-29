@@ -630,7 +630,7 @@
     "residency": "portable_capability",
     "commands": [],
     "definitions": [
-      "blueprint"
+      "structure"
     ],
     "events": []
   }

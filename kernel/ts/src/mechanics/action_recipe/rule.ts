@@ -28,7 +28,7 @@
 // A recipe's craft (Homestead hs-10; shared.ts crafted) moves its consume's first items held
 // directly to consume.to on every accepted perform, and unless the outcome is failure one yield
 // item from yield.from to the body with item_acquired before the steps (made). A build step (Built
-// rooms S6, success outcome only) raises its blueprint at the target's room for the actor
+// rooms S6, success outcome only) raises its structure at the target's room for the actor
 // (service/build.ts created); admission refused it while unbuildable (shared.ts craftRefused).
 import type {
   ActionRecipe,
@@ -241,7 +241,7 @@ const step =
     if (s.op === 'build') {
       const site = recipeOf(world, command.payload)!.target; // a detail (the compiler's build check)
       if (site.kind !== 'detail') return r;
-      const b = { blueprint: s.blueprint, site: site.room, direction: s.direction };
+      const b = { structure: s.structure, site: site.room, direction: s.direction };
       return { ...r, ops: [...r.ops, ...created(world, b, command.payload.actor_id, mint)] };
     }
     if (s.op === 'resource.adjust') {

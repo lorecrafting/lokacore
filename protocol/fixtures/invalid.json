@@ -19753,10 +19753,10 @@
     "contract": "RecipeStep",
     "value": {
       "op": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "craft_sampler",
         "cartridge_version": "2.0.0",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut_timbered"
       }
     },
@@ -19772,10 +19772,10 @@
     "contract": "RecipeStep",
     "value": {
       "op": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "craft_sampler",
         "cartridge_version": "2.0.0",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut_timbered"
       },
       "direction": "northwest"
@@ -19788,7 +19788,7 @@
     ]
   },
   {
-    "name": "build_step_without_blueprint",
+    "name": "build_step_without_structure",
     "contract": "RecipeStep",
     "value": {
       "op": "build",
@@ -19796,7 +19796,7 @@
     },
     "errors": [
       {
-        "path": "/blueprint",
+        "path": "/structure",
         "code": "missing_property"
       }
     ]
@@ -19806,10 +19806,10 @@
     "contract": "RecipeStep",
     "value": {
       "op": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "craft_sampler",
         "cartridge_version": "2.0.0",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut_timbered"
       },
       "direction": "north",
@@ -28410,7 +28410,7 @@
     },
     "errors": [
       {
-        "path": "/blueprint",
+        "path": "/structure",
         "code": "missing_property"
       }
     ]
@@ -28419,10 +28419,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "direction": "north"
@@ -28438,10 +28438,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28462,10 +28462,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28487,10 +28487,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28513,10 +28513,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28544,10 +28544,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28587,10 +28587,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28637,10 +28637,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -28687,10 +28687,10 @@
     "contract": "ServiceBenefit",
     "value": {
       "kind": "build",
-      "blueprint": {
+      "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
-        "kind": "blueprint",
+        "kind": "structure",
         "key": "hut"
       },
       "site": {
@@ -29724,7 +29724,7 @@
     ]
   },
   {
-    "contract": "BlueprintDefinition",
+    "contract": "StructureDefinition",
     "value": {
       "x": 1
     },
@@ -29748,7 +29748,7 @@
     ]
   },
   {
-    "contract": "BlueprintDefinition",
+    "contract": "StructureDefinition",
     "value": {
       "key": "hut",
       "title": "t",
@@ -29779,7 +29779,7 @@
     ]
   },
   {
-    "contract": "BlueprintDefinition",
+    "contract": "StructureDefinition",
     "value": {
       "key": "hut",
       "title": "t",
@@ -29988,7 +29988,7 @@
     ]
   },
   {
-    "contract": "BlueprintDefinition",
+    "contract": "StructureDefinition",
     "value": {
       "key": "hut",
       "title": "t",
@@ -30003,7 +30003,7 @@
     ]
   },
   {
-    "contract": "BlueprintDefinition",
+    "contract": "StructureDefinition",
     "value": {
       "key": "hut",
       "title": "t",
@@ -30018,7 +30018,7 @@
     ]
   },
   {
-    "contract": "BlueprintDefinition",
+    "contract": "StructureDefinition",
     "value": {
       "key": "hut",
       "title": "t",
@@ -30356,12 +30356,12 @@
     },
     "errors": [
       {
-        "path": "/site/blueprints",
-        "code": "missing_property"
-      },
-      {
         "path": "/site/directions",
         "code": "too_few_items"
+      },
+      {
+        "path": "/site/structures",
+        "code": "missing_property"
       },
       {
         "path": "/site/x",
@@ -30380,12 +30380,12 @@
         "directions": [
           "north"
         ],
-        "blueprints": []
+        "structures": []
       }
     },
     "errors": [
       {
-        "path": "/site/blueprints",
+        "path": "/site/structures",
         "code": "too_few_items"
       }
     ]
@@ -30398,11 +30398,11 @@
       "description": "d",
       "exits": {},
       "site": {
-        "blueprints": [
+        "structures": [
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           }
         ]
@@ -30432,107 +30432,107 @@
           "north",
           "north"
         ],
-        "blueprints": [
+        "structures": [
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           },
           {
             "cartridge_id": "c",
             "cartridge_version": "0.0.1",
-            "kind": "blueprint",
+            "kind": "structure",
             "key": "hut"
           }
         ]
@@ -30540,16 +30540,16 @@
     },
     "errors": [
       {
-        "path": "/site/blueprints",
-        "code": "too_many_items"
-      },
-      {
         "path": "/site/directions",
         "code": "too_many_items"
       },
       {
         "path": "/site/directions/0",
         "code": "not_in_enum"
+      },
+      {
+        "path": "/site/structures",
+        "code": "too_many_items"
       }
     ]
   },

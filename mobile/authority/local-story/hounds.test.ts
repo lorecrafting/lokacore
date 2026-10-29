@@ -37,7 +37,7 @@ function populationOnly() {
       'actions',
       'attributes',
       'barriers',
-      'blueprints',
+      'structures',
       'dialogues',
       'liquids',
       'quests',

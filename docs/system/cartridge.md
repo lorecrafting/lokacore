@@ -14,7 +14,7 @@ world's definitions and text:
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 | `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ActionRecipe, `action_recipe@1`, [mechanics](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `recipes` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
@@ -191,9 +191,10 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   `scene_<key>` fact (`facts.facts.scene_<key>`) and each action, reaction or dialogue
   fact.assign of it are RESERVED_FACT at the same write-site paths as position;
   fact_compare and reaction on.fact reads remain legal;
-- story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
-  one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
-  `lib/loka/content/dialogues.ex:2`);
+- story points: a dialogue choice's `story_point: "<key>/<outcome>"` and a scene's `on_end`
+  declare the point's outcomes; a second claim of one outcome is `DUPLICATE_DEFINITION` at its
+  site, and a claiming choice's dialogue resolves a quest (`OUTCOME_MISMATCH`;
+  `lib/loka/content/dialogues.ex`);
 - chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
   (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
   (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a
@@ -1185,7 +1186,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Recipe build step declarations
 
-[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `build {blueprint, direction}`, `blueprint` a blueprint ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) refuses, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a blueprint or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.blueprint` or `.direction`). The listed blueprint already resolves and owns construction@1.
+[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `build {structure, direction}`, `structure` a structure ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) refuses, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a structure or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.structure` or `.direction`). The listed structure already resolves and owns construction@1.
 
 ## Durability declarations
 
@@ -1241,11 +1242,11 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 Retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)): `RecipeTarget` has no `storylet` kind, so an action declaring one fails with SCHEMA_VIOLATION at `target.kind`.
 
-## Blueprint and site declarations
+## Structure and site declarations
 
-Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `blueprints/<key>.json` (`BlueprintDefinition`, `protocol/cartridge.schema.json`): `title` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a blueprint and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`), and `blueprints`, 1 to 16 blueprints of this cartridge (UNRESOLVED_REFERENCE at `site.blueprints[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Compiler `lib/loka/content/construction.ex`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
+Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `structures/<key>.json` (`StructureDefinition`, `protocol/cartridge.schema.json`): `title` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a structure and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`), and `structures`, 1 to 16 structures of this cartridge (UNRESOLVED_REFERENCE at `site.structures[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Compiler `lib/loka/content/construction.ex`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
 
-Built rooms S2 adds a service benefit `{kind: "build", blueprint, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `blueprint` and `site` resolve to a blueprint and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the blueprint and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.blueprint` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`.
+Built rooms S2 adds a service benefit `{kind: "build", structure, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `structure` and `site` resolve to a structure and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the structure and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.structure` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`.
 
 ## Narrate declarations
 
