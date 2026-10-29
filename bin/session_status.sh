@@ -2,11 +2,12 @@
 # SessionStart context: live tracker and PR state, so no memory file has to copy it.
 # Read-only; a missing tool or network prints a note instead of failing the session.
 cd "$(dirname "$0")/.." || exit 0
+# --no-auto-import: a plain br imports main's export over rows a refused Beads sync left open (bin/lib/beads_sync.sh).
 if command -v br >/dev/null 2>&1; then
-  echo "## Beads ($(br where 2>/dev/null | head -1 | sed "s|$HOME|~|"))"
-  br list --status in_progress 2>/dev/null
-  r=$(br ready --json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)))' 2>/dev/null)
-  b=$(br blocked --json 2>/dev/null | python3 -c 'import json,sys;print(json.load(sys.stdin)["total"])' 2>/dev/null)
+  echo "## Beads ($(br --no-auto-import where 2>/dev/null | head -1 | sed "s|$HOME|~|"))"
+  br --no-auto-import list --status in_progress 2>/dev/null
+  r=$(br --no-auto-import ready --json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)))' 2>/dev/null)
+  b=$(br --no-auto-import blocked --json 2>/dev/null | python3 -c 'import json,sys;print(json.load(sys.stdin)["total"])' 2>/dev/null)
   echo "ready: ${r:-?}, blocked: ${b:-?} (lists: br ready, br blocked)"
 else
   echo "br not installed: see docs/BEADS.md"
@@ -42,7 +43,7 @@ echo "## Housekeeping queue"
 # One br query (open ids/titles and the newest created_at) and one git query; failure prints a note.
 hk=
 if command -v br >/dev/null 2>&1; then
-  hk=$(br list -l housekeeping --status all --json 2>/dev/null | python3 -I -c '
+  hk=$(br --no-auto-import list -l housekeeping --status all --json 2>/dev/null | python3 -I -c '
 import json, sys
 issues = json.load(sys.stdin)["issues"]
 open_ = [i for i in issues if i["status"] != "closed"]
@@ -70,7 +71,7 @@ echo "stashes: $(git stash list 2>/dev/null | wc -l | tr -d ' ')"
 git branch --list 'review-*' --merged origin/main 2>/dev/null | sed 's/^[* +]*/merged review ref (delete): /'
 echo "## Beads/PR drift"
 tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
-if command -v br >/dev/null 2>&1 && br list --status all --json > "$tmp/issues" 2>/dev/null \
+if command -v br >/dev/null 2>&1 && br --no-auto-import list --status all --json > "$tmp/issues" 2>/dev/null \
   && gh pr list --state open --limit 200 --json number --jq '.[] | "\(.number) OPEN"' > "$tmp/states" 2>/dev/null; then
   none=none
   for n in $(python3 bin/beads_pr_drift.py --in-progress-prs "$tmp/issues"); do

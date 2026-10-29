@@ -18,7 +18,24 @@ beads_sync() {
   # The export is a flush of the database, so discarding it loses nothing (the merge rebuilds it). An
   # unmoved export stays: after an uncommitted merge the base equals it, and HEAD's older copy would
   # make the next merge refuse with AmbiguousBase.
-  git diff --quiet HEAD origin/main -- .beads/issues.jsonl || git checkout -q -- .beads/issues.jsonl || die 'cannot reset the export'
+  # An unpushed merge advanced the base: a row it took from here that main changed since would merge
+  # as main-only (database = base) and lose this checkout's copy. br itself refuses an older main copy
+  # (AmbiguousBase) and a row edited here since (export != base: BothModified).
+  both=$(python3 -I -c '
+import json, subprocess
+def rows(text): return {r["id"]: r for r in map(json.loads, filter(str.strip, text.splitlines()))}
+def show(rev): return rows(subprocess.run(["git", "show", rev + ":.beads/issues.jsonl"], capture_output=True, text=True, check=True).stdout)
+def read(path):
+    try: return rows(open(path).read())
+    except FileNotFoundError: return {}
+head, main, base, export = show("HEAD"), show("origin/main"), read(".beads/beads.base.jsonl"), read(".beads/issues.jsonl")
+print(*sorted(i for i in base if base[i] != head.get(i) and main.get(i) != head.get(i) and export.get(i) == base[i]))
+') || die 'cannot compare the base with main'
+  [ -z "$both" ] || die "rows $both are in this checkout's unpushed merge and main changed them since: a merge would keep main's copy. Nothing changed.
+Compare a row: br --no-auto-import show <id> --json; git show origin/main:.beads/issues.jsonl | grep '\"id\":\"<id>\"'
+Make one real edit to each (br --no-auto-import update <id> ..., e.g. main's change), then rerun this script:
+the merge then refuses BothModified and prints how to keep a side."
+  git diff --quiet HEAD origin/main -- .beads/issues.jsonl || git checkout -q HEAD -- .beads/issues.jsonl || die 'cannot reset the export'
   # Hooks off: the post-merge import is last-writer-wins and would hide a same-row conflict from the merge.
   git -c core.hooksPath=/dev/null pull -q --ff-only origin main || die 'pull failed (main changed a dirty tracked file): set that file aside, rerun'
   br1 sync --merge || die "br sync --merge refused: main is fast-forwarded; the database, export and base are unchanged.

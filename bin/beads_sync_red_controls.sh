@@ -40,6 +40,11 @@ for t in one-local two-main three four; do has "$t" common; done
 cp "$A"/.beads/issues.jsonl "$tmp/first"
 sync rerun 0
 cmp -s "$A"/.beads/issues.jsonl "$tmp/first" && ! grep -q AmbiguousBase "$tmp/out" || bad 'rerun: export changed or AmbiguousBase'
+# A failed commit left that export staged, then main moved another row. Break: the export is restored
+# from the index, so the pull refuses the dirty file ("pull failed"; br then refuses AmbiguousBase on a).
+(cd "$A" && git add .beads/issues.jsonl); push_m br update "$c" --title three-main
+sync staged 1
+! grep -q 'pull failed' "$tmp/out" && [ "$(cd "$A" && git rev-parse HEAD)" = "$(cd "$A" && git rev-parse origin/main)" ] || { bad 'staged: no pull'; cat "$tmp/out"; }
 
 # (b) Same row edited on both sides. Break: the step overwrites one side (--force-db, or the post-merge
 # hook importing main's row first), or writes before refusing, or the printed steps lose a row.
@@ -50,6 +55,10 @@ grep -q "$a: BothModified" "$tmp/out" && grep -q 'refused: main is fast-forwarde
 [ "$(row "$a")" = 'one-local 2' ] || bad "same-row: database row a is $(row "$a")"
 [ "$(cksum < "$A"/.beads/beads.base.jsonl)" = "$base" ] || bad 'same-row: base changed'
 [ "$(cd "$A" && git rev-parse HEAD)" = "$(cd "$A" && git rev-parse origin/main)" ] || bad 'same-row: main not fast-forwarded'
+# The SessionStart hook with the refusal open (gh stubbed to fail). Break: its plain br imports main's a.
+mkdir -p "$tmp/stub" && printf '#!/bin/sh\nexit 1\n' > "$tmp/stub/gh" && chmod +x "$tmp/stub/gh" && cp "$bin/session_status.sh" "$A/bin/"
+PATH="$tmp/stub:$PATH" sh "$A/bin/session_status.sh" > /dev/null 2>&1
+[ "$(row "$a")" = 'one-local 2' ] || bad "session-status: database row a is $(row "$a")"
 # Follow the printed steps literally: compare, keep this checkout's rows, rerun.
 (cd "$A" && eval "$(sed -n "s/^Compare a row: \([^;]*\);.*/\1/p" "$tmp/out" | sed "s/<id>/$a/")" > /dev/null && br sync --merge --force-db > /dev/null)
 sync same-row-rerun 0
@@ -64,4 +73,20 @@ grep -q 'unexported local changes' "$tmp/hook" || { bad 'base: the hook imported
 push_m br update "$c" --title three-main
 sync base 0
 for t in one-local two-main three-main; do has "$t" base; done
+
+# (d) Died after the sync (nothing pushed), then main changed the row the first merge took from here.
+# Break: the rerun's merge finds the database equal to the base that merge advanced and silently
+# takes main's copy (a=one 0). Then the printed steps: a real edit, rerun, BothModified, --force-db.
+mk; push_m br update "$b" --title two-main
+sync unpushed 0
+push_m br update "$a" --priority 0
+sync unpushed-rerun 1
+grep -q "rows $a are in this checkout's unpushed merge" "$tmp/out" || { bad 'unpushed-rerun: no row id or message'; cat "$tmp/out"; }
+[ "$(row "$a")" = 'one-local 2' ] || bad "unpushed-rerun: database row a is $(row "$a")"
+(cd "$A" && nb update "$a" --priority 1 > /dev/null)
+sync unpushed-edited 1
+grep -q "$a: BothModified" "$tmp/out" || { bad 'unpushed-edited: no BothModified'; cat "$tmp/out"; }
+(cd "$A" && nb sync --merge --force-db > /dev/null)
+sync unpushed-forced 0
+[ "$(row "$a")" = 'one-local 1' ] && [ "$(row "$b")" = 'two-main 2' ] || bad "unpushed after --force-db: a=$(row "$a") b=$(row "$b")"
 exit $fail

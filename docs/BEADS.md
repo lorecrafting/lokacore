@@ -30,7 +30,9 @@ even when the task itself is durable.
 `bin/after_merge.sh` and `bin/beads_checkpoint.sh` share one sync step, `bin/lib/beads_sync.sh`:
 pull `main` (hooks off), then `br sync --merge`, a three-way merge of the database and main's export
 on the local base `.beads/beads.base.jsonl`, so local writes and a moved main export need no hand
-merge. Only a row edited on both sides refuses, with its id, after the pull. Until that is resolved a
+merge. Only a row edited on both sides refuses, with its id, after the pull; a rerun whose earlier
+merge was never pushed refuses before the pull a row main changed since (make one real edit to it,
+rerun, then keep a side as below). Until that is resolved a
 plain `br` command auto-imports main's rows over the local ones: compare with
 `br --no-auto-import show <id> --json`, then keep a side with `br sync --merge --force-db` or
 `--force-jsonl` as the refusal prints. The `post-merge` hook (`bin/beads_after_git.py`) and the
