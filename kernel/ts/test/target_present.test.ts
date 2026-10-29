@@ -49,7 +49,7 @@ test('the target reaches admission for a talk alias, a recipe and a take', () =>
     world((c) => {
       c.actions[`${F}:action/chat`] = chat(PRESENT);
       c.recipes[`${F}:recipe/coil_rope`].policy.root = PRESENT;
-      // Overrides the engine take (ALWAYS), so only this policy admits a take.
+      // Overrides the engine take (no policy: always holds); only this policy admits a take.
       c.actions[`${F}:action/take`] = { ...chat(PRESENT), key: 'take', command: 'take' };
       c.actions[`${F}:action/take`].target.scopes = ['room_contents'];
     }),
