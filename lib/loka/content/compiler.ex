@@ -205,7 +205,6 @@ defmodule Loka.Content.Compiler do
   end
 
   @kinds [
-    {"policy", :policy, "VersionedPolicy"},
     {"action", :action, "ActionDefinition"},
     {"room", :room, "RoomDefinition"},
     {"item", :item, "ItemDefinition"},
@@ -339,7 +338,7 @@ defmodule Loka.Content.Compiler do
   defp definition(_, _, _, :invalid, _), do: {:error, []}
 
   defp definition(rel, steps, key, value, contract) do
-    keyed = if contract == "VersionedPolicy", do: value, else: with_key(value, key)
+    keyed = with_key(value, key)
 
     case authored_key(rel, steps, value) ++
            validated(rel, steps, "Key", key) ++ body(rel, steps, contract, keyed) do

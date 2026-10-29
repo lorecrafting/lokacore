@@ -25,7 +25,6 @@ v['facts'] = {
     key('fact', 'search_plan'): definition('search_plan', version=1, value_type=dict(type='enum', values=['undecided', 'player_led', 'party_led'], default='undecided'), scopes=['player'], meaning="Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest)."),
     key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it."),
     key('fact', 'scene_lantern_kept'): definition('scene_lantern_kept', version=1, value_type=dict(type='int', minimum=-1, maximum=3, default=0), scopes=['player'], meaning="Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.")}
-v['policies'] = {}
 v['actions'] = {}
 # Literal reciprocal geometry; barrier faces share one reference.
 geometry = {

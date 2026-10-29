@@ -103,7 +103,6 @@ defmodule Loka.Core.ContractsTest do
 
     maps = [
       {"facts", "fact"},
-      {"policies", "policy"},
       {"actions", "action"},
       {"rooms", "room"},
       {"structures", "structure"}

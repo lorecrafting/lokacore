@@ -137,10 +137,11 @@ defmodule Loka.ContentAttributesTest do
     m = JSON.decode!(File.read!(Path.join(hello, "cartridge.json")))
     m = put_in(m, ["requires", "capabilities", "attributes"], 1)
     File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
-    policy = %{"policy_version" => 1, "root" => pool("hp", 1)}
-    File.write!(Path.join(dir, "policies/village_arrived.json"), JSON.encode!(policy))
+    talk = Path.join(dir, "actions/talk.json")
+    action = put_in(JSON.decode!(File.read!(talk)), ["policy", "root"], pool("hp", 1))
+    File.write!(talk, JSON.encode!(action))
     target = %{"target" => "hello_sampler@0.0.1:resource/hp"}
-    path = "policies/village_arrived.root.resource"
+    path = "actions/talk.policy.root.resource"
     assert Loka.Content.compile(dir) == {:error, [d("UNRESOLVED_REFERENCE", path, target)]}
   end
 

@@ -19,7 +19,6 @@ defmodule Loka.Content.Artifact do
         "capabilities" => m["requires"]["capabilities"]
       },
       "facts" => keyed(m, "fact", defs),
-      "policies" => keyed(m, "policy", defs),
       "actions" => keyed(m, "action", defs)
     }
   end
