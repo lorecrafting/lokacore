@@ -1,4 +1,4 @@
-# size: allow 377, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
+# size: allow 376, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -120,7 +120,6 @@ defmodule Loka.Content.Compiler do
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Standing.check(manifest, defs) ++
-        Loka.Content.Locks.check(manifest, defs) ++
         Loka.Content.Replenish.check(manifest, defs) ++
         Loka.Content.Delayed.check(manifest, defs, Checks.trees(defs)) ++
         Loka.Content.Construction.check(manifest, defs, v2, located, registry)

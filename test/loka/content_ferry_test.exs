@@ -312,7 +312,6 @@ defmodule Loka.ContentFerryTest do
       }
     }
 
-    # A receive also raises the ferry's kernel_api floor (KERNEL_API_RANGE_INVALID): not this break.
     assert {:error, diags} = compile(dir, files)
     assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{}) in diags
   end

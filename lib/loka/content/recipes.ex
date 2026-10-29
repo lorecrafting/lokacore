@@ -64,17 +64,8 @@ defmodule Loka.Content.Recipes do
         do: diag("SCHEMA_VIOLATION", at(rel, steps ++ ["op"]), %{"error" => "invalid_value"})
   end
 
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-  defp reserved?(key, m),
-    do: key in commands() and (key not in ~w(where knock) or api(m) >= [1, 37])
-
   defp duplicate(rel, r, ctx) do
-    taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
+    taken = r["key"] in ctx.actions or r["key"] in commands()
     if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
   end
 

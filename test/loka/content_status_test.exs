@@ -42,6 +42,17 @@ defmodule Loka.ContentStatusTest do
     end
   end
 
+  # Breaks: a status declaration without status@1 compiles, or is refused under another code or path.
+  test "status without the status capability is UNDECLARED_CAPABILITY at the manifest", %{
+    dir: dir
+  } do
+    drop = &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "status") end)
+    assert {:error, ds} = Loka.ContentSource.compile(dir, [{"cartridge.json", drop}])
+
+    got = Enum.map(ds, &{&1["code"], &1["path"], &1["data"]["capability"]})
+    assert {"UNDECLARED_CAPABILITY", "cartridge.requires.capabilities", "status"} in got
+  end
+
   # Breaks (row 16; twin of the loader case in kernel/ts/test/sneak.test.ts): pierced_by compiles
   # without a concealment, or naming no skill or attribute; an entry reaction applying
   # a concealment compiles (the engage cure then faults conflicting_write on that move).

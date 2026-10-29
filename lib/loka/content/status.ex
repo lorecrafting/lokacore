@@ -1,6 +1,6 @@
 defmodule Loka.Content.Status do
   @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses never tick nor move the derived hp maximum."
-  import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
   def check(nil, _, _, _), do: []
@@ -67,11 +67,11 @@ defmodule Loka.Content.Status do
 
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
   defp gate(m) do
-    caps = m["requires"]["capabilities"]
+    path = at("cartridge.json", ["requires", "capabilities"])
 
-    if caps["status"] == 1 and caps["death"] == 1,
-      do: [],
-      else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
+    for c <- ~w(status death),
+        m["requires"]["capabilities"][c] != 1,
+        do: diag("UNDECLARED_CAPABILITY", path, %{"capability" => c}, [c <> "@1"])
   end
 
   defp values(statuses, ms, defs, text) do

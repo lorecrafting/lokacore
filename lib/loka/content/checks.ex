@@ -290,6 +290,7 @@ defmodule Loka.Content.Checks do
 
     Enum.flat_map(all, &depth/1) ++
       Loka.Content.Exchanges.check(manifest, defs) ++
+      Loka.Content.Locks.check(manifest, defs) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
   end
 
