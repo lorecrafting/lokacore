@@ -2,7 +2,7 @@ defmodule Loka.Content.ScriptedActions do
   @moduledoc """
   Scripted actions and rooms' action contributions (action.schema.json ScriptedAction,
   ActionContribution; 06 §19-§20; 05 §28). A scripted action's policy tree is checked with every other
-  (`Loka.Content.Checks`); this module checks the rest, given a valid manifest.
+  (`Loka.Content.Resolve`); this module checks the rest, given a valid manifest.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]

@@ -5,7 +5,7 @@ defmodule Loka.Content.Construction do
   cartridge (UNRESOLVED_REFERENCE); a structure, its tags and description variants are owned by
   their capabilities, and its name and descriptions have catalog entries; a site or
   world.construction needs construction@1. Variant and enter-lock conditions
-  join Checks.trees/1 through RoomParts.conditions/1.
+  join Resolve.trees/1 through RoomParts.conditions/1.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4, ref: 3]
   import Loka.Content.Refs, only: [owned: 3, owners: 2, resolve: 4]

@@ -16,7 +16,7 @@ defmodule Loka.Content.Replenish do
         kv -> kv
       end)
 
-  @doc "A scripted action with its craft consume expanded (Checks.expand covers yield's items and from)."
+  @doc "A scripted action with its craft consume expanded (Resolve.expand covers yield's items and from)."
   @spec consume(term(), map()) :: term()
   def consume(%{"craft" => %{"consume" => c}} = r, m),
     do: put_in(r, ["craft", "consume"], expand(c, m))

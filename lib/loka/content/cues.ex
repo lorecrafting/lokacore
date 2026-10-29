@@ -42,7 +42,7 @@ defmodule Loka.Content.Cues do
         do: {rel, steps ++ ["when"], w}
       )
 
-  # From Checks.rooms/4, a v2 source only; `text` is :unknown when the catalog was rejected. A missing or schema-invalid manifest (nil)
+  # From Resolve.rooms/4, a v2 source only; `text` is :unknown when the catalog was rejected. A missing or schema-invalid manifest (nil)
   # has its own diagnostics.
   def check(nil, _, _, _), do: []
 

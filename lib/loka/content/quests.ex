@@ -5,7 +5,7 @@ defmodule Loka.Content.Quests do
   command's, action's or scripted action's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
   name, its offer's label (the offer is optional) and all journal texts have catalog entries
   (unless the catalog was rejected, `:unknown`), and a post_activation_event objective names an item of this cartridge. Its policy trees are checked
-  with every other (`conditions/1`, `Loka.Content.Checks`).
+  with every other (`conditions/1`, `Loka.Content.Resolve`).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6]

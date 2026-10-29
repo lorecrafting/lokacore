@@ -30,7 +30,7 @@ defmodule Loka.ContentLocksTest do
   defp errors({:error, ds}), do: Enum.sort_by(ds, & &1["path"])
   defp errors(other), do: other
 
-  # Breaks: an item's barrier dropped, or left a short key, in the artifact (Checks.expand).
+  # Breaks: an item's barrier dropped, or left a short key, in the artifact (Resolve.expand).
   test "locks_sampler compiles to its Python known answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile(@src) == {:ok, expected, []}
