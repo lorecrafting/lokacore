@@ -88,7 +88,12 @@ defmodule Loka.ContentChaptersTest do
   # Breaks: the same quest/choice in another dialogue silently reaches a marker, or rejecting
   # every multi-dialogue quest rather than only ambiguous counted triggers.
   test "only ambiguity in a counted quest choice is rejected", %{dir: dir} do
-    dialogue = src("dialogues/bram.json")
+    # A second dialogue with bram's quest and choice ids, reaching no story point itself.
+    dialogue =
+      update_in(src("dialogues/bram.json"), ["choices"], fn cs ->
+        Map.new(cs, fn {c, o} -> {c, Map.delete(o, "story_point")} end)
+      end)
+
     take = Map.take(dialogue["choices"], ["take_it"])
     leave = Map.take(dialogue["choices"], ["leave_it"])
     other = Map.put(dialogue, "choices", take)
