@@ -18,7 +18,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - Fable plans can contradict docs/system; the developer's STOP point catches it.
 - Give `/code-review` the exact branch target; developers ran it in the main checkout (`loka-aa75`, `loka-7p2w`).
 - Blocks deps between batch slices stop `br update --status in_progress` (`loka-gfgr`).
-- Parallel slices append to the same fixture and doc spots: expect a hand merge (`loka-0fhi`).
+- Parallel slices append to the same fixture and doc spots: hand-merge hand-kept files; for regenerated families, take theirs and run `sh bin/regen.sh` (`loka-0fhi`).
 - An item loop table in every content brief found the hidden faucets batch A missed (`loka-vro5`).
 - A fix round that answers a developer's own open question can add a blocker: rule on such questions as follow-ups unless the owner already decided.
 
@@ -38,7 +38,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 
 ## Tools
 
-- Rebuild toolbox_showcase_hash.json after a merge: `mix loka.compile cartridges/toolbox_showcase <out>`, then split `{"cartridge":<canonical>,"content_hash":"<sha>"}` into the fixture's canonical and sha256 (`loka-kjky`).
+- Regenerated families (toolbox_showcase_hash.json and the other hash fixtures, `*.gen.*`) after a merge: take theirs, then `sh bin/regen.sh` (`loka-kjky`).
 - `br` "WAL index recovery already failed ... database is busy": run `br doctor migrate-schema recover`, then retry.
 - `git cherry-pick -q` printed a usage error and picked nothing: use plain `git cherry-pick <sha>`.
 - Agents share one scratchpad and delete files: keep PM working files under a `pm_` prefix (`loka-xmvu`).

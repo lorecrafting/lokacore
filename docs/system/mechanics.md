@@ -15,8 +15,8 @@ Planned selections do not change these installed clauses; each consumer amends t
 
 `newWorld(cartridge, context, seed)` (`kernel/ts/src/runtime/fresh.ts`) mints ids under the nil
 CommandId in a fixed order: the player's CharacterId, its body, each room (DefinitionRefString
-order), each room's details, one instance from each ordinary NPC [blueprint](glossary.md),
-one from each ordinarily placed item blueprint, then one job per NPC with a daily schedule,
+order), each room's details, one instance from each ordinary NPC definition,
+one from each ordinarily placed item definition, then one job per NPC with a daily schedule,
 then one slot holder per distinct `slot` some item declares, in slot-key order (UTF-8 bytes;
 [equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). NPCs marked `spawn_template`
 and items at `location.in: template` are definitions only at this stage; they receive no
@@ -697,7 +697,7 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 `invalid_state` (`:23`); the NPC moves to the room listed for the job's hour (or the room of its
 first holding case, [row W10](#conditional-schedules-toolbox-row-w10)) unless already
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
-scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/daily.ts:24`).
+scheduled at the schedule's next listed hour, strictly later (`mechanics/calendar.ts:20`).
 A next listed hour the same advance also crosses (loka-qi0r) runs as a sub-step of that row's one
 `run_job` instead: the row runs and completes once, and its occurrence stays its due time, so this
 is no change to the job CommandId clause ([numeric-profile.md](../spec/conformance/numeric-profile.md)).
@@ -3196,7 +3196,7 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
 [Toolbox row W12](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "kill the hounds and the deer fill the fen; the deer never drop below the declared floor". The PM brief is in Beads `loka-kgd.135` (2026-10-14); the optional prey hunt is out (a later row reuses W13). [Declarations](cartridge.md#status-declarations) govern it. A [population plan](#c3-bounded-living-hounds-selected-contract) gains three optional fields and the policy set one leaf; the plan's job is otherwise unchanged.
 
 - **Leaf.** `population_count {plan, at_least}` (`at_least` an integer from 1) holds when the named plan has at least `at_least` living members: slots 1 to `cap` whose row has a `member_id` and no `replacement_due` (a dead member keeps its id with `replacement_due` set and does not count). Derived on read from the slot rows; no RNG, no actor. A plan whose slot rows do not exist yet counts 0. Owned by `population@1`. Usable in any policy tree.
-- **Plan gates.** `birth_when` and `wander_when`, each a versioned policy. At a plan occurrence, a false `birth_when` births nothing above the floor; a false `wander_when` moves no member. Both are read at the occurrence's logical time on the world before the occurrence's own ops. They hold no actor, so their trees may use only `all`, `any`, `not`, `population_count`, `time_window`, `sky` and `barrier_state`; the compiler refuses any other leaf (SCHEMA_VIOLATION at the field). The gate covers every birth of the plan's job: an occurrence (ecology or encounter) and the end of a `population.suppress` window. Genesis ignores `birth_when` (genesis births to target as before, so no plan order matters), and so does `population.spawn` (as it ignores targets).
+- **Plan gates.** `birth_when` and `wander_when`, each a policy. At a plan occurrence, a false `birth_when` births nothing above the floor; a false `wander_when` moves no member. Both are read at the occurrence's logical time on the world before the occurrence's own ops. They hold no actor, so their trees may use only `all`, `any`, `not`, `population_count`, `time_window`, `sky` and `barrier_state`; the compiler refuses any other leaf (SCHEMA_VIOLATION at the field). The gate covers every birth of the plan's job: an occurrence (ecology or encounter) and the end of a `population.suppress` window. Genesis ignores `birth_when` (genesis births to target as before, so no plan order matters), and so does `population.spawn` (as it ignores targets).
 - **Floor.** `floor`, an integer from 1 to the plan's `day_target` (the smaller target), on a plan without `chance` (an encounter draw births one slot per roll and cannot keep a floor; SCHEMA_VIOLATION at `floor` otherwise). A member that dies in a slot at or below `floor` gets `replacement_due` equal to its death time, not death time plus `replacement_delay` (`deathSequence`, `kernel/ts/src/mechanics/death/sequence.ts`), and slots at or below `floor` birth whatever `birth_when` says. So the plan's next occurrence refills them. Kills cannot be prevented, so "never below the floor" means: below it at most until the plan's next occurrence (at most one `wander_interval`, sooner at a night boundary). A `population.suppress` window outranks the floor (a quiet plan births nothing until it ends).
 - **Opt-in.** `population_count` in any tree, or any of `floor`, `birth_when` and `wander_when`, is optional; a `plan` that names no population plan of the cartridge is UNRESOLVED_REFERENCE at the leaf's `plan`. Installed kernel 1.86. Chapter 1 and every existing sampler declare none and keep their bytes.
 - **Same time.** Two plans' jobs due at one time run in job id order, so one plan's count read at that time depends on that order. The sampler keeps its kills off a shared due time; the count is otherwise exact.
