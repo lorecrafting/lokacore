@@ -661,7 +661,7 @@ needed for this consumer.
 
 The installed wire shape is `buy`/`sell` with `actor_id`, `provider_id`, `item_id`
 and positive `quoted_price`. `ActionInput.quoted_price` carries that displayed quote;
-ordered invocation targets are provider then item. API 1.16 adds NPC `shop` with
+ordered invocation targets are provider then item. NPC `shop` has
 one conserved `resource`, finite `offers` (`item`, `buy`, `sell`) and `bought`/`sold`
 narration keys. Each NPC `EntityView.shop` row carries `item_id`, `name` and its
 Buy/Sell price, availability and optional typed refusal reason. Runtime admission
@@ -694,7 +694,7 @@ consequences and the bound receipt command prove the result. Register the actual
 command/outcome ownership and invariants; do not invent receipt fields. The receipt command identifies its
 original provider/service for confirmed narration routing and save validation.
 
-`service@1` requires kernel API **1.23**. `ServiceDefinition` binds its original
+`ServiceDefinition` binds its original
 provider, exact authored action key, currency, price, label/narration and one
 closed `ServiceBenefit`: entitlement fact, meal stock/debit/MV, or provider-held
 vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
@@ -826,10 +826,8 @@ Item definitions opt into `fuel`: a supply declares `kind: supply`, positive
 immutable `fuel_specs` bind these specifications to their actual item instances;
 mutable `fuel` rows are keyed by item ID. A room's optional `dark_description`
 is its authored darkness opt-in; the optional `dark: true` flag
-darkens a room with no text of its own, read as the engine key `place.dark`. Actual
-fuel or darkness fields require a `requires.kernel_api.at_least` floor of 1.19 (1.114
-for `dark`) in both compiler and loader;
-an unused reserved light capability does not impose that floor. `FuelView` carries confirmed `remaining`,
+darkens a room with no text of its own, read as the engine key `place.dark`.
+`FuelView` carries confirmed `remaining`,
 `capacity`, and effective `lit` without a presenter clock.
 
 Add only immutable per-item fuel specifications needed to validate those rows.
@@ -1010,7 +1008,6 @@ No due-job chain, new player verb, global objective interpreter or per-frame wri
 is needed. Declare new typed state/transition bounds and planted invalid fixtures;
 update generated contracts and current release pins in the implementation PR.
 
-C2 typed patrol state and drawn control input require kernel API **1.22**.
 The concrete row is `PatrolRelation`, stored in `State.patrols` by QuestInstanceId:
 actor/body/NPC, quest instance, activation continuation/choice, accepted command
 `attempt_id`, route `cursor`, ordered unique room-ID `credit` and status.
