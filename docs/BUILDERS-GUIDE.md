@@ -24,6 +24,8 @@ This is a route through the installed system, not a second specification. The
 
 These rules hold across every kind:
 
+- A definition's displayed name is `name` (an item's, NPC's, room's, action's); an option the player
+  picks (a dialogue or scene choice, a quest offer) has a `label`.
 - A policy is its condition tree, and it is optional: an absent policy always holds.
 - A story point is `story_point: "<key>/<outcome>"` on the dialogue choice that reaches it (a
   scene's `on_end` may also claim one); there is no story point file.

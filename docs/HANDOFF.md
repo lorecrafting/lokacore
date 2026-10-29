@@ -24,7 +24,7 @@ Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.m
   ~/dev/worktrees.noindex/simplify-c2-kinds). Merged in: A (signals out, diag guard, behavior@1 out), E
   (structures), F (story_point on the choice), B1 (policy optional), C1 (policies/ out, bundles inlined,
   hunter/prey/loot, :area), B2 (policy wrapper dropped). C2 travel cancelled: transport@1 stays. D (one
-  `name` field) in review; Z (docs sweep) on `simplify/c2-z-docs`; then Fable final review. Plan, rulings
+  `name` field) merged; Z (docs sweep) on `simplify/c2-z-docs`; then Fable final review. Plan, rulings
   and amendments: loka-ivjq.3 notes. pm_merge uses main's merge_resolve.py (loka-hhs6): when it refuses a
   generated-only conflict, merge by hand in the batch worktree with the batch's own resolver, regen,
   commit, push.
