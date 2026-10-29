@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  # Path filter (bin/ci_changes.sh): docs-only heads skip the test jobs; sim and walk need engine changes.
+  # Path filter (bin/ci_changes.sh): docs-only heads skip the test jobs; sim and walk need engine changes; a job skips only on an explicit false.
   changes:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -30,6 +30,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - id: f
+        shell: bash # pipefail: a failing filter fails the job, not a silent tee
         run: sh bin/ci_changes.sh "$EVENT" | tee -a "$GITHUB_OUTPUT"
         env:
           EVENT: ${{ github.event_name }}
@@ -37,7 +38,7 @@ jobs:
   # The local Book browser save/reload path with tester.army e2e (docs/web-preview.md).
   e2e:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
@@ -85,7 +86,7 @@ jobs:
   # Live stories' click-throughs and the Loka picker end to end on the dev server (web-preview.md).
   storybook:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
@@ -110,7 +111,7 @@ jobs:
   # economy/law and magic routes on the author preview of cartridges/toolbox_showcase (web-preview.md).
   walk:
     needs: changes
-    if: needs.changes.outputs.sim_walk == 'true'
+    if: needs.changes.outputs.sim_walk != 'false'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:

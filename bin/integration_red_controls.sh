@@ -327,6 +327,8 @@ echo x > lib/x.ex; git add lib/x.ex; pp l
 grep -q '^EX_SIZE_' "$R.l" && grep -q '^MIX_FORMAT_' "$R.l" && grep -q '^CREDO_' "$R.l" && ! grep -qE '^(TYPECHECK|PRETTIER)_' "$R.l" || bad "prepush: a staged .ex change skipped the Elixir checks or ran the TS ones: $(cat "$R.l")"
 git commit -qm ex; git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/y.ts; git add .; pp m
 grep -q '^TS_SIZE_' "$R.m" && grep -q '^TYPECHECK_' "$R.m" && grep -q '^PRETTIER_' "$R.m" && ! grep -q '^MIX_FORMAT_' "$R.m" || bad "prepush: a kernel/ts change skipped the TS checks or prettier, or ran the Elixir ones: $(cat "$R.m")"
+git commit -qm ts; git update-ref refs/remotes/origin/main HEAD; echo '{}' > .prettierrc; git add .; : > "$R.pp"; pp n
+grep -q 'git ls-files' "$R.pp" || bad "prepush: a Prettier setup change did not check every tracked file: $(cat "$R.pp")"
 # --- ci_changes.sh --------------------------------------------------------------------------
 # Break (loka-n0ng): a docs-only branch runs the test jobs or sim/walk; an engine change skips sim/walk; a test-only or
 # contract-doc change skips the test jobs; a non-push event, or a branch diff that is empty or cannot be read, skips anything.
@@ -339,7 +341,10 @@ cc push docs/x.md 'code=false sim_walk=false'
 cc push .beads/issues.jsonl 'code=false sim_walk=false'
 cc push lib/x.ex 'code=true sim_walk=true'
 cc push kernel/ts/test/x.ts 'code=true sim_walk=false'
+cc push kernel/ts/test/sim.test.ts 'code=true sim_walk=true'
+cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
 cc push docs/spec/conformance/x.json 'code=true sim_walk=false'
+cc push docs/contracts.gen.md 'code=true sim_walk=false'
 cc schedule docs/y.md 'code=true sim_walk=true'
 git checkout -qB t main; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' '); [ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: an empty branch diff skipped jobs: '$got'"
 git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_walk=true'

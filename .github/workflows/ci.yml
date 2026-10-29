@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  # Path filter (bin/ci_changes.sh): docs-only heads skip the test jobs; sim and walk need engine changes.
+  # Path filter (bin/ci_changes.sh): docs-only heads skip the test jobs; sim and walk need engine changes; a job skips only on an explicit false.
   changes:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -30,13 +30,14 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - id: f
+        shell: bash # pipefail: a failing filter fails the job, not a silent tee
         run: sh bin/ci_changes.sh "$EVENT" | tee -a "$GITHUB_OUTPUT"
         env:
           EVENT: ${{ github.event_name }}
 
   elixir:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -109,7 +110,7 @@ jobs:
   # two legs, the fresh sequences and the showcase test, each under the timeout on a slow runner.
   sim:
     needs: changes
-    if: needs.changes.outputs.sim_walk == 'true'
+    if: needs.changes.outputs.sim_walk != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -144,7 +145,7 @@ jobs:
   # (they load typescript from kernel/ts). The chapter fixtures compile the real authored cartridge with mix.
   kernel:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -180,7 +181,7 @@ jobs:
   # its fixtures also compile the chapter with mix. Prettier rides along.
   mobile:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

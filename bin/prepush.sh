@@ -16,11 +16,11 @@ run() { # <name> <command...>
 # (loka-n0ng); when the diff fails, every gated check runs.
 base=$(git merge-base origin/main HEAD 2>/dev/null) && changed=$(git diff --name-only "$base") || changed=ALL
 touched() { [ "$changed" = ALL ] || printf '%s\n' "$changed" | grep -qE "$1"; }
-ex='\.exs?$|(^|/)mix\.lock$' ts='\.(ts|tsx|mjs)$|^(kernel/ts|mobile)/.*\.json$'
+ex='\.exs?$|(^|/)mix\.lock$' ts='\.(ts|tsx|mjs)$|^(kernel/ts|mobile|cartridges|protocol)/.*\.json$|^package(-lock)?\.json$'
 touched "$ts" && run TS_SIZE node bin/check_ts_size.mjs
 touched "$ex" && run EX_SIZE elixir bin/check_size.exs
-# Prettier on the changed non-mobile files only (all tracked ones when the diff fails).
-pretty="git diff -z --name-only --diff-filter=d $base --"; [ "$changed" = ALL ] && pretty='git ls-files -z'
+# Prettier on the changed non-mobile files only; all tracked ones when its setup changed or the diff fails.
+pretty="git diff -z --name-only --diff-filter=d $base --"; touched '^(\.prettier|package(-lock)?\.json$)' && pretty='git ls-files -z'
 pretty="$pretty '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**'"
 [ -n "$(sh -c "$pretty" | tr -d '\0')" ] && run PRETTIER sh -c "$pretty | xargs -0 node_modules/.bin/prettier --check"
 # Generated files: bin/regen.sh must leave the tree as it found it (uncommitted edits keep their content).
