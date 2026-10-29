@@ -118,34 +118,6 @@ test('an instance row without started_at shows no hint', () => {
   assert.equal(hint({ ...w, state: { ...w.state, quests: { [i!]: old } } }), undefined);
 });
 
-// Breaks (loader twin of test/loka/content_quest_hints_test.exs): hints out of order or an empty
-// hints object accepted, hints without real_elapsed time (real minutes undefined) or below kernel_api 1.46 accepted.
-test('the loader refuses unordered hints, hints without real time and hints below 1.46', () => {
-  const hints = `.cartridge.quests["quest_sampler@0.0.1:quest/find_key"].journal.hints`;
-  const q = (c: Obj) => c.quests['quest_sampler@0.0.1:quest/find_key'];
-  const rows: [(c: Obj) => void, string, string][] = [
-    [(c) => (q(c).journal.hints.active[1].after = 10), 'SCHEMA_VIOLATION', `${hints}.active`],
-    [(c) => (q(c).journal.hints = {}), 'SCHEMA_VIOLATION', hints],
-    [(c) => delete c.manifest.time_policy, 'INVALID_TIME_POLICY', hints],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(content) as unknown as Obj;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
-});
-
 // Breaks (action tip): the tip shown on every perform (seen_tip_ never read or never assigned),
 // never shown, or shown before the outcome's own line.
 test('a recipe tip is read once, on the first perform, after its narration', () => {

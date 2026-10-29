@@ -267,9 +267,9 @@ test('loka play makes a say or shout Command only from a word of letters', () =>
   assert.equal(parse(`shout ${'a'.repeat(33)}`), 'One word of 1 to 32 letters.');
 });
 
-// Breaks: the loader accepts a keyword dialogue or a spoken reaction below kernel_api 1.48, or a
-// keyword on a riddle (whose save proof needs a talk receipt).
-test('the loader refuses keywords and spoken reactions below 1.48 or on a riddle', () => {
+// Breaks: the loader accepts a keyword dialogue or a spoken reaction below kernel_api 1.48 (a
+// keyword on a riddle is the compiler's: content_speech_test.exs).
+test('the loader refuses keywords and spoken reactions below 1.48', () => {
   const load = (change: (c: Obj) => void) => {
     const r = reload(content, change);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path.split('.').pop()];
@@ -284,13 +284,6 @@ test('the loader refuses keywords and spoken reactions below 1.48 or on a riddle
   assert.deepEqual(
     load((c) => (below(c), delete elder(c).keyword)),
     floor,
-  );
-  const wrong = 'narration.elder_ward.thank';
-  const bank = ['W', 'A', 'R', 'D'];
-  const riddle = { choice_id: 'thank', answer: 'ward', bank, wrong };
-  assert.deepEqual(
-    load((c) => (elder(c).riddle = riddle)),
-    ['OUTCOME_MISMATCH', 'keyword'],
   );
 });
 

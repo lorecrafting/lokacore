@@ -13,8 +13,6 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { fragment } from './fragment.ts';
-import * as patrol from './patrol_fixture.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-hidden-sampler-'));
@@ -80,34 +78,6 @@ test('a forged Move through the panel is not_found until the search; then the ex
   assert.deepEqual((send({ type: 'move', direction: 'west' }) as any).narration[0].bindings, {
     from: 'east',
   });
-});
-
-// Breaks: the loader admits a patrol leg or expedition edge over a hidden face, so the leader walks
-// it or the quest journal names its direction (twin of content_hidden_passage_test.exs).
-test('the loader refuses a patrol or expedition route over a hidden face', () => {
-  const expedition = fragment('protocol/fixtures/expedition_sampler_hash.json');
-  // Hide the west face out of `room` until `fact`; the patrol source rises to the 1.45 face floor.
-  const hide = (prefix: string, room: string, fact: string) => (c: any) => {
-    if (prefix === patrol.prefix) c.manifest.requires.kernel_api.at_least = '1.45';
-    const to = c.rooms[`${prefix}:room/${room}`].exits.west.to;
-    c.rooms[`${prefix}:room/${room}`].exits.west.hidden_until = {
-      fact: { ...to, kind: 'fact', key: fact },
-      equals: true,
-    };
-  };
-  const refused = (r: ReturnType<typeof patrol.load>) =>
-    r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  const P = patrol.prefix,
-    E = expedition.source.manifest;
-  assert.deepEqual(refused(patrol.load(hide(P, 'watch_post', 'watch_gate_trusts_player'))), [
-    'OUTCOME_MISMATCH',
-    `.cartridge.quests["${P}:quest/watch_rounds"].patrol.route[0]`,
-  ]);
-  const X = `${E.id}@${E.version}`;
-  assert.deepEqual(refused(expedition.load(hide(X, 'trailhead', 'night_survived'))), [
-    'OUTCOME_MISMATCH',
-    `.cartridge.quests["${X}:quest/night_walk"].expedition.route[0]`,
-  ]);
 });
 
 function refusal(source: object, change: (c: any) => void) {

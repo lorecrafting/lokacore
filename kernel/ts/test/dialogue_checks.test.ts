@@ -145,65 +145,6 @@ test('a failed check reads its failure line, closes the talk, counts a use; a ne
   assert.equal(g.fact('uses_intimidate'), 2);
 });
 
-// Breaks: the loader (twin of lib/loka/content/choice_checks.ex) drops a row 14 rule, so an
-// unsound check loads and fails or misbehaves in play.
-test('the loader refuses each unsound dialogue choice check', () => {
-  const guard = `${P}:dialogue/guard`;
-  const at = `.cartridge.dialogues[${JSON.stringify(guard)}].choices`;
-  const persuade = (c: any) => c.dialogues[guard].choices.persuade;
-  const rows: [(c: any) => void, string, string][] = [
-    [(c) => delete persuade(c).check.npc, 'SCHEMA_VIOLATION', `${at}.persuade.check`],
-    [(c) => (persuade(c).check.rating = 3), 'SCHEMA_VIOLATION', `${at}.persuade.check`],
-    [
-      (c) => delete c.npcs[`${P}:npc/guard`].attributes,
-      'SCHEMA_VIOLATION',
-      `${at}.persuade.check.npc`,
-    ],
-    [
-      (c) => (persuade(c).check.failure = 'missing'),
-      'UNRESOLVED_REFERENCE',
-      `${at}.persuade.check.failure`,
-    ],
-    [
-      (c) => (persuade(c).check.key = 'intimidate_guard'),
-      'DUPLICATE_DEFINITION',
-      `${at}.intimidate.check`,
-    ],
-    [(c) => (persuade(c).exchange = true), 'OUTCOME_MISMATCH', `${at}.persuade.check`],
-    [
-      (c) =>
-        (c.dialogues[guard].riddle = {
-          choice_id: 'persuade',
-          answer: 'x',
-          bank: ['X'],
-          wrong: 'narration.guard.persuade_failed',
-        }),
-      'OUTCOME_MISMATCH',
-      `${at}.intimidate.check`,
-    ],
-    [
-      (c) =>
-        persuade(c).sequence.push({
-          op: 'skill.acquire',
-          skill: c.dialogues[guard].choices.intimidate.check.skill,
-        }),
-      'OUTCOME_MISMATCH',
-      `${at}.persuade.check`,
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.46'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const r = load(c);
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path], path);
-  }
-});
-
 // Breaks: the duplicate-key scan drops recipes or choices, so a recipe and a dialogue choice (one
 // check DefinitionRef) both define one key and load.
 test('check keys gather every recipe check and every dialogue choice check', () => {

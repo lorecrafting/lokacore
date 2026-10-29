@@ -14,8 +14,7 @@ import {
 } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { typed } from '../mechanics/fact.ts';
-import { dialogues } from './cartridge_dialogues.ts';
-import { quests, questPolicies } from './cartridge_quests.ts';
+import { questPolicies } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { answerRoots } from './cartridge_asks.ts';
@@ -188,8 +187,6 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...recipes(c, check));
   out.push(...reactions(c, check));
   // -- C2
-  out.push(...quests(c, check));
-  out.push(...dialogues(c, check));
   // -- D1
   // -- D2
   return out;

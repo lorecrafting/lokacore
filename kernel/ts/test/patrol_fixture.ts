@@ -125,7 +125,6 @@ const withPatrol =
   };
 export const bundle = (change?: (c: any) => void) => f.bundle(withPatrol(change));
 export const genesis = (change?: (c: any) => void) => f.genesis(withPatrol(change));
-export const load = (change?: (c: any) => void) => f.load(withPatrol(change));
 export { prefix };
 export const fresh = genesis();
 export const ref = (_w: World, kind: string, key: string) => r(kind, key);
