@@ -436,7 +436,6 @@
       "kernel/ts/src/commands/actions.ts",
       "kernel/ts/src/runtime/proposal.ts",
       "kernel/ts/src/view/view.ts",
-      "kernel/ts/src/content/cartridge_dialogues.ts",
       "kernel/ts/src/mechanics/dialogue/selection.ts",
       "kernel/ts/src/mechanics/dialogue/behavior.ts"
     ],
@@ -994,7 +993,6 @@
     "modules": [
       "kernel/ts/src/mechanics/expedition/shared.ts",
       "kernel/ts/src/mechanics/expedition/sequence.ts",
-      "kernel/ts/src/content/cartridge_expedition.ts",
       "kernel/ts/src/foundation/compose_expedition.ts",
       "lib/loka/content/expedition.ex",
       "lib/loka/core/compose_expedition.ex",

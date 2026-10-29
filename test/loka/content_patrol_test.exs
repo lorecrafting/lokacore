@@ -58,6 +58,13 @@ defmodule Loka.ContentPatrolTest do
       {"dialogues/tobin_watch.json", "OUTCOME_MISMATCH",
        fn d -> update_in(d, ["choices", "start"], &Map.delete(&1, "patrol")) end},
       {"reactions/call.json", "OUTCOME_MISMATCH", reaction("watch_rounds")},
+      {"facts.json", "OUTCOME_MISMATCH",
+       &put_in(&1, ["facts", "watch_gate_trusts_player", "scopes"], ["instance"])},
+      {"npcs/tobin.json", "OUTCOME_MISMATCH",
+       &Map.put(&1, "daily_schedule", %{"23" => "watch_post"})},
+      {"cartridge.json", "UNDECLARED_CAPABILITY",
+       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "patrol") end)},
+      {"dialogues/maud_turn_in.json", "OUTCOME_MISMATCH", &Map.put(&1, "quest", "watch_rounds")},
       {"dialogues/tobin_watch.json", "RESERVED_FACT",
        fn d ->
          put_in(d, ["choices", "start", "sequence"], [

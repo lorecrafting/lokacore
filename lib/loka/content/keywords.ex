@@ -1,8 +1,7 @@
 defmodule Loka.Content.Keywords do
   @moduledoc """
   Toolbox row G9: a dialogue keyword uses speech@1's spoken event, declares no riddle
-  (OUTCOME_MISMATCH at the keyword). Twin of the keyword checks in
-  kernel/ts/src/content/cartridge_dialogues.ts.
+  (OUTCOME_MISMATCH at the keyword).
   """
   import Loka.Content.Source, only: [diag: 2, at: 2]
   import Loka.Content.Refs, only: [owned: 3]

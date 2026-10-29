@@ -267,29 +267,6 @@ test('loka play makes a say or shout Command only from a word of letters', () =>
   assert.equal(parse(`shout ${'a'.repeat(33)}`), 'One word of 1 to 32 letters.');
 });
 
-// Breaks: the loader accepts a keyword dialogue below kernel_api 1.48 or a keyword on a riddle
-// (whose save proof needs a talk receipt).
-test('the loader refuses keywords below 1.48 or on a riddle', () => {
-  const load = (change: (c: Obj) => void) => {
-    const r = reload(content, change);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path.split('.').pop()];
-  };
-  const elder = (c: Obj) => Object.values(c.dialogues as Obj)[0] as Obj;
-  const floor = ['KERNEL_API_RANGE_INVALID', 'at_least'];
-  const below = (c: Obj) => (c.manifest.requires.kernel_api.at_least = '1.47');
-  assert.deepEqual(
-    load((c) => (below(c), (c.reactions = {}))),
-    floor,
-  );
-  const wrong = 'narration.elder_ward.thank';
-  const bank = ['W', 'A', 'R', 'D'];
-  const riddle = { choice_id: 'thank', answer: 'ward', bank, wrong };
-  assert.deepEqual(
-    load((c) => (elder(c).riddle = riddle)),
-    ['OUTCOME_MISMATCH', 'keyword'],
-  );
-});
-
 // Breaks (word bar S2): the GameView drops or reorders the cartridge's speech.phrases, lists them
 // when none are authored, or the TS loader admits a phrase that is not a Word or an empty list
 // (the 1.98 floor and speech@1 are the compiler's: content_speech_test.exs).

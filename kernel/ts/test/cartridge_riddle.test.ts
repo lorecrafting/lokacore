@@ -51,43 +51,15 @@ function load(change: (c: any) => void = () => {}, installed = INSTALLED) {
   );
 }
 
-// Breaks: required compiler/loader semantics disappear despite structurally valid artifacts.
-test('loader accepts API1.9 and rejects invalid riddle and journal references', () => {
+// Breaks: a malformed riddle answer or journal policy version installs (references: content_riddle_test.exs).
+test('loader accepts API1.9 and rejects a malformed riddle answer and policy version', () => {
   assert.ok(load().ok);
   const cases: [string, string, (c: any) => void][] = [
-    [
-      'choice',
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        dialogue(c).riddle.choice_id = 'missing';
-      },
-    ],
-    [
-      'wrong text',
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        dialogue(c).riddle.wrong = 'missing';
-      },
-    ],
-    [
-      'repeated tile',
-      'OUTCOME_MISMATCH',
-      (c) => {
-        dialogue(c).riddle.bank.splice(7, 1);
-      },
-    ],
     [
       'answer syntax',
       'SCHEMA_VIOLATION',
       (c) => {
         dialogue(c).riddle.answer = 'Lantern';
-      },
-    ],
-    [
-      'variant text',
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        variant(c).text = 'missing';
       },
     ],
     [

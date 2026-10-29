@@ -468,15 +468,14 @@ leaves, its options `not_present`
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
 contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:264`). Only a dialogue's speaker, present in the room,
 offers its talk (`mechanics/dialogue/selection.ts:80`), one per dialogue under the dialogue's key, available while that
-dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
+dialogue's policy holds. The compiler rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
-that could repeat must not reach a once-per-lineage save proof: the loader and the compiler
-reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
+that could repeat must not reach a once-per-lineage save proof: the compiler
+rejects, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
 of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
 bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
-conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:264`, twin
-`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
+conversation) (`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
 The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII
@@ -1269,7 +1268,7 @@ trust and nonterminal attempt failure have retained causal evidence, not room-co
 inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
 are outside this selected consumer.
 
-Compiler and loader validate a patrol quest. It requires `patrol@1`, `movement@1`, `quest@1`,
+The compiler validates a patrol quest. It requires `patrol@1`, `movement@1`, `quest@1`,
 `dialogue@1`, `fact@1` and `death@1`; its objective evidence is `patrol` (that evidence requires a
 `patrol` declaration), and it has no offer, repeat, deadline or exchange. The initial cursor lies
 within the route, and each leg, including the last back to the first, is an exit to a different
