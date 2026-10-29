@@ -4,7 +4,6 @@
 // refreshed each hour). Bread cures hungry; a Drink of water cures thirsty and parched.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,9 +12,7 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import type { Obj } from '../src/content/cartridge_refs.ts';
 import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-needs-sampler-'));
@@ -135,43 +132,4 @@ test('a dry day on the flats drains thirst until a drink, and never past the poo
   // The empty pool reads as its own band, not the world's hp band "dying".
   const thirst = gameView(day).resources?.find((r) => r.resource.key === 'thirst');
   assert.deepEqual([thirst?.band, thirst?.tone], ['parched', 'danger']);
-});
-
-// Breaks: either loader accepts a liquid's cures below kernel_api 1.46 or naming no status.
-test('the loader refuses a liquid cure below 1.46 or naming no status', () => {
-  const water = 'needs_sampler@0.0.1:liquid/water';
-  const rows: [(c: Obj) => void, string, string][] = [
-    [
-      (c) => {
-        // The clock_hour reaction alone needs 1.46 (row W25); without it only the cure does.
-        for (const k of Object.keys(c.reactions))
-          if (c.reactions[k].on.event === 'clock_hour') delete c.reactions[k];
-        c.manifest.requires.kernel_api.at_least = '1.45';
-      },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => (c.liquids[water].cures[1].key = 'scurvy'),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.liquids[${JSON.stringify(water)}].cures[1]`,
-    ],
-  ];
-  // Control: without the cures (and the clock_hour reaction) 1.45 loads.
-  const uncured = (c: Obj) => {
-    rows[0]![0](c);
-    delete c.liquids[water].cures;
-  };
-  rows.push([uncured, 'loaded', '']);
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(content) as unknown as Obj;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? ['loaded', ''] : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });

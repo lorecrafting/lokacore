@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { gameView, step, INSTALLED, loadCartridge, type World } from '../src/index.ts';
+import { gameView, step, type World } from '../src/index.ts';
 import {
   armed,
-  bundle,
   coins,
   endpoint,
   entity,
@@ -155,44 +154,6 @@ test('recovery waiver uses actual death owner, recovery room and contained roots
       // south_road recovers only at north_post: the corpse here does not waive the return fare.
       assert.equal(ride(r.world, 'south_road', 2).decision.kind, 'rejected');
     }
-  }
-});
-// Breaks: a one-way route, missing or unpaired recipient, recipient without a currency
-// balance, walking bypass to the destination, or a reshaped action loads.
-test('loader rejects invalid endpoint, funding, action and bypass bindings', () => {
-  const route = `.cartridge.transports["${prefix}:transport/north_road"]`;
-  for (const [change, path] of [
-    [
-      (c: any) => delete c.transports[`${prefix}:transport/south_road`],
-      `.cartridge.rooms["${prefix}:room/south_post"].details.post.transport`,
-    ],
-    [
-      (c: any) =>
-        (c.transports[`${prefix}:transport/north_road`].recipient = ref('npc', 'missing')),
-      route,
-    ],
-    [(c: any) => delete c.npcs[`${prefix}:npc/carter`].resource_starts, `${route}.currency`],
-    [
-      (c: any) =>
-        (c.rooms[`${prefix}:room/north_post`].exits.east = { to: ref('room', 'south_post') }),
-      `${route}.destination`,
-    ],
-    [(c: any) => (c.actions[`${prefix}:action/ride_south`].input = []), `${route}.action`],
-  ] as const) {
-    const b = bundle((c) => {
-      open(c);
-      change(c);
-    });
-    const loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      INSTALLED,
-    );
-    assert.equal(loaded.ok, false);
-    if (!loaded.ok)
-      assert.deepEqual(
-        [loaded.diagnostic.code, loaded.diagnostic.path],
-        ['SCHEMA_VIOLATION', path],
-      );
   }
 });
 

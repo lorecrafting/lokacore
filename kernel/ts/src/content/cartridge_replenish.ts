@@ -1,24 +1,9 @@
-// Compiler twin (lib/loka/content/replenish.ex): replenish entries (toolbox row 19b,
-// docs/system/cartridge.md Replenish declarations).
+// Craft stock checks and `refilled` only, for cartridge_recipes.ts and cartridge_exchange.ts (slice C1 deletes them).
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
-
-export function replenish(c: Obj, { named }: Checks): Diagnostic[] {
-  const entries = Object.entries((c.replenish ?? {}) as Obj);
-  const out: Diagnostic[] =
-    entries.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.71') < 0
-      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-      : [];
-  for (const [ref, r] of entries) {
-    const at = `.cartridge.replenish${step(ref)}`;
-    out.push(...stock(c, named, at, r.items, { from: r.from, to: r.to }));
-    if (same(r.from, r.to)) out.push(diag('SCHEMA_VIOLATION', `${at}.from`));
-  }
-  return out;
-}
 
 /** Homestead hs-10: each craft recipe's consume and yield (docs/system/cartridge.md Craft). */
 export function craft(c: Obj, { named, text }: Checks): Diagnostic[] {
@@ -42,7 +27,7 @@ export function craft(c: Obj, { named, text }: Checks): Diagnostic[] {
   return out;
 }
 
-// Replenish's item and holder rules, shared with craft: no duplicate item, each item and holder
+// Craft's stock item and holder rules: no duplicate item, each item and holder
 // resolves, and each holder (`ends`, by field) is placed.
 function stock(
   c: Obj,

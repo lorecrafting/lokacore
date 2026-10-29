@@ -105,8 +105,7 @@ defmodule Loka.ContentLightTest do
            inspect(diags)
   end
 
-  # Break: the dark flag's 1.114 floor read on any definition kind, not rooms only (as the TS
-  # loader, cartridge_fuel.ts).
+  # Break: the dark flag's 1.114 floor read on any definition kind, not rooms only (fuel.ex).
   test "only a room's dark flag raises the floor to 1.114" do
     m = %{"requires" => %{"kernel_api" => %{"at_least" => "1.19"}, "capabilities" => %{}}}
     flagged = {"rooms/yard.json", [], %{"dark" => true}}

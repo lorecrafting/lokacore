@@ -465,29 +465,3 @@ test('thirty-day replay conserves three live deer and one hide per actual birth'
     4,
   );
 });
-
-// Breaks: a hash-correct untrusted cartridge bypasses the deer role pair or sight route checks.
-test('loader refuses malformed deer roles, missing hide and flight text', () => {
-  for (const changed of ['role', 'narration', 'missing_item']) {
-    const loaded = shoo.load((c) => {
-      if (changed === 'role')
-        c.population_bundles[ref('population_bundle', 'willow_deer')].loot_role = 'pelt';
-      else if (changed === 'narration')
-        delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
-      else delete c.population_bundles[ref('population_bundle', 'willow_deer')].item;
-    });
-    assert.equal(loaded.ok, false, changed);
-  }
-});
-
-// Breaks: a hash-correct sight-enabled crow (no deer/hide roles) loads but cannot cold-reopen its first world.
-test('loader refuses sight on a population without the deer and hide roles', () => {
-  const loaded = shoo.load((c) => {
-    // green.south -> lane and lane.north -> green are the crow area's only internal exits.
-    c.populations[ref('population', 'crow')].sight = {
-      delay: 300,
-      narration: { south: 'combat.deer_fled_south', north: 'combat.deer_fled_north' },
-    };
-  });
-  assert.equal(loaded.ok, false);
-});

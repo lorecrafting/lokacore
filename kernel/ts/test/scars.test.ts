@@ -2,7 +2,6 @@
 // kill the player, who returns to the hall still scarred, and the healer's salve cures it.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,12 +10,10 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { currentStatus, statusKey } from '../src/mechanics/status/shared.ts';
 import { key } from '../src/foundation/compose.ts';
-import { artifact as derived, MIGHT } from './derived_fixture.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-scars-sampler-'));
@@ -34,7 +31,6 @@ try {
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
-const SCAR = 'scars_sampler@0.0.1:status/scar';
 const WOLF = 'scars_sampler@0.0.1:npc/wolf';
 const SCAR_REF = {
   cartridge_id: 'scars_sampler',
@@ -121,46 +117,6 @@ test('a wolf bite leaves a scar that survives death and return, and the salve cu
     Object.values(w.state.statuses ?? {}).filter((r) => !r.active),
     [{ active: false, generation: 1 }],
   );
-});
-
-// Breaks: the loader lets a permanent status tick, slip under the 1.48 floor, or modify an
-// attribute the derived hp maximum reads (loka-kgd.50).
-test('the loader refuses each unsound permanent status', () => {
-  const read = (a: Uint8Array) => JSON.parse(new TextDecoder().decode(a)).cartridge;
-  const scar = `.cartridge.statuses[${JSON.stringify(SCAR)}]`;
-  const rows: [Uint8Array, (c: any) => void, string, string][] = [
-    [
-      artifact,
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.47';
-        delete c.statuses[SCAR].kind; // 1.102 (loka-x6t.64) would shadow the 1.48 floor
-      },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [artifact, (c) => (c.statuses[SCAR].per_tick = -1), 'SCHEMA_VIOLATION', `${scar}.per_tick`],
-    [
-      derived,
-      (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.48';
-        c.statuses[MIGHT].duration = 'permanent';
-        c.statuses[MIGHT].modifies[0].attribute.key = 'con';
-      },
-      'SCHEMA_VIOLATION',
-      `.cartridge.statuses[${JSON.stringify(MIGHT)}].modifies[0].attribute`,
-    ],
-  ];
-  for (const [base, change, code, path] of rows) {
-    const c = read(base);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });
 
 // Breaks: an NPC's death keeps its permanent status, so status_active still holds on the dead wolf
