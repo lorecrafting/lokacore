@@ -1,6 +1,6 @@
 {
   "extends": "herd",
-  "bundle": "willow_deer",
+  "npc": "willow_deer",
   "home": "willow_shade",
   "area": [
     "willow_shade",

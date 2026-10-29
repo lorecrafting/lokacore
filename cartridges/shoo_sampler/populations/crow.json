@@ -1,6 +1,7 @@
 {
   "extends": "herd",
-  "bundle": "crow",
+  "npc": "crow",
+  "corpse": "npc_corpse",
   "home": "green",
   "area": [
     "green",

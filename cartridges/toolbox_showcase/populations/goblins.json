@@ -1,5 +1,7 @@
 {
-  "bundle": "goblins",
+  "npc": "goblin",
+  "item": "ear",
+  "corpse": "npc_corpse",
   "home": "goblin_pit",
   "area": [
     "goblin_pit",

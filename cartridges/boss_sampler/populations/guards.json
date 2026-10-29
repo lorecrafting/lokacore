@@ -1,5 +1,7 @@
 {
-  "bundle": "guards",
+  "npc": "guard",
+  "item": "knife",
+  "corpse": "npc_corpse",
   "home": "hall",
   "area": [
     "hall",

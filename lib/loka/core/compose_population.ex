@@ -62,7 +62,7 @@ defmodule Loka.Core.ComposePopulation do
 
     check(
       row == nil and group == op["writer_group"] and
-        origin["kind"] == "spawned" and origin["role"] == "hound" and
+        origin["kind"] == "spawned" and origin["role"] == "hunter" and
         origin["member_id"] == op["entity_id"] and
         op["resource"] == Map.merge(origin["by"], %{"kind" => "resource", "key" => "hp"}) and
         op["at"] >= state["clock"] and op["at"] <= horizon and

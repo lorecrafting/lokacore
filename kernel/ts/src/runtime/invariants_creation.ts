@@ -18,7 +18,7 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
         previous.identity.id !== op.entity_id ||
         previous.writer_group !== op.writer_group ||
         ((state.known_entities?.[op.destination_id]?.kind !== 'room' ||
-          ['pelt', 'hide'].includes(previous.identity.origin?.role) ||
+          previous.identity.origin?.role === 'loot' ||
           (previous.identity.origin?.kind === 'spawned' &&
             state.population_specs?.[key(previous.identity.origin.by)]?.home !==
               op.destination_id)) &&
@@ -52,13 +52,13 @@ function complete(state: Any, ops: Any[]): boolean {
     (op) =>
       op.op === 'entity.create' &&
       op.identity.origin?.kind === 'spawned' &&
-      ['hound', 'deer'].includes(op.identity.origin.role),
+      ['hunter', 'prey'].includes(op.identity.origin.role),
   );
   const pelts = ops.filter(
     (op) =>
       op.op === 'entity.create' &&
       op.identity.origin?.kind === 'spawned' &&
-      ['pelt', 'hide'].includes(op.identity.origin.role),
+      op.identity.origin.role === 'loot',
   );
   const slots = ops.filter((op) => op.op === 'population.slot');
   for (const h of hounds) {
@@ -67,7 +67,7 @@ function complete(state: Any, ops: Any[]): boolean {
     if (
       pelts.filter(
         (p) => p.writer_group === h.writer_group && p.identity.origin.member_id === h.identity.id,
-      ).length !== (spec?.pelt ? 1 : 0) ||
+      ).length !== (spec?.loot ? 1 : 0) ||
       ops.filter(
         (op) =>
           op.op === 'resource.initialize' &&
@@ -127,7 +127,7 @@ function initialized(
   const target = { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
   if (
     !i ||
-    !['hound', 'deer'].includes(origin.role) ||
+    !['hunter', 'prey'].includes(origin.role) ||
     origin.member_id !== op.entity_id ||
     !spec ||
     op.writer_group !==
@@ -165,7 +165,7 @@ function provenance(state: Any, i: Any): boolean {
       same(i.origin.bundle, spec.bundle) &&
       i.origin.slot <= spec.cap &&
       same(i.definition, spec[i.origin.role]) &&
-      (['hound', 'deer'].includes(i.origin.role)
+      (['hunter', 'prey'].includes(i.origin.role)
         ? i.origin.member_id === i.id
         : i.origin.member_id !== i.id)
     );
@@ -192,9 +192,9 @@ function paired(parent: Any, child: Any): boolean {
     b = child?.origin;
   return (
     a?.kind === 'spawned' &&
-    ['hound', 'deer'].includes(a.role) &&
+    ['hunter', 'prey'].includes(a.role) &&
     b?.kind === 'spawned' &&
-    ((a.role === 'hound' && b.role === 'pelt') || (a.role === 'deer' && b.role === 'hide')) &&
+    b.role === 'loot' &&
     parent.id === b.member_id &&
     ['by', 'bundle', 'slot', 'generation', 'occurrence_id', 'member_id'].every((field) =>
       same(a[field], b[field]),
@@ -228,12 +228,12 @@ function flightSlot(state: Any, ops: Any[], s: Any) {
     s.value.last_flight_at === due &&
     s.expected.last_flight_at !== due &&
     origin?.kind === 'spawned' &&
-    ['hound', 'deer'].includes(origin.role) &&
+    ['hunter', 'prey'].includes(origin.role) &&
     origin.member_id === id &&
     same(origin.by, s.plan) &&
     origin.slot === s.slot &&
     origin.generation === s.value.generation &&
-    (origin.role === 'deer'
+    (origin.role === 'prey'
       ? state.population_specs?.[key(s.plan)]?.plan?.sight && s.value.sight_job_id == null
       : state.population_specs?.[key(s.plan)]?.plan?.pack) &&
     ops.filter(
@@ -259,7 +259,7 @@ function flightTime(state: Any, ops: Any[], s: Any, id: string) {
   );
   const sight = s.expected?.sight_job_id && state.jobs?.[s.expected.sight_job_id];
   const deerFlight =
-    origin?.role === 'deer' &&
+    origin?.role === 'prey' &&
     sight?.sight &&
     ops.some(
       (op) =>
@@ -281,7 +281,7 @@ function selectedFlight(state: Any, row: Any, id: string) {
     return (
       state.containers?.[member] === row.room_id &&
       origin?.kind === 'spawned' &&
-      origin.role === 'hound' &&
+      origin.role === 'hunter' &&
       origin.member_id === member &&
       slot?.member_id === member &&
       slot.generation === origin.generation &&

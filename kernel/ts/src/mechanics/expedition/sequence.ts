@@ -106,7 +106,7 @@ function houndHere(world: World, spec: Spec, actor: CharacterId, body: EntityId,
     .filter(
       ([id, row]) =>
         row.origin.kind === 'spawned' &&
-        row.origin.role === 'hound' &&
+        row.origin.role === 'hunter' &&
         same(row.origin.by, spec.population) &&
         world.state.containers[id] === world.state.containers[body] &&
         !attackRefused(world, actor, id) &&

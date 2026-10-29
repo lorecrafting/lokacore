@@ -4,6 +4,7 @@ import { apply } from './apply.ts';
 // A fresh world from a loaded loka-cartridge-v2 artifact (03 §1, §3, §23; numeric profile,
 // Initial world ids), split from runtime/world.ts, which re-exports newWorld.
 import type { CharacterId, EntityId, ResourceSpec, WorldContextId } from '../contracts.gen.ts';
+import type { DefinitionRef } from '../contracts.gen.ts';
 import { initialPopulation } from '../mechanics/population/shared.ts';
 import { initialLiquids } from '../mechanics/liquid/shared.ts';
 import { key } from '../foundation/compose.ts';
@@ -228,7 +229,7 @@ function corpseTemplates(cartridge: Cartridge): World['corpseTemplates'] {
         [key(cartridge.world.death.player_corpse)]: 'player',
         [key(cartridge.world.death.npc_corpse)]: 'npc',
         ...Object.fromEntries(
-          Object.values(cartridge.population_bundles ?? {}).map((b) => [key(b.corpse), 'npc']),
+          Object.values(cartridge.populations ?? {}).map((p) => [key(p.corpse), 'npc']),
         ),
       }
     : {};
@@ -240,24 +241,22 @@ function populationSpecs(
 ): World['populationSpecs'] {
   return Object.fromEntries(
     Object.entries(cartridge.populations ?? {}).map(([, plan]) => {
-      const bundle = cartridge.population_bundles![refString(plan.bundle)]!;
-      const npc = cartridge.npcs![refString(bundle.npc)]!;
-      const member_role = bundle.member_role ?? 'hound';
-      const loot_role = bundle.loot_role ?? 'pelt';
+      const npc = cartridge.npcs![refString(plan.npc)]!;
+      const member_role = plan.member_role ?? 'hunter';
+      const ref = {
+        cartridge_id: cartridge.manifest.id,
+        cartridge_version: cartridge.manifest.version,
+        kind: 'population',
+        key: plan.key,
+      } as DefinitionRef;
       return [
-        key({
-          cartridge_id: cartridge.manifest.id,
-          cartridge_version: cartridge.manifest.version,
-          kind: 'population',
-          key: plan.key,
-        }),
+        key(ref),
         {
-          bundle: plan.bundle,
-          [member_role]: bundle.npc,
-          [loot_role]: bundle.item,
+          bundle: ref,
+          [member_role]: plan.npc,
+          loot: plan.item,
           member_role,
-          loot_role,
-          corpse: bundle.corpse,
+          corpse: plan.corpse,
           home: roomIds[refString(plan.home)],
           cap: plan.cap,
           hp: { key: 'hp' as ResourceSpec['key'], ...npc.hp! },

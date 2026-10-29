@@ -1,5 +1,7 @@
 {
-  "bundle": "bandits",
+  "npc": "bandit",
+  "item": "knife",
+  "corpse": "npc_corpse",
   "home": "road",
   "area": [
     "road",

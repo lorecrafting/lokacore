@@ -268,7 +268,7 @@ defmodule Loka.Core.InvariantsEncounter do
 
     case present do
       fields when fields in [[], ["encounter_id"]] ->
-        get_in(op, ["job", "kind"]) not in ["population_bundle", "reaction"]
+        get_in(op, ["job", "kind"]) != "reaction"
 
       # Built rooms S3: an order job may carry its owner (a build commission's).
       ["actor_id"] ->
@@ -281,7 +281,7 @@ defmodule Loka.Core.InvariantsEncounter do
         get_in(op, ["job", "kind"]) == "room"
 
       ["crow_member_id", "crow_generation", "crow_phase"] ->
-        get_in(op, ["job", "kind"]) == "population_bundle" and
+        get_in(op, ["job", "kind"]) == "population" and
           op["crow_phase"] in ~w(acquire leg return)
 
       _ ->

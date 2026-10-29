@@ -134,7 +134,7 @@ defmodule Loka.Content.Population do
 
   defp sight_valid?(nil, _, _, _, _), do: true
 
-  defp sight_valid?(sight, area, rooms, text, %{"member_role" => "deer", "loot_role" => "hide"}) do
+  defp sight_valid?(sight, area, rooms, text, %{"member_role" => "prey", "loot_role" => "loot"}) do
     directions = area_directions(rooms, area)
 
     is_integer(sight["delay"]) and sight["delay"] > 0 and
@@ -208,7 +208,7 @@ defmodule Loka.Content.Population do
 
     roles_ok =
       (b["member_role"] == nil and b["loot_role"] == nil) or
-        (b["member_role"] == "deer" and b["loot_role"] == "hide")
+        (b["member_role"] == "prey" and b["loot_role"] == "loot")
 
     # An invalid NPC, corpse or item is already reported at its own path; a missing one is refused here.
     :invalid in refs or

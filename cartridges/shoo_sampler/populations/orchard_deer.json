@@ -1,6 +1,6 @@
 {
   "extends": "herd",
-  "bundle": "orchard_deer",
+  "npc": "orchard_deer",
   "home": "orchard",
   "area": [
     "orchard",

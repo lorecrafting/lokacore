@@ -99,7 +99,7 @@ function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
   const settings = world.cartridge.world!.death!;
   const spawned = world.state.created?.[victim_id];
   const population =
-    spawned?.origin.kind === 'spawned' && ['hound', 'deer'].includes(spawned.origin.role)
+    spawned?.origin.kind === 'spawned' && ['hunter', 'prey'].includes(spawned.origin.role)
       ? world.populationSpecs[key(spawned.origin.by)]
       : undefined;
   return player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
@@ -111,7 +111,7 @@ const delay = (plan: { floor?: number; replacement_delay: number }, slot: number
 
 function populationLoss(world: World, loss: Loss): DeltaOp[] {
   const spawned = world.state.created?.[loss.entity_id];
-  if (spawned?.origin.kind !== 'spawned' || !['hound', 'deer'].includes(spawned.origin.role))
+  if (spawned?.origin.kind !== 'spawned' || !['hunter', 'prey'].includes(spawned.origin.role))
     return [];
   const plan = spawned.origin.by;
   const population = world.populationSpecs[key(plan)];

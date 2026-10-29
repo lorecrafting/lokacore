@@ -1,5 +1,7 @@
 {
-  "bundle": "hunters",
+  "npc": "hunter",
+  "item": "fur",
+  "corpse": "npc_corpse",
   "home": "clearing",
   "area": ["clearing", "thicket"],
   "cap": 1,

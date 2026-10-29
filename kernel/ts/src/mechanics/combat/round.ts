@@ -85,7 +85,7 @@ export function roundSequence(
   const origin = world.state.created?.[row.npc_id]?.origin;
   if (
     origin?.kind === 'spawned' &&
-    origin.role === 'hound' &&
+    origin.role === 'hunter' &&
     suppressed(world, origin.by, job.due_time)
   )
     return accepted<never>(world, 'job_ran', [...r.ops, close], []);
