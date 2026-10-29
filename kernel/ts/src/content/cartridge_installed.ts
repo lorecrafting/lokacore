@@ -1,4 +1,4 @@
-// Host compatibility is checked after artifact semantics and references.
+// Host compatibility is checked after the integrity, key and lock stages.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
 import { scopeSites } from './cartridge_scoped_facts.ts';

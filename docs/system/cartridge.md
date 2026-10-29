@@ -501,7 +501,7 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:15
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:109`), the
 lock (`:134`: `LOCK_MANIFEST_MISMATCH`), and the installed kernel
-(`content/cartridge_installed.ts:24`: `CAPABILITY_NOT_INSTALLED`, `FACT_SCOPE_UNSUPPORTED` (a
+(`content/cartridge_installed.ts:25`: `CAPABILITY_NOT_INSTALLED`, `FACT_SCOPE_UNSUPPORTED` (a
 fact has exactly one scope, `player` or `instance`, and a subject site names only what this
 kernel can read, `content/cartridge_scoped_facts.ts`), `KERNEL_API_UNSUPPORTED`,
 `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`). Semantic checks run once, in the
@@ -514,7 +514,7 @@ hash and lock (`test/loka/cartridge_cross_kernel_test.exs:169`); the loader corp
 
 A compiled cartridge is a CompiledCartridge ([contracts](../contracts.gen.md#cartridge-artifact-contracts-protocolcartridgeschemajson)):
 the manifest, lock and definition maps keyed by DefinitionRefString
-(`<id>@<version>:<kind>/<key>`; `content/cartridge.ts:110`).
+(`<id>@<version>:<kind>/<key>`; `content/cartridge.ts:113`).
 
 ## Content reports
 
@@ -1171,7 +1171,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Conditional schedule declarations
 
-[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and its cases in `schedule_cases`, which source may not author. The compiler checks the emitted `schedule_cases`: each hour one the `daily_schedule` lists (SCHEMA_VIOLATION `invalid_value`), rooms, goal texts, condition references and owners. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The compiler refuses a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `<case>.when…fact`; the compiler at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
+[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and builds `schedule_cases` from the checked cases, which source may not author. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The compiler refuses a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
 
 ## Standing and disposition declarations
 
@@ -1183,7 +1183,7 @@ Author rule: an NPC with `disposition.hostile` refuses every dialogue while host
 
 ## Rumour declarations
 
-[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc` in both, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"policy_version": 1, "root": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
+[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc`, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"policy_version": 1, "root": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
 
 ## Lore deduction declarations
 
@@ -1250,7 +1250,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Identity declarations
 
-[Recognition and earned titles](mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) add one optional declaration, `world.identity {name, name_variants?}` (`protocol/cartridge.schema.json` `WorldSettings`). `name` and each variant's `description` are text keys (UNRESOLVED_REFERENCE); `name_variants` are W6 `TextVariants`, owned by `description_variant` (UNDECLARED_CAPABILITY), each condition naming declared definitions (UNRESOLVED_REFERENCE); a `fact_compare` with `subject: "target"` there is FACT_SCOPE_UNSUPPORTED (both kernels). The compiler refuses the rest.
+[Recognition and earned titles](mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) add one optional declaration, `world.identity {name, name_variants?}` (`protocol/cartridge.schema.json` `WorldSettings`). `name` and each variant's `description` are text keys (UNRESOLVED_REFERENCE); `name_variants` are W6 `TextVariants`, owned by `description_variant` (UNDECLARED_CAPABILITY), each condition naming declared definitions (UNRESOLVED_REFERENCE); a `fact_compare` with `subject: "target"` there is FACT_SCOPE_UNSUPPORTED; the compiler raises each of these and refuses the rest.
 
 ## Ask declarations
 
