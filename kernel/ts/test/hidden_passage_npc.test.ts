@@ -101,7 +101,7 @@ for (const face of ['hidden', 'climb'] as const)
       (id) =>
         w.state.containers[id] === willow &&
         w.state.created![id]!.origin.kind === 'spawned' &&
-        w.state.created![id]!.origin.role === 'deer',
+        w.state.created![id]!.origin.role === 'prey',
     )!;
     assert.ok(deer);
     const hidden = hide(w, willow, 'south', face);

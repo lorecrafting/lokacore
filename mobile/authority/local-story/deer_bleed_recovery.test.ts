@@ -100,7 +100,7 @@ function journey(t: TestContext) {
   const crow = Object.entries(w.state.created ?? {}).find(
     ([member, origin]) =>
       origin.origin.kind === 'spawned' &&
-      origin.origin.role === 'hound' &&
+      origin.origin.role === 'hunter' &&
       w.state.containers[member] === w.state.containers[w.body],
   )![0];
   invoke(2, 'attack', {}, [crow]);
@@ -159,7 +159,7 @@ for (const kind of ['bleed', 'population', 'mixed sight cancellation'] as const)
       const deer = Object.entries(w.state.created ?? {}).find(
         ([member, origin]) =>
           origin.origin.kind === 'spawned' &&
-          origin.origin.role === 'deer' &&
+          origin.origin.role === 'prey' &&
           w.state.containers[member] === w.state.containers[w.body],
       )![0];
       // Hits at 68450 and on the round at 68600 end the deer as the bleed ticks at 68600.

@@ -92,7 +92,7 @@ function rung(): World {
     ([, row]) =>
       row.origin.kind === 'spawned' &&
       row.origin.by.key === 'goblins' &&
-      row.origin.role === 'hound' &&
+      row.origin.role === 'hunter' &&
       row.origin.slot === 1,
   )!;
   const member = goblin as EntityId;
@@ -206,7 +206,7 @@ test('suppression closes an open goblin encounter without reward or deleting the
     ([, row]) =>
       row.origin.kind === 'spawned' &&
       row.origin.by.key === 'goblins' &&
-      row.origin.role === 'hound' &&
+      row.origin.role === 'hunter' &&
       row.origin.slot === 1,
   )!;
   const transferred = apply(base, [

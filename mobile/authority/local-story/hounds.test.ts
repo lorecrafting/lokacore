@@ -158,7 +158,7 @@ test('a real goblin kill and pelt Take cold-reopen with conserved custody and ev
   const pelt = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
       identity.origin.kind === 'spawned' &&
-      identity.origin.role === 'pelt' &&
+      identity.origin.role === 'loot' &&
       identity.origin.member_id === member,
   )![0];
   invoke('attack', [member]);

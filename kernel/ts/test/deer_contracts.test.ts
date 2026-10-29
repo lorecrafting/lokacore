@@ -7,11 +7,11 @@ const id = '11111111-2222-4333-8444-555555555555';
 const plan = content.populations![ref('population', 'willow_deer')];
 const world = fresh();
 const origins = Object.values(world.state.created ?? {}).map((i) => i.origin);
-const deer = origins.find((o) => o.kind === 'spawned' && o.role === 'deer')! as Extract<
+const deer = origins.find((o) => o.kind === 'spawned' && o.role === 'prey')! as Extract<
   (typeof origins)[number],
   { kind: 'spawned' }
 >;
-const hide = origins.find((o) => o.kind === 'spawned' && o.role === 'hide')! as Extract<
+const hide = origins.find((o) => o.kind === 'spawned' && o.role === 'loot')! as Extract<
   (typeof origins)[number],
   { kind: 'spawned' }
 >;

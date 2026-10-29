@@ -335,7 +335,7 @@ test('crow job refuses a carrier whose spawn origin names another role or genera
   const row = Object.values(world.state.crows ?? {}).find((r) => r.phase === 'leg')!;
   const member = world.state.created![row.member_id];
   const origin = member.origin as { generation: number };
-  for (const forged of [{ role: 'deer' }, { generation: origin.generation + 1 }]) {
+  for (const forged of [{ role: 'prey' }, { generation: origin.generation + 1 }]) {
     const created = { ...world.state.created };
     created[row.member_id] = { ...member, origin: { ...origin, ...forged } } as typeof member;
     const result = elapse({ ...world, state: { ...world.state, created } }, START + 300, 173);

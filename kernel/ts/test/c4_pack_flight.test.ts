@@ -33,7 +33,7 @@ test('strictly wounded selected goblin flies with its ear before either attack',
   const result = due(seated(begun(wounded(w, 1))));
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
   assert.equal(result.world.state.containers[h2], nest);
-  assert.equal(result.world.state.containers[spawned(w, 2, 'pelt')], h2);
+  assert.equal(result.world.state.containers[spawned(w, 2, 'loot')], h2);
   const row = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.deepEqual(row.active_ids, [h1]);
   assert.equal(row.npc_id, h1);
@@ -178,7 +178,7 @@ test('both real same-deadline job orders leave the fled goblin and ear at its de
     );
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], nest);
-    assert.equal(result.world.state.containers[spawned(w, 2, 'pelt')], h2);
+    assert.equal(result.world.state.containers[spawned(w, 2, 'loot')], h2);
     const slot = Object.values(result.world.state.population_slots ?? {}).find(
       (row) => row.member_id === h2,
     )!;

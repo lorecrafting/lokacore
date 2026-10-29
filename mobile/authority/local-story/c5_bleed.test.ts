@@ -26,7 +26,7 @@ function managedBleedBundle() {
   const target = Object.entries(initial.state.created ?? {}).find(
     ([id, e]) =>
       e.origin.kind === 'spawned' &&
-      e.origin.role === 'hound' &&
+      e.origin.role === 'hunter' &&
       initial.state.containers[id] === initial.state.containers[initial.body],
   )?.[0];
   assert.ok(target);
@@ -226,7 +226,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
   const target = Object.entries(base.state.created ?? {}).find(
     ([id, e]) =>
       e.origin.kind === 'spawned' &&
-      e.origin.role === 'hound' &&
+      e.origin.role === 'hunter' &&
       base.state.containers[id] === base.state.containers[base.body],
   )![0];
   const item = base.entityIds[`${prefix}:item/bandage`];
