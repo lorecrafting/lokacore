@@ -169,7 +169,7 @@ test("a hunter follows the player's fresh trail; a cold or shut one gives its pl
     [`${REF}:barrier/door`]: {
       key: 'door',
       keywords: ['door'],
-      short: 'item.fur.short',
+      name: 'item.fur.short',
       initial: 'closed',
     },
   };

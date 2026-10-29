@@ -167,7 +167,7 @@ test('loader: movement and terrain tags load at API 1.62; movement stands in for
       ['ward_sampler@0.0.1:barrier/mist_gate']: {
         key: 'mist_gate',
         keywords: ['gate'],
-        short: 'barrier.mist_gate.short',
+        name: 'barrier.mist_gate.short',
         initial: 'open',
         tags: ['chasm'],
       },

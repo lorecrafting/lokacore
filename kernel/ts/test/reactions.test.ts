@@ -249,7 +249,7 @@ const slowMove =
   (c: any) => {
     c.actions[`${G}:action/move`] = {
       key: 'move',
-      label: 'room.belfry.title',
+      name: 'room.belfry.title',
       accessibility: 'room.belfry.title',
       target: { kind: 'none' },
       command: 'move',

@@ -32,7 +32,7 @@ export const infirmary = (c: any) => {
     c.items[named('item', `bandage_${i}`)] = {
       key: `bandage_${i}`,
       keywords: ['bandage', `bandage_${i}`],
-      short: 'item.bandage.short',
+      name: 'item.bandage.short',
       room_line: 'item.bandage.room',
       description: 'item.bandage.description',
       mass_grams: 10,
@@ -42,7 +42,7 @@ export const infirmary = (c: any) => {
     [named('npc', 'healer')]: {
       key: 'healer',
       keywords: ['healer'],
-      short: 'npc.healer.short',
+      name: 'npc.healer.short',
       room_line: 'npc.healer.room',
       description: 'npc.healer.description',
       room: ref('room', 'mine'),
@@ -60,7 +60,7 @@ export const infirmary = (c: any) => {
   c.quests = {
     [named('quest', 'herbs')]: {
       key: 'herbs',
-      title: 'quest.herbs.title',
+      name: 'quest.herbs.title',
       repeatable: true,
       objective: {
         evidence: 'current_state',

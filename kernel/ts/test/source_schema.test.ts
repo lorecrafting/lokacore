@@ -52,7 +52,7 @@ test('every $ref in the source schemas resolves', () => {
   }
 });
 
-const room = { title: 'hall.title', description: 'hall.description', exits: {} };
+const room = { name: 'hall.title', description: 'hall.description', exits: {} };
 const step = { op: 'fact.assign', fact: 'known', value: true };
 const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [step] };
 const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [step] };

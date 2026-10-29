@@ -111,7 +111,7 @@ test('pre-choice service envelope agrees only with Step invalid_state before ide
       hill: {
         attribute: ref('attribute', 'str'),
         description: 'ancestry.hill.description',
-        label: 'ancestry.hill.label',
+        name: 'ancestry.hill.label',
         modifier: 1,
       },
     };

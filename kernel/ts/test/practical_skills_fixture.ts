@@ -37,7 +37,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
   const npc = (k: string, extra = {}) => ({
     key: k,
     keywords: [k],
-    short: `npc.${k}.short`,
+    name: `npc.${k}.short`,
     room_line: `npc.${k}.room`,
     description: `npc.${k}.description`,
     room: ref('room', 'mine'),
@@ -65,7 +65,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
     c.items[named('item', item)] = {
       key: item,
       keywords: [item],
-      short: 'item.ware.short',
+      name: 'item.ware.short',
       room_line: 'item.ware.room',
       description: 'item.ware.description',
       mass_grams: 100,
@@ -86,7 +86,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
     c.skills[named('skill', skill)] = {
       ...c.skills[named('skill', 'mining')],
       key: skill,
-      label: `skill.${skill}.label`,
+      name: `skill.${skill}.label`,
       requirement: `skill.${skill}.requirement`,
       qualification: qualification(attribute),
     };
@@ -104,7 +104,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
       roles: { teacher: { role: 'npc', npc: teacherRef } },
       policy: { op: 'fact_compare', fact: ref('fact', `skill_${skill}`), equals: false },
       prompt: 'teacher.prompt',
-      label: 'teacher.choice',
+      name: 'teacher.choice',
       choices: {
         learn: {
           label: 'teacher.choice',

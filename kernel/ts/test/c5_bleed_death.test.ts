@@ -17,7 +17,7 @@ function water(c: any) {
   const room = (key: string, exits: object, dark = false) => {
     c.rooms[`${prefix}:room/${key}`] = {
       key,
-      title: 'room.burrow.title',
+      name: 'room.burrow.title',
       description: 'room.burrow.description',
       ...(dark ? { dark_description: 'room.burrow.description' } : {}),
       exits,
@@ -27,7 +27,7 @@ function water(c: any) {
   room('pool_bottom', { up: { to: ref('room', 'pool') } }, true);
   c.skills[`${prefix}:skill/swim`] = {
     key: 'swim',
-    label: 'skill.bandage.label',
+    name: 'skill.bandage.label',
     requirement: 'skill.bandage.requirement',
     qualification: { op: 'all', items: [] },
   };

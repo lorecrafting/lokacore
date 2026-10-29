@@ -23,7 +23,7 @@ const fresh = () =>
       description: 'room.study.description',
       exits: { east: { to: ref('room', 'chapel_nave') } },
       key: 'study',
-      title: 'room.study.title',
+      name: 'room.study.title',
     };
     c.rooms[`${prefix}:room/chapel_nave`].exits.west = {
       to: ref('room', 'study'),

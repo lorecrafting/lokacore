@@ -92,7 +92,7 @@ export function ancestrySource() {
   c.skills = {
     [ancestryNamed('skill', 'swim')]: {
       key: 'swim',
-      label: 'ancestry.strong.label',
+      name: 'ancestry.strong.label',
       requirement: 'ancestry.strong.label',
       qualification: {
         op: 'stat_compare',

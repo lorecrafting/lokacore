@@ -17,7 +17,7 @@ export function riddleSource(c: any) {
   c.npcs[`${prefix}:npc/sphinx`] = {
     key: 'sphinx',
     keywords: ['sphinx'],
-    short: 'npc.sphinx.short',
+    name: 'npc.sphinx.short',
     description: 'npc.sphinx.description',
     room_line: 'npc.sphinx.room',
     room: ref('room', 'ferry_landing'),

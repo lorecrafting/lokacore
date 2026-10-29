@@ -273,7 +273,7 @@ function deathSetup(path = ':memory:') {
     c.items[`${prefix}:item/lantern`] = {
       key: 'lantern',
       keywords: ['lantern'],
-      short: 'item.lantern.short',
+      name: 'item.lantern.short',
       description: 'item.lantern.description',
       room_line: 'item.lantern.room',
       mass_grams: 10,

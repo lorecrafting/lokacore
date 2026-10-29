@@ -16,7 +16,7 @@ test('Book preserves an aliased Read place offer and exact target through a live
     c.actions[`${P}:action/peruse`] = {
       key: 'peruse',
       command: 'read',
-      label: 'actions.read_plaque',
+      name: 'actions.read_plaque',
       accessibility: 'actions.read_plaque',
       target: { kind: 'entity', scopes: ['inspectable_details'] },
       input: [],

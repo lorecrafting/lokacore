@@ -34,7 +34,7 @@ function poisoned(
     tick_every: every,
     resource: resourceRef(w, 'hp'),
     per_tick: -1,
-    label: any,
+    name: any,
     narration: { applied: any, tick: any, expired: any },
   };
   const statuses = { ...w.cartridge.statuses, [refString(poison as never)]: spec };

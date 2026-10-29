@@ -321,7 +321,7 @@ test('board-child readable recipes project exclusively on the child Notice', () 
     c.recipes = {};
     c.recipes[`${prefix}:recipe/study_tracks`] = {
       key: 'study_tracks',
-      label: 'actions.study_tracks',
+      name: 'actions.study_tracks',
       aliases: ['study'],
       target: { kind: 'detail', room: ref('room', 'village_green'), detail: 'lost_whistle' },
       priority: 10,
