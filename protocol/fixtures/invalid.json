@@ -30356,12 +30356,12 @@
     },
     "errors": [
       {
-        "path": "/site/structures",
-        "code": "missing_property"
-      },
-      {
         "path": "/site/directions",
         "code": "too_few_items"
+      },
+      {
+        "path": "/site/structures",
+        "code": "missing_property"
       },
       {
         "path": "/site/x",
@@ -30540,16 +30540,16 @@
     },
     "errors": [
       {
-        "path": "/site/structures",
-        "code": "too_many_items"
-      },
-      {
         "path": "/site/directions",
         "code": "too_many_items"
       },
       {
         "path": "/site/directions/0",
         "code": "not_in_enum"
+      },
+      {
+        "path": "/site/structures",
+        "code": "too_many_items"
       }
     ]
   },
