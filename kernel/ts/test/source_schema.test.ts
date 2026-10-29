@@ -72,7 +72,7 @@ const fact = {
 // dialogue choice or nested npc member yet. The defs rows pin the contract's
 // exactlyOneRequired and requiredUnless translations.
 test('the schemas refuse a misspelled field and each shortcut written wrong', () => {
-  const pairs: [string, object, object][] = [
+  const pairs: [string, unknown, unknown][] = [
     ['rooms', room, { ...room, titel: 'hall.title' }],
     ['rooms', { ...room, title: { prose: 'Hall' } }, { ...room, title: { prose: '' } }],
     ['rooms', { extends: 'hall' }, { extends: 1 }],
