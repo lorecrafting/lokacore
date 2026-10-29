@@ -59,7 +59,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   // The deliveries at which leaf `i` of `ref` held: `ref` replaced, under its own key, by that leaf.
   const held = (ref: string, i: number) => {
     const { key, on, when } = rules[ref]!;
-    const leaf = { ...when!, root: leaves(when!.root)[i]! };
+    const leaf = leaves(when!)[i]!;
     const probed = { key, on, when: leaf, apply: [{ op: 'narrate', text: probe }] };
     const reactions = { ...rules, [ref]: probed };
     return said(decide({ ...cartridge, reactions } as Cartridge), (k) => k === probe);
@@ -74,7 +74,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
         rule: ref,
         causes: causes(rule, d, before),
         fired: said(d, (key) => ruleOf(key) === ref),
-        ...(rule.when && { when: annotate(rule.when.root, (i) => ({ held: held(ref, i) })) }),
+        ...(rule.when && { when: annotate(rule.when, (i) => ({ held: held(ref, i) })) }),
       })),
     ...asked(c, on, before, command),
   };
@@ -140,7 +140,7 @@ const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
 
 // The definition keyed `key`, its policy's leaves read on `world` as admission reads them; no
 // policy, none (it holds).
-function policy<D extends { key: string; policy?: { root: Policy } }>(
+function policy<D extends { key: string; policy?: Policy }>(
   defs: Readonly<Record<string, D>> | undefined,
   key: string,
   world: World,
@@ -151,7 +151,7 @@ function policy<D extends { key: string; policy?: { root: Policy } }>(
   if (!d) throw new Usage(`no definition keyed ${key}`);
   const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
   const actor = (command.payload as { actor_id: CharacterId }).actor_id; // recipes' and talk's commands carry one
-  const root = d.policy?.root;
+  const root = d.policy;
   if (!root) return { rule };
   const at = (i: number) => ({ holds: holds(world, actor, leaves(root)[i]!, ctx()) });
   return { rule, policy: annotate(root, at) };

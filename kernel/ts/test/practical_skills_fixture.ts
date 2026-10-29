@@ -72,14 +72,11 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
       location: { in: 'npc', npc: ref('npc', 'smith') },
     };
   const qualification = (attribute: string) => ({
-    policy_version: 1,
-    root: {
-      op: 'all',
-      items: [
-        { op: 'stat_compare', attribute: ref('attribute', attribute), at_least: 10 },
-        { op: 'resource_compare', resource: ref('resource', 'mv'), at_least: 5 },
-      ],
-    },
+    op: 'all',
+    items: [
+      { op: 'stat_compare', attribute: ref('attribute', attribute), at_least: 10 },
+      { op: 'resource_compare', resource: ref('resource', 'mv'), at_least: 5 },
+    ],
   });
   c.dialogues = {};
   for (const [skill, attribute, teacher] of [
@@ -105,10 +102,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
       key: `${teacher}_${skill}`,
       npc: teacherRef,
       roles: { teacher: { role: 'npc', npc: teacherRef } },
-      policy: {
-        policy_version: 1,
-        root: { op: 'fact_compare', fact: ref('fact', `skill_${skill}`), equals: false },
-      },
+      policy: { op: 'fact_compare', fact: ref('fact', `skill_${skill}`), equals: false },
       prompt: 'teacher.prompt',
       label: 'teacher.choice',
       choices: {

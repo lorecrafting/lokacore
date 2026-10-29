@@ -479,7 +479,7 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "traverse": { "$ref": "#/$defs/VersionedPolicy" }
+            "traverse": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
@@ -507,7 +507,7 @@
           ]
         },
         "text": { "$ref": "#/$defs/TextKey" },
-        "when": { "$ref": "#/$defs/VersionedPolicy" }
+        "when": { "$ref": "#/$defs/Policy" }
       },
       "required": [
         "sense",
@@ -686,10 +686,10 @@
     },
     "DescriptionVariant": {
       "additionalProperties": false,
-      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json VersionedPolicy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
+      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json Policy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
       "properties": {
         "description": { "$ref": "#/$defs/TextKey" },
-        "when": { "$ref": "#/$defs/VersionedPolicy" }
+        "when": { "$ref": "#/$defs/Policy" }
       },
       "required": [
         "description"
@@ -2110,7 +2110,7 @@
           "type": "object"
         }
       ],
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
     },
     "QuestJournal": {
       "additionalProperties": false,
@@ -2123,7 +2123,7 @@
             "additionalProperties": false,
             "properties": {
               "text": { "$ref": "#/$defs/TextKey" },
-              "when": { "$ref": "#/$defs/VersionedPolicy" }
+              "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
               "text"
@@ -2206,7 +2206,7 @@
           "additionalProperties": false,
           "properties": {
             "evidence": { "const": "current_state" },
-            "policy": { "$ref": "#/$defs/VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/Policy" }
           },
           "required": [
             "evidence"
@@ -3324,22 +3324,6 @@
       },
       "type": "object"
     },
-    "VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/Policy" }
-      },
-      "required": [
-        "policy_version",
-        "root"
-      ],
-      "type": "object"
-    },
     "VesselSpec": {
       "additionalProperties": false,
       "description": "Opted finite vessel shell with authored positive capacity and initial contents.",
@@ -3838,7 +3822,7 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "traverse": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "traverse": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -4761,7 +4745,7 @@
           "type": "object"
         }
       ],
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
     },
     "partial.QuestJournal": {
       "additionalProperties": false,
@@ -4774,7 +4758,7 @@
             "additionalProperties": false,
             "properties": {
               "text": { "$ref": "#/$defs/TextKey" },
-              "when": { "$ref": "#/$defs/VersionedPolicy" }
+              "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
               "text"
@@ -4850,7 +4834,7 @@
           "additionalProperties": false,
           "properties": {
             "evidence": { "const": "current_state" },
-            "policy": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -5327,18 +5311,6 @@
       },
       "type": "object"
     },
-    "partial.VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/partial.Policy" }
-      },
-      "type": "object"
-    },
     "partial.VesselSpec": {
       "additionalProperties": false,
       "description": "Opted finite vessel shell with authored positive capacity and initial contents.",
@@ -5403,7 +5375,7 @@
           "pattern": "^[a-z][a-z0-9_.]*$",
           "type": "string"
         },
-        "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
         "priority": { "type": "integer" },
         "target": { "$ref": "#/$defs/partial.TargetSpec" },
         "with": { "type": "object" }
@@ -5538,7 +5510,7 @@
           },
           "type": "object"
         },
-        "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
         "priority": { "type": "integer" },
         "reason": { "$ref": "#/$defs/partial.TextKey" },
         "target": { "$ref": "#/$defs/partial.RecipeTarget" },
@@ -5561,7 +5533,7 @@
           "type": "array"
         },
         "opens_when": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
         },
         "short": { "$ref": "#/$defs/partial.TextKey" },
@@ -5629,7 +5601,7 @@
           "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
         },
         "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
         "prompt": { "$ref": "#/$defs/partial.TextKey" },
         "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
         "riddle": {
@@ -5760,8 +5732,8 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/partial.VersionedPolicy" },
-            "put": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "get": { "$ref": "#/$defs/partial.Policy" },
+            "put": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -5833,7 +5805,7 @@
                   "grants": { "$ref": "#/$defs/DefinitionRef" },
                   "text": { "$ref": "#/$defs/TextKey" },
                   "topic": { "$ref": "#/$defs/DefinitionRef" },
-                  "when": { "$ref": "#/$defs/VersionedPolicy" }
+                  "when": { "$ref": "#/$defs/Policy" }
                 },
                 "required": [
                   "topic",
@@ -5941,7 +5913,7 @@
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
                         },
-                        "when": { "$ref": "#/$defs/VersionedPolicy" }
+                        "when": { "$ref": "#/$defs/Policy" }
                       },
                       "required": [
                         "room"
@@ -5975,8 +5947,8 @@
               "type": "object"
             },
             "engage": { "$ref": "#/$defs/partial.TextKey" },
-            "friendly": { "$ref": "#/$defs/partial.VersionedPolicy" },
-            "hostile": { "$ref": "#/$defs/partial.VersionedPolicy" },
+            "friendly": { "$ref": "#/$defs/partial.Policy" },
+            "hostile": { "$ref": "#/$defs/partial.Policy" },
             "refuse": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "Book hostile refusal: the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal."
@@ -6025,7 +5997,7 @@
           "additionalProperties": false,
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "get": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -6090,7 +6062,7 @@
           "type": "array"
         },
         "birth_when": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
         "cap": {
@@ -6241,7 +6213,7 @@
           "type": "integer"
         },
         "wander_when": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "Toolbox row W12: while false at a wander boundary, no member wanders. The same leaf limit as birth_when."
         },
         "with": { "type": "object" }
@@ -6369,7 +6341,7 @@
           "additionalProperties": false,
           "properties": {
             "label": { "$ref": "#/$defs/partial.TextKey" },
-            "policy": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -7000,7 +6972,7 @@
           "const": true,
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
-        "when": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "when": { "$ref": "#/$defs/partial.Policy" },
         "with": { "type": "object" },
         "zone": { "$ref": "#/$defs/Key" }
       },
@@ -7077,7 +7049,7 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "enter": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "enter": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -7278,14 +7250,14 @@
         },
         "label": { "$ref": "#/$defs/partial.TextKey" },
         "prerequisite": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "Homestead hs-11 (docs/system/mechanics.md Skill trees): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused."
         },
         "profession": {
           "$ref": "#/$defs/partial.TextKey",
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
         },
-        "qualification": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "qualification": { "$ref": "#/$defs/partial.Policy" },
         "requirement": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
@@ -7454,7 +7426,7 @@
         "locks": {
           "additionalProperties": false,
           "properties": {
-            "enter": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "enter": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -7540,7 +7512,7 @@
           "pattern": "^[a-z][a-z0-9_.]*$",
           "type": "string"
         },
-        "policy": { "$ref": "#/$defs/VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/Policy" },
         "priority": { "type": "integer" },
         "target": { "$ref": "#/$defs/TargetSpec" }
       },
@@ -7739,7 +7711,7 @@
           ],
           "type": "object"
         },
-        "policy": { "$ref": "#/$defs/VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/Policy" },
         "priority": { "type": "integer" },
         "reason": { "$ref": "#/$defs/TextKey" },
         "target": { "$ref": "#/$defs/RecipeTarget" },
@@ -7767,7 +7739,7 @@
           "type": "array"
         },
         "opens_when": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
         },
         "short": { "$ref": "#/$defs/TextKey" },
@@ -7848,7 +7820,7 @@
           "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
         },
         "npc": { "$ref": "#/$defs/DefinitionRef" },
-        "policy": { "$ref": "#/$defs/VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/Policy" },
         "prompt": { "$ref": "#/$defs/TextKey" },
         "quest": { "$ref": "#/$defs/DefinitionRef" },
         "riddle": {
@@ -7995,8 +7967,8 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/VersionedPolicy" },
-            "put": { "$ref": "#/$defs/VersionedPolicy" }
+            "get": { "$ref": "#/$defs/Policy" },
+            "put": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
@@ -8078,7 +8050,7 @@
                   "grants": { "$ref": "#/$defs/DefinitionRef" },
                   "text": { "$ref": "#/$defs/TextKey" },
                   "topic": { "$ref": "#/$defs/DefinitionRef" },
-                  "when": { "$ref": "#/$defs/VersionedPolicy" }
+                  "when": { "$ref": "#/$defs/Policy" }
                 },
                 "required": [
                   "topic",
@@ -8200,7 +8172,7 @@
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
                         },
-                        "when": { "$ref": "#/$defs/VersionedPolicy" }
+                        "when": { "$ref": "#/$defs/Policy" }
                       },
                       "required": [
                         "room"
@@ -8238,8 +8210,8 @@
               "type": "object"
             },
             "engage": { "$ref": "#/$defs/TextKey" },
-            "friendly": { "$ref": "#/$defs/VersionedPolicy" },
-            "hostile": { "$ref": "#/$defs/VersionedPolicy" },
+            "friendly": { "$ref": "#/$defs/Policy" },
+            "hostile": { "$ref": "#/$defs/Policy" },
             "refuse": {
               "$ref": "#/$defs/TextKey",
               "description": "Book hostile refusal: the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal."
@@ -8287,7 +8259,7 @@
           "additionalProperties": false,
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/VersionedPolicy" }
+            "get": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
@@ -8364,7 +8336,7 @@
           "type": "array"
         },
         "birth_when": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
         "cap": {
@@ -8544,7 +8516,7 @@
           "type": "integer"
         },
         "wander_when": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "Toolbox row W12: while false at a wander boundary, no member wanders. The same leaf limit as birth_when."
         }
       },
@@ -8721,7 +8693,7 @@
           "additionalProperties": false,
           "properties": {
             "label": { "$ref": "#/$defs/TextKey" },
-            "policy": { "$ref": "#/$defs/VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/Policy" }
           },
           "required": [
             "label"
@@ -9484,7 +9456,7 @@
           "const": true,
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
-        "when": { "$ref": "#/$defs/VersionedPolicy" },
+        "when": { "$ref": "#/$defs/Policy" },
         "zone": { "$ref": "#/$defs/Key" }
       },
       "required": [
@@ -9577,7 +9549,7 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "enter": { "$ref": "#/$defs/VersionedPolicy" }
+            "enter": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
@@ -9843,14 +9815,14 @@
         },
         "label": { "$ref": "#/$defs/TextKey" },
         "prerequisite": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "Homestead hs-11 (docs/system/mechanics.md Skill trees): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused."
         },
         "profession": {
           "$ref": "#/$defs/TextKey",
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
         },
-        "qualification": { "$ref": "#/$defs/VersionedPolicy" },
+        "qualification": { "$ref": "#/$defs/Policy" },
         "requirement": { "$ref": "#/$defs/TextKey" }
       },
       "required": [
@@ -10035,7 +10007,7 @@
         "locks": {
           "additionalProperties": false,
           "properties": {
-            "enter": { "$ref": "#/$defs/VersionedPolicy" }
+            "enter": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },

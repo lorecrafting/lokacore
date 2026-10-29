@@ -35,7 +35,7 @@ defmodule Loka.Content.Delayed do
     do:
       for(
         {_, {rel, [], %{"after" => _, "when" => w}}} <- defs["reaction"],
-        {_, path, %{"subject" => "subject"}} <- nodes(rel, ["when", "root"], w["root"]),
+        {_, path, %{"subject" => "subject"}} <- nodes(rel, ["when"], w),
         do: diag("SCHEMA_VIOLATION", at(rel, path ++ ["subject"]), %{"error" => "invalid_value"})
       )
 

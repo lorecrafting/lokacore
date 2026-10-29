@@ -101,7 +101,6 @@
   "policy": {
     "spec": "21 §3.2, §4 Policy; 06 §21",
     "contracts": [
-      "VersionedPolicy",
       "Policy"
     ],
     "modules": [

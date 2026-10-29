@@ -3,21 +3,18 @@
     "event": "clock_hour"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "sky",
-          "lunar": "full"
-        },
-        {
-          "op": "fact_compare",
-          "fact": "raided",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "sky",
+        "lunar": "full"
+      },
+      {
+        "op": "fact_compare",
+        "fact": "raided",
+        "equals": false
+      }
+    ]
   },
   "apply": [
     {

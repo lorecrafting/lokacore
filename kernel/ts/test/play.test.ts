@@ -395,7 +395,7 @@ function sortKeys(v: any): any {
 test('the terminal shows the description variant the fresh facts select', () => {
   const facts = read('protocol/fixtures/cartridge_facts_hash.json');
   const c = facts.value;
-  c.rooms['facts_sampler@0.0.1:room/reed_path'].details.mud.variants[0].when.root.items[0].equals =
+  c.rooms['facts_sampler@0.0.1:room/reed_path'].details.mud.variants[0].when.items[0].equals =
     false;
   const sorted = (v: any): any =>
     Array.isArray(v)

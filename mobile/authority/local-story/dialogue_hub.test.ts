@@ -18,7 +18,7 @@ const configure = (c: any) => {
   const bram = c.dialogues[`${f.prefix}:dialogue/bram`];
   delete bram.quest;
   delete c.story_points;
-  bram.policy = { policy_version: 1, root: { op: 'all', items: [] } };
+  bram.policy = { op: 'all', items: [] };
   bram.roles = { bram: bram.roles.bram };
   delete bram.choices.leave.hand_over;
   const { daily_schedule, ...ivy } = c.npcs[`${f.prefix}:npc/bram`];

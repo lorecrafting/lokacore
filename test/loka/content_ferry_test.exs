@@ -142,7 +142,7 @@ defmodule Loka.ContentFerryTest do
       "command" => "run_job",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+      "policy" => %{"op" => "all", "items" => []}
     }
 
     assert compile(dir, %{"actions/hurry.json" => action}) ==
@@ -208,8 +208,8 @@ defmodule Loka.ContentFerryTest do
       {dialogue(&put_in(&1, ~w(roles lantern item), "missing")),
        unresolved.(".roles.lantern.item", missing.("item"))},
       {dialogue(&Map.put(&1, "quest", "missing")), unresolved.(".quest", missing.("quest"))},
-      {dialogue(&put_in(&1, ~w(policy root quest), "missing")),
-       unresolved.(".policy.root.quest", missing.("quest"))},
+      {dialogue(&put_in(&1, ~w(policy quest), "missing")),
+       unresolved.(".policy.quest", missing.("quest"))},
       {dialogue(fn d ->
          d
          |> put_in(~w(roles bram), %{"role" => "item", "item" => "lantern"})
@@ -259,7 +259,7 @@ defmodule Loka.ContentFerryTest do
         "dialogues/bram_offer.json" =>
           f.(%{
             "npc" => "bram",
-            "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+            "policy" => %{"op" => "all", "items" => []},
             "prompt" => "dialogue.bram.prompt",
             "roles" => %{"bram" => %{"role" => "npc", "npc" => "bram"}},
             "choices" => %{"accept" => Map.put(choice, "accept", "lantern")}
@@ -300,7 +300,7 @@ defmodule Loka.ContentFerryTest do
     files = %{
       "dialogues/bram_offer.json" => %{
         "npc" => "bram",
-        "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+        "policy" => %{"op" => "all", "items" => []},
         "prompt" => "dialogue.bram.prompt",
         "roles" => %{
           "bram" => %{"role" => "npc", "npc" => "bram"},
@@ -405,7 +405,7 @@ defmodule Loka.ContentFerryTest do
       "target" => %{"kind" => "none"},
       "priority" => 0,
       "input" => ["until"],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+      "policy" => %{"op" => "all", "items" => []}
     }
 
     for name <- ~w(elapsed wait) do

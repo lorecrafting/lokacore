@@ -296,7 +296,7 @@ const action = (c: any, key: string, command: string, target: object) => {
     label: `action.${key}`,
     accessibility: `action.${key}`,
     priority: 0,
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
   };
 };
 const inventory = { kind: 'entity', scopes: ['inventory'] };

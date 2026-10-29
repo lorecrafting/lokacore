@@ -49,7 +49,7 @@ test('exit availability follows an offered movement action whose policy fails', 
       input: ['direction'],
       command: 'move',
       priority: 0,
-      policy: { policy_version: 1, root: { op: 'time_window', from: 1, to: 2 } },
+      policy: { op: 'time_window', from: 1, to: 2 },
     };
   });
   const exit = gameView(w).exits.find((e) => e.direction === 'north')!;

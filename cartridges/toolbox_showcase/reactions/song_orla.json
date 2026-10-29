@@ -4,11 +4,8 @@
     "action": "play_song"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "npc_present",
-      "npc": "orla"
-    }
+    "op": "npc_present",
+    "npc": "orla"
   },
   "apply": [
     {

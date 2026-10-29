@@ -10,22 +10,19 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "tollhouse_forced",
-          "equals": false
-        },
-        {
-          "op": "has_tag",
-          "barrier": "tollhouse_door",
-          "tag": "fragile"
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "tollhouse_forced",
+        "equals": false
+      },
+      {
+        "op": "has_tag",
+        "barrier": "tollhouse_door",
+        "tag": "fragile"
+      }
+    ]
   },
   "check": {
     "key": "force_tollhouse_door",

@@ -126,7 +126,7 @@ test('a recipe gated on mv at least 2 is offered and admitted at mv 2, refused a
   ] as const) {
     const fresh = world((c) => {
       c.resources[`${AT}resource/mv`].start = start;
-      c.recipes[`${AT}recipe/pray`].policy.root = pool('mv', 2);
+      c.recipes[`${AT}recipe/pray`].policy = pool('mv', 2);
     });
     const moved = step(
       fresh,

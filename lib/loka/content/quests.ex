@@ -19,11 +19,11 @@ defmodule Loka.Content.Quests do
   defp policies(q) do
     base =
       for {field, %{"policy" => p}} <- [{"offer", q["offer"]}, {"objective", q["objective"]}],
-          do: {[field, "policy", "root"], p["root"]}
+          do: {[field, "policy"], p}
 
     base ++
       for {v, i} <- Enum.with_index(get_in(q, ["journal", "active_variants"]) || []),
-          do: {["journal", "active_variants", i, "when", "root"], v["when"]["root"]}
+          do: {["journal", "active_variants", i, "when"], v["when"]}
   end
 
   defp all(defs), do: for({_, {rel, [], q}} <- defs["quest"], do: {rel, q})

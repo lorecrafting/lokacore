@@ -1,14 +1,7 @@
 {
   "title": "quest.oar.title",
   "offer": {
-    "label": "quest.oar.accept",
-    "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
-    }
+    "label": "quest.oar.accept"
   },
   "objective": {
     "evidence": "post_activation_event",

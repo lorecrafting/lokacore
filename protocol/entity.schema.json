@@ -304,10 +304,10 @@
           "type": "object",
           "properties": {
             "get": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             },
             "put": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
           "additionalProperties": false
@@ -353,15 +353,12 @@
           "room_line_variants": [
             {
               "when": {
-                "policy_version": 1,
-                "root": {
-                  "op": "has_item",
-                  "item": {
-                    "cartridge_id": "items_sampler",
-                    "cartridge_version": "0.0.1",
-                    "kind": "item",
-                    "key": "lantern"
-                  }
+                "op": "has_item",
+                "item": {
+                  "cartridge_id": "items_sampler",
+                  "cartridge_version": "0.0.1",
+                  "kind": "item",
+                  "key": "lantern"
                 }
               },
               "description": "item.satchel.room_empty"
@@ -591,10 +588,10 @@
           "type": "object",
           "properties": {
             "hostile": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             },
             "friendly": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             },
             "engage": {
               "$ref": "text.schema.json#/$defs/TextKey"
@@ -638,7 +635,7 @@
                     "$ref": "text.schema.json#/$defs/TextKey"
                   },
                   "when": {
-                    "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+                    "$ref": "policy.schema.json#/$defs/Policy"
                   },
                   "grants": {
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -771,7 +768,7 @@
           "type": "object",
           "properties": {
             "get": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
           "additionalProperties": false
@@ -842,16 +839,13 @@
         [
           {
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "status_active",
-                "subject": "target",
-                "status": {
-                  "cartridge_id": "variants_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "status",
-                  "key": "bruised"
-                }
+              "op": "status_active",
+              "subject": "target",
+              "status": {
+                "cartridge_id": "variants_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "bruised"
               }
             },
             "description": "npc.maud.description_bruised"
@@ -866,7 +860,7 @@
         "type": "object",
         "properties": {
           "when": {
-            "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            "$ref": "policy.schema.json#/$defs/Policy"
           },
           "room": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -890,17 +884,14 @@
         [
           {
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "schedule_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "fact",
-                  "key": "child_lost"
-                },
-                "equals": true
-              }
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "schedule_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "child_lost"
+              },
+              "equals": true
             },
             "room": {
               "cartridge_id": "schedule_sampler",
@@ -1505,7 +1496,7 @@
           "maximum": 2
         },
         "when": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         }
       },
       "required": [

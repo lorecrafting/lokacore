@@ -5,13 +5,13 @@ defmodule Loka.ContentLintTest do
 
   alias Loka.Content.Lint
 
-  @refuses %{"policy_version" => 1, "root" => %{"op" => "npc_present", "npc" => "wight"}}
-  @always %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+  @refuses %{"op" => "npc_present", "npc" => "wight"}
+  @always %{"op" => "all", "items" => []}
   @tide %{"op" => "sky", "tide" => "high"}
   @visits %{"op" => "visited_count", "room" => "shore_steps", "at_least" => 3}
 
   defp lint(files), do: Lint.findings(files)
-  defp variant(items), do: %{"when" => %{"root" => %{"op" => "all", "items" => items}}}
+  defp variant(items), do: %{"when" => %{"op" => "all", "items" => items}}
 
   test "check 1: a recipe whose policy refuses names a reason (M1, flamma)" do
     assert lint(%{"actions/flamma.json" => %{"policy" => @refuses}}) ==
@@ -20,7 +20,6 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"actions/flamma.json" => %{"policy" => @refuses, "reason" => "reason.flamma"}}) ==
              []
 
-    assert lint(%{"actions/look.json" => %{"policy" => @always}}) == []
     # Break: a built-in action (with command, no reason field to add) gets an unfixable finding.
     assert lint(%{"actions/look.json" => %{"command" => "look", "policy" => @refuses}}) == []
   end
@@ -195,20 +194,41 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"resources.json" => %{"resources" => %{"hp" => %{}}}}) == []
   end
 
+  # Breaks: the rule dropped, a gate key (qualification) left out, a nested gate (a quest offer)
+  # not walked, or an optional trigger (hostile, absent means never) flagged.
+  test "an always-true policy, when or qualification is written by omission" do
+    assert lint(%{"actions/look.json" => %{"policy" => @always, "reason" => "reason.look"}}) ==
+             ["actions/look.json: policy always holds; omit it"]
+
+    assert lint(%{"skills/s.json" => %{"qualification" => @always}}) ==
+             ["skills/s.json: qualification always holds; omit it"]
+
+    assert lint(%{"quests/q.json" => %{"offer" => %{"policy" => @always}}}) ==
+             ["quests/q.json: offer.policy always holds; omit it"]
+
+    assert lint(%{"npcs/n.json" => %{"disposition" => %{"hostile" => @always}}}) == []
+  end
+
   test "check 6: no description variant is shadowed by an earlier one that always wins first" do
     shadow = "rooms/shore_steps.json: variants[1] is shadowed by variants[0]"
     room = &%{"rooms/shore_steps.json" => %{"variants" => &1}}
 
     assert lint(room.([variant([@visits]), variant([@visits, @tide])])) == [shadow]
-    assert lint(room.([variant([]), variant([@tide])])) == [shadow]
+
+    assert lint(room.([variant([]), variant([@tide])])) ==
+             [shadow, "rooms/shore_steps.json: variants.0.when always holds; omit it"]
+
     assert lint(room.([variant([@visits, @tide]), variant([@visits])])) == []
     any = %{"op" => "any", "items" => [@visits, @tide]}
-    assert lint(room.([%{"when" => %{"root" => any}}, variant([@visits])])) == []
-    assert lint(room.([%{"when" => %{"root" => any}}, variant([any, @visits])])) == [shadow]
+    assert lint(room.([%{"when" => any}, variant([@visits])])) == []
+    assert lint(room.([%{"when" => any}, variant([any, @visits])])) == [shadow]
     detail = %{"details" => %{"post" => %{"variants" => [variant([]), variant([@tide])]}}}
 
     assert lint(%{"rooms/shore_steps.json" => detail}) ==
-             ["rooms/shore_steps.json details.post: variants[1] is shadowed by variants[0]"]
+             [
+               "rooms/shore_steps.json details.post: variants[1] is shadowed by variants[0]",
+               "rooms/shore_steps.json: details.post.variants.0.when always holds; omit it"
+             ]
 
     assert lint(room.([%{"description" => "d"}, variant([@tide])])) ==
              ["rooms/shore_steps.json: variants[0] has no when", shadow]
@@ -291,8 +311,8 @@ defmodule Loka.ContentLintTest do
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)
 
     # Holding it for a quest or a recipe guard checks the item; neither takes it out of play.
-    quest = %{"objective" => %{"policy" => %{"root" => has}}}
-    guard = %{"policy" => %{"root" => has}, "reason" => "reason.r"}
+    quest = %{"objective" => %{"policy" => has}}
+    guard = %{"policy" => has, "reason" => "reason.r"}
     assert lint(Map.merge(flask, %{"actions/r.json" => guard, "quests/q.json" => quest})) == dry
 
     assert lint(%{"items/ear.json" => %{"location" => %{"in" => "template"}}}) ==

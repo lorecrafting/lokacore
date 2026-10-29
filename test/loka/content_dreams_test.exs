@@ -1,7 +1,7 @@
 defmodule Loka.ContentDreamsTest do
   use ExUnit.Case, async: true
 
-  @always %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+  @always %{"op" => "all", "items" => []}
   @flag %{
     "version" => 1,
     "value_type" => %{"type" => "bool", "default" => false},
@@ -55,10 +55,7 @@ defmodule Loka.ContentDreamsTest do
       "title" => "quest.room.title",
       "objective" => %{
         "evidence" => "current_state",
-        "policy" => %{
-          "policy_version" => 1,
-          "root" => %{"op" => "fact_compare", "fact" => "dream_seen", "equals" => true}
-        }
+        "policy" => %{"op" => "fact_compare", "fact" => "dream_seen", "equals" => true}
       },
       "journal" =>
         Map.new(~w(active objectives_met resolved failed abandoned), &{&1, "quest.room.active"})
@@ -247,8 +244,7 @@ defmodule Loka.ContentDreamsTest do
          {scene, &put_in(&1, ["on_end", "quest"], "other")}
        ], {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end"}},
       {[
-         {"quests/a_room.json",
-          &put_in(&1, ["objective", "policy", "root", "fact"], "slept_paid")}
+         {"quests/a_room.json", &put_in(&1, ["objective", "policy", "fact"], "slept_paid")}
        ], {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest.quest"}},
       {[{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "value"], false)}],
        {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end.assign[0]"}},
@@ -286,7 +282,7 @@ defmodule Loka.ContentDreamsTest do
        |> put_in(["facts", "annex_slept"], facts["facts"]["slept_paid"])
        |> put_in(["facts", "annex_seen"], facts["facts"]["dream_seen"])},
       {"quests/annex_rest.json",
-       put_in(read.("quests/a_room.json"), ["objective", "policy", "root", "fact"], "annex_seen")},
+       put_in(read.("quests/a_room.json"), ["objective", "policy", "fact"], "annex_seen")},
       {"rooms/dream_annex.json", room}
     ]
 

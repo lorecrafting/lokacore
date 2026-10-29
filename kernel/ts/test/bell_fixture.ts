@@ -33,7 +33,7 @@ export function bellSource(c: any) {
     aliases: ['ring'],
     label: 'actions.ring_bell',
     priority: 10,
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     target: { kind: 'detail', detail: 'bell', room: ref('room', 'drill_yard') },
     outcomes: {
       success: {

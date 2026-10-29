@@ -7,7 +7,7 @@ defmodule Loka.Content.Dialogues do
   @doc "Each schema-valid dialogue's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs),
-    do: for({rel, d} <- all(defs), do: {rel, ["policy", "root"], d["policy"]["root"]})
+    do: for({rel, d} <- all(defs), do: {rel, ["policy"], d["policy"]})
 
   defp all(defs), do: for({_, {rel, [], d}} <- defs["dialogue"], do: {rel, d})
 

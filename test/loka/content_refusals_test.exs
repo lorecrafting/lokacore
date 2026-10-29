@@ -150,7 +150,7 @@ defmodule Loka.ContentRefusalsTest do
            "repeatable" => true,
            "objective" => %{
              "evidence" => "current_state",
-             "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+             "policy" => %{"op" => "all", "items" => []}
            },
            "exchange" => %{
              "npc" => "healer",

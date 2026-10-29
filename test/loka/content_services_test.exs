@@ -6,7 +6,7 @@ defmodule Loka.ContentServicesTest do
   setup_all do
     dir = Loka.ContentSource.copy("cartridges/toolbox_showcase")
     put = fn rel, f -> File.write!(Path.join(dir, rel), JSON.encode!(f.(read(dir, rel)))) end
-    open = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+    open = %{"op" => "all", "items" => []}
 
     put.("resources.json", fn r ->
       put_in(r, ["resources", "meal_stock"], %{

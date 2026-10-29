@@ -223,7 +223,7 @@ const leaf = (equals: boolean) => ({ op: 'fact_compare', fact: ref('fact', 'bell
 // delivery): no deliveries budget, an off-by-one limit, or a rule whose `when` is false not
 // counted as a delivery (8193 of them commit).
 test('8193 deliveries of one event exceed deliveries, whether their `when` holds or not', () => {
-  const never = { when: { policy_version: 1, root: leaf(true) } }; // bell_up is false
+  const never = { when: leaf(true) }; // bell_up is false
   for (const rest of [{}, never]) {
     assert.equal(enter(belfry(8192, rest)), 'accepted');
     assert.equal(enter(belfry(8193, rest)), 'deliveries');
@@ -232,7 +232,7 @@ test('8193 deliveries of one event exceed deliveries, whether their `when` holds
 
 const TRUE = { op: 'time_window', from: 0, to: 12 }; // true at 06:00
 const all = (n: number) => ({
-  when: { policy_version: 1, root: { op: 'all', items: Array(n).fill(TRUE) } },
+  when: { op: 'all', items: Array(n).fill(TRUE) },
 });
 
 // Breaks (04 §5.4 query_steps): reaction guards not counted, or an off-by-one limit. 1024 guards
@@ -255,7 +255,7 @@ const slowMove =
       command: 'move',
       priority: 0,
       input: ['direction'],
-      policy: { policy_version: 1, root: { op: 'all', items: [...Array(n).fill(TRUE), ...tail] } },
+      policy: { op: 'all', items: [...Array(n).fill(TRUE), ...tail] },
     };
   };
 const FAULT = { kind: 'fault', code: 'budget_exceeded' };
@@ -307,7 +307,7 @@ test('a root over the operations limit names it, found at its first delivery', (
 // Breaks: limits over at one check named in call-site order (deliveries first), not 04 §5.4's.
 // 24576 steps already spent, so delivery 8193 of a 1-leaf guard brings query_steps to 32769.
 test('deliveries and query_steps over at one check name query_steps', () => {
-  const w = belfry(8193, { when: { policy_version: 1, root: leaf(true) } }); // bell_up false
+  const w = belfry(8193, { when: leaf(true) }); // bell_up false
   const SET = { id: CMD, payload: { actor_id: w.character } } as never;
   const room_id = w.roomIds[`${G}:room/belfry`];
   const entered = [

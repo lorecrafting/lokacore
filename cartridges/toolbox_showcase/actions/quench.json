@@ -12,12 +12,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "status_active",
-      "subject": "target",
-      "status": "burning"
-    }
+    "op": "status_active",
+    "subject": "target",
+    "status": "burning"
   },
   "outcomes": {
     "success": {

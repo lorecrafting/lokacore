@@ -24,7 +24,7 @@ defmodule Loka.Content.Population do
         is_map(p),
         k <- @gates,
         is_map(p[k]),
-        do: {rel, steps ++ [k, "root"], p[k]["root"]}
+        do: {rel, steps ++ [k], p[k]}
       )
 
   # ponytail: one bounded plan expansion keeps short refs together. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
@@ -116,8 +116,8 @@ defmodule Loka.Content.Population do
     |> add(not sight_valid?(p["sight"], p["area"], rooms, text, p), ["sight", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["npc"])
     |> add(p["floor"] != nil and (p["floor"] > p["day_target"] or p["chance"] != nil), ["floor"])
-    |> add(is_map(p["birth_when"]) and not actorless?(p["birth_when"]["root"]), ["birth_when"])
-    |> add(is_map(p["wander_when"]) and not actorless?(p["wander_when"]["root"]), ["wander_when"])
+    |> add(is_map(p["birth_when"]) and not actorless?(p["birth_when"]), ["birth_when"])
+    |> add(is_map(p["wander_when"]) and not actorless?(p["wander_when"]), ["wander_when"])
   end
 
   defp actorless?(%{"op" => "not", "item" => i}), do: actorless?(i)

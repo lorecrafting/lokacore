@@ -29,22 +29,19 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": [
-                {
-                  "op": "fact_compare",
-                  "fact": "door_jammed",
-                  "equals": true
-                },
-                {
-                  "op": "fact_compare",
-                  "fact": "door_forced",
-                  "equals": false
-                }
-              ]
-            }
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "door_jammed",
+                "equals": true
+              },
+              {
+                "op": "fact_compare",
+                "fact": "door_forced",
+                "equals": false
+              }
+            ]
           },
           "description": "detail.wooden_door.jammed"
         }

@@ -79,7 +79,7 @@ defmodule Loka.Content.Entities do
   defp roots(e) do
     for(
       {steps, %{"when" => w}} <- variants(e) ++ cases(e),
-      do: {steps ++ ["when", "root"], w["root"]}
+      do: {steps ++ ["when"], w}
     ) ++
       policies(e, "disposition", ~w(hostile friendly)) ++
       policies(e, "locks", ~w(get put)) ++
@@ -89,11 +89,11 @@ defmodule Loka.Content.Entities do
   # Toolbox row FD7: each ask answer's condition (read with the NPC as the target).
   defp answers(e) do
     for {%{"when" => w}, i} <- Enum.with_index(get_in(e, ["ask", "answers"]) || []),
-        do: {["ask", "answers", i, "when", "root"], w["root"]}
+        do: {["ask", "answers", i, "when"], w}
   end
 
   defp policies(e, field, keys) do
-    for k <- keys, p = get_in(e, [field, k]), p != nil, do: {[field, k, "root"], p["root"]}
+    for k <- keys, p = get_in(e, [field, k]), p != nil, do: {[field, k], p}
   end
 
   # Toolbox row W10: each case of a source daily_schedule hour list, and (row W26) a lone walking

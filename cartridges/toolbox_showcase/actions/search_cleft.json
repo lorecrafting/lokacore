@@ -10,12 +10,9 @@
   },
   "priority": 10,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "time_window",
-      "from": 20,
-      "to": 5
-    }
+    "op": "time_window",
+    "from": 20,
+    "to": 5
   },
   "outcomes": {
     "success": {

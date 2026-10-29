@@ -64,14 +64,14 @@ export function messageSource(c: any) {
     meaning: 'Bram has the courier message.',
   };
   const lantern = c.quests[`${prefix}:quest/lantern`];
-  lantern.objective.policy.root = branch('carried');
+  lantern.objective.policy = branch('carried');
   const active = { op: 'quest_state', quest: ref('quest', 'lantern'), state: 'active' };
   c.dialogues = {
     [`${prefix}:dialogue/courier`]: {
       key: 'courier',
       npc: ref('npc', 'courier'),
       prompt: 'dialogue.courier.prompt',
-      policy: { policy_version: 1, root: { op: 'all', items: [active, branch('unselected')] } },
+      policy: { op: 'all', items: [active, branch('unselected')] },
       roles: { courier: role('npc', 'courier'), message: role('item', 'message') },
       choices: {
         carry: {
@@ -88,11 +88,8 @@ export function messageSource(c: any) {
       quest: ref('quest', 'lantern'),
       prompt: 'dialogue.deliver.prompt',
       policy: {
-        policy_version: 1,
-        root: {
-          op: 'all',
-          items: [active, branch('carried'), { op: 'has_item', item: ref('item', 'message') }],
-        },
+        op: 'all',
+        items: [active, branch('carried'), { op: 'has_item', item: ref('item', 'message') }],
       },
       roles: { bram: role('npc', 'bram'), message: role('item', 'message') },
       choices: {

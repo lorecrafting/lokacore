@@ -91,8 +91,7 @@ export function blocked(
   if (!d || row.beat !== d.key || !boundSitting(world, row, d, option))
     return 'invalid_state' as const;
   const target = speakerOf(d, row);
-  if (!holds(world, row.actor_id, d.policy?.root, { target, steps }))
-    return 'invalid_state' as const;
+  if (!holds(world, row.actor_id, d.policy, { target, steps })) return 'invalid_state' as const;
   const window = option.availability;
   if (
     window &&

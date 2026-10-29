@@ -16,12 +16,9 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "inspired"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "inspired"
       },
       "description": "npc.orla.description_inspired"
     }

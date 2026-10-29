@@ -49,7 +49,7 @@ export function placeOf(world: World, npc: EntityId, due: number, steps: Steps) 
   const ctx = { target: npc, steps };
   const pick = e.schedule_cases?.[hour]?.find(
     // ast-grep-ignore: ts-rule-actor-from-command
-    (c) => !c.when || holds(at, world.character, c.when.root, ctx),
+    (c) => !c.when || holds(at, world.character, c.when, ctx),
   );
   return {
     room: world.roomIds[refString(pick?.room ?? e.daily_schedule![hour])],

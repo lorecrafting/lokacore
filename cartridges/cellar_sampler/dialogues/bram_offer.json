@@ -1,39 +1,36 @@
 {
   "npc": "bram",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "any",
-        "items": [
-          {
-            "op": "quest_state",
-            "quest": "lantern",
-            "state": "active"
-          },
-          {
-            "op": "quest_state",
-            "quest": "lantern",
-            "state": "objectives_complete"
-          },
-          {
-            "op": "quest_state",
-            "quest": "lantern",
-            "state": "resolved"
-          },
-          {
-            "op": "quest_state",
-            "quest": "lantern",
-            "state": "failed"
-          },
-          {
-            "op": "quest_state",
-            "quest": "lantern",
-            "state": "abandoned"
-          }
-        ]
-      }
+    "op": "not",
+    "item": {
+      "op": "any",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "lantern",
+          "state": "active"
+        },
+        {
+          "op": "quest_state",
+          "quest": "lantern",
+          "state": "objectives_complete"
+        },
+        {
+          "op": "quest_state",
+          "quest": "lantern",
+          "state": "resolved"
+        },
+        {
+          "op": "quest_state",
+          "quest": "lantern",
+          "state": "failed"
+        },
+        {
+          "op": "quest_state",
+          "quest": "lantern",
+          "state": "abandoned"
+        }
+      ]
     }
   },
   "prompt": "dialogue.bram_offer.prompt",

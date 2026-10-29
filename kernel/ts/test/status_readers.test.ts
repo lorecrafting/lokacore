@@ -374,7 +374,7 @@ test('a hostile troll does not engage a concealed player unless it sees invisibl
         [T]: {
           ...c.npcs![T],
           disposition: {
-            hostile: { policy_version: 1, root: { op: 'all', items: [] } },
+            hostile: { op: 'all', items: [] },
             engage: 'npc.troll.room',
           },
         },

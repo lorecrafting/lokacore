@@ -39,7 +39,7 @@ defmodule Loka.Content.Cues do
     do:
       for(
         {rel, steps, %{"when" => w}} <- located(defs),
-        do: {rel, steps ++ ["when", "root"], w["root"]}
+        do: {rel, steps ++ ["when"], w}
       )
 
   # From Checks.rooms/4, a v2 source only; `text` is :unknown when the catalog was rejected. A missing or schema-invalid manifest (nil)

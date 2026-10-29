@@ -18,13 +18,10 @@
         "topic": "smugglers",
         "text": "smith.smugglers",
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "trust",
-            "equals": 1,
-            "subject": "target"
-          }
+          "op": "fact_compare",
+          "fact": "trust",
+          "equals": 1,
+          "subject": "target"
         }
       }
     ]

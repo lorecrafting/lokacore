@@ -21,8 +21,7 @@ defmodule Loka.ContentVarietyTest do
       {[{"cartridge.json", key}],
        {"UNRESOLVED_REFERENCE", "cartridge.alternates[\"narration.gone\"]"}},
       {[{"cartridge.json", drop}], {"UNDECLARED_CAPABILITY", "cartridge.alternates"}},
-      {[{"cartridge.json", drop}],
-       {"UNDECLARED_CAPABILITY", "rooms/garden.variants[0].when.root.op"}}
+      {[{"cartridge.json", drop}], {"UNDECLARED_CAPABILITY", "rooms/garden.variants[0].when.op"}}
     ]
 
     for {changes, {code, path}} <- cases do

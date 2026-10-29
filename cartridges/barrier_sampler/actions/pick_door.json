@@ -10,27 +10,24 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "door_picked",
-          "equals": false
-        },
-        {
-          "op": "fact_compare",
-          "fact": "door_forced",
-          "equals": false
-        },
-        {
-          "op": "fact_compare",
-          "fact": "door_jammed",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "door_picked",
+        "equals": false
+      },
+      {
+        "op": "fact_compare",
+        "fact": "door_forced",
+        "equals": false
+      },
+      {
+        "op": "fact_compare",
+        "fact": "door_jammed",
+        "equals": false
+      }
+    ]
   },
   "check": {
     "key": "pick_door",

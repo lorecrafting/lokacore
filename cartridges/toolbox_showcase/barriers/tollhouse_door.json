@@ -9,11 +9,8 @@
     "fragile"
   ],
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "tollhouse_forced",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "tollhouse_forced",
+    "equals": true
   }
 }

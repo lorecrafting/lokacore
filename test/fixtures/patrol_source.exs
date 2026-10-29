@@ -71,7 +71,6 @@ defmodule Loka.PatrolSource do
     put(dir, "dialogues/tobin_watch.json", %{
       "npc" => "tobin",
       "roles" => %{"leader" => %{"role" => "npc", "npc" => "tobin"}},
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
       "prompt" => "watch.prompt",
       "label" => "watch.talk",
       "choices" => %{

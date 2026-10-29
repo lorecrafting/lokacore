@@ -16,14 +16,11 @@
   "replacement_delay": 200,
   "floor": 1,
   "birth_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "population_count",
-        "plan": "hounds",
-        "at_least": 1
-      }
+    "op": "not",
+    "item": {
+      "op": "population_count",
+      "plan": "hounds",
+      "at_least": 1
     }
   }
 }

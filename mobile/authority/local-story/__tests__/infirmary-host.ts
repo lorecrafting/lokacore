@@ -18,7 +18,7 @@ const change = (c: any) => {
     key: 'c_pledge',
     label: 'quest.herbs.accept', // a labelled talk is selected by key, not by policy order
     npc: ref('npc', 'healer'),
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     prompt: 'dialogue.healer.prompt',
     roles: { healer: { role: 'npc', npc: ref('npc', 'healer') } },
     choices: {

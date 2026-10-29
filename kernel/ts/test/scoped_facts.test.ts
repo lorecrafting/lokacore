@@ -128,11 +128,13 @@ test('row W2 needs a known subject, at fact sites only', () => {
   const smith = `${S}:dialogue/smith_talk`;
   const leaf = (extra: object) => (c: any) =>
     (c.dialogues[smith].policy = {
-      policy_version: 1,
-      root: { op: 'fact_compare', fact: c.facts[met] && fact('times_met'), equals: 0, ...extra },
+      op: 'fact_compare',
+      fact: c.facts[met] && fact('times_met'),
+      equals: 0,
+      ...extra,
     });
   const npcRef = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
-  const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy.root`;
+  const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy`;
   const rows: [(c: any) => void, string, string][] = [
     [leaf({}), 'FACT_SCOPE_UNSUPPORTED', root],
     [
@@ -205,12 +207,12 @@ test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () =
     assert.deepEqual(variant(change), []);
   const fed = `${S}:reaction/fed`;
   const root = { op: 'fact_compare', fact: fact('trust'), equals: 0, subject: 'target' };
-  const when = variant((_, c) => (c.reactions[fed].when = { policy_version: 1, root }));
-  assert.deepEqual(when, [`.cartridge.reactions[${JSON.stringify(fed)}].when.root.subject`]);
+  const when = variant((_, c) => (c.reactions[fed].when = root));
+  assert.deepEqual(when, [`.cartridge.reactions[${JSON.stringify(fed)}].when.subject`]);
   for (const kind of ['quests', 'barriers', 'skills']) {
     const k = `${S}:${kind}/x`;
-    const paths = variant((_, c) => (c[kind] = { [k]: { policy: { policy_version: 1, root } } }));
-    assert.deepEqual(paths, [`.cartridge.${kind}[${JSON.stringify(k)}].policy.root.subject`]);
+    const paths = variant((_, c) => (c[kind] = { [k]: { policy: root } }));
+    assert.deepEqual(paths, [`.cartridge.${kind}[${JSON.stringify(k)}].policy.subject`]);
   }
   assert.deepEqual(scopeSites(source), []);
 });

@@ -32,12 +32,9 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
         label: text,
         requirement: text,
         qualification: {
-          policy_version: 1,
-          root: {
-            op: 'stat_compare',
-            attribute: ref('attribute', k === 'swords' ? 'str' : 'dex'),
-            at_least: 10,
-          },
+          op: 'stat_compare',
+          attribute: ref('attribute', k === 'swords' ? 'str' : 'dex'),
+          at_least: 10,
         },
       },
     ]),
@@ -107,13 +104,10 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
       key: `learn_${skill}`,
       npc: ref('npc', 'teacher'),
       roles,
-      policy: {
-        policy_version: 1,
-        root:
-          skill === 'swords'
-            ? { op: 'all', items: [] }
-            : { op: 'fact_compare', fact: ref('fact', 'skill_swords'), equals: true },
-      },
+      policy:
+        skill === 'swords'
+          ? { op: 'all', items: [] }
+          : { op: 'fact_compare', fact: ref('fact', 'skill_swords'), equals: true },
       prompt: text,
       choices: { learn: option },
     };

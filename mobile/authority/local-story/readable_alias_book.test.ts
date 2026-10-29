@@ -21,7 +21,7 @@ test('Book preserves an aliased Read place offer and exact target through a live
       target: { kind: 'entity', scopes: ['inspectable_details'] },
       input: [],
       priority: 0,
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
     };
     c.rooms[`${P}:room/hall`].actions = [{ op: 'subtract', actions: ['read'] }];
     c.items[`${P}:item/carters_note`].location.room.key = 'hall';

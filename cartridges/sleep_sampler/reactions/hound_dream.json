@@ -4,22 +4,19 @@
     "room": "fen"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "hound_slain",
-          "equals": true
-        },
-        {
-          "op": "fact_compare",
-          "fact": "dreamt_of_hounds",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "hound_slain",
+        "equals": true
+      },
+      {
+        "op": "fact_compare",
+        "fact": "dreamt_of_hounds",
+        "equals": false
+      }
+    ]
   },
   "apply": [
     {

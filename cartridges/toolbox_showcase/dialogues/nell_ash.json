@@ -1,26 +1,23 @@
 {
   "npc": "nell",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "knows_ash",
+        "subject": "target",
+        "equals": true
+      },
+      {
+        "op": "not",
+        "item": {
           "op": "fact_compare",
-          "fact": "knows_ash",
-          "subject": "target",
+          "fact": "topic_surety_known",
           "equals": true
-        },
-        {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": "topic_surety_known",
-            "equals": true
-          }
         }
-      ]
-    }
+      }
+    ]
   },
   "prompt": "dialogue.nell_ash.prompt",
   "roles": {

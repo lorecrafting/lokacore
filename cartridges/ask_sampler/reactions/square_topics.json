@@ -4,20 +4,17 @@
     "room": "square"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "not",
-          "item": {
-            "op": "fact_compare",
-            "fact": "topic_mill_known",
-            "equals": true
-          }
+    "op": "all",
+    "items": [
+      {
+        "op": "not",
+        "item": {
+          "op": "fact_compare",
+          "fact": "topic_mill_known",
+          "equals": true
         }
-      ]
-    }
+      }
+    ]
   },
   "apply": [
     {

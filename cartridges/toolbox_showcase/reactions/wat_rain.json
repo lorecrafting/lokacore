@@ -5,11 +5,8 @@
     "npc": "wat"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "sky",
-      "weather": "rain"
-    }
+    "op": "sky",
+    "weather": "rain"
   },
   "apply": [
     {

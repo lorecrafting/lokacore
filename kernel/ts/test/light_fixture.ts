@@ -202,7 +202,7 @@ export function lightActionFixture(
       target,
       input,
       priority: 1,
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
     };
     c.text[`action.${command}`] ??= command;
   });

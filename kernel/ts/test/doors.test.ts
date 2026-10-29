@@ -133,7 +133,7 @@ test('d. the guard without the key stays in the lane; the gate stays locked, no 
 // An enter lock on room `at` that holds for the player holding hut_key.
 const enterLock = (at: string) => (c: any) =>
   (c.rooms[room(at)].locks = {
-    enter: { policy_version: 1, root: { op: 'has_item', item: ref('item', 'hut_key') } },
+    enter: { op: 'has_item', item: ref('item', 'hut_key') },
   });
 
 // Breaks: a G7 lock read for a walking NPC (with the player as actor the lock holds, so the
@@ -154,7 +154,7 @@ test('e. any enter lock refuses a walking NPC, even one that holds for the playe
 // Breaks: the walker refusal reads only the enter lock (the guard passes the gate and re-locks it).
 test("e2. a traverse lock on the lane's east exit refuses the guard; the gate emits nothing", () => {
   changes = [];
-  const lock = { policy_version: 1, root: { op: 'has_item', item: ref('item', 'hut_key') } };
+  const lock = { op: 'has_item', item: ref('item', 'hut_key') };
   const w = play(
     fresh((c) => (c.rooms[room('lane')].exits.east.locks = { traverse: lock })),
     at(9.5),

@@ -3,11 +3,8 @@
     "event": "clock_hour"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "sky",
-      "lunar": "new"
-    }
+    "op": "sky",
+    "lunar": "new"
   },
   "apply": [
     {

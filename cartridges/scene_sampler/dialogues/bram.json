@@ -1,12 +1,9 @@
 {
   "npc": "bram",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "quest_state",
-      "quest": "lantern",
-      "state": "active"
-    }
+    "op": "quest_state",
+    "quest": "lantern",
+    "state": "active"
   },
   "prompt": "dialogue.bram.prompt",
   "roles": {

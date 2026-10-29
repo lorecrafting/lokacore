@@ -6,11 +6,8 @@
   "short": "barrier.cell_door.short",
   "initial": "closed",
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "wanted",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "wanted",
+    "equals": false
   }
 }

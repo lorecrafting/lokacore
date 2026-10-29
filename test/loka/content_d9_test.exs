@@ -22,7 +22,7 @@ defmodule Loka.ContentD9Test do
          "aliases" => ["ring"],
          "target" => %{"kind" => "detail", "room" => "drill_yard", "detail" => "bell"},
          "priority" => 10,
-         "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+         "policy" => %{"op" => "all", "items" => []},
          "outcomes" => %{
            "success" => %{
              "sequence" => [%{"op" => "fact.assign", "fact" => "bell_rung", "value" => true}],

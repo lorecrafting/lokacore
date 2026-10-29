@@ -171,11 +171,8 @@ test('random Flee candidate policies share the command query budget and fault at
           ...move,
           accessibility: 'actions.move.a11y',
           policy: {
-            policy_version: 1,
-            root: {
-              op: 'all',
-              items: Array.from({ length: 16385 }, () => ({ op: 'time_window', from: 0, to: 24 })),
-            },
+            op: 'all',
+            items: Array.from({ length: 16385 }, () => ({ op: 'time_window', from: 0, to: 24 })),
           },
         },
       },

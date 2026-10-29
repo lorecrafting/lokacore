@@ -391,7 +391,7 @@ test('authored liquid overrides project the same availability as the exact invoc
                 target,
                 input,
                 priority: 0,
-                policy: { policy_version: 1, root: policy },
+                policy: policy,
               } as never,
             },
           },

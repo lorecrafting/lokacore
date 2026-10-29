@@ -44,8 +44,8 @@ export function disposition(
 ): Disposition {
   const d = npc === undefined ? undefined : (world.entities[npc] as NpcDefinition)?.disposition;
   const ctx = { target: npc, steps };
-  if (d?.hostile && holds(world, actor, d.hostile.root, ctx)) return 'hostile';
-  return d?.friendly && holds(world, actor, d.friendly.root, ctx) ? 'friendly' : 'wary';
+  if (d?.hostile && holds(world, actor, d.hostile, ctx)) return 'hostile';
+  return d?.friendly && holds(world, actor, d.friendly, ctx) ? 'friendly' : 'wary';
 }
 
 type Actor = { readonly id: CommandId; readonly payload: { readonly actor_id: CharacterId } };

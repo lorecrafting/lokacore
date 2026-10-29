@@ -34,12 +34,9 @@ defmodule Loka.ContentRiddleTest do
         "active_variants" => [
           %{
             "when" => %{
-              "policy_version" => 1,
-              "root" => %{
-                "op" => "fact_compare",
-                "fact" => "search_plan",
-                "equals" => "player_led"
-              }
+              "op" => "fact_compare",
+              "fact" => "search_plan",
+              "equals" => "player_led"
             },
             "text" => "narration.bram.carry"
           }
@@ -59,7 +56,7 @@ defmodule Loka.ContentRiddleTest do
 
     [v] = c["quests"]["ferry_sampler@0.0.1:quest/lantern"]["journal"]["active_variants"]
 
-    assert v["when"]["root"]["fact"] == %{
+    assert v["when"]["fact"] == %{
              "cartridge_id" => "ferry_sampler",
              "cartridge_version" => "0.0.1",
              "kind" => "fact",
@@ -78,12 +75,10 @@ defmodule Loka.ContentRiddleTest do
           {"dialogues/bram.json", ["riddle", "answer"], "Lantern", "SCHEMA_VIOLATION"},
           {"quests/lantern.json", ["journal", "active_variants", 0, "text"], "missing",
            "UNRESOLVED_REFERENCE"},
-          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "root", "fact"],
-           "missing", "UNRESOLVED_REFERENCE"},
-          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "root", "equals"],
-           true, "FACT_TYPE_MISMATCH"},
-          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "policy_version"], 2,
-           "SCHEMA_VIOLATION"}
+          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "fact"], "missing",
+           "UNRESOLVED_REFERENCE"},
+          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "equals"], true,
+           "FACT_TYPE_MISMATCH"}
         ] do
       path = Path.join(dir, rel)
       original = File.read!(path)

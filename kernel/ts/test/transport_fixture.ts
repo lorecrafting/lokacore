@@ -42,10 +42,7 @@ export const hound = (c: any) => {
 // Rides are offered only after the destination was visited; transport tests open that gate.
 export const open = (c: any) => {
   for (const a of ['ride_south', 'ride_north'])
-    c.actions[`${prefix}:action/${a}`].policy = {
-      policy_version: 1,
-      root: { op: 'all', items: [] },
-    };
+    c.actions[`${prefix}:action/${a}`].policy = { op: 'all', items: [] };
 };
 export const entity = (w: World, kind: string, name: string) =>
   w.entityIds[`${prefix}:${kind}/${name}`];

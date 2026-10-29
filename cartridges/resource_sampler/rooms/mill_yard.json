@@ -16,12 +16,9 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "cart_moved",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "cart_moved",
+            "equals": true
           },
           "description": "detail.cart.moved"
         }

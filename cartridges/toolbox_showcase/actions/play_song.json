@@ -10,20 +10,17 @@
   },
   "priority": 10,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "any",
-      "items": [
-        {
-          "op": "has_item",
-          "item": "lute"
-        },
-        {
-          "op": "has_item",
-          "item": "fold_lute"
-        }
-      ]
-    }
+    "op": "any",
+    "items": [
+      {
+        "op": "has_item",
+        "item": "lute"
+      },
+      {
+        "op": "has_item",
+        "item": "fold_lute"
+      }
+    ]
   },
   "outcomes": {
     "success": {

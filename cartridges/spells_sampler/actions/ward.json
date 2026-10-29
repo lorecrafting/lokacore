@@ -5,15 +5,12 @@
   "target": { "kind": "spell", "word": "ward", "learned": "ward_taught" },
   "priority": 0,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        { "op": "fact_compare", "fact": "ward_taught", "equals": true },
-        { "op": "level_compare", "at_least": 2 },
-        { "op": "stat_compare", "attribute": "wis", "at_least": 11 }
-      ]
-    }
+    "op": "all",
+    "items": [
+      { "op": "fact_compare", "fact": "ward_taught", "equals": true },
+      { "op": "level_compare", "at_least": 2 },
+      { "op": "stat_compare", "attribute": "wis", "at_least": 11 }
+    ]
   },
   "costs": [{ "resource": "mana", "amount": 1 }],
   "outcomes": {

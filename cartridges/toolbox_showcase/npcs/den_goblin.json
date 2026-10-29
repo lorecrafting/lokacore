@@ -7,12 +7,9 @@
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "afraid"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "afraid"
       },
       "description": "npc.goblin.room_afraid"
     }

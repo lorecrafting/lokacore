@@ -36,7 +36,7 @@ const world = (): World => {
     command: 'move',
     priority: 0,
     input: ['direction'],
-    policy: { policy_version: 1, root: { op: 'all', items: Array(32769).fill(TRUE) } },
+    policy: { op: 'all', items: Array(32769).fill(TRUE) },
   };
   const text = encode(c);
   const h = createHash('sha256').update(text).digest('hex');

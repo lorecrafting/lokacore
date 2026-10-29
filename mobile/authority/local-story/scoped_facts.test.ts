@@ -167,7 +167,7 @@ const put = (dir: string, file: string, o: object) => {
 const json = (dir: string, file: string, edit: (o: any) => object) =>
   put(dir, file, edit(JSON.parse(readFileSync(join(dir, file), 'utf8'))));
 const trust2 = { op: 'fact.assign', fact: 'trust', value: 2 };
-const all = { policy_version: 1, root: { op: 'all', items: [] } };
+const all = { op: 'all', items: [] };
 const variant = build((dir) => {
   json(dir, 'cartridge.json', (c) => {
     Object.assign(c.requires.capabilities, { skills: 1, quest: 1 });
@@ -200,7 +200,7 @@ const variant = build((dir) => {
   });
   put(dir, 'dialogues/smith_errand.json', {
     npc: 'smith',
-    policy: { policy_version: 1, root: { op: 'quest_state', quest: 'errand', state: 'active' } },
+    policy: { op: 'quest_state', quest: 'errand', state: 'active' },
     prompt: 'dialogue.talk.prompt',
     roles: { smith: { role: 'npc', npc: 'smith' } },
     quest: 'errand',

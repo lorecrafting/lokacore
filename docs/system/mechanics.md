@@ -971,7 +971,7 @@ then lowers to the existing `fact.assign` in the choice's writer group. It is no
 a new foundation delta operation. Already acquired refuses before any lesson cost,
 gift or result; replay returns the accepted receipt without running this check again.
 The shared skills query returns acquired, current qualification and usable
-(`acquired && qualified`) separately, using the ordinary VersionedPolicy evaluator
+(`acquired && qualified`) separately, using the ordinary Policy evaluator
 and the command/projection query budget. Failed qualification never clears acquisition.
 
 Tobin's ordered swords, then dodge conversations bind the original living,
@@ -2143,7 +2143,7 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 [Toolbox row 10](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#time-gate-declarations) govern it; the PM brief is in Beads `loka-kgd.27` (2026-10-10).
 
 - **`sky {lunar}`** (owned by `calendar@1`): holds when the lunar phase at the committed clock is `lunar`: the phase of the last `calendar.lunar.phases` cut at or before ((clock - origin) mod period), the value the calendar status already shows (`lunarPhase`, `kernel/ts/src/mechanics/calendar.ts`). Derived on read, never stored or ticked ([trap 1](../MECHANICS-TOOLBOX.md#traps)). One phase per leaf; a set of phases is an `any` of leaves. The field is named for the calendar cut it reads, so [row 31](../MECHANICS-TOOLBOX.md#ranked-toolbox) adds its weather, season and tide as alternative fields of the same leaf (`exactlyOneRequired`), not new leaves. It names no definition, so it has no `Loka.Content.LeafRefs.all` entry. The hour gate is the existing `time_window` (schedule@1).
-- **Gate.** A barrier definition's optional `opens_when` (a VersionedPolicy) must hold for `open`: after the state checks (a locked barrier is still `exit_locked`), a failing condition refuses `invalid_state`. Close, lock and unlock ignore it, and an open barrier stays open when the condition stops holding: nothing closes it on a clock edge. The check is in `transition` (`kernel/ts/src/mechanics/barrier/rule.ts`), so the GameView offers Open on that door only while the condition holds, and the exit stays `exit_closed`. A barrier, not an exit, carries the gate: movement admission is unchanged.
+- **Gate.** A barrier definition's optional `opens_when` (a Policy) must hold for `open`: after the state checks (a locked barrier is still `exit_locked`), a failing condition refuses `invalid_state`. Close, lock and unlock ignore it, and an open barrier stays open when the condition stops holding: nothing closes it on a clock edge. The check is in `transition` (`kernel/ts/src/mechanics/barrier/rule.ts`), so the GameView offers Open on that door only while the condition holds, and the exit stays `exit_closed`. A barrier, not an exit, carries the gate: movement admission is unchanged.
 - **Book.** Nothing new: outside its window the closed door shows no Open, as a locked one does; a typed `open` is refused with the existing invalid_state wording. A cartridge says why in its own words with a description variant on the same leaf ([trap 12](../MECHANICS-TOOLBOX.md#traps): the sign is in the text).
 - **Sampler.** `cartridges/time_sampler`: 100 units an hour, 10 hours a day, a lunar period of 2000 (`new` from 0, `full` from 1000). From the hall the silver door north (`opens_when: sky lunar full`) is refused at 0 and 999, opens at 1000, is refused again at 2000 and opens at 3000; the brass door east (`opens_when: time_window 2 to 4`) is refused at 199, opens at 200, is refused at 400 and opens at 1399. The hall's description has a full-moon variant.
 - **Composition record.** Consumer: barrier@1's `open` and every policy site (variants, recipes, reactions). Reads: the committed clock and the authored calendar; writes, events, jobs and save rows: none. Reused: the policy evaluator and its step budget, the lunar cut lookup of the calendar status, barrier@1's transition and the GameView door verbs. New: the `sky` leaf and `BarrierDefinition.opens_when`; no foundation change.
@@ -2949,7 +2949,7 @@ Homestead row hs-4 (Beads `loka-kgd.108.2`): hens in an owned pen; fill the trou
 
 [Toolbox row G7](../MECHANICS-TOOLBOX.md#ranked-toolbox): per-entity access types to policy, with ownership and grants; its sampler: "a guest may enter an owned hut but not take from its chest; revoke the grant and entry refuses; a stranger is refused". The PM brief is in Beads `loka-kgd.123` (2026-10-13). The row's new leaves (`owner`, `role`, `holder`), grant commands, `stolen` provenance and the access types beyond the four below are not built: grants are authored pair facts read by `fact_compare` (PM decisions in the brief). [Declarations](cartridge.md#access-lock-declarations) govern it. Before it, an action's policy gated a whole verb and a barrier's `opens_when` one door's open; nothing gated one exit, room or container for one actor.
 
-- **Locks.** An optional `locks` map names an access type's VersionedPolicy: `traverse` on an exit (Connection), `enter` on a room, `get` and `put` on an item (`put` only on a container). A lock holds when [policy@1](#target_resolution1-policy1-fact1)'s `holds` is true for the actor over committed state, with the item that carries the lock as target for `get` and `put`; a room or exit lock has no target. Each evaluated leaf charges the decision's `query_steps`. A failing lock refuses `permission_denied` (error_registry.json, "The actor may not do this"). The helpers are `lockRefused` and `chainRefused` (`kernel/ts/src/mechanics/locks.ts`).
+- **Locks.** An optional `locks` map names an access type's Policy: `traverse` on an exit (Connection), `enter` on a room, `get` and `put` on an item (`put` only on a container). A lock holds when [policy@1](#target_resolution1-policy1-fact1)'s `holds` is true for the actor over committed state, with the item that carries the lock as target for `get` and `put`; a room or exit lock has no target. Each evaluated leaf charges the decision's `query_steps`. A failing lock refuses `permission_denied` (error_registry.json, "The actor may not do this"). The helpers are `lockRefused` and `chainRefused` (`kernel/ts/src/mechanics/locks.ts`).
 - **Traverse and enter.** `movementPlan` (`kernel/ts/src/mechanics/movement/sequence.ts`) reads the exit's `traverse` lock, then the destination room's `enter` lock, right after the exit's passage: a missing or hidden exit stays `not_found`, a closed or locked door `exit_closed` or `exit_locked`. Move, Flee and the GameView's exits share it, so a locked exit shows unavailable with reason `permission_denied`.
 - **Get.** Take walks from the item up `State.containers` to the room or the body (`chainRefused`), charging one query step per edge: the item's own `get` lock, then each container item on the way, after custody (`reach`) and before carrying. The take rule and the GameView's take admission (`takeAdmission`, `kernel/ts/src/view/action_lists.ts`) both call it.
 - **Put.** `putRefused` (`kernel/ts/src/mechanics/containment/shared.ts`) walks from the destination up `State.containers` the same way (`chainRefused`, one query step per edge): the destination's own `put` lock, then each container item above it, so a bag inside a locked chest is locked too. It runs after the lid and before capacity; the rule and the GameView's put pairs share it.
@@ -3553,7 +3553,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Consumer: `craft_sampler`. Later: Homestead profession trees.
   - Reads: the actor's facts through `holds` (`skill_compare`, use counts).
   - Writes: none new.
-  - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
+  - Reused: Policy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check.
   - Missing invariant: none.
 
@@ -3579,7 +3579,7 @@ Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree s
   - Consumer: `craft_sampler`; talk, say, whisper and the GameView talk action (through `spokenBy`). Later: Homestead profession trees.
   - Reads: the actor's facts through `holds` and `level`; dialogue choice sequences (`offered`).
   - Writes: none.
-  - Reused: VersionedPolicy, `holds`, `level`, `spokenBy`, `opening`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
+  - Reused: Policy, `holds`, `level`, `spokenBy`, `opening`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
 
 ## Self-cooking (Homestead hs-13)
 
@@ -3636,7 +3636,7 @@ Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does 
   - Consumer: `furnish_sampler`. Later: Settle S1 functional furnishing.
   - Reads: containers, item tags, the actor's body.
   - Writes: none new.
-  - Reused: VersionedPolicy, `holds`, `rested`, `status.apply`, room `variants`, `action_recipe` policy and check, G1 tags.
+  - Reused: Policy, `holds`, `rested`, `status.apply`, room `variants`, `action_recipe` policy and check, G1 tags.
   - New: `item_present`, `furnished`, tags `bed`, `forge`, `rug`.
 
 ## Built rooms S6: self-build

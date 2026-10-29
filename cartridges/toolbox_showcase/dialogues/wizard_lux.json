@@ -1,12 +1,9 @@
 {
   "npc": "hedge_wizard",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "lux_known",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "lux_known",
+    "equals": false
   },
   "prompt": "dialogue.wizard_lux.prompt",
   "roles": {

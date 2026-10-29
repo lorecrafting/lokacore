@@ -95,7 +95,7 @@ function hour(c: any, key: string, at: number, apply: object[]) {
   c.reactions[`settle_sampler@0.0.1:reaction/${key}`] = {
     key,
     on: { event: 'clock_hour' },
-    when: { policy_version: 1, root: { op: 'time_window', from: at, to: at + 1 } },
+    when: { op: 'time_window', from: at, to: at + 1 },
     apply,
   };
 }
@@ -116,7 +116,7 @@ function band(out: number, back?: number, spawn = true, edit = (_: any) => {}) {
     c.reactions['settle_sampler@0.0.1:reaction/band_in'] = {
       ...c.reactions[MOVE],
       key: 'band_in',
-      when: { policy_version: 1, root: { op: 'fact_compare', fact: BAND, equals: false } },
+      when: { op: 'fact_compare', fact: BAND, equals: false },
       apply: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'square') }],
     };
   }, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e12');
@@ -183,7 +183,7 @@ test("S4-1: two plan moves of one band in one advance share each member's writer
         ...c.reactions[MOVE],
         key: 'band_road',
         on: { event: 'fact_changed', fact: road },
-        when: { policy_version: 1, root: { op: 'fact_compare', fact: road, equals: true } },
+        when: { op: 'fact_compare', fact: road, equals: true },
         apply: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'road') }],
       };
     }),

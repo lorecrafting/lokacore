@@ -6,12 +6,9 @@
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "notched"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "notched"
       },
       "description": "item.sword.short_notched"
     }

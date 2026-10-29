@@ -2,7 +2,7 @@
 // `traverse`, a room's `enter` and an item's `get` and `put` lock name a policy@1 tree the actor
 // must hold; a failing lock refuses permission_denied. Read by movementPlan, take (rule and
 // GameView) and putRefused; writes nothing.
-import type { CharacterId, EntityId, VersionedPolicy } from '../contracts.gen.ts';
+import type { CharacterId, EntityId, Policy } from '../contracts.gen.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import type { Steps, World } from '../runtime/decision.ts';
 import { holds } from './policy.ts';
@@ -11,12 +11,11 @@ import { holds } from './policy.ts';
 export function lockRefused(
   world: World,
   actor: CharacterId,
-  lock: VersionedPolicy | undefined,
+  lock: Policy | undefined,
   target: EntityId | undefined,
   steps: Steps,
 ) {
-  if (lock && !holds(world, actor, lock.root, { target, steps }))
-    return 'permission_denied' as const;
+  if (lock && !holds(world, actor, lock, { target, steps })) return 'permission_denied' as const;
 }
 
 /**

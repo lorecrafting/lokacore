@@ -8,11 +8,8 @@
     "metal"
   ],
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "iron_forced",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "iron_forced",
+    "equals": true
   }
 }

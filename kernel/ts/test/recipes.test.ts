@@ -145,7 +145,7 @@ test('ring bell assigns the fact, then fact_changed, then the custom event, and 
 test('an assign that keeps its value takes no position and emits no fact_changed', () => {
   const w = world((c) => {
     const r = c.recipes[RECIPE];
-    r.policy.root = { op: 'all', items: [] };
+    r.policy = { op: 'all', items: [] };
     r.outcomes.success.sequence.splice(1, 0, r.outcomes.success.sequence[0]);
   });
   const { decision } = step(w, ring(), 0);
@@ -369,7 +369,7 @@ test("an entity target in the action's scope is admitted", () => {
         command: 'look',
         priority: 0,
         input: [],
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
         accessibility: 'item.satchel.short',
       };
       c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;

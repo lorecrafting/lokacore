@@ -7,7 +7,6 @@ import json, hashlib
 ID, V = "lantern_proof", "0.0.1"
 def ref(kind, key): return {"cartridge_id": ID, "cartridge_version": V, "kind": kind, "key": key}
 def k(kind, key): return f"{ID}@{V}:{kind}/{key}"
-P = lambda root: {"policy_version": 1, "root": root}
 caps = {"movement":1,"description_variant":1,"containment":1,"barrier":1,"policy":1,
         "calendar":1,"fact":1,"quest":1,"dialogue":1,"resource":1,"schedule":1}
 def room(key, exits, variants=None):
@@ -15,7 +14,7 @@ def room(key, exits, variants=None):
     if variants: r["variants"] = variants
     return r
 gate = lambda to: {"to": ref("room", to), "barrier": ref("barrier", "old_gate")}
-plan = lambda v: {"when": P({"op":"fact_compare","fact":ref("fact","search_plan"),"equals":v}), "description": f"room.landing.{v}"}
+plan = lambda v: {"when": {"op":"fact_compare","fact":ref("fact","search_plan"),"equals":v}, "description": f"room.landing.{v}"}
 assign = lambda v: [{"op":"fact.assign","fact":ref("fact","search_plan"),"value":v}]
 value = {
  "format": "loka-cartridge-v2",
@@ -44,10 +43,10 @@ value = {
    "room_line": "item.lantern.room", "description": "item.lantern.description",
    "location": {"in": "room", "room": ref("room","shelter")}, "key": "lantern"}},
  "quests": {k("quest","lantern"): {"title": "quest.lantern.title",
-   "objective": {"evidence": "current_state", "policy": P({"op":"has_item","item":ref("item","lantern")})},
+   "objective": {"evidence": "current_state", "policy": {"op":"has_item","item":ref("item","lantern")}},
    "key": "lantern"}},
  "dialogues": {k("dialogue","bram"): {"npc": ref("npc","bram"),
-   "policy": P({"op":"quest_state","quest":ref("quest","lantern"),"state":"active"}),
+   "policy": {"op":"quest_state","quest":ref("quest","lantern"),"state":"active"},
    "prompt": "dialogue.bram.prompt",
    "roles": {"bram": {"role":"npc","npc":ref("npc","bram")}, "lantern": {"role":"item","item":ref("item","lantern")}},
    "quest": ref("quest","lantern"),
@@ -56,9 +55,9 @@ value = {
                          "hand_over": {"item":"lantern","to":"bram"}}},
    "key": "bram"},
    k("dialogue","bram_offer"): {"npc": ref("npc","bram"),
-   "policy": P({"op":"not","item":{"op":"any","items":[
+   "policy": {"op":"not","item":{"op":"any","items":[
      {"op":"quest_state","quest":ref("quest","lantern"),"state":s}
-     for s in ["active","objectives_complete","resolved","failed","abandoned"]]}}),
+     for s in ["active","objectives_complete","resolved","failed","abandoned"]]}},
    "prompt": "dialogue.bram_offer.prompt",
    "roles": {"bram": {"role":"npc","npc":ref("npc","bram")}},
    "choices": {"accept": {"label":"quest.lantern.accept","narration":"proof.accept","accept":ref("quest","lantern")}},

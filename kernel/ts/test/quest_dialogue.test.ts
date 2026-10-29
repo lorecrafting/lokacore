@@ -113,7 +113,7 @@ test('a stale accept is invalid_state once the actor has an instance', () => {
 test("an accept is invalid_state while its quest's offer policy fails", () => {
   const [w] = talk(
     world((c) => {
-      c.quests[`${F}:quest/lantern`].offer.policy.root = {
+      c.quests[`${F}:quest/lantern`].offer.policy = {
         op: 'has_item',
         item: ref('item', 'lantern'),
       };

@@ -4,11 +4,8 @@
     "item": "apple"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "npc_present",
-      "npc": "miller"
-    }
+    "op": "npc_present",
+    "npc": "miller"
   },
   "apply": [
     {

@@ -29,8 +29,8 @@ defmodule Loka.ContentConstructionTest do
            [{"UNRESOLVED_REFERENCE", "structures/hut.title"}]},
           {[hut(["variants", Access.at(0), "description"], "structure.hut.nope")],
            [{"UNRESOLVED_REFERENCE", "structures/hut.variants[0].description"}]},
-          {[hut(["locks", "enter", "root", "fact"], "nope")],
-           [{"UNRESOLVED_REFERENCE", "structures/hut.locks.enter.root.fact"}]},
+          {[hut(["locks", "enter", "fact"], "nope")],
+           [{"UNRESOLVED_REFERENCE", "structures/hut.locks.enter.fact"}]},
           {[hut(["weathering"], "nope")],
            [{"UNRESOLVED_REFERENCE", "structures/hut.weathering"}]},
           {[hut(["ruin"], "nope")], [{"UNRESOLVED_REFERENCE", "structures/hut.ruin"}]}

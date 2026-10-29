@@ -10,12 +10,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "hall_box_picked",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "hall_box_picked",
+    "equals": false
   },
   "check": {
     "key": "pick_hall_strongbox",

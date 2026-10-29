@@ -18,13 +18,10 @@
   ],
   "locks": {
     "get": {
-      "policy_version": 1,
-      "root": {
-        "op": "not",
-        "item": {
-          "op": "all",
-          "items": []
-        }
+      "op": "not",
+      "item": {
+        "op": "all",
+        "items": []
       }
     }
   },

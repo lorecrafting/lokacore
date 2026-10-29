@@ -89,7 +89,7 @@ defmodule Loka.ContentStandingTest do
   # quest step the warning covers, though a hostile Maud refuses it too.
   test "a hostile-capable escort speaker warns" do
     dir = Loka.ContentSource.copy("cartridges/standing_sampler")
-    always = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+    always = %{"op" => "all", "items" => []}
 
     journal =
       Map.new(~w(active objectives_met resolved failed abandoned), &{&1, "npc.maud.short"})

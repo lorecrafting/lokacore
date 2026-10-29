@@ -9,12 +9,9 @@
     "metal"
   ],
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "gate_oiled",
-      "item": "gate_winch",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "gate_oiled",
+    "item": "gate_winch",
+    "equals": true
   }
 }

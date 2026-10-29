@@ -5,12 +5,9 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "stat_compare",
-          "attribute": "per",
-          "at_least": 14
-        }
+        "op": "stat_compare",
+        "attribute": "per",
+        "at_least": 14
       },
       "description": "room.hall.sharp"
     }

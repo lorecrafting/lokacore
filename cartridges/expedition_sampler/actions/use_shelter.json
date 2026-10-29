@@ -14,12 +14,5 @@
     "cursor"
   ],
   "priority": 0,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "accessibility": "walk.action.shelter"
 }

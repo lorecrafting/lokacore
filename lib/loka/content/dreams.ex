@@ -123,10 +123,7 @@ defmodule Loka.Content.Dreams do
 
     expected = %{
       "evidence" => "current_state",
-      "policy" => %{
-        "policy_version" => 1,
-        "root" => %{"op" => "fact_compare", "fact" => memory, "equals" => true}
-      }
+      "policy" => %{"op" => "fact_compare", "fact" => memory, "equals" => true}
     }
 
     valid =

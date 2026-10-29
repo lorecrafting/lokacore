@@ -4,12 +4,9 @@
     "room": "cell"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "wanted",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "wanted",
+    "equals": true
   },
   "apply": [
     {

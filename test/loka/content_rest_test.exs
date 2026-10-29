@@ -64,10 +64,7 @@ defmodule Loka.ContentRestTest do
       if read,
         do: %{
           "on" => on,
-          "when" => %{
-            "policy_version" => 1,
-            "root" => %{"op" => "fact_compare", "fact" => "position", "equals" => "sitting"}
-          },
+          "when" => %{"op" => "fact_compare", "fact" => "position", "equals" => "sitting"},
           "apply" => [plan]
         },
         else: %{"on" => on, "apply" => [@write]}

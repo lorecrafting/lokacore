@@ -6,7 +6,7 @@ defmodule Loka.ContentTrainingTest do
   defp trained do
     [
       {"skills/blade.json",
-       &put_in(&1, [Access.key("qualification", %{"policy_version" => 1}), "root"], %{
+       &put_in(&1, ["qualification"], %{
          "op" => "stat_compare",
          "attribute" => "str",
          "at_least" => 10
@@ -35,7 +35,7 @@ defmodule Loka.ContentTrainingTest do
       }
     end
 
-    assert c["skills"][prefix <> ":skill/blade"]["qualification"]["root"]["attribute"] ==
+    assert c["skills"][prefix <> ":skill/blade"]["qualification"]["attribute"] ==
              ref.("attribute", "str")
 
     assert c["items"][prefix <> ":item/training_sword"]["weapon"]["skill"] ==
@@ -107,12 +107,12 @@ defmodule Loka.ContentTrainingTest do
            {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.block"}},
           {[
              {"skills/blade.json",
-              &put_in(&1, [Access.key("qualification", %{"policy_version" => 1}), "root"], %{
+              &put_in(&1, ["qualification"], %{
                 "op" => "stat_compare",
                 "attribute" => "missing",
                 "at_least" => 10
               })}
-           ], {"UNRESOLVED_REFERENCE", "skills/blade.qualification.root.attribute"}}
+           ], {"UNRESOLVED_REFERENCE", "skills/blade.qualification.attribute"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)

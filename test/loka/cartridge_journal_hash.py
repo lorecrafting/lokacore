@@ -29,7 +29,7 @@ value['quests'][k('quest', 'lantern')]['journal'] = {
 }
 value['quests'][k('quest', 'oar')] = {
     'key': 'oar', 'title': 'quest.oar.title',
-    'offer': {'label': 'quest.oar.accept', 'policy': {'policy_version': 1, 'root': {'op': 'all', 'items': []}}},
+    'offer': {'label': 'quest.oar.accept'},
     'objective': {'evidence': 'post_activation_event', 'item_acquired': ref('item', 'oar')},
     'journal': {'active': 'quest.oar.find', 'objectives_met': 'quest.oar.found',
                 'resolved': 'quest.oar.done', 'failed': 'quest.oar.failed', 'abandoned': 'quest.oar.abandoned'},

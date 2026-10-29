@@ -238,17 +238,14 @@
           {
             "description": "detail.bed.paid",
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "village_chapter",
-                  "cartridge_version": "0.0.25",
-                  "kind": "fact",
-                  "key": "lantern_bed_paid"
-                },
-                "equals": true
-              }
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "village_chapter",
+                "cartridge_version": "0.0.25",
+                "kind": "fact",
+                "key": "lantern_bed_paid"
+              },
+              "equals": true
             }
           }
         ]

@@ -37,7 +37,7 @@ defmodule Loka.ContentWaterTest do
         "skills/swim.json" => %{
           "label" => "skill.swim.label",
           "requirement" => "skill.swim.requirement",
-          "qualification" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+          "qualification" => %{"op" => "all", "items" => []}
         },
         "rooms/well_lane.json" => &put_in(&1, ["exits", "down"], %{"to" => "well_bottom"}),
         "rooms/well_bottom.json" => bottom(%{"to" => "well_lane"}),

@@ -64,7 +64,7 @@ export const infirmary = (c: any) => {
       repeatable: true,
       objective: {
         evidence: 'current_state',
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
       },
       exchange: {
         npc: healer,
@@ -86,7 +86,7 @@ export const infirmary = (c: any) => {
   const dialogue = (key: string, policy: object, choices: object, extra = {}) => ({
     key,
     npc: healer,
-    policy: { policy_version: 1, root: policy },
+    policy: policy,
     prompt: 'dialogue.healer.prompt',
     roles: { healer: { role: 'npc', npc: healer } },
     choices,

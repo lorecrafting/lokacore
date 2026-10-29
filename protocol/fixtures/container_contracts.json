@@ -263,154 +263,103 @@
       "room_line_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "description": "item.box.description"
         }

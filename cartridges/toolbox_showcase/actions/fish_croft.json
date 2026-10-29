@@ -10,20 +10,17 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "any",
-      "items": [
-        {
-          "op": "has_item",
-          "item": "rod"
-        },
-        {
-          "op": "has_item",
-          "item": "rod_2"
-        }
-      ]
-    }
+    "op": "any",
+    "items": [
+      {
+        "op": "has_item",
+        "item": "rod"
+      },
+      {
+        "op": "has_item",
+        "item": "rod_2"
+      }
+    ]
   },
   "check": {
     "key": "fish_croft",

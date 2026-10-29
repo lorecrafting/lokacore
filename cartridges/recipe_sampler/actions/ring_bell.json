@@ -10,14 +10,11 @@
   },
   "priority": 10,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "fact_compare",
-        "fact": "chapel_bell_rung",
-        "equals": true
-      }
+    "op": "not",
+    "item": {
+      "op": "fact_compare",
+      "fact": "chapel_bell_rung",
+      "equals": true
     }
   },
   "outcomes": {

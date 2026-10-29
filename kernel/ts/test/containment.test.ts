@@ -581,7 +581,7 @@ test('a Take alias advertises too_heavy and cannot evade the view admission inva
     input: [],
     command: 'take',
     priority: 0,
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
   };
   const w: World = {
     ...base,

@@ -20,7 +20,7 @@
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "policy": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
           "required": [
@@ -307,25 +307,19 @@
           "offer": {
             "label": "quest.lantern.accept",
             "policy": {
-              "policy_version": 1,
-              "root": {
-                "op": "all",
-                "items": []
-              }
+              "op": "all",
+              "items": []
             }
           },
           "objective": {
             "evidence": "current_state",
             "policy": {
-              "policy_version": 1,
-              "root": {
-                "op": "has_item",
-                "item": {
-                  "cartridge_id": "ferrymans_lantern",
-                  "cartridge_version": "0.1.0",
-                  "kind": "item",
-                  "key": "lantern"
-                }
+              "op": "has_item",
+              "item": {
+                "cartridge_id": "ferrymans_lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "item",
+                "key": "lantern"
               }
             }
           }
@@ -336,15 +330,12 @@
           "objective": {
             "evidence": "current_state",
             "policy": {
-              "policy_version": 1,
-              "root": {
-                "op": "has_item",
-                "item": {
-                  "cartridge_id": "ferrymans_lantern",
-                  "cartridge_version": "0.1.0",
-                  "kind": "item",
-                  "key": "lantern"
-                }
+              "op": "has_item",
+              "item": {
+                "cartridge_id": "ferrymans_lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "item",
+                "key": "lantern"
               }
             }
           },
@@ -371,7 +362,7 @@
               "const": "current_state"
             },
             "policy": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
           "required": [
@@ -468,7 +459,7 @@
             "type": "object",
             "properties": {
               "when": {
-                "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+                "$ref": "policy.schema.json#/$defs/Policy"
               },
               "text": {
                 "$ref": "text.schema.json#/$defs/TextKey"

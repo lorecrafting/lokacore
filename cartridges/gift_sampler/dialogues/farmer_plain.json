@@ -1,13 +1,10 @@
 {
   "npc": "farmer",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "trust",
-      "equals": 0,
-      "subject": "target"
-    }
+    "op": "fact_compare",
+    "fact": "trust",
+    "equals": 0,
+    "subject": "target"
   },
   "prompt": "dialogue.farmer.plain",
   "roles": {

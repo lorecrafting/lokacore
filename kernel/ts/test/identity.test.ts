@@ -157,12 +157,12 @@ test('the guard collars a wanted character unless disguised', () => {
 test('world.identity loader refusals', () => {
   assert.deepEqual(
     diagnostic((c) =>
-      Object.assign(c.world.identity.name_variants[1].when.root, {
+      Object.assign(c.world.identity.name_variants[1].when, {
         fact: ref('fact', 'knows_name'),
         subject: 'target',
       }),
     ),
-    ['FACT_SCOPE_UNSUPPORTED', '.cartridge.world.identity.name_variants[1].when.root.subject'],
+    ['FACT_SCOPE_UNSUPPORTED', '.cartridge.world.identity.name_variants[1].when.subject'],
   );
   assert.deepEqual(
     diagnostic((c) => delete c.world.identity),

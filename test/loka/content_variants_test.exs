@@ -3,7 +3,7 @@ defmodule Loka.ContentVariantsTest do
 
   @variant [
     %{
-      "when" => %{"policy_version" => 1, "root" => %{"op" => "has_item", "item" => "lamp_oil"}},
+      "when" => %{"op" => "has_item", "item" => "lamp_oil"},
       "description" => "item.lantern.room_oil"
     }
   ]
@@ -28,11 +28,11 @@ defmodule Loka.ContentVariantsTest do
   test "a new variant list's references and text keys are checked" do
     dir = Loka.ContentSource.copy("cartridges/variants_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-    ghost = &put_in(&1, ["description_variants", Access.at(0), "when", "root", "status"], "ghost")
+    ghost = &put_in(&1, ["description_variants", Access.at(0), "when", "status"], "ghost")
     no_text = &put_in(&1, ["short_variants", Access.at(0), "description"], "item.sword.gone")
 
     for {file, change, path, target} <- [
-          {"npcs/maud.json", ghost, "npcs/maud.description_variants[0].when.root.status",
+          {"npcs/maud.json", ghost, "npcs/maud.description_variants[0].when.status",
            "variants_sampler@0.0.1:status/ghost"},
           {"items/sword.json", no_text, "items/sword.short_variants[0].description",
            "item.sword.gone"}

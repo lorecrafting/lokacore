@@ -271,7 +271,7 @@ function cart(c: any) {
       label: 'transport.ride',
       accessibility: 'transport.ride',
       priority: 0,
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
       target: { kind: 'entity', scopes: ['inspectable_details'] },
     };
     c.rooms[`${prefix}:room/${from}`].details = {

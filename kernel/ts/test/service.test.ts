@@ -291,7 +291,7 @@ test('loaded differently named service keys project exactly the captured invocat
     undefined,
     (a: any) => (a.target = { kind: 'none' }),
     (a: any) => (a.input = ['service']),
-    (a: any) => (a.policy.root = { op: 'not', item: { op: 'all', items: [] } }),
+    (a: any) => (a.policy = { op: 'not', item: { op: 'all', items: [] } }),
   ]) {
     const w = fresh((c) => changed?.(c.actions[`${prefix}:action/eat_kitchen_meal`]));
     const offers = gameView(w).entities.find((e) => e.id === entity(w, 'npc', 'cook'))!.services!;

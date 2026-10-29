@@ -248,7 +248,7 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
   const key = `${P}recipe/carve_spoon`;
   const shut = {
     ...content.recipes![key]!,
-    policy: { policy_version: 1, root: { op: 'any', items: [] } },
+    policy: { op: 'any', items: [] },
   };
   const w = heavy({ ...content, recipes: { ...content.recipes, [key]: shut } } as never);
   const r = carve(w);
@@ -339,7 +339,7 @@ test('a hidden skill is left out of the view while its prerequisite fails', () =
 // NPC lists a lesson for a skill the view leaves out. Carving is hidden and needs stick_02 held.
 test('a learned hidden skill stays in the view; a lesson for a left-out skill is not listed', () => {
   const carving = content.skills![`${P}skill/carving`]!;
-  const stick = { ...(carving.prerequisite!.root as any).skill, kind: 'item', key: 'stick_02' };
+  const stick = { ...(carving.prerequisite! as any).skill, kind: 'item', key: 'stick_02' };
   const root = { op: 'has_item', item: stick } as never;
   const c = {
     ...content,
@@ -348,7 +348,7 @@ test('a learned hidden skill stays in the view; a lesson for a left-out skill is
       [`${P}skill/carving`]: {
         ...carving,
         hidden: true,
-        prerequisite: { policy_version: 1, root },
+        prerequisite: root,
       },
       [`${P}skill/joinery`]: { ...content.skills![`${P}skill/joinery`]!, hidden: true },
     },

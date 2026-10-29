@@ -13,20 +13,14 @@
   "container": true,
   "locks": {
     "get": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_hut",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_hut",
+      "equals": true
     },
     "put": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_hut",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_hut",
+      "equals": true
     }
   }
 }

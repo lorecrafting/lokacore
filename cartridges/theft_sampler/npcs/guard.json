@@ -25,12 +25,9 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "wanted",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "wanted",
+      "equals": true
     },
     "engage": "guard.collars"
   }

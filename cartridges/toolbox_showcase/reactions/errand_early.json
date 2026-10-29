@@ -4,22 +4,19 @@
     "room": "loft"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "quest_state",
-          "quest": "errand",
-          "state": "active"
-        },
-        {
-          "op": "fact_compare",
-          "fact": "flamma_known",
-          "equals": true
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "quest_state",
+        "quest": "errand",
+        "state": "active"
+      },
+      {
+        "op": "fact_compare",
+        "fact": "flamma_known",
+        "equals": true
+      }
+    ]
   },
   "apply": [
     {

@@ -447,10 +447,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -512,10 +509,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "kind": "attribute_threshold",
@@ -576,10 +570,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -640,10 +631,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -699,10 +687,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -763,10 +748,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -828,10 +810,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -893,10 +872,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -958,10 +934,7 @@
       },
       "priority": 10,
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "light_off"
-        }
+        "op": "light_off"
       },
       "check": {
         "key": "wisp_perception",
@@ -1168,35 +1141,32 @@
       },
       "label": "actions.ask_wisp",
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "light_off"
+        "op": "all",
+        "items": [
+          {
+            "op": "light_off"
+          },
+          {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "village_chapter",
+              "cartridge_version": "0.0.23",
+              "kind": "fact",
+              "key": "fen_wisp_discovered"
             },
-            {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "village_chapter",
-                "cartridge_version": "0.0.23",
-                "kind": "fact",
-                "key": "fen_wisp_discovered"
-              },
-              "equals": true
+            "equals": true
+          },
+          {
+            "op": "quest_state",
+            "quest": {
+              "cartridge_id": "village_chapter",
+              "cartridge_version": "0.0.23",
+              "kind": "quest",
+              "key": "wisp_ward"
             },
-            {
-              "op": "quest_state",
-              "quest": {
-                "cartridge_id": "village_chapter",
-                "cartridge_version": "0.0.23",
-                "kind": "quest",
-                "key": "wisp_ward"
-              },
-              "state": "active"
-            }
-          ]
-        }
+            "state": "active"
+          }
+        ]
       },
       "prompt": "dialogue.wisp.riddle",
       "roles": {
@@ -1271,35 +1241,32 @@
       },
       "label": "actions.ask_wisp",
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "light_off"
+        "op": "all",
+        "items": [
+          {
+            "op": "light_off"
+          },
+          {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "village_chapter",
+              "cartridge_version": "0.0.23",
+              "kind": "fact",
+              "key": "fen_wisp_discovered"
             },
-            {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "village_chapter",
-                "cartridge_version": "0.0.23",
-                "kind": "fact",
-                "key": "fen_wisp_discovered"
-              },
-              "equals": true
+            "equals": true
+          },
+          {
+            "op": "quest_state",
+            "quest": {
+              "cartridge_id": "village_chapter",
+              "cartridge_version": "0.0.23",
+              "kind": "quest",
+              "key": "wisp_ward"
             },
-            {
-              "op": "quest_state",
-              "quest": {
-                "cartridge_id": "village_chapter",
-                "cartridge_version": "0.0.23",
-                "kind": "quest",
-                "key": "wisp_ward"
-              },
-              "state": "active"
-            }
-          ]
-        }
+            "state": "active"
+          }
+        ]
       },
       "prompt": "dialogue.wisp.riddle",
       "roles": {
@@ -1374,35 +1341,32 @@
       },
       "label": "actions.ask_wisp",
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "light_off"
+        "op": "all",
+        "items": [
+          {
+            "op": "light_off"
+          },
+          {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "village_chapter",
+              "cartridge_version": "0.0.23",
+              "kind": "fact",
+              "key": "fen_wisp_discovered"
             },
-            {
-              "op": "fact_compare",
-              "fact": {
-                "cartridge_id": "village_chapter",
-                "cartridge_version": "0.0.23",
-                "kind": "fact",
-                "key": "fen_wisp_discovered"
-              },
-              "equals": true
+            "equals": true
+          },
+          {
+            "op": "quest_state",
+            "quest": {
+              "cartridge_id": "village_chapter",
+              "cartridge_version": "0.0.23",
+              "kind": "quest",
+              "key": "wisp_ward"
             },
-            {
-              "op": "quest_state",
-              "quest": {
-                "cartridge_id": "village_chapter",
-                "cartridge_version": "0.0.23",
-                "kind": "quest",
-                "key": "wisp_ward"
-              },
-              "state": "active"
-            }
-          ]
-        }
+            "state": "active"
+          }
+        ]
       },
       "prompt": "dialogue.wisp.riddle",
       "roles": {

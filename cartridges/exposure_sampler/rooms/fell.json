@@ -12,41 +12,29 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "frost"
-        }
+        "op": "sky",
+        "weather": "frost"
       },
       "description": "room.fell.frost"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "heat"
-        }
+        "op": "sky",
+        "weather": "heat"
       },
       "description": "room.fell.heat"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "rain"
-        }
+        "op": "sky",
+        "weather": "rain"
       },
       "description": "room.fell.rain"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "gale"
-        }
+        "op": "sky",
+        "weather": "gale"
       },
       "description": "room.fell.gale"
     }
