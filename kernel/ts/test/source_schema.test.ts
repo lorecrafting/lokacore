@@ -72,8 +72,8 @@ const fact = {
 // exactlyOneRequired and requiredUnless translations.
 test('the schemas refuse a misspelled field and each shortcut written wrong', () => {
   const pairs: [string, unknown, unknown][] = [
-    ['rooms', room, { ...room, titel: 'hall.title' }],
-    ['rooms', { ...room, title: { prose: 'Hall' } }, { ...room, title: { prose: '' } }],
+    ['rooms', room, { ...room, nmae: 'hall.title' }],
+    ['rooms', { ...room, name: { prose: 'Hall' } }, { ...room, name: { prose: '' } }],
     ['rooms', { extends: 'hall' }, { extends: 1 }],
     [
       'npcs',

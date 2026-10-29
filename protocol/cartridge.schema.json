@@ -447,7 +447,7 @@
           "actions": {
             "hello_sampler@0.0.1:action/talk": {
               "key": "talk",
-              "label": "actions.talk",
+              "name": "actions.talk",
               "target": {
                 "kind": "entity",
                 "scopes": [
@@ -500,7 +500,7 @@
           "rooms": {
             "rooms_sampler@0.0.1:room/boathouse": {
               "key": "boathouse",
-              "title": "room.boathouse.title",
+              "name": "room.boathouse.title",
               "description": "room.boathouse.description",
               "exits": {
                 "east": {
@@ -515,7 +515,7 @@
             },
             "rooms_sampler@0.0.1:room/ferry_landing": {
               "key": "ferry_landing",
-              "title": "room.ferry_landing.title",
+              "name": "room.ferry_landing.title",
               "description": "room.ferry_landing.description",
               "exits": {
                 "north": {
@@ -538,7 +538,7 @@
             },
             "rooms_sampler@0.0.1:room/well_lane": {
               "key": "well_lane",
-              "title": "room.well_lane.title",
+              "name": "room.well_lane.title",
               "description": "room.well_lane.description",
               "exits": {
                 "south": {
@@ -660,7 +660,7 @@
             "actions": {
               "hello_sampler@0.0.1:action/talk": {
                 "key": "talk",
-                "label": "actions.talk",
+                "name": "actions.talk",
                 "target": {
                   "kind": "entity",
                   "scopes": [
@@ -716,7 +716,7 @@
             "rooms": {
               "rooms_sampler@0.0.1:room/boathouse": {
                 "key": "boathouse",
-                "title": "room.boathouse.title",
+                "name": "room.boathouse.title",
                 "description": "room.boathouse.description",
                 "exits": {
                   "east": {
@@ -731,7 +731,7 @@
               },
               "rooms_sampler@0.0.1:room/ferry_landing": {
                 "key": "ferry_landing",
-                "title": "room.ferry_landing.title",
+                "name": "room.ferry_landing.title",
                 "description": "room.ferry_landing.description",
                 "exits": {
                   "north": {
@@ -754,7 +754,7 @@
               },
               "rooms_sampler@0.0.1:room/well_lane": {
                 "key": "well_lane",
-                "title": "room.well_lane.title",
+                "name": "room.well_lane.title",
                 "description": "room.well_lane.description",
                 "exits": {
                   "south": {

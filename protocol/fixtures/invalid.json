@@ -9325,11 +9325,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/room_line",
+        "path": "/name",
         "code": "missing_property"
       },
       {
-        "path": "/name",
+        "path": "/room_line",
         "code": "missing_property"
       }
     ]
@@ -9540,12 +9540,12 @@
         "code": "too_many_items"
       },
       {
-        "path": "/room_line_variants",
-        "code": "too_many_items"
-      },
-      {
         "path": "/name",
         "code": "pattern_mismatch"
+      },
+      {
+        "path": "/room_line_variants",
+        "code": "too_many_items"
       }
     ]
   },
@@ -9612,15 +9612,15 @@
         "code": "missing_property"
       },
       {
+        "path": "/name",
+        "code": "missing_property"
+      },
+      {
         "path": "/room",
         "code": "missing_property"
       },
       {
         "path": "/room_line",
-        "code": "missing_property"
-      },
-      {
-        "path": "/name",
         "code": "missing_property"
       }
     ]
@@ -11563,11 +11563,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/objective",
+        "path": "/name",
         "code": "missing_property"
       },
       {
-        "path": "/name",
+        "path": "/objective",
         "code": "missing_property"
       },
       {
@@ -11598,16 +11598,16 @@
         "code": "pattern_mismatch"
       },
       {
+        "path": "/name",
+        "code": "pattern_mismatch"
+      },
+      {
         "path": "/offer/label",
         "code": "missing_property"
       },
       {
         "path": "/offer/x",
         "code": "unknown_property"
-      },
-      {
-        "path": "/name",
-        "code": "pattern_mismatch"
       }
     ]
   },
