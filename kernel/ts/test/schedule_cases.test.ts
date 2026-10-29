@@ -139,8 +139,9 @@ test("a case's time window is read at the hour's due time, not the end of the wa
   assert.equal(room(w), roomId(w, 'green'));
 });
 
-// Breaks: the loader skips a schedule case condition (an unknown fact loads and fails in play).
-test('the loader checks schedule_cases conditions', () => {
+// Breaks: the loader skips a schedule case condition (an unknown fact loads and fails in play) or
+// accepts a case hour the daily_schedule does not list (its job never runs it).
+test('the loader checks schedule_cases conditions and hours', () => {
   const at0 = `.cartridge.npcs[${JSON.stringify(MAUD)}].schedule_cases.8[0]`;
   const rows: [(c: any) => void, string, string, object][] = [
     [
@@ -148,6 +149,12 @@ test('the loader checks schedule_cases conditions', () => {
       'UNRESOLVED_REFERENCE',
       `${at0}.when.root.fact`,
       { target: `${C}:fact/ghost` },
+    ],
+    [
+      (c) => (c.npcs[MAUD].schedule_cases['9'] = c.npcs[MAUD].schedule_cases['8']),
+      'SCHEMA_VIOLATION',
+      `.cartridge.npcs[${JSON.stringify(MAUD)}].schedule_cases.9`,
+      { error: 'invalid_value' },
     ],
   ];
   for (const [change, code, path, data] of rows) {
