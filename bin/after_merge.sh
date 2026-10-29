@@ -6,7 +6,7 @@
 # Refuses unless the PR is MERGED, main is checked out and the tracked files are clean (untracked files are ignored, like pm_merge.sh) apart from
 # .beads/issues.jsonl, and docs/ROADMAP.md (which must then be edited) when a subject is given.
 # The pull and the Beads merge are bin/lib/beads_sync.sh (`br sync --merge`): a dirty export and a
-# moved main export fold together; only a row edited on both sides refuses, after main is pulled. Every refusal
+# moved main export fold together; only a row edited on both sides refuses, after main is pulled. Every other refusal
 # (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change, except that a stale script copy first fast-forwards main.
 # review-<PR> counts as merged when `git cherry` finds each of its commits' patches in origin/main.
 # A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
@@ -24,7 +24,7 @@ cd "$(git rev-parse --show-toplevel)" || exit 2
 if [ -z "${AFTER_MERGE_REEXEC-}" ]; then
   git fetch -q origin main || die 'fetch failed'
   git diff --quiet HEAD origin/main -- bin/after_merge.sh bin/lib/beads_sync.sh || {
-    git merge -q --ff-only origin/main || die 'this script is behind main and the pull failed: pull by hand'
+    git -c core.hooksPath=/dev/null merge -q --ff-only origin/main || die 'this script is behind main and the pull failed: pull by hand'
     AFTER_MERGE_REEXEC=1 exec sh bin/after_merge.sh "$@"
   }
 fi

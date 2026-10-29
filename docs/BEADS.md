@@ -19,7 +19,8 @@ the interactive board and graph. `br` mutates local
 SQLite and exports Git-tracked JSONL. Beads Rust 0.7.6 auto-flushes mutations
 and auto-imports newer JSONL on commands by default; use `br sync --status --json`
 to inspect drift, `br sync --import-only` to recover an out-of-date index, and
-`br sync --flush-only` before a tracker commit if the index is dirty. Review the JSONL diff
+in the main checkout let `bin/beads_checkpoint.sh` export (a hand `br sync --flush-only` moves the
+merge base, and the next sync refuses this checkout's edited rows as AmbiguousBase). Review the JSONL diff
 and verify it contains no local machine path; the installed release writes
 `source_repo_path` on creation: create issues with `bin/br_create.sh <br create arguments>`,
 which clears it, or clear it with `br update <id> --source-repo lokacore --source-repo-path ''`.

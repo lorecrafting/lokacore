@@ -26,7 +26,7 @@ mk() { # fresh origin, M and A; A's database imported and flushed (the merge bas
 }
 push_m() { (cd "$tmp/M" && "$@" > /dev/null && git commit -qam m && git push -q origin main); }
 sync() { # <case> <want-rc>: run beads_sync in A; $0 is this script so the lib finds bin/
-  rc=0; (cd "$A" && sh -c 'die() { echo "$*" >&2; exit 1; }; . "$(dirname "$0")/lib/beads_sync.sh"; beads_sync' "$bin/x") > "$tmp/out" 2>&1 || rc=$?
+  rc=0; (cd "$A" && sh -c 'die() { echo "$*" >&2; exit 1; }; . "$(dirname "$0")/lib/beads_sync.sh"; git fetch -q origin main; beads_sync' "$bin/x") > "$tmp/out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] || { bad "$1: exit $rc, want $2"; sed 's/^/  /' "$tmp/out"; }
 }
 

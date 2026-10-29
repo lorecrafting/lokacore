@@ -55,7 +55,7 @@ if touched '^bin/worktree_setup'; then
   run WORKTREE_SETUP sh bin/worktree_setup_red_controls.sh
 fi
 # The Beads sync controls need real br (CI installs it; loka-ivjq.28).
-if touched '^bin/(lib/beads_sync|after_merge|beads_checkpoint|beads_sync_red_controls)' && command -v br > /dev/null; then
+if touched '^(bin/(lib/beads_sync|after_merge|beads_checkpoint|beads_sync_red_controls|beads_after_git)|\.githooks/post-merge)' && command -v br > /dev/null; then
   run BEADS_SYNC sh bin/beads_sync_red_controls.sh
 fi
 exit $fail

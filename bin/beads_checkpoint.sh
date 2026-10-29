@@ -4,7 +4,7 @@
 # docs/HANDOFF.md, push.
 #   bin/beads_checkpoint.sh ["commit subject"]
 # Refuses before any change unless main is checked out, has no unpushed commit and no tracked file
-# other than those two is dirty. A rejected push undoes this run's commit (the files stay dirty): rerun.
+# other than those two is dirty; a refused pull or merge leaves main fast-forwarded. A rejected push undoes this run's commit (the files stay dirty): rerun.
 set -u
 die() { echo "beads_checkpoint: $*" >&2; exit 1; }
 . "$(dirname "$0")/lib/beads_sync.sh"
