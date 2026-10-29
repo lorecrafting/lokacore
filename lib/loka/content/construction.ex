@@ -3,7 +3,7 @@ defmodule Loka.Content.Construction do
   Built rooms S1 (construction@1; cartridge.md Structure and site declarations): a room's site
   names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only structures of this
   cartridge (UNRESOLVED_REFERENCE); a structure, its tags and description variants are owned by
-  their capabilities, and its title and descriptions have catalog entries; a site or
+  their capabilities, and its name and descriptions have catalog entries; a site or
   world.construction needs construction@1. Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """

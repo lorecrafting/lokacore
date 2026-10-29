@@ -342,15 +342,15 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 [shoo_sampler](../../cartridges/shoo_sampler/) is the working example: `npcs/wild.json`,
 `items/corpse.json` and `populations/herd.json` are abstract prototypes.
 
-**Inline prose.** A text field may hold its words in place: `"short": {"prose": "the elder"}`.
+**Inline prose.** A text field may hold its words in place: `"name": {"prose": "the elder"}`.
 - The marker is an object whose only member is `"prose"`, a non-empty string, anywhere inside a
   definition (a plain file or a bundle). Any other `{"prose": ...}` shape stays, and the schema
   reports it at its site. Root files (`text.json` too) are not lowered.
 - The compiler writes the generated key `<kind>.<key>.<path>` in its place: `<kind>` singular
   (`npc`, `room`, `story_point`), `<key>` the definition key, `<path>` the steps from the
   definition to the marker joined by `.`, array indexes in decimal. One alias: a step
-  `room_line` is written `room` (the house `npc.<key>.room` convention). So `npcs.elder.short`
-  is `npc.elder.short`, a choice label `dialogue.elder_ward.choices.thank.label`, and a room
+  `room_line` is written `room` (the house `npc.<key>.room` convention). So `npcs.elder.name`
+  is `npc.elder.name`, a choice label `dialogue.elder_ward.choices.thank.label`, and a room
   variant `room.lane.variants.0.description`.
 - The words join the one `text.json` catalog (created when absent; an undecodable one takes
   nothing, its `INVALID_JSON` fails the build). A generated key that fails TextKey is the

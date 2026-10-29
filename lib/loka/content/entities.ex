@@ -182,7 +182,7 @@ defmodule Loka.Content.Entities do
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
   @doc """
-  Every text of each entity as `{rel, entity key, steps, text key}`: short, room_line and
+  Every text of each entity as `{rel, entity key, steps, text key}`: name, room_line and
   description, then each text variant's description.
   """
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]

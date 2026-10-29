@@ -231,7 +231,7 @@ defmodule Loka.Content.Lint do
       end)
 
     if bare? and text["action.talk"] in [nil, ""],
-      do: ["text.json: action.talk has no text, yet a dialogue has no label of its own"],
+      do: ["text.json: action.talk has no text, yet a dialogue has no name of its own"],
       else: []
   end
 

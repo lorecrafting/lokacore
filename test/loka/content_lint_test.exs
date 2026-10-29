@@ -60,7 +60,7 @@ defmodule Loka.ContentLintTest do
     titled = put_in(room, ["details", "slate", "readable", "title"], "detail.slate.title")
     assert lint(%{"rooms/lever_hall.json" => titled, "text.json" => linked}) == []
 
-    talk = "text.json: action.talk has no text, yet a dialogue has no label of its own"
+    talk = "text.json: action.talk has no text, yet a dialogue has no name of its own"
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{}}) == [talk]
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => ""}}) == [talk]
 

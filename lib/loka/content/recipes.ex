@@ -29,7 +29,7 @@ defmodule Loka.Content.Recipes do
   row 29b effect steps: `Loka.Content.Spells`),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
-  and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
+  and its name and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
   key is an action's or a
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
   contribution names a registered command, an action, a recipe or a quest (its offer).
