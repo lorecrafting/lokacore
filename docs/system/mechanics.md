@@ -471,12 +471,11 @@ offers its talk (`mechanics/dialogue/selection.ts:80`), one per dialogue under t
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
-that could repeat must not reach a once-per-lineage save proof: the loader and the compiler
-reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
+that could repeat must not reach a once-per-lineage save proof: the compiler
+rejects, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
 of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
 bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
-conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:264`, twin
-`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
+conversation) (`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
 The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII

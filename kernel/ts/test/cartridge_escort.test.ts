@@ -44,64 +44,12 @@ test('loader accepts API1.11 escort effects and policy leaves', () => {
   }
 });
 
-// Breaks: capability, NPC role, local quest and terminal agreement checks are bypassed.
-test('loader rejects incompatible and unresolved escort bindings', () => {
-  const cases: [string, (c: any) => void][] = [
-    [
-      'UNDECLARED_CAPABILITY',
-      (c) => {
-        delete c.manifest.requires.capabilities.escort;
-        delete c.lock.capabilities.escort;
-      },
-    ],
-    [
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        effect(c).npc = 'lantern';
-      },
-    ],
-    [
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        effect(c).quest = { ...quest, key: 'missing' };
-      },
-    ],
-    [
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        effect(c).quest = { ...quest, cartridge_id: 'foreign' };
-      },
-    ],
-    [
-      'OUTCOME_MISMATCH',
-      (c) => {
-        effect(c).transition = 'complete';
-      },
-    ],
-    [
-      'OUTCOME_MISMATCH',
-      (c) => {
-        effect(c).transition = 'complete';
-        dialogue(c).quest = { ...quest, key: 'other' };
-      },
-    ],
-    [
-      'OUTCOME_MISMATCH',
-      (c) => {
-        dialogue(c).quest = quest;
-      },
-    ],
-    [
-      'OUTCOME_MISMATCH', // loka-x6t.5: in a dialogue that reopens, the start could repeat
-      (c) => {
-        const { label, narration } = dialogue(c).choices.carry;
-        dialogue(c).choices.stay = { label, narration };
-      },
-    ],
-  ];
-  for (const [code, change] of cases) {
-    const result = load(change);
-    assert.ok(!result.ok);
-    assert.equal(result.diagnostic.code, code, JSON.stringify(result));
-  }
+// Breaks: an escort cartridge without escort@1 installs (references and outcomes: content_escort_test.exs).
+test('loader rejects an escort binding without its capability', () => {
+  const result = load((c) => {
+    delete c.manifest.requires.capabilities.escort;
+    delete c.lock.capabilities.escort;
+  });
+  assert.ok(!result.ok);
+  assert.equal(result.diagnostic.code, 'UNDECLARED_CAPABILITY', JSON.stringify(result));
 });

@@ -580,87 +580,9 @@ const fails = (
 const D = `.cartridge.dialogues["${F}:dialogue/bram"]`;
 const bram = (c: any) => c.dialogues[`${F}:dialogue/bram`];
 
-// Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): the
-// kernel would bind a role, speaker or quest that does not exist, hand over through a role of the
-// wrong kind, show a missing text, assign an undeclared fact or a wrong value, run a dialogue its
-// capability is not locked for, shadow the actor participant, open a choice with no option, list
-// a talk under another action's key.
-test('the loader checks dialogue references, roles, texts, facts, keys and the lock', () => {
-  const missing = (kind: string) => ({ target: `${F}:${kind}/missing` });
-  fails(
-    (c) => (bram(c).npc = ref('npc', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${D}.npc`,
-    missing('npc'),
-  );
-  fails(
-    (c) => (bram(c).roles.lantern.item = ref('item', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${D}.roles.lantern.item`,
-    missing('item'),
-  );
-  fails(
-    (c) => (bram(c).quest = ref('quest', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${D}.quest`,
-    missing('quest'),
-  );
-  fails(
-    (c) => {
-      bram(c).roles.bram = { role: 'item', item: ref('item', 'lantern') };
-      delete bram(c).choices.leave.hand_over;
-    },
-    'UNRESOLVED_REFERENCE',
-    `${D}.npc`,
-    { target: `${F}:npc/bram` },
-  );
-  fails(
-    (c) => (bram(c).choices.leave.hand_over.item = 'bram'),
-    'UNRESOLVED_REFERENCE',
-    `${D}.choices.leave.hand_over.item`,
-    { target: 'bram' },
-  );
-  fails(
-    (c) => (bram(c).choices.leave.hand_over.to = 'lantern'),
-    'UNRESOLVED_REFERENCE',
-    `${D}.choices.leave.hand_over.to`,
-    { target: 'lantern' },
-  );
-  fails((c) => (bram(c).prompt = 'dialogue.none'), 'UNRESOLVED_REFERENCE', `${D}.prompt`, {
-    target: 'dialogue.none',
-  });
-  fails(
-    (c) => (bram(c).choices.carry.narration = 'dialogue.none'),
-    'UNRESOLVED_REFERENCE',
-    `${D}.choices.carry.narration`,
-    { target: 'dialogue.none' },
-  );
-  fails(
-    (c) => (bram(c).choices.carry.sequence[0].fact = ref('fact', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${D}.choices.carry.sequence[0].fact`,
-    missing('fact'),
-  );
-  fails(
-    (c) => (bram(c).choices.carry.sequence[0].value = 'lost'),
-    'FACT_TYPE_MISMATCH',
-    `${D}.choices.carry.sequence[0].value`,
-  );
-  fails(
-    (c) => (bram(c).roles.actor = { role: 'npc', npc: ref('npc', 'bram') }),
-    'DUPLICATE_DEFINITION',
-    `${D}.roles.actor`,
-  );
-  fails((c) => (bram(c).choices = {}), 'SCHEMA_VIOLATION', `${D}.choices`, {
-    error: 'too_few_items',
-  });
-  fails(
-    (c) => {
-      c.dialogues = { [`${F}:dialogue/lantern`]: { ...bram(c), key: 'lantern' } };
-    },
-    'DUPLICATE_DEFINITION',
-    `.cartridge.dialogues["${F}:dialogue/lantern"]`,
-  );
+// Breaks: a dialogue loads without dialogue@1 in its lock (references, roles, texts, facts and
+// keys are the compiler's: test/loka/content_ferry_test.exs).
+test('the loader checks the dialogue lock', () => {
   fails(
     (c) => {
       delete c.manifest.requires.capabilities.dialogue;
@@ -676,37 +598,14 @@ test('the loader checks dialogue references, roles, texts, facts, keys and the l
 const P = `.cartridge.story_points["${F}:story_point/lantern_resolved"]`;
 const point = (c: any) => c.story_points[`${F}:story_point/lantern_resolved`];
 
-// Breaks (23 §3: the loader admitting what the compiler rejects, test/loka/content_ferry_test.exs):
-// a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes (it would
-// emit twice), a dialogue without a quest (its choice repeatable), a story point with no outcome,
-// a story point loaded without dialogue@1, its event's owner, in the lock, or keyed apart from
-// its key (the map's kind story_point has an underscore).
-test('the loader checks story point triggers, outcomes, keys and the lock', () => {
+// Breaks: a story point loaded without dialogue@1 in its lock or keyed apart from its key (the
+// map's kind story_point has an underscore); triggers and outcomes are the compiler's
+// (test/loka/content_ferry_test.exs).
+test('the loader checks story point keys and the lock', () => {
   fails((c) => (point(c).key = 'other'), 'ARTIFACT_DEFINITION_KEY_MISMATCH', P, {
     field: 'key',
     declared: 'lantern_resolved',
     expected: 'other',
-  });
-  fails(
-    (c) => (point(c).outcomes.carry.dialogue = ref('dialogue', 'missing')),
-    'UNRESOLVED_REFERENCE',
-    `${P}.outcomes.carry.dialogue`,
-    { target: `${F}:dialogue/missing` },
-  );
-  fails(
-    (c) => (point(c).outcomes.carry.choice = 'wave'),
-    'UNRESOLVED_REFERENCE',
-    `${P}.outcomes.carry.choice`,
-    { target: 'wave' },
-  );
-  fails(
-    (c) => (point(c).outcomes.leave.choice = 'carry'),
-    'DUPLICATE_DEFINITION',
-    `${P}.outcomes.carry`,
-  );
-  fails((c) => delete bram(c).quest, 'OUTCOME_MISMATCH', `${P}.outcomes.carry`);
-  fails((c) => (point(c).outcomes = {}), 'SCHEMA_VIOLATION', `${P}.outcomes`, {
-    error: 'too_few_items',
   });
   fails(
     (c) => {

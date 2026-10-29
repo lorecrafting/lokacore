@@ -12,7 +12,6 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import * as patrol from './patrol_fixture.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-climb-sampler-'));
@@ -108,22 +107,4 @@ test('the fall lands after the move cost', () => {
   const { send, at, hp } = session(costly);
   assert.deepEqual(send({ type: 'move', direction: 'down' }), ['movement.moved', 'narration.fell']);
   assert.deepEqual([at(), hp()], ['room.ledge.title', 5]);
-});
-
-// Breaks: the loader admits a patrol leg over a climb face, so the leader walks it (twin of
-// content_climb_test.exs).
-test('the loader refuses a patrol route over a climb face', () => {
-  const P = patrol.prefix;
-  const r = patrol.load((c: any) => {
-    c.manifest.requires.kernel_api.at_least = '1.45';
-    c.rooms[`${P}:room/watch_post`].exits.west.climb = {
-      item: patrol.ref(patrol.fresh, 'item', 'brass_key'),
-      damage: 1,
-      fell: 'watch.prompt',
-    };
-  });
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'OUTCOME_MISMATCH',
-    `.cartridge.quests["${P}:quest/watch_rounds"].patrol.route[0]`,
-  ]);
 });
