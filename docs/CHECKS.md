@@ -5,7 +5,7 @@ run on the exact head is the merge gate with review ([two-lane CI](decisions/own
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
 `bin/check_all.sh` mirrors the hosted line for an occasional full local run (PM only: `LOKA_PM=1` prefix). `bin/prepush.sh` runs
 the static checks of hosted CI that the branch's changed file types need (diff against the merge base with `origin/main`,
-uncommitted edits included; all of them when it cannot be read): the Elixir checks only for `.ex`, `.exs` or `mix.lock`,
+uncommitted edits included; all of them when it cannot be read): the Elixir checks only for `.ex`, `.exs`, `mix.lock`, `protocol/` or `composition-profile.json`,
 the TypeScript ones only for TS, package JSON or JSON under `kernel/ts`, `mobile`, `cartridges` or `protocol`, Prettier only on the changed files (every file after a Prettier setup change); `REGEN` and `DOCS` always run before every push and after every
 `bin/pm_merge.sh` merge. It first runs `bin/regen.sh`, the one command that rewrites every generated file from its inputs (the `contracts.exs` and `features.exs` outputs, `docs/state-sections.gen.json`, the review index, and, only when the diff against `origin/main` touches their inputs, the story views and saves, a changed cartridge's (every one after a `lib/` change) `{description, canonical, sha256}` hash fixture with its transcripts' content hash, and `test/loka/lint_baseline.txt`, which only shrinks: a new finding fails), and fails `REGEN_DIRTY` naming each file it rewrote: after editing a generator's input, run `bin/regen.sh` and commit what it rewrites. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF). The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
@@ -160,7 +160,7 @@ their rules and red controls remain available for resumption.
   was cancelled, or if the path filter did not succeed ([workflow step 7](PM.md#loop)). The path filter is a first `changes` job
   ([`bin/ci_changes.sh`](../bin/ci_changes.sh), loka-n0ng) over the branch's diff against its merge base with `main`: a push whose
   files are all prose under `docs/` or `.beads/` (not `docs/spec/`, `docs/system/`, JSON, `.gen.` files or the prose files tests read, listed in the script) skips every job
-  but `lint`; `sim` and `walk` run only when `kernel/ts/src`, `lib`, `cartridges`, `protocol`, the sim tests, the walk, `mix.lock`, `kernel/ts/package*.json`, either workflow or the filter changed;
+  but `lint`; `sim` and `walk` run only when `kernel/ts/src` or `play`, `lib`, `cartridges`, `protocol`, `mobile/app`, `config`, `mix.exs` or `mix.lock`, `bin/loka`, the sim tests, `kernel/ts/package*.json`, `.github` or the filter changed;
   the nightly and `workflow_dispatch` runs run everything. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job, two parallel legs `sim (fresh)` (`npm run test:sim:fresh`) and `sim (showcase)` (`npm run test:sim:showcase`); the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
