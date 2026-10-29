@@ -26,11 +26,11 @@ spec text; the [designer](../../docs/decisions/owner-decision-designer-role-2026
 Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
    the touched layer's type/compile checks and the focused tests your diff touches ([Every agent](../../docs/WORKFLOW.md#every-agent)).
-   The pre-push hook runs `bin/prepush.sh` (CI's static checks, about 50 s) and refuses a failing push: fix what fails.
+   The pre-push hook runs `bin/prepush.sh` (the static checks of CI that the changed file types need; [CHECKS](../../docs/CHECKS.md)) and refuses a failing push: fix what fails.
    Push with `bin/push_slice.sh <slice worktree> <branch>` (the hook runs prepush in that worktree) and read its one line `PUSH_EXIT=<n> <sha>`; the log path follows it. Every finished slice in the hosted-PR and draft-batch lanes is pushed, even when the brief names no push: an unpushed head is not durable.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
-   after a push, `push_slice.sh` prints whether `ci.yml` and `book-e2e.yml` started; hand back (a run can start up to ~2 minutes late: report `not started`, never dispatch);
-   the PM watches CI and sends a red run back as a finding (a hand dispatch cancels the push run, loka-thz). Every new check has a
+   after a push, `push_slice.sh` prints whether `ci.yml` and `book-e2e.yml` started (a run can start up to ~2 minutes late; never dispatch: a hand dispatch cancels the push run, loka-thz);
+   then run `bin/wait_ci.sh <sha>` in the background and hand back only on green, since the hosted kernel and elixir jobs are the full red-test list ([Every agent](../../docs/WORKFLOW.md#ci-is-the-full-suite)). Every new check has a
    planted violation that fails.
    A test that builds a GameView with a new or changed field asserts `validate('GameView', view)` is `[]` (as `kernel/ts/test/c4_pack.test.ts` does; loka-x3i0).
 2. Commit first, then self-review the diff once with this exact command: `/code-review medium <branch-name>` (the slice branch, e.g. `/code-review medium feat/x`). `/code-review` is a skill, so a `cd` before it does not change its target; never run it with no target. The review never runs checkout, stash or reset in your worktree. The handback names the range and confirms the reviewed files are the slice's; a review that lists files outside the slice is void: rerun it

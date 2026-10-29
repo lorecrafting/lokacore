@@ -17,7 +17,26 @@ permissions:
   contents: read
 
 jobs:
+  # Path filter (bin/ci_changes.sh): docs-only heads skip the test jobs; sim and walk need engine changes.
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    outputs:
+      code: ${{ steps.f.outputs.code }}
+      sim_walk: ${{ steps.f.outputs.sim_walk }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: f
+        run: sh bin/ci_changes.sh "$EVENT" | tee -a "$GITHUB_OUTPUT"
+        env:
+          EVENT: ${{ github.event_name }}
+
   elixir:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -89,6 +108,8 @@ jobs:
   # sim.test.ts (CI is set: 10,000 fresh sequences), in parallel with the kernel job, which skips it:
   # two legs, the fresh sequences and the showcase test, each under the timeout on a slow runner.
   sim:
+    needs: changes
+    if: needs.changes.outputs.sim_walk == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -122,6 +143,8 @@ jobs:
   # Kernel typecheck and unit tests (sim.test.ts runs in the sim jobs) and the TypeScript size gates
   # (they load typescript from kernel/ts). The chapter fixtures compile the real authored cartridge with mix.
   kernel:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -156,6 +179,8 @@ jobs:
   # Local-story authority (saves, faults, start-over) and Book tests (67 s wall, 327 s CPU locally);
   # its fixtures also compile the chapter with mix. Prettier rides along.
   mobile:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -187,12 +212,13 @@ jobs:
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
-  # The run's one verdict: fails unless every job succeeded.
+  # The run's one verdict: fails unless every job succeeded or was filtered out.
   ci-green:
-    needs: [elixir, lint, sim, kernel, mobile]
+    needs: [changes, elixir, lint, sim, kernel, mobile]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+      # A job skips only by its path filter, so skipped passes once the filter itself succeeded.
+      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: exit 1

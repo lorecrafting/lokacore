@@ -40,7 +40,7 @@ Every finding has a severity (blocker / should-fix / nit, at most five nits), a
 `file:line`, and a concrete failure scenario; without one, label it a question. Do not ask
 for work beyond the spec and brief.
 
-Do not edit code. For a slice that changes save, protocol or kernel contracts, write `docs/reviews/<YYYY-MM-DD>-<slice>-review.md` (PR or local branch, exact commit reviewed,
+Do not edit code, except a [small should-fix](../../docs/WORKFLOW.md#small-should-fix) during a re-check (the one push a reviewer makes). For a slice that changes save, protocol or kernel contracts, write `docs/reviews/<YYYY-MM-DD>-<slice>-review.md` (PR or local branch, exact commit reviewed,
 verdict APPROVE / APPROVE WITH NOTES / CHANGES REQUIRED, findings), run `bin/review_index.sh` to regenerate `docs/reviews/README.md`, commit those two files only; never push: run `git branch -f review-<N> HEAD` in your detached worktree before removing it and return the sha (the developer's fix push or the PM's merge carries it).
 For every other slice (polish, toolbox, docs) post the verdict and findings as one PR review (`gh pr review <N> --comment -b ...`, or `gh pr comment`) and write no record ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)); a fix re-check is a further comment.
 Keep the record short: links to governing clauses, verdict, concrete findings
