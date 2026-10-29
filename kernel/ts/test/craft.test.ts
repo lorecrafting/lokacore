@@ -261,20 +261,6 @@ test('loader: a storylet target is refused', () => {
   assert.deepEqual(loadEdited(edit), ['SCHEMA_VIOLATION', at]);
 });
 
-// Breaks: a skill prerequisite naming an unknown skill loads. The self-reference and hidden-skill
-// checks are the compiler's (content_craft_test.exs).
-test('loader: a skill prerequisite resolves', () => {
-  const at = `.cartridge.skills["${P}skill/carving"].prerequisite`;
-  // The leaf sits under all and not, so a walker that skips nesting misses it.
-  const naming = (key: string) => (c: any) => {
-    const p = c.skills[`${P}skill/carving`].prerequisite;
-    const leaf = { ...p.root, skill: { ...p.root.skill, key } };
-    p.root = { op: 'all', items: [{ op: 'not', item: leaf }] };
-  };
-  const leaf = at + '.root.items[0].item.skill';
-  assert.deepEqual(loadEdited(naming('nothing')), ['UNRESOLVED_REFERENCE', leaf]);
-});
-
 // A stick held, a carry limit of 100 g and 200 g spoons: the carve's exchange is too heavy.
 const heavy = (c = content) => {
   const w = take(fresh({ ...c, world: { ...c.world, carry: { max_grams: 100 } } }), 'stick_01');

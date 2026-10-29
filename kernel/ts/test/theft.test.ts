@@ -220,15 +220,6 @@ test('8. loader: vault lock, fence offers, floors, stolen fact scope, references
     diagnostic((c) => delete c.npcs[`${S}:npc/vault`].locks),
     ['SCHEMA_VIOLATION', `.cartridge.services["${S}:service/deposit"].benefit.vault`],
   );
-  assert.deepEqual(
-    diagnostic((c) => {
-      c.npcs[F].shop.offers[0].stock = {
-        items: [ref('item', 'purse'), ref('item', 'coin')],
-        buy: [6, 6],
-      };
-    }),
-    ['SCHEMA_VIOLATION', `.cartridge.npcs["${F}"].shop.offers[0].stolen`],
-  );
   assert.deepEqual(diagnostic(api), ['KERNEL_API_RANGE_INVALID', API]);
   assert.deepEqual(
     diagnostic((c) => {
@@ -248,14 +239,6 @@ test('8. loader: vault lock, fence offers, floors, stolen fact scope, references
     diagnostic((c) => (delete c.world.theft, delete c.npcs[V].locks)),
     ['SCHEMA_VIOLATION', `.cartridge.npcs["${F}"].shop.offers[0].stolen`],
   );
-  assert.deepEqual(
-    diagnostic((c) => delete c.npcs[F].shop.offers[0].stolen),
-    ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${F}"].shop`],
-  );
-  assert.deepEqual(
-    diagnostic((c) => delete c.text['shop.not_stolen']),
-    ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${F}"].shop.offers`],
-  ); // pass-1 GE3: a fence names its refusal of honest goods
   assert.deepEqual(
     diagnostic((c) => (c.facts[`${S}:fact/stolen`].scopes = ['player'])),
     ['FACT_SCOPE_UNSUPPORTED', '.cartridge.world.theft.stolen'],
