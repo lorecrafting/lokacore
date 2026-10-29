@@ -118,7 +118,8 @@ defmodule Loka.ContentCombatTest do
            ]
   end
 
-  # Breaks: combat opts in without the executable API/owners, or admits a reversed damage roll/no HP.
+  # Breaks: combat opts in without the executable API/owners, or admits a reversed damage roll,
+  # no HP or HP whose bounds miss its start.
   test "combat requirements and attack bounds are enforced", %{tmp_dir: dir} do
     cases =
       [
@@ -129,6 +130,8 @@ defmodule Loka.ContentCombatTest do
         {@manifest, put_in(@npc, ["attack", "damage_min"], 4), "SCHEMA_VIOLATION",
          "npcs/rat.attack.damage_max"},
         {@manifest, Map.delete(@npc, "hp"), "SCHEMA_VIOLATION", "npcs/rat.hp"},
+        {@manifest, put_in(@npc, ["hp", "start"], 7), "RESOURCE_SPEC_INVALID", "npcs/rat.hp"},
+        {@manifest, put_in(@npc, ["hp", "minimum"], 7), "RESOURCE_SPEC_INVALID", "npcs/rat.hp"},
         {update_in(@manifest, ["world"], &Map.delete(&1, "combat")), @npc, "SCHEMA_VIOLATION",
          "npcs/rat.attack"}
       ] ++

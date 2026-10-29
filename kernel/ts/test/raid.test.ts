@@ -199,22 +199,9 @@ test('f: a world rebuilt from the receipts holds the one raider and does not res
   assert.equal(raiders(elapsed(rebuilt, 1900)).length, 1);
 });
 
-// Breaks: the loader's population.spawn or day_target 0 floor is missing or low, or the step's
-// plan is never resolved.
-test('g: the loader refuses population.spawn or a 0 target below 1.84, or an unknown plan', () => {
+// Breaks: a population.spawn step's plan is never resolved.
+test('g: the loader refuses an unknown plan', () => {
   const raid = 'raid_sampler@0.0.1:reaction/raid';
-  const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-  for (const drop of [false, true]) {
-    const old = reload(base, (c) => {
-      c.manifest.requires.kernel_api.at_least = '1.83';
-      delete c.reactions[AFTERSHOCK]; // row FD1's rule and stamp need 1.90 on their own
-      c.reactions[raid].apply.pop();
-      // drop: the plan's target 0 alone; else the step alone (targets 1)
-      if (drop) c.reactions[raid].apply.shift();
-      else Object.assign(Object.values(c.populations)[0]!, { day_target: 1, night_target: 1 });
-    });
-    assert.deepEqual(old.ok ? undefined : [old.diagnostic.code, old.diagnostic.path], api);
-  }
   const nowhere = reload(base, (c) => (c.reactions[raid].apply[0].plan.key = 'nowhere'));
   assert.deepEqual(nowhere.ok ? undefined : [nowhere.diagnostic.code, nowhere.diagnostic.path], [
     'UNRESOLVED_REFERENCE',

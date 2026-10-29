@@ -240,16 +240,6 @@ test('the loader refuses each unsound derived table', () => {
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
     [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'), // row 2c modifies: 1.46
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => delete c.statuses[MIGHT].modifies, // only a modifying status may omit per_tick
-      'SCHEMA_VIOLATION',
-      `.cartridge.statuses[${JSON.stringify(MIGHT)}].per_tick`,
-    ],
-    [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.39'),
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',

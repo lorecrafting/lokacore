@@ -288,9 +288,8 @@ function reload(edit: (c: any) => void) {
 const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
 
 // Breaks (twin of test/loka/content_elements_test.exs): a status_applied trigger, a reaction
-// status.cure or a status_active leaf reading self or subject (each alone) loads under API 1.52,
-// or a reaction cure of an undeclared status loads.
-test('status readers need API 1.53; a reaction cure names a declared status', () => {
+// status.cure or a status_active leaf reading self or subject (each alone) loads under API 1.52.
+test('status readers need API 1.53', () => {
   assert.equal(
     reload(() => {}),
     'loaded',
@@ -311,12 +310,5 @@ test('status readers need API 1.53; a reaction cure names a declared status', ()
   assert.equal(
     reload((c) => (spark(c).when = leaf('target'))),
     'loaded',
-  );
-  assert.deepEqual(
-    reload((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.53';
-      spark(c).apply.push({ ...cure, status: ref('status', 'ash') });
-    }),
-    ['UNRESOLVED_REFERENCE', `.cartridge.reactions["${rule('spark')}"].apply[1].status`],
   );
 });

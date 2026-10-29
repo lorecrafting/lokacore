@@ -142,12 +142,3 @@ test('a suppression resume births nothing and draws nothing', () => {
   w = elapsed(w, ends_at);
   assert.deepEqual([w.state.rng, bandits(w)], [[1, 2, 3, 4], []]);
 });
-
-// Break: the loader admits an encounter plan below kernel_api 1.74.
-test('chance needs kernel_api 1.74', () => {
-  const r = reload(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.73'));
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
-});

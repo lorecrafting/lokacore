@@ -280,15 +280,6 @@ const road = (c: any, key: string) => c.recipes[`resource_sampler@0.0.1:recipe/$
 const road_fails = (f: (c: any) => void, code: string, path: string, data = {}, s: string[] = []) =>
   fails(f, code, path, data, s, ROAD);
 
-test('a resource spec whose bounds do not hold its start is RESOURCE_SPEC_INVALID', () => {
-  assert.ok(load(ROAD, () => {}).ok);
-  const at = `.cartridge.resources["${HP}"]`;
-  road_fails((c) => (c.resources[HP].start = 26), 'RESOURCE_SPEC_INVALID', at);
-  road_fails((c) => (c.resources[HP].start = -1), 'RESOURCE_SPEC_INVALID', at);
-  road_fails((c) => (c.resources[HP].minimum = 26), 'RESOURCE_SPEC_INVALID', at);
-  assert.ok(load(ROAD, (c) => (c.resources[HP].start = 25)).ok); // start at a bound
-});
-
 test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE", () => {
   const target = { target: 'resource_sampler@0.0.1:resource/sp' };
   road_fails(

@@ -1,4 +1,3 @@
-// size: allow 306, one statement per family until batch C1 removes them; construction joins the declaration stage
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
 import { scopedFacts } from './cartridge_scoped_facts.ts';
@@ -35,13 +34,7 @@ import { variants } from './cartridge_variants.ts';
 import { schedules } from './cartridge_schedules.ts';
 import { standing } from './cartridge_standing.ts';
 import { construction } from './cartridge_construction.ts';
-import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
-import { food } from './cartridge_food.ts';
-import { bleed } from './cartridge_bleed.ts';
-import { status } from './cartridge_status.ts';
-import { liquids } from './cartridge_liquids.ts';
-import { population } from './cartridge_population.ts';
 import { apiCmp, installedStage, type Installed } from './cartridge_installed.ts';
 export type { Installed } from './cartridge_installed.ts';
 
@@ -292,12 +285,6 @@ function declarations(c: Obj): Diagnostic[] {
   out.push(...schedules(c));
   out.push(...construction(c));
   // -- D1
-  out.push(...liquids(c));
-  out.push(...food(c));
-  out.push(...bleed(c));
-  out.push(...status(c));
-  out.push(...population(c));
-  out.push(...transports(c));
   // -- D2
   out.push(...services(c));
   out.push(...scopedFacts(c));
