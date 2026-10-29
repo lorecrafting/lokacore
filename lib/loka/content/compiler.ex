@@ -127,7 +127,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle replenish structure),
+         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population population_bundle replenish structure),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -215,7 +215,6 @@ defmodule Loka.Content.Compiler do
     {"quest", :quest, "QuestDefinition"},
     {"reaction", :reaction, "ReactionRule"},
     {"dialogue", :dialogue, "DialogueDefinition"},
-    {"story_point", :story_point, "StoryPointDefinition"},
     {"scene", :scene, "SceneDefinition"},
     {"skill", :skill, "SkillDefinition"},
     {"topic", :topic, "TopicDefinition"},
@@ -240,7 +239,7 @@ defmodule Loka.Content.Compiler do
     {facts, d4} = Position.facts(facts, m)
     {resources, d1} = Resources.load(of(files, :resources))
     {attributes, d3} = Resources.attributes(of(files, :attributes))
-    {defs, d2} = kinds(files)
+    {defs, d2} = kinds(files, m)
     {facts, d5} = Enum.reduce(@engine_facts, {facts, []}, &engine_facts(&1, &2, m, defs))
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
     {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5])}
@@ -250,12 +249,12 @@ defmodule Loka.Content.Compiler do
   defp engine_facts(mod, {facts, ds}, m, defs),
     do: with({facts, d} <- mod.facts(facts, m, defs), do: {facts, ds ++ d})
 
-  # The one-file-per-definition kinds (@kinds) and their diagnostics.
-  defp kinds(files) do
+  # The one-file-per-definition kinds (@kinds), the story points their claims derive, diagnostics.
+  defp kinds(files, m) do
     loaded = for {kind, file, contract} <- @kinds, do: {kind, files(files, file, contract)}
 
-    {Map.new(loaded, fn {kind, {ds, _}} -> {kind, ds} end),
-     for({_, {_, ds}} <- loaded, d <- ds, do: d)}
+    ds = for {_, {_, ds}} <- loaded, d <- ds, do: d
+    Dialogues.points({Map.new(loaded, fn {kind, {ds, _}} -> {kind, ds} end), ds}, m)
   end
 
   # Short references become full ones once a valid manifest names the cartridge; without one

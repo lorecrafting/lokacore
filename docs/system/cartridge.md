@@ -14,7 +14,7 @@ world's definitions and text:
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 | `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ActionRecipe, `action_recipe@1`, [mechanics](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `recipes` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
@@ -191,9 +191,10 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   `scene_<key>` fact (`facts.facts.scene_<key>`) and each action, reaction or dialogue
   fact.assign of it are RESERVED_FACT at the same write-site paths as position;
   fact_compare and reaction on.fact reads remain legal;
-- story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
-  one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
-  `lib/loka/content/dialogues.ex:2`);
+- story points: a dialogue choice's `story_point: "<key>/<outcome>"` and a scene's `on_end`
+  declare the point's outcomes; a second claim of one outcome is `DUPLICATE_DEFINITION` at its
+  site, and a claiming choice's dialogue resolves a quest (`OUTCOME_MISMATCH`;
+  `lib/loka/content/dialogues.ex`);
 - chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
   (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
   (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a
