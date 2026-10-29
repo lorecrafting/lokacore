@@ -25,7 +25,6 @@
       "scene": 1,
       "action_recipe": 1,
       "reaction": 1,
-      "behavior": 1,
       "schedule": 1,
       "population": 1,
       "commerce": 1,
@@ -42,6 +41,6 @@
       "sense_cue": 1
     }
   },
-  "canonical": "{\"capabilities\":{\"action_recipe\":1,\"attributes\":1,\"barrier\":1,\"behavior\":1,\"calendar\":1,\"check\":1,\"combat\":1,\"commerce\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"faction\":1,\"inspectable_detail\":1,\"light\":1,\"liquid\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"population\":1,\"position\":1,\"quest\":1,\"reaction\":1,\"readable\":1,\"relationship\":1,\"resource\":1,\"scene\":1,\"schedule\":1,\"sense_cue\":1,\"service\":1,\"skills\":1,\"status\":1,\"target_resolution\":1,\"tide\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"}",
-  "sha256": "df07f06a4900fa8e7b9c5a9528d6350ab23983b76ffa270564c552f6bd4df0ee"
+  "canonical": "{\"capabilities\":{\"action_recipe\":1,\"attributes\":1,\"barrier\":1,\"calendar\":1,\"check\":1,\"combat\":1,\"commerce\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"faction\":1,\"inspectable_detail\":1,\"light\":1,\"liquid\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"population\":1,\"position\":1,\"quest\":1,\"reaction\":1,\"readable\":1,\"relationship\":1,\"resource\":1,\"scene\":1,\"schedule\":1,\"sense_cue\":1,\"service\":1,\"skills\":1,\"status\":1,\"target_resolution\":1,\"tide\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"}",
+  "sha256": "e34a3e1dac3da19c03631d49e121ccf56a1a91a6287df2a3f9e09f2681511960"
 }
