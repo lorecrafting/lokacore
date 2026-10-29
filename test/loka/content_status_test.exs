@@ -42,15 +42,16 @@ defmodule Loka.ContentStatusTest do
     end
   end
 
-  # Breaks: a status declaration without status@1 compiles, or is refused under another code or path.
-  test "status without the status capability is UNDECLARED_CAPABILITY at the manifest", %{
-    dir: dir
-  } do
-    drop = &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "status") end)
-    assert {:error, ds} = Loka.ContentSource.compile(dir, [{"cartridge.json", drop}])
+  # Breaks: a status declaration without status@1 or death@1 compiles, or is refused under another
+  # code or path.
+  test "status without the status or death capability is UNDECLARED_CAPABILITY", %{dir: dir} do
+    for cap <- ~w(status death) do
+      drop = &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, cap) end)
+      assert {:error, ds} = Loka.ContentSource.compile(dir, [{"cartridge.json", drop}])
 
-    got = Enum.map(ds, &{&1["code"], &1["path"], &1["data"]["capability"]})
-    assert {"UNDECLARED_CAPABILITY", "cartridge.requires.capabilities", "status"} in got
+      got = Enum.map(ds, &{&1["code"], &1["path"], &1["data"]["capability"]})
+      assert {"UNDECLARED_CAPABILITY", "cartridge.requires.capabilities", cap} in got
+    end
   end
 
   # Breaks (row 16; twin of the loader case in kernel/ts/test/sneak.test.ts): pierced_by compiles
