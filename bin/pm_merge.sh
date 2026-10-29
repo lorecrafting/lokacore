@@ -59,5 +59,6 @@ sh "$here/prepush.sh" || fail=1
 [ -n "$ts" ] && run TS_TESTS sh -c "cd kernel/ts && nice -n 10 mise exec -- node --test --test-reporter=dot $ts"
 [ -n "$ex" ] && run EX_TESTS sh -c "nice -n 10 mise exec -- mix test $ex"
 [ "$fail" = 0 ] || { echo "NOT PUSHED; reset to pre-merge $pre"; git reset -q --hard "$pre"; exit 1; }
-git push -q origin "HEAD:$batch" && echo "PUSHED $batch $(git rev-parse HEAD)" ||
+# prepush.sh passed on this head above; the pre-push hook skips its second run for exactly this sha (loka-36uz).
+LOKA_PREPUSH_OK=$(git rev-parse HEAD) git push -q origin "HEAD:$batch" && echo "PUSHED $batch $(git rev-parse HEAD)" ||
   { echo "PUSH FAILED; reset to pre-merge $pre"; git reset -q --hard "$pre"; exit 1; }

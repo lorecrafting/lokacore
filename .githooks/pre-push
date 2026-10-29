@@ -1,6 +1,7 @@
 #!/bin/sh
 # Refuses a push when a new commit's message names a local path, or when bin/prepush.sh fails (loka-9ruc). Activate once per clone: git config core.hooksPath .githooks
 # Status-only pushes (every changed file under .beads/ or docs/HANDOFF.md) skip the check; a new branch or an unknown remote sha runs it.
+# A ref whose sha equals $LOKA_PREPUSH_OK (set by bin/pm_merge.sh after its own prepush.sh run) skips it too.
 z=0000000000000000000000000000000000000000
 skip=1
 while read -r _ local_sha _ remote_sha; do
@@ -9,6 +10,7 @@ while read -r _ local_sha _ remote_sha; do
   for c in $(git rev-list "$local_sha" --not --remotes); do
     git log -1 --format=%B "$c" | grep -qE '/Users/|worktrees\.noindex/' && { echo "pre-push: commit $c's message names a local path (/Users/ or worktrees.noindex/); reword it" >&2; exit 1; }
   done
+  [ "$local_sha" = "${LOKA_PREPUSH_OK-}" ] && continue # bin/pm_merge.sh just passed prepush.sh on this sha
   [ "$remote_sha" = "$z" ] && { skip=0; continue; }
   files=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null) || { skip=0; continue; }
   [ -n "$(printf '%s\n' "$files" | grep -vE '^(\.beads/|docs/HANDOFF\.md$)')" ] && { skip=0; continue; }

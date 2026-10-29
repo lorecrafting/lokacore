@@ -266,14 +266,17 @@ chmod +x "$tmp/pmgh/gh"
 pm() { # <case> <want-rc> <want-output>
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
   sf=${SLICE_FILE:-s} rf=${REC_FILE:-r}; mkdir -p "$(dirname "$sf")" "$(dirname "$rf")"
-  git checkout -qb batch; mkdir bin node_modules; cp "$bin/pm_merge.sh" bin/; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; echo base > a
+  git checkout -qb batch; mkdir bin node_modules; cp "$bin/pm_merge.sh" bin/; printf '#!/bin/sh\necho run >> %s.pp\n' "$R" > bin/prepush.sh; echo base > a; chmod +x bin/prepush.sh
   [ -z "${REC_IN_BASE-}" ] || echo old > "$rf" # the record branch updates an existing record
   git add . && git commit -qm base && git push -q origin batch
   git checkout -qb slice; echo "${SLICE_TEXT:-s}" > "$sf"; git add . && git commit -qm slice && git push -q origin slice
   git checkout -q batch; git checkout -qb rec; echo r > "$rf"; git add . && git commit -qm rec && git push -q origin rec; git checkout -q batch
+  mkdir "$R.h"; cp "$bin/../.githooks/pre-push" "$R.h/"; git config core.hooksPath "$R.h" # pm_merge's push runs the real hook
   pre=$(git rev-parse HEAD); rc=0; EXPECT_SHA=$(git rev-parse origin/slice) PATH="$tmp/pmgh:$PATH" capped sh bin/pm_merge.sh "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] && grep -q "$3" "$R.out" || { bad "pm_merge $1: exit $rc, want $2 with '$3'"; sed 's/^/  /' "$R.out"; }
   if [ "$2" != 0 ]; then [ "$(git rev-parse HEAD)" = "$pre" ] && [ "$(git rev-parse origin/batch)" = "$pre" ] || bad "pm_merge $1: merged or pushed"; fi
+  # Break (loka-36uz): the push's pre-push hook runs prepush.sh again on the head pm_merge just checked.
+  if [ "$2" = 0 ]; then [ "$(wc -l < "$R.pp")" -eq 1 ] || bad "pm_merge $1: prepush.sh ran $(wc -l < "$R.pp") times, want 1"; fi
 }
 ok='[{"conclusion":"success"},{"conclusion":"cancelled"}]'
 CI=$ok E2E=$ok pm green 0 '^PUSHED batch'
@@ -834,6 +837,13 @@ git commit -qm 'see /Users/x/f' --allow-empty; rc=0
 printf 'refs/heads/a %s refs/heads/a %s\nrefs/heads/b %s refs/heads/b 1111111111111111111111111111111111111111\nrefs/heads/c %s refs/heads/c %s\n' "$c1" "$base" "$c1" "$(git rev-parse HEAD)" $z \
   | sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
 [ "$rc" = 1 ] || bad "pre-push: a path-naming message after code and unknown-sha refs: exit $rc, want 1"
+# Break (loka-36uz): the hook skips a failing prepush.sh for a sha other than $LOKA_PREPUSH_OK, or for a second ref with one.
+git reset -q --hard "$c1"; printf '#!/bin/sh\nexit 1\n' > bin/prepush.sh
+for m in "$c1 $c1 0" "$a $c1 1" "$c1 $c1,$a 1"; do
+  set -- $m; rc=0
+  for s in $(echo "$2" | tr , ' '); do echo "refs/heads/$s $s refs/heads/$s $z"; done | LOKA_PREPUSH_OK=$1 sh "$bin/../.githooks/pre-push" > /dev/null 2>&1 || rc=$?
+  [ "$rc" = "$3" ] || bad "pre-push: LOKA_PREPUSH_OK=$1, pushing $2: exit $rc, want $3"
+done
 # Break (loka-ivjq.27): an edited TypeScript file over the size limit passes the edit hook silently, the check gets
 # a path the size script cannot resolve from the repo root, or a non-TypeScript edit runs it.
 mkdir "$tmp/fe"; printf '#!/bin/sh\nshift 2; echo "$*" >> "$FE_LOG"; case $* in *check_ts_size*) echo too-long; exit 1 ;; esac\n' > "$tmp/fe/mise"

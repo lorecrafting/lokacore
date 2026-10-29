@@ -21,6 +21,7 @@ touched() {
 }
 
 m mix compile >/dev/null
+m mix loka.source_schema >/dev/null # schemas/source/ (the compiler's source contracts; loka-tp02)
 sha() { sed -n 's/^  "sha256": "\(.*\)",*$/\1/p' "$1"; }
 # Each fixture regen_hash_fixture.sh accepts, with its cartridge (the manifest id).
 python3 -c '
