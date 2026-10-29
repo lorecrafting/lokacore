@@ -202,7 +202,7 @@ printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
 # issue is newer than the last merge, or stays silent when none is; closed issues counted as open;
 # the ready/blocked counts line misreads br's JSON.
-printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; "ready --json") echo "[{},{}]" ;; "blocked --json") echo "{\\"total\\":3}" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
+printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; *"ready --json") echo "[{},{}]" ;; *"blocked --json") echo "{\\"total\\":3}" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
 printf '#!/bin/sh\nexit 1\n' > "$tmp/stub/gh"; chmod +x "$tmp/stub/br" "$tmp/stub/gh"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/session_status.sh" bin/
 echo a > a; git add . && git commit -qm base; git checkout -qb x; echo b > a; git commit -qam x; git checkout -q main
