@@ -38,7 +38,7 @@ defmodule Loka.ContentRoomsTest do
     }
   end
 
-  defp room(exits), do: %{"title" => "r.t", "description" => "r.d", "exits" => exits}
+  defp room(exits), do: %{"name" => "r.t", "description" => "r.d", "exits" => exits}
 
   # A two-room source (a north to b), with `files` merged over it; nil removes a file.
   defp compile(dir, files) do
@@ -170,7 +170,7 @@ defmodule Loka.ContentRoomsTest do
   # Review F5. Breaks: a v2 action label or accessibility key reaches the player unresolved.
   test "an action text key without a catalog entry is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
     talk = %{
-      "label" => "act.talk",
+      "name" => "act.talk",
       "target" => %{"kind" => "none"},
       "command" => "move",
       "priority" => 0,
@@ -185,7 +185,7 @@ defmodule Loka.ContentRoomsTest do
              "cartridge.json" => Map.put(m, "entry", ref("a")),
              "actions/go.json" => talk
            }) ==
-             {:error, [d("UNRESOLVED_REFERENCE", "actions/go.label", %{"target" => "act.talk"})]}
+             {:error, [d("UNRESOLVED_REFERENCE", "actions/go.name", %{"target" => "act.talk"})]}
   end
 
   # Review F6. Breaks: v2 keyed on rooms alone, so text.json or an entry is silently dropped.

@@ -3,7 +3,7 @@
     "iron_door",
     "door"
   ],
-  "short": "barrier.iron_door.short",
+  "name": "barrier.iron_door.short",
   "initial": "closed",
   "tags": [
     "metal"

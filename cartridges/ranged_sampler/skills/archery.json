@@ -1,4 +1,4 @@
 {
-  "label": "skill.archery.label",
+  "name": "skill.archery.label",
   "requirement": "skill.archery.requirement"
 }

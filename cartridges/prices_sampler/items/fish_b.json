@@ -3,7 +3,7 @@
     "fish",
     "fish_b"
   ],
-  "short": "item.fish.short",
+  "name": "item.fish.short",
   "room_line": "item.fish.room",
   "description": "item.fish.description",
   "mass_grams": 500,

@@ -1,5 +1,5 @@
 {
-  "title": "fixture.quest",
+  "name": "fixture.quest",
   "objective": {
     "evidence": "current_state",
     "policy": {

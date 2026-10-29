@@ -1,5 +1,5 @@
 {
-  "title": "room.pen.title",
+  "name": "room.pen.title",
   "description": "room.pen.description",
   "locks": {
     "enter": {

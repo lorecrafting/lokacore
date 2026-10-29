@@ -2,7 +2,7 @@
   "keywords": [
     "mark"
   ],
-  "short": "npc.mark.short",
+  "name": "npc.mark.short",
   "room_line": "npc.mark.room",
   "description": "npc.mark.description",
   "room": "vault_yard",

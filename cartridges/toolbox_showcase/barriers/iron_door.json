@@ -2,7 +2,7 @@
   "keywords": [
     "iron_door"
   ],
-  "short": "barrier.iron_door.short",
+  "name": "barrier.iron_door.short",
   "initial": "closed",
   "tags": [
     "metal"

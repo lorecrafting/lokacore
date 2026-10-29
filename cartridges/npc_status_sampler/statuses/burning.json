@@ -3,7 +3,7 @@
   "tick_every": 60,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.burning",
+  "name": "condition.burning",
   "narration": {
     "applied": "narration.burning.applied",
     "tick": "narration.burning.tick",

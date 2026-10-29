@@ -139,14 +139,14 @@ defmodule Loka.ContentRefusalsTest do
         {"npcs/healer.json",
          %{
            "keywords" => ["healer"],
-           "short" => "npc.healer.short",
+           "name" => "npc.healer.short",
            "room_line" => "npc.healer.room",
            "description" => "npc.healer.description",
            "room" => "mine"
          }},
         {"quests/herbs.json",
          %{
-           "title" => "quest.herbs.title",
+           "name" => "quest.herbs.title",
            "repeatable" => true,
            "objective" => %{
              "evidence" => "current_state",
@@ -173,7 +173,7 @@ defmodule Loka.ContentRefusalsTest do
               {"items/bandage_#{i}.json",
                %{
                  "keywords" => ["bandage"],
-                 "short" => "item.ore.short",
+                 "name" => "item.ore.short",
                  "room_line" => "item.ore_01.room",
                  "description" => "item.ore.description",
                  "mass_grams" => 10,
@@ -308,7 +308,7 @@ defmodule Loka.ContentRefusalsTest do
 
   # Breaks: a topic names a fact or label that does not exist, and the Codex lists a dead entry.
   test "a topic's fact and label must resolve", %{codex_sampler: dir} do
-    for key <- ["fact", "label"] do
+    for key <- ["fact", "name"] do
       assert {"UNRESOLVED_REFERENCE", "topics/mill.#{key}"} in codes(dir, [
                {"topics/mill.json", &Map.put(&1, key, "missing")}
              ])

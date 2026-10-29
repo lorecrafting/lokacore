@@ -1,5 +1,5 @@
 {
-  "label": "actions.pull_b",
+  "name": "actions.pull_b",
   "aliases": [
     "pull"
   ],

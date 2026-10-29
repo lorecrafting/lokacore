@@ -2,7 +2,7 @@
   "provider": "smith",
   "currency": "pennies",
   "action": "commission",
-  "label": "service.forge_commission",
+  "name": "service.forge_commission",
   "narration": "service.forge_commission.used",
   "price": 3,
   "benefit": {

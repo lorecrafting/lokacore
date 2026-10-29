@@ -3,7 +3,7 @@
     "ore",
     "ore_01"
   ],
-  "short": "item.ore.short",
+  "name": "item.ore.short",
   "room_line": "item.ore_01.room",
   "description": "item.ore.description",
   "mass_grams": 1000,

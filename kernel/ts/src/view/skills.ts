@@ -27,7 +27,7 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
       world.cartridge.ancestries && {
         ancestry_choices: Object.entries(world.cartridge.ancestries).map(([key, declaration]) => ({
           key: key as Key,
-          label: declaration.label,
+          label: declaration.name,
           description: declaration.description,
           attribute: declaration.attribute,
           modifier: declaration.modifier,
@@ -54,7 +54,7 @@ function skillView(
   return [
     {
       skill,
-      label: s.label,
+      label: s.name,
       requirement: s.requirement,
       ...st,
       ...(s.growth && { level: level(world, actor, skill) }),

@@ -1,5 +1,5 @@
 {
-  "label": "action.whittle",
+  "name": "action.whittle",
   "aliases": [
     "whittle"
   ],

@@ -69,7 +69,7 @@ function gongs(): string[] {
   const gong = {
     ...bell,
     key: 'ring_gong',
-    label: 'actions.ring_gong',
+    name: 'actions.ring_gong',
     policy: { op: 'all', items: [] },
   };
   gong.target = { kind: 'detail', room: ref('room', 'bell_tower'), detail: 'gong' };
@@ -82,7 +82,7 @@ function gongs(): string[] {
   c.recipes['recipe_sampler@0.0.1:recipe/toll_bell'] = {
     ...bell,
     key: 'toll_bell',
-    label: 'actions.toll_bell',
+    name: 'actions.toll_bell',
   };
   c.text['actions.ring_gong'] = 'Ring the gong';
   c.text['actions.toll_bell'] = 'Toll the bell';

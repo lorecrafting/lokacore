@@ -49,7 +49,7 @@ registerHooks({
 const source = () =>
   bundle((c) => {
     lidded()(c);
-    c.chapters = [{ title: 'chapter.codex' }];
+    c.chapters = [{ name: 'chapter.codex' }];
     c.text['chapter.codex'] = 'The codex';
     // Look (the room title tap) belongs to description_variant.
     c.manifest.requires.capabilities.description_variant = 1;

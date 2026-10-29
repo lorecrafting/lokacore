@@ -1,6 +1,6 @@
 {
   "keywords": ["carters_note", "book"],
-  "short": "item.carters_note.short",
+  "name": "item.carters_note.short",
   "room_line": "item.carters_note.room",
   "description": "item.carters_note.description",
   "location": { "in": "room", "room": "road" },

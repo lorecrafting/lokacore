@@ -1,5 +1,5 @@
 {
-  "label": "actions.think_hall_lectern",
+  "name": "actions.think_hall_lectern",
   "aliases": [
     "think"
   ],

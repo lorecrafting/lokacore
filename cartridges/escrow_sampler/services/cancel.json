@@ -2,7 +2,7 @@
   "provider": "smith",
   "currency": "pennies",
   "action": "cancel",
-  "label": "service.cancel",
+  "name": "service.cancel",
   "narration": "service.cancel.used",
   "price": 1,
   "benefit": {

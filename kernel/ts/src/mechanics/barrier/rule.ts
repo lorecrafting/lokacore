@@ -64,7 +64,7 @@ export const decide: Rule<'barrier'> = (world, command, mint, steps = { n: 0 }) 
   const line = engineLine(
     `barrier.${outcome}`,
     { actor: bodyOf(world, actor_id)! },
-    { barrier: world.cartridge.barriers![refString(barrier)].short },
+    { barrier: world.cartridge.barriers![refString(barrier)].name },
   );
   return accepted(world, outcome, [op], [event(world, command, mint, 1, changed)], [line]);
 };

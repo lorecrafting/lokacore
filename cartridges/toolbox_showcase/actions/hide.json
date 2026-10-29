@@ -1,5 +1,5 @@
 {
-  "label": "actions.hide",
+  "name": "actions.hide",
   "aliases": [
     "hide"
   ],

@@ -1,5 +1,5 @@
 {
-  "title": "room.loft.title",
+  "name": "room.loft.title",
   "description": "room.loft.description",
   "exits": {
     "down": {

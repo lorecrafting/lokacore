@@ -2,7 +2,7 @@
   "keywords": [
     "tusk"
   ],
-  "short": "item.tusk.short",
+  "name": "item.tusk.short",
   "room_line": "item.tusk.room",
   "description": "item.tusk.description",
   "location": {

@@ -2,7 +2,7 @@
   "keywords": [
     "raider"
   ],
-  "short": "npc.raider.short",
+  "name": "npc.raider.short",
   "room_line": "npc.raider.room",
   "description": "npc.raider.description",
   "room": "yard",

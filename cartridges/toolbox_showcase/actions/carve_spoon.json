@@ -1,5 +1,5 @@
 {
-  "label": "actions.carve_spoon",
+  "name": "actions.carve_spoon",
   "aliases": [
     "carve"
   ],

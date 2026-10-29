@@ -2,7 +2,7 @@
   "keywords": [
     "hall_cupboard"
   ],
-  "short": "barrier.hall_cupboard.short",
+  "name": "barrier.hall_cupboard.short",
   "initial": "closed",
   "tags": [
     "wooden",

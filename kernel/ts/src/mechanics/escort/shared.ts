@@ -7,9 +7,14 @@ import type {
   EntityId,
   EscortRelation,
   Key,
-  NpcDefinition,
 } from '../../contracts.gen.ts';
-import { bodyOf, refString, type ChoiceRow, type World } from '../../runtime/decision.ts';
+import {
+  bodyOf,
+  refString,
+  type ChoiceRow,
+  type World,
+  type NpcEntity,
+} from '../../runtime/decision.ts';
 import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { living, npcsIn } from '../death/shared.ts';
@@ -139,7 +144,7 @@ export function mounted(world: World, actor: CharacterId) {
   const body = bodyOf(world, actor);
   if (!fact || !body) return undefined;
   return npcsIn(world, [world.state.containers[body]!]).find(
-    (id) => (world.entities[id] as NpcDefinition).mount && value(world, actor, fact, id) === true,
+    (id) => (world.entities[id] as NpcEntity).mount && value(world, actor, fact, id) === true,
   );
 }
 

@@ -3,7 +3,7 @@
   "keywords": [
     "orchard_deer"
   ],
-  "short": "npc.orchard_deer.short",
+  "name": "npc.orchard_deer.short",
   "room_line": "npc.orchard_deer.room",
   "description": "npc.orchard_deer.description",
   "room": "orchard"

@@ -1,5 +1,5 @@
 {
-  "label": "actions.knock_door",
+  "name": "actions.knock_door",
   "aliases": [
     "knock"
   ],

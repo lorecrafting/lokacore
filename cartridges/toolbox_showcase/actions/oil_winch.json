@@ -1,5 +1,5 @@
 {
-  "label": "actions.oil_winch",
+  "name": "actions.oil_winch",
   "aliases": [
     "oil"
   ],

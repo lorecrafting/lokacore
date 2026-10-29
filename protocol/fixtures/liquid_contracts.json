@@ -34,7 +34,7 @@
       "contract": "LiquidDefinition",
       "value": {
         "key": "water",
-        "label": "liquid.water",
+        "name": "liquid.water",
         "unit_label": "liquid.units",
         "grams_per_unit": 250,
         "drink_amount": 1
@@ -322,12 +322,12 @@
       ]
     },
     {
-      "name": "liquid_definition-missing-label",
+      "name": "liquid_definition-missing-name",
       "base": "liquid_definition",
-      "omit": "label",
+      "omit": "name",
       "errors": [
         {
-          "path": "/label",
+          "path": "/name",
           "code": "missing_property"
         }
       ]

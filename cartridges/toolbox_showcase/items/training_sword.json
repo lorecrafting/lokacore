@@ -3,7 +3,7 @@
     "sword",
     "training_sword"
   ],
-  "short": "item.training_sword.short",
+  "name": "item.training_sword.short",
   "room_line": "item.training_sword.room",
   "description": "item.training_sword.description",
   "location": {

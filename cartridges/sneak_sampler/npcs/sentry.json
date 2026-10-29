@@ -2,7 +2,7 @@
   "keywords": [
     "sentry"
   ],
-  "short": "npc.sentry.short",
+  "name": "npc.sentry.short",
   "room_line": "npc.sentry.room",
   "description": "npc.sentry.description",
   "room": "gate",

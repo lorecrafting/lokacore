@@ -1,5 +1,5 @@
 {
-  "label": "actions.tear_notice",
+  "name": "actions.tear_notice",
   "aliases": [
     "tear"
   ],

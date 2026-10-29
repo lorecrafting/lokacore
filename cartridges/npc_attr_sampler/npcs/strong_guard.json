@@ -3,7 +3,7 @@
     "strong",
     "guard"
   ],
-  "short": "npc.strong_guard.short",
+  "name": "npc.strong_guard.short",
   "room_line": "npc.strong_guard.room",
   "description": "npc.strong_guard.description",
   "room": "gate_room",

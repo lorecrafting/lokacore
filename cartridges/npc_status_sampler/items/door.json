@@ -2,7 +2,7 @@
   "keywords": [
     "door"
   ],
-  "short": "item.door.short",
+  "name": "item.door.short",
   "room_line": "item.door.room",
   "description": "item.door.description",
   "mass_grams": 200000,

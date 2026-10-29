@@ -3,7 +3,7 @@
     "orla",
     "brewer"
   ],
-  "short": "npc.orla.short",
+  "name": "npc.orla.short",
   "room_line": "npc.orla.room",
   "description": "npc.orla.description",
   "room": "still_room",

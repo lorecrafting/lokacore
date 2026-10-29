@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_door",
+  "name": "actions.force_door",
   "aliases": [
     "force"
   ],

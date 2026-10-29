@@ -22,7 +22,7 @@ export function messageSource(c: any) {
   c.npcs[`${prefix}:npc/courier`] = {
     key: 'courier',
     keywords: ['courier'],
-    short: 'npc.courier.short',
+    name: 'npc.courier.short',
     description: 'npc.courier.description',
     room_line: 'npc.courier.room',
     room: green,
@@ -31,7 +31,7 @@ export function messageSource(c: any) {
     [`${prefix}:item/message`]: {
       key: 'message',
       keywords: ['message'],
-      short: 'item.message.short',
+      name: 'item.message.short',
       description: 'item.message.description',
       room_line: 'item.message.room',
       mass_grams: 20,
@@ -41,7 +41,7 @@ export function messageSource(c: any) {
     [`${prefix}:item/satchel`]: {
       key: 'satchel',
       keywords: ['satchel'],
-      short: 'item.satchel.short',
+      name: 'item.satchel.short',
       description: 'item.satchel.description',
       room_line: 'item.satchel.room',
       mass_grams: 1000,

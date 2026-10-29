@@ -1,5 +1,5 @@
 {
-  "title": "room.lever_hall.title",
+  "name": "room.lever_hall.title",
   "description": "room.lever_hall.description",
   "exits": {
     "west": {

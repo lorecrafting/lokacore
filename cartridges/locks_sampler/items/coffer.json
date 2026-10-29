@@ -2,7 +2,7 @@
   "keywords": [
     "coffer"
   ],
-  "short": "item.coffer.short",
+  "name": "item.coffer.short",
   "room_line": "item.coffer.room",
   "description": "item.coffer.description",
   "location": {

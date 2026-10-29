@@ -169,6 +169,7 @@ test('random Flee candidate policies share the command query budget and fault at
         ...initial.cartridge.actions,
         move: {
           ...move,
+          name: move.label,
           accessibility: 'actions.move.a11y',
           policy: {
             op: 'all',

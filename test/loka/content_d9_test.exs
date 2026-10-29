@@ -18,7 +18,7 @@ defmodule Loka.ContentD9Test do
        &put_in(&1, ["details", "bell"], %{"aliases" => ["bell"], "description" => "detail.bell"})},
       {"actions/ring_bell.json",
        %{
-         "label" => "actions.ring_bell",
+         "name" => "actions.ring_bell",
          "aliases" => ["ring"],
          "target" => %{"kind" => "detail", "room" => "drill_yard", "detail" => "bell"},
          "priority" => 10,

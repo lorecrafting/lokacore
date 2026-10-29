@@ -1,5 +1,5 @@
 {
-  "label": "actions.leave_word",
+  "name": "actions.leave_word",
   "aliases": [
     "chalk"
   ],

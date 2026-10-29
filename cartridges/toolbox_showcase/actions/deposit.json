@@ -1,5 +1,5 @@
 {
-  "label": "service.deposit",
+  "name": "service.deposit",
   "command": "use_service",
   "target": {
     "kind": "entity",

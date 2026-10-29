@@ -2,7 +2,7 @@
   "keywords": [
     "tollhouse_door"
   ],
-  "short": "barrier.tollhouse_door.short",
+  "name": "barrier.tollhouse_door.short",
   "initial": "closed",
   "tags": [
     "wooden",

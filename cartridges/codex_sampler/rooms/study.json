@@ -1,6 +1,6 @@
 {
   "zones": ["priory"],
-  "title": "room.study.title",
+  "name": "room.study.title",
   "description": "room.study.description",
   "exits": { "east": { "to": "hall" } },
   "details": { "desk": { "aliases": ["desk"], "description": "detail.desk" } }

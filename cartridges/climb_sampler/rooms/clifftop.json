@@ -1,5 +1,5 @@
 {
-  "title": "room.clifftop.title",
+  "name": "room.clifftop.title",
   "description": "room.clifftop.description",
   "exits": {
     "down": {

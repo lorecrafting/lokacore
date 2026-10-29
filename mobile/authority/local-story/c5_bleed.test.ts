@@ -195,7 +195,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
     c.npcs[`${prefix}:npc/teacher`] = {
       key: 'teacher',
       keywords: ['teacher'],
-      short: 'npc.hound.short',
+      name: 'npc.hound.short',
       description: 'npc.hound.description',
       room_line: 'npc.hound.room',
       room: ref('room', 'den'),
@@ -205,7 +205,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
       [`${prefix}:dialogue/teach_bandage`]: {
         key: 'teach_bandage',
         npc: ref('npc', 'teacher'),
-        label: 'narration.bandaged',
+        name: 'narration.bandaged',
         prompt: 'narration.bandaged',
         roles: { teacher: { role: 'npc', npc: ref('npc', 'teacher') } },
         policy: { op: 'fact_compare', fact: ref('fact', 'skill_bandage'), equals: false },

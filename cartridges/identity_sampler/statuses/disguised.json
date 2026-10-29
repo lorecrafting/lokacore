@@ -3,7 +3,7 @@
   "tick_every": 3600,
   "resource": "mv",
   "per_tick": 1,
-  "label": "condition.disguised",
+  "name": "condition.disguised",
   "narration": {
     "applied": "narration.disguised.applied",
     "tick": "narration.disguised.tick",

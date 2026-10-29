@@ -38,12 +38,12 @@ test('a failed compile or a refused artifact keeps the last good artifact', () =
   const last = readFileSync(out, 'utf8');
 
   const diag =
-    '{"code":"UNRESOLVED_REFERENCE","data":{"target":"room.nope"},"path":"rooms/a.title","severity":"error"}';
+    '{"code":"UNRESOLVED_REFERENCE","data":{"target":"room.nope"},"path":"rooms/a.name","severity":"error"}';
   const failed = dev({ STUB_ERR: diag });
   assert.equal(failed.status, 1);
   assert.match(
     failed.stderr,
-    /error at rooms\/a\.title: unresolved reference \(target "room\.nope"\)/,
+    /error at rooms\/a\.name: unresolved reference \(target "room\.nope"\)/,
   );
   assert.equal(readFileSync(out, 'utf8'), last);
 

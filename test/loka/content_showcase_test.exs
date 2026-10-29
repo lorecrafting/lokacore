@@ -41,7 +41,7 @@ defmodule Loka.ContentShowcaseTest do
         Path.join(dir, "barriers/stray.json"),
         JSON.encode!(%{
           "keywords" => ["stray"],
-          "short" => "barrier.store_door.short",
+          "name" => "barrier.store_door.short",
           "initial" => "closed",
           "tags" => ["burnable"]
         })

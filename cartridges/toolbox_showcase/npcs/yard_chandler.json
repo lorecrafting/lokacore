@@ -2,7 +2,7 @@
   "keywords": [
     "chandler"
   ],
-  "short": "npc.yard_chandler.short",
+  "name": "npc.yard_chandler.short",
   "room_line": "npc.yard_chandler.room",
   "description": "npc.yard_chandler.description",
   "room": "vault_yard",

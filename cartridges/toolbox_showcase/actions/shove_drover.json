@@ -1,5 +1,5 @@
 {
-  "label": "actions.shove_drover",
+  "name": "actions.shove_drover",
   "aliases": [
     "shove"
   ],

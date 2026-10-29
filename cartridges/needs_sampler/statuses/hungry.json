@@ -3,7 +3,7 @@
   "tick_every": 3600,
   "resource": "hunger",
   "per_tick": -1,
-  "label": "condition.hungry",
+  "name": "condition.hungry",
   "narration": {
     "applied": "narration.hungry.applied",
     "tick": "narration.hungry.tick",

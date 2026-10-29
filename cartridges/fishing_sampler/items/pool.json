@@ -2,7 +2,7 @@
   "keywords": [
     "pool"
   ],
-  "short": "item.pool.short",
+  "name": "item.pool.short",
   "room_line": "item.pool.room",
   "description": "item.pool.description",
   "mass_grams": 1000000,

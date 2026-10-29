@@ -44,7 +44,7 @@ export const chest =
     c.items[`${prefix}:item/chest`] = {
       key: 'chest',
       keywords: ['chest'],
-      short: 'item.chest.short',
+      name: 'item.chest.short',
       room_line: 'item.chest.room',
       description: 'item.chest.description',
       mass_grams: 8000,
@@ -58,7 +58,7 @@ export const chest =
       [`${prefix}:barrier/chest_lid`]: {
         key: 'chest_lid',
         keywords: ['lid', 'chest_lid'],
-        short: 'barrier.chest_lid.short',
+        name: 'barrier.chest_lid.short',
         initial,
       },
     };

@@ -1,5 +1,5 @@
 {
-  "title": "room.sea_cave.title",
+  "name": "room.sea_cave.title",
   "description": "room.sea_cave.description",
   "exits": {
     "west": {

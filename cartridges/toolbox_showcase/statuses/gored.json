@@ -3,7 +3,7 @@
   "tick_every": 60,
   "resource": "hp",
   "kind": "debuff",
-  "label": "condition.gored",
+  "name": "condition.gored",
   "narration": {
     "applied": "narration.gored.applied",
     "tick": "narration.gored.tick",

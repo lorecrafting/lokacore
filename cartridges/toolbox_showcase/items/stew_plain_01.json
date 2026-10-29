@@ -2,7 +2,7 @@
   "keywords": [
     "stew"
   ],
-  "short": "item.stew_plain_01.short",
+  "name": "item.stew_plain_01.short",
   "room_line": "item.stew_plain_01.room",
   "description": "item.stew_plain_01.description",
   "mass_grams": 500,

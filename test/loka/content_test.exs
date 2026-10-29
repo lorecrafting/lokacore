@@ -32,7 +32,7 @@ defmodule Loka.ContentTest do
   }
   @present %{"op" => "target_present"}
   @talk %{
-    "label" => "a",
+    "name" => "a",
     "target" => %{"kind" => "none"},
     "command" => "talk",
     "priority" => 0,

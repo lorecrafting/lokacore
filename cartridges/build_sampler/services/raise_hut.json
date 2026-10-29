@@ -2,7 +2,7 @@
   "provider": "carpenter",
   "currency": "pennies",
   "action": "raise_hut",
-  "label": "service.raise_hut",
+  "name": "service.raise_hut",
   "narration": "service.raise_hut.used",
   "price": 5,
   "benefit": {

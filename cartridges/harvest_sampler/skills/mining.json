@@ -1,4 +1,4 @@
 {
-  "label": "skill.mining.label",
+  "name": "skill.mining.label",
   "requirement": "skill.mining.requirement"
 }

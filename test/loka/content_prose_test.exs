@@ -13,10 +13,10 @@ defmodule Loka.ContentProseTest do
 
   # Breaks: a generated key silently replaces an authored or an earlier generated line.
   test "a generated key already in the catalog is DUPLICATE_KEY at the marker" do
-    assert {:error, diags} = speech([{"text.json", &Map.put(&1, "npc.elder.short", "x")}])
+    assert {:error, diags} = speech([{"text.json", &Map.put(&1, "npc.elder.name", "x")}])
 
     assert triples(diags) == [
-             {"DUPLICATE_KEY", "areas/village.npcs.elder.short", %{"target" => "npc.elder.short"}}
+             {"DUPLICATE_KEY", "areas/village.npcs.elder.name", %{"target" => "npc.elder.name"}}
            ]
 
     # An npc has no `room` member, so the schema also refuses the stray field itself.
@@ -66,8 +66,8 @@ defmodule Loka.ContentProseTest do
              "She hears."
 
     for shape <- [%{"prose" => ""}, %{"prose" => 1}, %{"prose" => "x", "y" => 1}] do
-      assert {:error, diags} = speech([{@bundle, &put_in(&1, @elder ++ ["short"], shape)}])
-      site = {"SCHEMA_VIOLATION", "areas/village.npcs.elder.short", %{"error" => "invalid_type"}}
+      assert {:error, diags} = speech([{@bundle, &put_in(&1, @elder ++ ["name"], shape)}])
+      site = {"SCHEMA_VIOLATION", "areas/village.npcs.elder.name", %{"error" => "invalid_type"}}
       assert triples(diags) == [site], inspect(shape)
     end
   end
@@ -76,24 +76,24 @@ defmodule Loka.ContentProseTest do
   # the author never wrote, the marker check drops the words (an UNRESOLVED_REFERENCE joins it),
   # or it refuses a line at the limit.
   test "a line too long for the catalog is refused at the marker and at its key" do
-    long = fn n -> &Map.put(&1, "short", %{"prose" => String.duplicate("x", n)}) end
+    long = fn n -> &Map.put(&1, "name", %{"prose" => String.duplicate("x", n)}) end
     elder = fn n -> &update_in(&1, @elder, long.(n)) end
     assert {:ok, _, []} = speech([{@bundle, elder.(4096)}])
     assert {:error, diags} = speech([{@bundle, elder.(4097)}])
 
     assert triples(diags) == [
-             {"SCHEMA_VIOLATION", "areas/village.npcs.elder.short", %{"error" => "too_long"}},
-             {"SCHEMA_VIOLATION", "text[\"npc.elder.short\"]", %{"error" => "too_long"}}
+             {"SCHEMA_VIOLATION", "areas/village.npcs.elder.name", %{"error" => "too_long"}},
+             {"SCHEMA_VIOLATION", "text[\"npc.elder.name\"]", %{"error" => "too_long"}}
            ]
 
     dir = Loka.ContentSource.copy("cartridges/ask_sampler")
-    untext = {"text.json", &Map.delete(&1, "npc.guard.short")}
+    untext = {"text.json", &Map.delete(&1, "npc.guard.name")}
     own = {"npcs/guard.json", long.(4097)}
     assert {:error, diags} = Loka.ContentSource.compile(dir, [own, untext])
 
     assert triples(diags) == [
-             {"SCHEMA_VIOLATION", "npcs/guard.short", %{"error" => "too_long"}},
-             {"SCHEMA_VIOLATION", "text[\"npc.guard.short\"]", %{"error" => "too_long"}}
+             {"SCHEMA_VIOLATION", "npcs/guard.name", %{"error" => "too_long"}},
+             {"SCHEMA_VIOLATION", "text[\"npc.guard.name\"]", %{"error" => "too_long"}}
            ]
   end
 
@@ -105,17 +105,17 @@ defmodule Loka.ContentProseTest do
     text = &JSON.decode!(&1)["cartridge"]["text"]
     untext = {"text.json", &Map.delete(&1, "item.old_coin.short")}
 
-    own = {"items/old_coin.json", &Map.put(&1, "short", %{"prose" => "an old coin"})}
+    own = {"items/old_coin.json", &Map.put(&1, "name", %{"prose" => "an old coin"})}
     assert {:ok, bytes, []} = Loka.ContentSource.compile(dir, [own, untext])
-    assert coin.(bytes)["short"] == "item.old_coin.short"
-    assert text.(bytes)["item.old_coin.short"] == "an old coin"
+    assert coin.(bytes)["name"] == "item.old_coin.name"
+    assert text.(bytes)["item.old_coin.name"] == "an old coin"
 
-    parent = %{"abstract" => true, "short" => %{"prose" => "a coin"}}
-    child = &(&1 |> Map.delete("short") |> Map.put("extends", "coinish"))
+    parent = %{"abstract" => true, "name" => %{"prose" => "a coin"}}
+    child = &(&1 |> Map.delete("name") |> Map.put("extends", "coinish"))
     changes = [{"items/coinish.json", parent}, {"items/old_coin.json", child}, untext]
     assert {:ok, bytes, []} = Loka.ContentSource.compile(dir, changes)
-    assert coin.(bytes)["short"] == "item.old_coin.short"
-    assert text.(bytes)["item.old_coin.short"] == "a coin"
-    refute Map.has_key?(text.(bytes), "item.coinish.short")
+    assert coin.(bytes)["name"] == "item.old_coin.name"
+    assert text.(bytes)["item.old_coin.name"] == "a coin"
+    refute Map.has_key?(text.(bytes), "item.coinish.name")
   end
 end

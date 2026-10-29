@@ -2,7 +2,7 @@
   "keywords": [
     "warlord"
   ],
-  "short": "npc.warlord.short",
+  "name": "npc.warlord.short",
   "room_line": "npc.warlord.room",
   "description": "npc.warlord.description",
   "room": "hall",

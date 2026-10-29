@@ -2,7 +2,7 @@
   "keywords": [
     "sack"
   ],
-  "short": "item.sack.short",
+  "name": "item.sack.short",
   "room_line": "item.sack.room",
   "description": "item.sack.description",
   "location": {

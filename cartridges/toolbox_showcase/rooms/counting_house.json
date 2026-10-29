@@ -1,5 +1,5 @@
 {
-  "title": "room.counting_house.title",
+  "name": "room.counting_house.title",
   "description": "room.counting_house.description",
   "exits": {
     "west": {

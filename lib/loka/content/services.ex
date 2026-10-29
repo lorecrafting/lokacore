@@ -213,8 +213,7 @@ defmodule Loka.Content.Services do
     do: ~w(service.unaffordable service.order_open service.missing_inputs)
 
   defp service_texts(s),
-    do:
-      Enum.map(reasons(s["benefit"]), &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})
+    do: Enum.map(reasons(s["benefit"]), &{[], &1}) ++ Enum.map(~w(name narration), &{[&1], s[&1]})
 
   defp reasons(%{"kind" => "entitlement"} = b), do: entitlement_texts(b["escrow"])
 

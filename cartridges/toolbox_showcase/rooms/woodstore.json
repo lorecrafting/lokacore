@@ -1,5 +1,5 @@
 {
-  "title": "room.woodstore.title",
+  "name": "room.woodstore.title",
   "description": "room.woodstore.description",
   "exits": {
     "north": {

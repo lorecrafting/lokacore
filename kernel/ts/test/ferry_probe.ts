@@ -17,7 +17,7 @@ const ref = (kind: string, key: string) =>
 export const PRESENT = { op: 'target_present' } as const;
 export const chat = (root: object) => ({
   key: 'chat',
-  label: 'action.talk',
+  name: 'action.talk',
   accessibility: 'action.talk',
   target: { kind: 'entity', scopes: ['room_occupants'] },
   command: 'talk',

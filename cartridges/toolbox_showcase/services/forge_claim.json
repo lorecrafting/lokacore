@@ -2,7 +2,7 @@
   "provider": "smith",
   "currency": "pennies",
   "action": "claim",
-  "label": "service.forge_claim",
+  "name": "service.forge_claim",
   "narration": "service.forge_claim.used",
   "price": 1,
   "benefit": {

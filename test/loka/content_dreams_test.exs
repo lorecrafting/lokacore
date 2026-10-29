@@ -12,7 +12,7 @@ defmodule Loka.ContentDreamsTest do
   # first paid Rest there starts a presentation-only dream that resolves quest a_room.
   @dream %{
     "rooms/inn_rooms.json" => %{
-      "title" => "room.inn_rooms.title",
+      "name" => "room.inn_rooms.title",
       "description" => "room.inn_rooms.description",
       "exits" => %{"west" => %{"to" => "camp"}},
       "details" => %{
@@ -25,7 +25,7 @@ defmodule Loka.ContentDreamsTest do
     },
     "npcs/maud.json" => %{
       "keywords" => ["maud"],
-      "short" => "npc.maud.short",
+      "name" => "npc.maud.short",
       "room_line" => "npc.maud.room",
       "description" => "npc.maud.description",
       "room" => "camp",
@@ -36,7 +36,7 @@ defmodule Loka.ContentDreamsTest do
       "provider" => "maud",
       "currency" => "pennies",
       "action" => "rent_room",
-      "label" => "service.room",
+      "name" => "service.room",
       "narration" => "service.room.used",
       "price" => 3,
       "benefit" => %{"kind" => "entitlement", "fact" => "bed_paid"}
@@ -49,10 +49,10 @@ defmodule Loka.ContentDreamsTest do
       "choices" => %{
         "chat" => %{"label" => "dialogue.maud.chat", "narration" => "dialogue.maud.chat"}
       },
-      "label" => "dialogue.maud.label"
+      "name" => "dialogue.maud.label"
     },
     "quests/a_room.json" => %{
-      "title" => "quest.room.title",
+      "name" => "quest.room.title",
       "objective" => %{
         "evidence" => "current_state",
         "policy" => %{"op" => "fact_compare", "fact" => "dream_seen", "equals" => true}
@@ -62,7 +62,7 @@ defmodule Loka.ContentDreamsTest do
     },
     "scenes/fen_dream.json" => %{
       "control" => "presentation_only",
-      "title" => "dream.title",
+      "name" => "dream.title",
       "description" => "dream.description",
       "on" => %{
         "rest" => %{
@@ -101,7 +101,7 @@ defmodule Loka.ContentDreamsTest do
       }
     },
     "actions/rent_room.json" => %{
-      "label" => "service.room",
+      "name" => "service.room",
       "command" => "use_service",
       "target" => %{"kind" => "entity", "scopes" => ["room_occupants"]},
       "input" => ["service", "quoted_price"],
@@ -113,7 +113,7 @@ defmodule Loka.ContentDreamsTest do
       "command" => "continue",
       "target" => %{"kind" => "none"},
       "input" => ["scene", "line"],
-      "label" => "action.continue",
+      "name" => "action.continue",
       "priority" => 0,
       "policy" => @always,
       "accessibility" => "action.continue"
@@ -122,7 +122,7 @@ defmodule Loka.ContentDreamsTest do
       "command" => "choose",
       "target" => %{"kind" => "none"},
       "input" => ["continuation_id", "choice_id", "dream"],
-      "label" => "dream.choose",
+      "name" => "dream.choose",
       "priority" => 0,
       "policy" => @always,
       "accessibility" => "dream.choose"

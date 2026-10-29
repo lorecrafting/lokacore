@@ -2,7 +2,7 @@
   "keywords": [
     "knife"
   ],
-  "short": "item.knife_01.short",
+  "name": "item.knife_01.short",
   "room_line": "item.knife_01.room",
   "description": "item.knife_01.description",
   "mass_grams": 150,

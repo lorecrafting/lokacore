@@ -2,7 +2,7 @@
   "keywords": [
     "thief"
   ],
-  "short": "npc.thief.short",
+  "name": "npc.thief.short",
   "room_line": "npc.thief.room",
   "description": "npc.thief.description",
   "room": "lane",

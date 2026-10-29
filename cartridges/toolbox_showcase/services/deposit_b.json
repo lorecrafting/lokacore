@@ -2,7 +2,7 @@
   "provider": "clerk_b",
   "currency": "pennies",
   "action": "deposit",
-  "label": "service.deposit_b",
+  "name": "service.deposit_b",
   "narration": "service.deposit_b.used",
   "price": 1,
   "benefit": {

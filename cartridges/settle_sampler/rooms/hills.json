@@ -1,5 +1,5 @@
 {
-  "title": "room.hills.title",
+  "name": "room.hills.title",
   "description": "room.hills.description",
   "exits": {
     "south": {

@@ -3,7 +3,7 @@
     "chest",
     "storage_chest"
   ],
-  "short": "item.storage_chest.short",
+  "name": "item.storage_chest.short",
   "room_line": "item.storage_chest.room",
   "description": "item.storage_chest.description",
   "mass_grams": 8000,

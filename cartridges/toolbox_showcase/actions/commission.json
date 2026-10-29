@@ -1,5 +1,5 @@
 {
-  "label": "service.commission",
+  "name": "service.commission",
   "command": "use_service",
   "target": {
     "kind": "entity",

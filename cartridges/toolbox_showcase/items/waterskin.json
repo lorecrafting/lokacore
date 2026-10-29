@@ -3,7 +3,7 @@
     "waterskin",
     "skin"
   ],
-  "short": "item.waterskin.short",
+  "name": "item.waterskin.short",
   "room_line": "item.waterskin.room",
   "description": "item.waterskin.description",
   "location": {

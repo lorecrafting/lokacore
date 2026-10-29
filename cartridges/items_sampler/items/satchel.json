@@ -3,7 +3,7 @@
     "satchel",
     "leather_satchel"
   ],
-  "short": "item.satchel.short",
+  "name": "item.satchel.short",
   "room_line": "item.satchel.room",
   "description": "item.satchel.description",
   "location": {

@@ -5,7 +5,7 @@ defmodule Loka.ContentPracticalSkillsTest do
 
   @smith %{
     "keywords" => ["smith"],
-    "short" => "item.stick.short",
+    "name" => "item.stick.short",
     "room_line" => "item.stick.room",
     "description" => "item.stick.description",
     "room" => "mine",
@@ -25,7 +25,7 @@ defmodule Loka.ContentPracticalSkillsTest do
   }
   @lamp %{
     "keywords" => ["lamp"],
-    "short" => "item.stick.short",
+    "name" => "item.stick.short",
     "room_line" => "item.stick.room",
     "description" => "item.stick.description",
     "location" => %{"in" => "npc", "npc" => "smith"}

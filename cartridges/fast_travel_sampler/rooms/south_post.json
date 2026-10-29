@@ -1,5 +1,5 @@
 {
-  "title": "room.south_post.title",
+  "name": "room.south_post.title",
   "description": "room.south_post.description",
   "exits": {
     "north": {

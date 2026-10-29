@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_strongbox",
+  "name": "actions.force_strongbox",
   "aliases": [
     "force"
   ],

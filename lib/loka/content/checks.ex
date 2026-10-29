@@ -54,8 +54,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
 
-  # A room (its title a text key): a details map may also have a detail keyed exits or title.
-  def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
+  # A room (its name a text key): a details map may also have a detail keyed exits or name.
+  def expand(%{"exits" => exits, "name" => t} = room, m) when is_map(exits) and is_binary(t) do
     room
     |> Map.delete("exits")
     |> expand(m)
@@ -176,7 +176,7 @@ defmodule Loka.Content.Checks do
       )
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
-  def expand(%{"label" => _, "fact" => f} = n, m), do: Map.put(n, "fact", ref(f, "fact", m))
+  def expand(%{"name" => _, "fact" => f} = n, m), do: Map.put(n, "fact", ref(f, "fact", m))
 
   def expand(%{"skill" => s} = n, m) when is_binary(s),
     do: n |> Map.delete("skill") |> expand(m) |> Map.put("skill", ref(s, "skill", m))
@@ -225,8 +225,8 @@ defmodule Loka.Content.Checks do
     d |> Map.drop(~w(npc quest)) |> expand(m) |> Map.merge(Map.put(q, "npc", ref(n, "npc", m)))
   end
 
-  # A chapter marker: its title and outcome are keys, its story point a reference.
-  def expand(%{"story_point" => p, "title" => t} = chapter, m) when is_binary(t),
+  # A chapter marker: its name and outcome are keys, its story point a reference.
+  def expand(%{"story_point" => p, "name" => t} = chapter, m) when is_binary(t),
     do: Map.put(chapter, "story_point", ref(p, "story_point", m))
 
   def expand(%{"story_point" => p, "outcome" => o} = t, m) when is_binary(o),
@@ -363,9 +363,9 @@ defmodule Loka.Content.Checks do
   defp texts(defs, text) do
     for(
       {kind, fields} <- [
-        {"room", ~w(title description)},
-        {"action", ~w(label accessibility)},
-        {"barrier", ["short"]}
+        {"room", ~w(name description)},
+        {"action", ~w(name accessibility)},
+        {"barrier", ["name"]}
       ],
       {_, {rel, [], def}} <- defs[kind],
       d <- text_keys({rel, def}, fields, text),

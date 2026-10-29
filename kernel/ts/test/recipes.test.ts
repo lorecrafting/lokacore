@@ -273,7 +273,7 @@ test('a cartridge action overrides the engine verb of its key, policy included',
   const w = world((c) => {
     c.actions['recipe_sampler@0.0.1:action/look'] = {
       key: 'look',
-      label: 'actions.ring_bell',
+      name: 'actions.ring_bell',
       target: { kind: 'none' },
       command: 'look',
       priority: 20,
@@ -324,7 +324,7 @@ test("a command no offered action's target or input accepts is refused like an u
   const w = world((c) => {
     const action = (key: string, command: string, target: object, input: string[]) => ({
       key,
-      label: 'actions.ring_bell',
+      name: 'actions.ring_bell',
       target,
       command,
       priority: 0,
@@ -364,7 +364,7 @@ test("an entity target in the action's scope is admitted", () => {
     const loaded = load((c) => {
       c.actions['items_sampler@0.0.1:action/inspect'] = {
         key: 'inspect',
-        label: 'item.satchel.short',
+        name: 'item.satchel.short',
         target: { kind: 'entity', scopes: [scope] },
         command: 'look',
         priority: 0,

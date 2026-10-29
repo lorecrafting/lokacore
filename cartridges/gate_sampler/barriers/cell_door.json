@@ -3,7 +3,7 @@
     "door",
     "cell_door"
   ],
-  "short": "barrier.cell_door.short",
+  "name": "barrier.cell_door.short",
   "initial": "locked",
   "key_item": "iron_key"
 }

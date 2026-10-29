@@ -1,5 +1,5 @@
 {
-  "title": "room.boar_run.title",
+  "name": "room.boar_run.title",
   "description": "room.boar_run.description",
   "exits": {
     "south": {

@@ -3,7 +3,7 @@
     "loaf",
     "bread"
   ],
-  "short": "item.fold_loaf_1.short",
+  "name": "item.fold_loaf_1.short",
   "room_line": "item.fold_loaf_1.room",
   "description": "item.fold_loaf_1.description",
   "location": {

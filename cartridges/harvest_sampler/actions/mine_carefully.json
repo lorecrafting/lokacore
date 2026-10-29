@@ -1,5 +1,5 @@
 {
-  "label": "action.mine_carefully",
+  "name": "action.mine_carefully",
   "command": "harvest",
   "target": {
     "kind": "entity",

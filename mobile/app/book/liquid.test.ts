@@ -114,7 +114,7 @@ function alias(c: any, type: string, variant: string) {
     c.actions[id('action', key)] = {
       key,
       command,
-      label: `action.${command}`,
+      name: `action.${command}`,
       accessibility: `action.${command}`,
       priority: 0,
       target: {

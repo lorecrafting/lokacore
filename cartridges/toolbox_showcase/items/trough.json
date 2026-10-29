@@ -2,7 +2,7 @@
   "keywords": [
     "trough"
   ],
-  "short": "item.trough.short",
+  "name": "item.trough.short",
   "room_line": "item.trough.room",
   "description": "item.trough.description",
   "mass_grams": 20000,

@@ -16,7 +16,7 @@ const adit = (stat: number, pennies: number, mv: number) => (c: any) => {
   c.rooms[`${prefix}:room/mine`].exits.east = { to: ref('room', 'adit') };
   c.rooms[`${prefix}:room/adit`] = {
     key: 'adit',
-    title: 'room.mine.title', // KAT text: the authority holds no display text
+    name: 'room.mine.title', // KAT text: the authority holds no display text
     description: 'item.stick.description',
     exits: { west: { to: ref('room', 'mine') } },
   };

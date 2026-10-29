@@ -1,5 +1,5 @@
 {
-  "title": "quest.mauds_cellar.title",
+  "name": "quest.mauds_cellar.title",
   "objective": {
     "evidence": "current_state",
     "policy": {

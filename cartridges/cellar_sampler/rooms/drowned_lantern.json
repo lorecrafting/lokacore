@@ -1,5 +1,5 @@
 {
-  "title": "room.drowned_lantern.title",
+  "name": "room.drowned_lantern.title",
   "description": "room.drowned_lantern.description",
   "exits": {
     "west": {

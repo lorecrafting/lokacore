@@ -1,5 +1,5 @@
 {
-  "label": "spell.ward",
+  "name": "spell.ward",
   "aliases": ["ward"],
   "reason": "reason.ward",
   "target": { "kind": "spell", "word": "ward", "learned": "ward_taught" },

@@ -2,7 +2,7 @@
   "keywords": [
     "rod"
   ],
-  "short": "item.rod.short",
+  "name": "item.rod.short",
   "room_line": "item.rod.room",
   "description": "item.rod.description",
   "location": {

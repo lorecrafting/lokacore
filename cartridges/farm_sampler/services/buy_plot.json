@@ -2,7 +2,7 @@
   "provider": "seller",
   "currency": "pennies",
   "action": "buy_plot",
-  "label": "service.buy_plot",
+  "name": "service.buy_plot",
   "narration": "service.buy_plot.used",
   "price": 10,
   "benefit": {

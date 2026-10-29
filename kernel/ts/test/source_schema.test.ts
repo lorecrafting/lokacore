@@ -52,7 +52,7 @@ test('every $ref in the source schemas resolves', () => {
   }
 });
 
-const room = { title: 'hall.title', description: 'hall.description', exits: {} };
+const room = { name: 'hall.title', description: 'hall.description', exits: {} };
 const step = { op: 'fact.assign', fact: 'known', value: true };
 const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [step] };
 const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [step] };
@@ -72,8 +72,8 @@ const fact = {
 // exactlyOneRequired and requiredUnless translations.
 test('the schemas refuse a misspelled field and each shortcut written wrong', () => {
   const pairs: [string, unknown, unknown][] = [
-    ['rooms', room, { ...room, titel: 'hall.title' }],
-    ['rooms', { ...room, title: { prose: 'Hall' } }, { ...room, title: { prose: '' } }],
+    ['rooms', room, { ...room, nmae: 'hall.title' }],
+    ['rooms', { ...room, name: { prose: 'Hall' } }, { ...room, name: { prose: '' } }],
     ['rooms', { extends: 'hall' }, { extends: 1 }],
     [
       'npcs',

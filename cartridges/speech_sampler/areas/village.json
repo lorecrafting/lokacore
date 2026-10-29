@@ -1,7 +1,7 @@
 {
   "rooms": {
     "lane": {
-      "title": { "prose": "Lane" },
+      "name": { "prose": "Lane" },
       "description": { "prose": "A lane west of the square." },
       "exits": {
         "east": {
@@ -13,7 +13,7 @@
       }
     },
     "mill": {
-      "title": { "prose": "Mill" },
+      "name": { "prose": "Mill" },
       "description": { "prose": "A mill at the end of the lane." },
       "exits": {
         "east": {
@@ -22,7 +22,7 @@
       }
     },
     "square": {
-      "title": { "prose": "Square" },
+      "name": { "prose": "Square" },
       "description": { "prose": "A village square." },
       "exits": {
         "east": {
@@ -34,7 +34,7 @@
       }
     },
     "watchhouse": {
-      "title": { "prose": "Watchhouse" },
+      "name": { "prose": "Watchhouse" },
       "description": { "prose": "A watchhouse east of the square." },
       "exits": {
         "west": {
@@ -48,7 +48,7 @@
       "keywords": [
         "elder"
       ],
-      "short": { "prose": "the elder" },
+      "name": { "prose": "the elder" },
       "room_line": { "prose": "The [elder](elder) sits by the well." },
       "description": { "prose": "An old woman who knows the old wards." },
       "room": "square"
@@ -57,7 +57,7 @@
       "keywords": [
         "miller"
       ],
-      "short": { "prose": "the miller" },
+      "name": { "prose": "the miller" },
       "room_line": { "prose": "The [miller](miller) sacks flour." },
       "description": { "prose": "A dusty miller." },
       "room": "mill"
@@ -66,7 +66,7 @@
       "keywords": [
         "smith"
       ],
-      "short": { "prose": "the smith" },
+      "name": { "prose": "the smith" },
       "room_line": { "prose": "The [smith](smith) rests on a bench." },
       "description": { "prose": "A smith on her break." },
       "room": "square"
@@ -75,7 +75,7 @@
       "keywords": [
         "watchman"
       ],
-      "short": { "prose": "the watchman" },
+      "name": { "prose": "the watchman" },
       "room_line": { "prose": "The [watchman](watchman) dozes." },
       "description": { "prose": "A sleepy watchman." },
       "room": "watchhouse"

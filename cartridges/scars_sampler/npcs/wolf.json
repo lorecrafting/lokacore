@@ -2,7 +2,7 @@
   "keywords": [
     "wolf"
   ],
-  "short": "npc.wolf.short",
+  "name": "npc.wolf.short",
   "short_variants": [
     {
       "when": {

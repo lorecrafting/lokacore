@@ -118,10 +118,10 @@ function place(
   const defs: [string, Entity][] = [
     ...sorted(cartridge.npcs)
       .filter(([, d]) => !d.spawn_template)
-      .map(([r, d]): [string, Entity] => [r, { ...d, kind: 'npc' }]),
+      .map(([r, { name, ...d }]): [string, Entity] => [r, { ...d, short: name, kind: 'npc' }]),
     ...sorted(cartridge.items)
       .filter(([, d]) => d.location.in !== 'template')
-      .map(([r, d]): [string, Entity] => [r, { ...d, kind: 'item' }]),
+      .map(([r, { name, ...d }]): [string, Entity] => [r, { ...d, short: name, kind: 'item' }]),
   ];
   const entityIds = Object.fromEntries(defs.map(([r]) => [r, mint()]));
   const ids = { ...roomIds, ...entityIds };

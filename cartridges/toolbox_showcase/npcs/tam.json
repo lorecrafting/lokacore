@@ -3,7 +3,7 @@
     "tam",
     "carter"
   ],
-  "short": "npc.tam.short",
+  "name": "npc.tam.short",
   "room_line": "npc.tam.room",
   "description": "npc.tam.description",
   "room": "warden_gate",

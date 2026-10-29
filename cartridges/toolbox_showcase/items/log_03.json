@@ -3,7 +3,7 @@
     "log",
     "log_03"
   ],
-  "short": "item.log.short",
+  "name": "item.log.short",
   "room_line": "item.log.room",
   "description": "item.log.description",
   "mass_grams": 200,

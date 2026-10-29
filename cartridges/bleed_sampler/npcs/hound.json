@@ -2,7 +2,7 @@
   "keywords": [
     "hound"
   ],
-  "short": "npc.hound.short",
+  "name": "npc.hound.short",
   "room_line": "npc.hound.room",
   "description": "npc.hound.description",
   "room": "den",

@@ -1,5 +1,5 @@
 {
-  "title": "room.workshop.title",
+  "name": "room.workshop.title",
   "description": "room.workshop.description",
   "exits": {
     "west": {

@@ -25,11 +25,11 @@ export function transportOffer(
     fare: t.fare,
     charge: 'charge' in r ? (r.charge ?? t.fare) : t.fare,
     waived: 'waived' in r ? (r.waived ?? false) : false,
-    label: t.label,
+    label: t.name,
     action: {
       action_key: t.action,
       command: 'use_transport' as Key,
-      label: t.label,
+      label: t.name,
       target: { kind: 'entity', scopes: ['inspectable_details'] },
       input: ['route', 'quoted_fare'],
       target_ids: [id],

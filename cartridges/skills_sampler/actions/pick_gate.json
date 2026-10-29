@@ -1,5 +1,5 @@
 {
-  "label": "actions.pick_gate",
+  "name": "actions.pick_gate",
   "aliases": [
     "pick"
   ],

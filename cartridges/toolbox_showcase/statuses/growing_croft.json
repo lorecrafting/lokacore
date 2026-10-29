@@ -3,7 +3,7 @@
   "tick_every": 3600,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.growing_croft",
+  "name": "condition.growing_croft",
   "narration": {
     "applied": "narration.growing_croft.applied",
     "tick": "narration.growing_croft.tick",

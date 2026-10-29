@@ -28,7 +28,7 @@ defmodule Loka.ContentPropertyTest do
     }
 
     pick = %{
-      "label" => "service.deposit",
+      "name" => "service.deposit",
       "requirement" => "service.deposit",
       "qualification" => talk["policy"],
       "growth" => [10, 20]

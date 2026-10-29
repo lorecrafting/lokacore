@@ -1,5 +1,5 @@
 {
-  "label": "actions.throw_bones",
+  "name": "actions.throw_bones",
   "aliases": [
     "throw"
   ],

@@ -1,5 +1,5 @@
 {
-  "label": "actions.pick_strongbox",
+  "name": "actions.pick_strongbox",
   "aliases": [
     "pick"
   ],

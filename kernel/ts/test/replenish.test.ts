@@ -153,7 +153,7 @@ const digging =
     c.recipes = {
       [`${S}recipe/dig`]: {
         key: 'dig',
-        label: 'action.mine',
+        name: 'action.mine',
         aliases: ['dig'],
         target: { kind: 'detail', room: ref('room', 'mine'), detail: 'seam' },
         priority: 10,

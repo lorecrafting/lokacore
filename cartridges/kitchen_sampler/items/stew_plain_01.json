@@ -2,7 +2,7 @@
   "keywords": [
     "stew"
   ],
-  "short": "item.stew_plain.short",
+  "name": "item.stew_plain.short",
   "short_variants": [
     {
       "when": {

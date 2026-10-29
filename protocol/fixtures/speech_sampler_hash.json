@@ -134,7 +134,7 @@
           "kind": "room"
         },
         "room_line": "npc.elder.room",
-        "short": "npc.elder.short"
+        "name": "npc.elder.name"
       },
       "speech_sampler@0.0.1:npc/miller": {
         "description": "npc.miller.description",
@@ -149,7 +149,7 @@
           "kind": "room"
         },
         "room_line": "npc.miller.room",
-        "short": "npc.miller.short"
+        "name": "npc.miller.name"
       },
       "speech_sampler@0.0.1:npc/smith": {
         "description": "npc.smith.description",
@@ -164,7 +164,7 @@
           "kind": "room"
         },
         "room_line": "npc.smith.room",
-        "short": "npc.smith.short"
+        "name": "npc.smith.name"
       },
       "speech_sampler@0.0.1:npc/watchman": {
         "description": "npc.watchman.description",
@@ -179,7 +179,7 @@
           "kind": "room"
         },
         "room_line": "npc.watchman.room",
-        "short": "npc.watchman.short"
+        "name": "npc.watchman.name"
       }
     },
     "reactions": {
@@ -303,7 +303,7 @@
           }
         },
         "key": "lane",
-        "title": "room.lane.title"
+        "name": "room.lane.name"
       },
       "speech_sampler@0.0.1:room/mill": {
         "description": "room.mill.description",
@@ -318,7 +318,7 @@
           }
         },
         "key": "mill",
-        "title": "room.mill.title"
+        "name": "room.mill.name"
       },
       "speech_sampler@0.0.1:room/square": {
         "description": "room.square.description",
@@ -341,7 +341,7 @@
           }
         },
         "key": "square",
-        "title": "room.square.title"
+        "name": "room.square.name"
       },
       "speech_sampler@0.0.1:room/watchhouse": {
         "description": "room.watchhouse.description",
@@ -356,7 +356,7 @@
           }
         },
         "key": "watchhouse",
-        "title": "room.watchhouse.title"
+        "name": "room.watchhouse.name"
       }
     },
     "speech": {
@@ -372,26 +372,26 @@
       "narration.elder_ward.thank": "The elder nods.",
       "npc.elder.description": "An old woman who knows the old wards.",
       "npc.elder.room": "The [elder](elder) sits by the well.",
-      "npc.elder.short": "the elder",
+      "npc.elder.name": "the elder",
       "npc.miller.description": "A dusty miller.",
       "npc.miller.room": "The [miller](miller) sacks flour.",
-      "npc.miller.short": "the miller",
+      "npc.miller.name": "the miller",
       "npc.smith.description": "A smith on her break.",
       "npc.smith.room": "The [smith](smith) rests on a bench.",
-      "npc.smith.short": "the smith",
+      "npc.smith.name": "the smith",
       "npc.watchman.description": "A sleepy watchman.",
       "npc.watchman.room": "The [watchman](watchman) dozes.",
-      "npc.watchman.short": "the watchman",
+      "npc.watchman.name": "the watchman",
       "room.lane.description": "A lane west of the square.",
-      "room.lane.title": "Lane",
+      "room.lane.name": "Lane",
       "room.mill.description": "A mill at the end of the lane.",
-      "room.mill.title": "Mill",
+      "room.mill.name": "Mill",
       "room.square.description": "A village square.",
-      "room.square.title": "Square",
+      "room.square.name": "Square",
       "room.watchhouse.description": "A watchhouse east of the square.",
-      "room.watchhouse.title": "Watchhouse"
+      "room.watchhouse.name": "Watchhouse"
     }
   },
-  "canonical": "{\"actions\":{},\"dialogues\":{\"speech_sampler@0.0.1:dialogue/elder_ward\":{\"choices\":{\"thank\":{\"label\":\"dialogue.elder_ward.thank\",\"narration\":\"narration.elder_ward.thank\"}},\"key\":\"elder_ward\",\"keyword\":\"ward\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder\",\"kind\":\"npc\"},\"prompt\":\"dialogue.elder_ward.prompt\",\"roles\":{\"elder\":{\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder\",\"kind\":\"npc\"},\"role\":\"npc\"}}}},\"entry\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"},\"facts\":{\"speech_sampler@0.0.1:fact/elder_heard\":{\"key\":\"elder_heard\",\"meaning\":\"The elder heard the player speak.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"speech_sampler@0.0.1:fact/miller_heard\":{\"key\":\"miller_heard\",\"meaning\":\"The miller heard the player speak.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"speech_sampler@0.0.1:fact/watchman_alerted\":{\"key\":\"watchman_alerted\",\"meaning\":\"The watchman heard a shout for help.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"containment\":1,\"dialogue\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"speech\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"speech_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"dialogue\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"speech\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.98\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Speech Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"speech_sampler@0.0.1:npc/elder\":{\"description\":\"npc.elder.description\",\"key\":\"elder\",\"keywords\":[\"elder\"],\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"},\"room_line\":\"npc.elder.room\",\"short\":\"npc.elder.short\"},\"speech_sampler@0.0.1:npc/miller\":{\"description\":\"npc.miller.description\",\"key\":\"miller\",\"keywords\":[\"miller\"],\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"},\"room_line\":\"npc.miller.room\",\"short\":\"npc.miller.short\"},\"speech_sampler@0.0.1:npc/smith\":{\"description\":\"npc.smith.description\",\"key\":\"smith\",\"keywords\":[\"smith\"],\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"},\"room_line\":\"npc.smith.room\",\"short\":\"npc.smith.short\"},\"speech_sampler@0.0.1:npc/watchman\":{\"description\":\"npc.watchman.description\",\"key\":\"watchman\",\"keywords\":[\"watchman\"],\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchhouse\",\"kind\":\"room\"},\"room_line\":\"npc.watchman.room\",\"short\":\"npc.watchman.short\"}},\"reactions\":{\"speech_sampler@0.0.1:reaction/elder_hears\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder_heard\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"elder_hears\",\"on\":{\"event\":\"spoken\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder\",\"kind\":\"npc\"}}},\"speech_sampler@0.0.1:reaction/miller_hears\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"miller_heard\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"miller_hears\",\"on\":{\"event\":\"spoken\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"miller\",\"kind\":\"npc\"}}},\"speech_sampler@0.0.1:reaction/watchman_alarm\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchman_alerted\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"watchman_alarm\",\"on\":{\"event\":\"spoken\",\"loudness\":\"shout\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchman\",\"kind\":\"npc\"},\"word\":\"help\"}}},\"resources\":{\"speech_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"speech_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"speech_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"speech_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}}},\"key\":\"lane\",\"title\":\"room.lane.title\"},\"speech_sampler@0.0.1:room/mill\":{\"description\":\"room.mill.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}}},\"key\":\"mill\",\"title\":\"room.mill.title\"},\"speech_sampler@0.0.1:room/square\":{\"description\":\"room.square.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchhouse\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}}},\"key\":\"square\",\"title\":\"room.square.title\"},\"speech_sampler@0.0.1:room/watchhouse\":{\"description\":\"room.watchhouse.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"}}},\"key\":\"watchhouse\",\"title\":\"room.watchhouse.title\"}},\"speech\":{\"phrases\":[\"ward\",\"help\",\"hello\"]},\"text\":{\"dialogue.elder_ward.prompt\":\"The elder leans close. \\\"The ward fails at the new moon.\\\"\",\"dialogue.elder_ward.thank\":\"Thank her\",\"narration.elder_ward.thank\":\"The elder nods.\",\"npc.elder.description\":\"An old woman who knows the old wards.\",\"npc.elder.room\":\"The [elder](elder) sits by the well.\",\"npc.elder.short\":\"the elder\",\"npc.miller.description\":\"A dusty miller.\",\"npc.miller.room\":\"The [miller](miller) sacks flour.\",\"npc.miller.short\":\"the miller\",\"npc.smith.description\":\"A smith on her break.\",\"npc.smith.room\":\"The [smith](smith) rests on a bench.\",\"npc.smith.short\":\"the smith\",\"npc.watchman.description\":\"A sleepy watchman.\",\"npc.watchman.room\":\"The [watchman](watchman) dozes.\",\"npc.watchman.short\":\"the watchman\",\"room.lane.description\":\"A lane west of the square.\",\"room.lane.title\":\"Lane\",\"room.mill.description\":\"A mill at the end of the lane.\",\"room.mill.title\":\"Mill\",\"room.square.description\":\"A village square.\",\"room.square.title\":\"Square\",\"room.watchhouse.description\":\"A watchhouse east of the square.\",\"room.watchhouse.title\":\"Watchhouse\"}}",
-  "sha256": "18053808872ced23a6a530486c039d337de7bfc6d36cb05c14e4846338a121e4"
+  "canonical": "{\"actions\":{},\"dialogues\":{\"speech_sampler@0.0.1:dialogue/elder_ward\":{\"choices\":{\"thank\":{\"label\":\"dialogue.elder_ward.thank\",\"narration\":\"narration.elder_ward.thank\"}},\"key\":\"elder_ward\",\"keyword\":\"ward\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder\",\"kind\":\"npc\"},\"prompt\":\"dialogue.elder_ward.prompt\",\"roles\":{\"elder\":{\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder\",\"kind\":\"npc\"},\"role\":\"npc\"}}}},\"entry\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"},\"facts\":{\"speech_sampler@0.0.1:fact/elder_heard\":{\"key\":\"elder_heard\",\"meaning\":\"The elder heard the player speak.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"speech_sampler@0.0.1:fact/miller_heard\":{\"key\":\"miller_heard\",\"meaning\":\"The miller heard the player speak.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"speech_sampler@0.0.1:fact/watchman_alerted\":{\"key\":\"watchman_alerted\",\"meaning\":\"The watchman heard a shout for help.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"containment\":1,\"dialogue\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"speech\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"speech_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"dialogue\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"resource\":1,\"schedule\":1,\"speech\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.98\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Speech Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"speech_sampler@0.0.1:npc/elder\":{\"description\":\"npc.elder.description\",\"key\":\"elder\",\"keywords\":[\"elder\"],\"name\":\"npc.elder.name\",\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"},\"room_line\":\"npc.elder.room\"},\"speech_sampler@0.0.1:npc/miller\":{\"description\":\"npc.miller.description\",\"key\":\"miller\",\"keywords\":[\"miller\"],\"name\":\"npc.miller.name\",\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"},\"room_line\":\"npc.miller.room\"},\"speech_sampler@0.0.1:npc/smith\":{\"description\":\"npc.smith.description\",\"key\":\"smith\",\"keywords\":[\"smith\"],\"name\":\"npc.smith.name\",\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"},\"room_line\":\"npc.smith.room\"},\"speech_sampler@0.0.1:npc/watchman\":{\"description\":\"npc.watchman.description\",\"key\":\"watchman\",\"keywords\":[\"watchman\"],\"name\":\"npc.watchman.name\",\"room\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchhouse\",\"kind\":\"room\"},\"room_line\":\"npc.watchman.room\"}},\"reactions\":{\"speech_sampler@0.0.1:reaction/elder_hears\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder_heard\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"elder_hears\",\"on\":{\"event\":\"spoken\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"elder\",\"kind\":\"npc\"}}},\"speech_sampler@0.0.1:reaction/miller_hears\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"miller_heard\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"miller_hears\",\"on\":{\"event\":\"spoken\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"miller\",\"kind\":\"npc\"}}},\"speech_sampler@0.0.1:reaction/watchman_alarm\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchman_alerted\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"watchman_alarm\",\"on\":{\"event\":\"spoken\",\"loudness\":\"shout\",\"npc\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchman\",\"kind\":\"npc\"},\"word\":\"help\"}}},\"resources\":{\"speech_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"speech_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"speech_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"speech_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}}},\"key\":\"lane\",\"name\":\"room.lane.name\"},\"speech_sampler@0.0.1:room/mill\":{\"description\":\"room.mill.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}}},\"key\":\"mill\",\"name\":\"room.mill.name\"},\"speech_sampler@0.0.1:room/square\":{\"description\":\"room.square.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"watchhouse\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}}},\"key\":\"square\",\"name\":\"room.square.name\"},\"speech_sampler@0.0.1:room/watchhouse\":{\"description\":\"room.watchhouse.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"speech_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"square\",\"kind\":\"room\"}}},\"key\":\"watchhouse\",\"name\":\"room.watchhouse.name\"}},\"speech\":{\"phrases\":[\"ward\",\"help\",\"hello\"]},\"text\":{\"dialogue.elder_ward.prompt\":\"The elder leans close. \\\"The ward fails at the new moon.\\\"\",\"dialogue.elder_ward.thank\":\"Thank her\",\"narration.elder_ward.thank\":\"The elder nods.\",\"npc.elder.description\":\"An old woman who knows the old wards.\",\"npc.elder.name\":\"the elder\",\"npc.elder.room\":\"The [elder](elder) sits by the well.\",\"npc.miller.description\":\"A dusty miller.\",\"npc.miller.name\":\"the miller\",\"npc.miller.room\":\"The [miller](miller) sacks flour.\",\"npc.smith.description\":\"A smith on her break.\",\"npc.smith.name\":\"the smith\",\"npc.smith.room\":\"The [smith](smith) rests on a bench.\",\"npc.watchman.description\":\"A sleepy watchman.\",\"npc.watchman.name\":\"the watchman\",\"npc.watchman.room\":\"The [watchman](watchman) dozes.\",\"room.lane.description\":\"A lane west of the square.\",\"room.lane.name\":\"Lane\",\"room.mill.description\":\"A mill at the end of the lane.\",\"room.mill.name\":\"Mill\",\"room.square.description\":\"A village square.\",\"room.square.name\":\"Square\",\"room.watchhouse.description\":\"A watchhouse east of the square.\",\"room.watchhouse.name\":\"Watchhouse\"}}",
+  "sha256": "fc379924b1260dad6d855b7061d2501c568397d0363e220df268a2866a9e16b6"
 }

@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_hall_cupboard",
+  "name": "actions.force_hall_cupboard",
   "aliases": [
     "force"
   ],

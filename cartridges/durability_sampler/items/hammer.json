@@ -2,7 +2,7 @@
   "keywords": [
     "hammer"
   ],
-  "short": "item.hammer.short",
+  "name": "item.hammer.short",
   "room_line": "item.hammer.room",
   "description": "item.hammer.description",
   "location": {

@@ -2,7 +2,7 @@
   "keywords": [
     "belt"
   ],
-  "short": "item.belt.short",
+  "name": "item.belt.short",
   "room_line": "item.belt.room",
   "description": "item.belt.description",
   "location": {

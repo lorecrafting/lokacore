@@ -2,7 +2,7 @@
   "keywords": [
     "grate"
   ],
-  "short": "barrier.grate.short",
+  "name": "barrier.grate.short",
   "initial": "closed",
   "tags": [
     "metal",

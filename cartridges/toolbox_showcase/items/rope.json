@@ -2,7 +2,7 @@
   "keywords": [
     "rope"
   ],
-  "short": "item.rope.short",
+  "name": "item.rope.short",
   "room_line": "item.rope.room",
   "description": "item.rope.description",
   "location": {

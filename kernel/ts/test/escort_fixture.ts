@@ -31,7 +31,7 @@ export function escortSource(c: any) {
     c.npcs[`${prefix}:npc/${key}`] = {
       key,
       keywords: [key],
-      short: `npc.${key}.short`,
+      name: `npc.${key}.short`,
       description: `npc.${key}.description`,
       room_line: `npc.${key}.room`,
       room: ref('room', room),
@@ -51,7 +51,7 @@ export function escortSource(c: any) {
   };
   c.quests[`${prefix}:quest/homeward`] = {
     key: 'homeward',
-    title: 'quest.homeward.title',
+    name: 'quest.homeward.title',
     objective: { evidence: 'current_state', policy: policy() },
     journal: {
       active: 'quest.homeward.active',

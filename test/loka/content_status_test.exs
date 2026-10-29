@@ -27,7 +27,7 @@ defmodule Loka.ContentStatusTest do
         {"items/antidote.json", &put_in(&1, ["edible", "cures"], [])}
       ] ++
         for(
-          field <- ~w(duration tick_every resource per_tick label narration),
+          field <- ~w(duration tick_every resource per_tick name narration),
           do: {"statuses/poison.json", &Map.delete(&1, field)}
         ) ++
         for(

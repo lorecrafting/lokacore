@@ -1,5 +1,5 @@
 {
-  "title": "room.bunkroom.title",
+  "name": "room.bunkroom.title",
   "description": "room.bunkroom.description",
   "exits": {
     "south": {

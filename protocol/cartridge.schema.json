@@ -447,7 +447,7 @@
           "actions": {
             "hello_sampler@0.0.1:action/talk": {
               "key": "talk",
-              "label": "actions.talk",
+              "name": "actions.talk",
               "target": {
                 "kind": "entity",
                 "scopes": [
@@ -500,7 +500,7 @@
           "rooms": {
             "rooms_sampler@0.0.1:room/boathouse": {
               "key": "boathouse",
-              "title": "room.boathouse.title",
+              "name": "room.boathouse.title",
               "description": "room.boathouse.description",
               "exits": {
                 "east": {
@@ -515,7 +515,7 @@
             },
             "rooms_sampler@0.0.1:room/ferry_landing": {
               "key": "ferry_landing",
-              "title": "room.ferry_landing.title",
+              "name": "room.ferry_landing.title",
               "description": "room.ferry_landing.description",
               "exits": {
                 "north": {
@@ -538,7 +538,7 @@
             },
             "rooms_sampler@0.0.1:room/well_lane": {
               "key": "well_lane",
-              "title": "room.well_lane.title",
+              "name": "room.well_lane.title",
               "description": "room.well_lane.description",
               "exits": {
                 "south": {
@@ -660,7 +660,7 @@
             "actions": {
               "hello_sampler@0.0.1:action/talk": {
                 "key": "talk",
-                "label": "actions.talk",
+                "name": "actions.talk",
                 "target": {
                   "kind": "entity",
                   "scopes": [
@@ -716,7 +716,7 @@
             "rooms": {
               "rooms_sampler@0.0.1:room/boathouse": {
                 "key": "boathouse",
-                "title": "room.boathouse.title",
+                "name": "room.boathouse.title",
                 "description": "room.boathouse.description",
                 "exits": {
                   "east": {
@@ -731,7 +731,7 @@
               },
               "rooms_sampler@0.0.1:room/ferry_landing": {
                 "key": "ferry_landing",
-                "title": "room.ferry_landing.title",
+                "name": "room.ferry_landing.title",
                 "description": "room.ferry_landing.description",
                 "exits": {
                   "north": {
@@ -754,7 +754,7 @@
               },
               "rooms_sampler@0.0.1:room/well_lane": {
                 "key": "well_lane",
-                "title": "room.well_lane.title",
+                "name": "room.well_lane.title",
                 "description": "room.well_lane.description",
                 "exits": {
                   "south": {
@@ -851,7 +851,7 @@
       "description": "One authored character choice and its bounded initial effects.",
       "examples": [
         {
-          "label": "ancestry.fen_born.label",
+          "name": "ancestry.fen_born.label",
           "description": "ancestry.fen_born.description",
           "attribute": {
             "cartridge_id": "village_chapter",
@@ -864,7 +864,7 @@
       ],
       "type": "object",
       "properties": {
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "description": {
@@ -901,7 +901,7 @@
         }
       },
       "required": [
-        "label",
+        "name",
         "description",
         "attribute",
         "modifier"
@@ -1637,10 +1637,10 @@
       ]
     },
     "Chapter": {
-      "description": "An ordered chapter marker (mechanics.md Chapters): title is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
+      "description": "An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
       "type": "object",
       "properties": {
-        "title": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "story_point": {
@@ -1651,15 +1651,15 @@
         }
       },
       "required": [
-        "title"
+        "name"
       ],
       "additionalProperties": false,
       "examples": [
         {
-          "title": "chapter.landing"
+          "name": "chapter.landing"
         },
         {
-          "title": "chapter.reeds",
+          "name": "chapter.reeds",
           "story_point": {
             "cartridge_id": "chapters_sampler",
             "cartridge_version": "0.0.1",
@@ -2070,7 +2070,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "requirement": {
@@ -2104,7 +2104,7 @@
       },
       "required": [
         "key",
-        "label",
+        "name",
         "requirement"
       ],
       "dependentRequired": {
@@ -2117,7 +2117,7 @@
       "examples": [
         {
           "key": "swords",
-          "label": "skill.swords",
+          "name": "skill.swords",
           "requirement": "skill.swords_requirement",
           "qualification": {
             "op": "stat_compare",
@@ -2138,7 +2138,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "fact": {
@@ -2147,14 +2147,14 @@
       },
       "required": [
         "key",
-        "label",
+        "name",
         "fact"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "key": "ward",
-          "label": "topic.ward",
+          "name": "topic.ward",
           "fact": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.23",
@@ -2594,13 +2594,13 @@
       "additionalProperties": false
     },
     "StructureDefinition": {
-      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
+      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "type": "object",
       "properties": {
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "title": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "description": {
@@ -2645,14 +2645,14 @@
       },
       "required": [
         "key",
-        "title",
+        "name",
         "description"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "key": "hut",
-          "title": "structure.hut.title",
+          "name": "structure.hut.title",
           "description": "structure.hut.description"
         }
       ]
@@ -2671,7 +2671,7 @@
             "key": "hp"
           },
           "per_tick": -1,
-          "label": "condition.poisoned",
+          "name": "condition.poisoned",
           "narration": {
             "applied": "narration.poison.applied",
             "tick": "narration.poison.tick",
@@ -2712,7 +2712,7 @@
           "maximum": 2147483647,
           "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION)."
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "narration": {
@@ -2733,7 +2733,7 @@
             },
             "skipped": {
               "$ref": "text.schema.json#/$defs/TextKey",
-              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's label."
+              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             }
           },
           "required": [
@@ -2864,7 +2864,7 @@
         "duration",
         "tick_every",
         "resource",
-        "label",
+        "name",
         "narration"
       ],
       "additionalProperties": false

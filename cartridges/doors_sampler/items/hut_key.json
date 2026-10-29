@@ -3,7 +3,7 @@
     "key",
     "hut_key"
   ],
-  "short": "item.hut_key.short",
+  "name": "item.hut_key.short",
   "room_line": "item.hut_key.room",
   "description": "item.hut_key.description",
   "location": {

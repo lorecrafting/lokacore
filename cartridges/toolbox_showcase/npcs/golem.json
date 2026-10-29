@@ -2,7 +2,7 @@
   "keywords": [
     "golem"
   ],
-  "short": "npc.golem.short",
+  "name": "npc.golem.short",
   "room_line": "npc.golem.room",
   "description": "npc.golem.description",
   "room": "golem_yard",

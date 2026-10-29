@@ -3,7 +3,7 @@
     "roll",
     "parish_roll"
   ],
-  "short": "item.parish_roll.short",
+  "name": "item.parish_roll.short",
   "room_line": "item.parish_roll.room",
   "description": "item.parish_roll.description",
   "location": {

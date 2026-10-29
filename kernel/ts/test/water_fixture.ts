@@ -14,7 +14,7 @@ const to = (key: string) => ({ to: ref('room', key) });
 function addRoom(c: any, key: string, exits: object, dark = false) {
   c.rooms[`${prefix}:room/${key}`] = {
     key,
-    title: `room.${key}.title`,
+    name: `room.${key}.title`,
     description: `room.${key}.description`,
     ...(dark ? { dark_description: `room.${key}.dark` } : {}),
     exits,
@@ -27,7 +27,7 @@ function addItem(c: any, key: string, location: object, extra: object = {}) {
   c.items[`${prefix}:item/${key}`] = {
     key,
     keywords: [key],
-    short: `item.${key}.short`,
+    name: `item.${key}.short`,
     description: `item.${key}.description`,
     room_line: `item.${key}.room`,
     location,
@@ -61,7 +61,7 @@ export function waterSource(c: any) {
   c.skills = {
     [`${prefix}:skill/swim`]: {
       key: 'swim',
-      label: 'skill.swim.label',
+      name: 'skill.swim.label',
       requirement: 'skill.swim.requirement',
       qualification: { op: 'all', items: [] },
     },
@@ -133,7 +133,7 @@ export function waterSource(c: any) {
   c.npcs[`${prefix}:npc/sedge`] = {
     key: 'sedge',
     keywords: ['sedge'],
-    short: 'npc.sedge.short',
+    name: 'npc.sedge.short',
     description: 'npc.sedge.description',
     room_line: 'npc.sedge.room',
     room: ref('room', 'well_shaft'),
@@ -141,7 +141,7 @@ export function waterSource(c: any) {
   c.dialogues[`${prefix}:dialogue/sedge_swim`] = {
     key: 'sedge_swim',
     npc: ref('npc', 'sedge'),
-    label: 'sedge.swim.choice',
+    name: 'sedge.swim.choice',
     prompt: 'sedge.swim.prompt',
     roles: { teacher: { role: 'npc', npc: ref('npc', 'sedge') } },
     policy: { op: 'fact_compare', fact: ref('fact', 'skill_swim'), equals: false },

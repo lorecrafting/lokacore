@@ -1,5 +1,5 @@
 {
-  "title": "room.guardroom.title",
+  "name": "room.guardroom.title",
   "description": "room.guardroom.description",
   "exits": {
     "north": {

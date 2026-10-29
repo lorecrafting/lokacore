@@ -3,7 +3,7 @@
   "tick_every": 1800,
   "resource": "thirst",
   "per_tick": -1,
-  "label": "condition.parched",
+  "name": "condition.parched",
   "narration": {
     "applied": "narration.parched.applied",
     "tick": "narration.parched.tick",

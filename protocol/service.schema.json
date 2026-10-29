@@ -15,7 +15,7 @@
         "action": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "narration": {
@@ -38,7 +38,7 @@
         "key",
         "provider",
         "action",
-        "label",
+        "name",
         "narration",
         "currency",
         "price",
@@ -55,7 +55,7 @@
             "key": "innkeeper"
           },
           "action": "rent_room",
-          "label": "service.room",
+          "name": "service.room",
           "narration": "service.rented",
           "currency": {
             "cartridge_id": "service_probe",

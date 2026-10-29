@@ -1,5 +1,5 @@
 {
-  "title": "room.hut.title",
+  "name": "room.hut.title",
   "description": "room.hut.description",
   "locks": {
     "enter": {

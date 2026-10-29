@@ -2,7 +2,7 @@
   "keywords": [
     "captain"
   ],
-  "short": "npc.captain.short",
+  "name": "npc.captain.short",
   "room_line": "npc.captain.room",
   "description": "npc.captain.description",
   "room": "keep",

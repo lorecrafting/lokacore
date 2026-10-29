@@ -2,7 +2,7 @@
   "keywords": [
     "old_coin"
   ],
-  "short": "item.old_coin.short",
+  "name": "item.old_coin.short",
   "room_line": "item.old_coin.room",
   "description": "item.old_coin.description",
   "mass_grams": 10,

@@ -47,7 +47,7 @@ defmodule Loka.Content.Dialogues do
     |> Enum.flat_map(fn {chapter, i} ->
       steps = ["chapters", i]
 
-      texts("cartridge.json", [{steps ++ ["title"], chapter["title"]}], ctx.text) ++
+      texts("cartridge.json", [{steps ++ ["name"], chapter["name"]}], ctx.text) ++
         chapter(chapter, i, steps, ctx)
     end)
   end
@@ -204,7 +204,7 @@ defmodule Loka.Content.Dialogues do
         do: [diag("OUTCOME_MISMATCH", at(rel, ["riddle", "wrong_limit"]))],
         else: []
 
-    texts(rel, [{["prompt"], d["prompt"]}, {["label"], d["label"]}], text) ++ bound
+    texts(rel, [{["prompt"], d["prompt"]}, {["name"], d["name"]}], text) ++ bound
   end
 
   defp riddle(rel, %{"riddle" => r, "choices" => choices}, ctx) do

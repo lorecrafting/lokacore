@@ -2,7 +2,7 @@
   "keywords": [
     "lute"
   ],
-  "short": "item.lute.short",
+  "name": "item.lute.short",
   "room_line": "item.lute.room",
   "description": "item.lute.description",
   "location": {

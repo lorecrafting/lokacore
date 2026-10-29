@@ -3,7 +3,7 @@
   "tick_every": 14400,
   "resource": "hp",
   "per_tick": 1,
-  "label": "condition.hen_fed",
+  "name": "condition.hen_fed",
   "narration": {
     "applied": "narration.hen_fed.applied",
     "tick": "narration.hen_fed.tick",

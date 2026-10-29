@@ -1,5 +1,5 @@
 {
-  "label": "service.cancel",
+  "name": "service.cancel",
   "command": "use_service",
   "target": {
     "kind": "entity",

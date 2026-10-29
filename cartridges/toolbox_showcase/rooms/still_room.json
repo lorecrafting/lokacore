@@ -1,5 +1,5 @@
 {
-  "title": "room.still_room.title",
+  "name": "room.still_room.title",
   "description": "room.still_room.description",
   "exits": {
     "east": {

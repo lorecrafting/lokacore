@@ -1,5 +1,5 @@
 {
-  "label": "actions.gather_ash",
+  "name": "actions.gather_ash",
   "aliases": [
     "gather"
   ],

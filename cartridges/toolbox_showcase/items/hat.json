@@ -2,7 +2,7 @@
   "keywords": [
     "hat"
   ],
-  "short": "item.hat.short",
+  "name": "item.hat.short",
   "room_line": "item.hat.room",
   "description": "item.hat.description",
   "location": {

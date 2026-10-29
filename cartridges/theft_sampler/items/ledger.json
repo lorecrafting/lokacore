@@ -2,7 +2,7 @@
   "keywords": [
     "ledger"
   ],
-  "short": "item.ledger.short",
+  "name": "item.ledger.short",
   "room_line": "item.ledger.room",
   "description": "item.ledger.description",
   "location": {

@@ -1,5 +1,5 @@
 {
-  "label": "service.mend_hut",
+  "name": "service.mend_hut",
   "command": "use_service",
   "target": {
     "kind": "entity",

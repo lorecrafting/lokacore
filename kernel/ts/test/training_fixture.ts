@@ -29,7 +29,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
       named('skill', k),
       {
         key: k,
-        label: text,
+        name: text,
         requirement: text,
         qualification: {
           op: 'stat_compare',
@@ -57,7 +57,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
   c.npcs[named('npc', 'teacher')] = {
     key: 'teacher',
     keywords: ['teacher'],
-    short: text,
+    name: text,
     room_line: text,
     description: text,
     room: ref('room', 'lantern_cellar'),
@@ -66,7 +66,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
   c.items[named('item', 'sword')] = {
     key: 'sword',
     keywords: ['sword'],
-    short: text,
+    name: text,
     room_line: text,
     description: text,
     location: { in: 'npc', npc: ref('npc', 'teacher') },
@@ -80,7 +80,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
   c.items[named('item', 'shield')] = {
     key: 'shield',
     keywords: ['shield'],
-    short: text,
+    name: text,
     room_line: text,
     description: text,
     location: { in: 'npc', npc: ref('npc', 'teacher') },

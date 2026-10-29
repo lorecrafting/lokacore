@@ -2,7 +2,7 @@
   "keywords": [
     "fishmonger"
   ],
-  "short": "npc.fishmonger.short",
+  "name": "npc.fishmonger.short",
   "room_line": "npc.fishmonger.room",
   "description": "npc.fishmonger.description",
   "room": "market",

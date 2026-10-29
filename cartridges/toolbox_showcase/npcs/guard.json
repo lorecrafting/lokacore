@@ -2,7 +2,7 @@
   "keywords": [
     "guard"
   ],
-  "short": "npc.guard.short",
+  "name": "npc.guard.short",
   "room_line": "npc.guard.room",
   "description": "npc.guard.description",
   "room": "market_row",
