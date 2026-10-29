@@ -28,13 +28,20 @@ loka-kgd.194.12/.13/.14/.16/.18/.22/.17/.9). In flight; each verdict lands as a 
   top). Integration branch `simplify/c1-loader` (worktree simplify-c1-loader) cut at 801a9a20. Wave 1
   running: slice 0 prep then B1 (one developer, `simplify/c1-prep`, `simplify/c1-b1`), F2-Ex
   (`simplify/c1-f2-ex`); D1 starts from the prep head. Per-slice review, PM merges sub-branches
-  `--no-ff`; wave 2 = B2, D2, F2-docs (after #488); wave 3 = C1, C2; then F; Fable final-head review.
+  `--no-ff`; prep and D1 merged (86f6781cc); B1 and F2-Ex in fix rounds; B2, D2, F2-docs building;
+  wave 3 = C1, C2; then F; Fable final-head review. At F2-Ex merge take its deletion of
+  loader_floors.json and `git rm kernel/ts/test/loader_floors.test.ts`.
   Starred decisions D1 D2 D4 D5 D6 are PM defaults inside the owner's yes; owner ratifies on return.
 - B5 (loka-ivjq.28) reopened: Beads sync redesign (Fable brief); #484 review found three failure states
   (AmbiguousBase after a mid-run death, br's --force-db hint reverting main rows, base rebuild dropping
   rows). Old refuse-then-manual sync stays: on `after_merge` "Sync conflict", run `br sync --merge`, then
   rerun `bin/after_merge.sh`; a "local path" refusal means a Beads note quotes a path: reword it.
 - Draft #454 ON HOLD (P3 hold below).
+
+- Batch S (speed, loka-n0ng; owner yes 2026-10-28 "yes to all the process speedups"): reviewer fixes
+  small no-logic should-fixes in place; CI path filters; agents leave full suites to CI (wait_ci is the
+  full-suite bar; already the practice in C1 briefs); prepush only for changed file types. One developer when
+  a slot frees; B5 (loka-ivjq.28) moves ahead of C2.
 
 ## Next, in order (owner-approved)
 
