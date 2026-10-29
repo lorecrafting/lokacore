@@ -329,7 +329,7 @@ git commit -qm ex; git update-ref refs/remotes/origin/main HEAD; echo x > kernel
 grep -q '^TS_SIZE_' "$R.m" && grep -q '^TYPECHECK_' "$R.m" && grep -q '^PRETTIER_' "$R.m" && ! grep -q '^MIX_FORMAT_' "$R.m" || bad "prepush: a kernel/ts change skipped the TS checks or prettier, or ran the Elixir ones: $(cat "$R.m")"
 # --- ci_changes.sh --------------------------------------------------------------------------
 # Break (loka-n0ng): a docs-only branch runs the test jobs or sim/walk; an engine change skips sim/walk; a test-only or
-# contract-doc change skips the test jobs; a non-push event, or a branch diff that cannot be read, skips anything.
+# contract-doc change skips the test jobs; a non-push event, or a branch diff that is empty or cannot be read, skips anything.
 R=$(mktemp -d); cd "$R"; git init -q -b main; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 cc() { # <event> <file> <expected output on one line>
   git checkout -qB t main; mkdir -p "$(dirname "$2")"; echo x > "$2"; git add . && git commit -qm "$2"
@@ -341,6 +341,7 @@ cc push lib/x.ex 'code=true sim_walk=true'
 cc push kernel/ts/test/x.ts 'code=true sim_walk=false'
 cc push docs/spec/conformance/x.json 'code=true sim_walk=false'
 cc schedule docs/y.md 'code=true sim_walk=true'
+git checkout -qB t main; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' '); [ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: an empty branch diff skipped jobs: '$got'"
 git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_walk=true'
 # --- regen.sh -------------------------------------------------------------------------------
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
