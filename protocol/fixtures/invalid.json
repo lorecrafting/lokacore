@@ -1006,11 +1006,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/resources/c@1.0.0:scripted~1x",
+        "path": "/resources/c@1.0.0:action~1x",
         "code": "invalid_type"
       },
       {
-        "path": "/resources/c@1.0.0:scripted~1x",
+        "path": "/resources/c@1.0.0:action~1x",
         "code": "pattern_mismatch"
       },
       {
@@ -10556,7 +10556,7 @@
         "key": "r"
       },
       "scripted_actions": {
-        "c@1.0.0:action/x": 1
+        "c@1.0.0:room/x": 1
       }
     },
     "errors": [
@@ -10569,11 +10569,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/scripted_actions/c@1.0.0:action~1x",
+        "path": "/scripted_actions/c@1.0.0:room~1x",
         "code": "invalid_type"
       },
       {
-        "path": "/scripted_actions/c@1.0.0:action~1x",
+        "path": "/scripted_actions/c@1.0.0:room~1x",
         "code": "pattern_mismatch"
       }
     ]

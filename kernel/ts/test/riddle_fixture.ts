@@ -66,7 +66,7 @@ export function riddleSource(c: any) {
     key: 'rope_coiled',
     control: 'modal',
     on: {
-      action: ref('scripted_action', 'coil_rope'),
+      action: ref('action', 'coil_rope'),
       room: ref('room', 'ferry_landing'),
       detail: 'mooring_post',
       outcome: 'success',

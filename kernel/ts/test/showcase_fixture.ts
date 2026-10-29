@@ -383,7 +383,7 @@ export function homestead(c: any) {
   // spells (1.98) with flamma's sparks; ward's level and stat policy.
   delete c.manifest.requires.capabilities.light;
   delete c.lock.capabilities.light;
-  for (const k of ['lux', 'ward', 'flamma']) delete c.scripted_actions[ref('scripted_action', k)];
+  for (const k of ['lux', 'ward', 'flamma']) delete c.scripted_actions[ref('action', k)];
   delete c.reactions[ref('reaction', 'flamma_sparks')];
   for (const k of ['lantern', 'attic_lantern', 'lamp_oil']) delete c.items[ref('item', k)];
   delete c.rooms[ref('room', 'crypt')].dark_description;

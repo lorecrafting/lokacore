@@ -40,7 +40,7 @@ const begin = (c: any) => {
   c.scenes[SCENE] = {
     key: 'begin',
     on: {
-      action: ref('scripted_action', 'begin'),
+      action: ref('action', 'begin'),
       room,
       detail: 'mooring_post',
       outcome: 'success',
