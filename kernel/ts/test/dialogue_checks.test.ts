@@ -143,17 +143,3 @@ test('a failed check reads its failure line, closes the talk, counts a use; a ne
   assert.equal(g.fact('gate_open'), true);
   assert.equal(g.fact('uses_intimidate'), 2);
 });
-
-// Breaks: the lock stage drops the check capability, so a check loads undeclared.
-// The row 14 semantic rules are the compiler's (test/loka/content_choice_checks_test.exs).
-test('the loader refuses a dialogue choice check without its capability', () => {
-  const guard = `${P}:dialogue/guard`;
-  const c = structuredClone(source);
-  delete c.manifest.requires.capabilities.check;
-  delete c.lock.capabilities.check;
-  const r = load(c);
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'UNDECLARED_CAPABILITY',
-    `.cartridge.dialogues[${JSON.stringify(guard)}].choices.intimidate.check`,
-  ]);
-});

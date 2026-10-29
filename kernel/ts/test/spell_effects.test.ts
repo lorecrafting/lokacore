@@ -159,29 +159,6 @@ test('ward lands warded on the caster: status_applied fires the reaction once', 
   assert.deepEqual(types(cast(warded.world, 'ward')), ['action_completed']);
 });
 
-// Breaks: the TS loader admits light.ignite without light@1. Effects off a spell, below 1.98 or
-// naming no NPC are the compiler's (content_spell_effects_test.exs).
-test('loader: an effect step declares its owner', () => {
-  const seq = (k: string) =>
-    `.cartridge.recipes[${JSON.stringify(R(k))}].outcomes.success.sequence[0]`;
-  const rows: [(c: Record<string, any>) => void, string, string][] = [
-    [
-      (c) => {
-        for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
-          delete caps.light;
-        for (const i of ['orb', 'glowdust']) delete c.items[`${P}:item/${i}`].fuel;
-        delete c.rooms[`${P}:room/crypt`].dark_description;
-      },
-      'UNDECLARED_CAPABILITY',
-      `${seq('lux')}.op`,
-    ],
-  ];
-  for (const [change, diagnostic, path] of rows) {
-    const r = variant(change);
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [diagnostic, path]);
-  }
-});
-
 // Breaks: a step after a fatal damage still reaches the NPC the spell just killed (a status lands on
 // the dead wight), or damage on an NPC with no hp pool faults instead of writing nothing.
 test('a spell writes nothing more to an NPC it killed, nor damage to an NPC without hp', () => {

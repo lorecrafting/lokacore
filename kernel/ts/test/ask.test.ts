@@ -15,7 +15,6 @@ import type { DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { knownTopics } from '../src/mechanics/topics/shared.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
-import type { Obj } from '../src/content/cartridge_refs.ts';
 import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ask-sampler-'));
@@ -226,30 +225,4 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   const t = accepted(w, { type: 'talk', target_id: id(w, 'smith') });
   assert.equal(offer(t, 'smith'), undefined);
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
-});
-
-// Breaks: the loader trusting an ask's topic, grants or texts, its owning capability, the 1.96 floor, or an asked
-// trigger's topic.
-test('the loader refuses an unknown answer topic or grant, ask without speech@1 and 1.95', () => {
-  const smith = `${P}npc/smith`;
-  const refusal = (change: (c: Obj) => void) => {
-    const r = reload(content, change);
-    assert.ok(!r.ok);
-    return [r.diagnostic.code, r.diagnostic.path?.split('.').at(-1)];
-  };
-  assert.deepEqual(
-    refusal((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.95';
-      Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask);
-    }),
-    ['KERNEL_API_RANGE_INVALID', 'at_least'],
-  );
-  // The asks' floor alone (no asked trigger left).
-  assert.deepEqual(
-    refusal((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.95';
-      delete c.reactions[`${P}reaction/guard_smugglers`];
-    }),
-    ['KERNEL_API_RANGE_INVALID', 'at_least'],
-  );
 });

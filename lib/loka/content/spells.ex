@@ -6,8 +6,7 @@ defmodule Loka.Content.Spells do
   spell (SCHEMA_VIOLATION at its op) and needs its owner (UNDECLARED_CAPABILITY at its op: damage
   death@1 by entity_died, light.ignite light@1 by the ignite command; status.apply's status
   already needs status@1); an unaimed spell's damage names its npc and its light.ignite its item
-  (SCHEMA_VIOLATION at the missing field). Word bar S2: speech.phrases needs speech@1 (UNDECLARED_CAPABILITY at the phrases). Twin of
-  spells/1 in kernel/ts/src/content/cartridge_recipes.ts.
+  (SCHEMA_VIOLATION at the missing field). Word bar S2: speech.phrases needs speech@1 (UNDECLARED_CAPABILITY at the phrases).
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]

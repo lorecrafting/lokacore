@@ -15,7 +15,6 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { moveItem } from '../src/mechanics/containment/react.ts';
-import { uses } from '../src/content/cartridge_reactions.ts';
 import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
@@ -209,14 +208,6 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
   w = ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, ++stream.n));
   assert.deepEqual(activeStatuses(w, item(w, 'fish')), []);
   assert.equal(w.state.containers[item(w, 'fish')], w.consumed);
-});
-
-test('item.move is not counted as a fact_changed writer', () => {
-  // Break: item.move counted as a fact_changed writer (it emits no event, so needs no fact@1).
-  const steps = uses(JSON.parse(new TextDecoder().decode(artifact)).cartridge).filter(([, , p]) =>
-    /(spoil|sweep)"\]\.apply/.test(p),
-  );
-  assert.deepEqual(steps, []);
 });
 
 // Break: replenish.run ignores the item's earlier group (hs-1: the spoil move and the same-event

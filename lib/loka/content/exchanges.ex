@@ -1,5 +1,5 @@
 defmodule Loka.Content.Exchanges do
-  @moduledoc "Finite authored stock and equal-count exchanges; twin of cartridge_exchange.ts."
+  @moduledoc "Finite authored stock and equal-count exchanges."
   import Loka.Content.Source, only: [diag: 2, at: 2, ref: 3]
   alias Loka.Content.Refs
 

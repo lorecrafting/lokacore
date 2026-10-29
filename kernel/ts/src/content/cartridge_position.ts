@@ -1,11 +1,19 @@
 import { skillSpec, usesSpec } from './cartridge_skills.ts';
-import { tipSpec } from './cartridge_recipes.ts';
 import { trailFacts } from './cartridge_trails.ts';
 // Engine-owned fact specs (position@1, scene, skill, marker and tip facts), kept for
 // cartridge_services.ts and play/reach.ts; the compiler checks RESERVED_FACT (position.ex).
 import { markerSpec, spec } from './cartridge_scenes.ts';
 import type { Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
+
+/** Toolbox row W23: the FactSpec the compiler adds for a recipe's tip (recipes.ex tip_spec). */
+const tipSpec = (key: string) => ({
+  key: `seen_tip_${key}`,
+  version: 1,
+  value_type: { type: 'bool', default: false },
+  scopes: ['player'],
+  meaning: `Recipe ${key}'s tip was shown (action_recipe@1): only that recipe writes it.`,
+});
 
 /** The FactSpec the compiler adds under position@1 (cartridge.md Compiler), byte for byte. */
 const SPEC = {

@@ -197,23 +197,6 @@ test('a dig event moves one ore from the store at once, up to the cap; the job s
   assert.deepEqual(ore(w), [2, 1]);
 });
 
-// Breaks: the loader drops replenish.run's refusal under `after` (as item.move's, row FD1).
-// Stale and repeated keys are the compiler's (test/loka/content_replenish_test.exs).
-test('loader: replenish.run refuses a delayed reaction', () => {
-  const reload = (edit: (c: any) => void) => {
-    const r = edited(edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = `.cartridge.reactions["${S}reaction/dig"]`;
-  assert.deepEqual(
-    reload((c) => {
-      digging()(c);
-      c.reactions[`${S}reaction/dig`].after = 60;
-    }),
-    ['SCHEMA_VIOLATION', `${at}.apply[0].op`],
-  );
-});
-
 // Break: replenish.run ignores the root command's write of the item (hs-1 fix round 1): the drop
 // and the same-command sweep write the ore in two groups, and the drop faults conflicting_write.
 test('a sweep rule on item_dropped moves the dropped ore on in the same command', () => {

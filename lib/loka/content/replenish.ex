@@ -1,8 +1,7 @@
 defmodule Loka.Content.Replenish do
   @moduledoc """
   Replenish entries and recipe crafts (toolbox row 19b, Homestead hs-10; docs/system/cartridge.md
-  Replenish and Craft declarations);
-  twin of cartridge_replenish.ts.
+  Replenish and Craft declarations).
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, ref: 3]
   alias Loka.Content.Refs

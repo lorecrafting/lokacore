@@ -2,8 +2,7 @@ defmodule Loka.ContentChoiceChecksTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/persuade_sampler")}
 
-  # Breaks: a row 14 rule is dropped from the compiler (twin of the TypeScript loader's
-  # kernel/ts/src/content/cartridge_choice_checks.ts), so an unsound choice check compiles.
+  # Breaks: a row 14 rule is dropped from the compiler, so an unsound choice check compiles.
   test "row 14 dialogue choice checks keep their boundaries", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     guard = "dialogues/guard.json"
