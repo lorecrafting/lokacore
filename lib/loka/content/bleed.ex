@@ -53,8 +53,8 @@ defmodule Loka.Content.Bleed do
     Enum.flat_map(hits, fn {rel, n, hit} ->
       valid_hound =
         n["spawn_template"] == true and
-          Enum.any?(defs["population_bundle"], fn {_, {_, _, bundle}} ->
-            bundle["npc"]["key"] == n["key"]
+          Enum.any?(defs["population"] || %{}, fn {_, {_, _, plan}} ->
+            is_map(plan) and plan["npc"]["key"] == n["key"]
           end)
 
       Refs.reference(rel, ["attack", "on_positive_hit"], {"effect", "bleed"}, hit, m, defs) ++

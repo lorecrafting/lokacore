@@ -252,7 +252,6 @@ function populationSpecs(
       return [
         key(ref),
         {
-          bundle: ref,
           [member_role]: plan.npc,
           loot: plan.item,
           member_role,

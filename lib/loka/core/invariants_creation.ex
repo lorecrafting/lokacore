@@ -207,8 +207,8 @@ defmodule Loka.Core.InvariantsCreation do
     parent["kind"] == "spawned" and parent["role"] == "hunter" and
       child["kind"] == "spawned" and child["role"] == "loot" and
       p["id"] == child["member_id"] and
-      Map.take(parent, ~w(by bundle slot generation occurrence_id member_id)) ==
-        Map.take(child, ~w(by bundle slot generation occurrence_id member_id))
+      Map.take(parent, ~w(by slot generation occurrence_id member_id)) ==
+        Map.take(child, ~w(by slot generation occurrence_id member_id))
   end
 
   defp paired?(_, _), do: false
@@ -284,8 +284,7 @@ defmodule Loka.Core.InvariantsCreation do
   defp spawn_provenance?(s, i, origin) do
     spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
 
-    spec != nil and origin["bundle"] == spec["bundle"] and
-      origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
+    spec != nil and origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
       if(origin["role"] == "hunter",
         do: origin["member_id"] == i["id"],
         else: origin["member_id"] != i["id"]

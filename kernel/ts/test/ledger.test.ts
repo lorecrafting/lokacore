@@ -81,7 +81,9 @@ const fixture = {
   }),
   populations: defs('population', {
     hounds: {
-      bundle: R('population_bundle', 'hounds'),
+      npc: R('npc', 'hound'),
+      item: R('item', 'pelt'),
+      corpse: R('item', 'carcass'),
       home: R('room', 'kennel'),
       area: [R('room', 'kennel'), R('room', 'moor')],
       cap: 3,
@@ -89,9 +91,6 @@ const fixture = {
       night_target: 3,
       replacement_delay: 86400,
     },
-  }),
-  population_bundles: defs('population_bundle', {
-    hounds: { npc: R('npc', 'hound'), item: R('item', 'pelt'), corpse: R('item', 'carcass') },
   }),
   rooms: defs('room', {
     glade: {

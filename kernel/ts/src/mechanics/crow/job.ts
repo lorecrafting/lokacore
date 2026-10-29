@@ -54,7 +54,7 @@ export function runCrow(
   const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
   if (!b) return accepted<never>(world, 'job_ran', [done], []);
   if (
-    refString(job.job) !== refString(b.spec.bundle) ||
+    refString(job.job) !== refString(b.plan) ||
     job.crow_member_id !== b.row.member_id ||
     job.crow_generation !== b.row.generation ||
     job.crow_phase !== b.row.phase

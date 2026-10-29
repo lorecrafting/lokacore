@@ -136,7 +136,7 @@
           "job": {
             "cartridge_id": "fen",
             "cartridge_version": "0.0.1",
-            "kind": "population_bundle",
+            "kind": "population",
             "key": "crows"
           },
           "due_time": 250,
@@ -156,7 +156,7 @@
               "job": {
                 "cartridge_id": "fen",
                 "cartridge_version": "0.0.1",
-                "kind": "population_bundle",
+                "kind": "population",
                 "key": "crows"
               },
               "due_time": 250,

@@ -3,7 +3,7 @@ defmodule Loka.ContentDeerTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/shoo_sampler")}
 
   # Breaks: the compiler leaves local deer plan links as short strings that the loader cannot resolve.
-  test "deer plan and bundle short references expand" do
+  test "deer plan short references expand" do
     assert {:ok, bytes, []} = Loka.Content.compile("cartridges/shoo_sampler")
     cartridge = JSON.decode!(bytes)["cartridge"]
     id = "shoo_sampler@0.0.1:population/willow_deer"
@@ -16,11 +16,12 @@ defmodule Loka.ContentDeerTest do
              "key" => "willow_shade"
            }
 
-    assert plan["bundle"]["key"] == "willow_deer"
+    assert {plan["npc"]["kind"], plan["npc"]["key"], plan["corpse"]["kind"]} ==
+             {"npc", "willow_deer", "item"}
   end
 
-  # Breaks: a deer plan compiles with missing flight narration or an untyped hound/hide bundle.
-  test "invalid sight narration and role pair refuse source", %{dir: dir} do
+  # Breaks: a deer plan compiles with missing flight narration.
+  test "invalid sight narration refuses source", %{dir: dir} do
     assert {:error, ds} =
              Loka.ContentSource.compile(dir, [
                {"populations/willow_deer.json",
@@ -28,17 +29,6 @@ defmodule Loka.ContentDeerTest do
              ])
 
     assert Enum.any?(ds, &(&1["path"] == "populations/willow_deer.sight.narration"))
-
-    assert {:error, ds} =
-             Loka.ContentSource.compile(dir, [
-               {"population_bundles/willow_deer.json", &Map.put(&1, "loot_role", "pelt")}
-             ])
-
-    assert Enum.any?(
-             ds,
-             &(&1["path"] == "population_bundles/willow_deer.loot_role" or
-                 &1["path"] == "populations/willow_deer.bundle")
-           )
   end
 
   # Breaks: a sight plan compiles on a bundle without the deer/hide roles (the crow's), though saved

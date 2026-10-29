@@ -24,7 +24,6 @@ export function creationValid(identity: Json, state: State): boolean {
     i.audience === undefined &&
     (spawned
       ? !!population &&
-        key(origin.bundle) === key(population.bundle) &&
         (origin.slot as number) <= (population.cap as number) &&
         key(i.definition) === key(population[origin.role as string]) &&
         (['hunter', 'prey'].includes(origin.role as string)
@@ -85,7 +84,6 @@ export function initialPlacement(
         ['hunter', 'prey'].includes(holder.role as string) &&
         op.destination_id === holder.member_id &&
         key(child.by) === key(holder.by) &&
-        key(child.bundle) === key(holder.bundle) &&
         child.slot === holder.slot &&
         child.generation === holder.generation &&
         child.occurrence_id === holder.occurrence_id &&

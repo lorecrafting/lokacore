@@ -695,7 +695,7 @@ Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05
 - **EntityIdentity**: A runtime entity's identity and provenance (03 §3, §11; 21 §4): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.
 - **EntityOrigin**: Where a runtime entity came from (21 §4 'spawn/population provenance'; 05 §25 'Population provenance': a plan may only replenish or clean up what it spawned).
   - `authored`: Placed by the cartridge's authored content.
-  - `spawned`: Created by the definition `by` (a spawn bundle or population plan).
+  - `spawned`: Created by the population plan `by`.
   - `death`
   - `built`: Built rooms S2 (construction@1; mechanics.md Built rooms): a room raised by a build service. The identity's definition is the StructureDefinition; site is the authored room it opens from, direction the site direction it occupies (one of site.directions), owner the character who paid.
 - **EscortRelation**: API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.

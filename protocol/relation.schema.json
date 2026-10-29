@@ -221,16 +221,13 @@
           "additionalProperties": false
         },
         {
-          "description": "Created by the definition `by` (a spawn bundle or population plan).",
+          "description": "Created by the population plan `by`.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "spawned"
             },
             "by": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "bundle": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "slot": {
@@ -259,7 +256,6 @@
           "required": [
             "kind",
             "by",
-            "bundle",
             "slot",
             "generation",
             "occurrence_id",
@@ -339,12 +335,6 @@
         {
           "kind": "spawned",
           "by": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "population",
-            "key": "fen_wisps"
-          },
-          "bundle": {
             "cartridge_id": "ferrymans_lantern",
             "cartridge_version": "0.1.0",
             "kind": "population",

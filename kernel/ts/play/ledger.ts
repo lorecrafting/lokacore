@@ -176,7 +176,6 @@ function unclassified(c: Obj, currencies: string[]) {
 function populations(c: Obj) {
   return defs(c, 'populations')
     .map(([ref, p]) => {
-      const b = c.population_bundles[refString(p.bundle)];
       return {
         ref,
         home: refString(p.home),
@@ -186,9 +185,9 @@ function populations(c: Obj) {
         night_target: p.night_target,
         replacement_delay: p.replacement_delay,
         ...(p.chance && { chance: p.chance }),
-        npc: refString(b.npc),
-        ...(b.item && { item: refString(b.item) }),
-        corpse: refString(b.corpse),
+        npc: refString(p.npc),
+        ...(p.item && { item: refString(p.item) }),
+        corpse: refString(p.corpse),
       };
     })
     .sort(by((p) => [p.ref]));

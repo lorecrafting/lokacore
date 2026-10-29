@@ -169,56 +169,6 @@
           }
         ]
       }
-    },
-    {
-      "id": "population-bundle-requires-crow-binding",
-      "state": {
-        "clock": 100
-      },
-      "ops": [
-        {
-          "op": "job.schedule",
-          "writer_group": 0,
-          "job_id": "77777777-7777-4777-8777-777777777777",
-          "job": {
-            "cartridge_id": "fen",
-            "cartridge_version": "0.0.1",
-            "kind": "population_bundle",
-            "key": "crows"
-          },
-          "due_time": 250
-        }
-      ],
-      "expected": {
-        "fault": {
-          "kind": "fault",
-          "code": "precondition_failed",
-          "target": {
-            "kind": "job",
-            "job_id": "77777777-7777-4777-8777-777777777777"
-          }
-        }
-      },
-      "counterfeit": {
-        "changes": [
-          {
-            "target": {
-              "kind": "job",
-              "job_id": "77777777-7777-4777-8777-777777777777"
-            },
-            "value": {
-              "job": {
-                "cartridge_id": "fen",
-                "cartridge_version": "0.0.1",
-                "kind": "population_bundle",
-                "key": "crows"
-              },
-              "due_time": 250,
-              "status": "pending"
-            }
-          }
-        ]
-      }
     }
   ]
 }

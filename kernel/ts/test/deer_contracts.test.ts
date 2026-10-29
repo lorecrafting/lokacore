@@ -5,7 +5,6 @@ import { content, fresh, ref, shoo } from './deer_fixture.ts';
 
 const id = '11111111-2222-4333-8444-555555555555';
 const plan = content.populations![ref('population', 'willow_deer')];
-const bundle = content.population_bundles![ref('population_bundle', 'willow_deer')];
 const world = fresh();
 const origins = Object.values(world.state.created ?? {}).map((i) => i.origin);
 const deer = origins.find((o) => o.kind === 'spawned' && o.role === 'deer')! as Extract<
@@ -43,7 +42,6 @@ const cancel = { op: 'job.cancel', writer_group: 0, job_id: id, sight_member_id:
 test('valid deer wire rows and operations remain admitted', () => {
   for (const [name, value] of [
     ['PopulationPlan', plan],
-    ['PopulationBundle', bundle],
     ['EntityOrigin', deer],
     ['EntityOrigin', hide],
     ['PopulationSlot', slot],
@@ -82,13 +80,7 @@ test('new deer wire guards refuse malformed occurrences', () => {
     op.sight[field] = value;
     cases.push(['DeltaOp', op, `/sight/${field}`, code]);
   }
-  for (const [field, bad] of [
-    ['member_role', 'fox'],
-    ['loot_role', 'fur'],
-  ] as const) {
-    const b = { ...bundle, [field]: bad };
-    cases.push(['PopulationBundle', b, `/${field}`, 'not_in_enum']);
-  }
+  cases.push(['PopulationPlan', { ...plan, member_role: 'fox' }, '/member_role', 'not_in_enum']);
   const badOrigin = { ...deer, role: 'fox' };
   cases.push(['EntityOrigin', badOrigin, '/role', 'not_in_enum']);
   const badSlot = { ...slot, sight_job_id: 'bad' };

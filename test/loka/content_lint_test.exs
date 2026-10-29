@@ -266,8 +266,8 @@ defmodule Loka.ContentLintTest do
           {"npcs/n.json", %{"drops" => [%{"item" => "ear", "chance" => 1}]}},
           {"npcs/n.json", shop.(%{"item" => "ear", "buy" => 1})},
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["ear"]}})},
-          {"population_bundles/b.json", %{"item" => "ear"}},
-          {"population_bundles/b.json", %{"corpse" => "ear"}},
+          {"populations/b.json", %{"item" => "ear"}},
+          {"populations/b.json", %{"corpse" => "ear"}},
           {"cartridge.json", %{"world" => %{"death" => %{"npc_corpse" => "ear"}}}},
           {"cartridge.json", %{"world" => %{"death" => %{"player_corpse" => "ear"}}}},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"output" => "ear"}}}}

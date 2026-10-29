@@ -21,7 +21,6 @@ export function birth(
   const origin = {
     kind: 'spawned' as const,
     by: plan,
-    bundle: spec.bundle,
     slot,
     generation,
     occurrence_id,

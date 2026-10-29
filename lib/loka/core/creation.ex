@@ -50,8 +50,8 @@ defmodule Loka.Core.Creation do
     origin = identity["origin"]
     spec = section(state, "population_specs")[key(origin["by"])]
 
-    spec != nil and origin["bundle"] == spec["bundle"] and
-      origin["slot"] <= spec["cap"] and identity["definition"] == spec[origin["role"]] and
+    spec != nil and origin["slot"] <= spec["cap"] and
+      identity["definition"] == spec[origin["role"]] and
       if(origin["role"] == "hunter",
         do: origin["member_id"] == identity["id"],
         else: origin["member_id"] != identity["id"]
@@ -89,8 +89,8 @@ defmodule Loka.Core.Creation do
       child_origin["kind"] == "spawned" and child_origin["role"] == "loot" and
         parent_origin["kind"] == "spawned" and parent_origin["role"] == "hunter" and
         op["destination_id"] == parent_origin["member_id"] and
-        Map.take(child_origin, ~w(by bundle slot generation occurrence_id member_id)) ==
-          Map.take(parent_origin, ~w(by bundle slot generation occurrence_id member_id))
+        Map.take(child_origin, ~w(by slot generation occurrence_id member_id)) ==
+          Map.take(parent_origin, ~w(by slot generation occurrence_id member_id))
 
     home = get_in(state, ["population_specs", key(child_origin["by"] || %{}), "home"])
 

@@ -163,7 +163,6 @@ export function onlyService(c: any) {
     'topics',
     'liquids',
     'populations',
-    'population_bundles',
     'barriers',
     'attributes',
     'recipes',

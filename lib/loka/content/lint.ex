@@ -147,7 +147,7 @@ defmodule Loka.Content.Lint do
     tag(:source, drops ++ stock) ++ tag(:sink, stock)
   end
 
-  defp refs(["population_bundles", _], b), do: tag(:source, [b["item"], b["corpse"]])
+  defp refs(["populations", _], p), do: tag(:source, [p["item"], p["corpse"]])
 
   defp refs(["cartridge.json"], %{"world" => %{"death" => d}}),
     do: tag(:source, [d["player_corpse"], d["npc_corpse"]])

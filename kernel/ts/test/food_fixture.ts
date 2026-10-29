@@ -42,7 +42,6 @@ export function onlyFood(c: any) {
     'liquids',
     'services',
     'populations',
-    'population_bundles',
     'barriers',
     'attributes',
     'recipes',

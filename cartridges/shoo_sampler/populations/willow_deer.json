@@ -1,6 +1,9 @@
 {
   "extends": "herd",
   "npc": "willow_deer",
+  "item": "deer_hide",
+  "corpse": "deer_corpse",
+  "member_role": "prey",
   "home": "willow_shade",
   "area": [
     "willow_shade",

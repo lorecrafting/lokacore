@@ -101,7 +101,7 @@ defmodule Loka.Content.Death do
     corpse = death != nil and item_ref in [death["player_corpse"], death["npc_corpse"]]
 
     bundle_roles =
-      for {_, {_, _, b}} <- defs["population_bundle"] || %{},
+      for {_, {_, _, b}} <- defs["population"] || %{},
           b != :invalid,
           b["item"] == item_ref or b["corpse"] == item_ref,
           do: if(b["corpse"] == item_ref, do: :corpse, else: :pelt)

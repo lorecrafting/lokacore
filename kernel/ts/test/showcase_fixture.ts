@@ -308,7 +308,6 @@ export function homestead(c: any) {
       'item/watering_can',
     ],
     npcs: ['npc/cook', 'npc/farmer', 'npc/hen'],
-    population_bundles: ['population_bundle/hens'],
     populations: ['population/hens'],
     replenish: [
       'replenish/croft_fish',

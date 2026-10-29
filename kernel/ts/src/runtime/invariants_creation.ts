@@ -162,7 +162,6 @@ function provenance(state: Any, i: Any): boolean {
     const spec = state.population_specs?.[key(i.origin.by)];
     return (
       !!spec &&
-      same(i.origin.bundle, spec.bundle) &&
       i.origin.slot <= spec.cap &&
       same(i.definition, spec[i.origin.role]) &&
       (['hunter', 'prey'].includes(i.origin.role)
@@ -196,7 +195,7 @@ function paired(parent: Any, child: Any): boolean {
     b?.kind === 'spawned' &&
     b.role === 'loot' &&
     parent.id === b.member_id &&
-    ['by', 'bundle', 'slot', 'generation', 'occurrence_id', 'member_id'].every((field) =>
+    ['by', 'slot', 'generation', 'occurrence_id', 'member_id'].every((field) =>
       same(a[field], b[field]),
     )
   );

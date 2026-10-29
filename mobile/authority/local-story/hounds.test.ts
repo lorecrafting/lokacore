@@ -31,7 +31,6 @@ function populationOnly() {
     c.items = keep(c.items, ['ear', 'npc_corpse', 'player_corpse']);
     for (const item of Object.values(c.items) as any[]) delete item.immune;
     c.npcs = keep(c.npcs, ['goblin']);
-    c.population_bundles = keep(c.population_bundles, ['goblins']);
     c.resources = keep(c.resources, ['hp', 'mv']);
     for (const section of [
       'actions',

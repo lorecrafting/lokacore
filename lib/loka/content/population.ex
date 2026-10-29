@@ -1,5 +1,5 @@
 defmodule Loka.Content.Population do
-  @moduledoc "Checks the selected bounded population and its exact two-member bundle."
+  @moduledoc "Checks the selected bounded population: its NPC, held item and corpse."
   import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3]
   alias Loka.Content.Refs
 
@@ -28,9 +28,14 @@ defmodule Loka.Content.Population do
       )
 
   # ponytail: one bounded plan expansion keeps short refs together. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
-  def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m, expand) do
+  def expand(%{"home" => home, "area" => area} = plan, m, expand) do
     plan
-    |> Map.put("bundle", ref(b, "population_bundle", m))
+    |> Map.merge(
+      for {k, kind} <- [{"npc", "npc"}, {"item", "item"}, {"corpse", "item"}],
+          is_map_key(plan, k),
+          into: %{},
+          do: {k, ref(plan[k], kind, m)}
+    )
     |> Map.put("home", ref(home, "room", m))
     |> Map.put("area", Enum.map(area, &ref(&1, "room", m)))
     |> then(fn p ->
@@ -54,13 +59,6 @@ defmodule Loka.Content.Population do
     end)
   end
 
-  def expand(%{"npc" => n, "corpse" => c} = bundle, m, _expand) do
-    bundle
-    |> Map.put("npc", ref(n, "npc", m))
-    |> Map.put("corpse", ref(c, "item", m))
-    |> then(fn b -> if b["item"], do: Map.put(b, "item", ref(b["item"], "item", m)), else: b end)
-  end
-
   def check(nil, _, _, _), do: []
   def check(_, _, nil, _), do: []
 
@@ -68,15 +66,24 @@ defmodule Loka.Content.Population do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
-    for {_key, {rel, steps, plan}} <- plans,
-        is_map(plan),
-        error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
-        do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
+    for {_key, {rel, steps, plan}} <- plans, is_map(plan) do
+      errors = plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan)
+
+      refs(rel, steps, plan, manifest, defs) ++
+        for(error <- errors, do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error)))
+    end
+    |> List.flatten()
+  end
+
+  defp refs(rel, steps, plan, manifest, defs) do
+    for {k, kind} <- [{"npc", "npc"}, {"item", "item"}, {"corpse", "item"}],
+        is_map_key(plan, k),
+        d <- Refs.reference(rel, steps, {k, kind}, plan, manifest, defs),
+        do: d
   end
 
   # ponytail: report this finite plan's linked source errors together; split on another plan shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp plan_errors(manifest, defs, calendar, text, p) do
-    bundle = value(Refs.resolve(p["bundle"], "population_bundle", manifest, defs))
     room_refs = Enum.map([p["home"] | p["area"]], &Refs.resolve(&1, "room", manifest, defs))
     [home | rooms] = Enum.map(room_refs, &value/1)
     n = p["cap"]
@@ -97,18 +104,17 @@ defmodule Loka.Content.Population do
         (is_map(home) and Enum.uniq(p["area"]) == p["area"] and Enum.member?(p["area"], p["home"]) and
            Enum.all?(rooms, &is_map/1) and reciprocal?(rooms, p["area"]))
 
-    bundle_ok =
-      is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"], p["scavenge"] != nil)
+    members_ok = members_valid?(p, manifest, defs, p["scavenge"] != nil)
 
     []
     |> add(not targets, ["day_target"])
     |> add(not valid_time, ["wander_interval"])
     |> add(not connected, ["area"])
-    |> add(not bundle_ok, ["bundle"])
-    |> add(not scavenge_valid?(p["scavenge"], p, bundle, manifest, defs, text), ["scavenge"])
+    |> add(not members_ok, ["npc"])
+    |> add(not scavenge_valid?(p["scavenge"], p, manifest, defs, text), ["scavenge"])
     |> add(not pack_valid?(p["pack"], p["area"], rooms, text), ["pack", "narration"])
-    |> add(not sight_valid?(p["sight"], p["area"], rooms, text, bundle), ["sight", "narration"])
-    |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
+    |> add(not sight_valid?(p["sight"], p["area"], rooms, text, p), ["sight", "narration"])
+    |> add(manifest["requires"]["capabilities"]["population"] != 1, ["npc"])
     |> add(p["floor"] != nil and (p["floor"] > p["day_target"] or p["chance"] != nil), ["floor"])
     |> add(is_map(p["birth_when"]) and not actorless?(p["birth_when"]["root"]), ["birth_when"])
     |> add(is_map(p["wander_when"]) and not actorless?(p["wander_when"]["root"]), ["wander_when"])
@@ -134,7 +140,7 @@ defmodule Loka.Content.Population do
 
   defp sight_valid?(nil, _, _, _, _), do: true
 
-  defp sight_valid?(sight, area, rooms, text, %{"member_role" => "prey", "loot_role" => "loot"}) do
+  defp sight_valid?(sight, area, rooms, text, %{"member_role" => "prey"}) do
     directions = area_directions(rooms, area)
 
     is_integer(sight["delay"]) and sight["delay"] > 0 and
@@ -161,10 +167,10 @@ defmodule Loka.Content.Population do
   defp value({_, _, v}) when is_map(v), do: v
   defp value(_), do: nil
 
-  defp scavenge_valid?(nil, _, _, _, _, _), do: true
+  defp scavenge_valid?(nil, _, _, _, _), do: true
 
   # ponytail: validate one authored corridor and nest together. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp scavenge_valid?(s, p, bundle, manifest, defs, text) do
+  defp scavenge_valid?(s, p, manifest, defs, text) do
     corridor = s["corridor"]
     rooms = Enum.map(corridor, &value(Refs.resolve(&1, "room", manifest, defs)))
     nest = value(Refs.resolve(s["nest"], "item", manifest, defs))
@@ -178,7 +184,7 @@ defmodule Loka.Content.Population do
         Enum.drop(rooms, 1)
       ])
 
-    is_map(bundle) and bundle["item"] == nil and
+    p["item"] == nil and
       Enum.all?(Map.values(s["narration"]), &Map.has_key?(text, &1)) and
       Enum.uniq(corridor) == corridor and
       Enum.member?(corridor, p["home"]) and
@@ -196,8 +202,8 @@ defmodule Loka.Content.Population do
       end)
   end
 
-  # ponytail: the optional companion keeps the existing bounded population bundle shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp bundle_valid?(b, manifest, defs, home, allow_empty) do
+  # ponytail: the optional companion keeps the existing bounded population member shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp members_valid?(b, manifest, defs, allow_empty) do
     refs = [
       Refs.resolve(b["npc"], "npc", manifest, defs),
       Refs.resolve(b["corpse"], "item", manifest, defs),
@@ -206,14 +212,11 @@ defmodule Loka.Content.Population do
 
     [npc, corpse, item] = Enum.map(refs, &value/1)
 
-    roles_ok =
-      (b["member_role"] == nil and b["loot_role"] == nil) or
-        (b["member_role"] == "prey" and b["loot_role"] == "loot")
-
     # An invalid NPC, corpse or item is already reported at its own path; a missing one is refused here.
-    :invalid in refs or
-      (roles_ok && (b["item"] != nil or allow_empty) && npc && corpse &&
-         npc["spawn_template"] == true && npc["room"] == home &&
+    # An unresolved one is reported by check/4.
+    Enum.any?(refs, &(&1 in [:invalid, :unresolved])) or
+      ((b["item"] != nil or allow_empty) && npc && corpse &&
+         npc["spawn_template"] == true && npc["room"] == b["home"] &&
          is_map(npc["hp"]) && is_map(npc["attack"]) &&
          (b["item"] == nil or
             ((is_map(item) and item["location"] == %{"in" => "template"} and

@@ -141,7 +141,6 @@ export type World = {
     Record<
       string,
       {
-        readonly bundle: DefinitionRef;
         readonly hunter?: DefinitionRef;
         readonly prey?: DefinitionRef;
         readonly loot?: DefinitionRef;

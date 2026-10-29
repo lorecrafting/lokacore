@@ -49,7 +49,7 @@ export const schedule = (
   op: 'job.schedule',
   writer_group: 0,
   job_id,
-  job: b.spec.bundle,
+  job: b.plan,
   due_time,
   crow_member_id: b.row.member_id,
   crow_generation: b.row.generation,
