@@ -994,7 +994,7 @@ Required cartridge text: an escrow with `output`: `service.no_output`.
 The compiler (`lib/loka/content/services.ex`) refuses:
 
 - An `account` that is not a fact, or a `vault` that is not an NPC: UNRESOLVED_REFERENCE at `.benefit.account` or `.benefit.vault`.
-- An `account` that is not a bounded int player fact (scopes `["player"]`, `minimum` 0, a `maximum`, default 0), or that another engine writer owns (a reserved fact such as `skill_<key>`, `uses_<key>` or `scene_<key>`, a dream-owned scene fact, a patrol `trust_fact` or an entitlement fact; `foreignRefs` in `kernel/ts/src/content/cartridge_position.ts`, `foreign_names` in `lib/loka/content/position.ex`): SCHEMA_VIOLATION `invalid_value` at `.benefit.account`.
+- An `account` that is not a bounded int player fact (scopes `["player"]`, `minimum` 0, a `maximum`, default 0), or that another engine writer owns (a reserved fact such as `skill_<key>`, `uses_<key>` or `scene_<key>`, a dream-owned scene fact, a patrol `trust_fact` or an entitlement fact; `foreign_names` in `lib/loka/content/position.ex`): SCHEMA_VIOLATION `invalid_value` at `.benefit.account`.
 - An `account` whose `maximum`, or a currency whose `maximum` − `minimum`, is below `amount` (no deposit could ever succeed): SCHEMA_VIOLATION `invalid_value` at `.benefit.amount`.
 - A `vault` without a `resource_starts` entry in the service's currency: SCHEMA_VIOLATION `invalid_value` at `.benefit.vault`.
 - Two deposit or withdraw services naming one `account` with different vaults or currencies: SCHEMA_VIOLATION `invalid_value` at each one's `.benefit.vault`.

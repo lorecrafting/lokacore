@@ -30,16 +30,16 @@ const SPEC = {
 
 /**
  * Authored facts only the engine writes: each quest patrol's trust_fact, each entitlement service's
- * fact and, with `accounts`, each deposit or withdraw service's account (toolbox row 25).
+ * fact and each deposit or withdraw service's account (toolbox row 25).
  */
-export const engineWrittenRefs = (c: Obj, accounts = true): string[] => [
+export const engineWrittenRefs = (c: Obj): string[] => [
   ...Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
   ),
   ...Object.values((c.services ?? {}) as Obj).flatMap((s) =>
     s.benefit.kind === 'entitlement'
       ? [refString(s.benefit.fact)]
-      : s.benefit.account && accounts
+      : s.benefit.account
         ? [refString(s.benefit.account)]
         : [],
   ),

@@ -130,7 +130,7 @@ defmodule Loka.ContentAttributesTest do
   end
 
   # Breaks: a v1 source's resource_compare resolved against the default pools, which only a v2
-  # artifact carries, so the compiler writes an artifact the loader rejects (refStage, any format).
+  # artifact carries, so the compiler writes an artifact naming a pool it lacks.
   test "a v1 cartridge's resource_compare names no pool", %{tmp_dir: dir} do
     hello = "cartridges/hello_sampler"
     File.cp_r!(hello, dir)

@@ -40,7 +40,7 @@ defmodule Loka.Content.Trails do
         do: {key, rel, steps, p}
       )
 
-  # The reserved {name, spec} pairs, in the loader's order.
+  # The reserved {name, spec} pairs, in trailFacts' order (cartridge_trails.ts).
   defp specs(defs) do
     planned =
       for {key, _, _, %{"trail" => true}} <- plans(defs),
