@@ -1276,8 +1276,9 @@ Typed character-owned visited-room and observed-NPC rows are the only new gamepl
 knowledge. Their delta operations are written by the accepted entry/Look decision and
 committed with the receipt; GameView, Map, Where and Knock never write them while
 projecting. Observation retains exact entity ID, last visible room and logical time.
-The loader rejects unknown room/NPC refs and evidence inconsistent with character
-ownership or visible committed observation. GameView carries only the actor's known
+The compiler rejects unknown room/NPC refs and evidence inconsistent with character
+ownership or visible committed observation; the loader checks only integrity and install.
+GameView carries only the actor's known
 rooms, observed targets and current-room door options, with no hidden coordinates,
 unobserved NPC names or live remote positions. Where applies Look/direct-target current
 visibility before returning `here` for an exact present NPC; hidden co-location falls
