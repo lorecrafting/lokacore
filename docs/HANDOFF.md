@@ -5,7 +5,7 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #490; written 2026-10-28 by Claude Code (Opus 5.5), PM
+AS OF main after #492; written 2026-10-28 by Claude Code (Opus 5.5), PM
 session 97831846. Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of
 weekly limit ... this will be my last week before a break so yeah make it right!" Owner is away from Storybook
 until all work is done; the picks Monitor is off. Storybook serves polish/session-2026-10-23 on 6006 (updated
@@ -15,30 +15,33 @@ notes of loka-ivjq.20, .3, .4, .29. Owner asked to be told when the "How Loka wo
 
 ## Now
 
-Merged 2026-10-28: #485-#489, #491 (B5 Beads sync: refuses instead of losing a row), #490 (batch C1: TS
+Merged 2026-10-28/29: #485-#489, #491, #492 (B5 Beads sync: refuses instead of losing a row), #490 (batch C1: TS
 loader keeps integrity/install checks only; one kernel_api range check; gate_sampler `knock` -> `knock_door`;
 Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.md). Pushes to main run no CI
 (nightly only); prove CI changes on a scratch branch. In flight; read the agent result or PR comment first:
 
-- Housekeeping `housekeeping/regen-prepush` (developer running): loka-tp02 regen.sh also runs
-  `mix loka.source_schema` (a stale schemas/source turned slice F red), loka-36uz pm_merge runs prepush
-  once, plus timings of regen.sh and the cross-kernel test (owner asked why they are slow). Must merge
-  before C2 starts.
-- Batch C2 (F3 F5 F6 F7 F8 F11 F12): "C2 PLAN" in loka-ivjq.3 notes plus the PM ruling note there (starred
-  decisions ratified; naming-audit items #1 #2-roles #3 #8 #14 folded in). Branch `simplify/c2-...` cut
-  from main after the housekeeping PR; 3 waves, the two whole-corpus rewrites (B2 policy unwrap, D one
-  `name` field) last and alone.
+- Batch C2 (F3 F5 F6 F7 F8 F11 F12): draft PR #493, integration branch `simplify/c2-kinds` (worktree
+  ~/dev/worktrees.noindex/simplify-c2-kinds). Merged in: A (signals out, diag guard, behavior@1 out), E
+  (structures), F (story_point on the choice), B1 (policy optional); CI green at 00eee3b72. Slice C1
+  (policies/ out, bundles inlined, hunter/prey/loot, :area) at b3f886b2c in review (third developer;
+  long mutation triage). Next: C2 travel (after C1 merges), then B2 alone (amended: delete the 23
+  always-true blocks, keep the 3 hostile; lint refuses explicit always), then D alone, then Z, then Fable
+  final review. Plan, rulings and amendments: loka-ivjq.3 notes. #492 merged (regen schemas/source;
+  pm_merge prepush once). pm_merge uses main's merge_resolve.py (loka-hhs6): when it refuses a
+  generated-only conflict, merge by hand in the batch worktree with the batch's own resolver, regen,
+  commit, push.
 - Then C3: "C3 PLAN" (Fable) in loka-ivjq.4 notes; owner ratified D1 (two maps, rename recipe -> scripted
   action); naming #7 #12 folded in; slice Z rebuilds the glossary. After C3: a Fable "How Loka works"
   explainer page (Artifact), link to the owner. Then C4 naming batch (loka-ivjq.29), then polish (Next 3).
 - C1 lessons, applied in every brief: parallel slices clash in shared tests, so each slice merges the
   latest integration branch before handback; bash_guard refuses local full suites, CI kernel/elixir jobs
   are the full red-test list and must be green before review; handback carries its own check table;
-  load gate refuses spawns above load 8. A schema description edit needs schemas/source regenerated
-  (until loka-tp02 merges). A PR blocked only by a generated-file conflict with main: merge origin/main
+  load gate refuses spawns above load 8. Run bin/worktree_setup.sh from inside a new worktree (the
+  main checkout's copy sets up main). A developer past ~2 h on mutation triage: tell it to hand back;
+  the reviewer classifies the rest. A PR blocked only by a generated-file conflict with main: merge origin/main
   with diff3, `python3 bin/merge_resolve.py`, commit, push, wait_ci, merge.
-- Follow-ups filed today: loka-83pq, qik8, 82h3, kl1u, r0o7, lizb, hzag, poxf, hofs, pe11, mh6p
-  (provenance before any downloadable content: D5 gate).
+- Follow-ups filed 2026-10-28/29: loka-83pq, qik8, 82h3, kl1u, r0o7, lizb, hzag, poxf, hofs, pe11, mh6p
+  (provenance before any downloadable content: D5 gate), qjj4, hpbk, zeyz, q84v, muss, hhs6.
 - Draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
