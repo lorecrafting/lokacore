@@ -59,7 +59,6 @@ const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [si
 const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [signal] };
 const defs = 'defs.schema.json#/$defs/';
 const discount = { numerator: 1, denominator: 2, minimum: 1, skill: 'haggle' };
-const outcome = 'source.StoryPointDefinition/properties/outcomes/additionalProperties';
 const consume = { items: ['log'], quantity: 1, to: { in: 'room', room: 'yard' } };
 const fact = {
   version: 1,
@@ -113,7 +112,7 @@ test('the schemas refuse a misspelled field and each shortcut written wrong', ()
       { extends: 'talk', choices: { ask: { chek: {} } } },
     ],
     [defs + 'Shop/properties/buy_discount', discount, { ...discount, friendly: true }],
-    [defs + outcome, { scene: 'intro' }, { scene: 'intro', dialogue: 'talk', choice: 'ask' }],
+    [defs + 'DialogueChoice/properties/story_point', 'lantern_resolved/carry', 'lantern_resolved'],
     [defs + 'RecipeCraft', { consume }, {}],
     ['facts', { facts: { lit: fact } }, { facts: { lit: { ...fact, colour: 'red' } } }],
   ];
