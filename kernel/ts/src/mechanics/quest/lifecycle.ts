@@ -23,7 +23,7 @@ import { ready } from '../dialogue/exchange.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { add } from '../../foundation/int.ts';
 
-/** The cartridge's definition of `quest` (the loader resolves every quest reference). */
+/** The cartridge's definition of `quest` (the compiler resolves every quest reference). */
 const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
   world.cartridge.quests![refString(quest)];
 

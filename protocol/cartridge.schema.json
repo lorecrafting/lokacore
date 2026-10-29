@@ -860,7 +860,7 @@
       ]
     },
     "StoryPointDefinition": {
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a loader check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
+      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
       "type": "object",
       "properties": {
         "key": {
@@ -1005,7 +1005,7 @@
       ]
     },
     "Calendar": {
-      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; compiler and loader check order, cycle bounds and schedule/window hours. Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
+      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "type": "object",
       "properties": {
         "start": {
@@ -1405,7 +1405,7 @@
           "type": "object",
           "properties": {
             "per_slot": {
-              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler and loader check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
+              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(head|neck|body|cloak|arms|hands|finger|waist|legs|feet|wield|off_hand|light)$"
@@ -2302,7 +2302,7 @@
       ]
     },
     "ReplenishPlan": {
-      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The loader refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
+      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "type": "object",
       "properties": {
         "key": {
@@ -2809,7 +2809,7 @@
               "const": "permanent"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler SCHEMA_VIOLATION)."
         },
         "tick_every": {
           "type": "integer",
@@ -2823,7 +2823,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION)."
         },
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2887,7 +2887,7 @@
           "items": {
             "$ref": "action.schema.json#/$defs/Key"
           },
-          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler and loader UNKNOWN_COMMAND); may stand in for per_tick."
+          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick."
         },
         "allows": {
           "type": "array",
@@ -2945,7 +2945,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler and loader SCHEMA_VIOLATION); may stand in for per_tick."
+          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick."
         },
         "concealment": {
           "enum": [

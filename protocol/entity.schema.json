@@ -300,7 +300,7 @@
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "locks": {
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
           "type": "object",
           "properties": {
             "get": {
@@ -582,7 +582,7 @@
           "maximum": 1024
         },
         "daily_schedule": {
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler and loader check it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(0|[1-9][0-9]*)$"
@@ -660,7 +660,7 @@
           "additionalProperties": false
         },
         "schedule_cases": {
-          "description": "Toolbox row W10: conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler and the loader); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
+          "description": "Toolbox row W10: conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(0|[1-9][0-9]*)$"

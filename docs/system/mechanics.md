@@ -1586,7 +1586,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
 - **Book.** No new element: the offer reads as an entitlement ("label — 3p"); refusals use the existing service message path.
 - **Traps.** None applies: no new job, event, op or save row (the containers and facts sections hold the result).
 - **Sampler.** `cartridges/escrow_sampler`: a forge (entry) and a sealed vault (no exits); start clock 28800. The player has 10 pennies; the smith (0 pennies) offers `commission` for 3 pennies: `{kind: entitlement, fact: ordered, escrow {items [ore_a, ore_b, ore_c, ore_d], quantity 2, custody vault}}`. The four ore lie in the forge. With no ore, or one, the offer and a use refuse `not_owned`. Holding three, a use pays 3 and moves exactly two to the vault; one stays held; `ordered` is true. A retry, holding two again, refuses `invalid_state` and moves nothing. Broke (2 pennies), a use refuses `insufficient_resource` and moves nothing; a protected input (`give_allowed: false`) refuses `invalid_state`.
-- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumer: `escrow_sampler`; next row 20b (timer, claim, cancel), C3-M03 forge, row 24 bank deposits. Reads: the entitlement fact, body custody of the authored identity set, Give protection, the payer's balance. Writes: B3's resource transfer, `entity.transfer` body to custody room, `fact.assign` (existing ops). Writer ownership: service@1 owns the fact and the escrow transfer. Events, jobs, save rows: none new. Reused: B8 entitlement admission and its already-open refusal, B3 exact payment, the quest exchange's `selected`, Give's `giveRefused`, the conserved `entity.transfer` and its compose checks, the sealed-room sink of rows 19b and 41. New: the `escrow` field, two message keys, the transfers in `transition`, the shop-offer loader check. Missing invariant: none (`one_container_per_item` and `containment_acyclic` cover the transfer). Atomicity: one proposal.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumer: `escrow_sampler`; next row 20b (timer, claim, cancel), C3-M03 forge, row 24 bank deposits. Reads: the entitlement fact, body custody of the authored identity set, Give protection, the payer's balance. Writes: B3's resource transfer, `entity.transfer` body to custody room, `fact.assign` (existing ops). Writer ownership: service@1 owns the fact and the escrow transfer. Events, jobs, save rows: none new. Reused: B8 entitlement admission and its already-open refusal, B3 exact payment, the quest exchange's `selected`, Give's `giveRefused`, the conserved `entity.transfer` and its compose checks, the sealed-room sink of rows 19b and 41. New: the `escrow` field, two message keys, the transfers in `transition`, the shop-offer compiler check. Missing invariant: none (`one_container_per_item` and `containment_acyclic` cover the transfer). Atomicity: one proposal.
 
 ## Timed job claim and cancel (toolbox row 20b)
 
@@ -3312,7 +3312,7 @@ Retired (owner 2026-10-23, Beads `loka-x6t.125` batch; [toolbox row FD3](../MECH
   - Writes: containment's move, `fact.assign` of `stolen`, G5 practice, `custom_event`.
   - Events, jobs and save rows: none new (`custom_event` and entity fact rows exist).
   - Reused: containment take, `lockRefused`, `chainRefused`, `carrying`, `practised`, `assigned`, `npcsIn`, commerce sell, W1 reactions, `RESERVED_FACT`, `FACT_SCOPE_UNSUPPORTED`.
-  - New: `world.theft`, `NpcDefinition.locks.get`, `ShopOffer.stolen`, `theftRefused`, `witnesses`, the theft owner of `stolen`, the vault loader check, the refusal of `locks` or `stolen` without `world.theft`, the custody exception, containment composing `action_recipe` (`COMPOSES`, `kernel/ts/src/runtime/decision.ts`).
+  - New: `world.theft`, `NpcDefinition.locks.get`, `ShopOffer.stolen`, `theftRefused`, `witnesses`, the theft owner of `stolen`, the vault compiler check, the refusal of `locks` or `stolen` without `world.theft`, the custody exception, containment composing `action_recipe` (`COMPOSES`, `kernel/ts/src/runtime/decision.ts`).
   - Missing invariant: none. Named exceptions: the fence custody exception above.
 
 ## Witness ledger and reaction moves (toolbox row FD5, loka-kgd.22)
@@ -3666,7 +3666,7 @@ Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site 
   - Reads: the recipe's detail target room, the blueprint caps, the built rows' origins.
   - Writes: `entity.create` (and S4 weathering) through `created`.
   - Reused: S2/S3 `unbuildable` and `created`, hs-10 craft and `craftRefused`, the recipe check and outcome.
-  - New: RecipeStep `build`, the build-step loader checks.
+  - New: RecipeStep `build`, the build-step compiler checks.
   - Missing invariant: none.
 
 ## Barter (toolbox row kgd.70)
@@ -3703,7 +3703,7 @@ Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts
   - Reads: the entitlement fact, body and custody containers, pair facts through `fact_compare`.
   - Writes: `entity.transfer`, `fact.assign`, `fact.adjust`; ops, events, jobs and save rows: none new.
   - Reused: row 20a escrow, the 20b output and `service.no_output`, Give's `item_acquired`, W1 reactions, W2 pair facts, W6 room lines, the dialogue policy.
-  - New: the output transfer for an untimed escrow, the price 0 path, the loader price check.
+  - New: the output transfer for an untimed escrow, the price 0 path, the compiler price check.
   - Missing invariant: none (`one_container_per_item` covers the transfers).
 
 ## Give pairs

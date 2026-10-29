@@ -222,7 +222,7 @@ function handOver(
 }
 
 // The story_point_reached of the story point outcome whose trigger is this row's dialogue and
-// choice (23 §3; the loader allows at most one).
+// choice (23 §3; the compiler allows at most one).
 function storyPoints(
   world: World,
   command: Command<'choose'>,

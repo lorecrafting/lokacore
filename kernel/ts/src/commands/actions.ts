@@ -116,7 +116,7 @@ function engine(world: World, actor: CharacterId): ActionSet {
 
 // The cartridge's actions, recipes, aimed spells, offers of quests `actor` has no instance of (a
 // quest may have none) and talks of dialogues whose speaker is in the actor's room (several per
-// speaker), by key: disjoint, since the compiler and the loader reject a recipe, quest or dialogue
+// speaker), by key: disjoint, since the compiler rejects a recipe, quest or dialogue
 // whose key is an action's, a recipe's, a quest's or a registered command's (DUPLICATE_DEFINITION).
 function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = keyed(world).map((recipe): [string, Offered] => {
@@ -196,7 +196,7 @@ const barred = (world: World, actor: CharacterId, type: string) =>
   !permits(world, actor)(type) &&
   Object.values(composed(world, actor)).some((a) => a.command === type);
 
-/** The target id of a recipe's detail (the loader checks it exists). */
+/** The target id of a recipe's detail (the compiler checks it exists). */
 export const detailOf = (world: World, t: Extract<RecipeTarget, { kind: 'detail' }>): EntityId =>
   Object.keys(world.details).find(
     (id) =>

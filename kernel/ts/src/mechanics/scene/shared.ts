@@ -24,7 +24,7 @@ const reference = (world: World, kind: string, key: string): DefinitionRef => ({
 export const fact = (world: World, scene: SceneDefinition) =>
   reference(world, 'fact', `scene_${scene.key}`);
 
-/** Current shown line, for this actor; the loader admits one scene per trigger. */
+/** Current shown line, for this actor; the compiler admits one scene per trigger. */
 export function running(world: World, actor: CharacterId): SceneView | undefined {
   if (!has(world.cartridge.lock.capabilities, 'scene')) return undefined;
   for (const s of values(world.cartridge.scenes ?? {})) {

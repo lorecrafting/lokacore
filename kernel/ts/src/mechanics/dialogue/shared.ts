@@ -42,7 +42,7 @@ import { questOf } from '../lookups.ts';
 import { choicePayment } from './payment.ts';
 import { unpaid } from '../resource.ts';
 
-/** The cartridge's definition the row's source names (the loader resolves every dialogue). */
+/** The cartridge's definition the row's source names (the compiler resolves every dialogue). */
 export const definition = (world: World, source: DefinitionRef): DialogueDefinition =>
   world.cartridge.dialogues![refString(source)]!;
 

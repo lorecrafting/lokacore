@@ -32,7 +32,7 @@ export function firstReplenish(cartridge: Cartridge, clock: number, mint: Mint) 
   return jobs;
 }
 
-// The loader refuses a template location, so `at` names a room, an NPC or an item.
+// The compiler refuses a template location, so `at` names a room, an NPC or an item.
 export const holder = (world: World, at: ItemLocation): EntityId =>
   at.in === 'room'
     ? world.roomIds[refString(at.room)]
