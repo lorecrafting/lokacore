@@ -6,7 +6,7 @@ import { markerSpec, spec } from './cartridge_scenes.ts';
 import type { Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 
-/** Toolbox row W23: the FactSpec the compiler adds for a scripted action's tip (scripted actions.ex tip_spec). */
+/** Toolbox row W23: the FactSpec the compiler adds for a scripted action's tip (action_tips.ex tip_spec). */
 const tipSpec = (key: string) => ({
   key: `seen_tip_${key}`,
   version: 1,
