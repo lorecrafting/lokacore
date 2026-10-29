@@ -419,7 +419,7 @@ grep -q 'load is 15.93' "$tmp/lg.err" || bad 'agent_load_gate: message omits the
 lg comma-decimal 'load averages: 9,50 9,00 9,00' 0
 lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- bash_guard.py, send_guard.py (Claude Code PreToolUse hooks) ------------------------------------
-# Break: a git hook skip (--no-verify, commit -n) or a bare br create passes, the owner marker does not let it through, or a
+# Break: a git hook skip (--no-verify, commit -n, setting or exporting LOKA_PREPUSH_OK) or a bare br create passes, the owner marker does not let it through, or a
 # command that only mentions the flag in quoted text, a heredoc body, another tool's flag or bin/br_create.sh is refused.
 # Break: a force or mirror push, git rebase, pkill/killall, kill fed by pgrep (a pipe or $( ), not after ;), gh run watch,
 # gh pr checks --watch, gh workflow run, the full npm test, test:e2e, storybook:smoke, check_all.sh or a worktree outside
@@ -468,6 +468,11 @@ bg 2 'echo $((1<<2))
 git push --no-verify'
 bg 2 'git commit --no-verif -m x'
 bg 2 'git -c core.hooksPath=/dev/null commit -m x'
+bg 2 'LOKA_PREPUSH_OK=abc git push'
+bg 2 'export LOKA_PREPUSH_OK=abc; git push'
+bg 2 'LOKA_PM=1 env LOKA_PREPUSH_OK=abc git push'
+bg 0 'LOKA_OWNER_OK_NO_VERIFY=1 LOKA_PREPUSH_OK=abc git push'
+bg 0 'bin/pm_merge.sh feat/x && git commit -m "LOKA_PREPUSH_OK=x"'
 bg 2 'git commit -mx -n'
 bg 2 'git commit -S -n'
 bg 0 'git diff -- f'
