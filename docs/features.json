@@ -852,7 +852,6 @@
     "modules": [
       "kernel/ts/src/mechanics/transport/shared.ts",
       "kernel/ts/src/view/transports.ts",
-      "kernel/ts/src/content/cartridge_transports.ts",
       "lib/loka/content/transports.ex",
       "mobile/authority/local-story/receipt-history.ts"
     ],
@@ -878,7 +877,6 @@
     "modules": [
       "kernel/ts/src/mechanics/food/shared.ts",
       "kernel/ts/src/view/food.ts",
-      "kernel/ts/src/content/cartridge_food.ts",
       "lib/loka/content/food.ex",
       "lib/loka/core/compose_food.ex",
       "lib/loka/core/invariants_food.ex",
@@ -939,7 +937,6 @@
     "modules": [
       "kernel/ts/src/mechanics/status/shared.ts",
       "kernel/ts/src/mechanics/status/job.ts",
-      "kernel/ts/src/content/cartridge_status.ts",
       "kernel/ts/src/foundation/compose_status.ts",
       "lib/loka/content/status.ex",
       "lib/loka/core/compose_status.ex"
