@@ -5854,7 +5854,7 @@
     },
     "partial.source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -5990,7 +5990,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -6474,25 +6474,6 @@
             "anyOf": [
               {
                 "additionalProperties": false,
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "properties": {
-                  "item": { "$ref": "#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "#/$defs/DefinitionRef" },
-                  "op": { "const": "signal" },
-                  "signal": { "$ref": "#/$defs/Key" },
-                  "with": {
-                    "$ref": "#/$defs/DefinitionRef",
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
-                  }
-                },
-                "required": [
-                  "op",
-                  "signal"
-                ],
-                "type": "object"
-              },
-              {
-                "additionalProperties": false,
                 "properties": {
                   "fact": { "$ref": "#/$defs/DefinitionRef" },
                   "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -6771,14 +6752,6 @@
         "extends": { "$ref": "#/$defs/Key" },
         "on": {
           "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "event": { "const": "signal" },
-                "signal": { "$ref": "#/$defs/Key" }
-              },
-              "type": "object"
-            },
             {
               "additionalProperties": false,
               "properties": {
@@ -8201,7 +8174,7 @@
     },
     "source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -8351,7 +8324,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -8976,25 +8949,6 @@
             "anyOf": [
               {
                 "additionalProperties": false,
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "properties": {
-                  "item": { "$ref": "#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "#/$defs/DefinitionRef" },
-                  "op": { "const": "signal" },
-                  "signal": { "$ref": "#/$defs/Key" },
-                  "with": {
-                    "$ref": "#/$defs/DefinitionRef",
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
-                  }
-                },
-                "required": [
-                  "op",
-                  "signal"
-                ],
-                "type": "object"
-              },
-              {
-                "additionalProperties": false,
                 "properties": {
                   "fact": { "$ref": "#/$defs/DefinitionRef" },
                   "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -9272,18 +9226,6 @@
         },
         "on": {
           "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "event": { "const": "signal" },
-                "signal": { "$ref": "#/$defs/Key" }
-              },
-              "required": [
-                "event",
-                "signal"
-              ],
-              "type": "object"
-            },
             {
               "additionalProperties": false,
               "properties": {
