@@ -267,30 +267,10 @@ test('loka play makes a say or shout Command only from a word of letters', () =>
   assert.equal(parse(`shout ${'a'.repeat(33)}`), 'One word of 1 to 32 letters.');
 });
 
-// Breaks: the loader accepts a keyword dialogue or a spoken reaction below kernel_api 1.48 (a
-// keyword on a riddle is the compiler's: content_speech_test.exs).
-test('the loader refuses keywords and spoken reactions below 1.48', () => {
-  const load = (change: (c: Obj) => void) => {
-    const r = reload(content, change);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path.split('.').pop()];
-  };
-  const elder = (c: Obj) => Object.values(c.dialogues as Obj)[0] as Obj;
-  const floor = ['KERNEL_API_RANGE_INVALID', 'at_least'];
-  const below = (c: Obj) => (c.manifest.requires.kernel_api.at_least = '1.47');
-  assert.deepEqual(
-    load((c) => (below(c), (c.reactions = {}))),
-    floor,
-  );
-  assert.deepEqual(
-    load((c) => (below(c), delete elder(c).keyword)),
-    floor,
-  );
-});
-
 // Breaks (word bar S2): the GameView drops or reorders the cartridge's speech.phrases, lists them
-// when none are authored, or the TS loader admits a phrase that is not a Word, an empty list,
-// phrases below kernel_api 1.98 or without speech@1 (content_speech_test.exs).
-test('phrases: the authored speech.phrases, Words only, from 1.98 with speech@1', () => {
+// when none are authored, or the TS loader admits a phrase that is not a Word or an empty list
+// (the 1.98 floor and speech@1 are the compiler's: content_speech_test.exs).
+test('phrases: the authored speech.phrases, Words only', () => {
   assert.deepEqual(gameView(fresh()).phrases, ['ward', 'help', 'hello']);
   const none = reload(content, (c) => delete c.speech);
   assert.ok(none.ok, JSON.stringify(none));
@@ -306,18 +286,5 @@ test('phrases: the authored speech.phrases, Words only, from 1.98 with speech@1'
   assert.deepEqual(
     refused((c) => (c.speech.phrases = [])),
     ['SCHEMA_VIOLATION', '.cartridge.speech.phrases'],
-  );
-  assert.deepEqual(
-    refused((c) => (c.manifest.requires.kernel_api.at_least = '1.97')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  assert.deepEqual(
-    refused((c) => {
-      delete c.manifest.requires.capabilities.speech;
-      delete c.lock.capabilities.speech;
-      c.reactions = {};
-      for (const d of Object.values(c.dialogues as Obj)) delete (d as Obj).keyword;
-    }),
-    ['UNDECLARED_CAPABILITY', '.cartridge.speech.phrases'],
   );
 });

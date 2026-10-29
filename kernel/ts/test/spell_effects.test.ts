@@ -159,42 +159,6 @@ test('ward lands warded on the caster: status_applied fires the reaction once', 
   assert.deepEqual(types(cast(warded.world, 'ward')), ['action_completed']);
 });
 
-// Breaks: the TS loader admits an effect step on a recipe that is not a spell, an effect below
-// kernel_api 1.98, a damage step naming no NPC of the cartridge, or light.ignite without light@1
-// (both kernels refuse them; content_spell_effects_test.exs).
-test('loader: effect steps sit on spells, need 1.98, resolve and declare their owner', () => {
-  const seq = (k: string) =>
-    `.cartridge.recipes[${JSON.stringify(R(k))}].outcomes.success.sequence[0]`;
-  const rows: [(c: Record<string, any>) => void, string, string][] = [
-    [
-      (c) => {
-        const room = { cartridge_id: 'spell_effects_sampler', cartridge_version: '0.0.1' };
-        c.recipes[R('ward')].target = {
-          kind: 'detail',
-          room: { ...room, kind: 'room', key: 'hall' },
-          detail: 'stand',
-        };
-      },
-      'SCHEMA_VIOLATION',
-      `${seq('ward')}.op`,
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.97'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => (c.recipes[R('flamma')].outcomes.success.sequence[0].npc.key = 'ghoul'),
-      'UNRESOLVED_REFERENCE',
-      `${seq('flamma')}.npc`,
-    ],
-  ];
-  for (const [change, diagnostic, path] of rows) {
-    const r = variant(change);
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [diagnostic, path]);
-  }
-});
-
 // Breaks: a step after a fatal damage still reaches the NPC the spell just killed (a status lands on
 // the dead wight), or damage on an NPC with no hp pool faults instead of writing nothing.
 test('a spell writes nothing more to an NPC it killed, nor damage to an NPC without hp', () => {

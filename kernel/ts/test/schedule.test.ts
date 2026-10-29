@@ -405,23 +405,9 @@ test("an item participant is pinned to the item's EntityId", () => {
   });
 });
 
-// Breaks: the kernel would pin an undefined EntityId because the loader let in a participant
-// naming no definition, or one of another kind than its role says; or a participant's field
-// outside its role's branch (cartridge.schema.json DiagnosticCode UNKNOWN_FIELD) let in.
-test('the loader rejects a narration participant naming no npc or item of its role', () => {
-  const npc = (r: DefinitionRef) => (c: any) => (coil(c).participants.bram.npc = r);
-  fails(npc(ref('npc', 'ada')), 'UNRESOLVED_REFERENCE', `${COIL}.bram.npc`, {
-    target: `${F}:npc/ada`,
-  });
-  fails(npc(ref('room', 'ferry_landing')), 'UNRESOLVED_REFERENCE', `${COIL}.bram.npc`, {
-    target: `${F}:room/ferry_landing`,
-  });
-  fails(
-    (c) => (coil(c).participants.bram = { role: 'item', item: BRAM }),
-    'UNRESOLVED_REFERENCE',
-    `${COIL}.bram.item`,
-    { target: `${F}:npc/bram` },
-  );
+// Breaks: a participant's field outside its role's branch (cartridge.schema.json DiagnosticCode
+// UNKNOWN_FIELD) let in. Unresolved participants are the compiler's (content_ferry_test.exs).
+test("the loader rejects a narration participant's field outside its role", () => {
   fails(
     (c) => (coil(c).participants.actor = { role: 'actor', npc: BRAM }),
     'UNKNOWN_FIELD',

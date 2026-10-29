@@ -1,7 +1,6 @@
 defmodule Loka.Content.ChoiceChecks do
   @moduledoc """
-  Toolbox row 14: a dialogue choice's opposed check (dialogue.schema.json DialogueCheck), twin of
-  kernel/ts/src/content/cartridge_choice_checks.ts. A checked choice needs
+  Toolbox row 14: a dialogue choice's opposed check (dialogue.schema.json DialogueCheck). A checked choice needs
   check@1 (its check_passed); its key is no recipe's or other choice's check's
   (DUPLICATE_DEFINITION); its skill, attribute and failure text resolve; it names exactly one of
   rating and npc (SCHEMA_VIOLATION invalid_value), its npc as a recipe check's (row G3); and it

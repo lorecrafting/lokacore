@@ -3,7 +3,6 @@
 // wooden stick and not the pickaxe on the floor; the seam depletes after two lumps.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,7 +10,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { acquisition } from '../src/mechanics/skills.ts';
 import { check } from '../src/runtime/invariants.ts';
@@ -165,25 +163,4 @@ test('a pickaxe in a worn sack is not held: refused, unlisted, and the view agre
   };
   const observation = { view: gameView(w), command, decision: r.decision, resolves };
   assert.ok(check('gameview_agrees_with_admission', observation));
-});
-
-// Breaks: the loader admits a tool gate under kernel_api 1.51 (twin of
-// test/loka/content_harvest_tool_test.exs).
-test('loader: a harvest tool needs kernel_api 1.52', () => {
-  const reload = (edit: (c: any) => void) => {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    edit(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = '.cartridge.rooms["harvest_sampler@0.0.1:room/mine"].details.seam.harvest';
-  assert.deepEqual(
-    reload((c) => (c.manifest.requires.kernel_api.at_least = '1.51')),
-    ['KERNEL_API_RANGE_INVALID', at],
-  );
 });

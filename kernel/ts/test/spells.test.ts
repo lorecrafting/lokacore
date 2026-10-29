@@ -155,54 +155,6 @@ test('an unknown word and unread noctis are refused alike; noctis works once rea
   assert.deepEqual(narration(cast(w, 'Noctis')), ['narration.noctis']);
 });
 
-// Breaks: the TS loader admits a spell below kernel_api 1.51, an opposed
-// check on a spell (no detail rating), two spells sharing one word, or a room contribution naming
-// a spell's key (both kernels refuse them; content_spells_test.exs).
-test('loader: spells need 1.51; spell words are unique', () => {
-  const R = (key: string) => `spells_sampler@0.0.1:recipe/${key}`;
-  const api = '.cartridge.manifest.requires.kernel_api.at_least';
-  const below = (c: Record<string, any>) => (c.manifest.requires.kernel_api.at_least = '1.50');
-  const rows: [(c: Record<string, any>) => void, string, string][] = [
-    [
-      (c) => {
-        below(c); // spells without a level_compare leaf
-        c.recipes[R('ward')].policy = c.recipes[R('lux')].policy;
-      },
-      'KERNEL_API_RANGE_INVALID',
-      api,
-    ],
-    [
-      (c) => {
-        // An opposed check on a spell: no detail rating, and no npc named.
-        for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.check = 1;
-        const wis = { cartridge_id: 'spells_sampler', cartridge_version: '0.0.1' };
-        c.recipes[R('ward')].check = {
-          key: 'w',
-          kind: 'opposed',
-          attribute: { ...wis, kind: 'attribute', key: 'wis' },
-        };
-        c.recipes[R('ward')].outcomes.failure = c.recipes[R('ward')].outcomes.success;
-      },
-      'SCHEMA_VIOLATION',
-      `.cartridge.recipes[${JSON.stringify(R('ward'))}].check`,
-    ],
-    [
-      (c) => (c.recipes[R('noctis')].target.word = 'lux'),
-      'DUPLICATE_DEFINITION',
-      `.cartridge.recipes[${JSON.stringify(R('lux'))}].target.word`,
-    ],
-    [
-      // A spell is cast by word, never by key: a room contribution naming one is unresolved.
-      (c) =>
-        (c.rooms['spells_sampler@0.0.1:room/tower'].actions = [{ op: 'union', actions: ['lux'] }]),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.rooms["spells_sampler@0.0.1:room/tower"].actions[0].actions[0]`,
-    ],
-  ];
-  for (const [change, diagnostic, path] of rows)
-    assert.deepEqual(verdict(base, change), [diagnostic, path]);
-});
-
 const words = (w: World, actor = w.character) =>
   (gameView(w, actor).spell_words ?? []).map((s) => [
     s.word,
@@ -276,9 +228,9 @@ test('every available spell_words entry casts', () => {
   for (const s of available) ok(cast(w, s.word));
 });
 
-// Breaks: the TS loader admits a spell without learned, naming a fact this cartridge lacks, a
-// non-bool fact, a per_subject one or an instance-scoped one, or a spell below kernel_api 1.98 (content_spells_test.exs).
-test('loader: a spell learned names a bool player fact; spells need 1.98', () => {
+// Breaks: the TS loader admits a spell without learned or with a per_subject learned fact; the
+// compiler checks the rest (content_spells_test.exs).
+test('loader: a spell names its learned fact, never a per_subject one', () => {
   const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
   const fact = (c: Record<string, any>, key: string, spec: object) => {
     const taught = c.facts['spells_sampler@0.0.1:fact/ward_taught'];
@@ -292,16 +244,6 @@ test('loader: a spell learned names a bool player fact; spells need 1.98', () =>
       `${at}.target.learned`,
     ],
     [
-      (c) => fact(c, 'count', { value_type: { type: 'int', default: 0 } }),
-      'FACT_TYPE_MISMATCH',
-      `${at}.target.learned`,
-    ],
-    [
-      (c) => (c.recipes['spells_sampler@0.0.1:recipe/ward'].target.learned = ref('fact', 'nope')),
-      'UNRESOLVED_REFERENCE',
-      `${at}.target.learned`,
-    ],
-    [
       (c) =>
         fact(c, 'pair', {
           value_type: { type: 'bool', default: false },
@@ -311,42 +253,7 @@ test('loader: a spell learned names a bool player fact; spells need 1.98', () =>
       'FACT_SCOPE_UNSUPPORTED',
       `${at}.target.learned`,
     ],
-    [
-      (c) =>
-        fact(c, 'world', { value_type: { type: 'bool', default: false }, scopes: ['instance'] }),
-      'FACT_SCOPE_UNSUPPORTED',
-      `${at}.target.learned`,
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.97'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
   ];
   for (const [change, diagnostic, path] of rows)
     assert.deepEqual(verdict(base, change), [diagnostic, path]);
-});
-
-// Breaks (loka-j64e): a recipe reason is not resolved in the catalog, its 1.100 floor is missing,
-// or kernel_api compares as text ('1.99' > '1.100'), refusing 1.100 or admitting 1.99.
-test('loader: a recipe reason resolves and needs 1.100, which is above 1.99', () => {
-  const ward = (c: Record<string, any>) => c.recipes['spells_sampler@0.0.1:recipe/ward'];
-  const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
-  assert.equal(
-    verdict(base, () => {}),
-    'loaded',
-  );
-  assert.deepEqual(
-    verdict(base, (c) => (ward(c).reason = 'reason.nope')),
-    ['UNRESOLVED_REFERENCE', `${at}.reason`],
-  );
-  assert.deepEqual(
-    verdict(base, (c) => (c.manifest.requires.kernel_api.at_least = '1.99')),
-    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-  );
-  const plain = (c: Record<string, any>) => {
-    delete ward(c).reason;
-    c.manifest.requires.kernel_api.at_least = '1.99';
-  };
-  assert.equal(verdict(base, plain), 'loaded');
 });

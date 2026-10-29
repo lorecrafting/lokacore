@@ -2,7 +2,6 @@
 // against a chest rated 3, a gate rated 5 and a vault rated 7; STR 8 (mechanics.md skill growth).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,7 +9,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { ctx } from './harness.ts';
 
@@ -107,33 +105,4 @@ test('a taught pick opens the rating 5 gate on the fifth attempt', () => {
     outcomes.push((r.decision as { outcome?: unknown }).outcome);
   }
   assert.deepEqual(outcomes, ['failure', 'failure', 'failure', 'failure', 'success']);
-});
-
-// Breaks: the loader drops a rows 5/G5 check, so an opposed check against an unrated detail, an
-// unknown skill or an authored write of the count loads. Growth order is the compiler's
-// (content_skill_growth_test.exs).
-test('the loader refuses each unsound growth or opposed declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const skill = `.cartridge.skills["${P}:skill/pick"]`;
-  const gate = `.cartridge.recipes["${P}:recipe/pick_gate"]`;
-  const room = (c: any) => c.rooms[`${P}:room/vault_room`];
-  const rows: [(c: any) => void, string, string][] = [
-    [(c) => delete room(c).details.gate.rating, 'SCHEMA_VIOLATION', `${gate}.check`],
-    [
-      (c) => (c.recipes[`${P}:recipe/pick_gate`].check.skill.key = 'climb'),
-      'UNRESOLVED_REFERENCE',
-      `${gate}.check.skill`,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path], path);
-  }
 });

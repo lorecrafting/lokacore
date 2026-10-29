@@ -367,11 +367,9 @@ const fails = (f: (c: any) => void, code: string, path: string, data: object = {
 const at = (key: string) => `.cartridge.reactions["${G}:reaction/${key}"]`;
 const rule = (c: any, key: string) => c.reactions[`${G}:reaction/${key}`];
 
-// Breaks: the loader admitting what the compiler rejects (test/loka/content_green_test.exs): a
-// trigger of an unregistered event type, a trigger or fact.assign naming a fact or room the
-// cartridge lacks (the kernel would never match it, or assign an undeclared fact), a value not
-// of its fact's type.
-test('the loader checks reaction triggers and consequences', () => {
+// Breaks: the loader admitting a trigger of an unregistered event type or a reaction keyed outside
+// its kind. Unresolved names and fact types are the compiler's (test/loka/content_green_test.exs).
+test('the loader checks reaction trigger events and keys', () => {
   fails(
     (c) => (rule(c, 'ring').on.event = 'bell_rung'),
     'SCHEMA_VIOLATION',
@@ -385,36 +383,6 @@ test('the loader checks reaction triggers and consequences', () => {
     'SCHEMA_VIOLATION',
     `.cartridge.reactions["${G}:quest/ring"]`,
     { error: 'pattern_mismatch' },
-  );
-  fails(
-    (c) => (rule(c, 'gossip').on.fact = ref('fact', 'rumour')),
-    'UNRESOLVED_REFERENCE',
-    `${at('gossip')}.on.fact`,
-    { target: `${G}:fact/rumour` },
-  );
-  fails(
-    (c) => (rule(c, 'ring').on.room = ref('room', 'tower')),
-    'UNRESOLVED_REFERENCE',
-    `${at('ring')}.on.room`,
-    { target: `${G}:room/tower` },
-  );
-  // W1: a new kind's filter naming a definition the cartridge lacks.
-  fails(
-    (c) => (rule(c, 'ring').on = { event: 'item_dropped', item: ref('item', 'nope') }),
-    'UNRESOLVED_REFERENCE',
-    `${at('ring')}.on.item`,
-    { target: `${G}:item/nope` },
-  );
-  fails(
-    (c) => (rule(c, 'ring').apply[0].fact = ref('fact', 'bell')),
-    'UNRESOLVED_REFERENCE',
-    `${at('ring')}.apply[0].fact`,
-    { target: `${G}:fact/bell` },
-  );
-  fails(
-    (c) => (rule(c, 'ring').apply[0].value = 1),
-    'FACT_TYPE_MISMATCH',
-    `${at('ring')}.apply[0].value`,
   );
 });
 

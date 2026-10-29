@@ -1,8 +1,7 @@
 defmodule Loka.Content.Reactions do
   @moduledoc """
-  Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
-  the reaction checks of `kernel/ts/src/content/cartridge.ts` (lock) and `kernel/ts/src/content/cartridge_refs.ts`
-  (references): each rule's owner (reaction@1), its trigger event's owner and each fact.assign's
+  Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14):
+  each rule's owner (reaction@1), its trigger event's owner and each fact.assign's
   (fact@1, by its fact_changed) is required; each trigger filter names a definition of this cartridge
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every
   other (`conditions/1`, `Loka.Content.Checks`).
@@ -58,7 +57,7 @@ defmodule Loka.Content.Reactions do
   end
 
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
-  # moved (twin of `runs` in kernel/ts/src/content/cartridge_reactions.ts).
+  # moved.
   defp steps(rel, apply, on, ctx) do
     runs = for {%{"op" => "replenish.run", "key" => k}, i} <- apply, do: {k, i}
 
@@ -158,7 +157,7 @@ defmodule Loka.Content.Reactions do
         listener(rel, s, i, ctx)
 
   # Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named
-  # barrier, or on every barrier carrying the tag (BARRIER_UNREACHABLE_KEY); twin of barrierSet.
+  # barrier, or on every barrier carrying the tag (BARRIER_UNREACHABLE_KEY).
   defp consequence(rel, {%{"op" => "barrier.set"} = s, i}, on, ctx) do
     owned(at(rel, ["apply", i, "op"]), "barrier_changed", ctx.events) ++
       if(s["barrier"], do: reference(rel, ["apply", i], "barrier", s, ctx.m, ctx.defs), else: []) ++

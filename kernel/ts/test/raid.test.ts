@@ -199,16 +199,6 @@ test('f: a world rebuilt from the receipts holds the one raider and does not res
   assert.equal(raiders(elapsed(rebuilt, 1900)).length, 1);
 });
 
-// Breaks: a population.spawn step's plan is never resolved.
-test('g: the loader refuses an unknown plan', () => {
-  const raid = 'raid_sampler@0.0.1:reaction/raid';
-  const nowhere = reload(base, (c) => (c.reactions[raid].apply[0].plan.key = 'nowhere'));
-  assert.deepEqual(nowhere.ok ? undefined : [nowhere.diagnostic.code, nowhere.diagnostic.path], [
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.reactions["${raid}"].apply[0].plan`,
-  ]);
-});
-
 // Row 37b: the `aftermath` rule adds 1 to the instance fact `aftermaths` on `raided`'s
 // fact_changed to false, which fires only at the first new-moon hour after a raid.
 const aftermaths = (w: World) => fact(w, 'aftermaths') ?? 0;

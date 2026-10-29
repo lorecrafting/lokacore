@@ -13,7 +13,6 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { choiceView } from '../src/mechanics/dialogue/shared.ts';
-import { checkKeys } from '../src/content/cartridge_recipes.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-persuade-'));
@@ -143,14 +142,4 @@ test('a failed check reads its failure line, closes the talk, counts a use; a ne
   assert.equal(again.events[0].payload.type, 'check_passed');
   assert.equal(g.fact('gate_open'), true);
   assert.equal(g.fact('uses_intimidate'), 2);
-});
-
-// Breaks: the duplicate-key scan drops recipes or choices, so a recipe and a dialogue choice (one
-// check DefinitionRef) both define one key and load.
-test('check keys gather every recipe check and every dialogue choice check', () => {
-  const c = {
-    recipes: { a: { check: { key: 'k' } }, b: {} },
-    dialogues: { d: { choices: { x: { check: { key: 'k' } }, y: {} } } },
-  };
-  assert.deepEqual(checkKeys(c), ['k', 'k']);
 });

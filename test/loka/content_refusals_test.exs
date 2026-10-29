@@ -210,6 +210,32 @@ defmodule Loka.ContentRefusalsTest do
              dir,
              quest.(&put_in(&1, ["exchange", "increment"], 3))
            )
+
+    # Breaks: an exchange loads with a repeated outgoing item, a reward not held by its NPC, a
+    # massless stock item, no harvest detail stocking its outgoing items, or an unknown fact.
+    assert {"DUPLICATE_DEFINITION", "quests/herbs.exchange"} in codes(
+             dir,
+             quest.(&put_in(&1, ["exchange", "outgoing", Access.at(1)], "ore_01"))
+           )
+
+    for {file, change} <- [
+          {"items/bandage_01.json",
+           &Map.put(&1, "location", %{"in" => "room", "room" => "mine"})},
+          {"items/ore_01.json", &Map.put(&1, "mass_grams", 0)},
+          {"rooms/mine.json", &update_in(&1, ["details"], fn d -> Map.delete(d, "seam") end)}
+        ],
+        do:
+          assert(
+            {"OUTCOME_MISMATCH", "quests/herbs.exchange"} in codes(
+              dir,
+              exchange ++ [{file, change}]
+            )
+          )
+
+    assert {"UNRESOLVED_REFERENCE", "quests/herbs.exchange.contribution"} in codes(
+             dir,
+             quest.(&put_in(&1, ["exchange", "contribution"], "missing"))
+           )
   end
 
   # Breaks: a hound-style area whose rooms are not joined both ways compiles and later strands

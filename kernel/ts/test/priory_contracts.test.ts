@@ -9,20 +9,11 @@ import { chest, codex } from './codex_fixture.ts';
 const { prefix, ref } = codex;
 const ledger = `${prefix}:item/mill_ledger`;
 
-// Break: malformed readable metadata or non-Boolean knowledge is accepted.
-// Topic and readable reference checks are the compiler's (content_priory_test.exs, content_refusals_test.exs).
-test('item writing, topic refs, text and unique player Boolean mappings fail closed', () => {
+// Break: malformed readable metadata is accepted.
+// Topic, knowledge type and readable reference checks are the compiler's (content_priory_test.exs,
+// content_refusals_test.exs, content_recipes_test.exs).
+test('item writing fails closed on malformed readable metadata', () => {
   assert.ok(codex.load().ok);
-  for (const mutate of [
-    (c: any) =>
-      (c.facts[`${prefix}:fact/topic_mill_known`].value_type = {
-        type: 'int',
-        minimum: 0,
-        maximum: 1,
-        default: 0,
-      }),
-  ])
-    assert.equal(codex.load(mutate).ok, false, String(mutate));
   for (const invalid of [
     null,
     [],

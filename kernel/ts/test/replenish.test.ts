@@ -127,33 +127,24 @@ test('a container target full of other items takes nothing and time still advanc
   assert.equal(w.state.containers[id(w, 'item', 'apple_01')], id(w, 'item', 'crate'));
 });
 
-// Breaks: the loader refuses a listed container as an item reserve, or drops the harvest
-// allowance, so the seam's ore in the store is refused (twin of test/loka/content_replenish_test.exs).
-test('loader: a container reserve loads; replenish into a holder keeps the harvest allowance', () => {
+// Breaks: the loader refuses a listed container as an item reserve.
+test('loader: a container reserve loads', () => {
   const reload = (edit: (c: any) => void) => {
     const r = edited(edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
-  const seam = (c: any) => c.replenish['replenish_sampler@0.0.1:replenish/seam_regrowth'];
   assert.equal(
     reload((c) => (c.items[`${S}item/apple_01`].container = true)),
     'loaded',
-  );
-  assert.deepEqual(
-    reload((c) => (seam(c).to = { in: 'npc', npc: ref('npc', 'trader') })),
-    [
-      'OUTCOME_MISMATCH',
-      '.cartridge.rooms["replenish_sampler@0.0.1:room/mine"].details.seam.harvest.items[2]',
-    ],
   );
 });
 
 // Homestead hs-1: the sampler with a `dig` recipe on the seam whose custom_event `dig` runs `apply`.
 const RUN = { op: 'replenish.run', key: ref('replenish', 'seam_regrowth') };
 const digging =
-  (apply: object[] = [RUN], at_least = '1.101') =>
+  (apply: object[] = [RUN]) =>
   (c: any) => {
-    c.manifest.requires.kernel_api.at_least = at_least;
+    c.manifest.requires.kernel_api.at_least = '1.101';
     for (const k of ['action_recipe', 'reaction'])
       c.manifest.requires.capabilities[k] = c.lock.capabilities[k] = 1;
     // The step emits no event: it needs no fact@1 (which owns fact_changed).
@@ -204,25 +195,6 @@ test('a dig event moves one ore from the store at once, up to the cap; the job s
   assert.deepEqual(w.state.jobs, jobs);
   w = waitUntil(w, 3600);
   assert.deepEqual(ore(w), [2, 1]);
-});
-
-// Breaks: a stale key loads (both kernels: test/loka/content_replenish_test.exs), the step's
-// 1.101 floor or its refusal of a repeated key is dropped.
-test('loader: replenish.run needs kernel_api 1.101, a replenish entry, one run a key', () => {
-  const reload = (edit: (c: any) => void) => {
-    const r = edited(edit);
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
-  const at = `.cartridge.reactions["${S}reaction/dig"]`;
-  assert.deepEqual(reload(digging([{ ...RUN, key: ref('replenish', 'gone') }])), [
-    'UNRESOLVED_REFERENCE',
-    `${at}.apply[0].key`,
-  ]);
-  assert.deepEqual(reload(digging([RUN], '1.100')), [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
-  assert.deepEqual(reload(digging([RUN, RUN])), ['DUPLICATE_DEFINITION', `${at}.apply[1].key`]);
 });
 
 // Break: replenish.run ignores the root command's write of the item (hs-1 fix round 1): the drop

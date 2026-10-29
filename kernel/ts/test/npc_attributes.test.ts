@@ -2,7 +2,6 @@
 // names a guard reads that guard's declared str at use (player str 10 against 15 and 5).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,7 +9,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-attr-'));
@@ -52,33 +50,4 @@ test('str 10 loses to the strong guard (str 15) and beats the weak guard (str 5)
   };
   assert.equal(perform('shove_north'), 'failure');
   assert.equal(perform('shove_south'), 'success');
-});
-
-// Breaks: the loader drops a row G3 check, so a recipe check naming no NPC, a guard without the
-// checked attribute or a template NPC loads. The NPC attribute list checks are the compiler's
-// (content_npc_attributes_test.exs).
-test('the loader refuses each unsound NPC attribute declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const strong = `${P}:npc/strong_guard`;
-  const north = `.cartridge.recipes[${JSON.stringify(`${P}:recipe/shove_north`)}].check`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.recipes[`${P}:recipe/shove_north`].check.npc.key = 'ghost'),
-      'UNRESOLVED_REFERENCE',
-      `${north}.npc`,
-    ],
-    [(c) => delete c.npcs[strong].attributes, 'SCHEMA_VIOLATION', `${north}.npc`],
-    [(c) => (c.npcs[strong].spawn_template = true), 'SCHEMA_VIOLATION', `${north}.npc`],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });

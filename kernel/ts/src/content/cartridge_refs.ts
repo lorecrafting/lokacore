@@ -1,4 +1,3 @@
-import { exchanges } from './cartridge_exchange.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
 // The loader's reference stage and the definition walks it shares with the lock stage
@@ -15,8 +14,6 @@ import {
 import { refString } from '../runtime/decision.ts';
 import { typed } from '../mechanics/fact.ts';
 import { questPolicies } from './cartridge_quests.ts';
-import { reactions } from './cartridge_reactions.ts';
-import { recipes } from './cartridge_recipes.ts';
 import { answerRoots } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots } from './cartridge_locks.ts';
@@ -183,9 +180,6 @@ export function refStage(c: Obj): Diagnostic[] {
   if (c.format !== 'loka-cartridge-v2') return out;
   // -- B2
   // -- C1
-  out.push(...exchanges(c, check));
-  out.push(...recipes(c, check));
-  out.push(...reactions(c, check));
   // -- C2
   // -- D1
   // -- D2

@@ -4,7 +4,6 @@
 // Nobody authored the bucket-cart or oilcan-winch pair.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,7 +14,6 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { commands, ctx } from './harness.ts';
@@ -199,60 +197,4 @@ test('the tool must be held, distinct from the target and named', () => {
   );
   assert.equal(quench(w, { target_id: e(w, 'bucket'), item_id: e(w, 'bucket') }), 'invalid_target');
   assert.equal(quench(w, { target_id: e(w, 'cart') }), 'invalid_target');
-});
-
-// Breaks: the TS loader admits a use recipe below kernel_api 1.49, a status.cure on a detail
-// recipe, an opposed check on a use recipe, which has no detail rating, or a tool liquid naming no
-// liquid of the cartridge (both kernels refuse them; content_use_test.exs).
-test('loader: kernel_api 1.49, cures only on use recipes, no rating-opposed check, liquid', () => {
-  const QUENCH = 'use_sampler@0.0.1:recipe/quench';
-  const rows: [(c: Record<string, any>) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.48'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c) => {
-        // A status.cure on a detail recipe: a detail holds no status.
-        const yard = { ...C, kind: 'room', key: 'yard' };
-        for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
-          caps.inspectable_detail = 1;
-        c.rooms['use_sampler@0.0.1:room/yard'].details = {
-          pump: { aliases: ['pump'], description: 'room.yard.title' },
-        };
-        c.recipes[QUENCH].target = { kind: 'detail', room: yard, detail: 'pump' };
-      },
-      'SCHEMA_VIOLATION',
-      `.cartridge.recipes[${JSON.stringify(QUENCH)}].outcomes.success.sequence[0].op`,
-    ],
-    [
-      (c) => {
-        const str = { ...C, kind: 'attribute', key: 'str' };
-        for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
-          Object.assign(caps, { attributes: 1, check: 1 });
-        c.attributes = { 'use_sampler@0.0.1:attribute/str': { key: 'str', start: 8 } };
-        c.recipes[QUENCH].check = { key: 'q', kind: 'opposed', attribute: str };
-        c.recipes[QUENCH].outcomes.failure = c.recipes[QUENCH].outcomes.success;
-      },
-      'SCHEMA_VIOLATION',
-      `.cartridge.recipes[${JSON.stringify(QUENCH)}].check`,
-    ],
-    [
-      (c) => (c.recipes[QUENCH].target.tool.liquid = { ...C, kind: 'liquid', key: 'milk' }),
-      'UNRESOLVED_REFERENCE',
-      `.cartridge.recipes[${JSON.stringify(QUENCH)}].target.tool.liquid`,
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });

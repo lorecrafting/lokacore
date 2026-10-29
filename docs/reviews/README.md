@@ -16,6 +16,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: C1 slice D2, characters and economy loader checks (loka-ivjq.20)](2026-10-28-c1-d2-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice D1, entities and supplies loader checks (loka-ivjq.20)](2026-10-28-c1-d1-review.md): **APPROVE WITH NOTES**
 - [Review: batch C1 slice C2, dialogue and quest loader checks (S7)](2026-10-28-c1-c2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice C1, rules modules (loka-ivjq.20)](2026-10-28-c1-c1-review.md): **APPROVE WITH NOTES**
 - [Review: C1 B2, world, time and the lock walk (loka-ivjq.20)](2026-10-28-c1-b2-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice 0 prep and slice B1 references core (loka-ivjq.20)](2026-10-28-c1-b1-review.md): **APPROVE WITH NOTES**
 - [Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)](2026-10-24-narration-log-batch-review.md): **APPROVE WITH NOTES**
