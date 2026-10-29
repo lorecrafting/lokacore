@@ -2,16 +2,10 @@
 // keys, lock and installed host; the first failing stage's first diagnostic, or the cartridge.
 import { scopedFacts } from './cartridge_scoped_facts.ts';
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
-import {
-  ARTIFACT_MAX_BYTES,
-  CAPABILITY_OWNERS,
-  type CompiledCartridge,
-  type Diagnostic,
-} from '../contracts.gen.ts';
+import { ARTIFACT_MAX_BYTES, type CompiledCartridge, type Diagnostic } from '../contracts.gen.ts';
 import { diag, isObj, refStage, step, type Data, type Obj } from './cartridge_refs.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
-import { schedules } from './cartridge_schedules.ts';
 import { standing } from './cartridge_standing.ts';
 import { services } from './cartridge_services.ts';
 import { installedStage, type Installed } from './cartridge_installed.ts';
@@ -56,7 +50,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
             }),
           ],
     () => keyStage(c),
-    () => lockStage(c),
+    () => lockDiagnostics(c.lock.capabilities, c.manifest.requires.capabilities),
     () => declarations(c),
     () => installedStage(c, installed),
   ];
@@ -140,27 +134,7 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// Loader-only lock checks (no compiler twin; B2 kept them for a PM ruling): every action's
-// command is owned and none is run_job (authority-internal, 04 §1; checked as an unowned name),
-// and the owners of every action command and resource definition are in the lock.
-function lockStage(c: Obj): Diagnostic[] {
-  const locked: Obj = c.lock.capabilities;
-  const out = lockDiagnostics(locked, c.manifest.requires.capabilities);
-  const use = (kind: 'command' | 'definition', name: string, path: string) => {
-    const owners = CAPABILITY_OWNERS[kind];
-    if (!Object.hasOwn(owners, name)) return void out.push(diag('UNKNOWN_COMMAND', path));
-    const [owner] = owners[name].split('@');
-    if (!Object.hasOwn(locked, owner))
-      out.push(diag('UNDECLARED_CAPABILITY', path, { capability: owner }, [owners[name]]));
-  };
-  for (const [ref, { command: k }] of Object.entries(c.actions as Obj))
-    use('command', k === 'run_job' ? '' : k, `.cartridge.actions${step(ref)}.command`);
-  for (const ref of Object.keys((c.resources ?? {}) as Obj))
-    use('definition', 'resource', `.cartridge.resources${step(ref)}`);
-  return out;
-}
-
-// Lock/manifest mismatches and the engine fact dependency of position and scene.
+// Lock/manifest mismatches.
 function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const key of new Set([...Object.keys(locked), ...Object.keys(required)])) {
@@ -170,25 +144,12 @@ function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
     if (Object.hasOwn(locked, key)) data.locked = locked[key];
     out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
   }
-  for (const capability of ['position', 'scene'])
-    if (Object.hasOwn(locked, capability) && locked.fact !== 1)
-      out.push(
-        diag(
-          'UNDECLARED_CAPABILITY',
-          `.cartridge.lock.capabilities.${capability}`,
-          {
-            capability: 'fact',
-          },
-          ['fact@1'],
-        ),
-      );
   return out;
 }
 
 function declarations(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [...refStage(c)];
   // -- B2
-  out.push(...schedules(c));
   // -- D1
   // -- D2
   out.push(...services(c));

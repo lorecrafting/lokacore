@@ -263,16 +263,3 @@ test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_
     target,
   );
 });
-
-test('resources without resource@1 in the lock are UNDECLARED_CAPABILITY', () => {
-  road_fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.resource;
-      delete c.lock.capabilities.resource;
-    },
-    'UNDECLARED_CAPABILITY',
-    `.cartridge.resources["${HP}"]`,
-    { capability: 'resource' },
-    ['resource@1'],
-  );
-});

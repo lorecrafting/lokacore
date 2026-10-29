@@ -954,8 +954,8 @@
     },
     {
       "name": "stage_list_order",
-      "break": "a stage reports its first-found diagnostic instead of the first in list order",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"},\"policies\":{\"hello_sampler@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"hello_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"0a2ee8753034720c9b2ea317d0eea1c79a8fa28d692fd61bc5dddfae1a54e7ca\"}",
+      "break": "a stage reports its first-found diagnostic (the locked topics key) instead of the first in list order (the unlocked dialogue key)",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"label\":\"actions.talk\",\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"target_present\"}},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":2},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"},\"policies\":{\"hello_sampler@0.0.1:policy/village_arrived\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"hello_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_arrived\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"content_hash\":\"f94c123e7dd49d87be407c7269181967e70dd4845d0c176221cd0f8771b13224\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1011,15 +1011,14 @@
       },
       "expected": {
         "severity": "error",
-        "code": "UNDECLARED_CAPABILITY",
-        "path": ".cartridge.actions[\"hello_sampler@0.0.1:action/talk\"].command",
-        "message_key": "diagnostics.undeclared_capability",
+        "code": "LOCK_MANIFEST_MISMATCH",
+        "path": ".cartridge.lock.capabilities.dialogue",
+        "message_key": "diagnostics.lock_manifest_mismatch",
         "data": {
-          "capability": "dialogue"
+          "capability": "dialogue",
+          "required": 1
         },
-        "suggested_capabilities": [
-          "dialogue@1"
-        ]
+        "suggested_capabilities": []
       }
     },
     {
