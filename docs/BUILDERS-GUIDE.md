@@ -26,7 +26,7 @@ These rules hold across every kind:
 
 - A definition's displayed name is `name` (an item's, NPC's, room's, action's); an option the player
   picks (a dialogue or scene choice, a quest offer) has a `label`.
-- A policy is its condition tree, and it is optional: an absent policy always holds.
+- A policy is its condition tree, and it is optional: an absent gate always holds, and an absent trigger (`disposition.hostile`, `friendly`) never fires.
 - A story point is `story_point: "<key>/<outcome>"` on the dialogue choice that reaches it (a
   scene's `on_end` may also claim one); there is no story point file.
 - Custom events are the one message between rules: a recipe step `event.emit` emits a `custom_event`,

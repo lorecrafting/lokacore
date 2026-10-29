@@ -198,7 +198,8 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   52 characters (`SCHEMA_VIOLATION` at `scenes/<s>.on_end.story_point`); a point needs dialogue@1
   (`UNDECLARED_CAPABILITY`, `lib/loka/content/dialogues.ex`);
 - policies: a policy is its condition tree inline (`protocol/policy.schema.json` `Policy`); no
-  policy field is required, and an absent one holds;
+  policy field is required; an absent gate holds, and an absent trigger
+  (`disposition.hostile`, `friendly`) never fires;
 - chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
   (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
   (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a
@@ -237,7 +238,7 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
-`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
+`lib/loka/content/areas.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
 `lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
 `lib/loka/content/zones.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
@@ -587,8 +588,7 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   `drop` (ref the NPC, `item`, `chance`). `items.sinks`: `hand_over` (ref the dialogue, `choice`,
   `item` and `npc` its roles), `edible` (ref the item, `resource`, `amount`).
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
-  replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan, the last
-  three from its bundle; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
+  replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
   careful?}`: the count of its items, its tool's tag, its careful count.
 - Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
   from then path, populations by ref, seams by room then detail. ponytail: authored static sites
