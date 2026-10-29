@@ -4,14 +4,12 @@
   spot keeps both, ours first, with the leading lines both sides share kept once; a shared part that
   ends inside a section, or a duplicate heading afterwards, refuses;
 - docs/MECHANICS-TOOLBOX.md: the same for table rows (a row id on both sides refuses);
-- protocol/fixtures/loader_floors.json: both sides append whole array elements at the end: ours, then theirs';
 - kernel/ts/src/runtime/world.ts: one conflict whose sides are each one kernel_api line keeps the higher;
 - a generated file or docs/reviews/README.md takes theirs, as does a review record whose sides differ
   only in whitespace (another review record is left); then every generator reruns.
 Exit 0: all resolved and staged, not committed. Exit 1: prints the files it left; abort the merge.
 Needs merge.conflictStyle=diff3 (the base section proves an append).
   python3 bin/merge_resolve.py"""
-import json
 import os
 import re
 import subprocess
@@ -76,27 +74,6 @@ def rows_union(text):
     return text[: h.start()] + h[1] + "".join(theirs) + text[h.end() :]
 
 
-def elements(arr):
-    """The JSON elements of an array body, each with its leading indent."""
-    out, pos, dec = [], 0, json.JSONDecoder()
-    while pos < len(arr):
-        _, end = dec.raw_decode(arr, len(arr) - len(arr[pos:].lstrip()))
-        out.append(arr[pos:end])
-        pos = end + len(arr[end:]) - len(arr[end:].lstrip(",\n"))
-    return out
-
-
-def floors_union(_):
-    """Both sides append whole elements to the top-level array of loader_floors.json: ours, then theirs' additions."""
-    base, ours, theirs = (git("show", f":{n}:protocol/fixtures/loader_floors.json") for n in (1, 2, 3))
-    tail = "\n  ]\n}\n"
-    b, o, t = (x[: -len(tail)] for x in (base, ours, theirs))
-    if not (o.startswith(b + ",\n") and t.startswith(b + ",\n")):
-        return None
-    have = {e.strip() for e in elements(o[len(b) + 2 :])}
-    return o + "".join(",\n" + e for e in elements(t[len(b) + 2 :]) if e.strip() not in have) + tail  # an element both sides added stays once
-
-
 def higher_kernel_api(text):
     hunks = list(HUNK.finditer(text))
     sides = [KERNEL_API.fullmatch(hunks[0][i]) for i in (1, 3)] if len(hunks) == 1 else [None]
@@ -109,7 +86,6 @@ def higher_kernel_api(text):
 RULES = {
     "docs/system/mechanics.md": section_union,
     "docs/MECHANICS-TOOLBOX.md": rows_union,
-    "protocol/fixtures/loader_floors.json": floors_union,
     "kernel/ts/src/runtime/world.ts": higher_kernel_api,
 }
 

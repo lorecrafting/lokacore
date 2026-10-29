@@ -18,110 +18,14 @@ defmodule Loka.Content.Requires do
       Enum.flat_map(req["capabilities"], &capability(rel, &1, offline?, registry))
   end
 
-  @doc "Minimum API for optional authored features (`rooms`, the room definitions)."
-  @spec features(map() | nil, list(), list()) :: [map()]
-  def features(nil, _, _), do: []
-
-  def features(m, all, rooms) do
-    minimum =
-      Enum.max([
-        minimum_feature_api(m, all),
-        light_minimum(all, rooms),
-        b6_minimum(all),
-        book_minimum(all)
-      ])
-
-    if version(m["requires"]["kernel_api"]["at_least"]) < minimum,
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp book_minimum(all),
-    do: if(Enum.any?(all, fn {_, _, d} -> d["readable"] != nil end), do: [1, 24], else: [])
-
-  # A room's dark flag (loka-x6t.36) needs 1.114; fuel or a dark_description 1.19.
-  defp light_minimum(all, rooms) do
-    cond do
-      Enum.any?(rooms, &match?({_, _, %{"dark" => _}}, &1)) ->
-        [1, 114]
-
-      Enum.any?(all, fn {_, _, d} ->
-        is_map_key(d, "fuel") or is_map_key(d, "dark_description")
-      end) ->
-        [1, 19]
-
-      true ->
-        []
-    end
-  end
-
-  defp b6_minimum(all), do: if(Enum.any?(all, &b6_feature?/1), do: [1, 21], else: [])
-
-  # ponytail: finite wire floors stay ordered here; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
-  defp minimum_feature_api(m, all) do
-    cond do
-      is_map_key(m["requires"]["capabilities"], "knowledge") ->
-        [1, 37]
-
-      is_map_key(m["requires"]["capabilities"], "patrol") ->
-        [1, 22]
-
-      is_map_key(m["requires"]["capabilities"], "skills") ->
-        [1, 18]
-
-      Enum.any?(all, fn {_, _, d} -> debt_feature?(d) end) ->
-        [1, 14]
-
-      is_map_key(m["requires"]["capabilities"], "escort") ->
-        [1, 11]
-
-      Enum.any?(all, fn {_, _, d} -> transfer_feature?(d) end) ->
-        [1, 10]
-
-      Enum.any?(all, fn {_, _, d} -> variant_feature?(d) end) ->
-        [1, 9]
-
-      true ->
-        []
-    end
-  end
-
-  defp variant_feature?(d),
-    do: is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
-
-  defp debt_feature?(d) do
-    get_in(d, ["deadline", "fact"]) != nil or is_map_key(d, "resource_starts") or
-      Enum.any?(Map.values(Map.get(d, "choices", %{})), fn choice ->
-        is_map_key(choice, "payment") or is_map_key(choice, "availability") or
-          (is_map_key(choice, "receive") and is_map_key(choice, "accept"))
-      end)
-  end
-
-  defp transfer_feature?(d) do
-    is_map_key(d, "give_allowed") or
-      (not is_map_key(d, "quest") and
-         Enum.any?(Map.get(d, "choices", %{}), fn {_, o} -> is_map_key(o, "receive") end))
-  end
-
-  defp elapsed(rel, %{"time_policy" => policy} = m) do
-    # The away recap threshold is toolbox row W27 (API 1.47).
-    floor = if is_map_key(policy, "recap_after_minutes"), do: [1, 47], else: [1, 1]
-
-    range =
-      if version(m["requires"]["kernel_api"]["at_least"]) < floor,
-        do: [diag("KERNEL_API_RANGE_INVALID", at(rel, ["requires", "kernel_api", "at_least"]))],
-        else: []
-
-    owner =
-      if is_map_key(m["requires"]["capabilities"], "schedule"),
-        do: [],
-        else: [
-          diag("UNDECLARED_CAPABILITY", at(rel, ["time_policy"]), %{"capability" => "schedule"}, [
-            "schedule@1"
-          ])
-        ]
-
-    range ++ owner
+  defp elapsed(rel, %{"time_policy" => _} = m) do
+    if is_map_key(m["requires"]["capabilities"], "schedule"),
+      do: [],
+      else: [
+        diag("UNDECLARED_CAPABILITY", at(rel, ["time_policy"]), %{"capability" => "schedule"}, [
+          "schedule@1"
+        ])
+      ]
   end
 
   defp elapsed(_, _), do: []
@@ -149,12 +53,5 @@ defmodule Loka.Content.Requires do
       %{"portability" => "server_only"} when offline? -> [diag("SERVER_ONLY_CAPABILITY", path)]
       _ -> []
     end
-  end
-
-  defp b6_feature?({_, _, d}) do
-    (d["label"] != nil and d["fact"] != nil) or get_in(d, ["riddle", "wrong_limit"]) != nil or
-      get_in(d, ["check", "kind"]) == "attribute_threshold" or
-      d["perception"] != nil or
-      Enum.any?(Map.values(Map.get(d, "details", %{})), &(&1["perception"] != nil))
   end
 end

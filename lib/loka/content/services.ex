@@ -60,7 +60,6 @@ defmodule Loka.Content.Services do
 
     Enum.flat_map(declared, fn {rel, s} -> service(rel, s, m, defs, text) end) ++
       beds(m, defs, text) ++
-      api(m, declared) ++
       providers(m, defs) ++
       owned(declared) ++
       vaults(declared)
@@ -92,36 +91,6 @@ defmodule Loka.Content.Services do
         Enum.any?(owners, fn {o, owner} -> o == f and owner != rel end),
         do: bad(at(rel, ["benefit", "fact"]))
   end
-
-  defp api(m, declared) do
-    minimum =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if declared != [] and minimum < api_floor(Enum.map(declared, fn {_, s} -> s end)),
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp api_floor(services) do
-    benefits = Enum.map(services, & &1["benefit"])
-
-    cond do
-      Enum.any?(services, &barter?/1) -> [1, 102]
-      Enum.any?(benefits, &bank?/1) -> [1, 83]
-      Enum.any?(benefits, &timed?/1) -> [1, 80]
-      Enum.any?(benefits, & &1["escrow"]) -> [1, 79]
-      true -> [1, 23]
-    end
-  end
-
-  # Row kgd.70 (API 1.102): a free service, or an output handed over at once (no ready_after).
-  defp barter?(%{"price" => p, "benefit" => b}),
-    do: p == 0 or (is_map_key(b["escrow"] || %{}, "output") and not timed?(b))
-
-  defp timed?(b),
-    do: b["kind"] in ~w(claim cancel) or is_map_key(b["escrow"] || %{}, "ready_after")
 
   defp providers(m, defs) do
     for {key, {rel, [], npc}} <- defs["npc"],

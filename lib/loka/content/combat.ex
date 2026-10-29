@@ -1,6 +1,6 @@
 defmodule Loka.Content.Combat do
   @moduledoc "Attack profiles and finite death credit."
-  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
+  import Loka.Content.Source, only: [diag: 3, diag: 4, at: 2, ref: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
 
   @spec expand(map(), map()) :: map()
@@ -30,7 +30,6 @@ defmodule Loka.Content.Combat do
       allies(combat, m, defs) ++
       group(settings, combat, m, defs) ++
       npc_profiles(defs, combat) ++
-      damage_api(m, defs, combat) ++
       shots(combat, m, defs) ++
       if(credit && !combat, do: [bad("cartridge.world.death_credit")], else: []) ++
       credits(credit || [], m, defs)
@@ -42,12 +41,7 @@ defmodule Loka.Content.Combat do
     if(get_in(settings, ["world", "death"]), do: [], else: [bad("cartridge.world.death")]) ++
       requirements(m) ++
       profile(combat["player_attack"], "cartridge.world.combat.player_attack") ++
-      narration(combat, text) ++
-      if((combat["target_choice"] || combat["allies"]) && version(m) < [1, 48],
-        # Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48.
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-      )
+      narration(combat, text)
   end
 
   # Toolbox row 6b: each ally is an authored NPC with an attack; allies need their narration.
@@ -78,28 +72,19 @@ defmodule Loka.Content.Combat do
   defp ally({_, _, _}, path), do: [bad(path)]
   defp ally(_, _), do: []
 
-  # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts, from
-  # kernel_api 1.70 (1.73 with stay or fight); members strike as allies, so combat needs the ally
-  # narration. Row 22b: the wage resource is conserved (gain 0, no regen), from 1.75.
+  # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts;
+  # members strike as allies, so combat needs the ally
+  # narration. Row 22b: the wage resource is conserved (gain 0, no regen).
   defp group(%{"world" => %{"group" => %{"member" => _} = g}}, combat, m, defs) do
     Enum.flat_map(~w(member stay fight), &if(g[&1], do: pair_fact(&1, g, m, defs), else: [])) ++
       wage(g["wage"], m, defs) ++
       if(combat && !combat["allies"],
         do: ally_narration(combat["narration"], ["world", "combat"]),
         else: []
-      ) ++
-      if(version(m) < group_floor(g),
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
       )
   end
 
   defp group(_, _, _, _), do: []
-
-  defp group_floor(%{"wage" => _}), do: [1, 75]
-  defp group_floor(%{"stay" => _}), do: [1, 73]
-  defp group_floor(%{"fight" => _}), do: [1, 73]
-  defp group_floor(_), do: [1, 70]
 
   defp wage(nil, _, _), do: []
 
@@ -141,21 +126,7 @@ defmodule Loka.Content.Combat do
         do: error
   end
 
-  # Toolbox row G2: damage kinds, crits and resistances need kernel_api 1.44.
-  defp damage_api(m, defs, combat) do
-    if version(m) < [1, 44] and damage_fields?(defs, combat),
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp damage_fields?(defs, combat) do
-    npcs = for {_, {_, _, n}} <- defs["npc"] || %{}, do: n
-    profiles = [combat["player_attack"] | Enum.map(npcs, & &1["attack"])] ++ weapon_attacks(defs)
-    Enum.any?(profiles, &(&1["kind"] || &1["crit"])) or Enum.any?(npcs, & &1["resistances"])
-  end
-
-  # Toolbox row 17: a ranged weapon names a known ammo pool, and its shots need their narration
-  # and kernel_api 1.67.
+  # Toolbox row 17: a ranged weapon names a known ammo pool, and its shots need their narration.
   defp shots(combat, m, defs) do
     ranged =
       for {_, {rel, _, %{"weapon" => %{"ranged" => r}}}} <- defs["item"] || %{}, do: {rel, r}
@@ -164,22 +135,16 @@ defmodule Loka.Content.Combat do
       {rel, r} <- ranged,
       error <- reference(rel, ["weapon", "ranged"], {"ammo", "resource"}, r, m, defs),
       do: error
-    ) ++ if(ranged == [], do: [], else: ranged_requirements(combat, m))
+    ) ++ if(ranged == [], do: [], else: ranged_requirements(combat))
   end
 
-  defp ranged_requirements(combat, m) do
+  defp ranged_requirements(combat) do
     for(
       field <- ~w(shot_hit shot_miss),
       !get_in(combat || %{}, ["narration", field]),
       do: bad(at("cartridge.json", ["world", "combat", "narration", field]))
-    ) ++
-      if version(m) < [1, 67],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
+    )
   end
-
-  defp weapon_attacks(defs),
-    do: for({_, {_, _, i}} <- defs["item"] || %{}, do: i["weapon"]["attack"])
 
   defp narration(_, :unknown), do: []
 
@@ -197,23 +162,13 @@ defmodule Loka.Content.Combat do
   defp profile(p, path),
     do: if(p["damage_min"] > p["damage_max"], do: [bad(path <> ".damage_max")], else: [])
 
-  defp version(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
   defp requirements(m) do
-    if(version(m) < [1, 6],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-    ) ++
-      for c <- ~w(combat schedule death),
-          m["requires"]["capabilities"][c] != 1,
-          do:
-            diag("UNDECLARED_CAPABILITY", "cartridge.world.combat", %{"capability" => c}, [
-              c <> "@1"
-            ])
+    for c <- ~w(combat schedule death),
+        m["requires"]["capabilities"][c] != 1,
+        do:
+          diag("UNDECLARED_CAPABILITY", "cartridge.world.combat", %{"capability" => c}, [
+            c <> "@1"
+          ])
   end
 
   defp credits(credits, m, defs) do

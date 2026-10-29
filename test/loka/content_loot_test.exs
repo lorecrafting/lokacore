@@ -2,17 +2,15 @@ defmodule Loka.ContentLootTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/loot_sampler")}
 
-  # Breaks: drops under API 1.42, without world.death or hp, with hp gain, on a spawn template, naming an item the NPC does not hold, a
+  # Breaks: drops without world.death or hp, with hp gain, on a spawn template, naming an item the NPC does not hold, a
   # repeated item or an unknown item compile (toolbox row 8).
-  test "drops keep their API floor, death settings, held distinct items and references", %{
+  test "drops keep their death settings, held distinct items and references", %{
     dir: dir
   } do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     coin = ["drops", Access.at(1), "item"]
 
     cases = [
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.42"),
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {"cartridge.json", &update_in(&1, ["world"], fn w -> Map.delete(w, "death") end),
        {"SCHEMA_VIOLATION", "npcs/rat.drops"}},
       {"npcs/rat.json", &Map.delete(&1, "hp"), {"SCHEMA_VIOLATION", "npcs/rat.drops"}},

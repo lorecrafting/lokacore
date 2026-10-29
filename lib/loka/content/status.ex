@@ -1,6 +1,6 @@
 defmodule Loka.Content.Status do
   @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses never tick nor move the derived hp maximum."
-  import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
   def check(nil, _, _, _), do: []
@@ -11,12 +11,12 @@ defmodule Loka.Content.Status do
 
     cures = edible_lists(defs)
 
-    {later, g3} = api_146(defs)
+    {later, g3} = g3_fields(defs)
 
     if statuses == %{} and cures == [] and not g3,
       do: [],
       else:
-        gate(m, floor(statuses, g3)) ++
+        gate(m) ++
           values(statuses, {m, settings}, defs, text) ++
           foods(cures ++ later, m, defs) ++ meals(cures, m, defs, settings)
   end
@@ -30,10 +30,10 @@ defmodule Loka.Content.Status do
         do: {rel, ["edible", k], list}
   end
 
-  # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item (or, row 42, an
+  # Row G3's immune lists, steps naming an item (or, row 42, an
   # NPC) and tick or expiry triggers; row 2c's status modifiers; row G13's liquid cures (ended by
   # Drink). Returns the lists naming statuses and whether any field is used.
-  defp api_146(defs) do
+  defp g3_fields(defs) do
     immune =
       for kind <- ~w(npc item),
           {_, {rel, _, e}} <- defs[kind] || %{},
@@ -56,38 +56,7 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A skipped line (loka-x6t.30) needs 1.115, an observed line (loka-kgd.176) 1.110, an authored
-  # kind (loka-x6t.64) 1.102, a pierced_by (row 16) 1.93, a movement status (reader 7) 1.62, a
-  # perception or concealment (readers 6, 8) 1.61, a status reader (4, 5) 1.54, a fear status (row
-  # W21) 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
-  defp floor(statuses, g3) do
-    defs = for {_, {_, _, s}} <- statuses, is_map(s), do: s
-
-    rule = Enum.find(floors(), fn {hit?, _} -> Enum.any?(defs, hit?) end)
-
-    cond do
-      rule -> elem(rule, 1)
-      g3 -> [1, 46]
-      true -> [1, 38]
-    end
-  end
-
-  defp floors,
-    do: [
-      {&narrates?(&1, "skipped"), [1, 115]},
-      {&narrates?(&1, "observed"), [1, 110]},
-      {&Map.has_key?(&1, "kind"), [1, 102]},
-      {&Map.has_key?(&1, "pierced_by"), [1, 93]},
-      {&Map.has_key?(&1, "movement"), [1, 62]},
-      {&senses?/1, [1, 61]},
-      {&reader?/1, [1, 54]},
-      {&(&1["fear"] == true), [1, 50]},
-      {&permanent?/1, [1, 48]}
-    ]
-
   defp permanent?(s), do: s["duration"] == "permanent"
-
-  defp narrates?(s, line), do: Map.has_key?(s["narration"] || %{}, line)
 
   # Status readers 4-8: blocks, allows, resistances, perception, concealment or movement; such a
   # status may omit per_tick too.
@@ -97,18 +66,12 @@ defmodule Loka.Content.Status do
   defp senses?(s), do: Map.has_key?(s, "perception") or Map.has_key?(s, "concealment")
 
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
-  defp gate(m, floor) do
-    caps = m["requires"]["capabilities"]
+  defp gate(m) do
+    path = at("cartridge.json", ["requires", "capabilities"])
 
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if caps["status"] == 1 and caps["death"] == 1 and
-         version >= floor,
-       do: [],
-       else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
+    for c <- ~w(status death),
+        m["requires"]["capabilities"][c] != 1,
+        do: diag("UNDECLARED_CAPABILITY", path, %{"capability" => c}, [c <> "@1"])
   end
 
   defp values(statuses, ms, defs, text) do

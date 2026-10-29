@@ -38,8 +38,6 @@ defmodule Loka.ContentChoiceChecksTest do
            s ++ [%{"op" => "skill.acquire", "skill" => "intimidate"}]
          end)
        ), {"OUTCOME_MISMATCH", at <> "persuade.check"}},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.46"),
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {"cartridge.json", &update_in(&1, caps, fn c -> Map.delete(c, "check") end),
        {"UNDECLARED_CAPABILITY", at <> "intimidate.check"}}
     ]

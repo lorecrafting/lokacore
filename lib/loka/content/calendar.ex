@@ -20,19 +20,13 @@ defmodule Loka.Content.Calendar do
       schedules(defs["npc"], hours, invalid) ++
       Loka.Content.Schedules.check(m, defs) ++
       windows(nodes, hours, invalid) ++
-      sky(calendar, nodes, {m, defs}, invalid)
+      sky(calendar, nodes, invalid)
   end
 
-  # Toolbox rows 10 and 31: each sky leaf names a phase its calendar table authors; it, the row 31
-  # tables and a barrier's opens_when need kernel_api 1.45.
-  defp sky(calendar, nodes, {m, defs}, invalid) do
+  # Toolbox row 10: each sky leaf names a phase its calendar table authors.
+  defp sky(calendar, nodes, invalid) do
     leaves = for {%{"op" => "sky"} = node, rel, path} <- nodes, do: {node, rel, path}
-
-    gated =
-      leaves != [] or Enum.any?(@row31, &Map.has_key?(calendar, &1)) or
-        Enum.any?(defs["barrier"] || %{}, &opens_when?/1)
-
-    phases(calendar, leaves, invalid) ++ floor(m, gated)
+    phases(calendar, leaves, invalid)
   end
 
   defp phases(calendar, leaves, invalid) do
@@ -45,23 +39,6 @@ defmodule Loka.Content.Calendar do
 
   defp table(calendar, "weather"), do: calendar["weather"] || []
   defp table(calendar, field), do: get_in(calendar, [field, "phases"]) || []
-
-  defp opens_when?({_, {_, _, barrier}}), do: is_map_key(barrier, "opens_when")
-
-  # A missing or schema-invalid manifest (nil) has its own diagnostics.
-  defp floor(nil, _), do: []
-  defp floor(_, false), do: []
-
-  defp floor(m, true) do
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if api < [1, 45],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-      else: []
-  end
 
   defp base(calendar, day, hour, subdivision, invalid) do
     fields =

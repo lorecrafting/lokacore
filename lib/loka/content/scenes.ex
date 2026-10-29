@@ -1,4 +1,3 @@
-# size: allow 326, action-started scenes validate source and end exports beside modal rules
 defmodule Loka.Content.Scenes do
   @moduledoc """
   scene@1's modal ordered subset, trigger/text references and compiler-added facts
@@ -102,23 +101,8 @@ defmodule Loka.Content.Scenes do
 
   defp scene({rel, steps, s}, ctx) do
     owned(at(rel, steps), "scene", ctx.required) ++
-      api(s, ctx.m) ++
       order(rel, steps, s) ++
       refs(rel, steps, s, ctx.m, ctx.defs) ++ texts(rel, steps, s, ctx.text)
-  end
-
-  defp api(s, m) do
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    needed =
-      if is_map_key(s["on"], "action") or is_map_key(s, "on_end"), do: [1, 15], else: [1, 12]
-
-    if (is_map_key(s["on"], "quest") or needed == [1, 15]) and version < needed,
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
   end
 
   defp order(rel, steps, s) do

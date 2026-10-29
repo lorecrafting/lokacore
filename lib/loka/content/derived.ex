@@ -31,11 +31,9 @@ defmodule Loka.Content.Derived do
 
   def check(m, defs, {_, settings}) do
     world = settings["world"] || %{}
-    table = world["derived"]
     items = for {_, {rel, _, item}} <- defs["item"] || %{}, do: {rel, item}
 
-    floor(m, api_floor(table, items, g3?(defs), world["gear_budget"])) ++
-      tables(m, defs, world) ++
+    tables(m, defs, world) ++
       gear_budget(m, world) ++
       Enum.flat_map(items, &item(&1, m, defs)) ++ npcs(m, defs)
   end
@@ -44,38 +42,6 @@ defmodule Loka.Content.Derived do
     do: owner(m, "cartridge.world.derived") ++ Enum.flat_map(table, &stat(&1, m, defs, world))
 
   defp tables(_, _, _), do: []
-
-  # Row G3: NPC attributes, or an opposed check naming an NPC.
-  defp g3?(defs),
-    do:
-      Enum.any?(defs["npc"] || %{}, &match?({_, {_, _, %{"attributes" => _}}}, &1)) or
-        Enum.any?(defs["recipe"] || %{}, &match?({_, {_, _, %{"check" => %{"npc" => _}}}}, &1))
-
-  # Authored equip words are row 6a (API 1.116); a gear budget or an intended level is balance 6b
-  # (1.72); an identified item is row 27 (1.68); NPC attributes are row G3 (1.46); finger slots and
-  # affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
-  defp api_floor(table, items, g3, budget) do
-    cond do
-      declares?(items, "equip") -> [1, 116]
-      budget || declares?(items, "intended_level") -> [1, 72]
-      declares?(items, "identified") -> [1, 68]
-      g3 -> [1, 46]
-      Enum.any?(items, fn {_, i} -> i["affects"] || i["slot"] == "finger" end) -> [1, 41]
-      true -> table_floor(table)
-    end
-  end
-
-  defp declares?(items, field), do: Enum.any?(items, fn {_, i} -> i[field] end)
-
-  defp floor(m, floor) do
-    if floor && api(m) < floor,
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp table_floor(nil), do: nil
-  defp table_floor(%{"hp_max" => _}), do: [1, 40]
-  defp table_floor(_), do: [1, 39]
 
   # Balance 6b: a gear budget needs attributes@1 and budgets at least one slot (too_few_items: the
   # subset has no minProperties).
@@ -167,12 +133,6 @@ defmodule Loka.Content.Derived do
         diag("UNDECLARED_CAPABILITY", path, %{"capability" => "attributes"}, ["attributes@1"])
       ]
   end
-
-  defp api(m),
-    do:
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
 
   defp stat({key, stat}, m, defs, world) do
     path = ["world", "derived", key]

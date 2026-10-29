@@ -167,9 +167,7 @@ defmodule Loka.ContentServicesTest do
       {"dialogues/aldous_lesson.json",
        &put_in(&1, ["choices", "learn", "sequence"], [
          %{"op" => "fact.assign", "fact" => "bed_paid", "value" => true}
-       ]), "dialogues/aldous_lesson.choices.learn.sequence[0].fact"},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.22"),
-       "cartridge.requires.kernel_api.at_least"}
+       ]), "dialogues/aldous_lesson.choices.learn.sequence[0].fact"}
     ]
 
     for {file, change, path} <- mutations do
