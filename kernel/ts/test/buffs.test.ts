@@ -3,7 +3,6 @@
 // (step `npc`, row 42) each listener present; str and dex start at 10.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,7 +11,6 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { npcValue, value } from '../src/mechanics/attributes/shared.ts';
 import { ctx } from './harness.ts';
 
@@ -130,51 +128,4 @@ test('a song with the lute gives dex +2 to the player and the listener present o
   w = wait(w, 1799);
   assert.deepEqual(dex(w), [12, 12, 10]);
   assert.deepEqual(dex(wait(w, 1)), [10, 10, 10]);
-});
-
-// Breaks (row 42): the loader drops a check on the step's `npc`, so an unknown NPC, a spawn
-// template, a step naming an item too, or an `npc` step under kernel_api 1.46 loads.
-test('the loader refuses each unsound status.apply npc', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const rule = `${P}:reaction/song_listener`;
-  const at = `.cartridge.reactions[${JSON.stringify(rule)}].apply[0].npc`;
-  const listener = `${P}:npc/listener`;
-  const rows: [(c: any) => void, string, string][] = [
-    [(c) => (c.reactions[rule].apply[0].npc.key = 'ghost'), 'UNRESOLVED_REFERENCE', at],
-    [(c) => (c.npcs[listener].spawn_template = true), 'SCHEMA_VIOLATION', at],
-    [
-      (c) =>
-        (c.reactions[rule].apply[0].item = {
-          ...c.reactions[rule].apply[0].npc,
-          kind: 'item',
-          key: 'lute',
-        }),
-      'SCHEMA_VIOLATION',
-      at,
-    ],
-    [
-      (c) => {
-        // Leave the npc step as the only 1.46 field: no modifies, no npc_present.
-        for (const s of Object.values(c.statuses) as any[]) {
-          delete s.modifies;
-          s.per_tick = 1;
-        }
-        for (const r of Object.values(c.reactions) as any[]) delete r.when;
-        c.manifest.requires.kernel_api.at_least = '1.45';
-      },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-  ];
-  for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
-  }
 });

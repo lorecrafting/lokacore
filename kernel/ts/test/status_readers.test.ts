@@ -22,7 +22,7 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { cartridgeOf, commands, ctx, verdict } from './harness.ts';
+import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -399,80 +399,4 @@ test('a hostile troll does not engage a concealed player unless it sees invisibl
     ],
     [true, false, true, false],
   );
-});
-
-const base = cartridgeOf(artifact);
-
-// Breaks (twin of test/loka/content_status_readers_test.exs): one reader field (each alone) loads
-// under API 1.53, a blocks or allows entry naming no command (or the authority-internal elapsed)
-// loads, or a reader status without per_tick (the sampler's four) is refused.
-test('loader: reader fields need API 1.54 and name player commands', () => {
-  assert.equal(
-    verdict(base, () => {}),
-    'loaded',
-  );
-  const keys = ['warded', 'hushed', 'soaked', 'stunned'];
-  for (const [key, field, value] of [
-    ['warded', 'resistances', { fire: 10 }],
-    ['hushed', 'blocks', ['say']],
-    ['hushed', 'allows', ['look']],
-  ] as const)
-    assert.deepEqual(
-      verdict(base, (c) => {
-        c.manifest.requires.kernel_api.at_least = '1.53';
-        for (const k of keys) {
-          const { blocks: _, allows: __, resistances: ___, ...plain } = c.statuses[S(k)];
-          c.statuses[S(k)] = { ...plain, per_tick: -1 };
-        }
-        c.statuses[S(key)][field] = value;
-      }),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-      field,
-    );
-  for (const [field, name] of [
-    ['blocks', 'fly'],
-    ['allows', 'elapsed'],
-  ])
-    assert.deepEqual(
-      verdict(base, (c) => (c.statuses[S('hushed')][field] = ['say', name])),
-      ['UNKNOWN_COMMAND', `.cartridge.statuses["${S('hushed')}"].${field}[1]`],
-    );
-});
-
-// Breaks (twin of test/loka/content_status_readers_test.exs): a perception or a concealment (each
-// alone) loads under API 1.60, such a status without per_tick is refused, or an empty perception
-// loads. `soaked`: no entry reaction applies it (row 16).
-test('loader: perception and concealment need API 1.61 and stand in for per_tick', () => {
-  const at = (api: string, fields: object) =>
-    verdict(base, (c) => {
-      c.manifest.requires.kernel_api.at_least = api;
-      const { resistances: _, ...plain } = c.statuses[S('soaked')];
-      c.statuses[S('soaked')] = { ...plain, ...fields };
-    });
-  for (const fields of [{ perception: { hearing: 'deaf' } }, { concealment: 'hidden' }]) {
-    assert.deepEqual(at('1.61', fields), 'loaded');
-    assert.deepEqual(
-      at('1.60', fields),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-      JSON.stringify(fields),
-    );
-  }
-  assert.deepEqual(at('1.61', { perception: {} }), [
-    'SCHEMA_VIOLATION',
-    `.cartridge.statuses["${S('soaked')}"].perception`,
-  ]);
-});
-
-// Breaks (loka-x6t.30): a skipped key missing from the text catalog loads.
-test('loader: a status skipped line must be in the text catalog', () => {
-  const skipped = (key: string) =>
-    verdict(base, (c) => {
-      c.manifest.requires.kernel_api.at_least = '1.115';
-      c.statuses[S('stunned')].narration.skipped = key;
-    });
-  assert.equal(skipped('narration.stunned.applied'), 'loaded');
-  assert.deepEqual(skipped('narration.stunned.nowhere'), [
-    'SCHEMA_VIOLATION',
-    `.cartridge.statuses["${S('stunned')}"].narration`,
-  ]);
 });

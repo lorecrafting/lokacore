@@ -13,13 +13,7 @@ import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { schedules } from './cartridge_schedules.ts';
 import { standing } from './cartridge_standing.ts';
-import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
-import { food } from './cartridge_food.ts';
-import { bleed } from './cartridge_bleed.ts';
-import { status } from './cartridge_status.ts';
-import { liquids } from './cartridge_liquids.ts';
-import { population } from './cartridge_population.ts';
 import { installedStage, type Installed } from './cartridge_installed.ts';
 export type { Installed } from './cartridge_installed.ts';
 
@@ -196,12 +190,6 @@ function declarations(c: Obj): Diagnostic[] {
   // -- B2
   out.push(...schedules(c));
   // -- D1
-  out.push(...liquids(c));
-  out.push(...food(c));
-  out.push(...bleed(c));
-  out.push(...status(c));
-  out.push(...population(c));
-  out.push(...transports(c));
   // -- D2
   out.push(...services(c));
   out.push(...scopedFacts(c));

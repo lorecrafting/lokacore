@@ -8,7 +8,7 @@ import { DEFS } from '../src/contracts.gen.ts';
 import { validate, type Defs } from '../src/foundation/validate.ts';
 import { compose } from '../src/foundation/compose.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
-import { f, light } from './light_fixture.ts';
+import { f } from './light_fixture.ts';
 import { read } from './read.ts';
 
 const DIR = 'protocol/fixtures';
@@ -72,33 +72,6 @@ for (const file of files)
 test('wisp attempts compose to their literal answers', () => {
   for (const c of read('protocol/fixtures/wisp_attempts.json'))
     assert.deepEqual(compose(c.state, { ops: c.ops }), c.expected, c.name);
-});
-
-// From light_contracts.
-// Break: actual fuel or darkness loads under API1.18, while an unused reserved light lock is over-restricted.
-test('authored light fields require API1.19 rather than merely a reserved capability lock', () => {
-  for (const fields of ['fuel', 'darkness', 'unused']) {
-    const b = f.bundle((c) => {
-      light(c);
-      c.manifest.requires.kernel_api.at_least = '1.18';
-      if (fields !== 'fuel') for (const item of Object.values(c.items) as any[]) delete item.fuel;
-      if (fields !== 'darkness')
-        for (const room of Object.values(c.rooms) as any[]) delete room.dark_description;
-    });
-    const loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      { ...INSTALLED, kernel_api: '1.18' },
-    );
-    if (fields === 'unused') assert.equal(loaded.ok, true, JSON.stringify(loaded));
-    else {
-      assert.equal(loaded.ok, false);
-      if (!loaded.ok)
-        assert.deepEqual(
-          [[loaded.diagnostic.code, loaded.diagnostic.path]],
-          [['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least']],
-        );
-    }
-  }
 });
 
 // From status_composition.

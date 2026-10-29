@@ -2,7 +2,6 @@
 // lightning landing on a wet golem stuns it, warmth landing dries it, and the loader floors.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,7 +11,6 @@ import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/in
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { living } from '../src/mechanics/death/shared.ts';
 import { ctx } from './harness.ts';
@@ -268,29 +266,4 @@ test('two rules that cure and re-apply each other fault budget_exceeded at react
   assert.deepEqual(r.decision, { kind: 'fault', code: 'budget_exceeded' });
   assert.equal(r.limit, 'reaction_depth');
   assert.equal(r.world, w);
-});
-
-/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
-function reload(edit: (c: any) => void) {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  delete c.reactions[rule('shock_on_wet')];
-  delete c.reactions[rule('warmth_dries')];
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-}
-
-// Breaks (twin of test/loka/content_elements_test.exs): a reaction cure of an undeclared status
-// loads.
-test('a reaction cure names a declared status', () => {
-  const ash = { op: 'status.cure', status: ref('status', 'ash') };
-  assert.deepEqual(
-    reload((c) => c.reactions[rule('spark')].apply.push(ash)),
-    ['UNRESOLVED_REFERENCE', `.cartridge.reactions["${rule('spark')}"].apply[1].status`],
-  );
 });

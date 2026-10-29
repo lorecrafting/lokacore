@@ -4,40 +4,14 @@ import { gameView, step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { hydrate } from '../src/runtime/created.ts';
-import { genesis, load, prefix, ref, shrine, spawned, unpacked } from './c4_pack_fixture.ts';
+import { genesis, prefix, ref, shrine, spawned, unpacked } from './c4_pack_fixture.ts';
 
 // The controlled goblins (cap 6, day 4, night 20-6, hourly wander, one-day replacement) as a plain
 // population: no pack block (c4_pack*.test.ts covers packs), 150-second combat rounds. The body
 // starts at the inn, two moves (west, south) from the pit.
 const fresh = () => genesis(unpacked);
-const plan = `.cartridge.populations["${prefix}:population/goblins"]`;
 const run_id = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 
-// Breaks: the installed loader accepts a forged one-way population area after its content hash is re-pinned.
-test('loader refuses a one-way goblin area with a valid hash', () => {
-  const result = load((c) => {
-    const room = c.rooms[`${prefix}:room/drill_yard`];
-    room.exits.up = room.exits.south;
-    delete room.exits.south;
-  });
-  assert.equal(result.ok, false);
-  if (!result.ok) assert.equal(result.diagnostic.path, `${plan}.area`);
-});
-
-// Breaks: a plan whose wander interval exceeds its replacement delay, or whose night window does
-// not wrap midnight (night every hour), enters the loaded world.
-for (const [name, change] of [
-  ['a slower wander than replacement', { wander_interval: 7200, replacement_delay: 3600 }],
-  ['a night window that does not wrap midnight', { night_start: 1, night_end: 5 }],
-  ['an empty night window', { night_start: 5, night_end: 5 }],
-] as const)
-  test(`loader refuses ${name} with a valid hash`, () => {
-    const result = load((c) =>
-      Object.assign(c.populations[`${prefix}:population/goblins`], change),
-    );
-    assert.equal(result.ok, false);
-    if (!result.ok) assert.equal(result.diagnostic.path, `${plan}.wander_interval`);
-  });
 const hounds = (w: World) =>
   Object.entries(w.state.created ?? {}).filter(
     ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'hound',

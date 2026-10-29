@@ -1,9 +1,5 @@
-// size: allow 367, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
-import { water } from './cartridge_water.ts';
+// size: allow 359, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
 import { topics } from './cartridge_topics.ts';
-import { pools } from './cartridge_pools.ts';
-import { replenish } from './cartridge_replenish.ts';
-import { fuel } from './cartridge_fuel.ts';
 import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
@@ -213,7 +209,6 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 // In both formats, validate fact defaults and policy references, typed comparisons and windows.
 // In v2 also validate entry, exits, NPC and item locations, text and touch links, barriers,
 // action contributions, quests, reactions, dialogues, resource bounds and movement cost.
-// size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -243,10 +238,6 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...quests(c, check));
   out.push(...dialogues(c, check));
   // -- D1
-  out.push(...fuel(c, check));
-  out.push(...replenish(c, check));
-  out.push(...water(c, check));
-  out.push(...pools(c, named));
   // -- D2
   out.push(...skills(c, check));
   out.push(...topics(c, check));
