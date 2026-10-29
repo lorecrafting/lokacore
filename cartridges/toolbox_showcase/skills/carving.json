@@ -1,13 +1,6 @@
 {
   "label": "skill.carving.label",
   "requirement": "skill.carving.requirement",
-  "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prerequisite": {
     "policy_version": 1,
     "root": {

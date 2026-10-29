@@ -18,6 +18,8 @@ defmodule Loka.Content.Policies do
   def nodes(%{"op" => "not", "item" => item} = n, steps),
     do: [{n, steps} | nodes(item, steps ++ ["item"])]
 
+  # An absent policy (always holds) has no nodes.
+  def nodes(nil, _), do: []
   def nodes(n, steps), do: [{n, steps}]
 
   defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do

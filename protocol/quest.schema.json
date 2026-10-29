@@ -24,8 +24,7 @@
             }
           },
           "required": [
-            "label",
-            "policy"
+            "label"
           ],
           "additionalProperties": false
         },
@@ -376,8 +375,7 @@
             }
           },
           "required": [
-            "evidence",
-            "policy"
+            "evidence"
           ],
           "additionalProperties": false
         },
@@ -477,7 +475,6 @@
               }
             },
             "required": [
-              "when",
               "text"
             ],
             "additionalProperties": false

@@ -127,11 +127,9 @@ test('row W2 needs a known subject, at fact sites only', () => {
   const met = `${S}:fact/times_met`;
   const smith = `${S}:dialogue/smith_talk`;
   const leaf = (extra: object) => (c: any) =>
-    (c.dialogues[smith].policy.root = {
-      op: 'fact_compare',
-      fact: c.facts[met] && fact('times_met'),
-      equals: 0,
-      ...extra,
+    (c.dialogues[smith].policy = {
+      policy_version: 1,
+      root: { op: 'fact_compare', fact: c.facts[met] && fact('times_met'), equals: 0, ...extra },
     });
   const npcRef = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
   const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy.root`;

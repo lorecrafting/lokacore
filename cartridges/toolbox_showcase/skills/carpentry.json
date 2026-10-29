@@ -1,13 +1,6 @@
 {
   "label": "skill.carpentry.label",
   "requirement": "skill.carpentry.requirement",
-  "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prerequisite": {
     "policy_version": 1,
     "root": {

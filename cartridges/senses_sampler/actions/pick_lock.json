@@ -9,13 +9,6 @@
     "detail": "lock"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "check": {
     "key": "pick_lock",
     "kind": "opposed",

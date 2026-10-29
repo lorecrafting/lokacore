@@ -361,6 +361,14 @@ defmodule Loka.ContentTest do
       assert {:ok, _, []} = Loka.ContentSource.compile(dir, [{"cartridge.json", at_1_0}])
     end
 
+    # Break: the compiler walks an absent policy (nodes/2 on nil) or requires it again (F3).
+    test "an action with no policy compiles", %{tmp_dir: tmp} do
+      assert {:ok, _, []} =
+               tmp
+               |> source(%{"actions/talk.json" => Map.delete(@talk, "policy")})
+               |> Loka.Content.compile()
+    end
+
     test "UNDECLARED_CAPABILITY: an action's command and a policy op", %{tmp_dir: tmp} do
       caps = %{"fact" => 1, "policy" => 1}
 

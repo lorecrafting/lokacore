@@ -2178,8 +2178,7 @@
       "required": [
         "key",
         "label",
-        "requirement",
-        "qualification"
+        "requirement"
       ],
       "dependentRequired": {
         "hidden": [
@@ -2739,9 +2738,6 @@
               "$ref": "policy.schema.json#/$defs/VersionedPolicy"
             }
           },
-          "required": [
-            "enter"
-          ],
           "additionalProperties": false
         },
         "max_per_owner": {

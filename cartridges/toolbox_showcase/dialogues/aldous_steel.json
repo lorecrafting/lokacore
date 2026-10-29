@@ -1,13 +1,6 @@
 {
   "npc": "aldous",
   "keyword": "steel",
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prompt": "dialogue.aldous_steel.prompt",
   "roles": {
     "aldous": {

@@ -164,7 +164,7 @@ export function acceptRefused(
   const prior = questOf(world, actor, quest);
   if (
     (prior && !(d.repeatable && prior[1].state === 'resolved')) ||
-    (offer && !holds(world, actor, offer.policy.root, { steps }))
+    (offer && !holds(world, actor, offer.policy?.root, { steps }))
   )
     return 'invalid_state' as const;
   if (d.exchange) {
@@ -190,7 +190,7 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef,
     const q = questOf(world, actor, quest);
     return !!q && world.state.expeditions?.[q[0]]?.status === 'completed';
   }
-  return o.evidence === 'current_state' && holds(world, actor, o.policy.root, { steps });
+  return o.evidence === 'current_state' && holds(world, actor, o.policy?.root, { steps });
 }
 
 /**

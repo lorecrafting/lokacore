@@ -310,11 +310,6 @@
               "$ref": "policy.schema.json#/$defs/VersionedPolicy"
             }
           },
-          "requiredUnless": {
-            "put": [
-              "get"
-            ]
-          },
           "additionalProperties": false
         }
       },
@@ -779,9 +774,6 @@
               "$ref": "policy.schema.json#/$defs/VersionedPolicy"
             }
           },
-          "required": [
-            "get"
-          ],
           "additionalProperties": false
         },
         "mount": {

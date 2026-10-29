@@ -1,14 +1,7 @@
 {
   "title": "quest.find_key.title",
   "offer": {
-    "label": "quest.find_key.accept",
-    "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
-    }
+    "label": "quest.find_key.accept"
   },
   "objective": {
     "evidence": "post_activation_event",

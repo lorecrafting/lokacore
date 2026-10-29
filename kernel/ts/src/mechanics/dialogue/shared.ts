@@ -34,7 +34,7 @@ import {
   type Steps,
   type World,
 } from '../../runtime/decision.ts';
-import { ALWAYS, holds } from '../policy.ts';
+import { holds } from '../policy.ts';
 import { carrying } from '../containment/shared.ts';
 import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
@@ -91,7 +91,7 @@ export function blocked(
   if (!d || row.beat !== d.key || !boundSitting(world, row, d, option))
     return 'invalid_state' as const;
   const target = speakerOf(d, row);
-  if (!holds(world, row.actor_id, d.policy.root, { target, steps }))
+  if (!holds(world, row.actor_id, d.policy?.root, { target, steps }))
     return 'invalid_state' as const;
   const window = option.availability;
   if (
@@ -275,7 +275,6 @@ export function modal(world: World, actor: CharacterId): ActionSet {
     target: { kind: 'none' } as const,
     input,
     priority: 0,
-    policy: ALWAYS,
     command: command as Key,
   });
   const open = pending(world, actor);

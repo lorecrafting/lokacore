@@ -138,8 +138,9 @@ const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
   }),
 });
 
-// The definition keyed `key`, its policy's leaves read on `world` as admission reads them.
-function policy<D extends { key: string; policy: { root: Policy } }>(
+// The definition keyed `key`, its policy's leaves read on `world` as admission reads them; no
+// policy, none (it holds).
+function policy<D extends { key: string; policy?: { root: Policy } }>(
   defs: Readonly<Record<string, D>> | undefined,
   key: string,
   world: World,
@@ -150,10 +151,10 @@ function policy<D extends { key: string; policy: { root: Policy } }>(
   if (!d) throw new Usage(`no definition keyed ${key}`);
   const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
   const actor = (command.payload as { actor_id: CharacterId }).actor_id; // recipes' and talk's commands carry one
-  const at = (i: number) => ({
-    holds: holds(world, actor, leaves(d.policy.root)[i]!, ctx()),
-  });
-  return { rule, policy: annotate(d.policy.root, at) };
+  const root = d.policy?.root;
+  if (!root) return { rule };
+  const at = (i: number) => ({ holds: holds(world, actor, leaves(root)[i]!, ctx()) });
+  return { rule, policy: annotate(root, at) };
 }
 
 if (import.meta.main) {
