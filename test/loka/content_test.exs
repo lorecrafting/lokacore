@@ -172,10 +172,10 @@ defmodule Loka.ContentTest do
                "actions/p.json" => act(compare),
                "actions/q.json" => act(other)
              }) == [
-               d("UNKNOWN_FIELD", "facts.api_version"),
                d("UNRESOLVED_REFERENCE", "actions/q.policy.root.fact", %{
                  "target" => "c@2.0.0:fact/a_b"
-               })
+               }),
+               d("UNKNOWN_FIELD", "facts.api_version")
              ]
 
       assert errors(Path.join(tmp, "bad"), %{
@@ -228,9 +228,6 @@ defmodule Loka.ContentTest do
                "actions/talk.json" => talk,
                "cartridge.json" => manifest(["requires", "capabilities"], caps)
              }) == [
-               d("UNRESOLVED_REFERENCE", "actions/talk.policy.root.item", %{
-                 "target" => "c@1.0.0:item/x"
-               }),
                d("UNRESOLVED_REFERENCE", "actions/p.policy.root.items[0].fact", %{
                  "target" => "c@1.0.0:fact/missing"
                }),
@@ -242,6 +239,9 @@ defmodule Loka.ContentTest do
                }),
                d("UNRESOLVED_REFERENCE", "actions/p.policy.root.items[4].item", %{
                  "target" => "c@1.0.0:fact/a_b"
+               }),
+               d("UNRESOLVED_REFERENCE", "actions/talk.policy.root.item", %{
+                 "target" => "c@1.0.0:item/x"
                })
              ]
     end
@@ -398,11 +398,11 @@ defmodule Loka.ContentTest do
         Enum.reduce(1..n, @present, fn _, acc -> %{"op" => "not", "item" => acc} end)
       end
 
-      ok = source(Path.join(tmp, "ok"), %{"actions/p.json" => act(nots.(123))})
+      ok = source(Path.join(tmp, "ok"), %{"actions/p.json" => act(nots.(122))})
       assert {:ok, bytes, []} = Loka.Content.compile(ok)
       assert {:ok, _} = Canonical.decode(bytes)
 
-      assert errors(Path.join(tmp, "deep"), %{"actions/p.json" => act(nots.(124))}) ==
+      assert errors(Path.join(tmp, "deep"), %{"actions/p.json" => act(nots.(123))}) ==
                [d("NESTING_TOO_DEEP", "actions/p", %{"maximum" => 128})]
     end
 

@@ -1021,10 +1021,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/resources/c@1.0.0:recipe~1x",
         "code": "invalid_type"
       },
@@ -9356,10 +9352,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -10050,10 +10042,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       }
     ]
@@ -11825,10 +11813,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -11988,10 +11972,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
@@ -13759,10 +13739,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -13879,10 +13855,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
@@ -14965,10 +14937,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
@@ -17212,10 +17180,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -17265,10 +17229,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies",
-        "code": "missing_property"
-      },
-      {
         "path": "/rooms",
         "code": "missing_property"
       },
@@ -17307,10 +17267,6 @@
       },
       {
         "path": "/manifest",
-        "code": "missing_property"
-      },
-      {
-        "path": "/policies",
         "code": "missing_property"
       },
       {
