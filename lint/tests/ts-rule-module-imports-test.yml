@@ -32,6 +32,8 @@ invalid:
   - "import { readFileSync } from 'node:fs';"
   - "import { decide } from '../movement/rule.ts';"
   - "export { decide } from './rule.ts';"
+  # Break: daily.ts is allowlisted by name in any module, not only schedule/daily.ts.
+  - "import { x } from '../combat/daily.ts';"
   - "import x from 'lodash';"
   - "import { y } from '../../../play/obs.ts';"
   - "import { x } from '../../index.ts';"
