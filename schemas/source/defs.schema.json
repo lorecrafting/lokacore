@@ -6149,7 +6149,7 @@
         },
         "birth_when": {
           "$ref": "#/$defs/partial.VersionedPolicy",
-          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, both kernels)."
+          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
         "bundle": { "$ref": "#/$defs/partial.DefinitionRef" },
         "cap": {
@@ -6170,7 +6170,7 @@
         },
         "extends": { "$ref": "#/$defs/Key" },
         "floor": {
-          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, both kernels).",
+          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, from the compiler).",
           "minimum": 1,
           "type": "integer"
         },
@@ -8530,7 +8530,7 @@
         },
         "birth_when": {
           "$ref": "#/$defs/VersionedPolicy",
-          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, both kernels)."
+          "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
         "bundle": { "$ref": "#/$defs/DefinitionRef" },
         "cap": {
@@ -8550,7 +8550,7 @@
           "type": "integer"
         },
         "floor": {
-          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, both kernels).",
+          "description": "Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, from the compiler).",
           "minimum": 1,
           "type": "integer"
         },
