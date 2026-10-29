@@ -13,7 +13,7 @@ import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts
 // The crow always hits back and every hit opens an inline C5 bleed; the player always misses.
 function bleeding(c: any) {
   const effect = shoo.ref('bleed', 'bleeding');
-  // C5 bleed loads only beside skills@1 and food@1 (cartridge_bleed.ts).
+  // C5 bleed compiles only beside skills@1 and food@1 (lib/loka/content/bleed.ex).
   for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities])
     for (const k of ['bleed', 'skills', 'food']) caps[k] = 1;
   c.npcs[ref('npc', 'crow')].hp = { gain: 0, maximum: 10, minimum: 0, start: 10 };
