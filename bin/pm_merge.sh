@@ -37,7 +37,7 @@ merge() { # <ref> <message>
     git commit -q --no-edit >/dev/null 2>&1; then
     echo "MERGED $1 (resolved: $(echo $c))"; return 0
   fi
-  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git merge --abort 2>/dev/null; return 1
+  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git reset -q --hard; return 1 # also drops a failed regen's edits, which merge --abort keeps
 }
 merge "$sha" "Merge $slice: $subj" || exit 1
 merge "$rec" "Merge review record for $subj" || { git reset -q --hard "$pre"; exit 1; }

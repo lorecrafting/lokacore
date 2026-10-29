@@ -271,7 +271,7 @@ pm() { # <case> <want-rc> <want-output>
   pmd=bin; if [ -n "${RESOLVE-}" ]; then # the batch's resolver settles the conflict; main's copy (beside pm_merge.sh, the old $here) refuses
     pmd=$R.m; mkdir "$pmd"; cp "$bin/pm_merge.sh" "$pmd/"; echo 'raise SystemExit(1)' > "$pmd/merge_resolve.py"
     echo 'import os; raise SystemExit(os.system("git checkout --theirs -- . && git add -u"))' > bin/merge_resolve.py
-    printf '#!/bin/sh\necho regenerated > a; echo run >> %s.rg\n' "$R" > bin/regen.sh
+    printf '#!/bin/sh\necho regenerated > a; echo run >> %s.rg; exit %s\n' "$R" "${REGEN_RC:-0}" > bin/regen.sh
   fi
   git add . && git commit -qm base && git push -q origin batch
   git checkout -qb slice; echo "${SLICE_TEXT:-s}" > "$sf"; git add . && git commit -qm slice && git push -q origin slice
@@ -280,7 +280,8 @@ pm() { # <case> <want-rc> <want-output>
   mkdir "$R.h"; cp "$bin/../.githooks/pre-push" "$R.h/"; git config core.hooksPath "$R.h" # pm_merge's push runs the real hook
   pre=$(git rev-parse HEAD); rc=0; EXPECT_SHA=$(git rev-parse origin/slice) PATH="$tmp/pmgh:$PATH" capped sh "$pmd/pm_merge.sh" "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] && grep -q "$3" "$R.out" || { bad "pm_merge $1: exit $rc, want $2 with '$3'"; sed 's/^/  /' "$R.out"; }
-  if [ "$2" != 0 ]; then [ "$(git rev-parse HEAD)" = "$pre" ] && [ "$(git rev-parse origin/batch)" = "$pre" ] || bad "pm_merge $1: merged or pushed"; fi
+  if [ "$2" != 0 ]; then [ "$(git rev-parse HEAD)" = "$pre" ] && [ "$(git rev-parse origin/batch)" = "$pre" ] || bad "pm_merge $1: merged or pushed"
+    [ -z "$(git status --porcelain --untracked-files=no)" ] || bad "pm_merge $1: left the worktree dirty"; fi
   # Break (loka-36uz): the push's pre-push hook runs prepush.sh again on the head pm_merge just checked.
   if [ "$2" = 0 ]; then [ "$(wc -l < "$R.pp")" -eq 1 ] || bad "pm_merge $1: prepush.sh ran $(wc -l < "$R.pp") times, want 1"; fi
 }
@@ -300,6 +301,8 @@ CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.
 # (regen's output must land in the pushed merge commit).
 CI=$ok E2E=$ok SLICE_FILE=s REC_FILE=r REC_IN_BASE= RESOLVE=1 pm batch-resolver 0 '^PUSHED batch'
 [ "$(cat "$R.rg" 2>/dev/null)" = run ] && [ "$(git -C "$R" show origin/batch:a)" = regenerated ] || bad 'pm_merge batch-resolver: regen.sh did not run once into the pushed merge'
+# Break: a failed regen.sh merges anyway, or leaves its edits in the worktree (merge --abort keeps them).
+CI=$ok E2E=$ok REGEN_RC=1 pm regen-fails 1 '^CONFLICT'; unset RESOLVE REGEN_RC # prefix assignments to a function persist in sh
 # --- prepush.sh ----------------------------------------------------------------------------
 # A repo whose stub mise logs each check and fails them when STUB_RC=1; origin/main is the base commit.
 # Break: two runs share log files, so one reports the other's output (the first log must still read "run-a" after
