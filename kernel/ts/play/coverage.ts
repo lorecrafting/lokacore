@@ -81,7 +81,7 @@ export function coverage(c: Cartridge, traces: Trace[]) {
           throw new Error(`narration cap reached at ordinal ${n}`);
         for (const n of d.narration ?? []) seen.add(ruleOf(n.key) ?? '');
         for (const { payload: p } of d.events) {
-          // scripted_action/rule.ts:78 (action = scripted action.key), :99-101 (none on failure)
+          // scripted_action/rule.ts:77 (action = scripted.key), :98-100 (none on failure)
           if (p.type === 'action_completed') done.add(p.action);
           if (p.type === 'quest_resolved') seen.add(refString(p.quest)); // quest/lifecycle.ts:261
           if (p.type !== 'choice_resolved') continue;
