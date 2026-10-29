@@ -15,6 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: C1 slice F2-docs, drop per-field kernel_api floors from docs and schema descriptions (loka-ivjq.2)](2026-10-28-c1-f2-docs-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice D2, characters and economy loader checks (loka-ivjq.20)](2026-10-28-c1-d2-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice D1, entities and supplies loader checks (loka-ivjq.20)](2026-10-28-c1-d1-review.md): **APPROVE WITH NOTES**
+- [Review: C1 B2, world, time and the lock walk (loka-ivjq.20)](2026-10-28-c1-b2-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice 0 prep and slice B1 references core (loka-ivjq.20)](2026-10-28-c1-b1-review.md): **APPROVE WITH NOTES**
 - [Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)](2026-10-24-narration-log-batch-review.md): **APPROVE WITH NOTES**
 - [Review: room words batch, signpost fixture link and entity name words (loka-x6t.105, loka-6qi, PR #458, kernel_api 1.118)](2026-10-23-room-words-batch-review.md): **CHANGES REQUIRED**

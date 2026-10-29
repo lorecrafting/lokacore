@@ -1,4 +1,3 @@
-import { trails } from './cartridge_trails.ts';
 import { exchanges } from './cartridge_exchange.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
@@ -19,9 +18,7 @@ import { dialogues } from './cartridge_dialogues.ts';
 import { quests, questPolicies } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
-import { theft } from './cartridge_theft.ts';
-import { mounts } from './cartridge_mounts.ts';
-import { answerRoots, asks } from './cartridge_asks.ts';
+import { answerRoots } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots } from './cartridge_locks.ts';
 
@@ -187,10 +184,6 @@ export function refStage(c: Obj): Diagnostic[] {
   const { named } = check;
   if (c.format !== 'loka-cartridge-v2') return out;
   // -- B2
-  out.push(...trails(c, check));
-  out.push(...theft(c, named));
-  out.push(...mounts(c, named));
-  out.push(...asks(c, check));
   // -- C1
   out.push(...exchanges(c, check));
   out.push(...recipes(c, check));

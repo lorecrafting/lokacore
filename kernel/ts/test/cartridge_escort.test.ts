@@ -44,16 +44,9 @@ test('loader accepts API1.11 escort effects and policy leaves', () => {
   }
 });
 
-// Breaks: capability, NPC role, local quest and terminal agreement checks are bypassed.
+// Breaks: NPC role, local quest and terminal agreement checks are bypassed.
 test('loader rejects incompatible and unresolved escort bindings', () => {
   const cases: [string, (c: any) => void][] = [
-    [
-      'UNDECLARED_CAPABILITY',
-      (c) => {
-        delete c.manifest.requires.capabilities.escort;
-        delete c.lock.capabilities.escort;
-      },
-    ],
     [
       'UNRESOLVED_REFERENCE',
       (c) => {

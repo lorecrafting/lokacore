@@ -244,9 +244,9 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
   assert.equal(result.decision.events[2].actor_id, actor);
 });
 
-// Breaks: loader leaves the new quest refs unchecked, accepts activation under an actorless
-// trigger (fact_changed; entering is legal since loka-kgd.150.2), omits quest/reaction lock ownership, or permits an older kernel API range.
-test('loader rejects missing quest references, trigger misuse and missing ownership locks', () => {
+// Breaks: loader leaves the new quest refs unchecked, or accepts activation under an actorless
+// trigger (fact_changed; entering is legal since loka-kgd.150.2) or a short quest ref.
+test('loader rejects missing quest references and trigger misuse', () => {
   for (const [change, code] of [
     [
       (c: any) => (c.reactions[`${prefix}:reaction/start_search`].on.quest.key = 'absent'),
@@ -263,20 +263,6 @@ test('loader rejects missing quest references, trigger misuse and missing owners
           fact: ref('fact', 'tracks_found'),
         }),
       'OUTCOME_MISMATCH',
-    ],
-    [
-      (c: any) => {
-        delete c.lock.capabilities.quest;
-        delete c.manifest.requires.capabilities.quest;
-      },
-      'UNDECLARED_CAPABILITY',
-    ],
-    [
-      (c: any) => {
-        delete c.lock.capabilities.reaction;
-        delete c.manifest.requires.capabilities.reaction;
-      },
-      'UNDECLARED_CAPABILITY',
     ],
     [
       (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest = 'lost_lamb'),

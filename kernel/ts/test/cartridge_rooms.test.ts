@@ -76,19 +76,6 @@ test('the v2 known answer loads with its fixture hash', () => {
   assert.equal(result.hash, kat.sha256);
 });
 
-// Breaks: rooms load when their owning capability is not locked (05 §6).
-test('rooms without movement in the lock are UNDECLARED_CAPABILITY', () =>
-  fails(
-    mutant((c) => {
-      delete c.manifest.requires.capabilities.movement;
-      delete c.lock.capabilities.movement;
-    }),
-    'UNDECLARED_CAPABILITY',
-    '.cartridge.rooms["rooms_sampler@0.0.1:room/boathouse"]',
-    { capability: 'movement' },
-    ['movement@1'],
-  ));
-
 // Breaks: the key stage skips the rooms map.
 test("a room map key that disagrees with the room's key is ARTIFACT_DEFINITION_KEY_MISMATCH", () =>
   fails(
@@ -123,15 +110,13 @@ test('the details known answer loads with its fixture hash', () => {
   assert.equal(result.hash, details.sha256);
 });
 
-// Breaks: readable content loads without its capability.
-test('readables require their lock', () => {
+// Breaks: a locked readable whose label and text resolve is refused.
+test('a locked readable with its label and text loads', () => {
   const c = withDetails((c) => {
     c.rooms[DFL].details.notice.readable = { label: 'read.label', text: 'read.text' };
     c.text['read.label'] = 'Read notice';
     c.text['read.text'] = 'The ferry leaves at dawn.';
   });
-  const at = `.cartridge.rooms["${DFL}"].details.notice.readable`;
-  fails(c, 'UNDECLARED_CAPABILITY', at, { capability: 'readable' }, ['readable@1']);
   c.manifest.requires.capabilities.readable = 1;
   c.lock.capabilities.readable = 1;
   assert.ok(load(c).ok);

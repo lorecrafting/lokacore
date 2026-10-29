@@ -334,14 +334,10 @@ const fails = (
     },
   });
 const Q = `.cartridge.quests["${E}:quest/lantern"]`;
-const unlock = (c: any, cap: string) => {
-  delete c.manifest.requires.capabilities[cap];
-  delete c.lock.capabilities[cap];
-};
 
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_errand_test.exs):
 // the kernel would read a quest, item or text that does not exist, run a quest whose capability
-// is not locked or not installed, or list an offer under another action's key.
+// is not installed, or list an offer under another action's key.
 test('the loader checks quest references, texts, keys and the lock', () => {
   fails(
     (c) => (quest(c).objective = { ...STRICT, item_acquired: ref('item', 'oil') }),
@@ -381,9 +377,6 @@ test('the loader checks quest references, texts, keys and the lock', () => {
     };
   };
   fails(recipe, 'DUPLICATE_DEFINITION', Q);
-  fails((c) => unlock(c, 'quest'), 'UNDECLARED_CAPABILITY', `${Q}`, { capability: 'quest' }, [
-    'quest@1',
-  ]);
   const without = { ...INSTALLED, capabilities: { ...INSTALLED.capabilities } };
   delete without.capabilities.quest;
   fails(

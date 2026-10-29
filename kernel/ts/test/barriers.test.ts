@@ -399,16 +399,6 @@ const room = (c: any, k: string) => c.rooms[`${G}:room/${k}`];
 // Breaks: the loader admitting a barrier without its capability or under the wrong map key.
 test('the loader checks the barrier capability and definition key', () => {
   fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.barrier;
-      delete c.lock.capabilities.barrier;
-    },
-    'UNDECLARED_CAPABILITY',
-    `.cartridge.barriers["${G}:barrier/cell_door"]`,
-    { capability: 'barrier' },
-    ['barrier@1'],
-  );
-  fails(
     (c) => (c.barriers[`${G}:barrier/oak_door`].key = 'gate'),
     'ARTIFACT_DEFINITION_KEY_MISMATCH',
     `.cartridge.barriers["${G}:barrier/oak_door"]`,

@@ -32,16 +32,11 @@ const view = (change?: (c: any) => void) => {
 };
 
 // Breaks: the threshold is projected in real minutes or seconds, not logical seconds (30 minutes
-// at rate 50 is 90000); it shows without the field; the API floor is not checked.
+// at rate 50 is 90000); it shows without the field.
 test('recap_after is the authored minutes in logical seconds, absent unless authored', () => {
   assert.equal(view().recap_after, 90000);
   assert.equal(
     view((c) => delete c.manifest.time_policy.recap_after_minutes).recap_after,
     undefined,
   );
-  const r = reload(source, (c) => (c.manifest.requires.kernel_api.at_least = '1.46'));
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
 });

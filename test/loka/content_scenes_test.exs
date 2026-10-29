@@ -116,6 +116,37 @@ defmodule Loka.ContentScenesTest do
               ]}
   end
 
+  # Breaks: an end outcome the story point does not resolve to this scene, or one fact
+  # assigned twice at scene end, loads.
+  test "scene end must agree with its story point", %{tmp_dir: dir} do
+    scene = src("scenes/bell_rung.json")
+    m = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.15")
+    point = src("story_points/lantern_resolved.json")
+    rung = put_in(point, ["outcomes", "rung"], %{"scene" => "bell_rung"})
+    assign = %{"fact" => "bell_heard", "value" => true}
+    ended = %{"story_point" => "lantern_resolved", "outcome" => "rung", "assign" => [assign]}
+
+    files = fn s, p ->
+      %{
+        "cartridge.json" => m,
+        "scenes/bell_rung.json" => Map.put(scene, "on_end", s),
+        "story_points/lantern_resolved.json" => p
+      }
+    end
+
+    assert {:ok, _, _} = compile(Path.join(dir, "end"), files.(ended, rung))
+
+    for {name, s, p, path, code} <- [
+          {"outcome", %{ended | "outcome" => "carry"}, point, "on_end.outcome",
+           "OUTCOME_MISMATCH"},
+          {"assign", %{ended | "assign" => [assign, assign]}, rung, "on_end.assign",
+           "DUPLICATE_DEFINITION"}
+        ] do
+      assert compile(Path.join(dir, name), files.(s, p)) ==
+               {:error, [d(code, "scenes/bell_rung." <> path)]}
+    end
+  end
+
   # Breaks: engine fact reservation misses any authored definition or consequence write site.
   test "content can read but cannot define or assign a scene fact", %{tmp_dir: dir} do
     f = src("facts.json")

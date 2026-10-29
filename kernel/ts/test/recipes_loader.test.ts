@@ -120,21 +120,6 @@ test("a room's contribution naming no verb, action or recipe is UNRESOLVED_REFER
   );
 });
 
-// Breaks: a recipe, or a step's operation, loads without its owner in the lock (05 §6).
-test('a recipe and its steps without their owners locked are UNDECLARED_CAPABILITY', () => {
-  const cases = [
-    ['action_recipe', AT],
-    ['fact', `${AT}.outcomes.success.sequence[0].op`],
-  ];
-  for (const [key, path] of cases) {
-    const without = (c: any) => {
-      delete c.manifest.requires.capabilities[key];
-      delete c.lock.capabilities[key];
-    };
-    fails(without, 'UNDECLARED_CAPABILITY', path, { capability: key }, [`${key}@1`]);
-  }
-});
-
 // R5 S6a. The bell with ring_bell given a luck check and a failure outcome, check@1 and
 // schedule@1 locked.
 const checked = (c: any) => {
@@ -161,9 +146,9 @@ test('a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMAT
   );
 });
 
-// Breaks: the failure outcome's fact, text or step owner goes unchecked, so a failed check
-// crashes or shows a raw key at play time; a check loads without check@1 locked.
-test("a failure outcome's references and owners, and the check's, are checked", () => {
+// Breaks: the failure outcome's fact or text goes unchecked, so a failed check
+// crashes or shows a raw key at play time.
+test("a failure outcome's references are checked", () => {
   fails(
     and((c) => (recipe(c).outcomes.failure.sequence[0].fact.key = 'bell_cracked')),
     'UNRESOLVED_REFERENCE',
@@ -176,35 +161,6 @@ test("a failure outcome's references and owners, and the check's, are checked", 
     `${AT}.outcomes.failure.narration.actor`,
     { target: 'narration.cracked' },
   );
-  for (const [key, path] of [
-    ['check', `${AT}.check`],
-    ['fact', `${AT}.outcomes.failure.sequence[0].op`],
-  ])
-    fails(
-      and((c) => {
-        delete c.manifest.requires.capabilities[key];
-        delete c.lock.capabilities[key];
-      }),
-      'UNDECLARED_CAPABILITY',
-      path,
-      { capability: key },
-      [`${key}@1`],
-    );
-});
-
-// Breaks: a time_window node loads without schedule@1 locked.
-test('time_window needs schedule@1', () => {
-  const window = (from: number, to: number) => (c: any) =>
-    (recipe(c).policy.root = { op: 'time_window', from, to });
-  assert.ok(load('cartridge_bell_hash.json', and(window(18, 6))).ok);
-  const unscheduled = (c: any) => {
-    delete c.manifest.requires.capabilities.schedule; // the compiler adds it with the pools
-    delete c.lock.capabilities.schedule;
-    window(18, 6)(c);
-  };
-  fails(unscheduled, 'UNDECLARED_CAPABILITY', `${AT}.policy.root.op`, { capability: 'schedule' }, [
-    'schedule@1',
-  ]);
 });
 
 // Astra A1. Breaks: a fact.assign value (any outcome) not of the fact's type installs although
@@ -245,7 +201,6 @@ test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
 // does not exist, or regenerate outside a spec's bounds, because the loader let it in (each
 // matched by a compiler test in test/loka/content_road_test.exs).
 const ROAD = 'cartridge_road_hash.json';
-const HP = 'resource_sampler@0.0.1:resource/hp';
 const SHOVE = `.cartridge.recipes["resource_sampler@0.0.1:recipe/shove_cart"]`;
 const PRAY = `.cartridge.recipes["resource_sampler@0.0.1:recipe/pray"]`;
 const road = (c: any, key: string) => c.recipes[`resource_sampler@0.0.1:recipe/${key}`];
@@ -271,18 +226,5 @@ test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_
     'UNRESOLVED_REFERENCE',
     `${PRAY}.outcomes.success.sequence[0].resource`,
     target,
-  );
-});
-
-test('resources without resource@1 in the lock are UNDECLARED_CAPABILITY', () => {
-  road_fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.resource;
-      delete c.lock.capabilities.resource;
-    },
-    'UNDECLARED_CAPABILITY',
-    `.cartridge.resources["${HP}"]`,
-    { capability: 'resource' },
-    ['resource@1'],
   );
 });

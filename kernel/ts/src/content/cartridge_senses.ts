@@ -1,9 +1,5 @@
-// Toolbox row G6 at the cartridge trust boundary: every declared cue as a definition part (its
-// owner sense_cue@1, its text key, its `when` condition), and the kernel_api 1.48 floor for a cue
-// or a cue_perceived leaf. Twin of lib/loka/content/cues.ex.
-import type { Diagnostic } from '../contracts.gen.ts';
-import { diag, nodes, step, type Obj } from './cartridge_refs.ts';
-import { apiCmp } from './cartridge_installed.ts';
+// Declared cues as definition parts (toolbox row G6), read by cartridge_refs.ts parts.
+import { step, type Obj } from './cartridge_refs.ts';
 
 /** Each cue of a room, detail, item (and its source fuel), NPC, status or recipe outcome. */
 export function cueParts(c: Obj): [string, Obj, string][] {
@@ -27,11 +23,4 @@ export function cueParts(c: Obj): [string, Obj, string][] {
     for (const [name, o] of Object.entries(r.outcomes as Obj))
       add(o, `.cartridge.recipes${step(ref)}.outcomes.${name}`);
   return out;
-}
-
-export function senses(c: Obj): Diagnostic[] {
-  const used = cueParts(c).length > 0 || nodes(c).some(([p]) => p.op === 'cue_perceived');
-  return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.48') < 0
-    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-    : [];
 }

@@ -151,20 +151,11 @@ test('case 7: cost_percent 50 applies last and floors', () => {
   assert.equal(mv(go(ride(yard(unset), 'mount'), 'north')), 9);
 });
 
-// Breaks: a loader check is missing, misplaced, or refuses the boundary values.
-test('case 8: loader refusals and the accepted edges', () => {
+// Breaks: the mount schema bounds (empty terrain, cost_percent over 1000) are missing or refuse
+// the boundary values.
+test('case 8: mount schema refusals and the accepted edges', () => {
   const npc = (f: (m: any) => void) => (c: any) => f(c.npcs[HORSE].mount);
-  const riding = `${P}:fact/riding`;
   const cases: [(c: any) => void, unknown][] = [
-    [(c) => delete c.world.mount, ['SCHEMA_VIOLATION', `.cartridge.npcs["${HORSE}"].mount`]],
-    [
-      (c) => delete c.facts[riding].per_subject,
-      ['SCHEMA_VIOLATION', '.cartridge.world.mount.riding'],
-    ],
-    [
-      (c) => (c.world.mount.riding.key = 'nope'),
-      ['UNRESOLVED_REFERENCE', '.cartridge.world.mount.riding'],
-    ],
     [
       npc((m) => (m.terrain = [])),
       ['SCHEMA_VIOLATION', `.cartridge.npcs["${HORSE}"].mount.terrain`],
@@ -172,33 +163,6 @@ test('case 8: loader refusals and the accepted edges', () => {
     [
       npc((m) => (m.cost_percent = 1001)),
       ['SCHEMA_VIOLATION', `.cartridge.npcs["${HORSE}"].mount.cost_percent`],
-    ],
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.107'),
-      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
-    ],
-    [
-      (c) => (c.npcs[HORSE].spawn_template = true),
-      ['SCHEMA_VIOLATION', `.cartridge.npcs["${HORSE}"].mount`],
-    ],
-    [
-      (c) => (c.facts[riding].scopes = ['instance']),
-      ['SCHEMA_VIOLATION', '.cartridge.world.mount.riding'],
-    ],
-    [
-      (c) => {
-        c.facts[riding].value_type = { type: 'int', default: 0 };
-        for (const [k, v] of [
-          ['mount', 0],
-          ['dismount', 1],
-        ] as const) {
-          const d = c.dialogues[`${P}:dialogue/horse_${k}`];
-          d.choices[k].sequence[0].value = 1;
-          d.policy.root.equals = v;
-        }
-        c.npcs[HORSE].description_variants[0].when.root.equals = 1;
-      },
-      ['SCHEMA_VIOLATION', '.cartridge.world.mount.riding'],
     ],
     [() => {}, 'loaded'],
     [npc((m) => (m.cost_percent = 1000)), 'loaded'],

@@ -582,10 +582,10 @@ const bram = (c: any) => c.dialogues[`${F}:dialogue/bram`];
 
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): the
 // kernel would bind a role, speaker or quest that does not exist, hand over through a role of the
-// wrong kind, show a missing text, assign an undeclared fact or a wrong value, run a dialogue its
-// capability is not locked for, shadow the actor participant, open a choice with no option, list
-// a talk under another action's key.
-test('the loader checks dialogue references, roles, texts, facts, keys and the lock', () => {
+// wrong kind, show a missing text, assign an undeclared fact or a wrong value, shadow the actor
+// participant, open a choice with no option, list a talk under
+// another action's key.
+test('the loader checks dialogue references, roles, texts, facts and keys', () => {
   const missing = (kind: string) => ({ target: `${F}:${kind}/missing` });
   fails(
     (c) => (bram(c).npc = ref('npc', 'missing')),
@@ -661,16 +661,6 @@ test('the loader checks dialogue references, roles, texts, facts, keys and the l
     'DUPLICATE_DEFINITION',
     `.cartridge.dialogues["${F}:dialogue/lantern"]`,
   );
-  fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.dialogue;
-      delete c.lock.capabilities.dialogue;
-    },
-    'UNDECLARED_CAPABILITY',
-    D,
-    { capability: 'dialogue' },
-    ['dialogue@1'],
-  );
 });
 
 const P = `.cartridge.story_points["${F}:story_point/lantern_resolved"]`;
@@ -679,9 +669,8 @@ const point = (c: any) => c.story_points[`${F}:story_point/lantern_resolved`];
 // Breaks (23 §3: the loader admitting what the compiler rejects, test/loka/content_ferry_test.exs):
 // a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes (it would
 // emit twice), a dialogue without a quest (its choice repeatable), a story point with no outcome,
-// a story point loaded without dialogue@1, its event's owner, in the lock, or keyed apart from
-// its key (the map's kind story_point has an underscore).
-test('the loader checks story point triggers, outcomes, keys and the lock', () => {
+// a story point keyed apart from its key (the map's kind story_point has an underscore).
+test('the loader checks story point triggers, outcomes and keys', () => {
   fails((c) => (point(c).key = 'other'), 'ARTIFACT_DEFINITION_KEY_MISMATCH', P, {
     field: 'key',
     declared: 'lantern_resolved',
@@ -708,15 +697,4 @@ test('the loader checks story point triggers, outcomes, keys and the lock', () =
   fails((c) => (point(c).outcomes = {}), 'SCHEMA_VIOLATION', `${P}.outcomes`, {
     error: 'too_few_items',
   });
-  fails(
-    (c) => {
-      delete c.dialogues;
-      delete c.manifest.requires.capabilities.dialogue;
-      delete c.lock.capabilities.dialogue;
-    },
-    'UNDECLARED_CAPABILITY',
-    P,
-    { capability: 'dialogue' },
-    ['dialogue@1'],
-  );
 });

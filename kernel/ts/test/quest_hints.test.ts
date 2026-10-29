@@ -195,18 +195,6 @@ test('the loader checks a recipe tip like the compiler', () => {
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
-    [
-      (c) => {
-        delete c.manifest.requires.capabilities.fact;
-        delete c.lock.capabilities.fact;
-        c.recipes[R].outcomes.success.sequence = [{ op: 'event.emit', event: 'searched' }];
-        // The W24 deadline content's other fact writers.
-        delete c.recipes['quest_sampler@0.0.1:recipe/leave_word'];
-        delete c.reactions;
-      },
-      'UNDECLARED_CAPABILITY',
-      `${recipe}.tip`,
-    ],
   ];
   for (const [change, code, path] of rows) {
     const c = structuredClone(content) as unknown as Obj;

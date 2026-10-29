@@ -1080,7 +1080,6 @@
       "kernel/ts/src/mechanics/variety.ts",
       "kernel/ts/src/mechanics/policy.ts",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
-      "kernel/ts/src/content/cartridge_variety.ts",
       "lib/loka/content/variety.ex",
       "lib/loka/core/compose_knowledge.ex"
     ],
@@ -1101,7 +1100,6 @@
       "WorldSettings"
     ],
     "modules": [
-      "kernel/ts/src/content/cartridge_construction.ts",
       "lib/loka/content/construction.ex"
     ],
     "fixtures": [

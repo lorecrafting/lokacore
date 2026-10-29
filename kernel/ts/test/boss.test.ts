@@ -158,30 +158,6 @@ test('the warlord drops his one crown into his corpse in the hall, and calls no 
   assert.equal(w.state.containers[corpse], w.roomIds[`${P}room/hall`]);
 });
 
-// Breaks: the loader's 1.87 floor misses `subject`, `at_least_percent` or the `target` filter (the
-// two leaves sit inside reaction `when`s), or refuses a 1.86 cartridge with none of them.
-test('the loader refuses subject, at_least_percent or target below 1.87', () => {
-  const old = (keep: 'none' | 'subject' | 'percent' | 'target') => (c: any) => {
-    c.manifest.requires.kernel_api.at_least = '1.86';
-    for (const k of ['summon', 'withdraw']) {
-      const leaf = percentLeaf(c, k);
-      if (keep !== 'subject') delete leaf.subject;
-      if (keep !== 'percent') {
-        delete leaf.at_least_percent;
-        leaf.at_least = 1;
-      }
-      if (keep !== 'target') delete c.reactions[R(k)].on.target;
-    }
-    if (keep !== 'subject') delete c.reactions[R('summon')].when.root.items[1].subject;
-  };
-  const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-  assert.ok(reload(base, old('none')).ok);
-  for (const keep of ['subject', 'percent', 'target'] as const) {
-    const r = reload(base, old(keep));
-    assert.deepEqual(r.ok ? keep : [r.diagnostic.code, r.diagnostic.path], api);
-  }
-});
-
 // Breaks: the subject leaf reads a pool its entity does not hold through the cartridge-wide spec
 // (the warlord has no `mv`: full by default, or NaN with regen, which faults the attack).
 test('a subject without the pool reads false', () => {
