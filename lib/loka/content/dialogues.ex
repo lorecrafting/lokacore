@@ -272,7 +272,7 @@ defmodule Loka.Content.Dialogues do
       receive_item(rel, steps, o, d, ctx) ++
       payment(rel, steps, o, d, ctx) ++
       Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
-      Loka.Content.ChoiceChecks.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.CheckKinds.choice(rel, steps, o, d, ctx) ++
       Loka.Content.Hub.choice(rel, steps, o, d, ctx.proven)
   end
 

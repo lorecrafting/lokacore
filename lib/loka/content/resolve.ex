@@ -1,5 +1,5 @@
 # size: allow 450, ancestry, careful skill refs, Study ingress, spell learned join source checking
-defmodule Loka.Content.Checks do
+defmodule Loka.Content.Resolve do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]

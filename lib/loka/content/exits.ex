@@ -3,7 +3,7 @@ defmodule Loka.Content.Exits do
   import Loka.Content.Source, only: [ref: 3]
   import Loka.Content.Refs, only: [reference: 6]
 
-  @doc "Expands each exit's short references to local DefinitionRefs; `expand` is Checks.expand/2, passed in to keep xref acyclic."
+  @doc "Expands each exit's short references to local DefinitionRefs; `expand` is Resolve.expand/2, passed in to keep xref acyclic."
   @spec expand(map(), map(), (term(), map() -> term())) :: map()
   def expand(exits, m, expand),
     do: Map.new(exits, fn {d, e} -> {d, Map.new(e, &field(&1, m, expand))} end)

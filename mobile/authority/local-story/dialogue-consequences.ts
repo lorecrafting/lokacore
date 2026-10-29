@@ -76,7 +76,8 @@ function assignmentOf(s: Story, step: NonNullable<DialogueChoice['sequence']>[nu
     const fact = s.world.cartridge.topics?.[refString(step.topic)]?.fact;
     return fact && { fact, value: true };
   }
-  return step;
+  // steps.ex: the choice context's ops; any other gives no evidence.
+  return step.op === 'fact.assign' ? step : undefined;
 }
 
 function changedEvidence(

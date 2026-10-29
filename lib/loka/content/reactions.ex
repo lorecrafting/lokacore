@@ -4,7 +4,7 @@ defmodule Loka.Content.Reactions do
   each rule's owner (reaction@1), its trigger event's owner and each fact.assign's
   (fact@1, by its fact_changed) is required; each trigger filter names a definition of this cartridge
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every
-  other (`conditions/1`, `Loka.Content.Checks`).
+  other (`conditions/1`, `Loka.Content.Resolve`).
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6, resolve: 4]

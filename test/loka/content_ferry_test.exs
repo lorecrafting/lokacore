@@ -40,7 +40,7 @@ defmodule Loka.ContentFerryTest do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
-  # Breaks: a schedule's short room left short (Checks.expand; the loader would reject it).
+  # Breaks: a schedule's short room left short (Resolve.expand; the loader would reject it).
   test "full schedule rooms compile to the same artifact", %{dir: dir} do
     full = %{"6" => ref("ferry_landing"), "19" => ref("village_green")}
     assert compile(dir, schedule(full)) == {:ok, @expected, []}
@@ -54,7 +54,7 @@ defmodule Loka.ContentFerryTest do
 
   @bram "actions/coil_rope.outcomes.success.narration.participants.bram"
 
-  # Breaks: a participant's short npc left short (Checks.expand; the loader would reject it).
+  # Breaks: a participant's short npc left short (Resolve.expand; the loader would reject it).
   test "a full participant reference compiles to the same artifact", %{dir: dir} do
     full = %{"role" => "npc", "npc" => Map.put(ref("bram"), "kind", "npc")}
     assert compile(dir, bram(full)) == {:ok, @expected, []}
@@ -172,7 +172,7 @@ defmodule Loka.ContentFerryTest do
     assert {:ok, _, []} = compile(dir, files)
   end
 
-  # Breaks: a dialogue's short speaker, quest, role or fact left short (Checks.expand; the loader
+  # Breaks: a dialogue's short speaker, quest, role or fact left short (Resolve.expand; the loader
   # would reject the artifact).
   test "a full-reference dialogue compiles to the same artifact", %{dir: dir} do
     full = fn kind, key -> Map.merge(ref(key), %{"kind" => kind}) end

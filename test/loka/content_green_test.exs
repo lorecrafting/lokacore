@@ -40,7 +40,7 @@ defmodule Loka.ContentGreenTest do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
-  # Breaks: a trigger's short fact or room left short (Checks.expand; the loader would reject it).
+  # Breaks: a trigger's short fact or room left short (Resolve.expand; the loader would reject it).
   test "full trigger references compile to the same artifact", %{dir: dir} do
     files =
       Map.merge(

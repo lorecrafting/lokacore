@@ -4,7 +4,7 @@ defmodule Loka.Content.Identity do
   catalog keys; description_variant@1 owns each name variant, whose condition names declared
   definitions through ops the cartridge's capabilities own. Called from Variety. The name
   variants' condition roots also get
-  Delayed's time_since checks and the target-subject FACT_SCOPE_UNSUPPORTED walk (Checks.trees/1
+  Delayed's time_since checks and the target-subject FACT_SCOPE_UNSUPPORTED walk (Resolve.trees/1
   holds definition roots only).
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]
@@ -51,7 +51,7 @@ defmodule Loka.Content.Identity do
         do: d
       )
 
-  # Checks.trees/1 reads definitions only; these roots get its tree checks here.
+  # Resolve.trees/1 reads definitions only; these roots get its tree checks here.
   defp trees(variants),
     do: for({v, p} <- variants, do: {"cartridge.json", p ++ ["when"], v["when"]})
 

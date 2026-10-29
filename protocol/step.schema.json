@@ -1,0 +1,1061 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Step and check contracts",
+  "description": "One step vocabulary and one check vocabulary (C3 D2, loka-ivjq.4): a reaction's apply, a scripted action outcome's sequence and a dialogue choice's sequence list Steps; a scripted action's and a dialogue choice's check is a Check. Each context runs a declared subset, enforced by the compiler (lib/loka/content/steps.ex, lib/loka/content/check_kinds.ex).",
+  "$defs": {
+    "Step": {
+      "description": "One registered operation of a step list, discriminated by op. Scripted action outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost).",
+      "examples": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "recipe_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "chapel_bell_rung"
+          },
+          "value": true
+        },
+        {
+          "op": "event.emit",
+          "event": "bell_rung"
+        },
+        {
+          "op": "resource.adjust",
+          "resource": {
+            "cartridge_id": "check_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "by": -3
+        }
+      ],
+      "oneOf": [
+        {
+          "description": "Assign a fact.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fact.assign"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "with": {
+              "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "value": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            }
+          },
+          "required": [
+            "op",
+            "fact",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fact.adjust"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "with": {
+              "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "op",
+            "fact",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest.activate"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "quest"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest.resolve"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "op",
+            "quest",
+            "outcome"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest.fail"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "op",
+            "quest",
+            "outcome"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Suppress one authored population plan for duration logical seconds from this accepted fact-change cause, preserving current members and closing its current encounter.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "population.suppress"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "plan",
+            "duration"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Reaction: Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing. Scripted action: Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status.apply"
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef",
+              "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION)."
+            },
+            "co_present": {
+              "enum": [
+                true
+              ],
+              "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION)."
+            },
+            "tag": {
+              "$ref": "entity.schema.json#/$defs/Tag",
+              "description": "Toolbox row W22 (only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing."
+            }
+          },
+          "required": [
+            "op",
+            "status"
+          ],
+          "dependentRequired": {
+            "tag": [
+              "co_present"
+            ]
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "barrier.set"
+            },
+            "to": {
+              "$ref": "room.schema.json#/$defs/BarrierState"
+            },
+            "barrier": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "tag": {
+              "$ref": "entity.schema.json#/$defs/Tag"
+            }
+          },
+          "exactlyOneRequired": [
+            "barrier",
+            "tag"
+          ],
+          "required": [
+            "op",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Reaction: Toolbox row G3 reader 3: end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins. Scripted action: Toolbox row G4: end the scripted action target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status.cure"
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Add amount experience to the acting character's levelling row (toolbox row 4), saturating at the ResourceInt maximum; needs world.levelling.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "experience.grant"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "item.move"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "room"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1: plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "npc.move"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 37a (phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "population.spawn"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "plan"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Homestead hs-1: one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "replenish.run"
+            },
+            "key": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Settle S3-1: appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "narrate"
+            },
+            "text": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "op",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fact.stamp"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "fact"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Emit a custom event.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "event.emit"
+            },
+            "event": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "op",
+            "event"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 29b (spell scripted actions only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "damage"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "kind": {
+              "$ref": "entity.schema.json#/$defs/DamageKind"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "kind",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "light.ignite"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Adjust a resource of the actor's body by `by`, stopping at its bounds.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "resource.adjust"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "by": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            }
+          },
+          "required": [
+            "op",
+            "resource",
+            "by"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Scripted action: Built rooms S6 (detail-target scripted actions only, at most one per sequence, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full). Service benefit: Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "build"
+            },
+            "structure": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "escrow": {
+              "type": "object",
+              "description": "Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room.",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 16,
+                  "items": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16
+                },
+                "custody": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "ready_after": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31536000
+                }
+              },
+              "required": [
+                "items",
+                "quantity",
+                "custody",
+                "ready_after"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "op",
+            "structure",
+            "direction"
+          ],
+          "additionalProperties": false,
+          "dependentRequired": {
+            "fact": [
+              "escrow"
+            ],
+            "escrow": [
+              "fact"
+            ]
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "skill.acquire"
+            },
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "skill"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "topic.grant"
+            },
+            "topic": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "topic"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "entitlement"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "escrow": {
+              "type": "object",
+              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 16,
+                  "items": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16
+                },
+                "custody": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "ready_after": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31536000
+                },
+                "output": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "items",
+                "quantity",
+                "custody"
+              ],
+              "additionalProperties": false,
+              "dependentRequired": {
+                "ready_after": [
+                  "output"
+                ]
+              }
+            }
+          },
+          "required": [
+            "op",
+            "fact"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "meal"
+            },
+            "stock": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "debit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "recovery": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "stock",
+            "debit",
+            "recovery",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "drink"
+            },
+            "vessel": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "liquid": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "recovery": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "vessel",
+            "liquid",
+            "recovery",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "repair"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "fact",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "claim"
+            },
+            "service": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "service"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "cancel"
+            },
+            "service": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "service"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "deposit"
+            },
+            "account": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "vault": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "op",
+            "account",
+            "vault",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "withdraw"
+            },
+            "account": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "vault": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "op",
+            "account",
+            "vault",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "mend"
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "escrow": {
+              "type": "object",
+              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 16,
+                  "items": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16
+                },
+                "custody": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "items",
+                "quantity",
+                "custody"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "op",
+            "site",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "raze"
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "site",
+            "direction"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Check": {
+      "description": "A check (check@1), discriminated by kind.",
+      "examples": [
+        {
+          "key": "pry_lid",
+          "kind": "luck",
+          "chance": 50
+        },
+        {
+          "key": "k",
+          "kind": "luck",
+          "chance": 1
+        },
+        {
+          "key": "k",
+          "kind": "luck",
+          "chance": 99
+        },
+        {
+          "key": "persuade_guard",
+          "kind": "opposed",
+          "attribute": {
+            "cartridge_id": "persuade_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "attribute",
+            "key": "cha"
+          },
+          "rating": 5,
+          "failure": "narration.guard.persuade_failed"
+        }
+      ],
+      "oneOf": [
+        {
+          "description": "A ScriptedAction's Check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two scripted actions' checks may not share one (DUPLICATE_DEFINITION). ScriptedAction.check is this luck shape or a threshold (R5 S6b; see ScriptedAction). Modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "kind": {
+              "const": "luck"
+            },
+            "chance": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "chance"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of a luck check apply.",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "kind": {
+              "const": "threshold"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "difficulty": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "resource",
+            "difficulty"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "kind": {
+              "const": "attribute_threshold"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "difficulty": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "attribute",
+            "difficulty"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "kind": {
+              "const": "opposed"
+            },
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "rating": {
+              "type": "integer"
+            },
+            "failure": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "key",
+            "kind"
+          ],
+          "exactlyOneRequired": [
+            "skill",
+            "attribute"
+          ],
+          "dependentRequired": {
+            "npc": [
+              "attribute"
+            ]
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "kind": {
+              "const": "track"
+            },
+            "plan": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "plan"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

@@ -7,7 +7,7 @@ import type {
   DeltaOp,
   EventPayload,
   EntityId,
-  ActionStep,
+  Step,
   RngState,
   TextKey,
 } from '../../contracts.gen.ts';
@@ -50,7 +50,7 @@ export type Effected = {
   readonly lines: readonly { key: TextKey }[];
   readonly rng: RngState;
 };
-type Effect = Extract<ActionStep, { op: 'status.apply' | 'damage' | 'light.ignite' }>;
+type Effect = Extract<Step, { op: 'status.apply' | 'damage' | 'light.ignite' }>;
 type Cast = Parameters<Rule<'scripted_action'>>[1];
 type Applied = Extract<EventPayload, { type: 'status_applied' }>;
 

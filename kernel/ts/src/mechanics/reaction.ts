@@ -316,14 +316,13 @@ type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 
 function assignment(
   world: World,
   actor: CharacterId,
-  step: Extract<
-    ReactionRule['apply'][number],
-    { op: 'fact.assign' | 'fact.adjust' | 'fact.stamp' }
-  >,
+  step: ReactionRule['apply'][number],
   group: number,
   { set, holders }: { set: Record<string, FactValue>; holders: Map<string, number> },
   cause: DomainEvent,
 ) {
+  if (step.op !== 'fact.assign' && step.op !== 'fact.adjust' && step.op !== 'fact.stamp')
+    throw new KernelError('precondition_failed'); // outside steps.ex's reaction context
   const named = step.npc ?? step.item;
   const who = (named ? world.entityIds[refString(named)] : subject(cause)) || undefined;
   const thing = who !== undefined && (world.entities[who] || world.details[who]);

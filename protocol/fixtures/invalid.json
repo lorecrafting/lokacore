@@ -778,7 +778,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "resource.adjust"
     },
@@ -794,7 +794,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "resource.adjust",
       "resource": {
@@ -9984,7 +9984,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "fact.assign"
     },
@@ -10000,7 +10000,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "event.emit",
       "x": 1
@@ -10017,7 +10017,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "fact.assign",
       "fact": {
@@ -10037,7 +10037,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "component.set"
     },
@@ -10610,17 +10610,9 @@
     ]
   },
   {
-    "contract": "ActionCheck",
+    "contract": "Check",
     "value": {},
     "errors": [
-      {
-        "path": "/chance",
-        "code": "missing_property"
-      },
-      {
-        "path": "/key",
-        "code": "missing_property"
-      },
       {
         "path": "/kind",
         "code": "missing_property"
@@ -10628,7 +10620,7 @@
     ]
   },
   {
-    "contract": "ActionCheck",
+    "contract": "Check",
     "value": {
       "key": "k",
       "kind": "luck",
@@ -10642,7 +10634,7 @@
     ]
   },
   {
-    "contract": "ActionCheck",
+    "contract": "Check",
     "value": {
       "key": "k",
       "kind": "luck",
@@ -10656,7 +10648,7 @@
     ]
   },
   {
-    "contract": "ActionCheck",
+    "contract": "Check",
     "value": {
       "key": "k",
       "kind": "luck",
@@ -10670,7 +10662,7 @@
     ]
   },
   {
-    "contract": "ActionCheck",
+    "contract": "Check",
     "value": {
       "key": "k",
       "kind": "skill",
@@ -10679,12 +10671,12 @@
     "errors": [
       {
         "path": "/kind",
-        "code": "const_mismatch"
+        "code": "unknown_variant"
       }
     ]
   },
   {
-    "contract": "ActionCheck",
+    "contract": "Check",
     "value": {
       "key": "K",
       "kind": "luck",
@@ -12976,8 +12968,20 @@
         "code": "missing_property"
       },
       {
-        "path": "/apply/1/op",
-        "code": "unknown_variant"
+        "path": "/apply/1/event",
+        "code": "missing_property"
+      },
+      {
+        "path": "/apply/1/fact",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/apply/1/value",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/apply/1/x",
+        "code": "unknown_property"
       }
     ]
   },
@@ -13349,8 +13353,16 @@
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/0/op",
-        "code": "unknown_variant"
+        "path": "/choices/d/sequence/0/event",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/d/sequence/0/fact",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/choices/d/sequence/0/value",
+        "code": "unknown_property"
       },
       {
         "path": "/choices/d/sequence/1/fact",
@@ -19302,7 +19314,7 @@
   },
   {
     "name": "build_step_without_direction",
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "build",
       "structure": {
@@ -19321,7 +19333,7 @@
   },
   {
     "name": "build_step_direction_not_a_direction",
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "build",
       "structure": {
@@ -19341,7 +19353,7 @@
   },
   {
     "name": "build_step_without_structure",
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "build",
       "direction": "north"
@@ -19354,8 +19366,8 @@
     ]
   },
   {
-    "name": "build_step_with_unknown_property",
-    "contract": "ActionStep",
+    "name": "build_step_site_not_a_ref",
+    "contract": "Step",
     "value": {
       "op": "build",
       "structure": {
@@ -19370,7 +19382,7 @@
     "errors": [
       {
         "path": "/site",
-        "code": "unknown_property"
+        "code": "invalid_type"
       }
     ]
   },
@@ -22214,18 +22226,6 @@
     },
     "errors": [
       {
-        "path": "/check",
-        "code": "exclusive_properties"
-      },
-      {
-        "path": "/check/failure",
-        "code": "missing_property"
-      },
-      {
-        "path": "/check/key",
-        "code": "missing_property"
-      },
-      {
         "path": "/check/kind",
         "code": "missing_property"
       }
@@ -22259,16 +22259,24 @@
     },
     "errors": [
       {
-        "path": "/check",
-        "code": "exclusive_properties"
+        "path": "/check/attribute",
+        "code": "unknown_property"
       },
       {
-        "path": "/check/kind",
-        "code": "const_mismatch"
+        "path": "/check/chance",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/failure",
+        "code": "unknown_property"
       },
       {
         "path": "/check/rating",
-        "code": "invalid_type"
+        "code": "unknown_property"
+      },
+      {
+        "path": "/check/skill",
+        "code": "unknown_property"
       },
       {
         "path": "/check/x",
@@ -22977,7 +22985,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "status.cure"
     },
@@ -22989,7 +22997,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "status.cure",
       "status": {
@@ -23013,7 +23021,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "status.apply"
     },
@@ -23025,26 +23033,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
-    "value": {
-      "op": "status.apply",
-      "status": {
-        "cartridge_id": "spell_effects_sampler",
-        "cartridge_version": "0.0.1",
-        "kind": "status",
-        "key": "warded"
-      },
-      "co_present": true
-    },
-    "errors": [
-      {
-        "path": "/co_present",
-        "code": "unknown_property"
-      }
-    ]
-  },
-  {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "damage",
       "npc": {
@@ -23063,7 +23052,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "damage",
       "npc": {
@@ -23082,7 +23071,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "damage",
       "npc": {
@@ -23102,7 +23091,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "damage",
       "npc": {
@@ -23122,7 +23111,7 @@
     ]
   },
   {
-    "contract": "ActionStep",
+    "contract": "Step",
     "value": {
       "op": "damage",
       "npc": {

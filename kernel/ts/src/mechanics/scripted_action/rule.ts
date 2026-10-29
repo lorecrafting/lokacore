@@ -40,8 +40,9 @@ import type {
   FactValue,
   NarrationParticipant,
   ActionNarration,
-  ActionStep,
+  Step,
 } from '../../contracts.gen.ts';
+import { KernelError } from '../../foundation/error.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
 import {
   accepted,
@@ -174,7 +175,7 @@ const DRAWS = 8;
 // The check's result, its event at position 1 and the RNG after it: luck draws one uniform
 // integer in [0, 100) and passes below chance; threshold draws nothing and passes when the
 // body's value of the resource at admission (before costs) is at least difficulty
-// (action.schema.json ActionCheck); opposed draws nothing and passes when the actor's skill level
+// (step.schema.json Check); opposed draws nothing and passes when the actor's skill level
 // or attribute is at least its rating (mechanics.md rows 5, G5 and G3).
 function resolve(
   world: World,
@@ -237,7 +238,7 @@ const made = (world: World, command: Command, mint: Mint, run: Run, moves: reado
 // One step of the sequence over the run so far.
 const step =
   (world: World, command: Command, mint: Mint, subject_id: EntityId, body: EntityId) =>
-  (r: Run, s: ActionStep): Run => {
+  (r: Run, s: Step): Run => {
     if (s.op === 'build') {
       const site = scriptedOf(world, command.payload)!.target; // a detail (the compiler's build check)
       if (site.kind !== 'detail') return r;
@@ -270,5 +271,8 @@ const step =
     }
     if (s.op === 'fact.assign')
       return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
+    // The compiler's scripted action context (steps.ex) admits no other op.
+    if (s.op !== 'status.apply' && s.op !== 'damage' && s.op !== 'light.ignite')
+      throw new KernelError('precondition_failed');
     return effect(world, command, mint, body, r, s, subject_id);
   };

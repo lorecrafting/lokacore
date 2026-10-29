@@ -2,11 +2,11 @@ defmodule Loka.Content.ScriptedActions do
   @moduledoc """
   Scripted actions and rooms' action contributions (action.schema.json ScriptedAction,
   ActionContribution; 06 §19-§20; 05 §28). A scripted action's policy tree is checked with every other
-  (`Loka.Content.Checks`); this module checks the rest, given a valid manifest.
+  (`Loka.Content.Resolve`); this module checks the rest, given a valid manifest.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
-  alias Loka.Content.ActionTips
+  alias Loka.Content.{ActionTips, CheckKinds}
 
   # A step uses its op through the event it produces, a check through check@1's events.
   @step_event %{"fact.assign" => "fact_changed", "event.emit" => "custom_event"}
@@ -46,7 +46,7 @@ defmodule Loka.Content.ScriptedActions do
       text: text,
       registry: registry,
       actions: actions,
-      shared: shared_checks(defs)
+      shared: CheckKinds.shared_checks(defs)
     }
 
     Enum.flat_map(all(defs), &scripted(&1, ctx)) ++
@@ -88,71 +88,11 @@ defmodule Loka.Content.ScriptedActions do
       else: []
   end
 
-  # An inline check's key is its check definition's key: no two checks (a scripted action's or a dialogue
-  # choice's, row 14) may share one.
-  @doc "The check keys (each scripted action's and each dialogue choice's, row 14) more than one check has."
-  def shared_checks(defs) do
-    choices =
-      for {_, {_, [], d}} <- defs["dialogue"] || %{},
-          {_, %{"check" => %{"key" => k}}} <- d["choices"],
-          do: k
-
-    checks = for({_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"]) ++ choices
-    for {k, n} <- Enum.frequencies(checks), n > 1, into: MapSet.new(), do: k
-  end
-
   defp shared(rel, %{"check" => %{"key" => k}}, shared) do
     if k in shared, do: [diag("DUPLICATE_DEFINITION", at(rel, ["check"]))], else: []
   end
 
   defp shared(_, _, _), do: []
-
-  # Toolbox row G3: an opposed check naming an NPC needs no rating; the NPC is an instance of this
-  # cartridge that declares the check's attribute.
-  defp opposed(rel, %{"check" => %{"npc" => _} = c}, m, defs),
-    do: reference(rel, ["check"], "attribute", c, m, defs) ++ rater(rel, ["check"], c, m, defs)
-
-  # Toolbox rows 5 and G5: an opposed check names a skill or attribute of this cartridge and its
-  # target detail declares a rating.
-  defp opposed(rel, %{"check" => c, "target" => t}, m, defs) do
-    side = if is_map_key(c, "skill"), do: "skill", else: "attribute"
-
-    reference(rel, ["check"], side, c, m, defs) ++
-      if rated?(t, m, defs),
-        do: [],
-        else: [diag("SCHEMA_VIOLATION", at(rel, ["check"]), %{"error" => "invalid_value"})]
-  end
-
-  @doc "Row G3: an opposed check's npc (at `steps`) is an NPC instance declaring its attribute."
-  def rater(rel, steps, %{"npc" => n} = c, m, defs) do
-    case resolve(n, "npc", m, defs) do
-      {_, _, npc} ->
-        if npc["spawn_template"] ||
-             !Enum.any?(npc["attributes"] || [], &(&1["attribute"] == c["attribute"])),
-           do: [
-             diag("SCHEMA_VIOLATION", at(rel, steps ++ ["npc"]), %{"error" => "invalid_value"})
-           ],
-           else: []
-
-      _ ->
-        reference(rel, steps, "npc", c, m, defs)
-    end
-  end
-
-  # An unresolved room or detail is the target's own diagnostic; a use or spell target
-  # (rows G4, 29a) has no detail and so no rating.
-  defp rated?(%{"kind" => kind}, _, _) when kind in ~w(use spell), do: false
-
-  defp rated?(t, m, defs) do
-    case resolve(t["room"], "room", m, defs) do
-      {_, _, room} ->
-        detail = (room["details"] || %{})[t["detail"]]
-        detail == nil or is_map_key(detail, "rating")
-
-      _ ->
-        true
-    end
-  end
 
   defp mismatch(rel, r) do
     if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),
@@ -186,7 +126,8 @@ defmodule Loka.Content.ScriptedActions do
   defp refs(rel, r, %{m: m, defs: defs}) do
     target(rel, r["target"], m, defs) ++
       named_steps(rel, r, m, defs) ++
-      attributes(rel, r, m, defs) ++ resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
+      CheckKinds.attributes(rel, r, m, defs) ++
+      resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
   end
 
   # Each step's fact, and (rows G4, 29b) status, npc and item, names one of this cartridge.
@@ -206,14 +147,6 @@ defmodule Loka.Content.ScriptedActions do
         d <- reference(rel, ["outcomes", name, "narration", "participants", n], k, p, m, defs),
         do: d
   end
-
-  defp attributes(rel, %{"check" => %{"kind" => "attribute_threshold"} = c}, m, defs),
-    do: reference(rel, ["check"], "attribute", c, m, defs)
-
-  defp attributes(rel, %{"check" => %{"kind" => "opposed"}} = r, m, defs),
-    do: opposed(rel, r, m, defs)
-
-  defp attributes(_, _, _, _), do: []
 
   defp resources(rel, r, m, defs),
     do: for({n, steps} <- resourced(r), d <- reference(rel, steps, "resource", n, m, defs), do: d)
