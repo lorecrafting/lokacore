@@ -5,7 +5,7 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #480/#484; written 2026-10-28 by Claude Code (Opus 5.5), PM
+AS OF main after #489; written 2026-10-28 by Claude Code (Opus 5.5), PM
 session 5e160e83. Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of
 weekly limit ... this will be my last week before a break so yeah make it right!" Owner is away from Storybook
 until all work is done; the picks Monitor is off. Storybook serves polish/session-2026-10-23 on 6006 (updated
@@ -13,29 +13,30 @@ from main today, before #481).
 
 ## Now
 
-Merged 2026-10-28: #481 (loka-x6t.127), #482 (loka-ivjq.16 E1 harness), #483 (loka-ivjq.25/.27 regen and
-gates), #484 (loka-ivjq.18/.19/.21 role files, guard rules, stage labels dropped), #480 (Authoring batch A:
-loka-kgd.194.12/.13/.14/.16/.18/.22/.17/.9). In flight; each verdict lands as a PR comment, read those first:
+Merged 2026-10-28: #485 (P), #486/#487 (T), #488 (Docs), #489 (S: CI path filters, verified on hosted CI:
+docs-only pushes run only changes+lint). Pushes to main run no CI (nightly only); prove CI changes on a
+scratch branch. In flight; read the agent result or PR comment first:
 
-- Merged this session: #486, #487 (batch T; loka-ivjq.24/.15/.14), #485 (batch P; loka-ivjq.26/.22/.13).
-  Follow-ups filed: loka-83pq (compose_knowledge test gap), loka-qik8 (check_as_never nits).
-  `gh` token lacks `workflow` scope: a PR touching .github/workflows merges only after `bin/sync_pr.sh`
-  (worked for #485); if refused, the owner runs `gh auth refresh -s workflow`.
-- #488 batch Docs (`housekeeping/batch-docs`; closes loka-ivjq.1/.17/.23/.10; F9 .9 stays open): designer
-  APPROVE WITH NOTES; batch review CHANGES REQUIRED (F1 cut live liquids/fuel/food/population rules from
-  cartridge.md); fix round 1 with a fresh developer. Then scoped re-check, merge.
-- Batch C1 (S7 loka-ivjq.20, F2 loka-ivjq.2): plan in loka-ivjq.20 notes ("C1 PLAN", PM amendments on
-  top). `simplify/c1-loader` at 6bf74b13 (green): prep, D1, B1, F2-Ex, F2-docs, D2, B2 merged (loader_floors test and fixture
-  deleted). In flight: B2 fix round 1 (`simplify/c1-b2`; restored "loader-only" checks all have twins,
-  delete them; merges c1-loader), D2 building, F2-docs (`simplify/c1-f2-docs`, carries #488 from main) in
-  review. Each slice merges latest c1-loader before handback (parallel slices clash in shared tests; CI is
-  the full-suite bar, bash_guard refuses local full suites). Next: wave 3 C1, C2 (after B2 merges), then F
-  (stale comments listed in slice handbacks: loader_floors cites in kernel/ts/test, lessons/pm.md,
-  content_*_test.exs comments, cartridge.md, mechanics.md), then Fable final-head review and the PR.
-  Starred decisions D1 D2 D4 D5 D6 are PM defaults inside the owner's yes; owner ratifies on return.
-- Batch S merged (#489, loka-n0ng): CI path filters (docs-only pushes skip sim/walk), prepush runs only
-  checks for changed file types, reviewer fixes small no-logic should-fixes in place, CI is the full-suite
-  bar. B5 (loka-ivjq.28) moves ahead of batch C2.
+- Batch C1 (S7 loka-ivjq.20, F2 loka-ivjq.2): draft PR #490 (`simplify/c1-loader`, d5136682, green; every
+  check-family slice merged: prep B1 B2 C1 C2 D1 D2 F2-Ex F2-docs, records docs/reviews/2026-10-28-c1-*).
+  Slice F (`simplify/c1-f`, cleanup) review CHANGES REQUIRED (docs only: "both kernels" claims for
+  compiler-only refusals); fresh developer fixing. Next: scoped re-check by a reviewer, merge F into
+  c1-loader (`git merge --no-ff`; regenerate generated conflicts; delegate any test/source conflict to a
+  developer), CI green, mark #490 ready, Fable final-head review (whole batch), then
+  `bin/merge_pr.sh 490 loka-ivjq.20,loka-ivjq.2`. Intended artifact change: gate_sampler `knock` recipe
+  renamed `knock_door`. Starred decisions D1 D2 D4 D5 D6 (C1 PLAN) await owner ratification.
+- B5 (loka-ivjq.28) PR #491 (`housekeeping/b5-beads-sync`, fc2e1a95, green): adversarial review running
+  (row loss with real br in throwaway clones). On approve: merge; closes loka-ivjq.28, loka-9ch9, loka-kovp.
+  Until merged, old recovery: on after_merge "Sync conflict" run `br sync --merge`, rerun after_merge.
+- Batch C2 (F3 F5 F6 F7 F8 F11 F12): plan "C2 PLAN" in loka-ivjq.3 notes (Fable; 10 slices, 3 waves, the
+  two whole-corpus rewrites last and alone). Starts after #490 merges; starred D2 D5 D8 await ratification.
+- Then C3 (F4 one step/check vocabulary + engine rename, L; needs a Fable plan), then polish (Next 3).
+- Follow-ups filed today: loka-83pq, loka-qik8, loka-82h3, loka-kl1u.
+- C1 lessons, applied in every brief: parallel slices clash in shared tests, so each slice merges the
+  latest integration branch before handback; bash_guard refuses local full suites, CI kernel/elixir jobs
+  are the full red-test list and must be green before review; handback carries its own check table;
+  load gate refuses spawns above load 8 (wait with a sysctl vm.loadavg until-loop).
+- Draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
 
