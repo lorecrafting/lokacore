@@ -27,6 +27,87 @@
       ],
       "type": "object"
     },
+    "ActionCost": {
+      "additionalProperties": false,
+      "description": "One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
+      "properties": {
+        "amount": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "resource": { "$ref": "#/$defs/DefinitionRef" }
+      },
+      "required": [
+        "resource",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "ActionCraft": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "required": [
+                "consume"
+              ]
+            },
+            {
+              "required": [
+                "yield"
+              ]
+            }
+          ]
+        }
+      ],
+      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "properties": {
+        "consume": {
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
+            },
+            "quantity": {
+              "maximum": 16,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "reason": { "$ref": "#/$defs/TextKey" },
+            "to": { "$ref": "#/$defs/ItemLocation" }
+          },
+          "required": [
+            "items",
+            "quantity",
+            "to"
+          ],
+          "type": "object"
+        },
+        "yield": {
+          "additionalProperties": false,
+          "properties": {
+            "from": { "$ref": "#/$defs/ItemLocation" },
+            "items": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "items",
+            "from"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
     "ActionInputParameter": {
       "description": "An input parameter an action requires (06 §20), one of the ActionInput fields.",
       "enum": [
@@ -54,6 +135,154 @@
         "attempt_id",
         "cursor"
       ]
+    },
+    "ActionNarration": {
+      "additionalProperties": false,
+      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
+      "properties": {
+        "actor": { "$ref": "#/$defs/TextKey" },
+        "observers": { "$ref": "#/$defs/TextKey" },
+        "participants": {
+          "additionalProperties": { "$ref": "#/$defs/NarrationParticipant" },
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+          "type": "object"
+        }
+      },
+      "required": [
+        "actor"
+      ],
+      "type": "object"
+    },
+    "ActionStep": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "description": "Assign a fact.",
+          "properties": {
+            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "op": { "const": "fact.assign" },
+            "value": { "$ref": "#/$defs/FactValue" }
+          },
+          "required": [
+            "op",
+            "fact",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Emit a custom event.",
+          "properties": {
+            "event": { "$ref": "#/$defs/Key" },
+            "op": { "const": "event.emit" }
+          },
+          "required": [
+            "op",
+            "event"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row G4: end the scripted action target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
+          "properties": {
+            "op": { "const": "status.cure" },
+            "status": { "$ref": "#/$defs/DefinitionRef" }
+          },
+          "required": [
+            "op",
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "properties": {
+            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "op": { "const": "status.apply" },
+            "status": { "$ref": "#/$defs/DefinitionRef" }
+          },
+          "required": [
+            "op",
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29b (spell scripted actions only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": { "$ref": "#/$defs/DamageKind" },
+            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "op": { "const": "damage" }
+          },
+          "required": [
+            "op",
+            "kind",
+            "amount"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "properties": {
+            "item": { "$ref": "#/$defs/DefinitionRef" },
+            "op": { "const": "light.ignite" }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Adjust a resource of the actor's body by `by`, stopping at its bounds.",
+          "properties": {
+            "by": { "$ref": "#/$defs/ResourceInt" },
+            "op": { "const": "resource.adjust" },
+            "resource": { "$ref": "#/$defs/DefinitionRef" }
+          },
+          "required": [
+            "op",
+            "resource",
+            "by"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Built rooms S6 (detail-target scripted actions only, at most one per sequence, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "properties": {
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "op": { "const": "build" },
+            "structure": { "$ref": "#/$defs/DefinitionRef" }
+          },
+          "required": [
+            "op",
+            "structure",
+            "direction"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "One registered operation of a scripted action outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost)."
     },
     "Alias": {
       "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for a ScriptedAction, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
@@ -2258,301 +2487,6 @@
         "abandoned"
       ]
     },
-    "ActionCost": {
-      "additionalProperties": false,
-      "description": "One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
-      "properties": {
-        "amount": {
-          "maximum": 2147483647,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "resource": { "$ref": "#/$defs/DefinitionRef" }
-      },
-      "required": [
-        "resource",
-        "amount"
-      ],
-      "type": "object"
-    },
-    "ActionCraft": {
-      "additionalProperties": false,
-      "allOf": [
-        {
-          "anyOf": [
-            {
-              "required": [
-                "consume"
-              ]
-            },
-            {
-              "required": [
-                "yield"
-              ]
-            }
-          ]
-        }
-      ],
-      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
-      "properties": {
-        "consume": {
-          "additionalProperties": false,
-          "properties": {
-            "items": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 16,
-              "minItems": 1,
-              "type": "array"
-            },
-            "quantity": {
-              "maximum": 16,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "reason": { "$ref": "#/$defs/TextKey" },
-            "to": { "$ref": "#/$defs/ItemLocation" }
-          },
-          "required": [
-            "items",
-            "quantity",
-            "to"
-          ],
-          "type": "object"
-        },
-        "yield": {
-          "additionalProperties": false,
-          "properties": {
-            "from": { "$ref": "#/$defs/ItemLocation" },
-            "items": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 64,
-              "minItems": 1,
-              "type": "array"
-            }
-          },
-          "required": [
-            "items",
-            "from"
-          ],
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
-    "ActionNarration": {
-      "additionalProperties": false,
-      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
-      "properties": {
-        "actor": { "$ref": "#/$defs/TextKey" },
-        "observers": { "$ref": "#/$defs/TextKey" },
-        "participants": {
-          "additionalProperties": { "$ref": "#/$defs/NarrationParticipant" },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "type": "object"
-        }
-      },
-      "required": [
-        "actor"
-      ],
-      "type": "object"
-    },
-    "ActionStep": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "description": "Assign a fact.",
-          "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
-            "op": { "const": "fact.assign" },
-            "value": { "$ref": "#/$defs/FactValue" }
-          },
-          "required": [
-            "op",
-            "fact",
-            "value"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Emit a custom event.",
-          "properties": {
-            "event": { "$ref": "#/$defs/Key" },
-            "op": { "const": "event.emit" }
-          },
-          "required": [
-            "op",
-            "event"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Toolbox row G4: end the scripted action target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
-          "properties": {
-            "op": { "const": "status.cure" },
-            "status": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "op",
-            "status"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
-          "properties": {
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
-            "op": { "const": "status.apply" },
-            "status": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "op",
-            "status"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Toolbox row 29b (spell scripted actions only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "$ref": "#/$defs/DamageKind" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
-            "op": { "const": "damage" }
-          },
-          "required": [
-            "op",
-            "kind",
-            "amount"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
-          "properties": {
-            "item": { "$ref": "#/$defs/DefinitionRef" },
-            "op": { "const": "light.ignite" }
-          },
-          "required": [
-            "op"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Adjust a resource of the actor's body by `by`, stopping at its bounds.",
-          "properties": {
-            "by": { "$ref": "#/$defs/ResourceInt" },
-            "op": { "const": "resource.adjust" },
-            "resource": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "op",
-            "resource",
-            "by"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Built rooms S6 (detail-target scripted actions only, at most one per sequence, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "op": { "const": "build" },
-            "structure": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "op",
-            "structure",
-            "direction"
-          ],
-          "type": "object"
-        }
-      ],
-      "description": "One registered operation of a scripted action outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost)."
-    },
-    "ScriptedTarget": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "properties": {
-            "detail": { "$ref": "#/$defs/Key" },
-            "kind": { "const": "detail" },
-            "room": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "room",
-            "detail"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "kind": { "const": "use" },
-            "tool": { "$ref": "#/$defs/UseTool" }
-          },
-          "required": [
-            "kind",
-            "tool"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
-          "properties": {
-            "aimed": {
-              "additionalProperties": false,
-              "properties": {
-                "scopes": {
-                  "items": {
-                    "enum": [
-                      "room_occupants",
-                      "room_contents",
-                      "inventory"
-                    ]
-                  },
-                  "minItems": 1,
-                  "type": "array"
-                }
-              },
-              "required": [
-                "scopes"
-              ],
-              "type": "object"
-            },
-            "kind": { "const": "spell" },
-            "learned": { "$ref": "#/$defs/DefinitionRef" },
-            "word": { "$ref": "#/$defs/SpokenKeyword" }
-          },
-          "required": [
-            "kind",
-            "word",
-            "learned"
-          ],
-          "type": "object"
-        }
-      ],
-      "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
-    },
     "ReleaseVersion": {
       "description": "A release version (05 §3 version, §12): MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.",
       "maxLength": 64,
@@ -2704,6 +2638,72 @@
         }
       ],
       "description": "The installed closed scene step subset; no arbitrary writes."
+    },
+    "ScriptedTarget": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "detail": { "$ref": "#/$defs/Key" },
+            "kind": { "const": "detail" },
+            "room": { "$ref": "#/$defs/DefinitionRef" }
+          },
+          "required": [
+            "kind",
+            "room",
+            "detail"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "use" },
+            "tool": { "$ref": "#/$defs/UseTool" }
+          },
+          "required": [
+            "kind",
+            "tool"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
+          "properties": {
+            "aimed": {
+              "additionalProperties": false,
+              "properties": {
+                "scopes": {
+                  "items": {
+                    "enum": [
+                      "room_occupants",
+                      "room_contents",
+                      "inventory"
+                    ]
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "scopes"
+              ],
+              "type": "object"
+            },
+            "kind": { "const": "spell" },
+            "learned": { "$ref": "#/$defs/DefinitionRef" },
+            "word": { "$ref": "#/$defs/SpokenKeyword" }
+          },
+          "required": [
+            "kind",
+            "word",
+            "learned"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
     },
     "ServiceBenefit": {
       "anyOf": [
@@ -3733,6 +3733,59 @@
           "type": "object"
         },
         "water": { "$ref": "#/$defs/WaterSettings" }
+      },
+      "type": "object"
+    },
+    "partial.ActionCraft": {
+      "additionalProperties": false,
+      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "properties": {
+        "consume": {
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
+            },
+            "quantity": {
+              "maximum": 16,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "reason": { "$ref": "#/$defs/partial.TextKey" },
+            "to": { "$ref": "#/$defs/partial.ItemLocation" }
+          },
+          "type": "object"
+        },
+        "yield": {
+          "additionalProperties": false,
+          "properties": {
+            "from": { "$ref": "#/$defs/partial.ItemLocation" },
+            "items": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "partial.ActionNarration": {
+      "additionalProperties": false,
+      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
+      "properties": {
+        "actor": { "$ref": "#/$defs/partial.TextKey" },
+        "observers": { "$ref": "#/$defs/partial.TextKey" },
+        "participants": {
+          "additionalProperties": { "$ref": "#/$defs/partial.NarrationParticipant" },
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+          "type": "object"
+        }
       },
       "type": "object"
     },
@@ -4863,56 +4916,15 @@
       ],
       "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet)."
     },
-    "partial.ActionCraft": {
+    "partial.RestBinding": {
       "additionalProperties": false,
-      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "description": "One exact paid Rest binding: authored bed, first-credit fact and sole quest.",
       "properties": {
-        "consume": {
-          "additionalProperties": false,
-          "properties": {
-            "items": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 16,
-              "minItems": 1,
-              "type": "array"
-            },
-            "quantity": {
-              "maximum": 16,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "reason": { "$ref": "#/$defs/partial.TextKey" },
-            "to": { "$ref": "#/$defs/partial.ItemLocation" }
-          },
-          "type": "object"
-        },
-        "yield": {
-          "additionalProperties": false,
-          "properties": {
-            "from": { "$ref": "#/$defs/partial.ItemLocation" },
-            "items": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 64,
-              "minItems": 1,
-              "type": "array"
-            }
-          },
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
-    "partial.ActionNarration": {
-      "additionalProperties": false,
-      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
-      "properties": {
-        "actor": { "$ref": "#/$defs/partial.TextKey" },
-        "observers": { "$ref": "#/$defs/partial.TextKey" },
-        "participants": {
-          "additionalProperties": { "$ref": "#/$defs/partial.NarrationParticipant" },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "type": "object"
-        }
+        "credit": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "detail": { "$ref": "#/$defs/Key" },
+        "entitlement": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "room": { "$ref": "#/$defs/partial.DefinitionRef" }
       },
       "type": "object"
     },
@@ -4964,18 +4976,6 @@
         }
       ],
       "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
-    },
-    "partial.RestBinding": {
-      "additionalProperties": false,
-      "description": "One exact paid Rest binding: authored bed, first-credit fact and sole quest.",
-      "properties": {
-        "credit": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "detail": { "$ref": "#/$defs/Key" },
-        "entitlement": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "room": { "$ref": "#/$defs/partial.DefinitionRef" }
-      },
-      "type": "object"
     },
     "partial.ServiceBenefit": {
       "anyOf": [
@@ -5378,143 +5378,6 @@
         "policy": { "$ref": "#/$defs/partial.Policy" },
         "priority": { "type": "integer" },
         "target": { "$ref": "#/$defs/partial.TargetSpec" },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
-    "partial.source.ScriptedAction": {
-      "additionalProperties": false,
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (ActionCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
-      "properties": {
-        "aliases": {
-          "items": { "$ref": "#/$defs/Alias" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "check": {
-          "anyOf": [
-            {
-              "additionalProperties": false,
-              "description": "A luck roll (ActionCheck).",
-              "properties": {
-                "chance": {
-                  "maximum": 99,
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "luck" }
-              },
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of ActionCheck apply.",
-              "properties": {
-                "difficulty": { "$ref": "#/$defs/ResourceInt" },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "threshold" },
-                "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
-              },
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "properties": {
-                "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "difficulty": { "type": "integer" },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "attribute_threshold" }
-              },
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
-              "properties": {
-                "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "opposed" },
-                "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
-              },
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
-              "properties": {
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "track" },
-                "plan": { "$ref": "#/$defs/Key" }
-              },
-              "type": "object"
-            }
-          ]
-        },
-        "cooldown": {
-          "minimum": 1,
-          "type": "integer"
-        },
-        "costs": {
-          "items": { "$ref": "#/$defs/ActionCost" },
-          "maxItems": 8,
-          "minItems": 1,
-          "type": "array"
-        },
-        "craft": { "$ref": "#/$defs/partial.ActionCraft" },
-        "duration": {
-          "minimum": 1,
-          "type": "integer"
-        },
-        "extends": { "$ref": "#/$defs/Key" },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "outcomes": {
-          "additionalProperties": false,
-          "properties": {
-            "failure": {
-              "additionalProperties": false,
-              "properties": {
-                "cues": {
-                  "$ref": "#/$defs/Cues",
-                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
-                },
-                "narration": { "$ref": "#/$defs/partial.ActionNarration" },
-                "sequence": {
-                  "items": { "$ref": "#/$defs/ActionStep" },
-                  "maxItems": 16,
-                  "minItems": 0,
-                  "type": "array"
-                }
-              },
-              "type": "object"
-            },
-            "success": {
-              "additionalProperties": false,
-              "properties": {
-                "cues": {
-                  "$ref": "#/$defs/Cues",
-                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
-                },
-                "narration": { "$ref": "#/$defs/partial.ActionNarration" },
-                "sequence": {
-                  "items": { "$ref": "#/$defs/ActionStep" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                }
-              },
-              "type": "object"
-            }
-          },
-          "type": "object"
-        },
-        "policy": { "$ref": "#/$defs/partial.Policy" },
-        "priority": { "type": "integer" },
-        "reason": { "$ref": "#/$defs/partial.TextKey" },
-        "target": { "$ref": "#/$defs/partial.ScriptedTarget" },
-        "tip": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -7208,6 +7071,143 @@
       ],
       "description": "Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream."
     },
+    "partial.source.ScriptedAction": {
+      "additionalProperties": false,
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (ActionCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
+      "properties": {
+        "aliases": {
+          "items": { "$ref": "#/$defs/Alias" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "check": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "description": "A luck roll (ActionCheck).",
+              "properties": {
+                "chance": {
+                  "maximum": 99,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "luck" }
+              },
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of ActionCheck apply.",
+              "properties": {
+                "difficulty": { "$ref": "#/$defs/ResourceInt" },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "threshold" },
+                "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
+              },
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "difficulty": { "type": "integer" },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "attribute_threshold" }
+              },
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
+              "properties": {
+                "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "opposed" },
+                "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+              },
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
+              "properties": {
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "track" },
+                "plan": { "$ref": "#/$defs/Key" }
+              },
+              "type": "object"
+            }
+          ]
+        },
+        "cooldown": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "costs": {
+          "items": { "$ref": "#/$defs/ActionCost" },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "craft": { "$ref": "#/$defs/partial.ActionCraft" },
+        "duration": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "extends": { "$ref": "#/$defs/Key" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
+        "outcomes": {
+          "additionalProperties": false,
+          "properties": {
+            "failure": {
+              "additionalProperties": false,
+              "properties": {
+                "cues": {
+                  "$ref": "#/$defs/Cues",
+                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
+                },
+                "narration": { "$ref": "#/$defs/partial.ActionNarration" },
+                "sequence": {
+                  "items": { "$ref": "#/$defs/ActionStep" },
+                  "maxItems": 16,
+                  "minItems": 0,
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "success": {
+              "additionalProperties": false,
+              "properties": {
+                "cues": {
+                  "$ref": "#/$defs/Cues",
+                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
+                },
+                "narration": { "$ref": "#/$defs/partial.ActionNarration" },
+                "sequence": {
+                  "items": { "$ref": "#/$defs/ActionStep" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
+        "priority": { "type": "integer" },
+        "reason": { "$ref": "#/$defs/partial.TextKey" },
+        "target": { "$ref": "#/$defs/partial.ScriptedTarget" },
+        "tip": { "$ref": "#/$defs/partial.TextKey" },
+        "with": { "type": "object" }
+      },
+      "type": "object"
+    },
     "partial.source.ServiceDefinition": {
       "additionalProperties": false,
       "description": "Exact original-provider action and conserved quote with one typed immediate benefit.",
@@ -7523,206 +7523,6 @@
         "priority",
         "input",
         "accessibility"
-      ],
-      "type": "object"
-    },
-    "source.ScriptedAction": {
-      "additionalProperties": false,
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (ActionCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
-      "properties": {
-        "aliases": {
-          "items": { "$ref": "#/$defs/Alias" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "check": {
-          "anyOf": [
-            {
-              "additionalProperties": false,
-              "description": "A luck roll (ActionCheck).",
-              "properties": {
-                "chance": {
-                  "maximum": 99,
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "luck" }
-              },
-              "required": [
-                "key",
-                "kind",
-                "chance"
-              ],
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of ActionCheck apply.",
-              "properties": {
-                "difficulty": { "$ref": "#/$defs/ResourceInt" },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "threshold" },
-                "resource": { "$ref": "#/$defs/DefinitionRef" }
-              },
-              "required": [
-                "key",
-                "kind",
-                "resource",
-                "difficulty"
-              ],
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "properties": {
-                "attribute": { "$ref": "#/$defs/DefinitionRef" },
-                "difficulty": { "type": "integer" },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "attribute_threshold" }
-              },
-              "required": [
-                "key",
-                "kind",
-                "attribute",
-                "difficulty"
-              ],
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "allOf": [
-                {
-                  "oneOf": [
-                    {
-                      "required": [
-                        "skill"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "attribute"
-                      ]
-                    }
-                  ]
-                }
-              ],
-              "dependentRequired": {
-                "npc": [
-                  "attribute"
-                ]
-              },
-              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
-              "properties": {
-                "attribute": { "$ref": "#/$defs/DefinitionRef" },
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "opposed" },
-                "npc": { "$ref": "#/$defs/DefinitionRef" },
-                "skill": { "$ref": "#/$defs/DefinitionRef" }
-              },
-              "required": [
-                "key",
-                "kind"
-              ],
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
-              "properties": {
-                "key": { "$ref": "#/$defs/Key" },
-                "kind": { "const": "track" },
-                "plan": { "$ref": "#/$defs/Key" }
-              },
-              "required": [
-                "key",
-                "kind",
-                "plan"
-              ],
-              "type": "object"
-            }
-          ]
-        },
-        "cooldown": {
-          "minimum": 1,
-          "type": "integer"
-        },
-        "costs": {
-          "items": { "$ref": "#/$defs/ActionCost" },
-          "maxItems": 8,
-          "minItems": 1,
-          "type": "array"
-        },
-        "craft": { "$ref": "#/$defs/ActionCraft" },
-        "duration": {
-          "minimum": 1,
-          "type": "integer"
-        },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "outcomes": {
-          "additionalProperties": false,
-          "properties": {
-            "failure": {
-              "additionalProperties": false,
-              "properties": {
-                "cues": {
-                  "$ref": "#/$defs/Cues",
-                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
-                },
-                "narration": { "$ref": "#/$defs/ActionNarration" },
-                "sequence": {
-                  "items": { "$ref": "#/$defs/ActionStep" },
-                  "maxItems": 16,
-                  "minItems": 0,
-                  "type": "array"
-                }
-              },
-              "required": [
-                "sequence",
-                "narration"
-              ],
-              "type": "object"
-            },
-            "success": {
-              "additionalProperties": false,
-              "properties": {
-                "cues": {
-                  "$ref": "#/$defs/Cues",
-                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
-                },
-                "narration": { "$ref": "#/$defs/ActionNarration" },
-                "sequence": {
-                  "items": { "$ref": "#/$defs/ActionStep" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                }
-              },
-              "required": [
-                "sequence",
-                "narration"
-              ],
-              "type": "object"
-            }
-          },
-          "required": [
-            "success"
-          ],
-          "type": "object"
-        },
-        "policy": { "$ref": "#/$defs/Policy" },
-        "priority": { "type": "integer" },
-        "reason": { "$ref": "#/$defs/TextKey" },
-        "target": { "$ref": "#/$defs/ScriptedTarget" },
-        "tip": { "$ref": "#/$defs/TextKey" }
-      },
-      "required": [
-        "name",
-        "aliases",
-        "target",
-        "priority",
-        "outcomes"
       ],
       "type": "object"
     },
@@ -9761,6 +9561,206 @@
         }
       ],
       "description": "Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream."
+    },
+    "source.ScriptedAction": {
+      "additionalProperties": false,
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (ActionCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
+      "properties": {
+        "aliases": {
+          "items": { "$ref": "#/$defs/Alias" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "check": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "description": "A luck roll (ActionCheck).",
+              "properties": {
+                "chance": {
+                  "maximum": 99,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "luck" }
+              },
+              "required": [
+                "key",
+                "kind",
+                "chance"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of ActionCheck apply.",
+              "properties": {
+                "difficulty": { "$ref": "#/$defs/ResourceInt" },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "threshold" },
+                "resource": { "$ref": "#/$defs/DefinitionRef" }
+              },
+              "required": [
+                "key",
+                "kind",
+                "resource",
+                "difficulty"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "attribute": { "$ref": "#/$defs/DefinitionRef" },
+                "difficulty": { "type": "integer" },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "attribute_threshold" }
+              },
+              "required": [
+                "key",
+                "kind",
+                "attribute",
+                "difficulty"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "oneOf": [
+                    {
+                      "required": [
+                        "skill"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "attribute"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "dependentRequired": {
+                "npc": [
+                  "attribute"
+                ]
+              },
+              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
+              "properties": {
+                "attribute": { "$ref": "#/$defs/DefinitionRef" },
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "opposed" },
+                "npc": { "$ref": "#/$defs/DefinitionRef" },
+                "skill": { "$ref": "#/$defs/DefinitionRef" }
+              },
+              "required": [
+                "key",
+                "kind"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
+              "properties": {
+                "key": { "$ref": "#/$defs/Key" },
+                "kind": { "const": "track" },
+                "plan": { "$ref": "#/$defs/Key" }
+              },
+              "required": [
+                "key",
+                "kind",
+                "plan"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "cooldown": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "costs": {
+          "items": { "$ref": "#/$defs/ActionCost" },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "craft": { "$ref": "#/$defs/ActionCraft" },
+        "duration": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": { "$ref": "#/$defs/TextKey" },
+        "outcomes": {
+          "additionalProperties": false,
+          "properties": {
+            "failure": {
+              "additionalProperties": false,
+              "properties": {
+                "cues": {
+                  "$ref": "#/$defs/Cues",
+                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
+                },
+                "narration": { "$ref": "#/$defs/ActionNarration" },
+                "sequence": {
+                  "items": { "$ref": "#/$defs/ActionStep" },
+                  "maxItems": 16,
+                  "minItems": 0,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "sequence",
+                "narration"
+              ],
+              "type": "object"
+            },
+            "success": {
+              "additionalProperties": false,
+              "properties": {
+                "cues": {
+                  "$ref": "#/$defs/Cues",
+                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown."
+                },
+                "narration": { "$ref": "#/$defs/ActionNarration" },
+                "sequence": {
+                  "items": { "$ref": "#/$defs/ActionStep" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "sequence",
+                "narration"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "success"
+          ],
+          "type": "object"
+        },
+        "policy": { "$ref": "#/$defs/Policy" },
+        "priority": { "type": "integer" },
+        "reason": { "$ref": "#/$defs/TextKey" },
+        "target": { "$ref": "#/$defs/ScriptedTarget" },
+        "tip": { "$ref": "#/$defs/TextKey" }
+      },
+      "required": [
+        "name",
+        "aliases",
+        "target",
+        "priority",
+        "outcomes"
+      ],
+      "type": "object"
     },
     "source.ServiceDefinition": {
       "additionalProperties": false,
