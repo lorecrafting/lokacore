@@ -917,6 +917,11 @@
             ]
           },
           "type": "array"
+        },
+        "story_point": {
+          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
         }
       },
       "required": [
@@ -4034,6 +4039,11 @@
             ]
           },
           "type": "array"
+        },
+        "story_point": {
+          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
         }
       },
       "type": "object"
@@ -7521,28 +7531,6 @@
       },
       "type": "object"
     },
-    "partial.source.StoryPointDefinition": {
-      "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
-      "properties": {
-        "extends": { "$ref": "#/$defs/Key" },
-        "outcomes": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "properties": {
-              "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/partial.DefinitionRef" },
-              "scene": { "$ref": "#/$defs/partial.DefinitionRef" }
-            },
-            "type": "object"
-          },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "type": "object"
-        },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
     "partial.source.TopicDefinition": {
       "additionalProperties": false,
       "description": "A declared localized topic mapped to its player Boolean knowledge fact.",
@@ -10218,58 +10206,6 @@
       ],
       "type": "object"
     },
-    "source.StoryPointDefinition": {
-      "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
-      "properties": {
-        "outcomes": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "allOf": [
-              {
-                "anyOf": [
-                  {
-                    "required": [
-                      "scene"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "dialogue",
-                      "choice"
-                    ]
-                  }
-                ]
-              },
-              {
-                "not": {
-                  "anyOf": [
-                    {
-                      "required": [
-                        "dialogue",
-                        "scene"
-                      ]
-                    }
-                  ]
-                }
-              }
-            ],
-            "properties": {
-              "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/DefinitionRef" },
-              "scene": { "$ref": "#/$defs/DefinitionRef" }
-            },
-            "type": "object"
-          },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "type": "object"
-        }
-      },
-      "required": [
-        "outcomes"
-      ],
-      "type": "object"
-    },
     "source.TopicDefinition": {
       "additionalProperties": false,
       "description": "A declared localized topic mapped to its player Boolean knowledge fact.",
@@ -10480,11 +10416,6 @@
         },
         "statuses": {
           "additionalProperties": { "$ref": "#/$defs/source.statuses" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
-        "story_points": {
-          "additionalProperties": { "$ref": "#/$defs/source.story_points" },
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
@@ -11097,30 +11028,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.StatusDefinition" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.story_points": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.StoryPointDefinition" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.StoryPointDefinition" }
       },
       "if": {
         "required": [
