@@ -62,8 +62,9 @@ done
 # --- after_merge.sh ------------------------------------------------------------------------
 # Bare origin; branch pr (worktree, review-7 on its tip) is merged on origin/main by another clone,
 # local main is behind with a dirty Beads export. Stub gh reports $PR_STATE; stub br close appends
-# to the export. Break: the local export write is lost in the pull, the issue is not closed, the
-# worktree or refs survive, nothing is pushed, or a refusal still changes something.
+# to the export and br sync --merge re-adds the local row (the database's) when the export lacks it.
+# Break: the local export write is lost in the pull, the issue is not closed, the worktree or refs
+# survive, nothing is pushed, or a refusal still changes something.
 printf '#!/bin/sh\necho "$PR_STATE pr"\n' > "$tmp/brstub/gh"
 cat > "$tmp/brstub/br" <<'SH'
 #!/bin/sh
@@ -71,7 +72,8 @@ echo "$*" >> "$BR_LOG"
 case $1 in
   close) [ -z "${BR_FAIL-}" ] || { echo 'some other error' >&2; exit 1; }
     if [ -n "${BR_BUSY-}" ] && [ ! -e "$BR_BUSY" ]; then : > "$BR_BUSY"; echo 'Database error: database is busy' >&2; exit 1; fi
-    echo "closed $2" >> .beads/issues.jsonl ;;
+    echo "{\"id\":\"closed $2\"}" >> .beads/issues.jsonl ;;
+  sync) [ "$2" != --merge ] || grep -q local-write .beads/issues.jsonl || echo '{"id":"local-write"}' >> .beads/issues.jsonl ;;
   show) echo "[{\"status\":\"${ISSUE_STATUS:-open}\"}]" ;;
 esac
 SH
@@ -82,13 +84,13 @@ am() { # <case> <want-rc> [subject]
 }
 amk() {
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-  git checkout -qb main; mkdir -p .beads docs/reviews bin; echo base > .beads/issues.jsonl; echo r > docs/ROADMAP.md
-  cp "$bin/review_index.sh" bin/; sh bin/review_index.sh; [ -z "${STALE-}" ] || sed 's/^info=/exit 9; info=/' "$bin/after_merge.sh" > bin/after_merge.sh
+  git checkout -qb main; mkdir -p .beads docs/reviews bin/lib; echo '{"id":"base"}' > .beads/issues.jsonl; echo r > docs/ROADMAP.md
+  cp "$bin/review_index.sh" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/; sh bin/review_index.sh; [ -z "${STALE-}" ] || sed 's/^info=/exit 9; info=/' "$bin/after_merge.sh" > bin/after_merge.sh
   git add . && git commit -qm base && git push -q origin main
   git checkout -qb pr; echo feature > f; git add f && git commit -qm pr && git push -q origin pr; git branch review-7
   git checkout -q main; git worktree add -q "$R.wt" pr 2>/dev/null
   M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git merge -q --no-ff origin/pr -m merge && { [ -z "${STALE-}" ] || { cp "$bin/after_merge.sh" bin/ && git commit -qam script; }; } && git push -q origin main)
-  echo local-write >> .beads/issues.jsonl; : > "$R.br"
+  echo '{"id":"local-write"}' >> .beads/issues.jsonl; : > "$R.br"
 }
 amk; head=$(git rev-parse HEAD); echo stray >> docs/ROADMAP.md; am dirty 1; git checkout -q docs/ROADMAP.md
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge dirty: changed something'
@@ -97,19 +99,21 @@ touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
 git branch -q -f review-7 HEAD~0 2>/dev/null; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; git checkout -q main
 am unmerged-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge unmerged-review: changed something'
 git branch -q -f review-7 pr
-(cd "$M" && echo m >> .beads/issues.jsonl && git commit -qam beads && git push -q origin main)
-am export-both 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge export-both: changed something'
-(cd "$M" && git revert --no-edit HEAD > /dev/null && git push -q origin main)
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
 echo r2 > docs/ROADMAP.md; echo u > owner.cjs # an untracked owner file must not block (loka-jxwu)
 am success 0 'ROADMAP status: X merged (#7)'
 git fetch -q origin
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
   && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
-[ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf 'base\nlocal-write\nclosed loka-a')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
-grep -qx 'sync --flush-only' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
+[ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf '{"id":"base"}\n{"id":"local-write"}\n{"id":"closed loka-a"}')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
+grep -qx 'sync --merge' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
 [ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
   && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
+# Break: main moved the export too (loka-kovp): the run refuses, or main's row or the local write is lost.
+amk; (cd "$M" && echo '{"id":"m"}' >> .beads/issues.jsonl && git commit -qam beads && git push -q origin main)
+am export-both 0; git fetch -q origin
+[ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf '{"id":"base"}\n{"id":"m"}\n{"id":"local-write"}\n{"id":"closed loka-a"}')" ] \
+  || { bad 'after_merge export-both: a row lost'; git show origin/main:.beads/issues.jsonl; }
 # Break: a commit pushed to the PR branch after the merge is deleted with the remote branch.
 amk; head=$(git rev-parse HEAD)
 (cd "$M" && git checkout -q -b pr origin/pr && echo late > late && git add late && git commit -qm late && git push -q origin pr)
@@ -198,7 +202,7 @@ printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
 # issue is newer than the last merge, or stays silent when none is; closed issues counted as open;
 # the ready/blocked counts line misreads br's JSON.
-printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; "ready --json") echo "[{},{}]" ;; "blocked --json") echo "{\\"total\\":3}" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
+printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; *"ready --json") echo "[{},{}]" ;; *"blocked --json") echo "{\\"total\\":3}" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
 printf '#!/bin/sh\nexit 1\n' > "$tmp/stub/gh"; chmod +x "$tmp/stub/br" "$tmp/stub/gh"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/session_status.sh" bin/
 echo a > a; git add . && git commit -qm base; git checkout -qb x; echo b > a; git commit -qam x; git checkout -q main
@@ -297,7 +301,7 @@ chmod +x "$tmp/pp/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin protocol protocol/fixtures; cp "$bin/prepush.sh" bin/; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 pp() { rc=0; PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} STUB_REGEN=${STUB_REGEN-} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || rc=$?; }
 pp a 1; pp b 1
-la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.b")
+la=$(sed -n 's/^DOCS_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^DOCS_FAIL (\(.*\))$/\1/p' "$R.b")
 [ -n "$la" ] && [ "$la" != "$lb" ] && grep -qx run-a "$la" && grep -qx run-b "$lb" || bad "prepush logs: run a's log is '$la' ($(cat "$la" 2>/dev/null)), run b's '$lb'"
 : > "$R.pp"; echo x > a; git commit -qam other; pp c
 ! grep -q 'transcripts.test.ts' "$R.pp" && ! grep -q IMPACT_STORY "$R.c" || bad 'prepush: transcript or Impact checks ran without a sampler hash change'
@@ -313,12 +317,56 @@ grep -q '^STORIES_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run t
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/authority; echo x > mobile/authority/x; git add . && git commit -qm auth; pp i
 grep -q '^STORIES_' "$R.i" || bad 'prepush: a mobile/authority change did not run the story check'
 git update-ref -d refs/remotes/origin/main; pp g
-grep -q '^STORIES_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
+grep -q '^STORIES_' "$R.g" && grep -q '^MIX_FORMAT_' "$R.g" && grep -q '^TYPECHECK_' "$R.g" && grep -q '^PRETTIER_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
 # Break (loka-ivjq.25): bin/regen.sh rewrites a file and prepush passes, or does not name it; or a file already
 # uncommitted before the run, which regen leaves alone, is reported.
 echo own > own.txt; STUB_REGEN=a pp j
 [ "$rc" = 1 ] && grep -q '^REGEN_DIRTY' "$R.j" && grep -qx '  a' "$R.j" && ! grep -q own.txt "$R.j" || bad "prepush: a regenerated file was not reported, or an untouched one was (exit $rc, want 1): $(cat "$R.j")"
 git checkout -q a; rm own.txt
+# Break (loka-n0ng): a docs-only change runs the Elixir, TS or prettier checks or skips REGEN or DOCS; a staged .ex
+# change skips the Elixir checks or runs the TS ones; a kernel/ts .ts change skips the TS checks or prettier.
+git update-ref refs/remotes/origin/main HEAD; mkdir -p docs lib; echo x > docs/x.md; git add . && git commit -qm docs; pp k
+grep -q '^REGEN_' "$R.k" && grep -q '^DOCS_' "$R.k" && ! grep -qE '^(EX_SIZE|MIX_FORMAT|CREDO|TS_SIZE|TYPECHECK|PRETTIER)_' "$R.k" || bad "prepush: a docs-only change ran a gated check or skipped REGEN or DOCS: $(cat "$R.k")"
+echo x > lib/x.ex; git add lib/x.ex; pp l
+grep -q '^EX_SIZE_' "$R.l" && grep -q '^MIX_FORMAT_' "$R.l" && grep -q '^CREDO_' "$R.l" && ! grep -qE '^(TYPECHECK|PRETTIER)_' "$R.l" || bad "prepush: a staged .ex change skipped the Elixir checks or ran the TS ones: $(cat "$R.l")"
+git commit -qm ex; git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/y.ts; git add .; pp m
+grep -q '^TS_SIZE_' "$R.m" && grep -q '^TYPECHECK_' "$R.m" && grep -q '^PRETTIER_' "$R.m" && ! grep -q '^MIX_FORMAT_' "$R.m" || bad "prepush: a kernel/ts change skipped the TS checks or prettier, or ran the Elixir ones: $(cat "$R.m")"
+git commit -qm ts; git update-ref refs/remotes/origin/main HEAD; echo '{}' > .prettierrc; git add .; : > "$R.pp"; pp n
+grep -q 'git ls-files' "$R.pp" || bad "prepush: a Prettier setup change did not check every tracked file: $(cat "$R.pp")"
+git commit -qm p; git update-ref refs/remotes/origin/main HEAD; echo x > v.mts; git add .; pp o
+grep -q '^TS_SIZE_' "$R.o" || bad "prepush: a .mts change skipped the TS checks: $(cat "$R.o")"
+git commit -qm o; git update-ref refs/remotes/origin/main HEAD; mkdir -p protocol; echo '{}' > protocol/x.json; git add .; pp p
+grep -q '^COMPILE_' "$R.p" || bad "prepush: a protocol JSON change skipped the Elixir compile that reads it: $(cat "$R.p")"
+git commit -qm pj; git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; git mv lib/x.ex docs/moved.md; pp q
+grep -q '^EX_SIZE_' "$R.q" || bad "prepush: moving a .ex file out of lib/ skipped the Elixir checks (rename hid the source): $(cat "$R.q")"
+# --- ci_changes.sh --------------------------------------------------------------------------
+# Break (loka-n0ng): a docs-only branch runs the test jobs or sim/walk; an engine change skips sim/walk; a test-only or
+# contract-doc change skips the test jobs; a non-push event, or a branch diff that is empty or cannot be read, skips anything.
+R=$(mktemp -d); cd "$R"; git init -q -b main; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
+cc() { # <event> <file> <expected output on one line>
+  git checkout -qB t main; mkdir -p "$(dirname "$2")"; echo x > "$2"; git add . && git commit -qm "$2"
+  got=$(sh "$bin/ci_changes.sh" "$1" | tr '\n' ' '); [ "$got" = "$3 " ] || bad "ci_changes $1 $2: '$got', want '$3'"
+}
+cc push docs/x.md 'code=false sim_walk=false'
+cc push .beads/issues.jsonl 'code=false sim_walk=false'
+cc push lib/x.ex 'code=true sim_walk=true'
+cc push kernel/ts/test/x.ts 'code=true sim_walk=false'
+cc push kernel/ts/test/sim.test.ts 'code=true sim_walk=true'
+cc push mobile/app/src/x.tsx 'code=true sim_walk=true'
+cc push kernel/ts/play/obs.ts 'code=true sim_walk=true'
+cc push mix.exs 'code=true sim_walk=true'
+cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
+for f in cartridges/x/room.md protocol/x.json config/config.exs .github/workflows/ci.yml kernel/ts/src/x.ts \
+  kernel/ts/test/read.ts kernel/ts/package.json mix.lock bin/loka bin/ci_changes.sh docs/spec/conformance/x.json; do cc push "$f" 'code=true sim_walk=true'; done
+# A move out of a sim/walk path still runs sim/walk (rename detection lists only the destination).
+git checkout -qB t main; mkdir -p cartridges docs; echo r > cartridges/r.md; git add . && git commit -qm r; git update-ref refs/remotes/origin/main HEAD
+git mv cartridges/r.md docs/r.md && git commit -qm mv; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' ')
+[ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: a move out of cartridges/ into docs/ skipped sim/walk: '$got'"; git update-ref refs/remotes/origin/main main
+cc push docs/spec/x.md 'code=true sim_walk=false'
+cc push docs/contracts.gen.md 'code=true sim_walk=false'
+cc schedule docs/y.md 'code=true sim_walk=true'
+git checkout -qB t main; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' '); [ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: an empty branch diff skipped jobs: '$got'"
+git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_walk=true'
 # --- regen.sh -------------------------------------------------------------------------------
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
 # into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them
@@ -697,13 +745,13 @@ git checkout -qb x; mp not-main OPEN 0 0 1 - 'pr '; git checkout -q main
 git checkout -q docs/ROADMAP.md; mp roadmap-unedited OPEN 0 0 1 - 'pr '
 
 # --- beads_checkpoint.sh -------------------------------------------------------------------
-# A main clone of a bare origin; stub br's flush writes $BC_ROW as the export. Break: a machine path,
-# a non-main checkout, an unpushed local commit, another dirty tracked file, a failed pull or an
-# export main changed is still committed or pushed; a rejected push exits 0; the happy path does not
-# reach origin.
-printf '#!/bin/sh\n[ "$*" = "sync --flush-only" ] && echo "$BC_ROW" > .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
+# A main clone of a bare origin; stub br's merge appends $BC_ROW (the local write) to the export. Break:
+# a machine path, a non-main checkout, an unpushed local commit, another dirty tracked file or a failed
+# pull is still committed or pushed; main's export row or the local row is lost; a rejected push exits
+# 0 or keeps its commit; the happy path does not reach origin.
+printf '#!/bin/sh\n[ "$*" = "sync --merge" ] && echo "$BC_ROW" >> .beads/issues.jsonl\n' > "$tmp/mp/br"; chmod +x "$tmp/mp/br"
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null; git checkout -qb main
-mkdir bin docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; echo h > docs/HANDOFF.md
+mkdir -p bin/lib docs .beads; cp "$bin/beads_checkpoint.sh" "$bin/check_beads_export.py" bin/; cp "$bin/lib/beads_sync.sh" bin/lib/; echo h > docs/HANDOFF.md
 echo '{"id":"a","title":"one"}' > .beads/issues.jsonl; git add . && git commit -qm base && git push -q origin main
 bc() { # <case> <row> <want-rc> <origin-must-hold or ->
   rc=0; BC_ROW=$2 PATH="$tmp/mp:$PATH" capped sh bin/beads_checkpoint.sh > "$tmp/mp/out" 2>&1 || rc=$?
@@ -711,19 +759,22 @@ bc() { # <case> <row> <want-rc> <origin-must-hold or ->
   git --git-dir="$O" show main:.beads/issues.jsonl | grep -q -e /Users/ -e '"bad"' && bad "beads_checkpoint $1: a refused export reached origin"
   git checkout -q -- .beads/issues.jsonl
 }
-bc ok '{"id":"a","title":"two"}' 0 '"two"'
+bc ok '{"id":"c","title":"two"}' 0 '"two"'
 bc machine-path '{"id":"a","title":"/Users/x/y"}' 1 -
 echo x > docs/x; git add docs/x; bc dirty '{"id":"a","title":"bad"}' 1 -; git reset -q; rm docs/x
 git checkout -qb x; bc not-main '{"id":"a","title":"bad"}' 1 -; git checkout -q main
 git clone -q "$O" "$R.o" 2>/dev/null; (cd "$R.o" && echo '{"id":"b","title":"main"}' >> .beads/issues.jsonl && git commit -qam m && git push -q origin main)
-bc main-changed '{"id":"a","title":"bad"}' 1 '"main"'
-git pull -q --ff-only origin main; echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
+bc main-changed '{"id":"d","title":"local"}' 0 '"local"'; git --git-dir="$O" show main:.beads/issues.jsonl | grep -q '"main"' || bad 'beads_checkpoint main-changed: main row lost'
+echo y > docs/HANDOFF.md; git commit -qam local; bc ahead '{"id":"a","title":"bad"}' 1 -
 git --git-dir="$O" log main | grep -q local && bad 'beads_checkpoint ahead: pushed an unpushed local commit'; git reset -q --hard HEAD~1
-(cd "$R.o" && echo n > docs/n.md && git add docs/n.md && git commit -qm n && git push -q origin main); echo z > docs/n.md; h=$(git rev-parse HEAD)
+(cd "$R.o" && git pull -q --ff-only origin main && echo n > docs/n.md && git add docs/n.md && git commit -qm n && git push -q origin main); echo z > docs/n.md; h=$(git rev-parse HEAD)
 bc pull-fail '{"id":"a","title":"bad"}' 1 -; [ "$(git rev-parse HEAD)" = "$h" ] || bad 'beads_checkpoint pull-fail: committed after a failed pull'; rm docs/n.md
 printf '#!/bin/sh\nexit 1\n' > "$O/hooks/pre-receive"; chmod +x "$O/hooks/pre-receive"
-bc push-rejected '{"id":"a","title":"three"}' 1 -
-grep -q 'br sync --merge' "$tmp/mp/out" || bad 'beads_checkpoint push-rejected: no recovery lines'
+git pull -q --ff-only origin main; h=$(git rev-parse HEAD); echo h2 > docs/HANDOFF.md; rc=0; BC_ROW='{"id":"e","title":"three"}' PATH="$tmp/mp:$PATH" capped sh bin/beads_checkpoint.sh > "$tmp/mp/out" 2>&1 || rc=$?
+[ "$rc" = 1 ] && [ "$(git rev-parse HEAD)" = "$h" ] && grep -q three .beads/issues.jsonl && grep -qx h2 docs/HANDOFF.md && grep -q 'rerun bin/beads_checkpoint.sh' "$tmp/mp/out" \
+  || { bad "beads_checkpoint push-rejected: exit $rc, commit kept or files lost"; sed 's/^/  /' "$tmp/mp/out"; }
+rm "$O/hooks/pre-receive"; git checkout -q -- .beads/issues.jsonl
+bc push-rerun '{"id":"e","title":"three"}' 0 '"three"'
 
 # --- ci_fail.sh --------------------------------------------------------------------------------
 # Stub gh lists one failed run and serves a log with one failing line among noise. Break: the failing

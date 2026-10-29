@@ -73,10 +73,14 @@ Step 4 (verify and review) is the PM's.
    the same reviewer; if a second opinion was required, its scoped fix re-check starts at the same moment. The reviewer checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
-   rewrote a core piece or the slice freezes a contract or closes a gate. A comment- or doc-only nit
-   fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
-   diff is comment- or doc-only. At most two fix
+   rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
    rounds; anything still open goes up the [escalation ladder](PM.md#loop), then to the owner.
+   <a id="small-should-fix"></a>**Small should-fixes take no fix round** (owner yes, loka-n0ng): a should-fix of about 10
+   lines or fewer with no logic change (docs wording, a comment, an import, one test assertion line) is either
+   fixed in place by the reviewer during its re-check (a commit in a detached worktree at the head,
+   pushed `HEAD:<branch>` as a fast-forward, never forced; hosted CI reruns and the PM checks the diff has no
+   logic change), or the PR merges as APPROVE WITH NOTES with the item filed in Beads. A fix round (step 5) is
+   only for blockers and logic changes.
 
 Step 7 (merge) is the PM's.
 
@@ -138,7 +142,7 @@ PM, developer, reviewer and designer alike; the role files link here instead of 
   notice, no sleep or poll loops. Any agent that expects a run over ~10 minutes (full-suite
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
-- Only the PM waits on CI. A developer pushes with `bin/push_slice.sh`, which reports whether `ci.yml` and `book-e2e.yml` started, and hands back; a reviewer or designer reports the CI state it sees, once; the PM returns a red run as a finding.
+- <a id="ci-is-the-full-suite"></a>No agent runs a full suite locally (`bash_guard` refuses the npm ones and `check_all`; `mix test` takes file paths): run the focused test files your diff touches, push with `bin/push_slice.sh` (it reports whether `ci.yml` and `book-e2e.yml` started), then run `bin/wait_ci.sh <sha>` in the background (loka-n0ng). The hosted kernel and elixir jobs are the full red-test list; a developer hands back only when they are green. A reviewer or designer reports the CI state it sees, once; the PM returns a red run found after handback as a finding.
 - Work in your own worktree under `worktrees.noindex` ([Git hygiene](#git-hygiene)); in a new one run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) first; in a shared one commit with `git commit -- <your own paths>`.
 - Stop only processes you started, by their PID, planted breaks and red controls included (a planted `pkill -f storybook` killed the owner's Storybook twice, loka-hg7, loka-rar); `bin/orphans.sh` lists orphaned busy ones. Red controls
   that plant files run in a `git worktree add --detach` scratch copy, never in the worktree

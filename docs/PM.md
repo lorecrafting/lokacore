@@ -78,7 +78,8 @@ Step 3 (build and self-review) is in [WORKFLOW](WORKFLOW.md#loop).
 Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
 
 7. **Merge (PM).** Merge with `bin/merge_pr.sh <PR> <beads-id[,...]> ["ROADMAP status: ..."]` (waits on `bin/wait_ci.sh` for the head, merge commit with `--match-head-commit`, then `bin/after_merge.sh`) once the verdict is
-   APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
+   APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head (a small should-fix needs no fix round:
+   [WORKFLOW step 6](WORKFLOW.md#small-should-fix)), and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
    a superseded run is not: `bin/merge_pr.sh` prints `bin/ci_timing.sh <head>`: cancelled jobs (name, seconds) of that head and of the nightly runs, and the sim leg times and medians, so compare each with its `timeout-minutes`. Judge a sim time against the median of the last 5 `main` runs of that leg, never one run (runners are two-speed: 280 s and 540 s on the same code, loka-9nd4). An E-gate closure or the
@@ -173,7 +174,7 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
 - At each handback and review completion the PM appends a Beads note `COST <role> <model> <tokens>` from the completion notice; the batch merge note sums them.
 - At session start and before a fan-out of 3+ agents or a Fable run, it reads `~/.claude/usage-cache.json` (`five_hour` and `seven_day` `used_percentage`, `resets_at`, `written_at`; the owner's status line writes it) instead of asking the owner; the numbers are stale when `written_at` is old (loka-8zqg). Near the cap: see the Budget line in [owner rules](system/owner-rules.md#process).
 - The PM spawns a new agent only while `uptime`, run in its own call (the one exception to batching), shows load under 8 (`bin/agent_load_gate.sh` enforces it), at most 5 agents with 3 running tests (owner 2026-10-10).
-- The PM waits with `bin/wait_ci.sh <sha|branch>` in the background (one line per workflow; exit 0 only when all succeeded; a branch waits on its fetched origin head). On red, `bin/ci_fail.sh <sha|branch>` prints only the failing lines; send those as the finding.
+- The PM, like a developer after its push ([Every agent](WORKFLOW.md#ci-is-the-full-suite)), waits with `bin/wait_ci.sh <sha|branch>` in the background (one line per workflow; exit 0 only when all succeeded; a branch waits on its fetched origin head). On red, `bin/ci_fail.sh <sha|branch>` prints only the failing lines; send those as the finding.
 - Delegate mechanical work. At a stable publication checkpoint, update the
   roadmap, Beads and shared handoff before a fresh session; do not reset during
   an open review merely to shorten context.
