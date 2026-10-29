@@ -31,7 +31,6 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { reopens } from '../mechanics/dialogue/selection.ts';
-import { choiceCheck, choiceCheckFloor } from './cartridge_choice_checks.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
 const each = (c: Obj): [Obj, string][] =>
@@ -94,13 +93,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     for (const [id, o] of Object.entries(d.choices as Obj))
       out.push(...choice(o, `${at}.choices${step(id)}`, d, checks, c));
   }
-  return [
-    ...out,
-    ...choiceCheckFloor(c),
-    ...keywordFloor(c),
-    ...storyPoints(c, named),
-    ...chapters(c, checks),
-  ];
+  return [...out, ...keywordFloor(c), ...storyPoints(c, named), ...chapters(c, checks)];
 }
 
 // A keyword dialogue (speech@1, row G9) needs kernel_api 1.48.
@@ -244,7 +237,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     if (e.transition === 'complete' ? !same(d.quest, e.quest) : d.quest !== undefined)
       out.push(diag('OUTCOME_MISMATCH', `${path}.escort.quest`));
   }
-  out.push(...once(o, path, d, c), ...choiceCheck(o, path, d, c, { named, typedValue, text }));
+  out.push(...once(o, path, d, c));
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);

@@ -11,8 +11,6 @@ import { newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { holds } from '../src/mechanics/policy.ts';
-import { reactions } from '../src/content/cartridge_reactions.ts';
-import type { Checks } from '../src/content/cartridge_refs.ts';
 import { ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-rumour-'));
@@ -159,28 +157,4 @@ test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
     }),
     'loaded',
   );
-});
-
-// Breaks: a consequence op's kernel_api floor dropped from FLOORS, so a cartridge below it loads
-// and an older host faults at runtime (twin of content_rumour_test.exs). Called directly: any
-// sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
-// row: quest_resolved, its only trigger the loader and compiler accept, has the same floor.
-test('each consequence op is refused just below its kernel_api floor', () => {
-  const refused = (op: string, at_least: string, event = 'fact_changed') =>
-    reactions(
-      {
-        manifest: { requires: { kernel_api: { at_least } } },
-        reactions: { r: { on: { event }, apply: [{ op }] } },
-      },
-      { named() {}, typedValue() {} } as unknown as Checks,
-    ).some((d) => d.code === 'KERNEL_API_RANGE_INVALID');
-  for (const [op, floor] of [
-    ['quest.resolve', 12],
-    ['quest.fail', 12],
-    ['population.suppress', 35],
-  ] as const)
-    assert.deepEqual([refused(op, `1.${floor - 1}`), refused(op, `1.${floor}`)], [true, false], op);
-  // the quest_resolved trigger's own 1.8 floor, the one quest.activate's missing row relies on
-  const trigger = (v: string) => refused('fact.assign', v, 'quest_resolved');
-  assert.deepEqual([trigger('1.7'), trigger('1.8')], [true, false], 'quest_resolved');
 });

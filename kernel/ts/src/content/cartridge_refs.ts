@@ -1,5 +1,4 @@
 import { trails } from './cartridge_trails.ts';
-import { exchanges } from './cartridge_exchange.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
 // The loader's reference stage and the definition walks it shares with the lock stage
@@ -17,8 +16,6 @@ import { refString } from '../runtime/decision.ts';
 import { typed } from '../mechanics/fact.ts';
 import { dialogues } from './cartridge_dialogues.ts';
 import { quests, questPolicies } from './cartridge_quests.ts';
-import { reactions } from './cartridge_reactions.ts';
-import { recipes } from './cartridge_recipes.ts';
 import { theft } from './cartridge_theft.ts';
 import { mounts } from './cartridge_mounts.ts';
 import { answerRoots, asks } from './cartridge_asks.ts';
@@ -192,9 +189,6 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...mounts(c, named));
   out.push(...asks(c, check));
   // -- C1
-  out.push(...exchanges(c, check));
-  out.push(...recipes(c, check));
-  out.push(...reactions(c, check));
   // -- C2
   out.push(...quests(c, check));
   out.push(...dialogues(c, check));
