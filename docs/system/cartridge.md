@@ -2,9 +2,8 @@
 
 ## Source layout
 
-A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`). An authored NPC or
-item definition is a [blueprint](glossary.md); the cartridge packages it with the rest of the
-world's definitions and text:
+A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`). The cartridge packages
+its NPC and item definitions with the rest of the world's definitions and text:
 
 | File | Holds |
 |---|---|
@@ -14,7 +13,7 @@ world's definitions and text:
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `replenish/`, `services/`, `transports/`, `bleeds/`, `statuses/`, `structures/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 | `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ActionRecipe, `action_recipe@1`, [mechanics](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `recipes` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
@@ -191,10 +190,16 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   `scene_<key>` fact (`facts.facts.scene_<key>`) and each action, reaction or dialogue
   fact.assign of it are RESERVED_FACT at the same write-site paths as position;
   fact_compare and reaction on.fact reads remain legal;
-- story points: a dialogue choice's `story_point: "<key>/<outcome>"` and a scene's `on_end`
-  declare the point's outcomes; a second claim of one outcome is `DUPLICATE_DEFINITION` at its
-  site, and a claiming choice's dialogue resolves a quest (`OUTCOME_MISMATCH`;
-  `lib/loka/content/dialogues.ex`);
+- story points: there is no story point file. A dialogue choice's `story_point: "<key>/<outcome>"`
+  and a scene's `on_end` declare the point's outcomes, and the point is located at its first
+  claim. A second claim of one outcome is `DUPLICATE_DEFINITION` at its site
+  (`dialogues/<d>.choices.<c>.story_point` or `scenes/<s>.on_end`); a claiming choice's dialogue
+  resolves a quest (`OUTCOME_MISMATCH` at the choice's `story_point`); a scene-claimed key is at most
+  52 characters (`SCHEMA_VIOLATION` at `scenes/<s>.on_end.story_point`); a point needs dialogue@1
+  (`UNDECLARED_CAPABILITY`, `lib/loka/content/dialogues.ex`);
+- policies: a policy is its condition tree inline (`protocol/policy.schema.json` `Policy`); no
+  policy field is required; an absent gate holds, and an absent trigger
+  (`disposition.hostile`, `friendly`) never fires;
 - chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
   (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
   (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a
@@ -233,7 +238,7 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
-`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
+`lib/loka/content/areas.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
 `lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
 `lib/loka/content/zones.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
@@ -583,8 +588,7 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   `drop` (ref the NPC, `item`, `chance`). `items.sinks`: `hand_over` (ref the dialogue, `choice`,
   `item` and `npc` its roles), `edible` (ref the item, `resource`, `amount`).
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
-  replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan, the last
-  three from its bundle; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
+  replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
   careful?}`: the count of its items, its tool's tag, its careful count.
 - Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
   from then path, populations by ref, seams by room then detail. ponytail: authored static sites
@@ -913,7 +917,7 @@ The historical0.0.8 fixture retains its original answer.
 
 [Fast travel](mechanics.md#fast-travel-toolbox-row-32) reuses the transport endpoint declarations
 (`protocol/transport.schema.json` `TransportDefinition`) unchanged: a reciprocal route pair between two waypoint rooms that share no exit,
-each with its own `use_transport` action whose `policy` root is
+each with its own `use_transport` action whose `policy` is
 `{"op": "visited_count", "room": "<destination>", "at_least": 1}`.
 
 ## Escrow declarations
@@ -1137,7 +1141,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Conditional schedule declarations
 
-[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and builds `schedule_cases` from the checked cases, which source may not author. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The compiler refuses a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
+[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and builds `schedule_cases` from the checked cases, which source may not author. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The compiler refuses a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
 
 ## Standing and disposition declarations
 

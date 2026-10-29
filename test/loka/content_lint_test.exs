@@ -370,9 +370,8 @@ defmodule Loka.ContentLintTest do
   defp queried(l) when is_list(l), do: Enum.flat_map(l, &queried/1)
   defp queried(_), do: []
 
-  # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge since Ashmere's
-  # retirement (loka-4hik). Out: every *_sampler (samplers break rules on purpose),
-  # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
+  # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge (loka-4hik). Out:
+  # every *_sampler (samplers break rules on purpose) and lantern_proof. Findings over the
   # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
   # fails, and so does a baseline grown past its cap.
   @baseline_cap 204

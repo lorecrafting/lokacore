@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: C2 slice Z, docs sweep (loka-ivjq.3)](2026-10-29-c2-z-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice D, one `name` field for display names (F6, loka-ivjq.3)](2026-10-29-c2-d-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice C1, source kinds and population wrappers cut (F5 F6, naming audit #2 #3, loka-ivjq.3)](2026-10-29-c2-c1-review.md): **APPROVE**
 - [Review: C2 slice B2, drop the `{policy_version, root}` wrapper (F3, loka-ivjq.3)](2026-10-29-c2-b2-review.md): **APPROVE WITH NOTES**

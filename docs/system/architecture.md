@@ -90,7 +90,7 @@ the static capability registry and pure Rule ABI; loading and executing rules st
 
 A mechanic reads shared typed facts, properties, relations, containment, resources,
 jobs, perception and events, then requests registered typed consequences in the normal
-proposal. Cartridge [blueprints](glossary.md) supply concrete NPCs and items; its other
+proposal. Cartridge NPC and item definitions supply concrete NPCs and items; its other
 definitions supply places, numbers and story combinations. Capability code does not
 special-case a chapter or NPC or call another mechanic's player verb; existing spec-required
 dependencies remain named exceptions.
