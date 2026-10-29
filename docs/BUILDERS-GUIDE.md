@@ -57,7 +57,7 @@ mise exec -- bin/loka play /tmp/bell.json
 The terminal player also accepts a script or a replay transcript:
 
 ```sh
-mise exec -- bin/loka play /tmp/bell.json --replay cartridges/recipe_sampler/transcripts/action_recipe.jsonl
+mise exec -- bin/loka play /tmp/bell.json --replay cartridges/recipe_sampler/transcripts/scripted_action.jsonl
 ```
 
 Use the transcript for the cartridge you compiled; see its `transcripts/` directory. A
