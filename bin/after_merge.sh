@@ -5,34 +5,25 @@
 #   bin/after_merge.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]
 # Refuses unless the PR is MERGED, main is checked out and the tracked files are clean (untracked files are ignored, like pm_merge.sh) apart from
 # .beads/issues.jsonl, and docs/ROADMAP.md (which must then be edited) when a subject is given.
-# A dirty export is copied out, reset, the pull runs, it is copied back and `br sync --flush-only`
-# rewrites it from the database; it is refused when main also changed the export (the post-merge
-# import is not proven to run first, so copying back could drop main's rows). Every refusal
+# The pull and the Beads merge are bin/lib/beads_sync.sh (`br sync --merge`): a dirty export and a
+# moved main export fold together; only a row edited on both sides refuses, after main is pulled. Every refusal
 # (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change, except that a stale script copy first fast-forwards main.
 # review-<PR> counts as merged when `git cherry` finds each of its commits' patches in origin/main.
 # A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
 # A rerun after a failed Beads commit works: br close is skipped for an issue already closed.
 # An export dirtied again after the commit (a concurrent br write) gets its own Beads commit before the push.
-# br sync and br close that fail with a stale WAL index or a busy database run once more after
-# `br doctor migrate-schema recover` (loka-8zf5); any other br failure stops the script.
+# br sync and br close retry once on a stale WAL index or a busy database (br1, loka-8zf5).
 set -u
 GH=${GH:-gh}
 die() { echo "after_merge: $*" >&2; exit 1; }
-br1() {
-  err=$(br "$@" 2>&1 > /dev/null) && return 0
-  case $err in
-    *'WAL index'* | *'database is busy'*) echo "after_merge: br $1: $err; recover and retry once" >&2
-      br doctor migrate-schema recover > /dev/null && br "$@" > /dev/null ;;
-    *) echo "$err" >&2; return 1 ;;
-  esac
-}
+. "$(dirname "$0")/lib/beads_sync.sh"
 [ $# -ge 2 ] && [ $# -le 3 ] || { echo "usage: $0 <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]" >&2; exit 2; }
 pr=$1 id=$2 subject=${3-} j=.beads/issues.jsonl
 cd "$(git rev-parse --show-toplevel)" || exit 2
 [ "$(git branch --show-current)" = main ] || die 'main is not checked out here'
 if [ -z "${AFTER_MERGE_REEXEC-}" ]; then
   git fetch -q origin main || die 'fetch failed'
-  git diff --quiet HEAD origin/main -- bin/after_merge.sh || {
+  git diff --quiet HEAD origin/main -- bin/after_merge.sh bin/lib/beads_sync.sh || {
     git merge -q --ff-only origin/main || die 'this script is behind main and the pull failed: pull by hand'
     AFTER_MERGE_REEXEC=1 exec sh bin/after_merge.sh "$@"
   }
@@ -62,17 +53,8 @@ if [ -n "$review" ]; then
   # git cherry skips merge commits, whose resolution could hold unmerged content.
   [ -z "$(git rev-list --merges origin/main.."$review")" ] || die "review-$pr has a merge not in origin/main; nothing changed"
 fi
-# Copying a dirty export back over main's changes would drop them unless the hook imported them first.
-git diff --quiet -- $j || git diff --quiet HEAD origin/main -- $j || die 'main changed the Beads export and the local one is dirty: merge it by hand'
 [ -z "$subject" ] || git diff --quiet HEAD origin/main -- docs/ROADMAP.md || die 'main changed docs/ROADMAP.md: set your edit aside, pull, redo it'
-tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
-git diff --quiet -- $j || { cp $j "$tmp/export" && git checkout -- $j; } || die 'cannot set the export aside'
-if ! git pull -q --ff-only origin main; then
-  [ ! -f "$tmp/export" ] || cp "$tmp/export" $j
-  die 'pull failed (export restored)'
-fi
-[ ! -f "$tmp/export" ] || cp "$tmp/export" $j
-br1 sync --flush-only || die 'br sync --flush-only failed'
+beads_sync
 # A rerun after a failed Beads commit finds the issue closed already.
 for i in $(echo "$id" | tr , ' '); do
   [ "$(br show "$i" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \

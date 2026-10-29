@@ -105,6 +105,12 @@ jobs:
           chmod +x "$RUNNER_TEMP/bin/mise"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - run: sh bin/merge_resolve_red_controls.sh
+      # Real br (the pinned release, checksum-checked) for the Beads sync controls (bin/lib/beads_sync.sh).
+      - run: |
+          curl -fsSL -o "$RUNNER_TEMP/br.tgz" https://github.com/Dicklesworthstone/beads_rust/releases/download/v0.7.6/br-0.7.6-linux_musl_amd64.tar.gz
+          echo "28b89f8f26540a4c9e6242b3c9fc93bcdd89f4ec0b9c9792895028c53f5bf2bd  $RUNNER_TEMP/br.tgz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/br.tgz" -C "$RUNNER_TEMP/bin" br
+      - run: sh bin/beads_sync_red_controls.sh
 
   # sim.test.ts (CI is set: 10,000 fresh sequences), in parallel with the kernel job, which skips it:
   # two legs, the fresh sequences and the showcase test, each under the timeout on a slow runner.
