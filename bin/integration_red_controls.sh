@@ -297,7 +297,7 @@ chmod +x "$tmp/pp/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin protocol protocol/fixtures; cp "$bin/prepush.sh" bin/; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 pp() { rc=0; PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} STUB_REGEN=${STUB_REGEN-} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || rc=$?; }
 pp a 1; pp b 1
-la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.b")
+la=$(sed -n 's/^DOCS_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^DOCS_FAIL (\(.*\))$/\1/p' "$R.b")
 [ -n "$la" ] && [ "$la" != "$lb" ] && grep -qx run-a "$la" && grep -qx run-b "$lb" || bad "prepush logs: run a's log is '$la' ($(cat "$la" 2>/dev/null)), run b's '$lb'"
 : > "$R.pp"; echo x > a; git commit -qam other; pp c
 ! grep -q 'transcripts.test.ts' "$R.pp" && ! grep -q IMPACT_STORY "$R.c" || bad 'prepush: transcript or Impact checks ran without a sampler hash change'
@@ -313,12 +313,56 @@ grep -q '^STORIES_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run t
 git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/authority; echo x > mobile/authority/x; git add . && git commit -qm auth; pp i
 grep -q '^STORIES_' "$R.i" || bad 'prepush: a mobile/authority change did not run the story check'
 git update-ref -d refs/remotes/origin/main; pp g
-grep -q '^STORIES_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
+grep -q '^STORIES_' "$R.g" && grep -q '^MIX_FORMAT_' "$R.g" && grep -q '^TYPECHECK_' "$R.g" && grep -q '^PRETTIER_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
 # Break (loka-ivjq.25): bin/regen.sh rewrites a file and prepush passes, or does not name it; or a file already
 # uncommitted before the run, which regen leaves alone, is reported.
 echo own > own.txt; STUB_REGEN=a pp j
 [ "$rc" = 1 ] && grep -q '^REGEN_DIRTY' "$R.j" && grep -qx '  a' "$R.j" && ! grep -q own.txt "$R.j" || bad "prepush: a regenerated file was not reported, or an untouched one was (exit $rc, want 1): $(cat "$R.j")"
 git checkout -q a; rm own.txt
+# Break (loka-n0ng): a docs-only change runs the Elixir, TS or prettier checks or skips REGEN or DOCS; a staged .ex
+# change skips the Elixir checks or runs the TS ones; a kernel/ts .ts change skips the TS checks or prettier.
+git update-ref refs/remotes/origin/main HEAD; mkdir -p docs lib; echo x > docs/x.md; git add . && git commit -qm docs; pp k
+grep -q '^REGEN_' "$R.k" && grep -q '^DOCS_' "$R.k" && ! grep -qE '^(EX_SIZE|MIX_FORMAT|CREDO|TS_SIZE|TYPECHECK|PRETTIER)_' "$R.k" || bad "prepush: a docs-only change ran a gated check or skipped REGEN or DOCS: $(cat "$R.k")"
+echo x > lib/x.ex; git add lib/x.ex; pp l
+grep -q '^EX_SIZE_' "$R.l" && grep -q '^MIX_FORMAT_' "$R.l" && grep -q '^CREDO_' "$R.l" && ! grep -qE '^(TYPECHECK|PRETTIER)_' "$R.l" || bad "prepush: a staged .ex change skipped the Elixir checks or ran the TS ones: $(cat "$R.l")"
+git commit -qm ex; git update-ref refs/remotes/origin/main HEAD; echo x > kernel/ts/src/y.ts; git add .; pp m
+grep -q '^TS_SIZE_' "$R.m" && grep -q '^TYPECHECK_' "$R.m" && grep -q '^PRETTIER_' "$R.m" && ! grep -q '^MIX_FORMAT_' "$R.m" || bad "prepush: a kernel/ts change skipped the TS checks or prettier, or ran the Elixir ones: $(cat "$R.m")"
+git commit -qm ts; git update-ref refs/remotes/origin/main HEAD; echo '{}' > .prettierrc; git add .; : > "$R.pp"; pp n
+grep -q 'git ls-files' "$R.pp" || bad "prepush: a Prettier setup change did not check every tracked file: $(cat "$R.pp")"
+git commit -qm p; git update-ref refs/remotes/origin/main HEAD; echo x > v.mts; git add .; pp o
+grep -q '^TS_SIZE_' "$R.o" || bad "prepush: a .mts change skipped the TS checks: $(cat "$R.o")"
+git commit -qm o; git update-ref refs/remotes/origin/main HEAD; mkdir -p protocol; echo '{}' > protocol/x.json; git add .; pp p
+grep -q '^COMPILE_' "$R.p" || bad "prepush: a protocol JSON change skipped the Elixir compile that reads it: $(cat "$R.p")"
+git commit -qm pj; git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; git mv lib/x.ex docs/moved.md; pp q
+grep -q '^EX_SIZE_' "$R.q" || bad "prepush: moving a .ex file out of lib/ skipped the Elixir checks (rename hid the source): $(cat "$R.q")"
+# --- ci_changes.sh --------------------------------------------------------------------------
+# Break (loka-n0ng): a docs-only branch runs the test jobs or sim/walk; an engine change skips sim/walk; a test-only or
+# contract-doc change skips the test jobs; a non-push event, or a branch diff that is empty or cannot be read, skips anything.
+R=$(mktemp -d); cd "$R"; git init -q -b main; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
+cc() { # <event> <file> <expected output on one line>
+  git checkout -qB t main; mkdir -p "$(dirname "$2")"; echo x > "$2"; git add . && git commit -qm "$2"
+  got=$(sh "$bin/ci_changes.sh" "$1" | tr '\n' ' '); [ "$got" = "$3 " ] || bad "ci_changes $1 $2: '$got', want '$3'"
+}
+cc push docs/x.md 'code=false sim_walk=false'
+cc push .beads/issues.jsonl 'code=false sim_walk=false'
+cc push lib/x.ex 'code=true sim_walk=true'
+cc push kernel/ts/test/x.ts 'code=true sim_walk=false'
+cc push kernel/ts/test/sim.test.ts 'code=true sim_walk=true'
+cc push mobile/app/src/x.tsx 'code=true sim_walk=true'
+cc push kernel/ts/play/obs.ts 'code=true sim_walk=true'
+cc push mix.exs 'code=true sim_walk=true'
+cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
+for f in cartridges/x/room.md protocol/x.json config/config.exs .github/workflows/ci.yml kernel/ts/src/x.ts \
+  kernel/ts/test/read.ts kernel/ts/package.json mix.lock bin/loka bin/ci_changes.sh docs/spec/conformance/x.json; do cc push "$f" 'code=true sim_walk=true'; done
+# A move out of a sim/walk path still runs sim/walk (rename detection lists only the destination).
+git checkout -qB t main; mkdir -p cartridges docs; echo r > cartridges/r.md; git add . && git commit -qm r; git update-ref refs/remotes/origin/main HEAD
+git mv cartridges/r.md docs/r.md && git commit -qm mv; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' ')
+[ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: a move out of cartridges/ into docs/ skipped sim/walk: '$got'"; git update-ref refs/remotes/origin/main main
+cc push docs/spec/x.md 'code=true sim_walk=false'
+cc push docs/contracts.gen.md 'code=true sim_walk=false'
+cc schedule docs/y.md 'code=true sim_walk=true'
+git checkout -qB t main; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' '); [ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: an empty branch diff skipped jobs: '$got'"
+git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_walk=true'
 # --- regen.sh -------------------------------------------------------------------------------
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
 # into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them

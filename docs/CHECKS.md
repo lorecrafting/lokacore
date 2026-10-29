@@ -4,7 +4,9 @@ The active checks run in hosted CI on every push to a branch, nightly on `main` 
 run on the exact head is the merge gate with review ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
 `bin/check_all.sh` mirrors the hosted line for an occasional full local run (PM only: `LOKA_PM=1` prefix). `bin/prepush.sh` runs
-the static checks of hosted CI, in about 50 s (more when it rebuilds the stories) before every push and after every
+the static checks of hosted CI that the branch's changed file types need (diff against the merge base with `origin/main`,
+uncommitted edits included; all of them when it cannot be read): the Elixir checks only for `.ex`, `.exs`, `mix.lock`, `protocol/` or `composition-profile.json`,
+the TypeScript ones only for TS, package JSON or JSON under `kernel/ts`, `mobile`, `cartridges` or `protocol`, Prettier only on the changed files (every file after a Prettier setup change); `REGEN` and `DOCS` always run before every push and after every
 `bin/pm_merge.sh` merge. It first runs `bin/regen.sh`, the one command that rewrites every generated file from its inputs (the `contracts.exs` and `features.exs` outputs, `docs/state-sections.gen.json`, the review index, and, only when the diff against `origin/main` touches their inputs, the story views and saves, a changed cartridge's (every one after a `lib/` change) `{description, canonical, sha256}` hash fixture with its transcripts' content hash, and `test/loka/lint_baseline.txt`, which only shrinks: a new finding fails), and fails `REGEN_DIRTY` naming each file it rewrote: after editing a generator's input, run `bin/regen.sh` and commit what it rewrites. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF). The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
@@ -135,7 +137,7 @@ their rules and red controls remain available for resumption.
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash
   count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not; a red, running or missing nightly run is reported).
-  It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs).
+  It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs), and `bin/ci_changes.sh` (docs-only skips the test jobs, an engine change runs `sim` and `walk`, any other event or an unreadable diff runs all).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`,
   `git commit -n`, a force or `--mirror` push and `git rebase` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix; `pkill`/`killall`,
@@ -154,8 +156,12 @@ their rules and red controls remain available for resumption.
   (see [preview command](web-preview.md)), and `storybook`: `npm run storybook:smoke` (every story renders, its play
   passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)), then `npm run storybook:live` (every Live story and its click-through on the dev server), then `npm run storybook:picker` (one pick reaches the [polish queue](web-preview.md#polish-queue), a status line shows, Close batch waits for a working item); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has
-  one verdict job, `ci-green` and `book-e2e-green` (`if: always()`): it fails if any job failed,
-  was cancelled or skipped ([workflow step 7](PM.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its
+  one verdict job, `ci-green` and `book-e2e-green` (`if: always()`): it fails if any job failed or
+  was cancelled, or if the path filter did not succeed ([workflow step 7](PM.md#loop)). The path filter is a first `changes` job
+  ([`bin/ci_changes.sh`](../bin/ci_changes.sh), loka-n0ng) over the branch's diff against its merge base with `main`: a push whose
+  files are all prose under `docs/` or `.beads/` (not `docs/spec/`, `docs/system/`, JSON, `.gen.` files or the prose files tests read, listed in the script) skips every job
+  but `lint`; `sim` and `walk` run only when `kernel/ts/src` or `play`, `lib`, `cartridges`, `protocol`, `docs/spec/conformance`, `mobile/app`, `config`, `mix.exs` or `mix.lock`, `bin/loka`, the sim tests, `kernel/ts/package*.json`, `.github` or the filter changed;
+  the nightly and `workflow_dispatch` runs run everything. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job, two parallel legs `sim (fresh)` (`npm run test:sim:fresh`) and `sim (showcase)` (`npm run test:sim:showcase`); the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)

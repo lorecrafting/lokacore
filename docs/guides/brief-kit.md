@@ -31,7 +31,8 @@ handoff); [building mechanics by composition](../system/architecture.md#building
   target (a `cd` does not change a skill's target). Name the range; a review that lists files outside the slice
   is void.
 - Push: `bin/push_slice.sh <slice worktree> <branch>`; read its `PUSH_EXIT=<n> <sha>` line and
-  whether `ci` and `book-e2e` started; never wait on CI.
+  whether `ci` and `book-e2e` started; then `bin/wait_ci.sh <sha>` in the background, green before handback
+  ([Every agent](../WORKFLOW.md#ci-is-the-full-suite)).
 - Screenshot: when the player sees the change, a 390 px screenshot of the web Book
   ([web preview](../web-preview.md)); its path goes in the handback.
 - Never print home or worktree absolute paths in commits, Beads text or PR text.
