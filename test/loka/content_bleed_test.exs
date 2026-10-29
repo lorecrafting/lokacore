@@ -2,7 +2,8 @@ defmodule Loka.ContentBleedTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/bleed_sampler")}
 
-  # Breaks: a non-hound source or mismatched bandage is compiled as a real C5 producer.
+  # Breaks: a non-hound source or mismatched bandage is compiled as a real C5 producer, or a
+  # plan missing area crashes the compiler.
   test "hound and bandage declarations keep exact effect, skill and item boundaries", %{
     dir: dir
   } do
@@ -11,7 +12,9 @@ defmodule Loka.ContentBleedTest do
       {"items/bandage.json", &put_in(&1, ["bandage", "skill"], "missing")},
       {"items/bandage.json", &put_in(&1, ["bandage", "action"], "eat")},
       {"items/bandage.json", &Map.put(&1, "container", true)},
-      {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")}
+      {"bleeds/bleeding.json", &put_in(&1, ["narration", "tick"], "missing.text")},
+      # an unexpanded (schema-refused) plan is refused, not a crash
+      {"populations/hounds.json", &Map.delete(&1, "area")}
     ]
 
     for {file, change} <- cases do
