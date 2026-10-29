@@ -205,82 +205,7 @@
         },
         "sequence": {
           "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "fact.assign"
-                  },
-                  "fact": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "value": {
-                    "$ref": "delta.schema.json#/$defs/FactValue"
-                  }
-                },
-                "required": [
-                  "op",
-                  "fact",
-                  "value"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "fact.adjust"
-                  },
-                  "fact": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "amount": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "op",
-                  "fact",
-                  "amount"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "skill.acquire"
-                  },
-                  "skill": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  }
-                },
-                "required": [
-                  "op",
-                  "skill"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "topic.grant"
-                  },
-                  "topic": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  }
-                },
-                "required": [
-                  "op",
-                  "topic"
-                ],
-                "additionalProperties": false
-              }
-            ]
-          }
+          "items": { "$ref": "step.schema.json#/$defs/Step" }
         },
         "accept": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -427,7 +352,7 @@
           "additionalProperties": false
         },
         "check": {
-          "$ref": "#/$defs/DialogueCheck"
+          "$ref": "step.schema.json#/$defs/Check"
         }
       },
       "required": [
@@ -461,62 +386,6 @@
             "kind": "quest",
             "key": "lantern"
           }
-        }
-      ]
-    },
-    "DialogueCheck": {
-      "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
-      "type": "object",
-      "properties": {
-        "key": {
-          "$ref": "action.schema.json#/$defs/Key"
-        },
-        "kind": {
-          "const": "opposed"
-        },
-        "skill": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "attribute": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "npc": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "rating": {
-          "type": "integer"
-        },
-        "failure": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "key",
-        "kind",
-        "failure"
-      ],
-      "exactlyOneRequired": [
-        "skill",
-        "attribute"
-      ],
-      "dependentRequired": {
-        "npc": [
-          "attribute"
-        ]
-      },
-      "additionalProperties": false,
-      "examples": [
-        {
-          "key": "persuade_guard",
-          "kind": "opposed",
-          "attribute": {
-            "cartridge_id": "persuade_sampler",
-            "cartridge_version": "0.0.1",
-            "kind": "attribute",
-            "key": "cha"
-          },
-          "rating": 5,
-          "failure": "narration.guard.persuade_failed"
         }
       ]
     }
