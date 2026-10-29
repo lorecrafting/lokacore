@@ -333,6 +333,8 @@ git commit -qm p; git update-ref refs/remotes/origin/main HEAD; echo x > v.mts; 
 grep -q '^TS_SIZE_' "$R.o" || bad "prepush: a .mts change skipped the TS checks: $(cat "$R.o")"
 git commit -qm o; git update-ref refs/remotes/origin/main HEAD; mkdir -p protocol; echo '{}' > protocol/x.json; git add .; pp p
 grep -q '^COMPILE_' "$R.p" || bad "prepush: a protocol JSON change skipped the Elixir compile that reads it: $(cat "$R.p")"
+git commit -qm pj; git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; git mv lib/x.ex docs/moved.md; pp q
+grep -q '^EX_SIZE_' "$R.q" || bad "prepush: moving a .ex file out of lib/ skipped the Elixir checks (rename hid the source): $(cat "$R.q")"
 # --- ci_changes.sh --------------------------------------------------------------------------
 # Break (loka-n0ng): a docs-only branch runs the test jobs or sim/walk; an engine change skips sim/walk; a test-only or
 # contract-doc change skips the test jobs; a non-push event, or a branch diff that is empty or cannot be read, skips anything.
@@ -350,7 +352,12 @@ cc push mobile/app/src/x.tsx 'code=true sim_walk=true'
 cc push kernel/ts/play/obs.ts 'code=true sim_walk=true'
 cc push mix.exs 'code=true sim_walk=true'
 cc push docs/BOOK-UI-COMPONENTS.md 'code=true sim_walk=false'
-cc push docs/spec/conformance/x.json 'code=true sim_walk=false'
+for f in cartridges/x/room.md protocol/x.json config/config.exs .github/workflows/ci.yml kernel/ts/src/x.ts \
+  kernel/ts/test/read.ts kernel/ts/package.json mix.lock bin/loka docs/spec/conformance/x.json; do cc push "$f" 'code=true sim_walk=true'; done
+# A move out of a sim/walk path still runs sim/walk (rename detection lists only the destination).
+git checkout -qB t main; mkdir -p cartridges docs; echo r > cartridges/r.md; git add . && git commit -qm r; git update-ref refs/remotes/origin/main HEAD
+git mv cartridges/r.md docs/r.md && git commit -qm mv; got=$(sh "$bin/ci_changes.sh" push | tr '\n' ' ')
+[ "$got" = 'code=true sim_walk=true ' ] || bad "ci_changes: a move out of cartridges/ into docs/ skipped sim/walk: '$got'"; git update-ref refs/remotes/origin/main main
 cc push docs/spec/x.md 'code=true sim_walk=false'
 cc push docs/contracts.gen.md 'code=true sim_walk=false'
 cc schedule docs/y.md 'code=true sim_walk=true'

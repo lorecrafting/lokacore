@@ -14,7 +14,7 @@ run() { # <name> <command...>
 }
 # Checks keyed to what the branch changed, committed or not, against its merge base with origin/main
 # (loka-n0ng); when the diff fails, every gated check runs.
-base=$(git merge-base origin/main HEAD 2>/dev/null) && changed=$(git diff --name-only "$base") || changed=ALL
+base=$(git merge-base origin/main HEAD 2>/dev/null) && changed=$(git diff --no-renames --name-only "$base") || changed=ALL
 touched() { [ "$changed" = ALL ] || printf '%s\n' "$changed" | grep -qE "$1"; }
 ex='\.exs?$|(^|/)mix\.lock$|^protocol/|composition-profile\.json$' ts='\.([cm]?ts|tsx|mjs)$|^(kernel/ts|mobile|cartridges|protocol)/.*\.json$|^package(-lock)?\.json$'
 touched "$ts" && run TS_SIZE node bin/check_ts_size.mjs

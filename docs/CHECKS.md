@@ -160,7 +160,7 @@ their rules and red controls remain available for resumption.
   was cancelled, or if the path filter did not succeed ([workflow step 7](PM.md#loop)). The path filter is a first `changes` job
   ([`bin/ci_changes.sh`](../bin/ci_changes.sh), loka-n0ng) over the branch's diff against its merge base with `main`: a push whose
   files are all prose under `docs/` or `.beads/` (not `docs/spec/`, `docs/system/`, JSON, `.gen.` files or the prose files tests read, listed in the script) skips every job
-  but `lint`; `sim` and `walk` run only when `kernel/ts/src` or `play`, `lib`, `cartridges`, `protocol`, `mobile/app`, `config`, `mix.exs` or `mix.lock`, `bin/loka`, the sim tests, `kernel/ts/package*.json`, `.github` or the filter changed;
+  but `lint`; `sim` and `walk` run only when `kernel/ts/src` or `play`, `lib`, `cartridges`, `protocol`, `docs/spec/conformance`, `mobile/app`, `config`, `mix.exs` or `mix.lock`, `bin/loka`, the sim tests, `kernel/ts/package*.json`, `.github` or the filter changed;
   the nightly and `workflow_dispatch` runs run everything. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job, two parallel legs `sim (fresh)` (`npm run test:sim:fresh`) and `sim (showcase)` (`npm run test:sim:showcase`); the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
