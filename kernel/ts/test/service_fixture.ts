@@ -166,7 +166,6 @@ export function onlyService(c: any) {
     'barriers',
     'attributes',
     'recipes',
-    'policies',
     'replenish',
     'statuses',
     'items',
