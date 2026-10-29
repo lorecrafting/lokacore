@@ -113,9 +113,9 @@ A ResourceSpec may opt into `regen {every, by_position}`. `every` is a positive 
 `by_position` requires all four keys `standing`, `sitting`, `resting`, `sleeping`, each a
 nonnegative ResourceInt gain per interval (zero allowed). Both compiler and loader enforce
 `every <= floor(9007199254740991 / (max_authored_rate + 1))` (`RESOURCE_SPEC_INVALID` at
-the pool's `regen`) and require `position@1` (`UNDECLARED_CAPABILITY` at `regen`),
-`time_policy.profile=real_elapsed` (`INVALID_TIME_POLICY` at `regen`), and an additive
-recovery API lower bound1.2. `gain` remains required for
+the pool's `regen`) and require `position@1` (`UNDECLARED_CAPABILITY` at `regen`)
+and `time_policy.profile=real_elapsed` (`INVALID_TIME_POLICY` at `regen`).
+`gain` remains required for
 legacy compatibility and is ignored for opted recovery; no new capability or numeric
 profile version is introduced. The active chapter consumes this opt-in under the
 [M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
@@ -224,10 +224,10 @@ potential check, not proof that quest/policy/carry conditions will be met. Unrea
 wrong custody, and keys behind inaccessible rooms or lids retain the lockout diagnostic.
 
 Dialogue `receive` role references must name an item and NPC and exclude accept/hand_over.
-API1.10 also permits receive without a resolving quest; earlier APIs require that quest.
-Optional item `give_allowed: false` also requires API1.10; absence preserves ordinary Give. Dialogue `fact.adjust` must name a bounded integer fact, never
+A receive needs no resolving quest.
+Optional item `give_allowed: false` refuses Give; absence preserves ordinary Give. Dialogue `fact.adjust` must name a bounded integer fact, never
 a reserved engine fact. Both validators enforce references, types and ownership; source short
-fact references expand for this new spelling. The original M20-B reward/storage release declared API1.7; current bundled content follows the [chapter pin](#current-bundled-chapter).
+fact references expand for this new spelling. Current bundled content follows the [chapter pin](#current-bundled-chapter).
 there is no per-feature minimum-version detector for legacy quest-resolving receive, fact.adjust or Put under the
 [pre-production policy](../decisions/owner-decision-forward-development-2026-10-05.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
@@ -892,8 +892,8 @@ birth, cannot hold authored children, and must be the configured corpse template
 Both compiler and loader validate these constraints and reference kinds.
 
 The sampler's 0.0.8 release binds chapel_nave, HP10/MV100 and two corpse templates.
-This is a foundation release: the first live lethal producer remains M6. Older kernels
-refuse API1.5 content; older bundled release lists refuse its unknown content pin.
+This is a foundation release: the first live lethal producer remains M6. Older bundled release lists
+refuse its unknown content pin.
 
 ### Death penalty declarations
 
@@ -1075,7 +1075,7 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Drop declarations
 
-[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`, and `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (populations keep their `loot_role`). The compiler (`lib/loka/content/death.ex`) and the loader (`kernel/ts/src/content/cartridge_death.ts`) refuse an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
+[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; requires `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (populations keep their `loot_role`). The compiler (`lib/loka/content/death.ex`) and the loader (`kernel/ts/src/content/cartridge_death.ts`) refuse an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
 
 ## NPC attribute declarations
 
@@ -1148,6 +1148,7 @@ An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `action
 ## Name word declarations
 
 Name words (loka-6qi): an NPC or item may declare `words {bare, article?, plural?}` (`NameWords`): `bare` and the optional `plural` are text keys checked as `short` (UNRESOLVED_REFERENCE at `words.bare` or `words.plural`), and `article` is one of `a`, `an`, `the`. `short` stays the phrase narration binds; `words` exist for presenters that compose a sentence from several names.
+
 ## Voice declarations
 
 [Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skills@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.room_line_variants[0].when.root.skill`). The checks are in `lib/loka/content/variants.ex`, `kernel/ts/src/content/cartridge_variants.ts`. Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
@@ -1222,6 +1223,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Craft declarations
 
 [Craft](mechanics.md#craft-homestead-hs-10) adds one optional action field (`protocol/action.schema.json` `RecipeCraft`): `craft {consume?, yield?}`, at least one. `consume {items, quantity, to, reason?}`: `items` 1 to 16 distinct item refs (short keys in source), `quantity` 1 to 16, `to` an `ItemLocation`, `reason` a text key in the catalog. `yield {items, from}`: `items` 1 to 64 distinct item refs, `from` an `ItemLocation`. Both kernels check, as for a [replenish entry](#replenish-declarations): an unresolved item or holder is UNRESOLVED_REFERENCE at the field, a repeated item DUPLICATE_DEFINITION at `items`, a `template` holder, a holder item that is placed nowhere or is not a container SCHEMA_VIOLATION at the holder, an unknown `reason` UNRESOLVED_REFERENCE at `consume.reason`. A craft on a storylet or spell target is SCHEMA_VIOLATION at `craft` (`craft` in `kernel/ts/src/content/cartridge_replenish.ts`; `Loka.Content.Replenish.craft/3`).
+
 ## Skill prerequisite declarations
 
 [Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView, NPC lessons and talk choices leave the skill out while its prerequisite fails and it is not acquired; a `skill_compare` naming it in a non-hidden skill's `qualification` or any dialogue `policy`, and a dialogue `label` on a dialogue teaching it, are SCHEMA_VIOLATION at that field) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`).
@@ -1275,6 +1277,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Boss phase declarations
 
 [Boss phases](mechanics.md#boss-phases-toolbox-row-39) add two optional fields on a `resource_compare` leaf (`protocol/policy.schema.json`): `subject` (`"subject"` only) and `at_least_percent` (integer 1 to 100), with exactly one of `at_least` and `at_least_percent`; and one `attack_result` reaction filter, `target` (an NPC of this cartridge, UNRESOLVED_REFERENCE otherwise; `protocol/reaction.schema.json`).
+
 ## Delayed reaction declarations
 
 [Delayed reactions](mechanics.md#delayed-reactions-toolbox-row-fd1) add three optional declarations. A reaction rule's `after` (`protocol/reaction.schema.json` `ReactionRule`), a positive integer of logical seconds; a rule with `after` carrying a `barrier.set`, `item.move` or `population.suppress` step, or a `status.apply` with `co_present` or `tag`, is SCHEMA_VIOLATION `invalid_value` at that step's `op` (reactions/aftershock.apply[0].op; in the loader .cartridge.reactions["..."].apply[0].op). A reaction step `fact.stamp {fact, npc?, item?}` (owned by fact@1, emits fact_changed) and a policy leaf `time_since {fact, npc?, item?, at_least}` (`protocol/policy.schema.json`, owned by fact@1): each fact resolves (UNRESOLVED_REFERENCE at its `fact`) and is an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at its `fact`); `npc` and `item` follow `fact_compare`'s per_subject rule (FACT_SCOPE_UNSUPPORTED).

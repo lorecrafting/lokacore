@@ -3018,7 +3018,7 @@ Homestead row hs-4 (Beads `loka-kgd.108.2`): hens in an owned pen; fill the trou
   - A withdraw the purse cannot hold refuses `service.no_funds`; a deposit past the account's maximum refuses `service.unaffordable`.
   - The account shows in the Book only as any player fact does today.
   - Mobile commerce save reconciles the deposit pair after the fee, and the withdraw pair before it, when the currency is a shop's resource.
-- **Opt-in.** `deposit` and `withdraw` are optional. Property alone needs only G7 (1.78) and an entitlement. Chapter 1 and every other sampler declare none and keep their bytes and hash.
+- **Opt-in.** `deposit` and `withdraw` are optional. Property alone needs only G7 and an entitlement. Chapter 1 and every other sampler declare none and keep their bytes and hash.
 - **Book.** No new element and no [Book UI](book-ui.md) change: two more service offers, labelled with the fee and no MV note (`Deposit ten pennies — fee 1p`; `priceNote` in `mobile/app/book/offers.ts`, PM ruling 2026-10-13).
 - **Traps.** None applies: no new job, op, event, command or save section.
 - **Sampler.** `cartridges/property_sampler`: a lane (entry); a hut north behind `hut_door` (open, key `hut_key`, lying in the hut) with an enter lock on `owns_hut`; a chest in the hut with get and put locks on `owns_hut`; a market east of the lane; a sealed strongroom. The seller (lane) offers `buy_hut` for 10; clerk A (lane) and clerk B (market) each offer deposit and withdraw of 10 pennies for a fee of 1 into the vault NPC (strongroom, pennies 20, other customers' money) on account `savings`; the thief (lane) walks to the hut at 08:00. The player starts with 30 pennies.
@@ -3438,7 +3438,7 @@ Gap 7 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md): [Toolbox row FD7]
 
 ### Built rooms S3: time and timber
 
-Beads `loka-kgd.109.2`. A build service may be a timed commission (row 20b): its benefit adds `fact` and `escrow {items, quantity, custody, ready_after}` (each requires the other; no `output`). Blueprint `max_per_owner` caps one owner's rows. No new floor (1.99).
+Beads `loka-kgd.109.2`. A build service may be a timed commission (row 20b): its benefit adds `fact` and `escrow {items, quantity, custody, ready_after}` (each requires the other; no `output`). Blueprint `max_per_owner` caps one owner's rows.
 
 - **Admission.** First `unbuildable` (`service/build.ts`): site taken refuses `service.site_taken`; `max_total`, or as many rows of that blueprint with `origin.owner === p.actor_id` as `max_per_owner`, refuse `service.construction_full`. Then as 20b: `service.order_open` while the fact is true, `service.missing_inputs` (`not_owned`) under `quantity` held.
 - **Order.** The payment, the inputs moved to `custody`, the fact true, and an order job due at `clock + ready_after` that carries `actor_id` (only a build commission's order job does; `scheduled` in `service/shared.ts`). No room yet.

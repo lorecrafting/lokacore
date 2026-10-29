@@ -1008,7 +1008,7 @@ No due-job chain, new player verb, global objective interpreter or per-frame wri
 is needed. Declare new typed state/transition bounds and planted invalid fixtures;
 update generated contracts and current release pins in the implementation PR.
 
-The concrete row is `PatrolRelation`, stored in `State.patrols` by QuestInstanceId:
+The concrete patrol row is `PatrolRelation`, stored in `State.patrols` by QuestInstanceId:
 actor/body/NPC, quest instance, activation continuation/choice, accepted command
 `attempt_id`, route `cursor`, ordered unique room-ID `credit` and status.
 `patrol.transition` targets that quest instance and compares its full prior row.
