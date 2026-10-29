@@ -1,7 +1,8 @@
 #!/bin/sh
 # Rewrites every generated file from its inputs; bin/prepush.sh runs it and fails when it changes
 # the tree. Run it after editing protocol/, docs/CHECKS.md, docs/MECHANICS-TOOLBOX.md,
-# docs/system/, docs/features.json, a cartridge, kernel/ts/src/, mobile/ or a review record, and
+# docs/system/, docs/features.json, a cartridge, lib/ (the source contracts feed schemas/source/), kernel/ts/src/,
+# mobile/ or a review record, and
 # commit what it rewrites. The slow generators run only when their inputs differ from origin/main
 # (committed or not; every generator when that diff cannot be read):
 #   - a changed cartridge (or lib/): its {description, canonical, sha256} fixture under protocol/fixtures/
@@ -20,7 +21,7 @@ touched() {
   { git diff --name-only "$base" && git ls-files -o --exclude-standard; } | grep -qE "$1"
 }
 
-m mix compile >/dev/null
+m mix do compile + loka.source_schema >/dev/null # one VM: schemas/source/ from the source contracts (loka-tp02)
 sha() { sed -n 's/^  "sha256": "\(.*\)",*$/\1/p' "$1"; }
 # Each fixture regen_hash_fixture.sh accepts, with its cartridge (the manifest id).
 python3 -c '

@@ -1,6 +1,8 @@
 """PreToolUse hook on Bash (.claude/settings.json): refuse `git ... --no-verify` (or `git commit -n`),
 a force or mirror push and `git rebase` (not --continue/--abort, nor `git pull --rebase`) without the owner's OK
-marker, and a bare `br create` (loka-zrqm, loka-sakg). Without the PM's LOKA_PM=1 prefix refuse
+marker, `LOKA_PREPUSH_OK=` as an env prefix, assignment or export (the pre-push skip only bin/pm_merge.sh
+sets; `+=`, `printf -v`/`read` then a bare `export LOKA_PREPUSH_OK`, or `sh -c`, gets past), and a bare
+`br create` (loka-zrqm, loka-sakg). Without the PM's LOKA_PM=1 prefix refuse
 pkill/killall and other by-name kills (`kill $(pgrep ...)`, `pgrep ... | xargs kill`), `gh run watch`,
 `gh pr checks --watch`, `gh workflow run`, the full `npm test`, `test:e2e`, `storybook:smoke`, bin/check_all.sh,
 and `git worktree add` outside worktrees.noindex or inside a checkout (docs/WORKFLOW.md, Every agent).
@@ -175,6 +177,8 @@ def refusal(seg, cwd=""):
             return f"git rebase refused: merge, never rebase (docs/WORKFLOW.md). With the owner's OK, prefix {MARKER}."
         if sub == "push" and any(a.startswith(("--force", "--mirror", "+")) or re.fullmatch(r"-[a-z]*f[a-z]*", a) for a in rest):
             return f"force push refused: fix the cause with a new commit. With the owner's OK, prefix {MARKER}."
+        if any(t.startswith("LOKA_PREPUSH_OK=") for t in seg):  # a prefix, export or declare -x
+            return f"LOKA_PREPUSH_OK refused: it skips the pre-push checks; only bin/pm_merge.sh sets it. With the owner's OK, prefix {MARKER}."
     if PM in env:
         return None
     path = sub == "worktree" and rest[:1] == ["add"] and worktree_path(words, rest[1:], cwd)
