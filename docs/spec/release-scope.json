@@ -218,14 +218,6 @@
       ]
     },
     {
-      "id": "behavior@1",
-      "first_required": "proof",
-      "phase": "R8",
-      "gates": [
-        "WORLD"
-      ]
-    },
-    {
       "id": "schedule@1",
       "first_required": "proof",
       "phase": "R8",
