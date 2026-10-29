@@ -228,7 +228,7 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
 });
 
-// Breaks: the loader trusting an ask's topic, grants, texts or answer condition, its owning capability, the 1.96 floor, or an asked
+// Breaks: the loader trusting an ask's topic, grants or texts, its owning capability, the 1.96 floor, or an asked
 // trigger's topic.
 test('the loader refuses an unknown answer topic or grant, ask without speech@1, 1.95 and a bad trigger topic', () => {
   const smith = `${P}npc/smith`;
@@ -249,7 +249,6 @@ test('the loader refuses an unknown answer topic or grant, ask without speech@1,
   for (const [change, field] of [
     [(a: Obj) => (a.unknown = 'nope'), 'unknown'],
     [(a: Obj) => (a.answers[0].text = 'nope'), 'text'],
-    [(a: Obj) => (a.answers[1].when.root.fact = ref('fact', 'nope')), 'fact'],
   ] as const)
     assert.deepEqual(
       refusal((c) => change(c.npcs[smith].ask)),

@@ -99,13 +99,6 @@ test('corpse content requires templates, valid shrine/restoration and its capabi
       'SCHEMA_VIOLATION',
     ],
     [
-      'missing mass',
-      (c: any) => {
-        delete c.items[player].mass_grams;
-      },
-      'SCHEMA_VIOLATION',
-    ],
-    [
       'restoration outside HP bounds',
       (c: any) => {
         c.world.death.restore.hp = 11;

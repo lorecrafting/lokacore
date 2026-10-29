@@ -17,7 +17,7 @@ export const decide: Rule<'position'> = (world, command, mint, steps = { n: 0 })
   const verb = VERBS[type];
   if (!verb) return rejected('invalid_state');
   const [to, outcome] = verb;
-  // `to` as the FactSpec's Key (the loader holds the spec to the engine's, content/cartridge_position.ts).
+  // `to` as the FactSpec's Key (the compiler writes the engine's spec, lib/loka/content/position.ex).
   const t = world.cartridge.facts[refString(fact(world))]!.value_type;
   const v = t.type === 'enum' ? t.values.find((k) => k === to) : undefined;
   if (v === undefined || positionOf(world, actor_id) === v) return rejected('invalid_state');

@@ -164,6 +164,10 @@ defmodule Loka.ContentServicesTest do
        "services/kitchen_room.benefit.fact"},
       {"facts.json", &put_in(&1, ["facts", "bed_paid", "value_type", "default"], true),
        "services/kitchen_room.benefit.fact"},
+      {"dialogues/aldous_lesson.json",
+       &put_in(&1, ["choices", "learn", "sequence"], [
+         %{"op" => "fact.assign", "fact" => "bed_paid", "value" => true}
+       ]), "dialogues/aldous_lesson.choices.learn.sequence[0].fact"},
       {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.22"),
        "cartridge.requires.kernel_api.at_least"}
     ]

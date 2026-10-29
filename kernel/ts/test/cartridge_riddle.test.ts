@@ -91,20 +91,6 @@ test('loader accepts API1.9 and rejects invalid riddle and journal references', 
       },
     ],
     [
-      'policy fact',
-      'UNRESOLVED_REFERENCE',
-      (c) => {
-        variant(c).when.root.fact.key = 'missing';
-      },
-    ],
-    [
-      'policy type',
-      'FACT_TYPE_MISMATCH',
-      (c) => {
-        variant(c).when.root.equals = true;
-      },
-    ],
-    [
       'policy version',
       'SCHEMA_VIOLATION',
       (c) => {
@@ -119,17 +105,8 @@ test('loader accepts API1.9 and rejects invalid riddle and journal references', 
   }
 });
 
-// Breaks: either feature bypasses its minimum API, or a kernel below the declared range loads it.
-test('riddles and active variants independently require API1.9', () => {
-  for (const feature of ['riddle', 'active_variants']) {
-    const result = load((c) => {
-      c.manifest.requires.kernel_api.at_least = '1.8';
-      if (feature === 'riddle') delete quest(c).journal;
-      else delete dialogue(c).riddle;
-    });
-    assert.ok(!result.ok);
-    assert.equal(result.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
-  }
+// Breaks: a kernel below the declared range loads the riddle cartridge.
+test('a kernel below the declared API1.9 refuses the riddle cartridge', () => {
   const result = load(() => {}, { ...INSTALLED, kernel_api: '1.8' });
   assert.ok(!result.ok);
   assert.equal(result.diagnostic.code, 'KERNEL_API_UNSUPPORTED');

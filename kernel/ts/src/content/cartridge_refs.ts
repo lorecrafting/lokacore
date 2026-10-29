@@ -1,20 +1,17 @@
-// size: allow 359, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
 import { topics } from './cartridge_topics.ts';
 import { trails } from './cartridge_trails.ts';
 import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
-import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
 import { derived } from './cartridge_derived.ts';
 import { levelling } from './cartridge_levelling.ts';
-import { LEAF_REFS } from './cartridge_leaf_refs.ts';
 import { cases } from './cartridge_schedules.ts';
 import { dispositions } from './cartridge_standing.ts';
 // The loader's reference stage and the definition walks it shares with the lock stage
-// (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
-// detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
+// (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode). References, text keys,
+// reachability and containment are the compiler's (lib/loka/content); the families below remain.
 import { encode } from '../foundation/canonical.ts';
 import {
   type DefinitionRef,
@@ -25,20 +22,15 @@ import {
 } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { typed } from '../mechanics/fact.ts';
-import { barriers } from './cartridge_barriers.ts';
-import { links, unreachable } from './cartridge_links.ts';
 import { dialogues } from './cartridge_dialogues.ts';
-import { knowledge } from './cartridge_knowledge.ts';
-import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
+import { quests, questPolicies } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
-import { reserved } from './cartridge_position.ts';
 import { theft } from './cartridge_theft.ts';
 import { mounts } from './cartridge_mounts.ts';
 import { answerRoots, asks } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
-import { lockRoots, locks } from './cartridge_locks.ts';
-import { holders } from './cartridge_holders.ts';
+import { lockRoots } from './cartridge_locks.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -171,25 +163,11 @@ export function nodes(c: Obj): [Obj, string][] {
   ];
 }
 
-const TEXT: Readonly<Record<string, string[]>> = {
-  room: ['title', 'description', 'dark_description'],
-  npc: ['short', 'room_line', 'description'],
-  item: ['short', 'room_line', 'description'],
-  barrier: ['short'],
-  blueprint: ['title', 'description'],
-  detail: ['title', 'description'], // title: loka-x6t.120
-  readable: ['label', 'text', 'title'],
-  cue: ['text'],
-};
-
 // Shared reference, fact-type and text-catalog checks append diagnostics to `out`.
 export type Checks = ReturnType<typeof checkers>;
 
 export function checkers(c: Obj, out: Diagnostic[]) {
   const { id, version } = c.manifest;
-  for (const [ref, fact] of Object.entries(c.facts as Obj))
-    if (!typed(fact.value_type.default, fact.value_type))
-      out.push(diag('FACT_DEFAULT_INVALID', `.cartridge.facts${step(ref)}.value_type.default`));
   const named = (r: Obj, kind: string, path: string) => {
     const target = refString(r as DefinitionRef);
     const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === kind;
@@ -209,30 +187,12 @@ export function checkers(c: Obj, out: Diagnostic[]) {
   return { named, typedValue, text };
 }
 
-// In both formats, validate fact defaults and policy references, typed comparisons and windows.
-// In v2 also validate entry, exits, NPC and item locations, text and touch links, barriers,
-// action contributions, quests, reactions, dialogues, resource bounds and movement cost.
-// size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
+// The v2 family checks batch C1 has not yet removed; each gets the shared checkers.
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
-  const { named, typedValue } = check;
-  for (const [n, at] of nodes(c)) {
-    for (const [field, kind] of Object.entries(LEAF_REFS[n.op as string] ?? {}))
-      if (n[field]) named(n[field], kind, `${at}.${field}`);
-    if (n.op === 'fact_compare') typedValue(n.fact, n.equals, `${at}.equals`);
-    if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
-  }
-  out.push(...reserved(c), ...featureApi(c), ...locks(c));
+  const { named } = check;
   if (c.format !== 'loka-cartridge-v2') return out;
-  // -- B1
-  spatialRefs(c, check, out);
-  out.push(...knowledge(c, check));
-  placesAndText(c, check, out);
-  ancestryRefs(c, check, out);
-  out.push(...holders(c));
-  out.push(...barriers(c, check.named));
-  out.push(...links(c));
   // -- B2
   out.push(...trails(c, check));
   out.push(...theft(c, named));
@@ -256,104 +216,3 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...levelling(c, check));
   return out;
 }
-
-// NPC rooms, item locations and carry, and every text field's links (B1 deletes it).
-function placesAndText(c: Obj, { named, text }: Checks, out: Diagnostic[]) {
-  for (const [r, at] of npcRooms(c)) named(r, 'room', at);
-  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
-    const [{ in: k }, at] = [i.location, `.cartridge.items${step(ref)}`];
-    if (k !== 'template') named(i.location[k], k, `${at}.location.${k}`);
-    if (c.world?.carry !== undefined && !Object.hasOwn(i, 'mass_grams'))
-      out.push(diag('SCHEMA_VIOLATION', `${at}.mass_grams`, { error: 'missing_property' }));
-  }
-  if (c.world?.carry !== undefined) {
-    if (c.lock.capabilities.containment !== 1)
-      out.push(
-        diag('UNDECLARED_CAPABILITY', '.cartridge.world.carry', { capability: 'containment' }, [
-          'containment@1',
-        ]),
-      );
-    const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-    if (major < 1 || (major === 1 && minor < 3))
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-  }
-  for (const [ref, a] of Object.entries(c.actions as Obj))
-    text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
-  for (const [kind, d, at] of parts(c)) {
-    text(d, TEXT[kind] ?? ['description'], at);
-    if (d.words) text(d.words, ['bare', 'plural'], `${at}.words`); // loka-6qi
-  }
-  text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
-}
-
-// Bell area and exit gates name exact local room/fact references.
-function spatialRefs(c: Obj, { named, typedValue, text }: Checks, out: Diagnostic[]) {
-  named(c.entry, 'room', '.cartridge.entry');
-  if (c.world?.bell_cue) {
-    named(c.world.bell_cue.fact, 'fact', '.cartridge.world.bell_cue.fact');
-    typedValue(c.world.bell_cue.fact, true, '.cartridge.world.bell_cue.fact');
-    c.world.bell_cue.rooms.forEach((room: Obj, i: number) =>
-      named(room, 'room', `.cartridge.world.bell_cue.rooms[${i}]`),
-    );
-    text(c.world.bell_cue, ['text'], '.cartridge.world.bell_cue');
-  }
-  for (const [ref, r] of Object.entries(c.rooms as Obj)) {
-    const at = `.cartridge.rooms${step(ref)}`;
-    for (const [dir, exit] of Object.entries(r.exits as Obj)) {
-      named(exit.to, 'room', `${at}.exits.${dir}.to`);
-      if (exit.corpse_ingress) {
-        named(exit.corpse_ingress.fact, 'fact', `${at}.exits.${dir}.corpse_ingress.fact`);
-        typedValue(
-          exit.corpse_ingress.fact,
-          exit.corpse_ingress.equals,
-          `${at}.exits.${dir}.corpse_ingress.equals`,
-        );
-      }
-    }
-    out.push(...unreachable(r.details ?? {}, at), ...noticeBoards(r.details ?? {}, at, text));
-  }
-}
-
-function ancestryRefs(c: Obj, check: ReturnType<typeof checkers>, out: Diagnostic[]) {
-  const { named, typedValue, text } = check;
-  if (c.ancestries && !Object.keys(c.ancestries).length)
-    out.push(diag('SCHEMA_VIOLATION', '.cartridge.ancestries'));
-  for (const [choice, ancestry] of Object.entries((c.ancestries ?? {}) as Obj)) {
-    const at = `.cartridge.ancestries${step(choice)}`;
-    const attribute = refString(ancestry.attribute);
-    named(ancestry.attribute, 'attribute', `${at}.attribute`);
-    if (ancestry.skill) named(ancestry.skill, 'skill', `${at}.skill`);
-    if (ancestry.faction) {
-      named(ancestry.faction.fact, 'fact', `${at}.faction.fact`);
-      typedValue(ancestry.faction.fact, ancestry.faction.value, `${at}.faction.value`);
-      const fact = c.facts[refString(ancestry.faction.fact)];
-      if (fact && (fact.scopes.length !== 1 || fact.scopes[0] !== 'player'))
-        out.push(diag('SCHEMA_VIOLATION', `${at}.faction.fact`));
-    }
-    text(ancestry, ['label', 'description'], at);
-    if (!Number.isSafeInteger((c.attributes?.[attribute]?.start ?? 0) + ancestry.modifier))
-      out.push(diag('SCHEMA_VIOLATION', `${at}.modifier`));
-    if (
-      c.lock.capabilities.attributes !== 1 ||
-      c.lock.capabilities.fact !== 1 ||
-      (ancestry.skill && c.lock.capabilities.skills !== 1) ||
-      (ancestry.dark_sight && c.lock.capabilities.light !== 1)
-    )
-      out.push(diag('UNDECLARED_CAPABILITY', at));
-  }
-}
-
-// Each room an NPC names, with its path: its start, its daily schedule, its arrest cell (row 35).
-const npcRooms = (c: Obj): [Obj, string][] =>
-  Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]): [Obj, string][] => {
-    const at = `.cartridge.npcs${step(ref)}`;
-    const daily = Object.entries((n.daily_schedule ?? {}) as Obj);
-    const arrest = n.disposition?.arrest;
-    return [
-      [n.room, `${at}.room`],
-      ...daily.map(([h, r]): [Obj, string] => [r, `${at}.daily_schedule${step(h)}`]),
-      ...(arrest ? [[arrest.to, `${at}.disposition.arrest.to`] as [Obj, string]] : []),
-    ];
-  });

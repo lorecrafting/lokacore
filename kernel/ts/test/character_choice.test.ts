@@ -166,23 +166,3 @@ test('hardy sees a dark room locally and next door while physical light stays of
     [true, false, false],
   ]);
 });
-
-// Breaks: a syntactically valid ancestry with an unresolved attribute, wrong skill kind
-// or unavailable description reaches creation without loader refusal.
-test('loader refuses invalid authored ancestry bindings', () => {
-  const refused = (edit: (c: any) => void) => {
-    const c = source();
-    edit(c);
-    const r = load(c);
-    return r.ok ? 'loaded' : r.diagnostic.code;
-  };
-  assert.deepEqual(
-    [
-      () => {},
-      (c: any) => (c.ancestries.strong.attribute.key = 'missing'),
-      (c: any) => (c.ancestries.strong.skill.kind = 'item'),
-      (c: any) => (c.ancestries.hardy.description = 'missing'),
-    ].map(refused),
-    ['loaded', 'UNRESOLVED_REFERENCE', 'UNRESOLVED_REFERENCE', 'UNRESOLVED_REFERENCE'],
-  );
-});

@@ -15,8 +15,6 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
   for (const mutate of [
     (c: any) => (c.items[ledger].readable.topic = ref('topic', 'missing')),
     (c: any) => (c.items[ledger].readable.topic = ref('fact', 'topic_mill_known')),
-    (c: any) => (c.items[ledger].readable.text = 'missing'),
-    (c: any) => (c.items[ledger].readable.label = 'missing'),
     (c: any) => (c.facts[`${prefix}:fact/topic_mill_known`].scopes = ['instance']),
     (c: any) =>
       (c.facts[`${prefix}:fact/topic_mill_known`].value_type = {

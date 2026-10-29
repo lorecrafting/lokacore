@@ -82,44 +82,6 @@ test('a forged Move through the panel is not_found until the search; then the ex
   });
 });
 
-// Breaks: the loader drops a hidden_until check, so an unknown or mistyped fact, a hidden face with
-// a barrier (a door verb would find it) or an old API floor loads.
-test('the loader refuses each unsound hidden_until declaration', () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const face = `.cartridge.rooms["${P}:room/hall"].exits.east.hidden_until`;
-  const until = (c: any) => c.rooms[`${P}:room/hall`].exits.east.hidden_until;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.44'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [(c) => (until(c).fact.key = 'panel_lost'), 'UNRESOLVED_REFERENCE', `${face}.fact`],
-    [(c) => (until(c).equals = 1), 'FACT_TYPE_MISMATCH', `${face}.equals`],
-    [
-      (c) => {
-        // A well-formed door on both faces, so only the hidden face's own rule refuses it.
-        const door = { ...until(c).fact, kind: 'barrier', key: 'panel' };
-        c.barriers = {
-          [`${P}:barrier/panel`]: {
-            key: 'panel',
-            keywords: ['panel'],
-            short: 'detail.panel',
-            initial: 'open',
-          },
-        };
-        c.lock.capabilities.barrier = c.manifest.requires.capabilities.barrier = 1;
-        c.rooms[`${P}:room/hall`].exits.east.barrier = door;
-        c.rooms[`${P}:room/study`].exits.west.barrier = door;
-      },
-      'BARRIER_MISMATCH',
-      face,
-    ],
-  ];
-  for (const [change, code, path] of rows)
-    assert.deepEqual(refusal(source, change), [code, path], path);
-});
-
 // Breaks: the loader admits a patrol leg or expedition edge over a hidden face, so the leader walks
 // it or the quest journal names its direction (twin of content_hidden_passage_test.exs).
 test('the loader refuses a patrol or expedition route over a hidden face', () => {

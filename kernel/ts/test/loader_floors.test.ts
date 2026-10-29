@@ -39,8 +39,10 @@ const load = (cartridge: unknown) => {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
-// C1 D1 deleted these cases' TS loader floors (plan D3); slice F2 deletes this test and its fixture.
-const unfloored = new Set([1, 3, 6, 23, 26, 27, 28, 33, 36, 46, 51, 72, 79, 83, 86, 87]); // fixture case indexes
+// C1 D1 and C1 B1 deleted these cases' TS loader floors (plan D3); slice F2 deletes this test and its fixture.
+const unfloored = new Set([
+  1, 3, 4, 5, 6, 23, 26, 27, 28, 33, 36, 39, 46, 51, 72, 79, 80, 81, 82, 83, 86, 87, 92,
+]); // fixture case indexes
 
 // Breaks: a loader floor check dropped, moved to another floor or reporting another code or path
 // (each case compiled at its floor loads; the same artifact at below is refused).

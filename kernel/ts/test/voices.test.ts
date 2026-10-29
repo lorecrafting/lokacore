@@ -93,19 +93,10 @@ const sage = `${C}:npc/sage`;
 const glyphs = `${C}:recipe/read_glyphs`;
 const floor = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}];
 
-// Breaks: the loader stops walking the leaf (an undeclared skill loads and fails in play), the
-// leaf loses its owner, the 1.91 floor misses a lone leaf, or a retired `asides` field loads
+// Breaks: the skill_compare leaf loses its owner, the 1.91 floor misses a lone leaf, or a retired `asides` field loads
 // (twin of content_voices_test.exs).
-test('the loader checks skill_compare (reference, owner, floor) and refuses asides', () => {
+test('the loader checks skill_compare (owner, floor) and refuses asides', () => {
   const rows: [(c: any) => void, unknown][] = [
-    [
-      (c) => (c.npcs[sage].room_line_variants[0].when.root.skill.key = 'ghost'),
-      [
-        'UNRESOLVED_REFERENCE',
-        `.cartridge.npcs[${JSON.stringify(sage)}].room_line_variants[0].when.root.skill`,
-        { target: `${C}:skill/ghost` },
-      ],
-    ],
     [
       (c) => {
         delete c.manifest.requires.capabilities.skills;

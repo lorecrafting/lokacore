@@ -165,18 +165,6 @@ test('world_lists_no_fixture_action: false with a detail recipe in actions, true
   assert.equal(guard(w, bad), false);
 });
 
-// Break: the loader accepts a detail title that names no catalog text.
-test('a detail title naming no text is UNRESOLVED_REFERENCE at its path', () => {
-  const r = load((c) => {
-    c.rooms[TOWER].details.hearth.title = 'detail.missing';
-  }) as any;
-  assert.equal(r.ok, false);
-  assert.deepEqual(
-    [r.diagnostic.code, r.diagnostic.path],
-    ['UNRESOLVED_REFERENCE', `.cartridge.rooms["${TOWER}"].details.hearth.title`],
-  );
-});
-
 // Break: a bed detail's page replaces its actions with the bed's Rest, dropping the recipe card
 // aimed at it (offered nowhere, since view.actions never lists a detail recipe).
 test('a recipe aimed at a bed detail keeps its card on that page', () => {

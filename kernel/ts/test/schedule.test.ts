@@ -366,18 +366,11 @@ const unlock = (c: any, cap: string) => {
 };
 
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): a
-// schedule naming a room the cartridge lacks (run_job would move Bram nowhere), a schedule or
-// calendar whose owner (behavior@1, calendar@1) is not locked, or a schedule without schedule@1
+// schedule or calendar whose owner (behavior@1, calendar@1) is not locked, or a schedule without schedule@1
 // (the drain would run its jobs under a capability the cartridge never declared), or an action
 // built on run_job (authority-internal, 04 §1: a dead action).
-test('the loader checks schedule rooms and the schedule and calendar owners', () => {
+test('the loader checks the schedule and calendar owners', () => {
   const bram = `.cartridge.npcs["${F}:npc/bram"]`;
-  fails(
-    (c) => (c.npcs[`${F}:npc/bram`].daily_schedule['19'] = ref('room', 'shed')),
-    'UNRESOLVED_REFERENCE',
-    `${bram}.daily_schedule.19`,
-    { target: `${F}:room/shed` },
-  );
   fails(
     (c) => unlock(c, 'behavior'),
     'UNDECLARED_CAPABILITY',

@@ -99,16 +99,6 @@ test('loader refuses service bindings that cannot produce exact immediate outcom
       'kitchen_room"].narration',
     ],
     [
-      'unpaid entitlement writer',
-      (c) => {
-        c.dialogues[`${prefix}:dialogue/aldous_lesson`].choices.learn.sequence = [
-          { op: 'fact.assign', fact: ref('fact', 'bed_paid'), value: true },
-        ];
-      },
-      'RESERVED_FACT',
-      '.sequence[0].fact',
-    ],
-    [
       'old API',
       (c) => (c.manifest.requires.kernel_api.at_least = '1.22'),
       'KERNEL_API_RANGE_INVALID',

@@ -238,23 +238,6 @@ test('g. the loader keeps the bank to API 1.83, a bounded account and one vault'
       ['SCHEMA_VIOLATION', `${at('deposit_a')}.benefit.vault`],
     ],
     [
-      (c) => {
-        c.manifest.requires.capabilities.dialogue = c.lock.capabilities.dialogue = 1;
-        const sequence = [{ op: 'fact.adjust', fact: ref('fact', 'savings'), amount: 1 }];
-        c.dialogues = {
-          [`${S}:dialogue/gift`]: {
-            key: 'gift',
-            npc: ref('npc', 'clerk_a'),
-            policy: { policy_version: 1, root: { op: 'all', items: [] } },
-            prompt: 'service.deposit',
-            roles: { clerk: { role: 'npc', npc: ref('npc', 'clerk_a') } },
-            choices: { gift: { label: 'service.deposit', narration: 'npc.vault.short', sequence } },
-          },
-        };
-      },
-      ['RESERVED_FACT', `.cartridge.dialogues["${S}:dialogue/gift"].choices.gift.sequence[0].fact`],
-    ],
-    [
       (c) => (c.services[`${S}:service/buy_hut`].benefit.fact = ref('fact', 'savings')),
       ['SCHEMA_VIOLATION', `${at('buy_hut')}.benefit.fact`],
     ],

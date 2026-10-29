@@ -246,8 +246,8 @@ test('an exhausted query budget perceives nothing', () => {
 });
 
 // Breaks: the loader accepts a cue or a lone cue_perceived leaf below kernel_api 1.48, a cue
-// without sense_cue@1 or with a text key missing from the catalog.
-test('the loader refuses a cue below 1.48, without sense_cue or without its text', () => {
+// without sense_cue@1.
+test('the loader refuses a cue below 1.48 or without sense_cue', () => {
   const load = (change: (c: Obj) => void) => {
     const c = structuredClone(content) as unknown as Obj;
     change(c);
@@ -287,9 +287,4 @@ test('the loader refuses a cue below 1.48, without sense_cue or without its text
     c.reactions = {}; // their cue_perceived leaves would be refused first
   });
   assert.deepEqual([owner, at.slice(-8)], ['UNDECLARED_CAPABILITY', '.cues[0]']);
-  const [missing, key] = load((c) => delete c.text['cue.rattle']);
-  assert.deepEqual(
-    [missing, key.slice(-29)],
-    ['UNRESOLVED_REFERENCE', 'outcomes.failure.cues[0].text'],
-  );
 });

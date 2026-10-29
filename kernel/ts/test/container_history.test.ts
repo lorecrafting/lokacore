@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { encode, hash } from '../src/foundation/canonical.ts';
-import { loadCartridge, INSTALLED } from '../src/index.ts';
 import { read } from './read.ts';
 
-// Breaks: a frozen encoding/hash answer changes, or the current loader silently treats
-// historical unmarked holders as containers. Historical bytes are evidence, not a fallback.
-test('historical artifacts retain their canonical answers and refuse unmarked receptacles', () => {
+// Breaks: a frozen encoding/hash answer changes. Historical bytes are evidence, not a fallback.
+test('historical artifacts retain their canonical answers', () => {
   for (const name of [
     'cartridge_items',
     'cartridge_locks',
@@ -21,11 +19,5 @@ test('historical artifacts retain their canonical answers and refuse unmarked re
     const pin = read(`protocol/fixtures/${name}_hash.json`);
     assert.equal(encode(pin.value), pin.canonical, name);
     assert.equal(hash(pin.value), pin.sha256, name);
-    const result = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
-      INSTALLED,
-    );
-    assert.equal(result.ok, false, name);
-    if (!result.ok) assert.equal(result.diagnostic.code, 'SCHEMA_VIOLATION', name);
   }
 });
