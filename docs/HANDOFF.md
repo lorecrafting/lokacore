@@ -25,7 +25,7 @@ loka-kgd.194.12/.13/.14/.16/.18/.22/.17/.9). In flight; each verdict lands as a 
   APPROVE WITH NOTES; batch review CHANGES REQUIRED (F1 cut live liquids/fuel/food/population rules from
   cartridge.md); fix round 1 with a fresh developer. Then scoped re-check, merge.
 - Batch C1 (S7 loka-ivjq.20, F2 loka-ivjq.2): plan in loka-ivjq.20 notes ("C1 PLAN", PM amendments on
-  top). `simplify/c1-loader` at 91a99666 (green): prep, D1, B1, F2-Ex merged (loader_floors test and fixture
+  top). `simplify/c1-loader` at 6bf74b13 (green): prep, D1, B1, F2-Ex, F2-docs, D2, B2 merged (loader_floors test and fixture
   deleted). In flight: B2 fix round 1 (`simplify/c1-b2`; restored "loader-only" checks all have twins,
   delete them; merges c1-loader), D2 building, F2-docs (`simplify/c1-f2-docs`, carries #488 from main) in
   review. Each slice merges latest c1-loader before handback (parallel slices clash in shared tests; CI is
@@ -33,10 +33,9 @@ loka-kgd.194.12/.13/.14/.16/.18/.22/.17/.9). In flight; each verdict lands as a 
   (stale comments listed in slice handbacks: loader_floors cites in kernel/ts/test, lessons/pm.md,
   content_*_test.exs comments, cartridge.md, mechanics.md), then Fable final-head review and the PR.
   Starred decisions D1 D2 D4 D5 D6 are PM defaults inside the owner's yes; owner ratifies on return.
-- Batch S (speed, loka-n0ng; owner yes 2026-10-28 "yes to all the process speedups"): reviewer fixes
-  small no-logic should-fixes in place; CI path filters; agents leave full suites to CI (wait_ci is the
-  full-suite bar; already the practice in C1 briefs); prepush only for changed file types. One developer when
-  a slot frees; B5 (loka-ivjq.28) moves ahead of C2.
+- Batch S merged (#489, loka-n0ng): CI path filters (docs-only pushes skip sim/walk), prepush runs only
+  checks for changed file types, reviewer fixes small no-logic should-fixes in place, CI is the full-suite
+  bar. B5 (loka-ivjq.28) moves ahead of batch C2.
 
 ## Next, in order (owner-approved)
 
