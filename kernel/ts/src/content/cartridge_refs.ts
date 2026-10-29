@@ -1,4 +1,4 @@
-// size: allow 355, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
+// size: allow 367, one statement per family until batch C1 removes them; ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and mounts (row 43b) join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -220,7 +220,7 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
-  const { named, typedValue, text } = check;
+  const { named, typedValue } = check;
   for (const [n, at] of nodes(c)) {
     for (const [field, kind] of Object.entries(LEAF_REFS[n.op as string] ?? {}))
       if (n[field]) named(n[field], kind, `${at}.${field}`);
@@ -229,9 +229,44 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c), ...locks(c));
   if (c.format !== 'loka-cartridge-v2') return out;
-  out.push(...exchanges(c, check), ...fuel(c, check), ...replenish(c, check), ...trails(c, check));
+  // -- B1
   spatialRefs(c, check, out);
   out.push(...knowledge(c, check));
+  placesAndText(c, check, out);
+  ancestryRefs(c, check, out);
+  out.push(...holders(c));
+  out.push(...barriers(c, check.named));
+  out.push(...links(c));
+  // -- B2
+  out.push(...trails(c, check));
+  out.push(...theft(c, named));
+  out.push(...mounts(c, named));
+  out.push(...asks(c, check));
+  // -- C1
+  out.push(...exchanges(c, check));
+  out.push(...recipes(c, check));
+  out.push(...reactions(c, check));
+  // -- C2
+  out.push(...quests(c, check));
+  out.push(...dialogues(c, check));
+  // -- D1
+  out.push(...fuel(c, check));
+  out.push(...replenish(c, check));
+  out.push(...water(c, check));
+  out.push(...pools(c, named));
+  // -- D2
+  out.push(...skills(c, check));
+  out.push(...topics(c, check));
+  out.push(...death(c, check));
+  out.push(...combat(c, named));
+  out.push(...commerce(c));
+  out.push(...derived(c, check));
+  out.push(...levelling(c, check));
+  return out;
+}
+
+// NPC rooms, item locations and carry, and every text field's links (B1 deletes it).
+function placesAndText(c: Obj, { named, text }: Checks, out: Diagnostic[]) {
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     const [{ in: k }, at] = [i.location, `.cartridge.items${step(ref)}`];
@@ -259,14 +294,6 @@ export function refStage(c: Obj): Diagnostic[] {
     if (d.words) text(d.words, ['bare', 'plural'], `${at}.words`); // loka-6qi
   }
   text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
-  out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
-  ancestryRefs(c, check, out);
-  out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
-  out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
-  out.push(...pools(c, named), ...death(c, check), ...combat(c, named), ...commerce(c));
-  out.push(...theft(c, named), ...mounts(c, named), ...asks(c, check));
-  out.push(...derived(c, check), ...levelling(c, check));
-  return out;
 }
 
 // Bell area and exit gates name exact local room/fact references.

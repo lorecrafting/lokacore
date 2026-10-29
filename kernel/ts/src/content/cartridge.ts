@@ -1,4 +1,4 @@
-// size: allow 304, construction joins the declaration stage
+// size: allow 306, one statement per family until batch C1 removes them; construction joins the declaration stage
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
 import { scopedFacts } from './cartridge_scoped_facts.ts';
@@ -282,23 +282,25 @@ const STEP_USE: Readonly<Record<string, ['event' | 'command', string]>> = {
 };
 
 function declarations(c: Obj): Diagnostic[] {
-  return [
-    ...refStage(c),
-    ...liquids(c),
-    ...services(c),
-    ...food(c),
-    ...bleed(c),
-    ...status(c),
-    ...population(c),
-    ...transports(c),
-    ...variety(c),
-    ...exposure(c),
-    ...senses(c),
-    ...delayed(c),
-    ...variants(c),
-    ...scopedFacts(c),
-    ...schedules(c),
-    ...standing(c),
-    ...construction(c),
-  ];
+  const out: Diagnostic[] = [...refStage(c)];
+  // -- B2
+  out.push(...variety(c));
+  out.push(...exposure(c));
+  out.push(...senses(c));
+  out.push(...delayed(c));
+  out.push(...variants(c));
+  out.push(...schedules(c));
+  out.push(...construction(c));
+  // -- D1
+  out.push(...liquids(c));
+  out.push(...food(c));
+  out.push(...bleed(c));
+  out.push(...status(c));
+  out.push(...population(c));
+  out.push(...transports(c));
+  // -- D2
+  out.push(...services(c));
+  out.push(...scopedFacts(c));
+  out.push(...standing(c));
+  return out;
 }
