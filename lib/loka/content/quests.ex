@@ -1,8 +1,7 @@
 defmodule Loka.Content.Quests do
   @moduledoc """
-  Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8), twin of
-  `kernel/ts/src/content/cartridge_quests.ts`: each quest's owning capability is required (quest@1, by
-  its quest_activated, as a recipe's check by check@1's events), its key is no registered
+  Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8): each quest's owning capability is
+  required (quest@1, by its quest_activated, as a recipe's check by check@1's events), its key is no registered
   command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
   title, its offer's label (the offer is optional) and all journal texts have catalog entries
   (unless the catalog was rejected, `:unknown`), and a post_activation_event objective names an item of this cartridge. Its policy trees are checked
@@ -64,7 +63,7 @@ defmodule Loka.Content.Quests do
 
   # Toolbox row W24: a deadline is legacy (S2: at, fact, trust_fact and trust_amount, no after) or
   # generic (exactly one of after or at, no legacy field); any other shape is
-  # SCHEMA_VIOLATION invalid_value at the deadline. Twin of cartridge_quests.ts deadline.
+  # SCHEMA_VIOLATION invalid_value at the deadline.
   defp deadline(_, nil, _), do: []
 
   defp deadline(rel, d, ctx) do
@@ -118,7 +117,7 @@ defmodule Loka.Content.Quests do
 
   # Toolbox row W23: each stage's minutes strictly ascend; real minutes need the real_elapsed time
   # policy (INVALID_TIME_POLICY); an empty hints object is
-  # too_few_items (the subset has no minProperties). Twin of cartridge_quests.ts hints.
+  # too_few_items (the subset has no minProperties).
   defp hints(rel, %{"journal" => %{"hints" => h}}, _) when h == %{},
     do: [diag("SCHEMA_VIOLATION", at(rel, ["journal", "hints"]), %{"error" => "too_few_items"})]
 
