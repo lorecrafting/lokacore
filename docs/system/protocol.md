@@ -225,7 +225,7 @@ the dedicated chapter/literal fixtures prove the family's real transitions.
 A `DomainEvent` (`kernel/ts/src/runtime/decision.ts:227`) has an IdSource id, the world, player scope,
 the actor, the world's logical time, a one-based causal `position`, and the command as
 `causation_id` and `correlation_id`. A job's `entity_entered_room` is at instance scope and the
-job's due time, caused by the `run_job` (`mechanics/schedule/behavior.ts:58`); the proposal renumbers positions and
+job's due time, caused by the `run_job` (`mechanics/schedule/daily.ts:58`); the proposal renumbers positions and
 correlates everything to the player's command (`runtime/proposal.ts:183`). The modal scene subset
 emits `scene_ended {scene}` on the final continue at position 2, leaving position 1
 for its line fact's fact_changed; start is the fact's 0→1 change, with no scene_started

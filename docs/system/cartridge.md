@@ -147,7 +147,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   several dialogues; no dialogue role named `actor`; a choice's `accept` names a quest, in a
   dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); an action with outcomes has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
-  (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
+  (`EMPTY_TIME_WINDOW`); a schedule needs `schedule@1` and a calendar `calendar@1`;
 - `calendar` may author a nonnegative multi-day `start`, positive `units_per_hour` and
   `hours_per_day`, a positive `subdivisions_per_hour` dividing the hour, and ordered solar
   and lunar cuts. The compiler checks safe day arithmetic, cut order and bounds,

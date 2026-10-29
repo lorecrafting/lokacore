@@ -87,20 +87,20 @@ defmodule Loka.ContentFerryTest do
               ]}
   end
 
-  # Breaks: a daily schedule compiling without behavior@1, or a calendar without calendar@1, in
+  # Breaks: a daily schedule compiling without schedule@1, or a calendar without calendar@1, in
   # the manifest (capability_registry.json definitions).
-  test "a schedule needs behavior@1 and a calendar calendar@1", %{dir: dir} do
+  test "a schedule needs schedule@1 and a calendar calendar@1", %{dir: dir} do
     m = src("cartridge.json")
     without = &update_in(m, ["requires", "capabilities"], fn c -> Map.delete(c, &1) end)
 
-    assert compile(dir, %{"cartridge.json" => without.("behavior")}) ==
+    assert compile(dir, %{"cartridge.json" => without.("schedule")}) ==
              {:error,
               [
                 d(
                   "UNDECLARED_CAPABILITY",
                   "npcs/bram.daily_schedule",
-                  %{"capability" => "behavior"},
-                  ["behavior@1"]
+                  %{"capability" => "schedule"},
+                  ["schedule@1"]
                 )
               ]}
 

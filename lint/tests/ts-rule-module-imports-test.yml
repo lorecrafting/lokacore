@@ -12,6 +12,7 @@ valid:
   - "import { chainRefused } from '../locks.ts';"
   - "import { barring } from '../status/bars.ts';"
   - "import { entered } from './behavior.ts';"
+  - "import { jobId } from '../schedule/daily.ts';"
   # Break: named pure helpers are rejected along with rule-module imports.
   - "import { moveSequence } from './sequence.ts';"
   - "import { roundSequence } from '../combat/round.ts';"

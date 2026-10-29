@@ -133,7 +133,7 @@ export function statusHolder(world: World, job_id: JobId) {
   return undefined;
 }
 
-// A job's status event, instance-scoped like a scheduled NPC's entry (schedule/behavior.ts entered).
+// A job's status event, instance-scoped like a scheduled NPC's entry (schedule/daily.ts entered).
 const happened = (
   world: World,
   run: Pick<Command, 'id'>,

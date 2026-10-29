@@ -13,7 +13,6 @@
     "capabilities": {
       "movement": 1,
       "containment": 1,
-      "behavior": 1,
       "calendar": 1,
       "schedule": 1,
       "fact": 1,

@@ -35,7 +35,6 @@
       "barrier": 1,
       "death": 1,
       "position": 1,
-      "behavior": 1,
       "inspectable_detail": 1,
       "target_resolution": 1,
       "topics": 1,
