@@ -1,6 +1,6 @@
 {
-  "title": "blueprint.hut_timbered.title",
-  "description": "blueprint.hut_timbered.description",
+  "title": "structure.hut_timbered.title",
+  "description": "structure.hut_timbered.description",
   "max_per_owner": 1,
   "variants": [
     {
@@ -11,7 +11,7 @@
           "tag": "rug"
         }
       },
-      "description": "blueprint.hut_timbered.description.rug"
+      "description": "structure.hut_timbered.description.rug"
     }
   ]
 }

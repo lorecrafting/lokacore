@@ -158,9 +158,9 @@ defmodule Loka.ContentCraftTest do
 
   # Break (Built rooms S6): a build step
   # compiles off a detail target, on a room that is no site, twice in one sequence, without
-  # world.construction or the refusal texts, or naming a blueprint or direction the site does not
+  # world.construction or the refusal texts, or naming a structure or direction the site does not
   # list.
-  test "a build step needs a site detail, its listed blueprint and direction, once, on success",
+  test "a build step needs a site detail, its listed structure and direction, once, on success",
        %{dir: dir} do
     seq = "actions/raise_timbered_hut.outcomes.success.sequence"
     raise = "actions/raise_timbered_hut.json"
@@ -190,8 +190,8 @@ defmodule Loka.ContentCraftTest do
       {[{"text.json", &Map.delete(&1, "service.site_taken")}], "UNRESOLVED_REFERENCE", "[0].op"},
       {[{"text.json", &Map.delete(&1, "service.construction_full")}], "UNRESOLVED_REFERENCE",
        "[0].op"},
-      {[{"rooms/lane.json", &put_in(&1, ["site", "blueprints"], ["hut_plain"])}],
-       "SCHEMA_VIOLATION", "[0].blueprint"},
+      {[{"rooms/lane.json", &put_in(&1, ["site", "structures"], ["hut_plain"])}],
+       "SCHEMA_VIOLATION", "[0].structure"},
       {[{raise, &step.(&1, "direction", "east")}], "SCHEMA_VIOLATION", "[0].direction"}
     ]
 

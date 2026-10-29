@@ -36,11 +36,11 @@ defmodule Loka.Core.Creation do
     end
   end
 
-  # Built rooms S2: a blueprint raised by a known character (some body's owner).
+  # Built rooms S2: a structure raised by a known character (some body's owner).
   defp built?(identity, state) do
     owner = identity["origin"]["owner"]
 
-    identity["definition"]["kind"] == "blueprint" and
+    identity["definition"]["kind"] == "structure" and
       Enum.any?(section(state, "known_entities"), fn {_, e} ->
         e["kind"] == "body" and e["owner_id"] == owner
       end)
