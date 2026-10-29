@@ -55,7 +55,7 @@ run() { # <name> <command...>
 ch=$(git diff --name-only --diff-filter=d "$pre" HEAD)
 ts=$(echo "$ch" | sed -n 's#^kernel/ts/\(test/.*\.test\.ts\)$#\1#p' | tr '\n' ' ')
 ex=$(echo "$ch" | grep -E '^test/.*_test\.exs$' | tr '\n' ' ')
-sh "$here/prepush.sh" || fail=1
+sh bin/prepush.sh || fail=1  # the batch's own copy: the hook skips it at push and hosted CI never runs it
 [ -n "$ts" ] && run TS_TESTS sh -c "cd kernel/ts && nice -n 10 mise exec -- node --test --test-reporter=dot $ts"
 [ -n "$ex" ] && run EX_TESTS sh -c "nice -n 10 mise exec -- mix test $ex"
 [ "$fail" = 0 ] || { echo "NOT PUSHED; reset to pre-merge $pre"; git reset -q --hard "$pre"; exit 1; }
