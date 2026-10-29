@@ -1,5 +1,5 @@
 {
-  "label": "actions.chop",
+  "name": "actions.chop",
   "aliases": [
     "chop"
   ],
@@ -11,21 +11,18 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "has_item",
-          "item": "axe"
-        },
-        {
-          "op": "skill_compare",
-          "skill": "woodcutting",
-          "at_least": 1
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "has_item",
+        "item": "axe"
+      },
+      {
+        "op": "skill_compare",
+        "skill": "woodcutting",
+        "at_least": 1
+      }
+    ]
   },
   "check": {
     "key": "chop",

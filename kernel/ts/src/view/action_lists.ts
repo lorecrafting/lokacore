@@ -18,11 +18,10 @@ import type {
   EntityId,
   ErrorCode,
   Key,
-  NpcDefinition,
   TargetSpec,
 } from '../contracts.gen.ts';
 import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
-import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
+import { bodyOf, type Steps, type World, type NpcEntity } from '../runtime/decision.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -168,7 +167,7 @@ function entityOffered(
       : a.target.kind === 'entity' &&
         a.target.scopes.includes(scope as never) &&
         (!equip(a) || fits(world, actor, a, id)) &&
-        (a.command !== 'ask' || !!(world.entities[id] as NpcDefinition | undefined)?.ask) && // row FD7
+        (a.command !== 'ask' || !!(world.entities[id] as NpcEntity | undefined)?.ask) && // row FD7
         !aimedRefused(world, actor, a.recipe, id, steps);
 }
 
@@ -210,7 +209,7 @@ function advertise(
     (speaks(world, target)
       ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
       : 'not_found');
-  const refused = holds(world, actor, a.policy.root, { target, steps })
+  const refused = holds(world, actor, a.policy, { target, steps })
     ? (heldOn(world, actor, a, target) ?? craftRefused(world, a.recipe, actor, steps)) // hs-10
     : policyRefusal(a.recipe); // the command's refusal of a failed policy, with its reason
   const code =

@@ -1,5 +1,5 @@
 {
-  "title": "room.flats.title",
+  "name": "room.flats.title",
   "description": "room.flats.description",
   "tags": [
     "exposed"
@@ -12,11 +12,8 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "drought"
-        }
+        "op": "sky",
+        "weather": "drought"
       },
       "description": "room.flats.drought"
     }

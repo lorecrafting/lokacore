@@ -2,17 +2,14 @@
   "keywords": [
     "sage"
   ],
-  "short": "npc.sage.short",
+  "name": "npc.sage.short",
   "room_line": "npc.sage.line",
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "skill_compare",
-          "skill": "lore",
-          "at_least": 2
-        }
+        "op": "skill_compare",
+        "skill": "lore",
+        "at_least": 2
       },
       "description": "npc.sage.line.scholar"
     }

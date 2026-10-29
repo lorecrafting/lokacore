@@ -2,7 +2,7 @@
   "keywords": [
     "seller"
   ],
-  "short": "npc.seller.short",
+  "name": "npc.seller.short",
   "room_line": "npc.seller.room",
   "description": "npc.seller.description",
   "room": "yard",

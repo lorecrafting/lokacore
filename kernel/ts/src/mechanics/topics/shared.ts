@@ -31,7 +31,7 @@ export function knownTopics(world: World, actor: CharacterId) {
                 kind: 'topic',
                 key: d.key,
               } as DefinitionRef,
-              label: d.label,
+              label: d.name,
             },
           ]
         : [],
@@ -50,10 +50,10 @@ export function lore(world: World, actor: CharacterId) {
   const deductions = Object.values(world.cartridge.recipes ?? {})
     .sort((a, b) => cmp(a.key, b.key))
     .flatMap((r) => {
-      const root = r.policy.root;
+      const root = r.policy;
       const from = [
         ...new Set(
-          (root.op === 'all' ? root.items : []).flatMap((p) =>
+          (root?.op === 'all' ? root.items : []).flatMap((p) =>
             p.op === 'fact_compare' && p.equals === true ? (topicOf(p.fact) ?? []) : [],
           ),
         ),
@@ -65,7 +65,7 @@ export function lore(world: World, actor: CharacterId) {
         grants?.op === 'fact.assign' &&
         from.every((t) => known(t.fact)) &&
         !known(grants.fact)
-        ? [{ action: r.key, label: r.label, from: from.map((t) => t.label) }]
+        ? [{ action: r.key, label: r.name, from: from.map((t) => t.name) }]
         : [];
     });
   return {

@@ -3,7 +3,7 @@
   "tick_every": 600,
   "resource": "mv",
   "per_tick": 2,
-  "label": "condition.well_rested",
+  "name": "condition.well_rested",
   "narration": {
     "applied": "narration.well_rested.applied",
     "tick": "narration.well_rested.tick",

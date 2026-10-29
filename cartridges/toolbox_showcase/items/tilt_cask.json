@@ -2,7 +2,7 @@
   "keywords": [
     "cask"
   ],
-  "short": "item.tilt_cask.short",
+  "name": "item.tilt_cask.short",
   "room_line": "item.tilt_cask.room",
   "description": "item.tilt_cask.description",
   "location": {

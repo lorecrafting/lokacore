@@ -1,5 +1,5 @@
 {
-  "title": "room.stairhead.title",
+  "name": "room.stairhead.title",
   "description": "room.stairhead.description",
   "exits": {
     "west": {

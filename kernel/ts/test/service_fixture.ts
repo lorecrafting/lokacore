@@ -45,7 +45,7 @@ function base(c: any) {
   };
   const cook = c.npcs[rk('npc', 'cook')];
   cook.resource_starts = { pennies: 10, meal_stock: 4 };
-  const open = { policy_version: 1, root: { op: 'all', items: [] } };
+  const open = { op: 'all', items: [] };
   const services: [string, string, object][] = [
     [
       'kitchen_meal',
@@ -89,7 +89,7 @@ function base(c: any) {
       command: 'use_service',
       input: ['service', 'quoted_price'],
       key: action,
-      label: `service.${name}`,
+      name: `service.${name}`,
       policy: open,
       priority: 0,
       target: { kind: 'entity', scopes: ['room_occupants'] },
@@ -98,7 +98,7 @@ function base(c: any) {
       action,
       currency: ref('resource', 'pennies'),
       key: name,
-      label: `service.${name}`,
+      name: `service.${name}`,
       narration: `service.${name}.used`,
       provider: ref('npc', 'cook'),
       ...rest,
@@ -163,17 +163,15 @@ export function onlyService(c: any) {
     'topics',
     'liquids',
     'populations',
-    'population_bundles',
     'barriers',
     'attributes',
     'recipes',
-    'policies',
     'replenish',
     'statuses',
     'items',
   ])
     c[section] = {};
-  for (const section of ['alternates', 'speech', 'blueprints', 'map_positions']) delete c[section];
+  for (const section of ['alternates', 'speech', 'structures', 'map_positions']) delete c[section];
   c.world = { carry: { max_grams: 12000 } };
   c.facts = keep(c.facts, ['position', 'bed_paid']);
   c.actions = keep(c.actions, ['rent_kitchen_room']);

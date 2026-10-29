@@ -1,5 +1,5 @@
 {
-  "label": "actions.search_floor",
+  "name": "actions.search_floor",
   "aliases": [
     "search"
   ],
@@ -10,12 +10,9 @@
   },
   "priority": 10,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "plate_found",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "plate_found",
+    "equals": false
   },
   "outcomes": {
     "success": {

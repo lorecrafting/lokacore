@@ -10,7 +10,6 @@ defmodule Loka.ContentFerryTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ferry_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_ferry_hash.json"))
   @src "cartridges/ferry_sampler"
-  @point "story_points/lantern_resolved.json"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
@@ -87,20 +86,20 @@ defmodule Loka.ContentFerryTest do
               ]}
   end
 
-  # Breaks: a daily schedule compiling without behavior@1, or a calendar without calendar@1, in
+  # Breaks: a daily schedule compiling without schedule@1, or a calendar without calendar@1, in
   # the manifest (capability_registry.json definitions).
-  test "a schedule needs behavior@1 and a calendar calendar@1", %{dir: dir} do
+  test "a schedule needs schedule@1 and a calendar calendar@1", %{dir: dir} do
     m = src("cartridge.json")
     without = &update_in(m, ["requires", "capabilities"], fn c -> Map.delete(c, &1) end)
 
-    assert compile(dir, %{"cartridge.json" => without.("behavior")}) ==
+    assert compile(dir, %{"cartridge.json" => without.("schedule")}) ==
              {:error,
               [
                 d(
                   "UNDECLARED_CAPABILITY",
                   "npcs/bram.daily_schedule",
-                  %{"capability" => "behavior"},
-                  ["behavior@1"]
+                  %{"capability" => "schedule"},
+                  ["schedule@1"]
                 )
               ]}
 
@@ -137,18 +136,24 @@ defmodule Loka.ContentFerryTest do
   # Breaks: an action built on run_job compiling (authority-internal, 04 §1: a dead action).
   test "an action's command is never run_job", %{dir: dir} do
     action = %{
-      "label" => "actions.coil_rope",
+      "name" => "actions.coil_rope",
       "accessibility" => "actions.coil_rope",
       "target" => %{"kind" => "none"},
       "command" => "run_job",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+      "policy" => %{"op" => "all", "items" => []}
     }
 
     assert compile(dir, %{"actions/hurry.json" => action}) ==
              {:error, [d("UNKNOWN_COMMAND", "actions/hurry.command", %{})]}
   end
+
+  # A source file's choices without their story_point declarations.
+  defp unclaimed(%{"choices" => cs} = d),
+    do: %{d | "choices" => Map.new(cs, fn {c, o} -> {c, Map.delete(o, "story_point")} end)}
+
+  defp unclaimed(v), do: v
 
   # Bram's dialogue source with `f` applied, under `rel` (dialogues/bram.json by default).
   defp dialogue(f, rel \\ "dialogues/bram.json"),
@@ -203,8 +208,8 @@ defmodule Loka.ContentFerryTest do
       {dialogue(&put_in(&1, ~w(roles lantern item), "missing")),
        unresolved.(".roles.lantern.item", missing.("item"))},
       {dialogue(&Map.put(&1, "quest", "missing")), unresolved.(".quest", missing.("quest"))},
-      {dialogue(&put_in(&1, ~w(policy root quest), "missing")),
-       unresolved.(".policy.root.quest", missing.("quest"))},
+      {dialogue(&put_in(&1, ~w(policy quest), "missing")),
+       unresolved.(".policy.quest", missing.("quest"))},
       {dialogue(fn d ->
          d
          |> put_in(~w(roles bram), %{"role" => "item", "item" => "lantern"})
@@ -235,10 +240,10 @@ defmodule Loka.ContentFerryTest do
        }, d("UNDECLARED_CAPABILITY", at, %{"capability" => "dialogue"}, ["dialogue@1"])}
     ]
 
-    # Story points, which name bram, have their own test below.
+    # Story points, declared on bram's choices, have their own test below.
     for {files, diag} <- cases do
-      assert compile(dir, Map.put(files, @point, nil)) == {:error, [diag]},
-             inspect(diag)
+      files = Map.new(Map.merge(dialogue(& &1), files), fn {r, d} -> {r, unclaimed(d)} end)
+      assert compile(dir, files) == {:error, [diag]}, inspect(diag)
     end
   end
 
@@ -254,7 +259,7 @@ defmodule Loka.ContentFerryTest do
         "dialogues/bram_offer.json" =>
           f.(%{
             "npc" => "bram",
-            "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+            "policy" => %{"op" => "all", "items" => []},
             "prompt" => "dialogue.bram.prompt",
             "roles" => %{"bram" => %{"role" => "npc", "npc" => "bram"}},
             "choices" => %{"accept" => Map.put(choice, "accept", "lantern")}
@@ -295,7 +300,7 @@ defmodule Loka.ContentFerryTest do
     files = %{
       "dialogues/bram_offer.json" => %{
         "npc" => "bram",
-        "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+        "policy" => %{"op" => "all", "items" => []},
         "prompt" => "dialogue.bram.prompt",
         "roles" => %{
           "bram" => %{"role" => "npc", "npc" => "bram"},
@@ -316,35 +321,26 @@ defmodule Loka.ContentFerryTest do
     assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{}) in diags
   end
 
-  # Breaks (23 §3: the compiler validates its trigger, outcome coverage and capability
-  # dependencies): the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts):
-  # a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes, a dialogue
-  # without a quest (its choice repeatable), a story point with no outcome, dialogue@1 not required.
-  test "the compiler checks story point triggers, outcomes and the lock", %{dir: dir} do
-    at = "story_points/lantern_resolved"
-    point = &%{@point => update_in(src(@point), ["outcomes"], &1)}
-    carry = &point.(fn o -> put_in(o, ["carry", &1], &2) end)
-    each = fn code -> for o <- ~w(carry leave), do: d(code, "#{at}.outcomes.#{o}", %{}) end
+  # Breaks (23 §3: the compiler validates its triggers and capability dependencies): the compiler
+  # admitting what the loader rejects (kernel/ts/test/dialogue.test.ts): two choices claiming one
+  # outcome, a claim without its outcome, a dialogue without a quest (its choice repeatable),
+  # dialogue@1 not required.
+  test "the compiler checks story point claims, outcomes and the lock", %{dir: dir} do
+    at = &"dialogues/bram.choices.#{&1}.story_point"
+    claim = &dialogue(fn d -> put_in(d, ~w(choices leave story_point), &1) end)
     m = src("cartridge.json")
 
     cases = [
-      {carry.("dialogue", "missing"),
-       [
-         d("UNRESOLVED_REFERENCE", at <> ".outcomes.carry.dialogue", %{
-           "target" => "ferry_sampler@0.0.1:dialogue/missing"
-         })
-       ]},
-      {carry.("choice", "wave"),
-       [d("UNRESOLVED_REFERENCE", at <> ".outcomes.carry.choice", %{"target" => "wave"})]},
-      {point.(&put_in(&1, ~w(leave choice), "carry")), each.("DUPLICATE_DEFINITION")},
-      {dialogue(&Map.delete(&1, "quest")), each.("OUTCOME_MISMATCH")},
-      {point.(fn _ -> %{} end),
-       [d("SCHEMA_VIOLATION", at <> ".outcomes", %{"error" => "too_few_items"})]},
+      {claim.("lantern_resolved/carry"), [d("DUPLICATE_DEFINITION", at.("leave"), %{})]},
+      {claim.("lantern_resolved"),
+       [d("SCHEMA_VIOLATION", at.("leave"), %{"error" => "pattern_mismatch"})]},
+      {dialogue(&Map.delete(&1, "quest")),
+       for(o <- ~w(carry leave), do: d("OUTCOME_MISMATCH", at.(o), %{}))},
       {%{
          "cartridge.json" => update_in(m, ~w(requires capabilities), &Map.delete(&1, "dialogue"))
        },
        for(
-         p <- ["dialogues/bram", at],
+         p <- ["dialogues/bram", at.("carry")],
          do: d("UNDECLARED_CAPABILITY", p, %{"capability" => "dialogue"}, ["dialogue@1"])
        )}
     ]
@@ -404,12 +400,12 @@ defmodule Loka.ContentFerryTest do
     files = elapsed_files()
 
     action = %{
-      "label" => "actions.coil_rope",
+      "name" => "actions.coil_rope",
       "accessibility" => "actions.coil_rope",
       "target" => %{"kind" => "none"},
       "priority" => 0,
       "input" => ["until"],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+      "policy" => %{"op" => "all", "items" => []}
     }
 
     for name <- ~w(elapsed wait) do

@@ -147,8 +147,8 @@ test('facts_typed refuses a pair row without two distinct NPCs', () => {
 // `with` a spawn template or the site's own npc. The 1.89 floor is the compiler's.
 test('row FD4 needs instance scope and a with NPC at each pair site', () => {
   const smith = `${S}:npc/smith`;
-  const rootAt = `.cartridge.npcs[${JSON.stringify(smith)}].room_line_variants[0].when.root`;
-  const root = (c: any) => c.npcs[smith].room_line_variants[0].when.root;
+  const rootAt = `.cartridge.npcs[${JSON.stringify(smith)}].room_line_variants[0].when`;
+  const root = (c: any) => c.npcs[smith].room_line_variants[0].when;
   const rows: [(c: any) => void, string, string][] = [
     [
       (c) => (c.facts[`${S}:fact/gloats`].scopes = ['player']),

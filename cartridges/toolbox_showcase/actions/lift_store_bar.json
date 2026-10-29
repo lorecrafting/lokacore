@@ -1,5 +1,5 @@
 {
-  "label": "actions.lift_store_bar",
+  "name": "actions.lift_store_bar",
   "aliases": [
     "lift"
   ],
@@ -10,12 +10,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "store_unbarred",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "store_unbarred",
+    "equals": false
   },
   "outcomes": {
     "success": {

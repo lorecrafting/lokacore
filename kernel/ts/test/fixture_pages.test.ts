@@ -144,10 +144,7 @@ test('a detail no recipe targets and of no page kind gets no page', () => {
 // Breaks: a failing policy drops the card (or shows it available), or the perform is admitted.
 test("a card whose policy fails lists unavailable with the policy's reason; perform refused", () => {
   const w = world((c) => {
-    c.recipes[`${P}:recipe/gather_ash`].policy.root = {
-      op: 'level_compare',
-      at_least: 5,
-    };
+    c.recipes[`${P}:recipe/gather_ash`].policy = { op: 'level_compare', at_least: 5 };
   });
   const card = notice(view(w), 'hearth').actions[0];
   assert.deepEqual([card.available, card.reason?.code], [false, 'invalid_state']);

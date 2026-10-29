@@ -4,14 +4,11 @@
     "action": "pull_a"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "fact_compare",
-        "fact": "lever_stage",
-        "equals": 0
-      }
+    "op": "not",
+    "item": {
+      "op": "fact_compare",
+      "fact": "lever_stage",
+      "equals": 0
     }
   },
   "apply": [

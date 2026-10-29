@@ -17,7 +17,6 @@
       "combat": 1,
       "schedule": 1,
       "death": 1,
-      "behavior": 1,
       "description_variant": 1,
       "calendar": 1,
       "position": 1,
@@ -32,14 +31,14 @@
   },
   "ancestries": {
     "archer": {
-      "label": "ancestry.archer.label",
+      "name": "ancestry.archer.label",
       "description": "ancestry.archer.description",
       "attribute": "str",
       "modifier": 1,
       "skill": "archery"
     },
     "farmer": {
-      "label": "ancestry.farmer.label",
+      "name": "ancestry.farmer.label",
       "description": "ancestry.farmer.description",
       "attribute": "str",
       "modifier": 1

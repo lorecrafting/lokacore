@@ -1,5 +1,5 @@
 {
-  "title": "room.hall.title",
+  "name": "room.hall.title",
   "description": "room.hall.description",
   "exits": {
     "north": {
@@ -42,100 +42,73 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 1
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 1
           },
           "description": "detail.wheel.1"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 2
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 2
           },
           "description": "detail.wheel.2"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 3
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 3
           },
           "description": "detail.wheel.3"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 4
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 4
           },
           "description": "detail.wheel.4"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 5
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 5
           },
           "description": "detail.wheel.5"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 6
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 6
           },
           "description": "detail.wheel.6"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 7
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 7
           },
           "description": "detail.wheel.7"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 8
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 8
           },
           "description": "detail.wheel.8"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_1",
-              "equals": 9
-            }
+            "op": "fact_compare",
+            "fact": "wheel_1",
+            "equals": 9
           },
           "description": "detail.wheel.9"
         }
@@ -150,100 +123,73 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 1
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 1
           },
           "description": "detail.wheel.1"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 2
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 2
           },
           "description": "detail.wheel.2"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 3
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 3
           },
           "description": "detail.wheel.3"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 4
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 4
           },
           "description": "detail.wheel.4"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 5
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 5
           },
           "description": "detail.wheel.5"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 6
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 6
           },
           "description": "detail.wheel.6"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 7
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 7
           },
           "description": "detail.wheel.7"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 8
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 8
           },
           "description": "detail.wheel.8"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_2",
-              "equals": 9
-            }
+            "op": "fact_compare",
+            "fact": "wheel_2",
+            "equals": 9
           },
           "description": "detail.wheel.9"
         }
@@ -258,100 +204,73 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 1
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 1
           },
           "description": "detail.wheel.1"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 2
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 2
           },
           "description": "detail.wheel.2"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 3
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 3
           },
           "description": "detail.wheel.3"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 4
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 4
           },
           "description": "detail.wheel.4"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 5
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 5
           },
           "description": "detail.wheel.5"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 6
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 6
           },
           "description": "detail.wheel.6"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 7
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 7
           },
           "description": "detail.wheel.7"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 8
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 8
           },
           "description": "detail.wheel.8"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "wheel_3",
-              "equals": 9
-            }
+            "op": "fact_compare",
+            "fact": "wheel_3",
+            "equals": 9
           },
           "description": "detail.wheel.9"
         }

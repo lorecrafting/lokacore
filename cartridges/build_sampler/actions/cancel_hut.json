@@ -1,5 +1,5 @@
 {
-  "label": "service.cancel_hut",
+  "name": "service.cancel_hut",
   "command": "use_service",
   "target": {
     "kind": "entity",
@@ -12,12 +12,5 @@
     "quoted_price"
   ],
   "priority": 0,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "accessibility": "service.cancel_hut"
 }

@@ -25,11 +25,11 @@ const begin = (c: any) => {
   details.notice = { aliases: ['notice'], description: 'detail.mooring_post' };
   c.recipes[`${prefix}:recipe/begin`] = {
     key: 'begin',
-    label: 'actions.coil_rope',
+    name: 'actions.coil_rope',
     aliases: ['begin'],
     target: { kind: 'detail', room, detail: 'mooring_post' },
     priority: 10,
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     outcomes: {
       success: {
         sequence: [{ op: 'event.emit', event: 'begun' }],

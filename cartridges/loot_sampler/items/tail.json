@@ -2,7 +2,7 @@
   "keywords": [
     "tail"
   ],
-  "short": "item.tail.short",
+  "name": "item.tail.short",
   "room_line": "item.tail.room",
   "description": "item.tail.description",
   "location": {

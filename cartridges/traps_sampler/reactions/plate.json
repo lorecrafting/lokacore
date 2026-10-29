@@ -4,22 +4,19 @@
     "room": "vault"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "plate_sprung",
-          "equals": false
-        },
-        {
-          "op": "fact_compare",
-          "fact": "plate_disarmed",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "plate_sprung",
+        "equals": false
+      },
+      {
+        "op": "fact_compare",
+        "fact": "plate_disarmed",
+        "equals": false
+      }
+    ]
   },
   "apply": [
     {

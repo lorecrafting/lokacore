@@ -3,7 +3,7 @@
   "tick_every": 60,
   "resource": "hp",
   "kind": "debuff",
-  "label": "condition.scarred",
+  "name": "condition.scarred",
   "narration": {
     "applied": "narration.scar.applied",
     "tick": "narration.scar.tick",

@@ -18,7 +18,6 @@
           "resource": 1,
           "movement": 1,
           "containment": 1,
-          "behavior": 1,
           "calendar": 1,
           "schedule": 1,
           "equipment": 1
@@ -35,18 +34,16 @@
         "resource": 1,
         "movement": 1,
         "containment": 1,
-        "behavior": 1,
         "calendar": 1,
         "schedule": 1,
         "equipment": 1
       }
     },
     "facts": {},
-    "policies": {},
     "actions": {},
     "rooms": {
       "wear_sampler@0.0.1:room/inn_attic": {
-        "title": "room.inn_attic.title",
+        "name": "room.inn_attic.title",
         "description": "room.inn_attic.description",
         "exits": {
           "down": {
@@ -61,7 +58,7 @@
         "key": "inn_attic"
       },
       "wear_sampler@0.0.1:room/inn_rooms": {
-        "title": "room.inn_rooms.title",
+        "name": "room.inn_rooms.title",
         "description": "room.inn_rooms.description",
         "exits": {
           "up": {
@@ -82,7 +79,7 @@
           "bram",
           "ferryman"
         ],
-        "short": "npc.bram.short",
+        "name": "npc.bram.short",
         "room_line": "npc.bram.room",
         "description": "npc.bram.description",
         "room": {
@@ -114,7 +111,7 @@
           "key",
           "cellar_key"
         ],
-        "short": "item.cellar_key.short",
+        "name": "item.cellar_key.short",
         "room_line": "item.cellar_key.room",
         "description": "item.cellar_key.description",
         "location": {
@@ -132,7 +129,7 @@
         "keywords": [
           "lantern"
         ],
-        "short": "item.lantern.short",
+        "name": "item.lantern.short",
         "room_line": "item.lantern.room",
         "description": "item.lantern.description",
         "location": {
@@ -152,7 +149,7 @@
           "cap",
           "leather_cap"
         ],
-        "short": "item.leather_cap.short",
+        "name": "item.leather_cap.short",
         "room_line": "item.leather_cap.room",
         "description": "item.leather_cap.description",
         "location": {
@@ -172,7 +169,7 @@
           "hat",
           "straw_hat"
         ],
-        "short": "item.straw_hat.short",
+        "name": "item.straw_hat.short",
         "room_line": "item.straw_hat.room",
         "description": "item.straw_hat.description",
         "location": {
@@ -192,7 +189,7 @@
           "cloak",
           "wool_cloak"
         ],
-        "short": "item.wool_cloak.short",
+        "name": "item.wool_cloak.short",
         "room_line": "item.wool_cloak.room",
         "description": "item.wool_cloak.description",
         "location": {
@@ -265,6 +262,6 @@
       "item.wool_cloak.description": "A wool cloak."
     }
   },
-  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"wear_sampler@0.0.1:item/cellar_key\":{\"description\":\"item.cellar_key.description\",\"key\":\"cellar_key\",\"keywords\":[\"key\",\"cellar_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.cellar_key.room\",\"short\":\"item.cellar_key.short\"},\"wear_sampler@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\",\"slot\":\"light\"},\"wear_sampler@0.0.1:item/leather_cap\":{\"description\":\"item.leather_cap.description\",\"key\":\"leather_cap\",\"keywords\":[\"cap\",\"leather_cap\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.leather_cap.room\",\"short\":\"item.leather_cap.short\",\"slot\":\"head\"},\"wear_sampler@0.0.1:item/straw_hat\":{\"description\":\"item.straw_hat.description\",\"key\":\"straw_hat\",\"keywords\":[\"hat\",\"straw_hat\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.straw_hat.room\",\"short\":\"item.straw_hat.short\",\"slot\":\"head\"},\"wear_sampler@0.0.1:item/wool_cloak\":{\"description\":\"item.wool_cloak.description\",\"key\":\"wool_cloak\",\"keywords\":[\"cloak\",\"wool_cloak\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.wool_cloak.room\",\"short\":\"item.wool_cloak.short\",\"slot\":\"cloak\"}},\"lock\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"equipment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"wear_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"equipment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Wear Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"wear_sampler@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"resources\":{\"wear_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"wear_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"wear_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"wear_sampler@0.0.1:room/inn_attic\":{\"description\":\"room.inn_attic.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_attic\",\"title\":\"room.inn_attic.title\"},\"wear_sampler@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"up\":{\"to\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"}},\"text\":{\"item.cellar_key.description\":\"A cellar key.\",\"item.cellar_key.room\":\"A [key] lies here.\",\"item.cellar_key.short\":\"a cellar key\",\"item.lantern.description\":\"A brass lantern.\",\"item.lantern.room\":\"A [lantern] lies here.\",\"item.lantern.short\":\"a brass lantern\",\"item.leather_cap.description\":\"A leather cap.\",\"item.leather_cap.room\":\"A [cap] lies here.\",\"item.leather_cap.short\":\"a leather cap\",\"item.straw_hat.description\":\"A straw hat.\",\"item.straw_hat.room\":\"A [hat] lies here.\",\"item.straw_hat.short\":\"a straw hat\",\"item.wool_cloak.description\":\"A wool cloak.\",\"item.wool_cloak.room\":\"A [cloak] lies here.\",\"item.wool_cloak.short\":\"a wool cloak\",\"npc.bram.description\":\"A ferryman with rope-scarred hands.\",\"npc.bram.room\":\"[Bram] the ferryman stands here.\",\"npc.bram.short\":\"Bram the ferryman\",\"room.inn_attic.description\":\"Low rafters and the smell of old straw.\",\"room.inn_attic.title\":\"The Attic\",\"room.inn_rooms.description\":\"A narrow passage of doors. A ladder climbs to the attic.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}}",
-  "sha256": "9e3229eecb185f128eccbff73ccdb699b7ab6ccf93df1cc4495d50704b0def4f"
+  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"wear_sampler@0.0.1:item/cellar_key\":{\"description\":\"item.cellar_key.description\",\"key\":\"cellar_key\",\"keywords\":[\"key\",\"cellar_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"name\":\"item.cellar_key.short\",\"room_line\":\"item.cellar_key.room\"},\"wear_sampler@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"name\":\"item.lantern.short\",\"room_line\":\"item.lantern.room\",\"slot\":\"light\"},\"wear_sampler@0.0.1:item/leather_cap\":{\"description\":\"item.leather_cap.description\",\"key\":\"leather_cap\",\"keywords\":[\"cap\",\"leather_cap\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"name\":\"item.leather_cap.short\",\"room_line\":\"item.leather_cap.room\",\"slot\":\"head\"},\"wear_sampler@0.0.1:item/straw_hat\":{\"description\":\"item.straw_hat.description\",\"key\":\"straw_hat\",\"keywords\":[\"hat\",\"straw_hat\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"name\":\"item.straw_hat.short\",\"room_line\":\"item.straw_hat.room\",\"slot\":\"head\"},\"wear_sampler@0.0.1:item/wool_cloak\":{\"description\":\"item.wool_cloak.description\",\"key\":\"wool_cloak\",\"keywords\":[\"cloak\",\"wool_cloak\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"name\":\"item.wool_cloak.short\",\"room_line\":\"item.wool_cloak.room\",\"slot\":\"cloak\"}},\"lock\":{\"capabilities\":{\"calendar\":1,\"containment\":1,\"equipment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"wear_sampler\",\"requires\":{\"capabilities\":{\"calendar\":1,\"containment\":1,\"equipment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Wear Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"wear_sampler@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"name\":\"npc.bram.short\",\"room\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\"}},\"resources\":{\"wear_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"wear_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"wear_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"wear_sampler@0.0.1:room/inn_attic\":{\"description\":\"room.inn_attic.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_attic\",\"name\":\"room.inn_attic.title\"},\"wear_sampler@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"up\":{\"to\":{\"cartridge_id\":\"wear_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"name\":\"room.inn_rooms.title\"}},\"text\":{\"item.cellar_key.description\":\"A cellar key.\",\"item.cellar_key.room\":\"A [key] lies here.\",\"item.cellar_key.short\":\"a cellar key\",\"item.lantern.description\":\"A brass lantern.\",\"item.lantern.room\":\"A [lantern] lies here.\",\"item.lantern.short\":\"a brass lantern\",\"item.leather_cap.description\":\"A leather cap.\",\"item.leather_cap.room\":\"A [cap] lies here.\",\"item.leather_cap.short\":\"a leather cap\",\"item.straw_hat.description\":\"A straw hat.\",\"item.straw_hat.room\":\"A [hat] lies here.\",\"item.straw_hat.short\":\"a straw hat\",\"item.wool_cloak.description\":\"A wool cloak.\",\"item.wool_cloak.room\":\"A [cloak] lies here.\",\"item.wool_cloak.short\":\"a wool cloak\",\"npc.bram.description\":\"A ferryman with rope-scarred hands.\",\"npc.bram.room\":\"[Bram] the ferryman stands here.\",\"npc.bram.short\":\"Bram the ferryman\",\"room.inn_attic.description\":\"Low rafters and the smell of old straw.\",\"room.inn_attic.title\":\"The Attic\",\"room.inn_rooms.description\":\"A narrow passage of doors. A ladder climbs to the attic.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}}",
+  "sha256": "49fbf8da664cef295fdf793894fd278e2680348113786ad0ab463069b54fc23f"
 }

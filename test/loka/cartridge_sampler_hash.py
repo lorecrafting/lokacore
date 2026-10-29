@@ -11,13 +11,11 @@ def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
 def key(kind, name):
     return f'{ID}@{VERSION}:{kind}/{name}'
-def policy(root):
-    return dict(policy_version=1, root=root)
 def quest_state(state):
     return dict(op='quest_state', quest=ref('quest', 'lantern'), state=state)
 def definition(name, **parts):
     return dict(key=name, **parts)
-caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior', 'death', 'combat'], 1)
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'death', 'combat'], 1)
 v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Cellar Sampler', requires=dict(kernel_api=dict(at_least='1.7', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
@@ -25,7 +23,6 @@ v['facts'] = {
     key('fact', 'search_plan'): definition('search_plan', version=1, value_type=dict(type='enum', values=['undecided', 'player_led', 'party_led'], default='undecided'), scopes=['player'], meaning="Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest)."),
     key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it."),
     key('fact', 'scene_lantern_kept'): definition('scene_lantern_kept', version=1, value_type=dict(type='int', minimum=-1, maximum=3, default=0), scopes=['player'], meaning="Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.")}
-v['policies'] = {}
 v['actions'] = {}
 # Literal reciprocal geometry; barrier faces share one reference.
 geometry = {
@@ -63,13 +60,13 @@ v['resources'][key('resource', 'mv')].update(
            dict(at_percent=75, key='steady', tone='normal'),
            dict(at_percent=25, key='tired', tone='warning'),
            dict(at_percent=0, key='exhausted', tone='danger')])
-v['quests'] = {key('quest', 'lantern'): definition('lantern', title='quest.lantern.title', objective=dict(evidence='current_state', policy=policy(dict(op='has_item', item=ref('item', 'lantern')))), journal=dict(active='quest.lantern.find', objectives_met='quest.lantern.return', resolved='quest.lantern.done', failed='quest.lantern.failed', abandoned='quest.lantern.abandoned', outcomes=dict(take_it='quest.lantern.carried')))}
+v['quests'] = {key('quest', 'lantern'): definition('lantern', title='quest.lantern.title', objective=dict(evidence='current_state', policy=dict(op='has_item', item=ref('item', 'lantern'))), journal=dict(active='quest.lantern.find', objectives_met='quest.lantern.return', resolved='quest.lantern.done', failed='quest.lantern.failed', abandoned='quest.lantern.abandoned', outcomes=dict(take_it='quest.lantern.carried')))}
 roles = dict(bram=dict(role='npc', npc=ref('npc', 'bram')))
 choices = {name: dict(label=f'dialogue.bram.{outcome}', narration=f'narration.bram.{outcome}', sequence=[dict(op='fact.assign', fact=ref('fact', 'search_plan'), value=value)]) for name, outcome, value in [('take_it', 'carry', 'player_led'), ('leave_it', 'leave', 'party_led')]}
 choices['leave_it']['hand_over'] = dict(item='lantern', to='bram')
 v['dialogues'] = {
-    key('dialogue', 'bram'): definition('bram', npc=ref('npc', 'bram'), policy=policy(quest_state('active')), prompt='dialogue.bram.prompt', roles=dict(**roles, lantern=dict(role='item', item=ref('item', 'lantern'))), quest=ref('quest', 'lantern'), choices=choices),
-    key('dialogue', 'bram_offer'): definition('bram_offer', npc=ref('npc', 'bram'), policy=policy(dict(op='not', item=dict(op='any', items=[quest_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']]))), prompt='dialogue.bram_offer.prompt', roles=roles, choices=dict(accept=dict(label='quest.lantern.accept', narration='narration.bram.accept', accept=ref('quest', 'lantern'))))}
+    key('dialogue', 'bram'): definition('bram', npc=ref('npc', 'bram'), policy=quest_state('active'), prompt='dialogue.bram.prompt', roles=dict(**roles, lantern=dict(role='item', item=ref('item', 'lantern'))), quest=ref('quest', 'lantern'), choices=choices),
+    key('dialogue', 'bram_offer'): definition('bram_offer', npc=ref('npc', 'bram'), policy=dict(op='not', item=dict(op='any', items=[quest_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']])), prompt='dialogue.bram_offer.prompt', roles=roles, choices=dict(accept=dict(label='quest.lantern.accept', narration='narration.bram.accept', accept=ref('quest', 'lantern'))))}
 v['story_points'] = {key('story_point', 'lantern_resolved'): definition('lantern_resolved', outcomes={outcome: dict(dialogue=ref('dialogue', 'bram'), choice=choice) for outcome, choice in [('carry', 'take_it'), ('leave', 'leave_it')]})}
 v['scenes'] = {key('scene', 'lantern_kept'): definition('lantern_kept', on=dict(story_point=ref('story_point', 'lantern_resolved'), outcome='carry'), control='modal', steps=[dict(type='narrate', text=f'scene.lantern_kept.{line}') for line in ['bram', 'brass', 'river']] + [dict(type='await_ack'), dict(type='end')])}
 # PM acceptance repair: hand-literal baseline table, independently declared.
@@ -101,11 +98,11 @@ v['items'][key('item', 'storage_chest')] = definition('storage_chest', keywords=
 v['barriers'][key('barrier', 'storage_chest_lid')] = definition('storage_chest_lid', keywords=['lid', 'storage_chest_lid'], short='barrier.storage_chest_lid.short', initial='locked', key_item=ref('item', 'cellar_key'))
 v['facts'][key('fact', 'maud_trust')] = definition('maud_trust', version=1, value_type=dict(type='int', minimum=-100, maximum=100, default=0), scopes=['player'], meaning='Maud’s trust in the player.')
 v['facts'][key('fact', 'inn_cellar_cleared')] = definition('inn_cellar_cleared', version=1, value_type=dict(type='bool', default=False), scopes=['instance'], meaning='Maud’s cellar quest has been completed.')
-v['quests'][key('quest', 'mauds_cellar')] = definition('mauds_cellar', title='quest.mauds_cellar.title', objective=dict(evidence='current_state', policy=policy(dict(op='all', items=[dict(op='fact_compare', fact=ref('fact', f'rat_{i}_killed'), equals=True) for i in range(1, 6)]))), journal={state: f'quest.mauds_cellar.{text}' for state, text in [('active', 'active'), ('objectives_met', 'ready'), ('resolved', 'resolved'), ('failed', 'failed'), ('abandoned', 'abandoned')]})
+v['quests'][key('quest', 'mauds_cellar')] = definition('mauds_cellar', title='quest.mauds_cellar.title', objective=dict(evidence='current_state', policy=dict(op='all', items=[dict(op='fact_compare', fact=ref('fact', f'rat_{i}_killed'), equals=True) for i in range(1, 6)])), journal={state: f'quest.mauds_cellar.{text}' for state, text in [('active', 'active'), ('objectives_met', 'ready'), ('resolved', 'resolved'), ('failed', 'failed'), ('abandoned', 'abandoned')]})
 maud_state = lambda state: dict(op='quest_state', quest=ref('quest', 'mauds_cellar'), state=state)
 maud_roles = dict(maud=dict(role='npc', npc=ref('npc', 'maud')))
-v['dialogues'][key('dialogue', 'maud_offer')] = definition('maud_offer', npc=ref('npc', 'maud'), policy=policy(dict(op='not', item=dict(op='any', items=[maud_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']]))), prompt='dialogue.maud_offer.prompt', roles=maud_roles, choices=dict(accept=dict(label='quest.mauds_cellar.accept', narration='narration.maud.accept', accept=ref('quest', 'mauds_cellar'))))
-v['dialogues'][key('dialogue', 'maud_turn_in')] = definition('maud_turn_in', npc=ref('npc', 'maud'), quest=ref('quest', 'mauds_cellar'), policy=policy(maud_state('active')), prompt='dialogue.maud_turn_in.prompt', roles=dict(**maud_roles, key=dict(role='item', item=ref('item', 'cellar_key'))), choices=dict(done=dict(label='dialogue.maud_turn_in.done', narration='narration.maud.done', receive=dict(item='key', **{'from': 'maud'}), sequence=[dict(op='fact.adjust', fact=ref('fact', 'maud_trust'), amount=5), dict(op='fact.assign', fact=ref('fact', 'inn_cellar_cleared'), value=True)])))
+v['dialogues'][key('dialogue', 'maud_offer')] = definition('maud_offer', npc=ref('npc', 'maud'), policy=dict(op='not', item=dict(op='any', items=[maud_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']])), prompt='dialogue.maud_offer.prompt', roles=maud_roles, choices=dict(accept=dict(label='quest.mauds_cellar.accept', narration='narration.maud.accept', accept=ref('quest', 'mauds_cellar'))))
+v['dialogues'][key('dialogue', 'maud_turn_in')] = definition('maud_turn_in', npc=ref('npc', 'maud'), quest=ref('quest', 'mauds_cellar'), policy=maud_state('active'), prompt='dialogue.maud_turn_in.prompt', roles=dict(**maud_roles, key=dict(role='item', item=ref('item', 'cellar_key'))), choices=dict(done=dict(label='dialogue.maud_turn_in.done', narration='narration.maud.done', receive=dict(item='key', **{'from': 'maud'}), sequence=[dict(op='fact.adjust', fact=ref('fact', 'maud_trust'), amount=5), dict(op='fact.assign', fact=ref('fact', 'inn_cellar_cleared'), value=True)])))
 v['text'] = json.loads(Path('cartridges/cellar_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()

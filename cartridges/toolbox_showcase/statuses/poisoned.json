@@ -3,7 +3,7 @@
   "tick_every": 1800,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.poisoned",
+  "name": "condition.poisoned",
   "narration": {
     "applied": "narration.poisoned.applied",
     "tick": "narration.poisoned.tick",

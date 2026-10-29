@@ -32,12 +32,12 @@ defmodule Loka.ContentTest do
   }
   @present %{"op" => "target_present"}
   @talk %{
-    "label" => "a",
+    "name" => "a",
     "target" => %{"kind" => "none"},
     "command" => "talk",
     "priority" => 0,
     "input" => [],
-    "policy" => %{"policy_version" => 1, "root" => @present},
+    "policy" => @present,
     "accessibility" => "a"
   }
 
@@ -79,7 +79,7 @@ defmodule Loka.ContentTest do
   defp ref(kind, key, version \\ "1.0.0"),
     do: %{"cartridge_id" => "c", "cartridge_version" => version, "kind" => kind, "key" => key}
 
-  defp policy(root), do: %{"policy_version" => 1, "root" => root}
+  defp act(root), do: %{@talk | "policy" => root}
   defp manifest(path, value), do: put_in(@manifest, path, value)
 
   # Break: wrong key mapping, key order, hash input or artifact framing.
@@ -106,18 +106,19 @@ defmodule Loka.ContentTest do
                [d("DUPLICATE_KEY", "actions/talk.target.kind")]
 
       root = %{"op" => "all", "items" => [@present]}
-      talk = JSON.encode!(%{@talk | "policy" => policy(root)})
+      talk = JSON.encode!(%{@talk | "policy" => root})
       text = String.replace(talk, ~s("op":"target_present"), ~s("op":"target_present","op":"x"))
 
       assert errors(tmp, %{"actions/talk.json" => {:raw, text}}) ==
-               [d("DUPLICATE_KEY", "actions/talk.policy.root.items[0].op")]
+               [d("DUPLICATE_KEY", "actions/talk.policy.items[0].op")]
     end
 
     test "UNKNOWN_FIELD: stray .json files (dot directories too), an authored key, an unregistered field",
          %{tmp_dir: tmp} do
       assert errors(tmp, %{
-               "polices/x.json" => policy(@present),
-               ".hidden/x.json" => policy(@present),
+               "polices/x.json" => @present,
+               "policies/x.json" => @present,
+               ".hidden/x.json" => @present,
                "notes.txt" => {:raw, "ignored"},
                "actions/talk.json" => Map.put(@talk, "key", "talk"),
                "cartridge.json" => Map.merge(@manifest, %{"unregistered" => true, "key" => "c"})
@@ -126,7 +127,8 @@ defmodule Loka.ContentTest do
                d("UNKNOWN_FIELD", "actions/talk.key"),
                d("UNKNOWN_FIELD", "cartridge.key"),
                d("UNKNOWN_FIELD", "cartridge.unregistered"),
-               d("UNKNOWN_FIELD", "polices/x")
+               d("UNKNOWN_FIELD", "polices/x"),
+               d("UNKNOWN_FIELD", "policies/x")
              ]
     end
 
@@ -134,9 +136,9 @@ defmodule Loka.ContentTest do
          %{tmp_dir: tmp} do
       assert errors(tmp, %{
                "actions/talk.json" => %{@talk | "input" => ["bogus"]},
-               "policies/Bad Name.json" => policy(@present)
+               "actions/Bad Name.json" => act(@present)
              }) == [
-               d("SCHEMA_VIOLATION", ~S("policies/Bad Name.json"), %{
+               d("SCHEMA_VIOLATION", ~S("actions/Bad Name.json"), %{
                  "error" => "pattern_mismatch"
                }),
                d("SCHEMA_VIOLATION", "actions/talk.input[0]", %{"error" => "not_in_enum"})
@@ -166,16 +168,18 @@ defmodule Loka.ContentTest do
 
       assert errors(tmp, %{
                "facts.json" => facts,
-               "policies/p.json" => policy(compare),
-               "policies/q.json" => policy(other)
+               "actions/p.json" => act(compare),
+               "actions/q.json" => act(other)
              }) == [
-               d("UNKNOWN_FIELD", "facts.api_version"),
-               d("UNRESOLVED_REFERENCE", "policies/q.root.fact", %{"target" => "c@2.0.0:fact/a_b"})
+               d("UNRESOLVED_REFERENCE", "actions/q.policy.fact", %{
+                 "target" => "c@2.0.0:fact/a_b"
+               }),
+               d("UNKNOWN_FIELD", "facts.api_version")
              ]
 
       assert errors(Path.join(tmp, "bad"), %{
                "facts.json" => {:raw, "{"},
-               "policies/p.json" => policy(compare)
+               "actions/p.json" => act(compare)
              }) ==
                [d("INVALID_JSON", "facts")]
     end
@@ -215,28 +219,28 @@ defmodule Loka.ContentTest do
         ]
       }
 
-      talk = %{@talk | "policy" => policy(%{"op" => "has_item", "item" => ref("item", "x")})}
+      talk = %{@talk | "policy" => %{"op" => "has_item", "item" => ref("item", "x")}}
       caps = Map.put(@manifest["requires"]["capabilities"], "containment", 1)
 
       assert errors(tmp, %{
-               "policies/p.json" => policy(root),
+               "actions/p.json" => act(root),
                "actions/talk.json" => talk,
                "cartridge.json" => manifest(["requires", "capabilities"], caps)
              }) == [
-               d("UNRESOLVED_REFERENCE", "actions/talk.policy.root.item", %{
-                 "target" => "c@1.0.0:item/x"
-               }),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[0].fact", %{
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[0].fact", %{
                  "target" => "c@1.0.0:fact/missing"
                }),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[1].fact", %{
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[1].fact", %{
                  "target" => "c@2.0.0:fact/a_b"
                }),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[3].fact", %{
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[3].fact", %{
                  "target" => "c@1.0.0:action/a_b"
                }),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[4].item", %{
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[4].item", %{
                  "target" => "c@1.0.0:fact/a_b"
+               }),
+               d("UNRESOLVED_REFERENCE", "actions/talk.policy.item", %{
+                 "target" => "c@1.0.0:item/x"
                })
              ]
     end
@@ -259,21 +263,23 @@ defmodule Loka.ContentTest do
       bad = %{"op" => "fact_compare", "fact" => "A-b", "equals" => true}
 
       assert errors(tmp, %{
-               "policies/p.json" => policy(root),
-               "policies/q.json" => policy(bad),
+               "actions/p.json" => act(root),
+               "actions/q.json" => act(bad),
                "cartridge.json" => manifest(["requires", "capabilities"], caps)
              }) == [
-               d("FACT_TYPE_MISMATCH", "policies/p.root.items[0].equals"),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[1].item.item", %{
+               d("FACT_TYPE_MISMATCH", "actions/p.policy.items[0].equals"),
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[1].item.item", %{
                  "target" => "c@1.0.0:item/a_b"
                }),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[2].fact", %{
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[2].fact", %{
                  "target" => "c@1.0.0:fact/missing"
                }),
-               d("UNRESOLVED_REFERENCE", "policies/p.root.items[3].quest", %{
+               d("UNRESOLVED_REFERENCE", "actions/p.policy.items[3].quest", %{
                  "target" => "c@1.0.0:quest/q"
                }),
-               d("SCHEMA_VIOLATION", "policies/q.root.fact", %{"error" => "pattern_mismatch"})
+               d("SCHEMA_VIOLATION", "actions/q.policy.fact", %{
+                 "error" => "pattern_mismatch"
+               })
              ]
     end
 
@@ -283,7 +289,7 @@ defmodule Loka.ContentTest do
 
       assert errors(tmp, %{
                "facts.json" => %{"facts" => %{"a.b" => %{@fact | "version" => 0}}},
-               "policies/p.json" => policy(compare)
+               "actions/p.json" => act(compare)
              }) == [
                d("SCHEMA_VIOLATION", ~s(facts.facts["a.b"].version), %{"error" => "below_minimum"})
              ]
@@ -295,12 +301,12 @@ defmodule Loka.ContentTest do
 
       assert errors(tmp, %{
                "facts.json" => %{"facts" => %{"a.b" => @fact, "e" => enum}},
-               "policies/p.json" => policy(compare.("a_b", "true")),
-               "policies/q.json" => policy(compare.("e", "y")),
-               "policies/r.json" => policy(compare.("e", "x"))
+               "actions/p.json" => act(compare.("a_b", "true")),
+               "actions/q.json" => act(compare.("e", "y")),
+               "actions/r.json" => act(compare.("e", "x"))
              }) == [
-               d("FACT_TYPE_MISMATCH", "policies/p.root.equals"),
-               d("FACT_TYPE_MISMATCH", "policies/q.root.equals")
+               d("FACT_TYPE_MISMATCH", "actions/p.policy.equals"),
+               d("FACT_TYPE_MISMATCH", "actions/q.policy.equals")
              ]
     end
 
@@ -361,6 +367,14 @@ defmodule Loka.ContentTest do
       assert {:ok, _, []} = Loka.ContentSource.compile(dir, [{"cartridge.json", at_1_0}])
     end
 
+    # Break: the compiler walks an absent policy (nodes/2 on nil) or requires it again (F3).
+    test "an action with no policy compiles", %{tmp_dir: tmp} do
+      assert {:ok, _, []} =
+               tmp
+               |> source(%{"actions/talk.json" => Map.delete(@talk, "policy")})
+               |> Loka.Content.compile()
+    end
+
     test "UNDECLARED_CAPABILITY: an action's command and a policy op", %{tmp_dir: tmp} do
       caps = %{"fact" => 1, "policy" => 1}
 
@@ -375,7 +389,7 @@ defmodule Loka.ContentTest do
                },
                d(
                  "UNDECLARED_CAPABILITY",
-                 "actions/talk.policy.root.op",
+                 "actions/talk.policy.op",
                  %{"capability" => "target_resolution"},
                  ["target_resolution@1"]
                )
@@ -383,19 +397,20 @@ defmodule Loka.ContentTest do
     end
 
     # loka-numeric-v1 nests at most 128 containers. The artifact, its cartridge and the
-    # policies map hold 3; a policy file holds 2 plus one per not: 123 nots fill it exactly.
+    # actions map hold 3; an action holds 2 (itself, its policy) plus one per not:
+    # 123 nots fill it exactly.
     test "NESTING_TOO_DEEP at the definition; one level less compiles and decodes",
          %{tmp_dir: tmp} do
       nots = fn n ->
         Enum.reduce(1..n, @present, fn _, acc -> %{"op" => "not", "item" => acc} end)
       end
 
-      ok = source(Path.join(tmp, "ok"), %{"policies/p.json" => policy(nots.(123))})
+      ok = source(Path.join(tmp, "ok"), %{"actions/p.json" => act(nots.(123))})
       assert {:ok, bytes, []} = Loka.Content.compile(ok)
       assert {:ok, _} = Canonical.decode(bytes)
 
-      assert errors(Path.join(tmp, "deep"), %{"policies/p.json" => policy(nots.(124))}) ==
-               [d("NESTING_TOO_DEEP", "policies/p", %{"maximum" => 128})]
+      assert errors(Path.join(tmp, "deep"), %{"actions/p.json" => act(nots.(124))}) ==
+               [d("NESTING_TOO_DEEP", "actions/p", %{"maximum" => 128})]
     end
 
     test "ARTIFACT_TOO_LARGE above the cap, never at it" do
@@ -454,5 +469,11 @@ defmodule Loka.ContentTest do
              d("SCHEMA_VIOLATION", ~s(facts.facts["A_b"]), %{"error" => "pattern_mismatch"}),
              d("UNKNOWN_FIELD", "polices/x")
            ]
+  end
+
+  # Breaks: a pass emits a code the schema's DiagnosticCode enum lacks (the bell cue's
+  # UNRESOLVED_TEXT_KEY did), so the diagnostic fails the Diagnostic contract downstream.
+  test "a diagnostic code outside DiagnosticCode raises" do
+    assert_raise ArgumentError, fn -> Loka.Content.Source.diag("NOPE", "cartridge") end
   end
 end

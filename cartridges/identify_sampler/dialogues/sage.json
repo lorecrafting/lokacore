@@ -1,11 +1,8 @@
 {
   "npc": "sage",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "has_item",
-      "item": "ring"
-    }
+    "op": "has_item",
+    "item": "ring"
   },
   "prompt": "dialogue.sage.prompt",
   "roles": {

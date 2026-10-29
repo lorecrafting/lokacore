@@ -2,7 +2,7 @@
   "provider": "smith",
   "currency": "pennies",
   "action": "cancel",
-  "label": "service.forge_cancel",
+  "name": "service.forge_cancel",
   "narration": "service.forge_cancel.used",
   "price": 1,
   "benefit": {

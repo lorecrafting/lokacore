@@ -71,7 +71,7 @@ test('board projection keeps bounded identities and selected descriptions separa
         ...w.details[board],
         variants: [
           {
-            when: { policy_version: 1, root: { op: 'time_window', from: 0, to: 23 } },
+            when: { op: 'time_window', from: 0, to: 23 },
             description: 'alternate.board' as never,
           },
         ],
@@ -80,7 +80,7 @@ test('board projection keeps bounded identities and selected descriptions separa
         ...w.details[whistle],
         variants: [
           {
-            when: { policy_version: 1, root: { op: 'time_window', from: 0, to: 23 } },
+            when: { op: 'time_window', from: 0, to: 23 },
             description: 'alternate.notice' as never,
           },
         ],

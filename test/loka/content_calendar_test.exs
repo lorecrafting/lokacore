@@ -8,7 +8,11 @@ defmodule Loka.ContentCalendarTest do
   # Breaks: the compiler emits a calendar whose period or schedule cannot be consumed safely.
   test "compiler rejects malformed authored periods and out-of-day schedules", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ferry_sampler", dir)
-    File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
+
+    update(Path.join(dir, "dialogues/bram.json"), fn d ->
+      update_in(d, ["choices"], &Map.new(&1, fn {c, o} -> {c, Map.delete(o, "story_point")} end))
+    end)
+
     manifest = Path.join(dir, "cartridge.json")
 
     update(
@@ -59,7 +63,11 @@ defmodule Loka.ContentCalendarTest do
   # default units) or a start + day or cycle span past the largest safe integer.
   test "compiler rejects partial units and calendar spans past 2^53 - 1", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ferry_sampler", dir)
-    File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
+
+    update(Path.join(dir, "dialogues/bram.json"), fn d ->
+      update_in(d, ["choices"], &Map.new(&1, fn {c, o} -> {c, Map.delete(o, "story_point")} end))
+    end)
+
     manifest = Path.join(dir, "cartridge.json")
     max = 9_007_199_254_740_991
 
@@ -99,7 +107,11 @@ defmodule Loka.ContentCalendarTest do
   # Breaks: a fixed 24-hour compiler cap rejects a valid authored late-hour policy.
   test "compiler admits hour 29 but rejects hour 30 in a 30-hour day", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ferry_sampler", dir)
-    File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
+
+    update(Path.join(dir, "dialogues/bram.json"), fn d ->
+      update_in(d, ["choices"], &Map.new(&1, fn {c, o} -> {c, Map.delete(o, "story_point")} end))
+    end)
+
     manifest = Path.join(dir, "cartridge.json")
 
     update(
@@ -120,12 +132,12 @@ defmodule Loka.ContentCalendarTest do
 
     update(
       recipe,
-      &put_in(&1, ["policy", "root"], %{"op" => "time_window", "from" => 29, "to" => 2})
+      &put_in(&1, ["policy"], %{"op" => "time_window", "from" => 29, "to" => 2})
     )
 
     assert {:ok, _, []} = Loka.Content.compile(dir)
 
-    update(recipe, &put_in(&1, ["policy", "root", "from"], 30))
+    update(recipe, &put_in(&1, ["policy", "from"], 30))
     assert {:error, errors} = Loka.Content.compile(dir)
     assert Enum.any?(errors, &(&1["code"] == "SCHEMA_VIOLATION"))
   end

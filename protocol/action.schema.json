@@ -371,13 +371,13 @@
       ]
     },
     "ActionDefinition": {
-      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
+      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, name (its localization key), target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
       "type": "object",
       "properties": {
         "key": {
           "$ref": "#/$defs/Key"
         },
-        "label": {
+        "name": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9_.]*$",
           "maxLength": 128
@@ -398,7 +398,7 @@
           }
         },
         "policy": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "accessibility": {
           "type": "string",
@@ -408,19 +408,18 @@
       },
       "required": [
         "key",
-        "label",
+        "name",
         "target",
         "command",
         "priority",
         "input",
-        "policy",
         "accessibility"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "key": "talk",
-          "label": "actions.talk",
+          "name": "actions.talk",
           "target": {
             "kind": "entity",
             "scopes": [
@@ -431,16 +430,13 @@
           "priority": 100,
           "input": [],
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "target_present"
-            }
+            "op": "target_present"
           },
           "accessibility": "actions.talk.a11y"
         },
         {
           "key": "move",
-          "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           "target": {
             "kind": "none"
           },
@@ -450,11 +446,8 @@
             "direction"
           ],
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "accessibility": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
         }
@@ -831,13 +824,13 @@
           "additionalProperties": false
         },
         {
-          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise structure at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
           "type": "object",
           "properties": {
             "op": {
               "const": "build"
             },
-            "blueprint": {
+            "structure": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "direction": {
@@ -853,7 +846,7 @@
           },
           "required": [
             "op",
-            "blueprint",
+            "structure",
             "direction"
           ],
           "additionalProperties": false
@@ -887,13 +880,13 @@
       ]
     },
     "ActionRecipe": {
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
       "type": "object",
       "properties": {
         "key": {
           "$ref": "#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "aliases": {
@@ -911,7 +904,7 @@
           "type": "integer"
         },
         "policy": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "outcomes": {
           "type": "object",
@@ -1132,18 +1125,17 @@
       },
       "required": [
         "key",
-        "label",
+        "name",
         "aliases",
         "target",
         "priority",
-        "policy",
         "outcomes"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "key": "ring_bell",
-          "label": "actions.ring_bell",
+          "name": "actions.ring_bell",
           "aliases": [
             "ring",
             "pull"
@@ -1160,19 +1152,16 @@
           },
           "priority": 10,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "not",
-              "item": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "recipe_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "fact",
-                  "key": "chapel_bell_rung"
-                },
-                "equals": true
-              }
+            "op": "not",
+            "item": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "recipe_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "equals": true
             }
           },
           "outcomes": {
@@ -1202,7 +1191,7 @@
         },
         {
           "key": "k",
-          "label": "l",
+          "name": "l",
           "aliases": [
             "a",
             "a",
@@ -1233,11 +1222,8 @@
           },
           "priority": -1,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "outcomes": {
             "success": {
@@ -1315,7 +1301,7 @@
         },
         {
           "key": "pry_lid",
-          "label": "actions.ring_bell",
+          "name": "actions.ring_bell",
           "aliases": [
             "ring",
             "pull"
@@ -1332,19 +1318,16 @@
           },
           "priority": 10,
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "not",
-              "item": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "recipe_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "fact",
-                  "key": "chapel_bell_rung"
-                },
-                "equals": true
-              }
+            "op": "not",
+            "item": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "recipe_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "equals": true
             }
           },
           "outcomes": {

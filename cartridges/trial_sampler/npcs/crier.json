@@ -2,7 +2,7 @@
   "keywords": [
     "crier"
   ],
-  "short": "npc.crier.short",
+  "name": "npc.crier.short",
   "room_line": "npc.crier.room",
   "description": "npc.crier.description",
   "room": "square"

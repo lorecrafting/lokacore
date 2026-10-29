@@ -1,14 +1,11 @@
 {
-  "title": "quest.bounty.title",
+  "name": "quest.bounty.title",
   "objective": {
     "evidence": "current_state",
     "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "raider_slain",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "raider_slain",
+      "equals": true
     }
   },
   "journal": {

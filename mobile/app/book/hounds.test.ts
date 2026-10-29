@@ -30,7 +30,7 @@ function preview() {
   return { ...a, invoke, buttons, pulse };
 }
 
-// Breaks: identical blueprint names bind Attack to the first goblin, or a departed goblin keeps a stale detail route.
+// Breaks: identical definition names bind Attack to the first goblin, or a departed goblin keeps a stale detail route.
 test('Book offers instance-bound Attack and prunes a departed goblin detail', (t) => {
   const a = preview();
   t.after(() => a.sql.close());

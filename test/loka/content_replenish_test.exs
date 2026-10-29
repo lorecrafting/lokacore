@@ -93,11 +93,11 @@ defmodule Loka.ContentReplenishTest do
          |> update_in(["requires", "capabilities"], caps))},
       {"actions/dig.json",
        %{
-         "label" => "action.mine",
+         "name" => "action.mine",
          "aliases" => ["dig"],
          "target" => %{"kind" => "detail", "room" => "mine", "detail" => "seam"},
          "priority" => 10,
-         "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+         "policy" => %{"op" => "all", "items" => []},
          "outcomes" => %{
            "success" => %{
              "sequence" => [%{"op" => "event.emit", "event" => "dig"}],

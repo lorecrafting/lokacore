@@ -22,16 +22,14 @@ Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.m
 
 - Batch C2 (F3 F5 F6 F7 F8 F11 F12): draft PR #493, integration branch `simplify/c2-kinds` (worktree
   ~/dev/worktrees.noindex/simplify-c2-kinds). Merged in: A (signals out, diag guard, behavior@1 out), E
-  (structures), F (story_point on the choice), B1 (policy optional); CI green at 00eee3b72. Slice C1
-  (policies/ out, bundles inlined, hunter/prey/loot, :area) at b3f886b2c in review (third developer;
-  long mutation triage). Next: C2 travel (after C1 merges), then B2 alone (amended: delete the 23
-  always-true blocks, keep the 3 hostile; lint refuses explicit always), then D alone, then Z, then Fable
-  final review. Plan, rulings and amendments: loka-ivjq.3 notes. #492 merged (regen schemas/source;
-  pm_merge prepush once). pm_merge uses main's merge_resolve.py (loka-hhs6): when it refuses a
+  (structures), F (story_point on the choice), B1 (policy optional), C1 (policies/ out, bundles inlined,
+  hunter/prey/loot, :area), B2 (policy wrapper dropped). C2 travel cancelled: transport@1 stays. D (one
+  `name` field) merged; Z (docs sweep) on `simplify/c2-z-docs`; then Fable final review. Plan, rulings
+  and amendments: loka-ivjq.3 notes. pm_merge uses main's merge_resolve.py (loka-hhs6): when it refuses a
   generated-only conflict, merge by hand in the batch worktree with the batch's own resolver, regen,
   commit, push.
 - Then C3: "C3 PLAN" (Fable) in loka-ivjq.4 notes; owner ratified D1 (two maps, rename recipe -> scripted
-  action); naming #7 #12 folded in; slice Z rebuilds the glossary. After C3: a Fable "How Loka works"
+  action); naming #7 #12 folded in; C3 rebuilds the glossary. After C3: a Fable "How Loka works"
   explainer page (Artifact), link to the owner. Then C4 naming batch (loka-ivjq.29), then polish (Next 3).
 - C1 lessons, applied in every brief: parallel slices clash in shared tests, so each slice merges the
   latest integration branch before handback; bash_guard refuses local full suites, CI kernel/elixir jobs
@@ -49,7 +47,7 @@ Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.m
 1. Finish batch A (above).
 2. Simplification batch, epic loka-ivjq (Fable audit 2026-10-28, report in its notes; owner rulings in its
    description): F1 docs, F2 kernel_api floors, F3 policy wrapper, F4 one step/check vocabulary (L, Fable
-   brief), F5 single-use kinds, F6 display-name field, F7 delete signal shortcut, F11 story points onto the
+   brief), F5 single-use kinds, F6 display-name field, F7 signals out, F11 story points onto the
    choice; F9/F10/F12 after .17.
 3. Then polish: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is ready
    (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide: [polish tour](design/polish-tour.md)).

@@ -43,7 +43,7 @@ defmodule Loka.Content.Lint do
 
     files
     |> Enum.sort()
-    |> Enum.flat_map(fn {rel, v} -> file(Path.split(rel), rel, v) end)
+    |> Enum.flat_map(fn {rel, v} -> file(Path.split(rel), rel, v) ++ always(rel, v, []) end)
     |> Kernel.++(talk(files, text))
     |> Kernel.++(labels(files, text))
     |> Kernel.++(items(files))
@@ -51,8 +51,8 @@ defmodule Loka.Content.Lint do
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
   end
 
-  defp file(["actions", _], rel, %{"policy" => %{"root" => root}} = r)
-       when root != @always and not is_map_key(r, "reason") and not is_map_key(r, "command"),
+  defp file(["actions", _], rel, %{"policy" => p} = r)
+       when p != @always and not is_map_key(r, "reason") and not is_map_key(r, "command"),
        do: ["#{rel}: policy refuses with no reason"]
 
   defp file(["reactions", _], rel, %{"apply" => steps} = r) do
@@ -85,6 +85,22 @@ defmodule Loka.Content.Lint do
 
   defp file(_, _, _), do: []
 
+  # Absent is the only way to write "always" for a gate; an optional trigger (hostile) keeps it.
+  defp always(rel, %{} = v, at) do
+    Enum.flat_map(v, fn
+      {k, @always} when k in ~w(policy when qualification) ->
+        ["#{rel}: #{Enum.join(at ++ [k], ".")} always holds; omit it"]
+
+      {k, x} ->
+        always(rel, x, at ++ [k])
+    end)
+  end
+
+  defp always(rel, v, at) when is_list(v),
+    do: v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> always(rel, x, at ++ [i]) end)
+
+  defp always(_, _, _), do: []
+
   # The kernel draws the first band whose cut the percentage reaches, so a lone normal cut at 100
   # shows any value below the maximum in the next band's colour (pass-1 UK).
   defp top([_ | _] = bands) do
@@ -109,9 +125,9 @@ defmodule Loka.Content.Lint do
           do: "#{rel}: variants[#{j}] is shadowed by variants[#{i}]"
   end
 
-  defp conds(%{"when" => %{"root" => %{"op" => "all", "items" => items}}}), do: items
-  defp conds(%{"when" => %{"root" => root}}), do: [root]
-  # No guard always wins; the missing `when` itself is reported.
+  defp conds(%{"when" => %{"op" => "all", "items" => items}}), do: items
+  defp conds(%{"when" => w}), do: [w]
+  # No `when` always holds, so it shadows every later variant.
   defp conds(_), do: []
 
   # Row 7 (M8c): an item nothing places, stocks, drops or yields never enters play; one nothing
@@ -147,7 +163,7 @@ defmodule Loka.Content.Lint do
     tag(:source, drops ++ stock) ++ tag(:sink, stock)
   end
 
-  defp refs(["population_bundles", _], b), do: tag(:source, [b["item"], b["corpse"]])
+  defp refs(["populations", _], p), do: tag(:source, [p["item"], p["corpse"]])
 
   defp refs(["cartridge.json"], %{"world" => %{"death" => d}}),
     do: tag(:source, [d["player_corpse"], d["npc_corpse"]])
@@ -205,17 +221,17 @@ defmodule Loka.Content.Lint do
 
   defp wants(_, _), do: []
 
-  # A dialogue with no label of its own is offered as the kernel's default action.talk (UH);
+  # A dialogue with no name of its own is offered as the kernel's default action.talk (UH);
   # a keyword dialogue (speech@1) is spoken, not offered.
   defp talk(files, text) do
     bare? =
       Enum.any?(files, fn {rel, d} ->
-        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "label") and
+        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "name") and
           !is_map_key(d, "keyword")
       end)
 
     if bare? and text["action.talk"] in [nil, ""],
-      do: ["text.json: action.talk has no text, yet a dialogue has no label of its own"],
+      do: ["text.json: action.talk has no text, yet a dialogue has no name of its own"],
       else: []
   end
 
@@ -249,12 +265,12 @@ defmodule Loka.Content.Lint do
   defp label_keys(["dialogues", _], d),
     do:
       Enum.map(
-        [d["label"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
+        [d["name"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
         &{:choice, &1}
       )
 
-  defp label_keys(["actions", _], d), do: [{:choice, d["label"]}]
-  defp label_keys(["statuses", _], d), do: [{:status, d["label"]}]
+  defp label_keys(["actions", _], d), do: [{:choice, d["name"]}]
+  defp label_keys(["statuses", _], d), do: [{:status, d["name"]}]
   defp label_keys(_, _), do: []
 
   defp label_problem(:choice, _, s),

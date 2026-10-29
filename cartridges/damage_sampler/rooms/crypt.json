@@ -1,5 +1,5 @@
 {
-  "title": "room.crypt.title",
+  "name": "room.crypt.title",
   "description": "room.crypt.description",
   "exits": {
     "west": {

@@ -1,5 +1,5 @@
 {
-  "title": "room.bell_tower.title",
+  "name": "room.bell_tower.title",
   "description": "room.bell_tower.description",
   "exits": {
     "up": {
@@ -9,12 +9,9 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "chapel_bell_rung",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "chapel_bell_rung",
+        "equals": true
       },
       "description": "room.bell_tower.rung"
     }

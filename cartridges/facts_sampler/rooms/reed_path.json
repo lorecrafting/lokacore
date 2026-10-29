@@ -1,5 +1,5 @@
 {
-  "title": "room.reed_path.title",
+  "name": "room.reed_path.title",
   "description": "room.reed_path.description",
   "exits": {
     "north": {
@@ -9,12 +9,9 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "chapel_bell_rung",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "chapel_bell_rung",
+        "equals": true
       },
       "description": "room.reed_path.flooded"
     }
@@ -29,17 +26,14 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "any",
-              "items": [
-                {
-                  "op": "fact_compare",
-                  "fact": "fen_tracks_found",
-                  "equals": true
-                }
-              ]
-            }
+            "op": "any",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_tracks_found",
+                "equals": true
+              }
+            ]
           },
           "description": "detail.mud.tracks"
         }

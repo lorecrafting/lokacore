@@ -4,12 +4,9 @@
     "fact": "flamma_known"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "quest_state",
-      "quest": "errand",
-      "state": "active"
-    }
+    "op": "quest_state",
+    "quest": "errand",
+    "state": "active"
   },
   "apply": [
     {

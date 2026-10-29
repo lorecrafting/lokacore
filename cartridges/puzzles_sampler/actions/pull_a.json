@@ -1,5 +1,5 @@
 {
-  "label": "actions.pull_a",
+  "name": "actions.pull_a",
   "aliases": [
     "pull"
   ],
@@ -9,13 +9,6 @@
     "detail": "lever_a"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

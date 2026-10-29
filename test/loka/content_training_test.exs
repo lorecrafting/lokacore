@@ -6,7 +6,7 @@ defmodule Loka.ContentTrainingTest do
   defp trained do
     [
       {"skills/blade.json",
-       &put_in(&1, ["qualification", "root"], %{
+       &put_in(&1, ["qualification"], %{
          "op" => "stat_compare",
          "attribute" => "str",
          "at_least" => 10
@@ -35,7 +35,7 @@ defmodule Loka.ContentTrainingTest do
       }
     end
 
-    assert c["skills"][prefix <> ":skill/blade"]["qualification"]["root"]["attribute"] ==
+    assert c["skills"][prefix <> ":skill/blade"]["qualification"]["attribute"] ==
              ref.("attribute", "str")
 
     assert c["items"][prefix <> ":item/training_sword"]["weapon"]["skill"] ==
@@ -56,11 +56,9 @@ defmodule Loka.ContentTrainingTest do
       &{"dialogues/carpenter_lessons.json",
        fn d -> update_in(d, ["choices", "carving", "sequence"], &1) end}
 
-    # letter_fate gains a scene-resolved outcome so the scene's on_end write is otherwise valid.
+    # The scene's on_end claims a letter_fate outcome so its write is otherwise valid.
     on_end = fn fact ->
       [
-        {"story_points/letter_fate.json",
-         &put_in(&1, ["outcomes", "read"], %{"scene" => "letter_read"})},
         {"scenes/letter_read.json",
          &Map.put(&1, "on_end", %{
            "story_point" => "letter_fate",
@@ -109,12 +107,12 @@ defmodule Loka.ContentTrainingTest do
            {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.block"}},
           {[
              {"skills/blade.json",
-              &put_in(&1, ["qualification", "root"], %{
+              &put_in(&1, ["qualification"], %{
                 "op" => "stat_compare",
                 "attribute" => "missing",
                 "at_least" => 10
               })}
-           ], {"UNRESOLVED_REFERENCE", "skills/blade.qualification.root.attribute"}}
+           ], {"UNRESOLVED_REFERENCE", "skills/blade.qualification.attribute"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)

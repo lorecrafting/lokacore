@@ -1,5 +1,5 @@
 {
-  "title": "room.pawn_alley.title",
+  "name": "room.pawn_alley.title",
   "description": "room.pawn_alley.description",
   "exits": {
     "east": {

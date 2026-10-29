@@ -7,7 +7,7 @@ defmodule Loka.Content do
   R4 minimal source layout (PM decision, 14 §R4): a cartridge source is a directory holding
   `cartridge.json` (the CartridgeManifest object form), `facts.json` (`{"facts": {name:
   FactSpec without key}}`, a dotted name mapping to its snake_case key) and one file per
-  definition, `policies/<key>.json` and `actions/<key>.json`, the frozen shape without `key`.
+  definition, `actions/<key>.json`, the frozen shape without `key`.
   R5 adds `rooms/<key>.json` (RoomDefinition without `key`), `text.json` (the TextCatalog)
   and an optional `entry` room in `cartridge.json`; a source with any of them compiles to
   loka-cartridge-v2. R5 S4 adds `items/<key>.json` and `npcs/<key>.json` (ItemDefinition and

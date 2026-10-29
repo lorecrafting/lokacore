@@ -1,23 +1,13 @@
 {
-  "title": "quest.lantern.title",
+  "name": "quest.lantern.title",
   "offer": {
-    "label": "quest.lantern.accept",
-    "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
-    }
+    "label": "quest.lantern.accept"
   },
   "objective": {
     "evidence": "current_state",
     "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "has_item",
-        "item": "lantern"
-      }
+      "op": "has_item",
+      "item": "lantern"
     }
   },
   "journal": {

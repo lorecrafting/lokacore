@@ -105,7 +105,7 @@ test('recovery waiver uses actual death owner, recovery room and contained roots
     c.items[`${prefix}:item/pack`] = {
       key: 'pack',
       keywords: ['pack'],
-      short: 'item.pack.short',
+      name: 'item.pack.short',
       description: 'item.pack.description',
       room_line: 'item.pack.room',
       mass_grams: 10,
@@ -175,9 +175,9 @@ test('a recipe aimed at a transport detail keeps its card beside the ride', () =
       [`${prefix}:recipe/polish_post`]: {
         key: 'polish_post',
         aliases: ['polish'],
-        label: 'actions.polish_post',
+        name: 'actions.polish_post',
         priority: 5,
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
         target: { kind: 'detail', room: ref('room', 'north_post'), detail: 'post' },
         outcomes: {
           success: {

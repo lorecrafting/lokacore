@@ -4,11 +4,8 @@
     "room": "holding_lane"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "item_present",
-      "tag": "bed"
-    }
+    "op": "item_present",
+    "tag": "bed"
   },
   "apply": [
     {

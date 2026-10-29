@@ -1,5 +1,5 @@
 {
-  "label": "actions.temper",
+  "name": "actions.temper",
   "aliases": [
     "temper"
   ],
@@ -10,11 +10,8 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "item_present",
-      "tag": "forge"
-    }
+    "op": "item_present",
+    "tag": "forge"
   },
   "check": {
     "key": "temper",

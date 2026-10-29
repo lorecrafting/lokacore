@@ -1,14 +1,11 @@
 {
-  "title": "room.strongroom.title",
+  "name": "room.strongroom.title",
   "description": "room.strongroom.description",
   "locks": {
     "enter": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_strongroom",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_strongroom",
+      "equals": true
     }
   },
   "exits": {

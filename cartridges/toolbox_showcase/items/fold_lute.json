@@ -2,7 +2,7 @@
   "keywords": [
     "lute"
   ],
-  "short": "item.fold_lute.short",
+  "name": "item.fold_lute.short",
   "room_line": "item.fold_lute.room",
   "description": "item.fold_lute.description",
   "location": {

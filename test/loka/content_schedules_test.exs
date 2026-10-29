@@ -16,7 +16,7 @@ defmodule Loka.ContentSchedulesTest do
              maud["schedule_cases"]["8"]
 
     assert green == Map.put(@ref, "key", "green")
-    assert w["root"]["fact"]["kind"] == "fact"
+    assert w["fact"]["kind"] == "fact"
     refute Map.has_key?(maud["schedule_cases"], "12")
   end
 
@@ -32,8 +32,7 @@ defmodule Loka.ContentSchedulesTest do
       {case0.(&Map.put(&1, "room", "moor")), "UNRESOLVED_REFERENCE", "8[0].room"},
       {&hour.(&1, fn [c, _] -> [c, "moor"] end), "UNRESOLVED_REFERENCE", "8[1]"},
       {case0.(&Map.put(&1, "goal", "npc.maud.gone")), "UNRESOLVED_REFERENCE", "8[0].goal"},
-      {case0.(&put_in(&1, ["when", "root", "fact"], "ghost")), "UNRESOLVED_REFERENCE",
-       "8[0].when.root.fact"},
+      {case0.(&put_in(&1, ["when", "fact"], "ghost")), "UNRESOLVED_REFERENCE", "8[0].when.fact"},
       {&hour.(&1, fn [c, r] -> [r, c] end), "SCHEMA_VIOLATION", "8"}
     ]
 
@@ -51,7 +50,7 @@ defmodule Loka.ContentSchedulesTest do
     player = &put_in(&1, ["facts", "child_lost", "scopes"], ["player"])
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"facts.json", player}])
 
-    assert {"FACT_SCOPE_UNSUPPORTED", "npcs/maud.daily_schedule.8[0].when.root.fact"} in Enum.map(
+    assert {"FACT_SCOPE_UNSUPPORTED", "npcs/maud.daily_schedule.8[0].when.fact"} in Enum.map(
              diags,
              &{&1["code"], &1["path"]}
            )

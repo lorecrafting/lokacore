@@ -20,7 +20,7 @@
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "policy": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         },
         "prompt": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -85,15 +85,14 @@
           "description": "Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle.",
           "$ref": "#/$defs/SpokenKeyword"
         },
-        "label": {
-          "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk.",
+        "name": {
+          "description": "A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
         "key",
         "npc",
-        "policy",
         "prompt",
         "roles",
         "choices"
@@ -109,11 +108,8 @@
             "key": "bram"
           },
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "prompt": "dialogue.bram.prompt",
           "roles": {

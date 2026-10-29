@@ -2,7 +2,7 @@
   "keywords": [
     "deer"
   ],
-  "short": "npc.deer.short",
+  "name": "npc.deer.short",
   "room_line": "npc.deer.room",
   "description": "npc.deer.description",
   "room": "fen",

@@ -1,6 +1,9 @@
 {
   "extends": "herd",
-  "bundle": "oak_deer",
+  "npc": "oak_deer",
+  "item": "deer_hide",
+  "corpse": "deer_corpse",
+  "member_role": "prey",
   "home": "drowned_oak",
   "area": [
     "drowned_oak",

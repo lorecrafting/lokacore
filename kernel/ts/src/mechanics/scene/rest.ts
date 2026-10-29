@@ -34,15 +34,12 @@ function reaction(world: World, s: Dream): ReactionRule {
     key: s.key as Key,
     on: { event: 'rested', room: s.on.rest.room },
     when: {
-      policy_version: 1,
-      root: {
-        op: 'all',
-        items: [
-          { op: 'fact_compare', fact: s.on.rest.entitlement, equals: true },
-          { op: 'fact_compare', fact: s.on.rest.credit, equals: false },
-          { op: 'fact_compare', fact: fact(world, s), equals: 0 },
-        ],
-      },
+      op: 'all',
+      items: [
+        { op: 'fact_compare', fact: s.on.rest.entitlement, equals: true },
+        { op: 'fact_compare', fact: s.on.rest.credit, equals: false },
+        { op: 'fact_compare', fact: fact(world, s), equals: 0 },
+      ],
     },
     apply: [
       { op: 'fact.assign', fact: s.on.rest.credit, value: true },

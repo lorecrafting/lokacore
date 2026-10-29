@@ -38,7 +38,7 @@ defmodule Loka.ContentRoomsTest do
     }
   end
 
-  defp room(exits), do: %{"title" => "r.t", "description" => "r.d", "exits" => exits}
+  defp room(exits), do: %{"name" => "r.t", "description" => "r.d", "exits" => exits}
 
   # A two-room source (a north to b), with `files` merged over it; nil removes a file.
   defp compile(dir, files) do
@@ -170,12 +170,12 @@ defmodule Loka.ContentRoomsTest do
   # Review F5. Breaks: a v2 action label or accessibility key reaches the player unresolved.
   test "an action text key without a catalog entry is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
     talk = %{
-      "label" => "act.talk",
+      "name" => "act.talk",
       "target" => %{"kind" => "none"},
       "command" => "move",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+      "policy" => %{"op" => "all", "items" => []},
       "accessibility" => "r.t"
     }
 
@@ -185,7 +185,7 @@ defmodule Loka.ContentRoomsTest do
              "cartridge.json" => Map.put(m, "entry", ref("a")),
              "actions/go.json" => talk
            }) ==
-             {:error, [d("UNRESOLVED_REFERENCE", "actions/go.label", %{"target" => "act.talk"})]}
+             {:error, [d("UNRESOLVED_REFERENCE", "actions/go.name", %{"target" => "act.talk"})]}
   end
 
   # Review F6. Breaks: v2 keyed on rooms alone, so text.json or an entry is silently dropped.
@@ -334,7 +334,7 @@ defmodule Loka.ContentRoomsTest do
   end
 
   defp variant(root, text \\ "r.d"),
-    do: %{"when" => %{"policy_version" => 1, "root" => root}, "description" => text}
+    do: %{"when" => root, "description" => text}
 
   defp bell(equals), do: %{"op" => "fact_compare", "fact" => "bell", "equals" => equals}
 
@@ -379,13 +379,13 @@ defmodule Loka.ContentRoomsTest do
     assert compile(dir, files) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "rooms/b.details.lamp.variants[0].when.root.fact", %{
+                d("UNRESOLVED_REFERENCE", "rooms/b.details.lamp.variants[0].when.fact", %{
                   "target" => "c@1.0.0:fact/nope"
                 }),
                 d("UNRESOLVED_REFERENCE", "rooms/b.variants[0].description", %{
                   "target" => "d.gone"
                 }),
-                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.root.equals")
+                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.equals")
               ]}
   end
 
@@ -416,10 +416,10 @@ defmodule Loka.ContentRoomsTest do
               [
                 undeclared.("rooms/b.details.lamp", "inspectable_detail"),
                 undeclared.("rooms/b.details.lamp.variants[0]", "description_variant"),
-                undeclared.("rooms/b.details.lamp.variants[0].when.root.op", "fact"),
+                undeclared.("rooms/b.details.lamp.variants[0].when.op", "fact"),
                 undeclared.("rooms/b.variants[0]", "description_variant"),
-                undeclared.("rooms/b.variants[0].when.root.item.op", "fact"),
-                undeclared.("rooms/b.variants[0].when.root.op", "policy")
+                undeclared.("rooms/b.variants[0].when.item.op", "fact"),
+                undeclared.("rooms/b.variants[0].when.op", "policy")
               ]}
   end
 
@@ -447,6 +447,6 @@ defmodule Loka.ContentRoomsTest do
     assert {:ok, bytes, _} = compile(dir, files)
     %{"cartridge" => c} = JSON.decode!(bytes)
     [v] = c["rooms"]["c@1.0.0:room/b"]["details"]["exits"]["variants"]
-    assert v["when"]["root"]["fact"] == ref("bell", "fact")
+    assert v["when"]["fact"] == ref("bell", "fact")
   end
 end

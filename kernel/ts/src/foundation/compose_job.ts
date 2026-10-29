@@ -59,8 +59,7 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   if (
     op.crow_member_id !== undefined ||
     op.crow_generation !== undefined ||
-    op.crow_phase !== undefined ||
-    op.job.kind === 'population_bundle'
+    op.crow_phase !== undefined
   )
     return crowBindingValid(op);
   if (
@@ -150,7 +149,7 @@ function crowBindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
     op.crow_member_id !== undefined &&
     op.crow_generation !== undefined &&
     op.crow_phase !== undefined &&
-    op.job.kind === 'population_bundle' &&
+    op.job.kind === 'population' &&
     op.encounter_id === undefined &&
     op.quest_instance_id === undefined &&
     op.water_generation === undefined &&

@@ -3,7 +3,7 @@
   "tick_every": 60,
   "resource": "hp",
   "per_tick": -3,
-  "label": "condition.stunned",
+  "name": "condition.stunned",
   "narration": {
     "applied": "narration.stunned.applied",
     "tick": "narration.stunned.tick",

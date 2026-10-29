@@ -387,11 +387,11 @@ test('authored liquid overrides project the same availability as the exact invoc
               [actionKey]: {
                 key: actionKey,
                 command: type,
-                label: `action.${type}`,
+                name: `action.${type}`,
                 target,
                 input,
                 priority: 0,
-                policy: { policy_version: 1, root: policy },
+                policy: policy,
               } as never,
             },
           },

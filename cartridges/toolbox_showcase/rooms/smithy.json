@@ -1,5 +1,5 @@
 {
-  "title": "room.smithy.title",
+  "name": "room.smithy.title",
   "description": "room.smithy.description",
   "exits": {
     "north": {

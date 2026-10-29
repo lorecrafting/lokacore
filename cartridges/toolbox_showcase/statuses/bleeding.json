@@ -3,7 +3,7 @@
   "tick_every": 900,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.bleeding",
+  "name": "condition.bleeding",
   "narration": {
     "applied": "narration.bleeding.applied",
     "tick": "narration.bleeding.tick",

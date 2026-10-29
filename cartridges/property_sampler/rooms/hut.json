@@ -1,14 +1,11 @@
 {
-  "title": "room.hut.title",
+  "name": "room.hut.title",
   "description": "room.hut.description",
   "locks": {
     "enter": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_hut",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_hut",
+      "equals": true
     }
   },
   "exits": {

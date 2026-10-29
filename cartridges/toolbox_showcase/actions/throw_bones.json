@@ -1,5 +1,5 @@
 {
-  "label": "actions.throw_bones",
+  "name": "actions.throw_bones",
   "aliases": [
     "throw"
   ],
@@ -9,13 +9,6 @@
     "detail": "knucklebones"
   },
   "priority": 10,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "check": {
     "key": "throw_bones",
     "kind": "opposed",

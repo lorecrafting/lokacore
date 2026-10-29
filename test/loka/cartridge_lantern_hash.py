@@ -7,7 +7,6 @@ import json, hashlib
 ID, V = "lantern_proof", "0.0.1"
 def ref(kind, key): return {"cartridge_id": ID, "cartridge_version": V, "kind": kind, "key": key}
 def k(kind, key): return f"{ID}@{V}:{kind}/{key}"
-P = lambda root: {"policy_version": 1, "root": root}
 caps = {"movement":1,"description_variant":1,"containment":1,"barrier":1,"policy":1,
         "calendar":1,"fact":1,"quest":1,"dialogue":1,"resource":1,"schedule":1}
 def room(key, exits, variants=None):
@@ -15,7 +14,7 @@ def room(key, exits, variants=None):
     if variants: r["variants"] = variants
     return r
 gate = lambda to: {"to": ref("room", to), "barrier": ref("barrier", "old_gate")}
-plan = lambda v: {"when": P({"op":"fact_compare","fact":ref("fact","search_plan"),"equals":v}), "description": f"room.landing.{v}"}
+plan = lambda v: {"when": {"op":"fact_compare","fact":ref("fact","search_plan"),"equals":v}, "description": f"room.landing.{v}"}
 assign = lambda v: [{"op":"fact.assign","fact":ref("fact","search_plan"),"value":v}]
 value = {
  "format": "loka-cartridge-v2",
@@ -29,7 +28,7 @@ value = {
    "scopes": ["player"],
    "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).",
    "key": "search_plan"}},
- "policies": {}, "actions": {},
+ "actions": {},
  "rooms": {
    k("room","landing"): room("landing", {"north": {"to": ref("room","green")}, "west": gate("shelter")},
                              [plan("player_led"), plan("party_led")]),
@@ -44,10 +43,10 @@ value = {
    "room_line": "item.lantern.room", "description": "item.lantern.description",
    "location": {"in": "room", "room": ref("room","shelter")}, "key": "lantern"}},
  "quests": {k("quest","lantern"): {"title": "quest.lantern.title",
-   "objective": {"evidence": "current_state", "policy": P({"op":"has_item","item":ref("item","lantern")})},
+   "objective": {"evidence": "current_state", "policy": {"op":"has_item","item":ref("item","lantern")}},
    "key": "lantern"}},
  "dialogues": {k("dialogue","bram"): {"npc": ref("npc","bram"),
-   "policy": P({"op":"quest_state","quest":ref("quest","lantern"),"state":"active"}),
+   "policy": {"op":"quest_state","quest":ref("quest","lantern"),"state":"active"},
    "prompt": "dialogue.bram.prompt",
    "roles": {"bram": {"role":"npc","npc":ref("npc","bram")}, "lantern": {"role":"item","item":ref("item","lantern")}},
    "quest": ref("quest","lantern"),
@@ -56,9 +55,9 @@ value = {
                          "hand_over": {"item":"lantern","to":"bram"}}},
    "key": "bram"},
    k("dialogue","bram_offer"): {"npc": ref("npc","bram"),
-   "policy": P({"op":"not","item":{"op":"any","items":[
+   "policy": {"op":"not","item":{"op":"any","items":[
      {"op":"quest_state","quest":ref("quest","lantern"),"state":s}
-     for s in ["active","objectives_complete","resolved","failed","abandoned"]]}}),
+     for s in ["active","objectives_complete","resolved","failed","abandoned"]]}},
    "prompt": "dialogue.bram_offer.prompt",
    "roles": {"bram": {"role":"npc","npc":ref("npc","bram")}},
    "choices": {"accept": {"label":"quest.lantern.accept","narration":"proof.accept","accept":ref("quest","lantern")}},
@@ -89,7 +88,7 @@ DESC = ("Known answer for the loka-cartridge-v2 content hash of cartridges/lante
  "setting player_led with narration proof.carry, leave setting party_led, handing the lantern to Bram, narration proof.leave); "
  "the story point proof_terminal (outcomes carry and leave, Bram's dialogue choice of that name). "
  "resources.json (owner decision, untimed Lantern record): hp 10 of 10, ma 100 of 100, mv 100 of 100, the default gains. Assembled by hand from the "
- "source files (manifest without entry and calendar plus resource@1 and schedule@1, the lock, empty policies and actions, each "
+ "source files (manifest without entry and calendar plus resource@1 and schedule@1, the lock, empty actions, each "
  "fact, room, barrier, NPC, item, quest, dialogue and story point with key added and short references expanded, the pools "
  "(resources.json over the defaults), entry, text, calendar) before the compiler was run, its canonical bytes by Python json.dumps(sort_keys=True, "
  "separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers "

@@ -8,11 +8,11 @@ defmodule Loka.ContentFenTest do
     dir = Loka.ContentSource.copy("cartridges/fen_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     deer = "populations/deer.json"
-    leaf = ["birth_when", "root", "item"]
+    leaf = ["birth_when", "item"]
 
     for {edits, expected} <- [
           {[{deer, &put_in(&1, leaf ++ ["plan"], "nowhere")}],
-           {"UNRESOLVED_REFERENCE", "populations/deer.birth_when.root.item.plan"}},
+           {"UNRESOLVED_REFERENCE", "populations/deer.birth_when.item.plan"}},
           {[{deer, &put_in(&1, leaf, %{"op" => "has_item", "item" => "tuft"})}],
            {"SCHEMA_VIOLATION", "populations/deer.birth_when"}},
           {[{deer, &%{&1 | "floor" => 4}}], {"SCHEMA_VIOLATION", "populations/deer.floor"}}

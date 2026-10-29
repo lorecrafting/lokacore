@@ -2,7 +2,7 @@
   "keywords": [
     "vial"
   ],
-  "short": "item.vial.short",
+  "name": "item.vial.short",
   "room_line": "item.vial.room",
   "description": "item.vial.description",
   "location": {

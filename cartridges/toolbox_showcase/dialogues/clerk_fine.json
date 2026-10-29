@@ -7,12 +7,9 @@
     }
   },
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "wanted",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "wanted",
+    "equals": true
   },
   "prompt": "dialogue.clerk_fine.prompt",
   "choices": {
@@ -33,5 +30,5 @@
       }
     }
   },
-  "label": "dialogue.clerk_fine.open"
+  "name": "dialogue.clerk_fine.open"
 }

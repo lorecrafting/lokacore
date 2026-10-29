@@ -158,8 +158,8 @@ defmodule Loka.Core.FixtureCompositionTest do
              Contracts.validate("DeltaOp", Map.drop(op, ~w(crow_member_id crow_generation)))
   end
 
-  # Breaks: a crow-bound job without a closed phase passes the portable wire validator.
-  test "crow-bound schedule requires its closed phase" do
+  # Breaks: a crow-bound job without a closed phase, or with one crow field alone, is accepted.
+  test "crow-bound schedule requires its closed phase and every crow field" do
     c = Enum.find(@crow, &(&1["id"] == "schedule-phase-bound-crow-job"))
     op = hd(c["ops"])
 
@@ -167,6 +167,11 @@ defmodule Loka.Core.FixtureCompositionTest do
              Compose.compose(c["state"], %{"ops" => [Map.delete(op, "crow_phase")]})
 
     assert {:error, _} = Contracts.validate("DeltaOp", %{op | "crow_phase" => "paused_return"})
+    # One crow field alone must not route past the crow binding check.
+    {crow, op} = Map.split(op, ~w(crow_member_id crow_generation crow_phase))
+
+    for {k, v} <- crow,
+        do: assert(%{"fault" => _} = Compose.compose(c["state"], %{"ops" => [Map.put(op, k, v)]}))
   end
 
   # Breaks: the portable kernels differ despite both having checked literal cases.

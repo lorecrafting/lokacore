@@ -2,7 +2,7 @@
   "keywords": [
     "plot"
   ],
-  "short": "item.plot.short",
+  "name": "item.plot.short",
   "room_line": "item.plot.room",
   "description": "item.plot.description",
   "location": {
@@ -17,65 +17,53 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "growing_plot"
-            },
-            {
-              "op": "time_since",
-              "fact": "sown_at",
-              "item": "plot",
-              "at_least": 64800
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "growing_plot"
+          },
+          {
+            "op": "time_since",
+            "fact": "sown_at",
+            "item": "plot",
+            "at_least": 64800
+          }
+        ]
       },
       "description": "item.bed.heavy"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "growing_plot"
-            },
-            {
-              "op": "time_since",
-              "fact": "sown_at",
-              "item": "plot",
-              "at_least": 3600
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "growing_plot"
+          },
+          {
+            "op": "time_since",
+            "fact": "sown_at",
+            "item": "plot",
+            "at_least": 3600
+          }
+        ]
       },
       "description": "item.bed.shoots"
     }
   ],
   "locks": {
     "put": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_plot",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_plot",
+      "equals": true
     },
     "get": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_plot",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_plot",
+      "equals": true
     }
   }
 }

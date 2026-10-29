@@ -7,7 +7,7 @@ defmodule Loka.Content.Dialogues do
   @doc "Each schema-valid dialogue's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs),
-    do: for({rel, d} <- all(defs), do: {rel, ["policy", "root"], d["policy"]["root"]})
+    do: for({rel, d} <- all(defs), do: {rel, ["policy"], d["policy"]})
 
   defp all(defs), do: for({_, {rel, [], d}} <- defs["dialogue"], do: {rel, d})
 
@@ -47,7 +47,7 @@ defmodule Loka.Content.Dialogues do
     |> Enum.flat_map(fn {chapter, i} ->
       steps = ["chapters", i]
 
-      texts("cartridge.json", [{steps ++ ["title"], chapter["title"]}], ctx.text) ++
+      texts("cartridge.json", [{steps ++ ["name"], chapter["name"]}], ctx.text) ++
         chapter(chapter, i, steps, ctx)
     end)
   end
@@ -107,96 +107,87 @@ defmodule Loka.Content.Dialogues do
     end
   end
 
+  # dialogue@1 owns story_point_reached; a choice's dialogue resolves a quest; a scene-reached
+  # point's marker fact story_point_<key> fits a Key (key at most 52).
   defp story_points(defs, ctx) do
-    points = for {_, {rel, [], p}} <- defs["story_point"], do: {rel, p}
-    sites = Enum.frequencies(for {_, p} <- points, {_, t} <- p["outcomes"], do: t)
-    Enum.flat_map(points, &story_point(&1, sites, ctx))
+    for {_, {rel, steps, p}} <- defs["story_point"],
+        d <- owned(at(rel, steps), "story_point_reached", ctx.events) ++ outcomes(p, ctx),
+        do: d
   end
 
-  defp story_point({rel, p}, sites, ctx) do
-    owned(at(rel, []), "story_point_reached", ctx.events) ++
-      point_empty(rel, p) ++
-      point_key(rel, p) ++
-      Enum.flat_map(p["outcomes"], fn {o, t} ->
-        trigger(rel, ["outcomes", o], t, sites[t], ctx, {p["key"], o})
-      end)
+  defp outcomes(p, ctx) do
+    for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d
   end
 
-  defp point_empty(rel, p) do
-    if p["outcomes"] == %{},
-      do: [diag("SCHEMA_VIOLATION", at(rel, ["outcomes"]), %{"error" => "too_few_items"})],
-      else: []
+  defp site(%{"scene" => s}, key, ctx) do
+    {rel, steps, _} = resolve(s, "scene", ctx.m, ctx.defs)
+
+    {String.length(key) > 52,
+     diag("SCHEMA_VIOLATION", at(rel, steps ++ ["on_end", "story_point"]))}
   end
 
-  defp point_key(rel, p) do
-    if String.length(p["key"]) > 52 and
-         Enum.any?(p["outcomes"], fn {_, t} -> is_map_key(t, "scene") end),
-       do: [diag("SCHEMA_VIOLATION", at(rel, ["key"]))],
-       else: []
+  defp site(%{"dialogue" => r, "choice" => c}, _, ctx) do
+    {rel, steps, d} = resolve(r, "dialogue", ctx.m, ctx.defs)
+
+    {not is_map_key(d, "quest"),
+     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]))}
   end
 
-  # One outcome's trigger: a dialogue of this cartridge with a quest, one of its choices, and a
-  # site no other outcome names.
-  defp trigger(rel, steps, %{"scene" => _} = t, n, ctx, {point, outcome}) do
-    dup = if n > 1, do: [diag("DUPLICATE_DEFINITION", at(rel, steps))], else: []
-
-    shape =
-      if is_map_key(t, "choice") or is_map_key(t, "dialogue"),
-        do: [diag("SCHEMA_VIOLATION", at(rel, steps))],
-        else: []
-
-    match = scene_match(rel, steps, t, ctx, point, outcome)
-
-    dup ++ shape ++ reference(rel, steps, "scene", t, ctx.m, ctx.defs) ++ match
+  @doc """
+  Derives the story_point kind (StoryPointDefinition) from each choice's `story_point`
+  ("<key>/<outcome>", which leaves the choice) and each scene's `on_end`; a second claim of one
+  outcome, in path order, is DUPLICATE_DEFINITION at its site.
+  """
+  @spec points({map(), [map()]}, map() | nil) :: {map(), [map()]}
+  def points({defs, ds}, m) do
+    claims = Enum.sort(choice_claims(defs) ++ scene_claims(defs, m))
+    {points, dups} = Enum.reduce(claims, {%{}, []}, &claim/2)
+    dialogues = Map.new(defs["dialogue"], fn {k, d} -> {k, unclaimed(d)} end)
+    {Map.put(%{defs | "dialogue" => dialogues}, "story_point", points), ds ++ dups}
   end
 
-  defp trigger(rel, steps, t, n, ctx, _) do
-    dup = if n > 1, do: [diag("DUPLICATE_DEFINITION", at(rel, steps))], else: []
-
-    shape =
-      if not is_map_key(t, "choice"), do: [diag("SCHEMA_VIOLATION", at(rel, steps))], else: []
-
-    dup ++
-      shape ++
-      reference(rel, steps, "dialogue", t, ctx.m, ctx.defs) ++ dialogue_match(rel, steps, t, ctx)
+  defp choice_claims(defs) do
+    for {k, {rel, steps, %{"choices" => cs}}} <- defs["dialogue"],
+        {c, %{"story_point" => sp}} <- cs,
+        [p, o] = String.split(sp, "/"),
+        do:
+          {{rel, steps ++ ["choices", c, "story_point"]}, p, o, %{"dialogue" => k, "choice" => c}}
   end
 
-  defp scene_match(rel, steps, t, ctx, point, outcome) do
-    case resolve(t["scene"], "scene", ctx.m, ctx.defs) do
-      {_, _, s} ->
-        expected = %{
-          "cartridge_id" => ctx.m["id"],
-          "cartridge_version" => ctx.m["version"],
-          "kind" => "story_point",
-          "key" => point
-        }
-
-        if get_in(s, ["on_end", "story_point"]) == expected and
-             get_in(s, ["on_end", "outcome"]) == outcome,
-           do: [],
-           else: [diag("OUTCOME_MISMATCH", at(rel, steps))]
-
-      _ ->
-        []
-    end
+  defp scene_claims(defs, m) do
+    for {k, {rel, steps, %{"on_end" => %{"story_point" => r, "outcome" => o}}}} <- defs["scene"],
+        p = local(r, m),
+        p != nil,
+        do: {{rel, steps ++ ["on_end"]}, p, o, %{"scene" => k}}
   end
 
-  defp dialogue_match(rel, steps, t, ctx) do
-    case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
-      {_, _, d} ->
-        for {true, diag} <- [
-              {not is_map_key(d["choices"], t["choice"]),
-               diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["choice"]), %{
-                 "target" => t["choice"]
-               })},
-              {not is_map_key(d, "quest"), diag("OUTCOME_MISMATCH", at(rel, steps))}
-            ],
-            do: diag
+  defp claim({{rel, steps} = site, p, o, t}, {points, ds}) do
+    {r, s, v} = Map.get(points, p, {rel, steps, %{"key" => p, "outcomes" => %{}}})
 
-      _ ->
-        []
-    end
+    if is_map_key(v["outcomes"], o),
+      do: {points, ds ++ [diag("DUPLICATE_DEFINITION", at(site, []))]},
+      else: {Map.put(points, p, {r, s, put_in(v, ["outcomes", o], t)}), ds}
   end
+
+  defp local(k, _) when is_binary(k), do: k
+
+  defp local(
+         %{"cartridge_id" => id, "cartridge_version" => v, "kind" => "story_point", "key" => k},
+         %{
+           "id" => id,
+           "version" => v
+         }
+       ),
+       do: k
+
+  defp local(_, _), do: nil
+
+  defp unclaimed({rel, steps, %{"choices" => cs} = d}),
+    do:
+      {rel, steps,
+       %{d | "choices" => Map.new(cs, fn {c, o} -> {c, Map.delete(o, "story_point")} end)}}
+
+  defp unclaimed(d), do: d
 
   defp dialogue({rel, d}, ctx) do
     owned(at(rel, []), "dialogue", ctx.kinds) ++
@@ -213,7 +204,7 @@ defmodule Loka.Content.Dialogues do
         do: [diag("OUTCOME_MISMATCH", at(rel, ["riddle", "wrong_limit"]))],
         else: []
 
-    texts(rel, [{["prompt"], d["prompt"]}, {["label"], d["label"]}], text) ++ bound
+    texts(rel, [{["prompt"], d["prompt"]}, {["name"], d["name"]}], text) ++ bound
   end
 
   defp riddle(rel, %{"riddle" => r, "choices" => choices}, ctx) do

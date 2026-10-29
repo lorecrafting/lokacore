@@ -2,7 +2,7 @@
   "keywords": [
     "feast"
   ],
-  "short": "item.feast_01.short",
+  "name": "item.feast_01.short",
   "room_line": "item.feast_01.room",
   "description": "item.feast_01.description",
   "mass_grams": 500,

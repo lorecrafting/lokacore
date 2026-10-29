@@ -1,5 +1,5 @@
 {
-  "label": "actions.force_hall_cupboard",
+  "name": "actions.force_hall_cupboard",
   "aliases": [
     "force"
   ],
@@ -10,22 +10,19 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "hall_cupboard_forced",
-          "equals": false
-        },
-        {
-          "op": "has_tag",
-          "barrier": "hall_cupboard",
-          "tag": "fragile"
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "hall_cupboard_forced",
+        "equals": false
+      },
+      {
+        "op": "has_tag",
+        "barrier": "hall_cupboard",
+        "tag": "fragile"
+      }
+    ]
   },
   "check": {
     "key": "force_hall_cupboard",

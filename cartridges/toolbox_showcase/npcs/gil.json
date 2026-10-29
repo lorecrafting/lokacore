@@ -2,7 +2,7 @@
   "keywords": [
     "gil"
   ],
-  "short": "npc.gil.short",
+  "name": "npc.gil.short",
   "room_line": "npc.gil.room",
   "description": "npc.gil.description",
   "room": "gate_yard",
@@ -20,12 +20,9 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "gil_warned",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "gil_warned",
+        "equals": true
       },
       "description": "npc.gil.description_warned"
     }

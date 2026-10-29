@@ -2,16 +2,13 @@
   "keywords": [
     "wolf"
   ],
-  "short": "npc.wolf.short",
+  "name": "npc.wolf.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "scar"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "scar"
       },
       "description": "npc.wolf.short_scarred"
     }

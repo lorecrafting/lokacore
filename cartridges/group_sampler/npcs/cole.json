@@ -2,7 +2,7 @@
   "keywords": [
     "cole"
   ],
-  "short": "npc.cole.short",
+  "name": "npc.cole.short",
   "room_line": "npc.cole.room",
   "description": "npc.cole.description",
   "room": "yard"

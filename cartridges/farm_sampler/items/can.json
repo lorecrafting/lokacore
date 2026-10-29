@@ -2,7 +2,7 @@
   "keywords": [
     "can"
   ],
-  "short": "item.can.short",
+  "name": "item.can.short",
   "room_line": "item.can.room",
   "description": "item.can.description",
   "location": {

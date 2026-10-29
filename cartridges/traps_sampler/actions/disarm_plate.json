@@ -1,5 +1,5 @@
 {
-  "label": "actions.disarm_plate",
+  "name": "actions.disarm_plate",
   "aliases": [
     "disarm"
   ],
@@ -10,22 +10,19 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "plate_found",
-          "equals": true
-        },
-        {
-          "op": "fact_compare",
-          "fact": "plate_disarmed",
-          "equals": false
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "plate_found",
+        "equals": true
+      },
+      {
+        "op": "fact_compare",
+        "fact": "plate_disarmed",
+        "equals": false
+      }
+    ]
   },
   "check": {
     "key": "disarm_plate",

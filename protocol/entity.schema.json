@@ -162,7 +162,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its short and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); name, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its name and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "type": "object",
       "properties": {
         "key": {
@@ -176,7 +176,7 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "short": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "words": {
@@ -300,20 +300,15 @@
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "locks": {
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "type": "object",
           "properties": {
             "get": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             },
             "put": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
-          },
-          "requiredUnless": {
-            "put": [
-              "get"
-            ]
           },
           "additionalProperties": false
         }
@@ -321,7 +316,7 @@
       "required": [
         "key",
         "keywords",
-        "short",
+        "name",
         "room_line",
         "description",
         "location"
@@ -334,7 +329,7 @@
             "lantern",
             "brass_lantern"
           ],
-          "short": "item.lantern.short",
+          "name": "item.lantern.short",
           "room_line": "item.lantern.room",
           "description": "item.lantern.description",
           "location": {
@@ -353,20 +348,17 @@
           "keywords": [
             "satchel"
           ],
-          "short": "item.satchel.short",
+          "name": "item.satchel.short",
           "room_line": "item.satchel.room",
           "room_line_variants": [
             {
               "when": {
-                "policy_version": 1,
-                "root": {
-                  "op": "has_item",
-                  "item": {
-                    "cartridge_id": "items_sampler",
-                    "cartridge_version": "0.0.1",
-                    "kind": "item",
-                    "key": "lantern"
-                  }
+                "op": "has_item",
+                "item": {
+                  "cartridge_id": "items_sampler",
+                  "cartridge_version": "0.0.1",
+                  "kind": "item",
+                  "key": "lantern"
                 }
               },
               "description": "item.satchel.room_empty"
@@ -538,7 +530,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "type": "object",
       "properties": {
         "key": {
@@ -552,7 +544,7 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "short": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "words": {
@@ -582,7 +574,7 @@
           "maximum": 1024
         },
         "daily_schedule": {
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(0|[1-9][0-9]*)$"
@@ -596,10 +588,10 @@
           "type": "object",
           "properties": {
             "hostile": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             },
             "friendly": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             },
             "engage": {
               "$ref": "text.schema.json#/$defs/TextKey"
@@ -643,7 +635,7 @@
                     "$ref": "text.schema.json#/$defs/TextKey"
                   },
                   "when": {
-                    "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+                    "$ref": "policy.schema.json#/$defs/Policy"
                   },
                   "grants": {
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -776,12 +768,9 @@
           "type": "object",
           "properties": {
             "get": {
-              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
-          "required": [
-            "get"
-          ],
           "additionalProperties": false
         },
         "mount": {
@@ -812,7 +801,7 @@
       "required": [
         "key",
         "keywords",
-        "short",
+        "name",
         "room_line",
         "description",
         "room"
@@ -825,7 +814,7 @@
             "bram",
             "ferryman"
           ],
-          "short": "npc.bram.short",
+          "name": "npc.bram.short",
           "room_line": "npc.bram.room",
           "description": "npc.bram.description",
           "room": {
@@ -850,16 +839,13 @@
         [
           {
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "status_active",
-                "subject": "target",
-                "status": {
-                  "cartridge_id": "variants_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "status",
-                  "key": "bruised"
-                }
+              "op": "status_active",
+              "subject": "target",
+              "status": {
+                "cartridge_id": "variants_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "bruised"
               }
             },
             "description": "npc.maud.description_bruised"
@@ -874,7 +860,7 @@
         "type": "object",
         "properties": {
           "when": {
-            "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            "$ref": "policy.schema.json#/$defs/Policy"
           },
           "room": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -898,17 +884,14 @@
         [
           {
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "schedule_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "fact",
-                  "key": "child_lost"
-                },
-                "equals": true
-              }
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "schedule_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "child_lost"
+              },
+              "equals": true
             },
             "room": {
               "cartridge_id": "schedule_sampler",
@@ -1513,7 +1496,7 @@
           "maximum": 2
         },
         "when": {
-          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          "$ref": "policy.schema.json#/$defs/Policy"
         }
       },
       "required": [

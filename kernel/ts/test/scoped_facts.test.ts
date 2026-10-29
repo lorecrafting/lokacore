@@ -127,14 +127,14 @@ test('row W2 needs a known subject, at fact sites only', () => {
   const met = `${S}:fact/times_met`;
   const smith = `${S}:dialogue/smith_talk`;
   const leaf = (extra: object) => (c: any) =>
-    (c.dialogues[smith].policy.root = {
+    (c.dialogues[smith].policy = {
       op: 'fact_compare',
       fact: c.facts[met] && fact('times_met'),
       equals: 0,
       ...extra,
     });
   const npcRef = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
-  const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy.root`;
+  const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy`;
   const rows: [(c: any) => void, string, string][] = [
     [leaf({}), 'FACT_SCOPE_UNSUPPORTED', root],
     [
@@ -177,7 +177,7 @@ test('row W2 needs a known subject, at fact sites only', () => {
 // a subject (a hand_over, a riddle answer with a wrong_limit, a legacy deadline quest's dialogue)
 // loads, and that save would not reopen; or one whose receipt recovery checks at the speaker (a
 // payment, a riddle without a wrong_limit) is refused; or subject "target" loads in a reaction,
-// quest, barrier or skill, which has no target.
+// quest, barrier, skill or room lock, which has no target.
 test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
   const smith = `${S}:dialogue/smith_talk`;
   const at = (k: string) =>
@@ -207,13 +207,16 @@ test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () =
     assert.deepEqual(variant(change), []);
   const fed = `${S}:reaction/fed`;
   const root = { op: 'fact_compare', fact: fact('trust'), equals: 0, subject: 'target' };
-  const when = variant((_, c) => (c.reactions[fed].when = { policy_version: 1, root }));
-  assert.deepEqual(when, [`.cartridge.reactions[${JSON.stringify(fed)}].when.root.subject`]);
+  const when = variant((_, c) => (c.reactions[fed].when = root));
+  assert.deepEqual(when, [`.cartridge.reactions[${JSON.stringify(fed)}].when.subject`]);
   for (const kind of ['quests', 'barriers', 'skills']) {
     const k = `${S}:${kind}/x`;
-    const paths = variant((_, c) => (c[kind] = { [k]: { policy: { policy_version: 1, root } } }));
-    assert.deepEqual(paths, [`.cartridge.${kind}[${JSON.stringify(k)}].policy.root.subject`]);
+    const paths = variant((_, c) => (c[kind] = { [k]: { policy: root } }));
+    assert.deepEqual(paths, [`.cartridge.${kind}[${JSON.stringify(k)}].policy.subject`]);
   }
+  const room = Object.keys(source.rooms)[0];
+  const lock = variant((_, c) => (c.rooms[room].locks = { enter: root }));
+  assert.deepEqual(lock, [`.cartridge.rooms[${JSON.stringify(room)}].locks.enter.subject`]);
   assert.deepEqual(scopeSites(source), []);
 });
 

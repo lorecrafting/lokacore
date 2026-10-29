@@ -2,16 +2,13 @@
   "keywords": [
     "stew"
   ],
-  "short": "item.stew_plain.short",
+  "name": "item.stew_plain.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "spoiling"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "spoiling"
       },
       "description": "item.stew_plain.short_spoiling"
     }

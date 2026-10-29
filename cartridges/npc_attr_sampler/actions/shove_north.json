@@ -1,5 +1,5 @@
 {
-  "label": "actions.shove_north",
+  "name": "actions.shove_north",
   "aliases": [
     "shove"
   ],
@@ -10,12 +10,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "north_open",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "north_open",
+    "equals": false
   },
   "check": {
     "key": "shove_north",

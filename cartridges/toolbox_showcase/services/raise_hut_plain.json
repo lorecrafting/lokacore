@@ -2,12 +2,12 @@
   "provider": "carpenter",
   "currency": "pennies",
   "action": "raise_hut_plain",
-  "label": "service.raise_hut_plain",
+  "name": "service.raise_hut_plain",
   "narration": "service.raise_hut_plain.used",
   "price": 5,
   "benefit": {
     "kind": "build",
-    "blueprint": "hut_plain",
+    "structure": "hut_plain",
     "site": "holding_lane",
     "direction": "north"
   }

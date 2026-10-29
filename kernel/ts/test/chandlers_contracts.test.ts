@@ -11,7 +11,7 @@ const ref = (kind: string, key: string) => ({
 // Compiled-form literals; each test first checks its literal validates unchanged.
 const quest = {
   key: 'find_key',
-  title: 'quest.find_key.title',
+  name: 'quest.find_key.title',
   objective: { evidence: 'post_activation_event', item_acquired: ref('item', 'key') },
   deadline: { after: 120000, outcome: 'late' },
 };
@@ -23,7 +23,7 @@ const choice = {
 const npc = {
   key: 'payer',
   keywords: ['payer'],
-  short: 'npc.payer.short',
+  name: 'npc.payer.short',
   room_line: 'npc.payer.room',
   description: 'npc.payer.description',
   room: ref('room', 'hall'),

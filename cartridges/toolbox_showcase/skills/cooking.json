@@ -1,13 +1,6 @@
 {
-  "label": "skill.cooking.label",
+  "name": "skill.cooking.label",
   "requirement": "skill.cooking.requirement",
-  "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "growth": [
     2,
     4

@@ -85,7 +85,7 @@ defmodule Loka.Content.Status do
         else: []
       ) ++
       per_tick(rel, s) ++
-      missing_text(rel, ["label"], [s["label"]], text) ++
+      missing_text(rel, ["name"], [s["name"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
       refs(rel, s, m, defs) ++
       hp_max(rel, s, settings) ++ readers(rel, s)

@@ -2,7 +2,7 @@
   "keywords": [
     "purse"
   ],
-  "short": "item.merchant_purse.short",
+  "name": "item.merchant_purse.short",
   "room_line": "item.merchant_purse.room",
   "description": "item.merchant_purse.description",
   "location": {

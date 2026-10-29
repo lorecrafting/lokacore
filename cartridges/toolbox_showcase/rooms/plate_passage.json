@@ -1,5 +1,5 @@
 {
-  "title": "room.plate_passage.title",
+  "name": "room.plate_passage.title",
   "description": "room.plate_passage.description",
   "exits": {
     "south": {

@@ -11,11 +11,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -79,11 +76,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -146,11 +140,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -213,11 +204,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -270,11 +258,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -337,11 +322,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -405,11 +387,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -473,11 +452,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -541,11 +517,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -609,11 +582,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -677,11 +647,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -745,11 +712,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -813,11 +777,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -871,11 +832,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -963,11 +921,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1023,11 +978,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1083,11 +1035,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1143,11 +1092,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1203,11 +1149,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1263,11 +1206,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1331,11 +1271,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1399,11 +1336,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1468,11 +1402,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -1528,11 +1459,8 @@
         "key": "bram"
       },
       "policy": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": []
-        }
+        "op": "all",
+        "items": []
       },
       "prompt": "dialogue.bram.prompt",
       "roles": {
@@ -2195,11 +2123,8 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         }
@@ -2222,161 +2147,113 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         }
@@ -2415,192 +2292,121 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
-          "text": "quest.lantern.find"
-        }
-      ]
-    },
-    "valid": false
-  },
-  {
-    "name": "QuestJournal active_variants.0.when missing",
-    "contract": "QuestJournal",
-    "value": {
-      "active": "quest.lantern.find",
-      "objectives_met": "quest.lantern.return",
-      "resolved": "quest.lantern.done",
-      "failed": "quest.lantern.failed",
-      "abandoned": "quest.lantern.abandoned",
-      "outcomes": {
-        "carry": "quest.lantern.carried"
-      },
-      "active_variants": [
-        {
           "text": "quest.lantern.find"
         }
       ]
@@ -2622,11 +2428,8 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           }
         }
       ]
@@ -2648,11 +2451,8 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "quest.lantern.find",
           "extra": true
@@ -2676,11 +2476,8 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
+            "op": "all",
+            "items": []
           },
           "text": "bad key"
         }
@@ -2689,7 +2486,7 @@
     "valid": false
   },
   {
-    "name": "QuestJournal active_variants.0.when.policy_version unsupported",
+    "name": "QuestJournal active_variants.0.when malformed",
     "contract": "QuestJournal",
     "value": {
       "active": "quest.lantern.find",
@@ -2703,37 +2500,7 @@
       "active_variants": [
         {
           "when": {
-            "policy_version": 2,
-            "root": {
-              "op": "all",
-              "items": []
-            }
-          },
-          "text": "quest.lantern.find"
-        }
-      ]
-    },
-    "valid": false
-  },
-  {
-    "name": "QuestJournal active_variants.0.when.root malformed",
-    "contract": "QuestJournal",
-    "value": {
-      "active": "quest.lantern.find",
-      "objectives_met": "quest.lantern.return",
-      "resolved": "quest.lantern.done",
-      "failed": "quest.lantern.failed",
-      "abandoned": "quest.lantern.abandoned",
-      "outcomes": {
-        "carry": "quest.lantern.carried"
-      },
-      "active_variants": [
-        {
-          "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "invented"
-            }
+            "op": "invented"
           },
           "text": "quest.lantern.find"
         }

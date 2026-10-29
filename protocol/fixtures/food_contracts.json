@@ -33,7 +33,7 @@
         "keywords": [
           "apple"
         ],
-        "short": "item.apple.short",
+        "name": "item.apple.short",
         "room_line": "item.apple.room",
         "description": "item.apple.description",
         "location": {

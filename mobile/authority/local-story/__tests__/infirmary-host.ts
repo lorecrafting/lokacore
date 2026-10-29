@@ -16,9 +16,9 @@ const change = (c: any) => {
   for (const i of [1, 2, 3, 4, 5, 6]) c.items[`${prefix}:item/ore_0${i}`].mass_grams = 100;
   c.dialogues[`${prefix}:dialogue/c_pledge`] = {
     key: 'c_pledge',
-    label: 'quest.herbs.accept', // a labelled talk is selected by key, not by policy order
+    name: 'quest.herbs.accept', // a labelled talk is selected by key, not by policy order
     npc: ref('npc', 'healer'),
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     prompt: 'dialogue.healer.prompt',
     roles: { healer: { role: 'npc', npc: ref('npc', 'healer') } },
     choices: {

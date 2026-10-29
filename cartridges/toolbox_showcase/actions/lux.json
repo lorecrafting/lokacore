@@ -1,5 +1,5 @@
 {
-  "label": "spell.lux",
+  "name": "spell.lux",
   "aliases": [
     "lux"
   ],
@@ -16,12 +16,9 @@
   },
   "priority": 0,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "has_tag",
-      "subject": "target",
-      "tag": "lamp"
-    }
+    "op": "has_tag",
+    "subject": "target",
+    "tag": "lamp"
   },
   "costs": [
     {

@@ -18,11 +18,11 @@ defmodule Loka.ContentD9Test do
        &put_in(&1, ["details", "bell"], %{"aliases" => ["bell"], "description" => "detail.bell"})},
       {"actions/ring_bell.json",
        %{
-         "label" => "actions.ring_bell",
+         "name" => "actions.ring_bell",
          "aliases" => ["ring"],
          "target" => %{"kind" => "detail", "room" => "drill_yard", "detail" => "bell"},
          "priority" => 10,
-         "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+         "policy" => %{"op" => "all", "items" => []},
          "outcomes" => %{
            "success" => %{
              "sequence" => [%{"op" => "fact.assign", "fact" => "bell_rung", "value" => true}],
@@ -66,7 +66,7 @@ defmodule Loka.ContentD9Test do
           {"cartridge.json", &put_in(&1, ["world", "bell_cue", "fact"], "absent"),
            "UNRESOLVED_REFERENCE", "cartridge.world.bell_cue.fact"},
           {"cartridge.json", &put_in(&1, ["world", "bell_cue", "text"], "narration.absent"),
-           "UNRESOLVED_TEXT_KEY", "cartridge.world.bell_cue.text"},
+           "UNRESOLVED_REFERENCE", "cartridge.world.bell_cue.text"},
           {"#{reaction}.json", &put_in(&1, ["apply", Access.at(0), "plan"], "hens"),
            "SCHEMA_VIOLATION", "#{reaction}.apply[0].plan"},
           {"#{reaction}.json", &put_in(&1, ["on", "fact"], "lever_stage"), "FACT_TYPE_MISMATCH",

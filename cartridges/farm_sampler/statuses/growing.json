@@ -3,7 +3,7 @@
   "tick_every": 3600,
   "resource": "hp",
   "per_tick": -1,
-  "label": "condition.growing",
+  "name": "condition.growing",
   "narration": {
     "applied": "narration.growing.applied",
     "tick": "narration.growing.tick",

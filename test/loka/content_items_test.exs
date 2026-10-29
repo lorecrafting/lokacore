@@ -150,10 +150,10 @@ defmodule Loka.ContentItemsTest do
               [
                 undeclared.("items/lamp_oil"),
                 undeclared.("items/lantern"),
-                undeclared.("items/lantern.room_line_variants[0].when.root.op"),
+                undeclared.("items/lantern.room_line_variants[0].when.op"),
                 undeclared.("items/satchel"),
                 undeclared.("npcs/bram"),
-                d("UNRESOLVED_REFERENCE", "npcs/bram.short", %{"target" => "npc.bram.short"})
+                d("UNRESOLVED_REFERENCE", "npcs/bram.name", %{"target" => "npc.bram.short"})
               ]}
   end
 
@@ -187,7 +187,7 @@ defmodule Loka.ContentItemsTest do
   test "a missing touch link is a TOUCH_LINK_MISSING warning and the build succeeds",
        %{dir: dir} do
     variant = %{
-      "when" => %{"policy_version" => 1, "root" => %{"op" => "has_item", "item" => "lantern"}},
+      "when" => %{"op" => "has_item", "item" => "lantern"},
       "description" => "room.ferry_landing.title"
     }
 

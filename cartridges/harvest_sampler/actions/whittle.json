@@ -1,5 +1,5 @@
 {
-  "label": "action.whittle",
+  "name": "action.whittle",
   "aliases": [
     "whittle"
   ],
@@ -11,12 +11,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "has_tag",
-      "subject": "target",
-      "tag": "wooden"
-    }
+    "op": "has_tag",
+    "subject": "target",
+    "tag": "wooden"
   },
   "outcomes": {
     "success": {

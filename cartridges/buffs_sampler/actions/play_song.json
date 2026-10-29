@@ -1,5 +1,5 @@
 {
-  "label": "actions.play_song",
+  "name": "actions.play_song",
   "aliases": [
     "play"
   ],
@@ -10,11 +10,8 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "has_item",
-      "item": "lute"
-    }
+    "op": "has_item",
+    "item": "lute"
   },
   "outcomes": {
     "success": {

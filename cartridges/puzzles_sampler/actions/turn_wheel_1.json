@@ -1,5 +1,5 @@
 {
-  "label": "actions.turn_wheel_1",
+  "name": "actions.turn_wheel_1",
   "aliases": [
     "turn"
   ],
@@ -9,13 +9,6 @@
     "detail": "wheel_1"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

@@ -239,7 +239,7 @@ function cart(c: any) {
   c.npcs[`${prefix}:npc/carter`] = {
     key: 'carter',
     keywords: ['carter'],
-    short: 'npc.carter.short',
+    name: 'npc.carter.short',
     description: 'npc.carter.description',
     room_line: 'npc.carter.room',
     room: ref('room', 'village_green'),
@@ -261,17 +261,17 @@ function cart(c: any) {
       currency: ref('resource', 'coins'),
       fare: 3,
       recovery_rooms: [ref('room', to)],
-      label: 'transport.ride',
+      name: 'transport.ride',
       narration: 'transport.ride',
     };
     c.actions[`${prefix}:action/${key}`] = {
       key,
       command: 'use_transport',
       input: ['route', 'quoted_fare'],
-      label: 'transport.ride',
+      name: 'transport.ride',
       accessibility: 'transport.ride',
       priority: 0,
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
       target: { kind: 'entity', scopes: ['inspectable_details'] },
     };
     c.rooms[`${prefix}:room/${from}`].details = {

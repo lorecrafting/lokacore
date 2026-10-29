@@ -4,12 +4,9 @@
     "fact": "scene_letter_ash"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "scene_letter_ash",
-      "equals": -1
-    }
+    "op": "fact_compare",
+    "fact": "scene_letter_ash",
+    "equals": -1
   },
   "apply": [
     {

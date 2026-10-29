@@ -4,12 +4,9 @@
     "check": "pick_lock"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "cue_perceived",
-      "npc": "guard",
-      "sense": "sound"
-    }
+    "op": "cue_perceived",
+    "npc": "guard",
+    "sense": "sound"
   },
   "apply": [
     {

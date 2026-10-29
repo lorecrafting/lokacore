@@ -1,14 +1,11 @@
 {
-  "title": "quest.hold_the_gate.title",
+  "name": "quest.hold_the_gate.title",
   "objective": {
     "evidence": "current_state",
     "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "raided",
-        "equals": false
-      }
+      "op": "fact_compare",
+      "fact": "raided",
+      "equals": false
     }
   },
   "journal": {

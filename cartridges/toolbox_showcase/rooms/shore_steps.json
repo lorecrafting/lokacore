@@ -1,5 +1,5 @@
 {
-  "title": "room.shore_steps.title",
+  "name": "room.shore_steps.title",
   "description": "room.shore_steps.description",
   "exits": {
     "west": {
@@ -41,72 +41,51 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "tide": "high"
-        }
+        "op": "sky",
+        "tide": "high"
       },
       "description": "room.shore_steps.high_tide"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "visited_count",
-          "room": "shore_steps",
-          "at_least": 3
-        }
+        "op": "visited_count",
+        "room": "shore_steps",
+        "at_least": 3
       },
       "description": "room.shore_steps.familiar"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "rain"
-        }
+        "op": "sky",
+        "weather": "rain"
       },
       "description": "room.shore_steps.rain"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "season": "spring"
-        }
+        "op": "sky",
+        "season": "spring"
       },
       "description": "room.shore_steps.spring"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "season": "summer"
-        }
+        "op": "sky",
+        "season": "summer"
       },
       "description": "room.shore_steps.summer"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "season": "autumn"
-        }
+        "op": "sky",
+        "season": "autumn"
       },
       "description": "room.shore_steps.autumn"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "season": "winter"
-        }
+        "op": "sky",
+        "season": "winter"
       },
       "description": "room.shore_steps.winter"
     }

@@ -3,7 +3,7 @@
   "tick_every": 60,
   "resource": "hp",
   "kind": "debuff",
-  "label": "condition.wanted",
+  "name": "condition.wanted",
   "narration": {
     "applied": "narration.wanted.applied",
     "tick": "narration.wanted.tick",

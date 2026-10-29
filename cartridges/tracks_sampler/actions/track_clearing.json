@@ -1,5 +1,5 @@
 {
-  "label": "actions.track",
+  "name": "actions.track",
   "aliases": [
     "track"
   ],
@@ -9,13 +9,6 @@
     "detail": "ground"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "check": {
     "key": "track_clearing",
     "kind": "track",

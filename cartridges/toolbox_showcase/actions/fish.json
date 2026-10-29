@@ -1,5 +1,5 @@
 {
-  "label": "action.fish",
+  "name": "action.fish",
   "aliases": [
     "fish"
   ],
@@ -11,12 +11,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "has_tag",
-      "subject": "target",
-      "tag": "water"
-    }
+    "op": "has_tag",
+    "subject": "target",
+    "tag": "water"
   },
   "check": {
     "key": "fish",

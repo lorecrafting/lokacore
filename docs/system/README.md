@@ -16,7 +16,7 @@ records and [docs/archive/](../archive/README.md).
 | [protocol.md](protocol.md) | contracts, the numeric profile, the decision loop, budgets, invariants, ActionSet, GameView |
 | [save.md](save.md) | the local Story authority: receipts, the SQLite save, recovery, story points, the trace |
 | [cartridge.md](cartridge.md) | source format, compiler, artifact, loader, installed capabilities |
-| [glossary.md](glossary.md) | cartridge, blueprint, instance, spawn and capability vocabulary |
+| [glossary.md](glossary.md) | cartridge, instance, spawn, capability, policy, structure and story point vocabulary |
 | [Builder's guide](../BUILDERS-GUIDE.md) | file-based authoring workflow and examples for current mechanics |
 | [mechanics.md](mechanics.md) | the rules of each implemented capability |
 | [owner-rules.md](owner-rules.md) | the active owner rules, one list, no history |

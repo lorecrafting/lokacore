@@ -30,7 +30,7 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
   const definition = world.cartridge.skills?.[refString(skill)];
   if (!definition) throw new KernelError('precondition_failed');
   const acquired = membership(world, actor, skill);
-  const qualified = holds(world, actor, definition.qualification.root, { steps });
+  const qualified = holds(world, actor, definition.qualification, { steps });
   return { acquired, qualified, usable: acquired && qualified };
 }
 
@@ -38,16 +38,14 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
 export function concealed(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
   const s = world.cartridge.skills?.[refString(skill)];
   const p = s?.hidden && s.prerequisite;
-  return !!p && !membership(world, actor, skill) && !holds(world, actor, p.root, { steps });
+  return !!p && !membership(world, actor, skill) && !holds(world, actor, p, { steps });
 }
 
 /** Not yet learned, and (Homestead hs-11) its prerequisite, when declared, holds; dialogue
  * admission only: an ancestry grant at birth (attributes/rule.ts) is not learning. */
 export function learnable(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
   const p = world.cartridge.skills?.[refString(skill)]?.prerequisite;
-  return (
-    membership(world, actor, skill) === false && (!p || holds(world, actor, p.root, { steps }))
-  );
+  return membership(world, actor, skill) === false && (!p || holds(world, actor, p, { steps }));
 }
 
 export function acquire(world: World, actor: CharacterId, run: Assigned, skill: DefinitionRef) {

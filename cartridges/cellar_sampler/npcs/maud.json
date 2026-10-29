@@ -4,7 +4,7 @@
     "widow",
     "innkeeper"
   ],
-  "short": "npc.maud.short",
+  "name": "npc.maud.short",
   "room_line": "npc.maud.room",
   "description": "npc.maud.description",
   "room": "drowned_lantern"

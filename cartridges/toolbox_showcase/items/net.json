@@ -2,7 +2,7 @@
   "keywords": [
     "net"
   ],
-  "short": "item.net.short",
+  "name": "item.net.short",
   "room_line": "item.net.room",
   "description": "item.net.description",
   "location": {
@@ -13,11 +13,8 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "rain"
-        }
+        "op": "sky",
+        "weather": "rain"
       },
       "description": "item.net.description_rain"
     }

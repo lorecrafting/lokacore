@@ -248,7 +248,7 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
   const key = `${P}recipe/carve_spoon`;
   const shut = {
     ...content.recipes![key]!,
-    policy: { policy_version: 1, root: { op: 'any', items: [] } },
+    policy: { op: 'any', items: [] },
   };
   const w = heavy({ ...content, recipes: { ...content.recipes, [key]: shut } } as never);
   const r = carve(w);
@@ -339,7 +339,7 @@ test('a hidden skill is left out of the view while its prerequisite fails', () =
 // NPC lists a lesson for a skill the view leaves out. Carving is hidden and needs stick_02 held.
 test('a learned hidden skill stays in the view; a lesson for a left-out skill is not listed', () => {
   const carving = content.skills![`${P}skill/carving`]!;
-  const stick = { ...(carving.prerequisite!.root as any).skill, kind: 'item', key: 'stick_02' };
+  const stick = { ...(carving.prerequisite! as any).skill, kind: 'item', key: 'stick_02' };
   const root = { op: 'has_item', item: stick } as never;
   const c = {
     ...content,
@@ -348,7 +348,7 @@ test('a learned hidden skill stays in the view; a lesson for a left-out skill is
       [`${P}skill/carving`]: {
         ...carving,
         hidden: true,
-        prerequisite: { policy_version: 1, root },
+        prerequisite: root,
       },
       [`${P}skill/joinery`]: { ...content.skills![`${P}skill/joinery`]!, hidden: true },
     },
@@ -487,7 +487,7 @@ test('chop, learn carpentry, saw and raise the timbered hut north of the lane', 
   assert.deepEqual(where(w, timbers), [room(w, 'yard'), room(w, 'yard')]);
   w = move(w, 'north');
   assert.equal(w.state.containers[w.body], hut);
-  assert.equal(gameView(w).place.title.key, 'blueprint.hut_timbered.title');
+  assert.equal(gameView(w).place.title.key, 'structure.hut_timbered.title');
   w = move(w, 'south');
   assert.deepEqual(hire(w).decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.deepEqual(offer(w, 'raise_hut_plain').reason, refusal('service.site_taken'));
@@ -508,7 +508,7 @@ test('the carpenter first: the plain hut for 5 pennies, then the raise is refuse
   const w = hire(w0).world;
   assert.equal(code(hire(w0)), 'accepted');
   const [hut] = built(w);
-  assert.equal(gameView(move(w, 'north')).place.title.key, 'blueprint.hut_plain.title');
+  assert.equal(gameView(move(w, 'north')).place.title.key, 'structure.hut_plain.title');
   assert.deepEqual(offer(w, 'raise_timbered_hut').reason, refusal('service.site_taken'));
   const r = perform(w, 'raise_timbered_hut');
   assert.equal(code(r), 'invalid_state');
@@ -561,7 +561,7 @@ test('chop needs woodcutting 1; a raise counts max_per_owner 1 and max_total 2',
         free.outcomes.success.sequence[0].direction = direction;
         c.recipes[`${P}recipe/raise_${direction}`] = free;
       }
-      if (!owner_cap) delete c.blueprints[`${P}blueprint/hut_timbered`].max_per_owner;
+      if (!owner_cap) delete c.structures[`${P}structure/hut_timbered`].max_per_owner;
     });
     assert.ok(r.ok, JSON.stringify(r));
     return done(ready(r.cartridge as Cartridge), 'raise_timbered_hut');

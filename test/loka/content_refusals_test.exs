@@ -139,18 +139,18 @@ defmodule Loka.ContentRefusalsTest do
         {"npcs/healer.json",
          %{
            "keywords" => ["healer"],
-           "short" => "npc.healer.short",
+           "name" => "npc.healer.short",
            "room_line" => "npc.healer.room",
            "description" => "npc.healer.description",
            "room" => "mine"
          }},
         {"quests/herbs.json",
          %{
-           "title" => "quest.herbs.title",
+           "name" => "quest.herbs.title",
            "repeatable" => true,
            "objective" => %{
              "evidence" => "current_state",
-             "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+             "policy" => %{"op" => "all", "items" => []}
            },
            "exchange" => %{
              "npc" => "healer",
@@ -173,7 +173,7 @@ defmodule Loka.ContentRefusalsTest do
               {"items/bandage_#{i}.json",
                %{
                  "keywords" => ["bandage"],
-                 "short" => "item.ore.short",
+                 "name" => "item.ore.short",
                  "room_line" => "item.ore_01.room",
                  "description" => "item.ore.description",
                  "mass_grams" => 10,
@@ -271,11 +271,17 @@ defmodule Loka.ContentRefusalsTest do
            ])
   end
 
-  # Breaks: a deer bundle compiles without its hide (only a scavenger bundle may omit the item).
-  test "a bundle without scavenge still requires its item", %{shoo_sampler: dir} do
-    assert {"SCHEMA_VIOLATION", "populations/oak_deer.bundle"} in codes(dir, [
-             {"population_bundles/oak_deer.json", &Map.delete(&1, "item")}
+  # Breaks: a deer plan compiles without its hide (only a scavenger plan may omit the item).
+  test "a plan without scavenge still requires its item", %{shoo_sampler: dir} do
+    assert {"SCHEMA_VIOLATION", "populations/oak_deer.npc"} in codes(dir, [
+             {"populations/oak_deer.json", &Map.delete(&1, "item")}
            ])
+  end
+
+  # Breaks: a plan's corpse is no longer a checked reference, so a dead member drops a missing item.
+  test "a plan with an unresolved corpse is refused", %{shoo_sampler: dir} do
+    assert codes(dir, [{"populations/oak_deer.json", &Map.put(&1, "corpse", "ghost")}]) ==
+             [{"UNRESOLVED_REFERENCE", "populations/oak_deer.corpse"}]
   end
 
   # Breaks: the compiler accepts a one-way scavenge corridor that strands a return leg.
@@ -302,7 +308,7 @@ defmodule Loka.ContentRefusalsTest do
 
   # Breaks: a topic names a fact or label that does not exist, and the Codex lists a dead entry.
   test "a topic's fact and label must resolve", %{codex_sampler: dir} do
-    for key <- ["fact", "label"] do
+    for key <- ["fact", "name"] do
       assert {"UNRESOLVED_REFERENCE", "topics/mill.#{key}"} in codes(dir, [
                {"topics/mill.json", &Map.put(&1, key, "missing")}
              ])

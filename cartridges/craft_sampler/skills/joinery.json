@@ -1,20 +1,10 @@
 {
-  "label": "skill.joinery.label",
+  "name": "skill.joinery.label",
   "requirement": "skill.joinery.requirement",
-  "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prerequisite": {
-    "policy_version": 1,
-    "root": {
-      "op": "skill_compare",
-      "skill": "carving",
-      "at_least": 1
-    }
+    "op": "skill_compare",
+    "skill": "carving",
+    "at_least": 1
   },
   "profession": "profession.woodcraft"
 }

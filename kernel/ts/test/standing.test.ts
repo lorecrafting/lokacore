@@ -160,7 +160,7 @@ test('low standing makes Peg refuse and the guard engage, unless he trusts the p
 // and talks (mechanics.md G11: hostile while its condition holds, else friendly).
 test('hostile wins over friendly when both hold', () => {
   const always = variant((c) => {
-    c.npcs[`${S}:npc/peg`].disposition.friendly.root = { op: 'all', items: [] };
+    c.npcs[`${S}:npc/peg`].disposition.friendly = { op: 'all', items: [] };
   });
   assert.equal(bread(fresh(always)).price, 2);
   const low = maud(fresh(always), 'wrong');

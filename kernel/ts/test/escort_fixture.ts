@@ -12,7 +12,7 @@ export const room = (w: World, name: string) => w.roomIds[`${prefix}:room/${name
 
 const quest = ref('quest', 'homeward');
 const npcRole = (key: string) => ({ role: 'npc', npc: ref('npc', key) });
-const policy = (...items: object[]) => ({ policy_version: 1, root: { op: 'all', items } });
+const policy = (...items: object[]) => ({ op: 'all', items });
 const active = { op: 'quest_state', quest, state: 'active' };
 const escortIs = (state: string) => ({ op: 'escort_state', quest, state });
 
@@ -31,7 +31,7 @@ export function escortSource(c: any) {
     c.npcs[`${prefix}:npc/${key}`] = {
       key,
       keywords: [key],
-      short: `npc.${key}.short`,
+      name: `npc.${key}.short`,
       description: `npc.${key}.description`,
       room_line: `npc.${key}.room`,
       room: ref('room', room),
@@ -51,7 +51,7 @@ export function escortSource(c: any) {
   };
   c.quests[`${prefix}:quest/homeward`] = {
     key: 'homeward',
-    title: 'quest.homeward.title',
+    name: 'quest.homeward.title',
     objective: { evidence: 'current_state', policy: policy() },
     journal: {
       active: 'quest.homeward.active',
@@ -74,7 +74,7 @@ export function escortSource(c: any) {
     [id]: { label: `dialogue.${id}.label`, narration: `narration.${id}`, ...extra },
   });
   dialogue('keeper_offer', 'keeper', {
-    policy: { policy_version: 1, root: { op: 'not', item: active } },
+    policy: { op: 'not', item: active },
     roles: { keeper: npcRole('keeper') },
     choices: choice('accept', { accept: quest }),
   });

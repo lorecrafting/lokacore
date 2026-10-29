@@ -81,7 +81,7 @@ test('wrong answer retries the same bound row; malformed banks refuse; correct a
   );
 });
 
-// Breaks: Choose rebinds by blueprint, ignores one role, or accepts dead/departed bound participants.
+// Breaks: Choose rebinds by definition, ignores one role, or accepts dead/departed bound participants.
 test('either original participant leaving or dying disables Choose while Close stays available', () => {
   for (const role of ['sphinx', 'bram'])
     for (const failure of ['departed', 'dead', 'substitute']) {

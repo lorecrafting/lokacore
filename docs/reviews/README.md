@@ -10,7 +10,16 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: C2 slice Z, docs sweep (loka-ivjq.3)](2026-10-29-c2-z-review.md): **APPROVE WITH NOTES**
+- [Review: batch C2 final head (loka-ivjq.3 F3 F5 F6, .7 .8 .11 .12)](2026-10-29-c2-final-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice D, one `name` field for display names (F6, loka-ivjq.3)](2026-10-29-c2-d-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice C1, source kinds and population wrappers cut (F5 F6, naming audit #2 #3, loka-ivjq.3)](2026-10-29-c2-c1-review.md): **APPROVE**
+- [Review: C2 slice B2, drop the `{policy_version, root}` wrapper (F3, loka-ivjq.3)](2026-10-29-c2-b2-review.md): **APPROVE WITH NOTES**
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
+- [Review: C2 slice F, `story_point` on the dialogue choice (F11)](2026-10-28-c2-f-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice E, blueprints -> structures (F8, loka-ivjq.8)](2026-10-28-c2-e-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice B1, `policy` optional and absent holds (F3, loka-ivjq.3)](2026-10-28-c2-b1-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice 0+A, prep, signals removal, diag guard, behavior@1 removal (loka-ivjq.3)](2026-10-28-c2-a-review.md): **APPROVE WITH NOTES**
 - [Review: batch C1 final head (loka-ivjq.20 S7, loka-ivjq.2 F2)](2026-10-28-c1-final-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **APPROVE**
 - [Review: C1 slice F2-docs, drop per-field kernel_api floors from docs and schema descriptions (loka-ivjq.2)](2026-10-28-c1-f2-docs-review.md): **APPROVE WITH NOTES**

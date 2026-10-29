@@ -1,5 +1,5 @@
 {
-  "label": "actions.knock_door",
+  "name": "actions.knock_door",
   "aliases": [
     "knock"
   ],
@@ -9,13 +9,6 @@
     "detail": "oak_door"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

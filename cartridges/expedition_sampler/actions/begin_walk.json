@@ -1,5 +1,5 @@
 {
-  "label": "walk.action.start",
+  "name": "walk.action.start",
   "command": "expedition",
   "target": {
     "kind": "entity",
@@ -11,12 +11,5 @@
     "transition"
   ],
   "priority": 0,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "accessibility": "walk.action.start"
 }

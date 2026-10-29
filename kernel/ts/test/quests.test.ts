@@ -164,7 +164,7 @@ test('the offer is a place action that resolves to accept_quest and is withdrawn
 
 // Breaks: the offer's policy ignored by admission or by the GameView.
 test('an offer whose policy fails is listed unavailable and accept is invalid_state', () => {
-  const never = { policy_version: 1, root: { op: 'not', item: { op: 'all', items: [] } } };
+  const never = { op: 'not', item: { op: 'all', items: [] } };
   const w = world((c) => (c.quests[`${E}:quest/lantern`].offer.policy = never));
   const listed = gameView(w).actions.find((a) => a.action_key === 'lantern');
   assert.deepEqual(plain(listed && 'reason' in listed && listed.reason), { code: 'invalid_state' });

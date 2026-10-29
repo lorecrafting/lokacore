@@ -189,15 +189,12 @@ test('a cartridge alias of sit is listed and dropped with sit, with its own poli
         command: 'sit',
         target: { kind: 'none' },
         input: [],
-        label: 'action.kneel',
+        name: 'action.kneel',
         accessibility: 'action.kneel.a11y',
         priority: 0,
         policy: {
-          policy_version: 1,
-          root: {
-            op: 'all',
-            items: allow ? [] : [{ op: 'fact_compare', fact: FACT, equals: 'sitting' }],
-          },
+          op: 'all',
+          items: allow ? [] : [{ op: 'fact_compare', fact: FACT, equals: 'sitting' }],
         },
       };
     });

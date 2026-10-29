@@ -2,7 +2,7 @@
   "keywords": [
     "dummy"
   ],
-  "short": "npc.dummy.short",
+  "name": "npc.dummy.short",
   "room_line": "npc.dummy.room",
   "description": "npc.dummy.description",
   "room": "yard",

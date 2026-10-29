@@ -164,7 +164,7 @@ test("the chest's lock reads the chest as its target", () => {
   const chest = id(w, 'item', 'chest');
   const role = ref('fact', 'role') as DefinitionRef;
   const root = { op: 'fact_compare', fact: role, subject: 'target', equals: 'resident' };
-  const locks = { get: { policy_version: 1, root } };
+  const locks = { get: root };
   const facts = { ...w.state.facts, [key(targetOf(w, w.character, role, chest))]: 'resident' };
   w = {
     ...w,
@@ -193,20 +193,20 @@ test('a closed door before the hut answers exit_closed first', () => {
 // lock (the item is its target).
 test('the loader checks subject target in every lock root', () => {
   const at = (kind: string, k: string) => `.cartridge.${kind}[${JSON.stringify(`${S}:${k}`)}]`;
-  const hut = `${at('rooms', 'room/hut')}.locks.enter.root`;
-  const east = `${at('rooms', 'room/lane')}.exits.east.locks.traverse.root`;
+  const hut = `${at('rooms', 'room/hut')}.locks.enter`;
+  const east = `${at('rooms', 'room/lane')}.exits.east.locks.traverse`;
   const targeted = (r: any) => {
     delete r.npc;
     r.subject = 'target';
   };
   const rows: [(c: any) => void, string, string][] = [
     [
-      (c) => targeted(c.rooms[`${S}:room/lane`].exits.east.locks.traverse.root),
+      (c) => targeted(c.rooms[`${S}:room/lane`].exits.east.locks.traverse),
       'FACT_SCOPE_UNSUPPORTED',
       `${east}.subject`,
     ],
     [
-      (c) => targeted(c.rooms[`${S}:room/hut`].locks.enter.root.items[0]),
+      (c) => targeted(c.rooms[`${S}:room/hut`].locks.enter.items[0]),
       'FACT_SCOPE_UNSUPPORTED',
       `${hut}.items[0].subject`,
     ],
@@ -224,7 +224,7 @@ test('the loader checks subject target in every lock root', () => {
   };
   for (const [change, want, path] of rows) assert.deepEqual(load(change), [want, path]);
   assert.equal(
-    load((c) => targeted(c.items[`${S}:item/chest`].locks.get.root)),
+    load((c) => targeted(c.items[`${S}:item/chest`].locks.get)),
     'loaded',
   );
 });

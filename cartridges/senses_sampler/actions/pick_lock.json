@@ -1,5 +1,5 @@
 {
-  "label": "actions.pick_lock",
+  "name": "actions.pick_lock",
   "aliases": [
     "pick"
   ],
@@ -9,13 +9,6 @@
     "detail": "lock"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "check": {
     "key": "pick_lock",
     "kind": "opposed",
@@ -45,12 +38,9 @@
           "text": "cue.rattle",
           "range": 1,
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "lock_picked",
-              "equals": false
-            }
+            "op": "fact_compare",
+            "fact": "lock_picked",
+            "equals": false
           }
         }
       ]

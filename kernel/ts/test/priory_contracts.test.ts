@@ -38,11 +38,11 @@ test('loaded consult alias projects the Read command and resolves the exact nest
     c.actions[`${prefix}:action/consult`] = {
       key: 'consult',
       command: 'read',
-      label: 'actions.read_book',
+      name: 'actions.read_book',
       accessibility: 'actions.read_book',
       target: { kind: 'entity', scopes: ['inventory'] },
       input: [],
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
       priority: 1,
     };
     chest()(c);

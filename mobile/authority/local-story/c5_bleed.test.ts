@@ -26,7 +26,7 @@ function managedBleedBundle() {
   const target = Object.entries(initial.state.created ?? {}).find(
     ([id, e]) =>
       e.origin.kind === 'spawned' &&
-      e.origin.role === 'hound' &&
+      e.origin.role === 'hunter' &&
       initial.state.containers[id] === initial.state.containers[initial.body],
   )?.[0];
   assert.ok(target);
@@ -195,7 +195,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
     c.npcs[`${prefix}:npc/teacher`] = {
       key: 'teacher',
       keywords: ['teacher'],
-      short: 'npc.hound.short',
+      name: 'npc.hound.short',
       description: 'npc.hound.description',
       room_line: 'npc.hound.room',
       room: ref('room', 'den'),
@@ -205,13 +205,10 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
       [`${prefix}:dialogue/teach_bandage`]: {
         key: 'teach_bandage',
         npc: ref('npc', 'teacher'),
-        label: 'narration.bandaged',
+        name: 'narration.bandaged',
         prompt: 'narration.bandaged',
         roles: { teacher: { role: 'npc', npc: ref('npc', 'teacher') } },
-        policy: {
-          policy_version: 1,
-          root: { op: 'fact_compare', fact: ref('fact', 'skill_bandage'), equals: false },
-        },
+        policy: { op: 'fact_compare', fact: ref('fact', 'skill_bandage'), equals: false },
         choices: {
           learn: {
             label: 'narration.bandaged',
@@ -226,7 +223,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
   const target = Object.entries(base.state.created ?? {}).find(
     ([id, e]) =>
       e.origin.kind === 'spawned' &&
-      e.origin.role === 'hound' &&
+      e.origin.role === 'hunter' &&
       base.state.containers[id] === base.state.containers[base.body],
   )![0];
   const item = base.entityIds[`${prefix}:item/bandage`];

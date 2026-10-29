@@ -2,18 +2,15 @@
   "keywords": [
     "grate"
   ],
-  "short": "barrier.grate.short",
+  "name": "barrier.grate.short",
   "initial": "closed",
   "tags": [
     "metal",
     "fragile"
   ],
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "grate_forced",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "grate_forced",
+    "equals": true
   }
 }

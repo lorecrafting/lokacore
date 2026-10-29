@@ -112,7 +112,7 @@ export function reaching(
   return (heard ?? sources(w, steps)).flatMap(({ room: at, cue }) => {
     const n = near.get(at);
     const reached =
-      n && n.d <= cue.range && (!cue.when || holds(w, actor, cue.when.root, { steps, cue: true }));
+      n && n.d <= cue.range && (!cue.when || holds(w, actor, cue.when, { steps, cue: true }));
     return reached ? [{ cue, ...n }] : [];
   });
 }

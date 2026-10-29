@@ -1,14 +1,11 @@
 {
   "npc": "warden",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "fact_compare",
-        "fact": "warden_lets_pass",
-        "equals": true
-      }
+    "op": "not",
+    "item": {
+      "op": "fact_compare",
+      "fact": "warden_lets_pass",
+      "equals": true
     }
   },
   "prompt": "dialogue.warden_talk.prompt",

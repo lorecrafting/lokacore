@@ -29,7 +29,7 @@ const load = (change: (c: any) => void = () => {}) => {
   c.liquids = {
     [`${ID}:liquid/water`]: {
       key: 'water',
-      label: 'water.label',
+      name: 'water.label',
       unit_label: 'water.units',
       grams_per_unit: 250,
       drink_amount: 1,

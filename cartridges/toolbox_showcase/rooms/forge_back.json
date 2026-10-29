@@ -1,5 +1,5 @@
 {
-  "title": "room.forge_back.title",
+  "name": "room.forge_back.title",
   "description": "room.forge_back.description",
   "exits": {}
 }

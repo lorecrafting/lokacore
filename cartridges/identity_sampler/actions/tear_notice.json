@@ -1,5 +1,5 @@
 {
-  "label": "actions.tear_notice",
+  "name": "actions.tear_notice",
   "aliases": [
     "tear"
   ],
@@ -9,13 +9,6 @@
     "detail": "notice"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

@@ -1,12 +1,5 @@
 {
   "npc": "hal",
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prompt": "dialogue.hal.prompt",
   "roles": {
     "hal": {

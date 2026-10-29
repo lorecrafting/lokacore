@@ -21,7 +21,7 @@ export function patrolSource(c: any) {
   const room = (key: string, exits: Record<string, string>) =>
     (c.rooms[`${prefix}:room/${key}`] = {
       key,
-      title: `room.${key}.title`,
+      name: `room.${key}.title`,
       description: `room.${key}.description`,
       exits: Object.fromEntries(Object.entries(exits).map(([d, to]) => [d, { to: r('room', to) }])),
     });
@@ -32,7 +32,7 @@ export function patrolSource(c: any) {
   c.npcs[`${prefix}:npc/tobin`] = {
     key: 'tobin',
     keywords: ['tobin', 'guard'],
-    short: 'npc.tobin.short',
+    name: 'npc.tobin.short',
     room_line: 'npc.tobin.room',
     description: 'npc.tobin.description',
     room: r('room', 'watch_post'),
@@ -48,7 +48,7 @@ export function patrolSource(c: any) {
   const rooms = (...keys: string[]) => keys.map((k) => r('room', k));
   c.quests[`${prefix}:quest/watch_rounds`] = {
     key: 'watch_rounds',
-    title: 'quest.watch_rounds.title',
+    name: 'quest.watch_rounds.title',
     objective: { evidence: 'patrol' },
     patrol: {
       npc: r('npc', 'tobin'),
@@ -84,9 +84,9 @@ export function patrolSource(c: any) {
     key: 'tobin_watch',
     npc: r('npc', 'tobin'),
     roles: { leader: { role: 'npc', npc: r('npc', 'tobin') } },
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     prompt: 'watch.prompt',
-    label: 'watch.talk',
+    name: 'watch.talk',
     choices: {
       start: choice('start', { accept: quest }),
       continue: choice('continue'),

@@ -2,7 +2,7 @@
   "keywords": [
     "guard"
   ],
-  "short": "npc.guard.short",
+  "name": "npc.guard.short",
   "room_line": "npc.guard.room",
   "description": "npc.guard.description",
   "room": "market_row",
@@ -25,12 +25,9 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "wanted",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "wanted",
+      "equals": true
     },
     "arrest": {
       "to": "cell",
@@ -43,12 +40,9 @@
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "wanted",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
       },
       "description": "npc.guard.room_wanted"
     }

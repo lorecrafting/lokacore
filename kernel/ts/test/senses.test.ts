@@ -74,10 +74,7 @@ test('a fuel source smokes only while lit', () => {
 test('a cue whose condition fails is not listed', () => {
   const c = structuredClone(content) as unknown as Obj;
   const forge = Object.values(c.rooms as Obj).find((r) => r.key === 'forge');
-  forge.cues[0].when = {
-    policy_version: 1,
-    root: { op: 'fact_compare', fact: ref('fact', 'guard_alerted'), equals: true },
-  };
+  forge.cues[0].when = { op: 'fact_compare', fact: ref('fact', 'guard_alerted'), equals: true };
   const texts = gameView(fresh(c as unknown as Cartridge)).cues!.map((x) => x.text);
   assert.deepEqual(texts, ['cue.stew']);
 });
@@ -101,7 +98,7 @@ test('a closed door carries cues', () => {
     'senses_sampler@0.0.1:barrier/door': {
       key: 'door',
       keywords: ['door'],
-      short: 'x',
+      name: 'x',
       initial: 'closed',
     },
   };

@@ -61,7 +61,7 @@ defmodule Loka.Content.Compiler do
   # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
   # bundles), except an action's own: an action refused by its extends must not build.
   defp split(lists, files) do
-    bundle? = Enum.any?(files, &match?({_, :bundle, :invalid}, &1))
+    bundle? = Enum.any?(files, &match?({_, :area, :invalid}, &1))
     actions = for {rel, {:action, _, _}, :invalid} <- files, do: Path.rootname(rel) <> "."
     held? = &(bundle? or (actions != [] and not String.starts_with?(&1, actions)))
 
@@ -127,7 +127,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle replenish blueprint),
+         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population replenish structure),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -205,7 +205,6 @@ defmodule Loka.Content.Compiler do
   end
 
   @kinds [
-    {"policy", :policy, "VersionedPolicy"},
     {"action", :action, "ActionDefinition"},
     {"room", :room, "RoomDefinition"},
     {"item", :item, "ItemDefinition"},
@@ -215,19 +214,17 @@ defmodule Loka.Content.Compiler do
     {"quest", :quest, "QuestDefinition"},
     {"reaction", :reaction, "ReactionRule"},
     {"dialogue", :dialogue, "DialogueDefinition"},
-    {"story_point", :story_point, "StoryPointDefinition"},
     {"scene", :scene, "SceneDefinition"},
     {"skill", :skill, "SkillDefinition"},
     {"topic", :topic, "TopicDefinition"},
     {"liquid", :liquid, "LiquidDefinition"},
     {"population", :population, "PopulationPlan"},
-    {"population_bundle", :population_bundle, "PopulationBundle"},
     {"replenish", :replenish, "ReplenishPlan"},
     {"service", :service, "ServiceDefinition"},
     {"transport", :transport, "TransportDefinition"},
     {"bleed", :bleed, "BleedDefinition"},
     {"status", :status, "StatusDefinition"},
-    {"blueprint", :blueprint, "BlueprintDefinition"}
+    {"structure", :structure, "StructureDefinition"}
   ]
 
   @doc false
@@ -240,7 +237,7 @@ defmodule Loka.Content.Compiler do
     {facts, d4} = Position.facts(facts, m)
     {resources, d1} = Resources.load(of(files, :resources))
     {attributes, d3} = Resources.attributes(of(files, :attributes))
-    {defs, d2} = kinds(files)
+    {defs, d2} = kinds(files, m)
     {facts, d5} = Enum.reduce(@engine_facts, {facts, []}, &engine_facts(&1, &2, m, defs))
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
     {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5])}
@@ -250,12 +247,12 @@ defmodule Loka.Content.Compiler do
   defp engine_facts(mod, {facts, ds}, m, defs),
     do: with({facts, d} <- mod.facts(facts, m, defs), do: {facts, ds ++ d})
 
-  # The one-file-per-definition kinds (@kinds) and their diagnostics.
-  defp kinds(files) do
+  # The one-file-per-definition kinds (@kinds), the story points their claims derive, diagnostics.
+  defp kinds(files, m) do
     loaded = for {kind, file, contract} <- @kinds, do: {kind, files(files, file, contract)}
 
-    {Map.new(loaded, fn {kind, {ds, _}} -> {kind, ds} end),
-     for({_, {_, ds}} <- loaded, d <- ds, do: d)}
+    ds = for {_, {_, ds}} <- loaded, d <- ds, do: d
+    Dialogues.points({Map.new(loaded, fn {kind, {ds, _}} -> {kind, ds} end), ds}, m)
   end
 
   # Short references become full ones once a valid manifest names the cartridge; without one
@@ -340,7 +337,7 @@ defmodule Loka.Content.Compiler do
   defp definition(_, _, _, :invalid, _), do: {:error, []}
 
   defp definition(rel, steps, key, value, contract) do
-    keyed = if contract == "VersionedPolicy", do: value, else: with_key(value, key)
+    keyed = with_key(value, key)
 
     case authored_key(rel, steps, value) ++
            validated(rel, steps, "Key", key) ++ body(rel, steps, contract, keyed) do

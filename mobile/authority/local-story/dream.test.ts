@@ -264,14 +264,14 @@ test('real elapsed and fatal return preserve the dormant choice until the actor 
     c.rooms[`${prefix}:room/ferry_landing`].exits.down = { to: ref('room', 'cellar') };
     c.rooms[`${prefix}:room/cellar`] = {
       key: 'cellar',
-      title: 'room.cellar.title',
+      name: 'room.cellar.title',
       description: 'room.cellar.description',
       exits: { up: { to: ref('room', 'ferry_landing') } },
     };
     c.npcs[`${prefix}:npc/rat`] = {
       key: 'rat',
       keywords: ['rat'],
-      short: 'npc.rat.short',
+      name: 'npc.rat.short',
       room_line: 'npc.rat.room',
       description: 'npc.rat.description',
       room: ref('room', 'cellar'),
@@ -349,10 +349,10 @@ test('real SQLite: a riddle left by the dream Continue reopens closed at count o
   const a = dreamHost(join(dir, 'riddle.db'), (c) => {
     c.quests[`${prefix}:quest/tide`] = {
       key: 'tide',
-      title: 'npc.sphinx.short',
+      name: 'npc.sphinx.short',
       objective: {
         evidence: 'current_state',
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
       },
       journal: Object.fromEntries(
         ['active', 'objectives_met', 'resolved', 'failed', 'abandoned'].map((k) => [
@@ -364,7 +364,7 @@ test('real SQLite: a riddle left by the dream Continue reopens closed at count o
     c.npcs[`${prefix}:npc/sphinx`] = {
       key: 'sphinx',
       keywords: ['sphinx'],
-      short: 'npc.sphinx.short',
+      name: 'npc.sphinx.short',
       description: 'npc.sphinx.description',
       room_line: 'npc.sphinx.room',
       room: ref('room', 'ferry_landing'),
@@ -373,7 +373,7 @@ test('real SQLite: a riddle left by the dream Continue reopens closed at count o
       key: 'sphinx_offer',
       npc: ref('npc', 'sphinx'),
       prompt: 'dialogue.riddle.prompt',
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
       roles: { sphinx: { role: 'npc', npc: ref('npc', 'sphinx') } },
       choices: {
         accept: {
@@ -390,10 +390,7 @@ test('real SQLite: a riddle left by the dream Continue reopens closed at count o
       quest: ref('quest', 'tide'),
       prompt: 'dialogue.riddle.prompt',
       // The riddle opens only once the offer bound quest tide, so its attempts have a quest.
-      policy: {
-        policy_version: 1,
-        root: { op: 'quest_state', quest: ref('quest', 'tide'), state: 'active' },
-      },
+      policy: { op: 'quest_state', quest: ref('quest', 'tide'), state: 'active' },
       roles: { sphinx: { role: 'npc', npc: ref('npc', 'sphinx') } },
       choices: {
         answer: {

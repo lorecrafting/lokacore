@@ -35,7 +35,7 @@ defmodule Loka.Content.Transports do
 
     texts(
       rel,
-      [{["label"], t["label"]}, {["narration"], t["narration"]}, {[], "transport.unaffordable"}],
+      [{["name"], t["name"]}, {["narration"], t["narration"]}, {[], "transport.unaffordable"}],
       text
     ) ++
       for({valid, fields} <- checks, not valid, do: bad(at(rel, fields)))

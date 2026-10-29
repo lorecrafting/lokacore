@@ -3,6 +3,6 @@
     "door",
     "inn_door"
   ],
-  "short": "barrier.inn_door.short",
+  "name": "barrier.inn_door.short",
   "initial": "closed"
 }

@@ -5,7 +5,6 @@ import type {
   ErrorCode,
   GameError,
   Key,
-  NpcDefinition,
 } from '../../contracts.gen.ts';
 import {
   accepted,
@@ -16,6 +15,7 @@ import {
   rejected,
   type Mint,
   type World,
+  type NpcEntity,
 } from '../../runtime/decision.ts';
 import * as water from '../water/shared.ts';
 import { engaged } from '../combat/shared.ts';
@@ -182,7 +182,7 @@ export function movementPlan(
   if (locked) return locked;
   if (!crossable(world, body, there)) return 'invalid_state' as const;
   const horse = mounted(world, actor_id);
-  const terrain = horse && (world.entities[horse] as NpcDefinition).mount!.terrain;
+  const terrain = horse && (world.entities[horse] as NpcEntity).mount!.terrain;
   if (terrain && !(world.rooms[there].tags ?? []).some((t) => terrain.includes(t)))
     return 'invalid_state' as const;
   const wet = water.edge(world, here, there, direction);

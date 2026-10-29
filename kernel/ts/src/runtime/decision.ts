@@ -141,14 +141,10 @@ export type World = {
     Record<
       string,
       {
-        readonly bundle: DefinitionRef;
-        readonly hound?: DefinitionRef;
-        readonly pelt?: DefinitionRef;
-        readonly deer?: DefinitionRef;
-        readonly hide?: DefinitionRef;
-        readonly member_role: 'hound' | 'deer';
-        readonly loot_role: 'pelt' | 'hide';
-
+        readonly hunter?: DefinitionRef;
+        readonly prey?: DefinitionRef;
+        readonly loot?: DefinitionRef;
+        readonly member_role: 'hunter' | 'prey';
         readonly corpse: DefinitionRef;
         readonly home: EntityId;
         readonly cap: number;
@@ -174,9 +170,13 @@ export type World = {
 /** A room's InspectableDetail, with the room and key its target id stands for (21 §6). */
 export type Detail = InspectableDetail & { readonly room: EntityId; readonly key: string };
 
-/** An item or NPC definition, tagged with its kind (entity.schema.json). */
-export type Entity =
-  (ItemDefinition & { readonly kind: 'item' }) | (NpcDefinition & { readonly kind: 'npc' });
+/** An item or NPC definition, tagged with its kind; its definition's name is its short (entity.schema.json). */
+type Named<D extends ItemDefinition | NpcDefinition, K> = Omit<D, 'name'> & {
+  readonly short: D['name'];
+  readonly kind: K;
+};
+export type NpcEntity = Named<NpcDefinition, 'npc'>;
+export type Entity = Named<ItemDefinition, 'item'> | NpcEntity;
 
 /**
  * The body entity `actor` acts through, if it has one here (21 §9). One body per world until

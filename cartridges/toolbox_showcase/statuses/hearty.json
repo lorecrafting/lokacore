@@ -8,7 +8,7 @@
       "modifier": 2
     }
   ],
-  "label": "condition.hearty",
+  "name": "condition.hearty",
   "narration": {
     "applied": "narration.hearty.applied",
     "tick": "narration.hearty.tick",

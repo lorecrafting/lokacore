@@ -1,5 +1,5 @@
 {
-  "title": "room.hut.title",
+  "name": "room.hut.title",
   "description": "room.hut.description",
   "exits": {
     "south": {
@@ -18,11 +18,8 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "item_present",
-          "tag": "rug"
-        }
+        "op": "item_present",
+        "tag": "rug"
       },
       "description": "room.hut.rug"
     }

@@ -1,5 +1,5 @@
 {
-  "label": "actions.gather_ash",
+  "name": "actions.gather_ash",
   "aliases": [
     "gather"
   ],
@@ -9,13 +9,6 @@
     "detail": "attic_hearth"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

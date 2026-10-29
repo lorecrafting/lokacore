@@ -203,7 +203,7 @@ test('lock and unlock need the key, held directly or in a carried bag', () => {
       key: 'satchel',
       container: true,
       keywords: ['satchel'],
-      short: 'item.iron_key.short',
+      name: 'item.iron_key.short',
       room_line: 'item.iron_key.room',
       description: 'item.iron_key.description',
       location: { in: 'room', room: { ...OAK, kind: 'room', key: 'courtyard' } },
@@ -343,9 +343,9 @@ test('each exit lists only the door verbs step accepts there now', () => {
       command: 'open',
       target: { kind: 'none' },
       input: ['direction'],
-      label: 'action.open',
+      name: 'action.open',
       priority: 0,
-      policy: { policy_version: 1, root: { op: 'barrier_state', barrier: OAK, equals: 'locked' } },
+      policy: { op: 'barrier_state', barrier: OAK, equals: 'locked' },
       accessibility: 'action.open.a11y',
     };
   });

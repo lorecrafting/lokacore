@@ -3,7 +3,7 @@
     "whistle",
     "tin_whistle"
   ],
-  "short": "item.tin_whistle.short",
+  "name": "item.tin_whistle.short",
   "room_line": "item.tin_whistle.room",
   "description": "item.tin_whistle.description",
   "location": {

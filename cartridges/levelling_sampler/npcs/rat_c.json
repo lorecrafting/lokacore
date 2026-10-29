@@ -3,7 +3,7 @@
     "rat",
     "rat_c"
   ],
-  "short": "npc.rat.short",
+  "name": "npc.rat.short",
   "room_line": "npc.rat.room",
   "description": "npc.rat.description",
   "room": "pit",

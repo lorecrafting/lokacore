@@ -197,8 +197,7 @@ function bindingValid(op: Any) {
   if (
     op.crow_member_id !== undefined ||
     op.crow_generation !== undefined ||
-    op.crow_phase !== undefined ||
-    op.job.kind === 'population_bundle'
+    op.crow_phase !== undefined
   )
     return crowBindingValid(op);
   if (
@@ -259,7 +258,7 @@ function crowBindingValid(op: Any) {
     op.crow_member_id !== undefined &&
     op.crow_generation !== undefined &&
     ['acquire', 'leg', 'return'].includes(op.crow_phase) &&
-    op.job.kind === 'population_bundle' &&
+    op.job.kind === 'population' &&
     [
       op.encounter_id,
       op.quest_instance_id,

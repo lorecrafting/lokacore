@@ -123,7 +123,7 @@
         },
         "mass_grams": 250,
         "room_line": "item.crow_nest.room",
-        "short": "item.crow_nest.short"
+        "name": "item.crow_nest.short"
       },
       "shoo_sampler@0.0.1:item/deer_corpse": {
         "container": true,
@@ -137,7 +137,7 @@
         },
         "mass_grams": 0,
         "room_line": "item.deer_corpse.room",
-        "short": "item.deer_corpse.short"
+        "name": "item.deer_corpse.short"
       },
       "shoo_sampler@0.0.1:item/deer_hide": {
         "description": "item.deer_hide.description",
@@ -150,7 +150,7 @@
         },
         "mass_grams": 100,
         "room_line": "item.deer_hide.room",
-        "short": "item.deer_hide.short"
+        "name": "item.deer_hide.short"
       },
       "shoo_sampler@0.0.1:item/npc_corpse": {
         "container": true,
@@ -164,7 +164,7 @@
         },
         "mass_grams": 0,
         "room_line": "item.npc_corpse.room",
-        "short": "item.npc_corpse.short"
+        "name": "item.npc_corpse.short"
       },
       "shoo_sampler@0.0.1:item/old_coin": {
         "description": "item.old_coin.description",
@@ -183,7 +183,7 @@
         },
         "mass_grams": 10,
         "room_line": "item.old_coin.room",
-        "short": "item.old_coin.short"
+        "name": "item.old_coin.short"
       },
       "shoo_sampler@0.0.1:item/player_corpse": {
         "container": true,
@@ -197,12 +197,11 @@
         },
         "mass_grams": 0,
         "room_line": "item.player_corpse.room",
-        "short": "item.player_corpse.short"
+        "name": "item.player_corpse.short"
       }
     },
     "lock": {
       "capabilities": {
-        "behavior": 1,
         "calendar": 1,
         "combat": 1,
         "containment": 1,
@@ -222,7 +221,6 @@
       "id": "shoo_sampler",
       "requires": {
         "capabilities": {
-          "behavior": 1,
           "calendar": 1,
           "combat": 1,
           "containment": 1,
@@ -278,7 +276,7 @@
           "kind": "room"
         },
         "room_line": "npc.crow.room",
-        "short": "npc.crow.short",
+        "name": "npc.crow.short",
         "spawn_template": true
       },
       "shoo_sampler@0.0.1:npc/oak_deer": {
@@ -305,7 +303,7 @@
           "kind": "room"
         },
         "room_line": "npc.oak_deer.room",
-        "short": "npc.oak_deer.short",
+        "name": "npc.oak_deer.short",
         "spawn_template": true
       },
       "shoo_sampler@0.0.1:npc/orchard_deer": {
@@ -332,7 +330,7 @@
           "kind": "room"
         },
         "room_line": "npc.orchard_deer.room",
-        "short": "npc.orchard_deer.short",
+        "name": "npc.orchard_deer.short",
         "spawn_template": true
       },
       "shoo_sampler@0.0.1:npc/willow_deer": {
@@ -359,95 +357,8 @@
           "kind": "room"
         },
         "room_line": "npc.willow_deer.room",
-        "short": "npc.willow_deer.short",
+        "name": "npc.willow_deer.short",
         "spawn_template": true
-      }
-    },
-    "policies": {},
-    "population_bundles": {
-      "shoo_sampler@0.0.1:population_bundle/crow": {
-        "corpse": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "npc_corpse",
-          "kind": "item"
-        },
-        "key": "crow",
-        "npc": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "crow",
-          "kind": "npc"
-        }
-      },
-      "shoo_sampler@0.0.1:population_bundle/oak_deer": {
-        "corpse": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "deer_corpse",
-          "kind": "item"
-        },
-        "item": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "deer_hide",
-          "kind": "item"
-        },
-        "key": "oak_deer",
-        "loot_role": "hide",
-        "member_role": "deer",
-        "npc": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "oak_deer",
-          "kind": "npc"
-        }
-      },
-      "shoo_sampler@0.0.1:population_bundle/orchard_deer": {
-        "corpse": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "deer_corpse",
-          "kind": "item"
-        },
-        "item": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "deer_hide",
-          "kind": "item"
-        },
-        "key": "orchard_deer",
-        "loot_role": "hide",
-        "member_role": "deer",
-        "npc": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "orchard_deer",
-          "kind": "npc"
-        }
-      },
-      "shoo_sampler@0.0.1:population_bundle/willow_deer": {
-        "corpse": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "deer_corpse",
-          "kind": "item"
-        },
-        "item": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "deer_hide",
-          "kind": "item"
-        },
-        "key": "willow_deer",
-        "loot_role": "hide",
-        "member_role": "deer",
-        "npc": {
-          "cartridge_id": "shoo_sampler",
-          "cartridge_version": "0.0.1",
-          "key": "willow_deer",
-          "kind": "npc"
-        }
       }
     },
     "populations": {
@@ -466,13 +377,13 @@
             "kind": "room"
           }
         ],
-        "bundle": {
+        "cap": 1,
+        "corpse": {
           "cartridge_id": "shoo_sampler",
           "cartridge_version": "0.0.1",
-          "key": "crow",
-          "kind": "population_bundle"
+          "key": "npc_corpse",
+          "kind": "item"
         },
-        "cap": 1,
         "day_target": 1,
         "home": {
           "cartridge_id": "shoo_sampler",
@@ -484,6 +395,12 @@
         "night_end": 6,
         "night_start": 20,
         "night_target": 1,
+        "npc": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "crow",
+          "kind": "npc"
+        },
         "replacement_delay": 86400,
         "scavenge": {
           "corridor": [
@@ -548,13 +465,13 @@
             "kind": "room"
           }
         ],
-        "bundle": {
+        "cap": 1,
+        "corpse": {
           "cartridge_id": "shoo_sampler",
           "cartridge_version": "0.0.1",
-          "key": "oak_deer",
-          "kind": "population_bundle"
+          "key": "deer_corpse",
+          "kind": "item"
         },
-        "cap": 1,
         "day_target": 1,
         "home": {
           "cartridge_id": "shoo_sampler",
@@ -562,10 +479,23 @@
           "key": "drowned_oak",
           "kind": "room"
         },
+        "item": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "deer_hide",
+          "kind": "item"
+        },
         "key": "oak_deer",
+        "member_role": "prey",
         "night_end": 6,
         "night_start": 20,
         "night_target": 1,
+        "npc": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "oak_deer",
+          "kind": "npc"
+        },
         "replacement_delay": 172800,
         "sight": {
           "delay": 300,
@@ -591,13 +521,13 @@
             "kind": "room"
           }
         ],
-        "bundle": {
+        "cap": 1,
+        "corpse": {
           "cartridge_id": "shoo_sampler",
           "cartridge_version": "0.0.1",
-          "key": "orchard_deer",
-          "kind": "population_bundle"
+          "key": "deer_corpse",
+          "kind": "item"
         },
-        "cap": 1,
         "day_target": 1,
         "home": {
           "cartridge_id": "shoo_sampler",
@@ -605,10 +535,23 @@
           "key": "orchard",
           "kind": "room"
         },
+        "item": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "deer_hide",
+          "kind": "item"
+        },
         "key": "orchard_deer",
+        "member_role": "prey",
         "night_end": 6,
         "night_start": 20,
         "night_target": 1,
+        "npc": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "orchard_deer",
+          "kind": "npc"
+        },
         "replacement_delay": 172800,
         "sight": {
           "delay": 300,
@@ -634,13 +577,13 @@
             "kind": "room"
           }
         ],
-        "bundle": {
+        "cap": 1,
+        "corpse": {
           "cartridge_id": "shoo_sampler",
           "cartridge_version": "0.0.1",
-          "key": "willow_deer",
-          "kind": "population_bundle"
+          "key": "deer_corpse",
+          "kind": "item"
         },
-        "cap": 1,
         "day_target": 1,
         "home": {
           "cartridge_id": "shoo_sampler",
@@ -648,10 +591,23 @@
           "key": "willow_shade",
           "kind": "room"
         },
+        "item": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "deer_hide",
+          "kind": "item"
+        },
         "key": "willow_deer",
+        "member_role": "prey",
         "night_end": 6,
         "night_start": 20,
         "night_target": 1,
+        "npc": {
+          "cartridge_id": "shoo_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "willow_deer",
+          "kind": "npc"
+        },
         "replacement_delay": 172800,
         "sight": {
           "delay": 300,
@@ -727,7 +683,7 @@
           }
         },
         "key": "drowned_oak",
-        "title": "room.drowned_oak.title"
+        "name": "room.drowned_oak.title"
       },
       "shoo_sampler@0.0.1:room/ferry_landing": {
         "description": "room.ferry_landing.description",
@@ -758,7 +714,7 @@
           }
         },
         "key": "ferry_landing",
-        "title": "room.ferry_landing.title"
+        "name": "room.ferry_landing.title"
       },
       "shoo_sampler@0.0.1:room/green": {
         "description": "room.green.description",
@@ -781,7 +737,7 @@
           }
         },
         "key": "green",
-        "title": "room.green.title"
+        "name": "room.green.title"
       },
       "shoo_sampler@0.0.1:room/lane": {
         "description": "room.lane.description",
@@ -796,7 +752,7 @@
           }
         },
         "key": "lane",
-        "title": "room.lane.title"
+        "name": "room.lane.title"
       },
       "shoo_sampler@0.0.1:room/orchard": {
         "description": "room.orchard.description",
@@ -811,7 +767,7 @@
           }
         },
         "key": "orchard",
-        "title": "room.orchard.title"
+        "name": "room.orchard.title"
       },
       "shoo_sampler@0.0.1:room/reed_bank": {
         "description": "room.reed_bank.description",
@@ -834,7 +790,7 @@
           }
         },
         "key": "reed_bank",
-        "title": "room.reed_bank.title"
+        "name": "room.reed_bank.title"
       },
       "shoo_sampler@0.0.1:room/reed_path": {
         "description": "room.reed_path.description",
@@ -857,7 +813,7 @@
           }
         },
         "key": "reed_path",
-        "title": "room.reed_path.title"
+        "name": "room.reed_path.title"
       },
       "shoo_sampler@0.0.1:room/smithy": {
         "description": "room.smithy.description",
@@ -880,7 +836,7 @@
           }
         },
         "key": "smithy",
-        "title": "room.smithy.title"
+        "name": "room.smithy.title"
       },
       "shoo_sampler@0.0.1:room/willow_shade": {
         "description": "room.willow_shade.description",
@@ -903,7 +859,7 @@
           }
         },
         "key": "willow_shade",
-        "title": "room.willow_shade.title"
+        "name": "room.willow_shade.title"
       }
     },
     "text": {
@@ -1050,6 +1006,6 @@
       }
     }
   },
-  "canonical": "{\"actions\":{},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"entry\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"shoo_sampler@0.0.1:fact/flag\":{\"key\":\"flag\",\"meaning\":\"A player flag.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"shoo_sampler@0.0.1:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"shoo_sampler@0.0.1:item/crow_nest\":{\"capacity\":8,\"container\":true,\"description\":\"item.crow_nest.description\",\"key\":\"crow_nest\",\"keywords\":[\"crow_nest\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"mass_grams\":250,\"room_line\":\"item.crow_nest.room\",\"short\":\"item.crow_nest.short\"},\"shoo_sampler@0.0.1:item/deer_corpse\":{\"container\":true,\"description\":\"item.deer_corpse.description\",\"key\":\"deer_corpse\",\"keywords\":[\"deer_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"room_line\":\"item.deer_corpse.room\",\"short\":\"item.deer_corpse.short\"},\"shoo_sampler@0.0.1:item/deer_hide\":{\"description\":\"item.deer_hide.description\",\"key\":\"deer_hide\",\"keywords\":[\"deer_hide\"],\"location\":{\"in\":\"template\"},\"mass_grams\":100,\"room_line\":\"item.deer_hide.room\",\"short\":\"item.deer_hide.short\"},\"shoo_sampler@0.0.1:item/npc_corpse\":{\"container\":true,\"description\":\"item.npc_corpse.description\",\"key\":\"npc_corpse\",\"keywords\":[\"npc_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"room_line\":\"item.npc_corpse.room\",\"short\":\"item.npc_corpse.short\"},\"shoo_sampler@0.0.1:item/old_coin\":{\"description\":\"item.old_coin.description\",\"key\":\"old_coin\",\"keywords\":[\"old_coin\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}},\"mass_grams\":10,\"room_line\":\"item.old_coin.room\",\"short\":\"item.old_coin.short\"},\"shoo_sampler@0.0.1:item/player_corpse\":{\"container\":true,\"description\":\"item.player_corpse.description\",\"key\":\"player_corpse\",\"keywords\":[\"player_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"room_line\":\"item.player_corpse.room\",\"short\":\"item.player_corpse.short\"}},\"lock\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"combat\":1,\"containment\":1,\"death\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"population\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"shoo_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"combat\":1,\"containment\":1,\"death\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"population\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.37\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"time_policy\":{\"profile\":\"real_elapsed\",\"rate\":50},\"title\":\"Shoo Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"shoo_sampler@0.0.1:npc/crow\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.crow.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"crow\",\"keywords\":[\"crow\"],\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},\"room_line\":\"npc.crow.room\",\"short\":\"npc.crow.short\",\"spawn_template\":true},\"shoo_sampler@0.0.1:npc/oak_deer\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.oak_deer.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"oak_deer\",\"keywords\":[\"oak_deer\"],\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"},\"room_line\":\"npc.oak_deer.room\",\"short\":\"npc.oak_deer.short\",\"spawn_template\":true},\"shoo_sampler@0.0.1:npc/orchard_deer\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.orchard_deer.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"orchard_deer\",\"keywords\":[\"orchard_deer\"],\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"},\"room_line\":\"npc.orchard_deer.room\",\"short\":\"npc.orchard_deer.short\",\"spawn_template\":true},\"shoo_sampler@0.0.1:npc/willow_deer\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.willow_deer.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"willow_deer\",\"keywords\":[\"willow_deer\"],\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"},\"room_line\":\"npc.willow_deer.room\",\"short\":\"npc.willow_deer.short\",\"spawn_template\":true}},\"policies\":{},\"population_bundles\":{\"shoo_sampler@0.0.1:population_bundle/crow\":{\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"npc_corpse\",\"kind\":\"item\"},\"key\":\"crow\",\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crow\",\"kind\":\"npc\"}},\"shoo_sampler@0.0.1:population_bundle/oak_deer\":{\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_corpse\",\"kind\":\"item\"},\"item\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_hide\",\"kind\":\"item\"},\"key\":\"oak_deer\",\"loot_role\":\"hide\",\"member_role\":\"deer\",\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_deer\",\"kind\":\"npc\"}},\"shoo_sampler@0.0.1:population_bundle/orchard_deer\":{\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_corpse\",\"kind\":\"item\"},\"item\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_hide\",\"kind\":\"item\"},\"key\":\"orchard_deer\",\"loot_role\":\"hide\",\"member_role\":\"deer\",\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard_deer\",\"kind\":\"npc\"}},\"shoo_sampler@0.0.1:population_bundle/willow_deer\":{\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_corpse\",\"kind\":\"item\"},\"item\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_hide\",\"kind\":\"item\"},\"key\":\"willow_deer\",\"loot_role\":\"hide\",\"member_role\":\"deer\",\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_deer\",\"kind\":\"npc\"}}},\"populations\":{\"shoo_sampler@0.0.1:population/crow\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}],\"bundle\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crow\",\"kind\":\"population_bundle\"},\"cap\":1,\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},\"key\":\"crow\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"replacement_delay\":86400,\"scavenge\":{\"corridor\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}],\"drop_rooms\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}],\"interval\":150,\"items\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"old_coin\",\"kind\":\"item\"}],\"narration\":{\"acquired\":\"narration.crow_acquired\",\"carrying\":\"narration.crow_carrying\",\"delivered\":\"narration.crow_delivered\",\"fallback\":\"narration.crow_fallback\",\"shoo\":\"narration.crow_shoo\"},\"nest\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crow_nest\",\"kind\":\"item\"}},\"wander_interval\":3600},\"shoo_sampler@0.0.1:population/oak_deer\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"}],\"bundle\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_deer\",\"kind\":\"population_bundle\"},\"cap\":1,\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"},\"key\":\"oak_deer\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"replacement_delay\":172800,\"sight\":{\"delay\":300,\"narration\":{\"north\":\"combat.deer_fled_north\",\"south\":\"combat.deer_fled_south\"}},\"wander_interval\":3600},\"shoo_sampler@0.0.1:population/orchard_deer\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"smithy\",\"kind\":\"room\"}],\"bundle\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard_deer\",\"kind\":\"population_bundle\"},\"cap\":1,\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"},\"key\":\"orchard_deer\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"replacement_delay\":172800,\"sight\":{\"delay\":300,\"narration\":{\"east\":\"combat.deer_fled_east\",\"west\":\"combat.deer_fled_west\"}},\"wander_interval\":3600},\"shoo_sampler@0.0.1:population/willow_deer\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"}],\"bundle\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_deer\",\"kind\":\"population_bundle\"},\"cap\":1,\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"},\"key\":\"willow_deer\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"replacement_delay\":172800,\"sight\":{\"delay\":300,\"narration\":{\"north\":\"combat.deer_fled_north\",\"south\":\"combat.deer_fled_south\"}},\"wander_interval\":3600}},\"resources\":{\"shoo_sampler@0.0.1:resource/hp\":{\"gain\":5,\"gain_every\":3600,\"key\":\"hp\",\"maximum\":10,\"minimum\":0,\"start\":10},\"shoo_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"shoo_sampler@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":100,\"key\":\"mv_ready\",\"tone\":\"normal\"},{\"at_percent\":25,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"exhausted\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":100,\"minimum\":0,\"regen\":{\"by_position\":{\"resting\":36,\"sitting\":18,\"sleeping\":36,\"standing\":18},\"every\":3600},\"start\":100}},\"rooms\":{\"shoo_sampler@0.0.1:room/drowned_oak\":{\"description\":\"room.drowned_oak.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"}}},\"key\":\"drowned_oak\",\"title\":\"room.drowned_oak.title\"},\"shoo_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"smithy\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_path\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"shoo_sampler@0.0.1:room/green\":{\"description\":\"room.green.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}}},\"key\":\"green\",\"title\":\"room.green.title\"},\"shoo_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}}},\"key\":\"lane\",\"title\":\"room.lane.title\"},\"shoo_sampler@0.0.1:room/orchard\":{\"description\":\"room.orchard.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"smithy\",\"kind\":\"room\"}}},\"key\":\"orchard\",\"title\":\"room.orchard.title\"},\"shoo_sampler@0.0.1:room/reed_bank\":{\"description\":\"room.reed_bank.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_path\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"}}},\"key\":\"reed_bank\",\"title\":\"room.reed_bank.title\"},\"shoo_sampler@0.0.1:room/reed_path\":{\"description\":\"room.reed_path.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_bank\",\"kind\":\"room\"}}},\"key\":\"reed_path\",\"title\":\"room.reed_path.title\"},\"shoo_sampler@0.0.1:room/smithy\":{\"description\":\"room.smithy.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"smithy\",\"title\":\"room.smithy.title\"},\"shoo_sampler@0.0.1:room/willow_shade\":{\"description\":\"room.willow_shade.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_bank\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"}}},\"key\":\"willow_shade\",\"title\":\"room.willow_shade.title\"}},\"text\":{\"band.dying\":\"dying\",\"band.exhausted\":\"exhausted\",\"band.hurt\":\"hurt\",\"band.mv_ready\":\"rested\",\"band.ready\":\"ready\",\"band.tired\":\"tired\",\"combat.deer_fled_east\":\"The deer bounds east.\",\"combat.deer_fled_north\":\"The deer bounds north.\",\"combat.deer_fled_south\":\"The deer bounds south.\",\"combat.deer_fled_west\":\"The deer bounds west.\",\"combat.npc_died\":\"It falls.\",\"combat.npc_hit\":\"It bites you.\",\"combat.npc_miss\":\"It snaps at air.\",\"combat.player_died\":\"You fall.\",\"combat.player_hit\":\"You strike.\",\"combat.player_miss\":\"You miss.\",\"item.crow_nest.description\":\"A nest.\",\"item.crow_nest.room\":\"A [nest](crow_nest) lies here.\",\"item.crow_nest.short\":\"a nest\",\"item.deer_corpse.description\":\"A deer corpse.\",\"item.deer_corpse.room\":\"A [deer corpse](deer_corpse) lies here.\",\"item.deer_corpse.short\":\"a deer corpse\",\"item.deer_hide.description\":\"A deer hide.\",\"item.deer_hide.room\":\"A [deer hide](deer_hide) lies here.\",\"item.deer_hide.short\":\"a deer hide\",\"item.npc_corpse.description\":\"A corpse.\",\"item.npc_corpse.room\":\"A [corpse](npc_corpse) lies here.\",\"item.npc_corpse.short\":\"a corpse\",\"item.old_coin.description\":\"An old coin.\",\"item.old_coin.room\":\"A [old coin](old_coin) lies here.\",\"item.old_coin.short\":\"an old coin\",\"item.player_corpse.description\":\"Your corpse.\",\"item.player_corpse.room\":\"A [corpse](player_corpse) lies here.\",\"item.player_corpse.short\":\"your corpse\",\"narration.crow_acquired\":\"The crow snatches it up.\",\"narration.crow_carrying\":\"The crow carries something.\",\"narration.crow_delivered\":\"The crow stows it in its nest.\",\"narration.crow_fallback\":\"The crow drops it.\",\"narration.crow_shoo\":\"The crow lets go and flaps off.\",\"npc.crow.description\":\"A crow.\",\"npc.crow.room\":\"A [crow](crow) is here.\",\"npc.crow.short\":\"a crow\",\"npc.oak_deer.description\":\"A deer.\",\"npc.oak_deer.room\":\"A [deer](oak_deer) is here.\",\"npc.oak_deer.short\":\"a deer\",\"npc.orchard_deer.description\":\"A deer.\",\"npc.orchard_deer.room\":\"A [deer](orchard_deer) is here.\",\"npc.orchard_deer.short\":\"a deer\",\"npc.willow_deer.description\":\"A deer.\",\"npc.willow_deer.room\":\"A [deer](willow_deer) is here.\",\"npc.willow_deer.short\":\"a deer\",\"room.drowned_oak.description\":\"The drowned oak.\",\"room.drowned_oak.title\":\"Drowned Oak\",\"room.ferry_landing.description\":\"The ferry landing.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.green.description\":\"The green.\",\"room.green.title\":\"Green\",\"room.lane.description\":\"The lane.\",\"room.lane.title\":\"Lane\",\"room.orchard.description\":\"The orchard.\",\"room.orchard.title\":\"Orchard\",\"room.reed_bank.description\":\"The reed bank.\",\"room.reed_bank.title\":\"Reed Bank\",\"room.reed_path.description\":\"The reed path.\",\"room.reed_path.title\":\"Reed Path\",\"room.smithy.description\":\"The smithy.\",\"room.smithy.title\":\"Smithy\",\"room.willow_shade.description\":\"The willow shade.\",\"room.willow_shade.title\":\"Willow Shade\"},\"world\":{\"bands\":[{\"at_percent\":100,\"key\":\"ready\",\"tone\":\"normal\"},{\"at_percent\":50,\"key\":\"hurt\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"dying\",\"tone\":\"danger\"}],\"combat\":{\"flee_multiplier\":2,\"interval\":150,\"narration\":{\"npc_died\":\"combat.npc_died\",\"npc_hit\":\"combat.npc_hit\",\"npc_miss\":\"combat.npc_miss\",\"player_died\":\"combat.player_died\",\"player_hit\":\"combat.player_hit\",\"player_miss\":\"combat.player_miss\"},\"player_attack\":{\"chance\":100,\"damage_max\":1,\"damage_min\":1},\"sleep_multiplier\":2},\"death\":{\"npc_corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"npc_corpse\",\"kind\":\"item\"},\"player_corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"player_corpse\",\"kind\":\"item\"},\"restore\":{\"hp\":10,\"mv\":100},\"shrine\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"movement\":{\"cost\":{\"amount\":1,\"resource\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}}",
-  "sha256": "805530f234c3c149f082c4da6fe67957bca6de666640efda85be2e284165f092"
+  "canonical": "{\"actions\":{},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"entry\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"shoo_sampler@0.0.1:fact/flag\":{\"key\":\"flag\",\"meaning\":\"A player flag.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"shoo_sampler@0.0.1:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"shoo_sampler@0.0.1:item/crow_nest\":{\"capacity\":8,\"container\":true,\"description\":\"item.crow_nest.description\",\"key\":\"crow_nest\",\"keywords\":[\"crow_nest\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}},\"mass_grams\":250,\"name\":\"item.crow_nest.short\",\"room_line\":\"item.crow_nest.room\"},\"shoo_sampler@0.0.1:item/deer_corpse\":{\"container\":true,\"description\":\"item.deer_corpse.description\",\"key\":\"deer_corpse\",\"keywords\":[\"deer_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"name\":\"item.deer_corpse.short\",\"room_line\":\"item.deer_corpse.room\"},\"shoo_sampler@0.0.1:item/deer_hide\":{\"description\":\"item.deer_hide.description\",\"key\":\"deer_hide\",\"keywords\":[\"deer_hide\"],\"location\":{\"in\":\"template\"},\"mass_grams\":100,\"name\":\"item.deer_hide.short\",\"room_line\":\"item.deer_hide.room\"},\"shoo_sampler@0.0.1:item/npc_corpse\":{\"container\":true,\"description\":\"item.npc_corpse.description\",\"key\":\"npc_corpse\",\"keywords\":[\"npc_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"name\":\"item.npc_corpse.short\",\"room_line\":\"item.npc_corpse.room\"},\"shoo_sampler@0.0.1:item/old_coin\":{\"description\":\"item.old_coin.description\",\"key\":\"old_coin\",\"keywords\":[\"old_coin\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}},\"mass_grams\":10,\"name\":\"item.old_coin.short\",\"room_line\":\"item.old_coin.room\"},\"shoo_sampler@0.0.1:item/player_corpse\":{\"container\":true,\"description\":\"item.player_corpse.description\",\"key\":\"player_corpse\",\"keywords\":[\"player_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"name\":\"item.player_corpse.short\",\"room_line\":\"item.player_corpse.room\"}},\"lock\":{\"capabilities\":{\"calendar\":1,\"combat\":1,\"containment\":1,\"death\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"population\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"shoo_sampler\",\"requires\":{\"capabilities\":{\"calendar\":1,\"combat\":1,\"containment\":1,\"death\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"population\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.37\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"time_policy\":{\"profile\":\"real_elapsed\",\"rate\":50},\"title\":\"Shoo Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"shoo_sampler@0.0.1:npc/crow\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.crow.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"crow\",\"keywords\":[\"crow\"],\"name\":\"npc.crow.short\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},\"room_line\":\"npc.crow.room\",\"spawn_template\":true},\"shoo_sampler@0.0.1:npc/oak_deer\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.oak_deer.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"oak_deer\",\"keywords\":[\"oak_deer\"],\"name\":\"npc.oak_deer.short\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"},\"room_line\":\"npc.oak_deer.room\",\"spawn_template\":true},\"shoo_sampler@0.0.1:npc/orchard_deer\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.orchard_deer.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"orchard_deer\",\"keywords\":[\"orchard_deer\"],\"name\":\"npc.orchard_deer.short\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"},\"room_line\":\"npc.orchard_deer.room\",\"spawn_template\":true},\"shoo_sampler@0.0.1:npc/willow_deer\":{\"attack\":{\"chance\":0,\"damage_max\":1,\"damage_min\":1},\"description\":\"npc.willow_deer.description\",\"hp\":{\"gain\":0,\"maximum\":1,\"minimum\":0,\"start\":1},\"key\":\"willow_deer\",\"keywords\":[\"willow_deer\"],\"name\":\"npc.willow_deer.short\",\"room\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"},\"room_line\":\"npc.willow_deer.room\",\"spawn_template\":true}},\"populations\":{\"shoo_sampler@0.0.1:population/crow\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}],\"cap\":1,\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"npc_corpse\",\"kind\":\"item\"},\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},\"key\":\"crow\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crow\",\"kind\":\"npc\"},\"replacement_delay\":86400,\"scavenge\":{\"corridor\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}],\"drop_rooms\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}],\"interval\":150,\"items\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"old_coin\",\"kind\":\"item\"}],\"narration\":{\"acquired\":\"narration.crow_acquired\",\"carrying\":\"narration.crow_carrying\",\"delivered\":\"narration.crow_delivered\",\"fallback\":\"narration.crow_fallback\",\"shoo\":\"narration.crow_shoo\"},\"nest\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crow_nest\",\"kind\":\"item\"}},\"wander_interval\":3600},\"shoo_sampler@0.0.1:population/oak_deer\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"}],\"cap\":1,\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_corpse\",\"kind\":\"item\"},\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"},\"item\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_hide\",\"kind\":\"item\"},\"key\":\"oak_deer\",\"member_role\":\"prey\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_deer\",\"kind\":\"npc\"},\"replacement_delay\":172800,\"sight\":{\"delay\":300,\"narration\":{\"north\":\"combat.deer_fled_north\",\"south\":\"combat.deer_fled_south\"}},\"wander_interval\":3600},\"shoo_sampler@0.0.1:population/orchard_deer\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"smithy\",\"kind\":\"room\"}],\"cap\":1,\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_corpse\",\"kind\":\"item\"},\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"},\"item\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_hide\",\"kind\":\"item\"},\"key\":\"orchard_deer\",\"member_role\":\"prey\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard_deer\",\"kind\":\"npc\"},\"replacement_delay\":172800,\"sight\":{\"delay\":300,\"narration\":{\"east\":\"combat.deer_fled_east\",\"west\":\"combat.deer_fled_west\"}},\"wander_interval\":3600},\"shoo_sampler@0.0.1:population/willow_deer\":{\"area\":[{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"},{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"}],\"cap\":1,\"corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_corpse\",\"kind\":\"item\"},\"day_target\":1,\"home\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"},\"item\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"deer_hide\",\"kind\":\"item\"},\"key\":\"willow_deer\",\"member_role\":\"prey\",\"night_end\":6,\"night_start\":20,\"night_target\":1,\"npc\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_deer\",\"kind\":\"npc\"},\"replacement_delay\":172800,\"sight\":{\"delay\":300,\"narration\":{\"north\":\"combat.deer_fled_north\",\"south\":\"combat.deer_fled_south\"}},\"wander_interval\":3600}},\"resources\":{\"shoo_sampler@0.0.1:resource/hp\":{\"gain\":5,\"gain_every\":3600,\"key\":\"hp\",\"maximum\":10,\"minimum\":0,\"start\":10},\"shoo_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"shoo_sampler@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":100,\"key\":\"mv_ready\",\"tone\":\"normal\"},{\"at_percent\":25,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"exhausted\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":100,\"minimum\":0,\"regen\":{\"by_position\":{\"resting\":36,\"sitting\":18,\"sleeping\":36,\"standing\":18},\"every\":3600},\"start\":100}},\"rooms\":{\"shoo_sampler@0.0.1:room/drowned_oak\":{\"description\":\"room.drowned_oak.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"}}},\"key\":\"drowned_oak\",\"name\":\"room.drowned_oak.title\"},\"shoo_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"smithy\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_path\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"name\":\"room.ferry_landing.title\"},\"shoo_sampler@0.0.1:room/green\":{\"description\":\"room.green.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"}}},\"key\":\"green\",\"name\":\"room.green.title\"},\"shoo_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green\",\"kind\":\"room\"}}},\"key\":\"lane\",\"name\":\"room.lane.title\"},\"shoo_sampler@0.0.1:room/orchard\":{\"description\":\"room.orchard.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"smithy\",\"kind\":\"room\"}}},\"key\":\"orchard\",\"name\":\"room.orchard.title\"},\"shoo_sampler@0.0.1:room/reed_bank\":{\"description\":\"room.reed_bank.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_path\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"willow_shade\",\"kind\":\"room\"}}},\"key\":\"reed_bank\",\"name\":\"room.reed_bank.title\"},\"shoo_sampler@0.0.1:room/reed_path\":{\"description\":\"room.reed_path.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_bank\",\"kind\":\"room\"}}},\"key\":\"reed_path\",\"name\":\"room.reed_path.title\"},\"shoo_sampler@0.0.1:room/smithy\":{\"description\":\"room.smithy.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"orchard\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"smithy\",\"name\":\"room.smithy.title\"},\"shoo_sampler@0.0.1:room/willow_shade\":{\"description\":\"room.willow_shade.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_bank\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"drowned_oak\",\"kind\":\"room\"}}},\"key\":\"willow_shade\",\"name\":\"room.willow_shade.title\"}},\"text\":{\"band.dying\":\"dying\",\"band.exhausted\":\"exhausted\",\"band.hurt\":\"hurt\",\"band.mv_ready\":\"rested\",\"band.ready\":\"ready\",\"band.tired\":\"tired\",\"combat.deer_fled_east\":\"The deer bounds east.\",\"combat.deer_fled_north\":\"The deer bounds north.\",\"combat.deer_fled_south\":\"The deer bounds south.\",\"combat.deer_fled_west\":\"The deer bounds west.\",\"combat.npc_died\":\"It falls.\",\"combat.npc_hit\":\"It bites you.\",\"combat.npc_miss\":\"It snaps at air.\",\"combat.player_died\":\"You fall.\",\"combat.player_hit\":\"You strike.\",\"combat.player_miss\":\"You miss.\",\"item.crow_nest.description\":\"A nest.\",\"item.crow_nest.room\":\"A [nest](crow_nest) lies here.\",\"item.crow_nest.short\":\"a nest\",\"item.deer_corpse.description\":\"A deer corpse.\",\"item.deer_corpse.room\":\"A [deer corpse](deer_corpse) lies here.\",\"item.deer_corpse.short\":\"a deer corpse\",\"item.deer_hide.description\":\"A deer hide.\",\"item.deer_hide.room\":\"A [deer hide](deer_hide) lies here.\",\"item.deer_hide.short\":\"a deer hide\",\"item.npc_corpse.description\":\"A corpse.\",\"item.npc_corpse.room\":\"A [corpse](npc_corpse) lies here.\",\"item.npc_corpse.short\":\"a corpse\",\"item.old_coin.description\":\"An old coin.\",\"item.old_coin.room\":\"A [old coin](old_coin) lies here.\",\"item.old_coin.short\":\"an old coin\",\"item.player_corpse.description\":\"Your corpse.\",\"item.player_corpse.room\":\"A [corpse](player_corpse) lies here.\",\"item.player_corpse.short\":\"your corpse\",\"narration.crow_acquired\":\"The crow snatches it up.\",\"narration.crow_carrying\":\"The crow carries something.\",\"narration.crow_delivered\":\"The crow stows it in its nest.\",\"narration.crow_fallback\":\"The crow drops it.\",\"narration.crow_shoo\":\"The crow lets go and flaps off.\",\"npc.crow.description\":\"A crow.\",\"npc.crow.room\":\"A [crow](crow) is here.\",\"npc.crow.short\":\"a crow\",\"npc.oak_deer.description\":\"A deer.\",\"npc.oak_deer.room\":\"A [deer](oak_deer) is here.\",\"npc.oak_deer.short\":\"a deer\",\"npc.orchard_deer.description\":\"A deer.\",\"npc.orchard_deer.room\":\"A [deer](orchard_deer) is here.\",\"npc.orchard_deer.short\":\"a deer\",\"npc.willow_deer.description\":\"A deer.\",\"npc.willow_deer.room\":\"A [deer](willow_deer) is here.\",\"npc.willow_deer.short\":\"a deer\",\"room.drowned_oak.description\":\"The drowned oak.\",\"room.drowned_oak.title\":\"Drowned Oak\",\"room.ferry_landing.description\":\"The ferry landing.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.green.description\":\"The green.\",\"room.green.title\":\"Green\",\"room.lane.description\":\"The lane.\",\"room.lane.title\":\"Lane\",\"room.orchard.description\":\"The orchard.\",\"room.orchard.title\":\"Orchard\",\"room.reed_bank.description\":\"The reed bank.\",\"room.reed_bank.title\":\"Reed Bank\",\"room.reed_path.description\":\"The reed path.\",\"room.reed_path.title\":\"Reed Path\",\"room.smithy.description\":\"The smithy.\",\"room.smithy.title\":\"Smithy\",\"room.willow_shade.description\":\"The willow shade.\",\"room.willow_shade.title\":\"Willow Shade\"},\"world\":{\"bands\":[{\"at_percent\":100,\"key\":\"ready\",\"tone\":\"normal\"},{\"at_percent\":50,\"key\":\"hurt\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"dying\",\"tone\":\"danger\"}],\"combat\":{\"flee_multiplier\":2,\"interval\":150,\"narration\":{\"npc_died\":\"combat.npc_died\",\"npc_hit\":\"combat.npc_hit\",\"npc_miss\":\"combat.npc_miss\",\"player_died\":\"combat.player_died\",\"player_hit\":\"combat.player_hit\",\"player_miss\":\"combat.player_miss\"},\"player_attack\":{\"chance\":100,\"damage_max\":1,\"damage_min\":1},\"sleep_multiplier\":2},\"death\":{\"npc_corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"npc_corpse\",\"kind\":\"item\"},\"player_corpse\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"player_corpse\",\"kind\":\"item\"},\"restore\":{\"hp\":10,\"mv\":100},\"shrine\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"movement\":{\"cost\":{\"amount\":1,\"resource\":{\"cartridge_id\":\"shoo_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}}",
+  "sha256": "1104fc95f9df94ebc5b0ff095f477dd04ca0cbb2588e11184edeafbe963a8557"
 }

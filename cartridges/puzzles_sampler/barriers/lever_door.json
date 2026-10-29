@@ -3,14 +3,11 @@
     "lever_door",
     "door"
   ],
-  "short": "barrier.lever_door.short",
+  "name": "barrier.lever_door.short",
   "initial": "closed",
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "lever_stage",
-      "equals": 3
-    }
+    "op": "fact_compare",
+    "fact": "lever_stage",
+    "equals": 3
   }
 }

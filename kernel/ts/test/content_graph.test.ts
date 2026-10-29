@@ -47,7 +47,7 @@ const fixture = (keyIn = 'yard', hermit: Obj = {}) => ({
     talk_guard: {
       npc: R('npc', 'guard'),
       roles: {},
-      policy: { root: read('f_rw') },
+      policy: read('f_rw'),
       choices: {
         yes: {
           sequence: [
@@ -61,7 +61,7 @@ const fixture = (keyIn = 'yard', hermit: Obj = {}) => ({
     talk_hermit: {
       npc: R('npc', 'hermit'),
       roles: {},
-      policy: { root: read('f_ro') },
+      policy: read('f_ro'),
       choices: { yes: { sequence: [{ op: 'quest.accept', quest: R('quest', 'q2') }] } },
     },
   }),
@@ -101,15 +101,13 @@ test('an NPC whose schedule visits a reached room is reachable', () => {
 
 test('a quest a reached room names is reachable', () => {
   const c: Obj = fixture();
-  c.rooms['f@1:room/yard'].variants = [
-    { when: { root: { op: 'quest_state', quest: R('quest', 'q2') } } },
-  ];
+  c.rooms['f@1:room/yard'].variants = [{ when: { op: 'quest_state', quest: R('quest', 'q2') } }];
   assert.deepEqual(reachReport(c).unreachable.quests, []);
 });
 
 test('a quest with its own offer and no dialogue is reachable', () => {
   const c: Obj = fixture();
-  c.quests['f@1:quest/q2'].offer = { policy: { root: { op: 'all', items: [] } } };
+  c.quests['f@1:quest/q2'].offer = { policy: { op: 'all', items: [] } };
   assert.deepEqual(reachReport(c).unreachable.quests, []);
 });
 
@@ -132,7 +130,7 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
   );
 });
 
-// A cartridge without rooms or an entry (hello_sampler). Each fact is read by the policy; the
+// A cartridge without rooms or an entry (hello_sampler). Each fact is read by a quest's policy; the
 // engine writes it at a site with no op, or owns it (skill_blade under skills@1, a patrol's
 // trust); a hit wears a weapon's durability fact and a repair service restores it (row 21); the
 // topic's fact is also read by the codex. None is read_only or write_only.
@@ -144,21 +142,19 @@ test('engine write sites and engine-owned facts are not reported read_only', () 
     topics: defs('topic', { mill: { fact: R('fact', 'known') } }),
     scenes: defs('scene', { end: { on_end: { assign: [{ fact: R('fact', 'ended') }] } } }),
     quests: defs('quest', {
-      trip: { expedition: { survived_fact: R('fact', 'survived') } },
+      trip: {
+        expedition: { survived_fact: R('fact', 'survived') },
+        policy: {
+          op: 'all',
+          items: ['slain', 'ended', 'survived', 'trust', 'skill_blade', 'worn', 'mended'].map(read),
+        },
+      },
       walk: { patrol: { trust_fact: R('fact', 'trust') } },
     }),
     items: defs('item', {
       sword: { location: { in: 'template' }, weapon: { durability: { fact: R('fact', 'worn') } } },
     }),
     services: defs('service', { mend: { benefit: { kind: 'repair', fact: R('fact', 'mended') } } }),
-    policies: defs('policy', {
-      p: {
-        root: {
-          op: 'all',
-          items: ['slain', 'ended', 'survived', 'trust', 'skill_blade', 'worn', 'mended'].map(read),
-        },
-      },
-    }),
     facts: defs('fact', {
       slain: {},
       known: {},

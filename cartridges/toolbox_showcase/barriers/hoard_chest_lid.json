@@ -2,6 +2,6 @@
   "keywords": [
     "hoard_chest_lid"
   ],
-  "short": "barrier.hoard_chest_lid.short",
+  "name": "barrier.hoard_chest_lid.short",
   "initial": "closed"
 }

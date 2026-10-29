@@ -1,5 +1,5 @@
 {
-  "label": "actions.hide",
+  "name": "actions.hide",
   "aliases": [
     "hide"
   ],
@@ -9,13 +9,6 @@
     "detail": "barrels"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "check": {
     "key": "hide",
     "kind": "opposed",

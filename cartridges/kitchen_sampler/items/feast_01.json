@@ -2,16 +2,13 @@
   "keywords": [
     "feast"
   ],
-  "short": "item.feast.short",
+  "name": "item.feast.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "spoiling"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "spoiling"
       },
       "description": "item.feast.short_spoiling"
     }

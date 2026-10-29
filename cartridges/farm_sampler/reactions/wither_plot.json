@@ -4,13 +4,10 @@
     "status": "growing_plot"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "time_since",
-      "fact": "watered_at",
-      "item": "plot",
-      "at_least": 43200
-    }
+    "op": "time_since",
+    "fact": "watered_at",
+    "item": "plot",
+    "at_least": 43200
   },
   "apply": [
     {

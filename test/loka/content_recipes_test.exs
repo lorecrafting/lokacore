@@ -104,7 +104,7 @@ defmodule Loka.ContentRecipesTest do
     assert compile(dir, %{"text.json" => text}) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "actions/ring_bell.label", %{
+                d("UNRESOLVED_REFERENCE", "actions/ring_bell.name", %{
                   "target" => "actions.ring_bell"
                 }),
                 d(
@@ -137,12 +137,12 @@ defmodule Loka.ContentRecipesTest do
               ]}
 
     action = %{
-      "label" => "actions.ring_bell",
+      "name" => "actions.ring_bell",
       "target" => %{"kind" => "none"},
       "command" => "look",
       "priority" => 0,
       "input" => [],
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+      "policy" => %{"op" => "all", "items" => []},
       "accessibility" => "actions.ring_bell"
     }
 
@@ -218,8 +218,8 @@ defmodule Loka.ContentRecipesTest do
     dup =
       String.replace(
         JSON.encode!(src("actions/ring_bell.json")),
-        ~s("label":),
-        ~s("label":"a","label":)
+        ~s("name":),
+        ~s("name":"a","name":)
       )
 
     assert compile(dir, %{"rooms/belfry.json" => room, "actions/ring_bell.json" => {:raw, "{"}}) ==
@@ -229,7 +229,7 @@ defmodule Loka.ContentRecipesTest do
              "rooms/belfry.json" => room,
              "actions/ring_bell.json" => {:raw, dup}
            }) ==
-             {:error, [d("DUPLICATE_KEY", "actions/ring_bell.label")]}
+             {:error, [d("DUPLICATE_KEY", "actions/ring_bell.name")]}
   end
 
   # Breaks: a room's contribution naming nothing compiles (a typo that silently changes

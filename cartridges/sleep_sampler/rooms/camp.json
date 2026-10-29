@@ -1,5 +1,5 @@
 {
-  "title": "room.camp.title",
+  "name": "room.camp.title",
   "description": "room.camp.description",
   "exits": {
     "west": {

@@ -59,14 +59,14 @@ const edited = load('protocol/fixtures/cartridge_scene_hash.json', (c) => {
   c.reactions[`${S}reaction/never_held`] = {
     ...bell,
     key: 'never_held',
-    when: { policy_version: 1, root: held },
+    when: held,
   };
   const bram = c.dialogues[`${S}dialogue/bram`];
   const failed = { op: 'quest_state', quest: bram.quest, state: 'failed' };
   c.dialogues[`${S}dialogue/bram_twin`] = {
     ...bram,
     key: 'bram_twin',
-    policy: { policy_version: 1, root: failed },
+    policy: failed,
   };
 });
 const choice = (dialogue: string, c: string) => ({
@@ -119,7 +119,7 @@ test('C, D: a failed perform counted as completed, a wrong recipe-to-action mapp
 test('E: coverage of a stale transcript (the byte guard missing)', () => {
   // equals 1: the rule writes bell_heard at 4, which the recording lacks.
   const stale = load('protocol/fixtures/cartridge_scene_hash.json', (c) => {
-    c.reactions[`${S}reaction/bell_after`].when.root.equals = 1;
+    c.reactions[`${S}reaction/bell_after`].when.equals = 1;
   });
   assert.throws(() => coverage(stale, [trace(SCENE)]), /replay differs at ordinal 4/);
   // 64 lines from bell_after (its job runs at 7) push its marker past closing()'s cut; set after the

@@ -1,4 +1,3 @@
-// size: allow 502, the drowning case also pins its death lines (loka-3w3q)
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fresh, room, entity, ref, prefix } from './water_fixture.ts';
@@ -393,21 +392,18 @@ test('water exit projection checks its exact move key despite a differently keye
   const w = learned(
     fresh((c) => {
       const a = {
-        label: 'action.recover_corpse',
+        name: 'action.recover_corpse',
         accessibility: 'action.recover_corpse',
         command: 'move',
         target: { kind: 'none' },
         input: ['direction'],
         priority: 0,
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
       };
       c.actions[`${prefix}:action/move`] = {
         ...a,
         key: 'move',
-        policy: {
-          policy_version: 1,
-          root: { op: 'fact_compare', fact: ref('fact', 'rat_1_killed'), equals: true },
-        },
+        policy: { op: 'fact_compare', fact: ref('fact', 'rat_1_killed'), equals: true },
       };
       c.actions[`${prefix}:action/walk`] = { ...a, key: 'walk' };
     }),
@@ -484,7 +480,7 @@ test('a hostile arresting NPC in a water bottom arrests neither the swimmer nor 
       c.manifest.requires.kernel_api.at_least = '1.105';
       c.npcs[`${prefix}:npc/sedge`].room = ref('room', 'well_bottom');
       c.npcs[`${prefix}:npc/sedge`].disposition = {
-        hostile: { policy_version: 1, root: { op: 'all', items: [] } },
+        hostile: { op: 'all', items: [] },
         arrest: {
           to: ref('room', 'well_shaft'),
           narration: c.rooms[`${prefix}:room/well_shaft`].description,

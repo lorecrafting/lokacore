@@ -4,23 +4,20 @@
     "item": "seed_01"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "sky",
-          "season": "spring"
-        },
-        {
-          "op": "not",
-          "item": {
-            "op": "has_item",
-            "item": "seed_01"
-          }
+    "op": "all",
+    "items": [
+      {
+        "op": "sky",
+        "season": "spring"
+      },
+      {
+        "op": "not",
+        "item": {
+          "op": "has_item",
+          "item": "seed_01"
         }
-      ]
-    }
+      }
+    ]
   },
   "apply": [
     {

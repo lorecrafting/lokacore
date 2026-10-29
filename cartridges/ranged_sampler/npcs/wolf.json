@@ -2,7 +2,7 @@
   "keywords": [
     "wolf"
   ],
-  "short": "npc.wolf.short",
+  "name": "npc.wolf.short",
   "room_line": "npc.wolf.room",
   "description": "npc.wolf.description",
   "room": "field",

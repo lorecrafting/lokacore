@@ -19,10 +19,32 @@ defmodule Loka.Content.Artifact do
         "capabilities" => m["requires"]["capabilities"]
       },
       "facts" => keyed(m, "fact", defs),
-      "policies" => keyed(m, "policy", defs),
       "actions" => keyed(m, "action", defs)
     }
   end
+
+  @optional ~w(
+    item
+    npc
+    recipe
+    barrier
+    quest
+    reaction
+    dialogue
+    story_point
+    scene
+    attribute
+    skill
+    topic
+    liquid
+    service
+    transport
+    population
+    bleed
+    status
+    replenish
+    structure
+  )
 
   # items, npcs, recipes, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
@@ -31,12 +53,11 @@ defmodule Loka.Content.Artifact do
 
     optional =
       for k <-
-            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle bleed status replenish blueprint),
+            @optional,
           defs[k] != %{},
           into: %{},
           do:
             {%{
-               "population_bundle" => "population_bundles",
                "status" => "statuses",
                "replenish" => "replenish"
              }[k] || k <> "s", keyed(m, k, defs)}

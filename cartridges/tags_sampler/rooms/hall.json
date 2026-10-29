@@ -1,5 +1,5 @@
 {
-  "title": "room.hall.title",
+  "name": "room.hall.title",
   "description": "room.hall.description",
   "tags": [
     "wooden"
@@ -24,12 +24,9 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "has_tag",
-              "barrier": "wooden_door",
-              "tag": "burnable"
-            }
+            "op": "has_tag",
+            "barrier": "wooden_door",
+            "tag": "burnable"
           },
           "description": "detail.wooden_door.burnable"
         }
@@ -44,12 +41,9 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "has_tag",
-              "barrier": "iron_door",
-              "tag": "burnable"
-            }
+            "op": "has_tag",
+            "barrier": "iron_door",
+            "tag": "burnable"
           },
           "description": "detail.iron_door.burnable"
         }
@@ -59,12 +53,9 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "has_tag",
-          "subject": "room",
-          "tag": "wooden"
-        }
+        "op": "has_tag",
+        "subject": "room",
+        "tag": "wooden"
       },
       "description": "room.hall.wooden"
     }

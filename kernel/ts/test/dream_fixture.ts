@@ -11,7 +11,7 @@ import { fragment } from './fragment.ts';
 
 const f = fragment('protocol/fixtures/cartridge_scene_hash.json');
 export const { prefix, ref } = f;
-const always = () => ({ policy_version: 1, root: { op: 'all', items: [] } });
+const always = () => ({ op: 'all', items: [] });
 const flag = (key: string, meaning: string) => ({
   key,
   version: 1,
@@ -47,7 +47,7 @@ function dreamSource(c: any) {
     c.items[`${prefix}:item/${key}`] = {
       key,
       keywords: ['corpse', key],
-      short: 'item.corpse.short',
+      name: 'item.corpse.short',
       room_line: 'item.corpse.room',
       description: 'item.corpse.description',
       location: { in: 'template' },
@@ -57,7 +57,7 @@ function dreamSource(c: any) {
   c.rooms[`${prefix}:room/ferry_landing`].exits.up = { to: ref('room', 'inn_rooms') };
   c.rooms[`${prefix}:room/inn_rooms`] = {
     key: 'inn_rooms',
-    title: 'room.inn_rooms.title',
+    name: 'room.inn_rooms.title',
     description: 'room.inn_rooms.description',
     exits: { down: { to: ref('room', 'ferry_landing') } },
     details: {
@@ -68,10 +68,7 @@ function dreamSource(c: any) {
         variants: [
           {
             description: 'detail.bed.paid',
-            when: {
-              policy_version: 1,
-              root: { op: 'fact_compare', fact: ref('fact', 'bed_paid'), equals: true },
-            },
+            when: { op: 'fact_compare', fact: ref('fact', 'bed_paid'), equals: true },
           },
         ],
       },
@@ -80,7 +77,7 @@ function dreamSource(c: any) {
   c.npcs[`${prefix}:npc/maud`] = {
     key: 'maud',
     keywords: ['maud'],
-    short: 'npc.maud.short',
+    name: 'npc.maud.short',
     room_line: 'npc.maud.room',
     description: 'npc.maud.description',
     room: ref('room', 'ferry_landing'),
@@ -95,7 +92,7 @@ function dreamSource(c: any) {
       provider: ref('npc', 'maud'),
       currency: ref('resource', 'pennies'),
       action: 'rent_room',
-      label: 'service.room',
+      name: 'service.room',
       narration: 'service.room.used',
       price: 3,
       benefit: { kind: 'entitlement', fact: ref('fact', 'bed_paid') },
@@ -127,13 +124,10 @@ function dreamSource(c: any) {
   });
   c.quests[`${prefix}:quest/a_room`] = {
     key: 'a_room',
-    title: 'quest.room.title',
+    name: 'quest.room.title',
     objective: {
       evidence: 'current_state',
-      policy: {
-        policy_version: 1,
-        root: { op: 'fact_compare', fact: ref('fact', 'dream_seen'), equals: true },
-      },
+      policy: { op: 'fact_compare', fact: ref('fact', 'dream_seen'), equals: true },
     },
     journal: {
       active: 'quest.room.active',
@@ -146,7 +140,7 @@ function dreamSource(c: any) {
   c.scenes[`${prefix}:scene/fen_dream`] = {
     key: 'fen_dream',
     control: 'presentation_only',
-    title: 'dream.title',
+    name: 'dream.title',
     description: 'dream.description',
     on: {
       rest: {
@@ -185,7 +179,7 @@ function dreamSource(c: any) {
     command,
     target,
     input,
-    label,
+    name: label,
     priority: 0,
     policy: always(),
     accessibility: label,

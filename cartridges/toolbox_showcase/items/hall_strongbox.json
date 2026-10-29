@@ -3,7 +3,7 @@
     "strongbox",
     "box"
   ],
-  "short": "item.hall_strongbox.short",
+  "name": "item.hall_strongbox.short",
   "room_line": "item.hall_strongbox.room",
   "description": "item.hall_strongbox.description",
   "location": {

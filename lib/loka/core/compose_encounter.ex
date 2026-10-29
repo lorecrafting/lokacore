@@ -51,7 +51,7 @@ defmodule Loka.Core.ComposeEncounter do
       if is_map(origin) and origin["kind"] == "spawned",
         do: get_in(state, ["population_specs", key(origin["by"])])
 
-    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hound" and
+    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hunter" and
       is_map(spec) and is_map(get_in(spec, ["plan", "pack"])) and
       roster_shape?(ids, op, spec["cap"]) and
       Enum.all?(ids, &pack_member?(&1, op["room_id"], origin["by"], state))
@@ -73,7 +73,7 @@ defmodule Loka.Core.ComposeEncounter do
 
   defp member_provenance?(member, id, plan),
     do:
-      is_map(member) and member["kind"] == "spawned" and member["role"] == "hound" and
+      is_map(member) and member["kind"] == "spawned" and member["role"] == "hunter" and
         member["member_id"] == id and member["by"] == plan
 
   defp slot_membership?(member, id, state) do
@@ -246,8 +246,7 @@ defmodule Loka.Core.ComposeEncounter do
 
   defp binding?(op) do
     cond do
-      op["crow_member_id"] != nil or op["crow_generation"] != nil or
-        op["crow_phase"] != nil or get_in(op, ["job", "kind"]) == "population_bundle" ->
+      op["crow_member_id"] != nil or op["crow_generation"] != nil or op["crow_phase"] != nil ->
         crow_binding?(op)
 
       op["bleed_body_id"] != nil or op["bleed_generation"] != nil or
@@ -262,7 +261,7 @@ defmodule Loka.Core.ComposeEncounter do
   defp crow_binding?(op) do
     op["crow_member_id"] != nil and op["crow_generation"] != nil and
       op["crow_phase"] in ~w(acquire leg return) and
-      get_in(op, ["job", "kind"]) == "population_bundle" and
+      get_in(op, ["job", "kind"]) == "population" and
       Enum.all?(
         ~w(encounter_id quest_instance_id water_generation water_body_id actor_id sight bleed_body_id bleed_generation),
         &(op[&1] == nil)

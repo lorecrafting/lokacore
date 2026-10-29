@@ -2,7 +2,7 @@
   "provider": "smith",
   "currency": "pennies",
   "action": "commission",
-  "label": "service.commission",
+  "name": "service.commission",
   "narration": "service.commission.used",
   "price": 3,
   "benefit": {

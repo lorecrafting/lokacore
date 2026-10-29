@@ -15,7 +15,7 @@ function source(cleared = false) {
   let world = genesis((c) => (c.calendar.start = 43200));
   if (cleared) {
     const hounds = Object.entries(world.state.created ?? {}).filter(
-      ([, row]) => row.origin.kind === 'spawned' && row.origin.role === 'hound',
+      ([, row]) => row.origin.kind === 'spawned' && row.origin.role === 'hunter',
     );
     hounds.forEach(([id], index) => {
       world = fatal(

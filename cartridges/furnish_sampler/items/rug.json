@@ -2,7 +2,7 @@
   "keywords": [
     "rug"
   ],
-  "short": "item.rug.short",
+  "name": "item.rug.short",
   "room_line": "item.rug.room",
   "description": "item.rug.description",
   "location": {

@@ -6,7 +6,7 @@ defmodule Loka.ContentTimeTest do
   # not name.
   test "opens_when reaches the artifact; sky names a lunar phase" do
     dir = Loka.ContentSource.copy("cartridges/time_sampler")
-    gate = fn root -> &put_in(&1, ["opens_when", "root"], root) end
+    gate = fn root -> &put_in(&1, ["opens_when"], root) end
     other = %{"op" => "barrier_state", "barrier" => "moon_door", "equals" => "open"}
 
     assert {:ok, artifact, _} =
@@ -14,10 +14,10 @@ defmodule Loka.ContentTimeTest do
 
     barriers = JSON.decode!(artifact)["cartridge"]["barriers"]
 
-    assert barriers["time_sampler@0.0.1:barrier/moon_door"]["opens_when"]["root"] ==
+    assert barriers["time_sampler@0.0.1:barrier/moon_door"]["opens_when"] ==
              %{"op" => "sky", "lunar" => "full"}
 
-    assert barriers["time_sampler@0.0.1:barrier/hour_door"]["opens_when"]["root"]["barrier"] == %{
+    assert barriers["time_sampler@0.0.1:barrier/hour_door"]["opens_when"]["barrier"] == %{
              "cartridge_id" => "time_sampler",
              "cartridge_version" => "0.0.1",
              "kind" => "barrier",
@@ -25,7 +25,7 @@ defmodule Loka.ContentTimeTest do
            }
 
     drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "calendar") end)
-    moon = "barriers/moon_door.opens_when.root"
+    moon = "barriers/moon_door.opens_when"
 
     cases = [
       {[{"barriers/moon_door.json", gate.(%{"op" => "sky", "lunar" => "half"})}],
@@ -44,10 +44,10 @@ defmodule Loka.ContentTimeTest do
   test "a keyed barrier's opens_when references expand" do
     m = %{"id" => "c", "version" => "1.0.0"}
     root = %{"op" => "barrier_state", "barrier" => "gate", "equals" => "open"}
-    door = %{"key_item" => "key", "opens_when" => %{"policy_version" => 1, "root" => root}}
+    door = %{"key_item" => "key", "opens_when" => root}
     out = Loka.Content.Checks.expand(door, m)
     ref = &%{"cartridge_id" => "c", "cartridge_version" => "1.0.0", "kind" => &1, "key" => &2}
     assert out["key_item"] == ref.("item", "key")
-    assert out["opens_when"]["root"]["barrier"] == ref.("barrier", "gate")
+    assert out["opens_when"]["barrier"] == ref.("barrier", "gate")
   end
 end

@@ -2,7 +2,7 @@
   "keywords": [
     "nest"
   ],
-  "short": "item.nest.short",
+  "name": "item.nest.short",
   "room_line": "item.nest.room",
   "description": "item.nest.description",
   "mass_grams": 20000,
@@ -17,12 +17,9 @@
   ],
   "locks": {
     "put": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_pen",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_pen",
+      "equals": true
     }
   },
   "words": {

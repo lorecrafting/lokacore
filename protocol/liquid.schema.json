@@ -83,7 +83,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "unit_label": {
@@ -110,7 +110,7 @@
       },
       "required": [
         "key",
-        "label",
+        "name",
         "unit_label",
         "grams_per_unit",
         "drink_amount"
@@ -120,7 +120,7 @@
       "examples": [
         {
           "key": "water",
-          "label": "liquid.water",
+          "name": "liquid.water",
           "unit_label": "liquid.units",
           "grams_per_unit": 250,
           "drink_amount": 1

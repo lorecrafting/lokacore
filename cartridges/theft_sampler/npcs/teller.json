@@ -2,7 +2,7 @@
   "keywords": [
     "teller"
   ],
-  "short": "npc.teller.short",
+  "name": "npc.teller.short",
   "room_line": "npc.teller.room",
   "description": "npc.teller.description",
   "room": "strongroom",

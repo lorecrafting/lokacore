@@ -2,30 +2,24 @@
   "keywords": [
     "farmer"
   ],
-  "short": "npc.farmer.short",
+  "name": "npc.farmer.short",
   "room_line": "npc.farmer.room",
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "trust",
-          "equals": 1,
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "trust",
+        "equals": 1,
+        "subject": "target"
       },
       "description": "npc.farmer.room_warm"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "trust",
-          "equals": -1,
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "trust",
+        "equals": -1,
+        "subject": "target"
       },
       "description": "npc.farmer.room_cold"
     }

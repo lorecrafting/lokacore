@@ -8,7 +8,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
-import { entered } from '../schedule/behavior.ts';
+import { entered } from '../schedule/daily.ts';
 import { moves } from '../status/bars.ts';
 import {
   changed,
@@ -54,8 +54,7 @@ export function runCrow(
   const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
   if (!b) return accepted<never>(world, 'job_ran', [done], []);
   if (
-    job.job.kind !== 'population_bundle' ||
-    refString(job.job) !== refString(b.spec.bundle) ||
+    refString(job.job) !== refString(b.plan) ||
     job.crow_member_id !== b.row.member_id ||
     job.crow_generation !== b.row.generation ||
     job.crow_phase !== b.row.phase

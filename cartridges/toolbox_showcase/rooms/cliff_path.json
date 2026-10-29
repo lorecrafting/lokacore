@@ -1,5 +1,5 @@
 {
-  "title": "room.cliff_path.title",
+  "name": "room.cliff_path.title",
   "description": "room.cliff_path.description",
   "exits": {
     "south": {

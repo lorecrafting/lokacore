@@ -3,7 +3,7 @@
     "nell",
     "baker"
   ],
-  "short": "npc.nell.short",
+  "name": "npc.nell.short",
   "room_line": "npc.nell.room",
   "description": "npc.nell.description",
   "room": "village_green",
@@ -30,30 +30,24 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "wardle_standing",
-        "equals": -2
-      }
+      "op": "fact_compare",
+      "fact": "wardle_standing",
+      "equals": -2
     },
     "friendly": {
-      "policy_version": 1,
-      "root": {
-        "op": "any",
-        "items": [
-          {
-            "op": "fact_compare",
-            "fact": "wardle_standing",
-            "equals": 1
-          },
-          {
-            "op": "fact_compare",
-            "fact": "wardle_standing",
-            "equals": 2
-          }
-        ]
-      }
+      "op": "any",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "wardle_standing",
+          "equals": 1
+        },
+        {
+          "op": "fact_compare",
+          "fact": "wardle_standing",
+          "equals": 2
+        }
+      ]
     },
     "refuse": "npc.nell.refuse"
   },

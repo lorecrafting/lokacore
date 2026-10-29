@@ -42,26 +42,22 @@
       }
     },
     "facts": {},
-    "policies": {},
     "actions": {},
     "rooms": {
       "errand_sampler@0.0.1:room/ferry_landing": {
-        "title": "room.ferry_landing.title",
+        "name": "room.ferry_landing.title",
         "description": "room.ferry_landing.description",
         "variants": [
           {
             "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "quest_state",
-                "quest": {
-                  "cartridge_id": "errand_sampler",
-                  "cartridge_version": "0.0.1",
-                  "kind": "quest",
-                  "key": "lantern"
-                },
-                "state": "active"
-              }
+              "op": "quest_state",
+              "quest": {
+                "cartridge_id": "errand_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "quest",
+                "key": "lantern"
+              },
+              "state": "active"
             },
             "description": "room.ferry_landing.waiting"
           }
@@ -79,7 +75,7 @@
         "key": "ferry_landing"
       },
       "errand_sampler@0.0.1:room/village_green": {
-        "title": "room.village_green.title",
+        "name": "room.village_green.title",
         "description": "room.village_green.description",
         "exits": {
           "south": {
@@ -100,7 +96,7 @@
           "bram",
           "ferryman"
         ],
-        "short": "npc.bram.short",
+        "name": "npc.bram.short",
         "room_line": "npc.bram.room",
         "description": "npc.bram.description",
         "room": {
@@ -119,7 +115,7 @@
           "lantern",
           "brass_lantern"
         ],
-        "short": "item.lantern.short",
+        "name": "item.lantern.short",
         "room_line": "item.lantern.room",
         "description": "item.lantern.description",
         "location": {
@@ -136,29 +132,19 @@
     },
     "quests": {
       "errand_sampler@0.0.1:quest/lantern": {
-        "title": "quest.lantern.title",
+        "name": "quest.lantern.title",
         "offer": {
-          "label": "quest.lantern.accept",
-          "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
-          }
+          "label": "quest.lantern.accept"
         },
         "objective": {
           "evidence": "current_state",
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "has_item",
-              "item": {
-                "cartridge_id": "errand_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "item",
-                "key": "lantern"
-              }
+            "op": "has_item",
+            "item": {
+              "cartridge_id": "errand_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "item",
+              "key": "lantern"
             }
           }
         },
@@ -210,6 +196,6 @@
       "quest.lantern.accept": "Offer to fetch Bram's lantern"
     }
   },
-  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"errand_sampler@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"}},\"lock\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"errand_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Errand Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"errand_sampler@0.0.1:npc/bram\":{\"capacity\":1,\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"quests\":{\"errand_sampler@0.0.1:quest/lantern\":{\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"offer\":{\"label\":\"quest.lantern.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.lantern.title\"}},\"resources\":{\"errand_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"errand_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"errand_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"errand_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\",\"variants\":[{\"description\":\"room.ferry_landing.waiting\",\"when\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}}}]},\"errand_sampler@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"text\":{\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] lies in the weeds.\",\"item.lantern.short\":\"a brass lantern\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry.\",\"npc.bram.room\":\"[Bram] the ferryman stands here, one boot on the ferry.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.title\":\"Bram's lantern\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. Across the water, a light swings once and goes dark.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.ferry_landing.waiting\":\"Reeds crowd a slick wooden landing. Bram keeps glancing north, toward the green.\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}}",
-  "sha256": "da3fdbdd406c7044859605459c69d22e0878c2b717a80f6cbd83e7a5f01f53b9"
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"errand_sampler@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"name\":\"item.lantern.short\",\"room_line\":\"item.lantern.room\"}},\"lock\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"errand_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Errand Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"errand_sampler@0.0.1:npc/bram\":{\"capacity\":1,\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"name\":\"npc.bram.short\",\"room\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\"}},\"quests\":{\"errand_sampler@0.0.1:quest/lantern\":{\"key\":\"lantern\",\"name\":\"quest.lantern.title\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"item\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}},\"offer\":{\"label\":\"quest.lantern.accept\"}}},\"resources\":{\"errand_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"errand_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"errand_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"errand_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"name\":\"room.ferry_landing.title\",\"variants\":[{\"description\":\"room.ferry_landing.waiting\",\"when\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}}]},\"errand_sampler@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"errand_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"name\":\"room.village_green.title\"}},\"text\":{\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] lies in the weeds.\",\"item.lantern.short\":\"a brass lantern\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry.\",\"npc.bram.room\":\"[Bram] the ferryman stands here, one boot on the ferry.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.title\":\"Bram's lantern\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. Across the water, a light swings once and goes dark.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.ferry_landing.waiting\":\"Reeds crowd a slick wooden landing. Bram keeps glancing north, toward the green.\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}}",
+  "sha256": "ac3aa639a83e7e407075cd0afdefac86525b3278ec9e3f8404faaecd406ceab1"
 }

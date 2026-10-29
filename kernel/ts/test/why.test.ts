@@ -86,7 +86,7 @@ test('W1, W2: causes, fired and the leaf at the kernel evaluation point', () => 
 test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () => {
   const quest = { op: 'quest_state', quest: ref('quest', 'lantern'), state: 'active' };
   const broken = load((c) => {
-    c.reactions[BELL].when.root = {
+    c.reactions[BELL].when = {
       op: 'all',
       items: [rung(-1), quest, { op: 'not', item: quest }],
     };
@@ -107,10 +107,7 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
     c.reactions[`${S}reaction/a_heard`] = {
       ...c.reactions[BELL],
       key: 'a_heard',
-      when: {
-        policy_version: 1,
-        root: { op: 'fact_compare', fact: ref('fact', 'bell_heard'), equals: true },
-      },
+      when: { op: 'fact_compare', fact: ref('fact', 'bell_heard'), equals: true },
     };
   });
   const a = row(heard, 7, `${S}reaction/a_heard`);
@@ -140,12 +137,12 @@ test('W5, W6: dialogue and recipe policies read on the world before the step', (
   const c = load((c) => {
     c.manifest.requires.capabilities.target_resolution = c.lock.capabilities.target_resolution = 1;
     const present = { op: 'target_present' }; // reads the target: undefined is false
-    c.recipes[`${S}recipe/coil_rope`].policy.root = {
+    c.recipes[`${S}recipe/coil_rope`].policy = {
       op: 'all',
       items: [{ op: 'has_item', item: ref('item', 'lantern') }, present],
     };
-    const bram = c.dialogues[`${S}dialogue/bram`].policy;
-    bram.root = { op: 'all', items: [bram.root, present] };
+    const bram = c.dialogues[`${S}dialogue/bram`];
+    bram.policy = { op: 'all', items: [bram.policy, present] };
   });
   const dialogue = (n: number) => why(c, trace, n, { dialogue: 'bram' }).dialogue as any;
   assert.equal(dialogue(1).rule, `${S}dialogue/bram`);
@@ -165,12 +162,17 @@ test('W5, W6: dialogue and recipe policies read on the world before the step', (
       [true, true],
     ],
   );
+  // Break: a definition with no policy (absent holds, F3) is annotated as if it had a root and throws.
+  const bare = load((c) => delete c.recipes[`${S}recipe/coil_rope`].policy);
+  assert.deepEqual(why(bare, trace, 2, { recipe: 'coil_rope' }).recipe, {
+    rule: `${S}recipe/coil_rope`,
+  });
 });
 
 // Break: the prefix guard removed (at 4 the edited rule writes bell_heard; the recording has none).
 test('W7: a prefix that no longer replays throws', () => {
   const c = load((c) => {
-    c.reactions[BELL].when.root.equals = 1;
+    c.reactions[BELL].when.equals = 1;
   });
   assert.throws(() => why(c, trace, 7), /^Error: replay differs at ordinal 4$/);
 });
@@ -188,7 +190,7 @@ test('W10: a step at the narration cap throws', () => {
 // bram's policy unmet at 3, talk finds no dialogue (dialogue/selection.ts:93); 3 is not compared.
 test('W9: a refused step has no causes and its decision kind', () => {
   const c = load((c) => {
-    c.dialogues[`${S}dialogue/bram`].policy.root.state = 'resolved';
+    c.dialogues[`${S}dialogue/bram`].policy.state = 'resolved';
   });
   const { outcome, reactions } = why(c, trace, 3);
   assert.deepEqual([outcome, reactions[0]!.causes, reactions[0]!.fired], ['rejected', [], 0]);
@@ -223,7 +225,7 @@ test('W8: the CLI prints the explanation and refuses bad arguments', () => {
     assert.equal(run('7', '--recipe', 'nope').stderr, 'no definition keyed nope\n'); // no path: not the transcript's
     writeFileSync(
       file,
-      artifact((c) => (c.reactions[BELL].when.root.equals = 1)),
+      artifact((c) => (c.reactions[BELL].when.equals = 1)),
     );
     const differs = run('7');
     assert.deepEqual(

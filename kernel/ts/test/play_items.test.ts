@@ -84,7 +84,7 @@ test('a lookup matching 1,025 items is refused and the session goes on', () => {
   const room = { cartridge_id: 'items_sampler', cartridge_version: '0.0.1', kind: 'room' };
   const coin = {
     keywords: ['coin'],
-    short: 'item.lantern.short',
+    name: 'item.lantern.short',
     room_line: 'item.lantern.room',
     description: 'item.lantern.description',
     location: { in: 'room', room: { ...room, key: 'ferry_landing' } },

@@ -1,5 +1,5 @@
 {
-  "title": "room.cliff_top.title",
+  "name": "room.cliff_top.title",
   "description": "room.cliff_top.description",
   "exits": {
     "south": {
@@ -21,21 +21,15 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "lunar": "full"
-        }
+        "op": "sky",
+        "lunar": "full"
       },
       "description": "room.cliff_top.full_moon"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "lunar": "new"
-        }
+        "op": "sky",
+        "lunar": "new"
       },
       "description": "room.cliff_top.dark_moon"
     }

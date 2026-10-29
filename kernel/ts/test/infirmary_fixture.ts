@@ -32,7 +32,7 @@ export const infirmary = (c: any) => {
     c.items[named('item', `bandage_${i}`)] = {
       key: `bandage_${i}`,
       keywords: ['bandage', `bandage_${i}`],
-      short: 'item.bandage.short',
+      name: 'item.bandage.short',
       room_line: 'item.bandage.room',
       description: 'item.bandage.description',
       mass_grams: 10,
@@ -42,7 +42,7 @@ export const infirmary = (c: any) => {
     [named('npc', 'healer')]: {
       key: 'healer',
       keywords: ['healer'],
-      short: 'npc.healer.short',
+      name: 'npc.healer.short',
       room_line: 'npc.healer.room',
       description: 'npc.healer.description',
       room: ref('room', 'mine'),
@@ -60,11 +60,11 @@ export const infirmary = (c: any) => {
   c.quests = {
     [named('quest', 'herbs')]: {
       key: 'herbs',
-      title: 'quest.herbs.title',
+      name: 'quest.herbs.title',
       repeatable: true,
       objective: {
         evidence: 'current_state',
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
       },
       exchange: {
         npc: healer,
@@ -86,7 +86,7 @@ export const infirmary = (c: any) => {
   const dialogue = (key: string, policy: object, choices: object, extra = {}) => ({
     key,
     npc: healer,
-    policy: { policy_version: 1, root: policy },
+    policy: policy,
     prompt: 'dialogue.healer.prompt',
     roles: { healer: { role: 'npc', npc: healer } },
     choices,

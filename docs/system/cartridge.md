@@ -2,19 +2,18 @@
 
 ## Source layout
 
-A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`). An authored NPC or
-item definition is a [blueprint](glossary.md); the cartridge packages it with the rest of the
-world's definitions and text:
+A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`). The cartridge packages
+its NPC and item definitions with the rest of the world's definitions and text:
 
 | File | Holds |
 |---|---|
-| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands; optional `chapters [{title, story_point?, outcome?}]` ([Chapters](mechanics.md#chapters-kerneltssrcviewviewts)) |
+| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands; optional `chapters [{name, story_point?, outcome?}]` ([Chapters](mechanics.md#chapters-kerneltssrcviewviewts)) |
 | `facts.json` | `{"facts": {name: FactSpec}}`; a dotted name maps to a snake_case key, two names mapping to one key is `FACT_NAME_COLLISION` |
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `replenish/`, `services/`, `transports/`, `bleeds/`, `statuses/`, `structures/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 | `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ActionRecipe, `action_recipe@1`, [mechanics](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `recipes` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
@@ -29,7 +28,7 @@ definition may sit in an area bundle, may name a parent of its own kind with `"e
 be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
 ([Source shortcuts](#source-shortcuts)). A
 source with rooms, text or an entry compiles to
-`loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
+`loka-cartridge-v2`; v1 (manifest, facts, actions) is the R4 form.
 
 ## Current bundled chapter
 
@@ -147,7 +146,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   several dialogues; no dialogue role named `actor`; a choice's `accept` names a quest, in a
   dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); an action with outcomes has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
-  (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
+  (`EMPTY_TIME_WINDOW`); a schedule needs `schedule@1` and a calendar `calendar@1`;
 - `calendar` may author a nonnegative multi-day `start`, positive `units_per_hour` and
   `hours_per_day`, a positive `subdivisions_per_hour` dividing the hour, and ordered solar
   and lunar cuts. The compiler checks safe day arithmetic, cut order and bounds,
@@ -191,9 +190,16 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   `scene_<key>` fact (`facts.facts.scene_<key>`) and each action, reaction or dialogue
   fact.assign of it are RESERVED_FACT at the same write-site paths as position;
   fact_compare and reaction on.fact reads remain legal;
-- story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
-  one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
-  `lib/loka/content/dialogues.ex:2`);
+- story points: there is no story point file. A dialogue choice's `story_point: "<key>/<outcome>"`
+  and a scene's `on_end` declare the point's outcomes, and the point is located at its first
+  claim. A second claim of one outcome is `DUPLICATE_DEFINITION` at its site
+  (`dialogues/<d>.choices.<c>.story_point` or `scenes/<s>.on_end`); a claiming choice's dialogue
+  resolves a quest (`OUTCOME_MISMATCH` at the choice's `story_point`); a scene-claimed key is at most
+  52 characters (`SCHEMA_VIOLATION` at `scenes/<s>.on_end.story_point`); a point needs dialogue@1
+  (`UNDECLARED_CAPABILITY`, `lib/loka/content/dialogues.ex`);
+- policies: a policy is its condition tree inline (`protocol/policy.schema.json` `Policy`); no
+  policy field is required; an absent gate holds, and an absent trigger
+  (`disposition.hostile`, `friendly`) never fires;
 - chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
   (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
   (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a
@@ -232,13 +238,13 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
-`lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
-`lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`, `lib/loka/content/signals.ex`,
+`lib/loka/content/areas.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
+`lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
 `lib/loka/content/zones.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
-behaviours, lower signals, expand zone rules, refuse repeated definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a signal or a zone;
+behaviours, expand zone rules, refuse repeated definitions again. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour or a zone;
 the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
@@ -341,15 +347,15 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 [shoo_sampler](../../cartridges/shoo_sampler/) is the working example: `npcs/wild.json`,
 `items/corpse.json` and `populations/herd.json` are abstract prototypes.
 
-**Inline prose.** A text field may hold its words in place: `"short": {"prose": "the elder"}`.
+**Inline prose.** A text field may hold its words in place: `"name": {"prose": "the elder"}`.
 - The marker is an object whose only member is `"prose"`, a non-empty string, anywhere inside a
   definition (a plain file or a bundle). Any other `{"prose": ...}` shape stays, and the schema
   reports it at its site. Root files (`text.json` too) are not lowered.
 - The compiler writes the generated key `<kind>.<key>.<path>` in its place: `<kind>` singular
   (`npc`, `room`, `story_point`), `<key>` the definition key, `<path>` the steps from the
   definition to the marker joined by `.`, array indexes in decimal. One alias: a step
-  `room_line` is written `room` (the house `npc.<key>.room` convention). So `npcs.elder.short`
-  is `npc.elder.short`, a choice label `dialogue.elder_ward.choices.thank.label`, and a room
+  `room_line` is written `room` (the house `npc.<key>.room` convention). So `npcs.elder.name`
+  is `npc.elder.name`, a choice label `dialogue.elder_ward.choices.thank.label`, and a room
   variant `room.lane.variants.0.description`.
 - The words join the one `text.json` catalog (created when absent; an undecodable one takes
   nothing, its `INVALID_JSON` fails the build). A generated key that fails TextKey is the
@@ -365,41 +371,6 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
 inline; its artifact equals the hand-keyed one byte for byte.
-
-**Signals.** A message from one reaction to others, lowered to a counter fact.
-1. In a reaction's `apply`, `{"op": "signal", "signal": "<name>"}` lowers to
-   `{"op": "fact.adjust", "fact": "signal_<name>", "amount": 1}` at the same index, so a check on
-   the lowered step (capability) reports at the author's step (`reactions/ring.apply[0].op`).
-2. The trigger `"on": {"event": "signal", "signal": "<name>"}` lowers to
-   `{"event": "fact_changed", "fact": "signal_<name>"}`.
-3. Each name sent adds `signal_<name>` to `facts.json` (created when absent; an undecodable one
-   takes nothing, its `INVALID_JSON` fails the build): version 1, `int` 0 to 9007199254740990,
-   default 0, scope `player` (a listener runs for the sending character), meaning
-   `Signal <name> (compiler-generated).`
-4. The pass adds nothing to `cartridge.json`: the author declares `fact@1` and `reaction@1`, and the existing checks report what is missing.
-5. Limits:
-   - After 9007199254740990 sends the counter is full: the adjust clamps, writes nothing new and
-     the listeners stay silent (`kernel/ts/src/mechanics/fact.ts:254`). The maximum is one below
-     the largest safe integer because `add` (`kernel/ts/src/foundation/int.ts:17`) overflows
-     before the clamp at 2^53-1 (loka-kgd.195).
-   - Each send writes the player's fact row.
-   - A rule that only sends is still a write for `mix loka.lint`; add `"silent": true`, which the
-     compiler drops.
-   - Senders are reaction steps only. Recipes keep `event.emit` / `custom_event`; dialogues keep
-     `fact.adjust`.
-
-| Case | Code | Path | data |
-|---|---|---|---|
-| An authored fact named exactly `signal_<name>` | `FACT_NAME_COLLISION` | `facts.facts.signal_<name>` | `{}` |
-| A listener whose name no sending step uses | `UNRESOLVED_REFERENCE` | `<src>.on.signal` | `{"target": "<name>"}` |
-| A sending step whose name is not a Key, or whose `signal_<name>` is not (a name over 57 characters), or with its own `fact` or `amount` | `SCHEMA_VIOLATION` | `<src>.apply[<i>].op` | `{"error": "unknown_variant"}` |
-| A trigger with its own `fact` | `SCHEMA_VIOLATION` | `<src>.on.event` | `{"error": "unknown_variant"}` |
-
-The dotted `signal.<name>` collides through the ordinary fact-name check. A refused step or
-trigger stays unlowered, so the schema reports it at the author's path. When a name or its
-`signal_<name>` is refused for not being a Key, its listeners report nothing of their own. [signal_sugar](../../test/fixtures/signal_sugar/) is the
-working example; it compiles to the same artifact as its hand-expanded twin
-[signal_expanded](../../test/fixtures/signal_expanded/).
 
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
@@ -456,8 +427,8 @@ rules byte for byte.
   name.
 - Prose lowers first, so all copies share the rule's generated key
   `behaviour.<name>.reactions.<rule>...`. Flattening runs first, so a holder inherits
-  `behaviours` through `extends` and an abstract holder gets no copy. Signals and zones run
-  after, so a behaviour rule may send a signal or carry a `zone`.
+  `behaviours` through `extends` and an abstract holder gets no copy. Zones run
+  after, so a behaviour rule may carry a `zone`.
 
 | Case | Code | Path | data |
 |---|---|---|---|
@@ -487,7 +458,7 @@ shortcuts above (`lib/loka/content/source_schema.ex`); a test fails when the com
 are stale, and `kernel/ts/test/source_schema.test.ts` validates every committed cartridge file
 with them. They accept every shortcut: no `key`, an `abstract` parent (checked only as an
 object), an `extends` child (no inherited member required), `with`, `{"prose": ...}` wherever a
-text key goes (root files too), the signal step and trigger, `zone` and `zones`, and
+text key goes (root files too), `zone` and `zones`, and
 `behaviours`. They are a writing aid, not a gate: nothing reads them, the compiler remains the
 judge, and they do not check references, bundle-member keys against file stems, or the
 `resources` and `attributes` entries beyond being objects, or a behaviour's rule bodies beyond
@@ -617,8 +588,7 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   `drop` (ref the NPC, `item`, `chance`). `items.sinks`: `hand_over` (ref the dialogue, `choice`,
   `item` and `npc` its roles), `edible` (ref the item, `resource`, `amount`).
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
-  replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan, the last
-  three from its bundle; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
+  replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
   careful?}`: the count of its items, its tool's tag, its careful count.
 - Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
   from then path, populations by ref, seams by room then detail. ponytail: authored static sites
@@ -850,7 +820,7 @@ known answer remains historical proof.
 
 ## Skill and bleed declarations
 
-A skill source `skills/<key>.json` supplies `label`, `requirement` and `qualification`
+A skill source `skills/<key>.json` supplies `name`, `requirement` and `qualification`
 (`SkillDefinition`, capability `skills@1`, with `attributes@1`); its key comes from its file.
 The compiler creates the exact reserved player Boolean `skill_<key>`, default false, reserved
 to `skills@1`. No writable stat, progression or skill-percentage field is introduced. A teacher
@@ -947,7 +917,7 @@ The historical0.0.8 fixture retains its original answer.
 
 [Fast travel](mechanics.md#fast-travel-toolbox-row-32) reuses the transport endpoint declarations
 (`protocol/transport.schema.json` `TransportDefinition`) unchanged: a reciprocal route pair between two waypoint rooms that share no exit,
-each with its own `use_transport` action whose `policy` root is
+each with its own `use_transport` action whose `policy` is
 `{"op": "visited_count", "room": "<destination>", "at_least": 1}`.
 
 ## Escrow declarations
@@ -1005,7 +975,7 @@ Required cartridge text: `service.unaffordable`, and `service.no_funds` for eith
 
 ## Status declarations
 
-[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence): `{duration, tick_every, resource, per_tick, label, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `label` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) refuses each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. The compiler refuses an unresolved name (`UNRESOLVED_REFERENCE`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. The compiler refuses an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`). A status with `modifies` may omit `per_tick` and then never ticks; the compiler refuses a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one), applied to the eater's body after the meal and its cures. The compiler refuses an unresolved name (UNRESOLVED_REFERENCE at the entry) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"`, the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. The compiler refuses another value (SCHEMA_VIOLATION at `kind`). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). The compiler refuses a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey): told when the status bars a combat blow, in place of the engine's `combat.skipped`; the compiler refuses a missing key.
+[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence): `{duration, tick_every, resource, per_tick, name, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `name` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) refuses each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. The compiler refuses an unresolved name (`UNRESOLVED_REFERENCE`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. The compiler refuses an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`). A status with `modifies` may omit `per_tick` and then never ticks; the compiler refuses a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one), applied to the eater's body after the meal and its cures. The compiler refuses an unresolved name (UNRESOLVED_REFERENCE at the entry) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"`, the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. The compiler refuses another value (SCHEMA_VIOLATION at `kind`). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). The compiler refuses a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey): told when the status bars a combat blow, in place of the engine's `combat.skipped`; the compiler refuses a missing key.
 
 [Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>`: an NPC of this cartridge, whose authored instance takes the status. The compiler refuses an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
 
@@ -1065,7 +1035,7 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Drop declarations
 
-[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; requires `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (populations keep their `loot_role`). The compiler (`lib/loka/content/death.ex`) refuses an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
+[Loot tables](mechanics.md#loot-tables-and-random-drops-toolbox-row-8) read an NPC's optional `drops` (`NpcDefinition.drops`, a list of 1 to 8 `{item, chance}`; requires `world.death`). `item` names an item of this cartridge (source: its short key) whose `location` is `{in: "npc", npc: <this NPC>}`; no item appears twice; `chance` is an integer 1 to 100; the NPC has `hp` with `gain` 0 (a regenerating NPC would revive holding its failed drops and re-roll them) and is not a `spawn_template` (population members carry their plan's `item`). The compiler (`lib/loka/content/death.ex`) refuses an unresolved item (UNRESOLVED_REFERENCE at the entry's `item`), an item this NPC does not hold or a repeated item (SCHEMA_VIOLATION at the entry), drops without `world.death`, without `hp`, with `hp.gain` above 0 or on a spawn template (SCHEMA_VIOLATION at `drops`). `cartridges/loot_sampler` is the sampler. A cartridge without drops keeps its bytes, hash and behavior.
 
 ## NPC attribute declarations
 
@@ -1089,7 +1059,7 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Time gate declarations
 
-[Time windows](mechanics.md#time-windows-hour-and-moon-gates-toolbox-row-10): a barrier source file may declare `opens_when`, a VersionedPolicy, and any policy may use the `sky {lunar}` leaf (`calendar@1` in `requires.capabilities`). The compiler (`lib/loka/content/calendar.ex`, policy roots in `lib/loka/content/barriers.ex` `conditions`) checks `opens_when` like every other policy (owners, references, windows) and refuse a `sky` field naming a phase its calendar table does not author, or a table the calendar lacks (SCHEMA_VIOLATION at that field; [row 31](#sky-declarations) adds `weather`, `season` and `tide`). Sampler: `cartridges/time_sampler`.
+[Time windows](mechanics.md#time-windows-hour-and-moon-gates-toolbox-row-10): a barrier source file may declare `opens_when`, a Policy, and any policy may use the `sky {lunar}` leaf (`calendar@1` in `requires.capabilities`). The compiler (`lib/loka/content/calendar.ex`, policy roots in `lib/loka/content/barriers.ex` `conditions`) checks `opens_when` like every other policy (owners, references, windows) and refuse a `sky` field naming a phase its calendar table does not author, or a table the calendar lacks (SCHEMA_VIOLATION at that field; [row 31](#sky-declarations) adds `weather`, `season` and `tide`). Sampler: `cartridges/time_sampler`.
 
 ## Climb declarations
 
@@ -1137,11 +1107,11 @@ An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `action
 
 ## Name word declarations
 
-Name words (loka-6qi): an NPC or item may declare `words {bare, article?, plural?}` (`NameWords`): `bare` and the optional `plural` are text keys checked as `short` (UNRESOLVED_REFERENCE at `words.bare` or `words.plural`), and `article` is one of `a`, `an`, `the`. `short` stays the phrase narration binds; `words` exist for presenters that compose a sentence from several names.
+Name words (loka-6qi): an NPC or item may declare `words {bare, article?, plural?}` (`NameWords`): `bare` and the optional `plural` are text keys checked as `name` (UNRESOLVED_REFERENCE at `words.bare` or `words.plural`), and `article` is one of `a`, `an`, `the`. `name` stays the phrase narration binds; `words` exist for presenters that compose a sentence from several names.
 
 ## Voice declarations
 
-[Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skills@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.room_line_variants[0].when.root.skill`). The checks are in `lib/loka/content/entities.ex`. Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
+[Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skills@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.room_line_variants[0].when.skill`). The checks are in `lib/loka/content/entities.ex`. Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
 
 A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.details.<key>.title`), the page title the Book shows for it. `mix loka.lint` requires it, and a prose link to it, on a detail some action targets (loka-x6t.120).
 
@@ -1171,7 +1141,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Conditional schedule declarations
 
-[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and builds `schedule_cases` from the checked cases, which source may not author. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The compiler refuses a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
+[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback) and goal text or leaf reference; it emits the hour's fallback in `daily_schedule` and builds `schedule_cases` from the checked cases, which source may not author. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The compiler refuses a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
 
 ## Standing and disposition declarations
 
@@ -1183,7 +1153,7 @@ Author rule: an NPC with `disposition.hostile` refuses every dialogue while host
 
 ## Rumour declarations
 
-[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc`, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"policy_version": 1, "root": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
+[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc`, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
 
 ## Lore deduction declarations
 
@@ -1216,11 +1186,11 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Skill prerequisite declarations
 
-[Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView, NPC lessons and talk choices leave the skill out while its prerequisite fails and it is not acquired; a `skill_compare` naming it in a non-hidden skill's `qualification` or any dialogue `policy`, and a dialogue `label` on a dialogue teaching it, are SCHEMA_VIOLATION at that field) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`).
+[Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`): `prerequisite`, a Policy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView, NPC lessons and talk choices leave the skill out while its prerequisite fails and it is not acquired; a `skill_compare` naming it in a non-hidden skill's `qualification` or any dialogue `policy`, and a dialogue `name` on a dialogue teaching it, are SCHEMA_VIOLATION at that field) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`).
 
 ## Recipe build step declarations
 
-[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `build {blueprint, direction}`, `blueprint` a blueprint ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) refuses, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a blueprint or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.blueprint` or `.direction`). The listed blueprint already resolves and owns construction@1.
+[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step an action's sequence may hold (`RecipeStep`, `protocol/action.schema.json`): `build {structure, direction}`, `structure` a structure ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) refuses, at `actions/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on an action whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a structure or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.structure` or `.direction`). The listed structure already resolves and owns construction@1.
 
 ## Durability declarations
 
@@ -1238,7 +1208,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Access lock declarations
 
-[Access locks](mechanics.md#access-locks-toolbox-row-g7) add three optional fields, each an object of VersionedPolicy (`protocol/policy.schema.json`) with no other key: a Connection's `locks {traverse}` and a RoomDefinition's `locks {enter}` (`protocol/room.schema.json`), an ItemDefinition's `locks {get?, put?}` with at least one (`protocol/entity.schema.json`). An unknown or misplaced access type, an empty `locks` or a value that is no policy is SCHEMA_VIOLATION (UNKNOWN_FIELD for an unknown key). A `put` lock on an item without `container: true` is SCHEMA_VIOLATION `invalid_value` at its `locks.put` (`items/chest.locks.put`). Each lock root joins the policy roots the compiler checks (`Loka.Content.RoomParts.conditions/1` and `Loka.Content.Entities.conditions/1`), so its references and fact types are checked like any condition's (UNRESOLVED_REFERENCE at the leaf's member, `rooms/hut.locks.enter.root.fact`), and short references in it expand. A room or exit lock is read with no target, so in the loader `subject: "target"` under it is FACT_SCOPE_UNSUPPORTED at that `subject`, as in the other targetless sites; an item lock may use it (the target is the item). Sampler: `cartridges/access_sampler`.
+[Access locks](mechanics.md#access-locks-toolbox-row-g7) add three optional fields, each an object of Policy (`protocol/policy.schema.json`) with no other key: a Connection's `locks {traverse}` and a RoomDefinition's `locks {enter}` (`protocol/room.schema.json`), an ItemDefinition's `locks {get?, put?}` with at least one (`protocol/entity.schema.json`). An unknown or misplaced access type, an empty `locks` or a value that is no policy is SCHEMA_VIOLATION (UNKNOWN_FIELD for an unknown key). A `put` lock on an item without `container: true` is SCHEMA_VIOLATION `invalid_value` at its `locks.put` (`items/chest.locks.put`). Each lock root joins the policy roots the compiler checks (`Loka.Content.RoomParts.conditions/1` and `Loka.Content.Entities.conditions/1`), so its references and fact types are checked like any condition's (UNRESOLVED_REFERENCE at the leaf's member, `rooms/hut.locks.enter.fact`), and short references in it expand. A room or exit lock is read with no target, so in the loader `subject: "target"` under it is FACT_SCOPE_UNSUPPORTED at that `subject`, as in the other targetless sites; an item lock may use it (the target is the item). Sampler: `cartridges/access_sampler`.
 
 ## Theft declarations
 
@@ -1276,11 +1246,11 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 Retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)): `RecipeTarget` has no `storylet` kind, so an action declaring one fails with SCHEMA_VIOLATION at `target.kind`.
 
-## Blueprint and site declarations
+## Structure and site declarations
 
-Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `blueprints/<key>.json` (`BlueprintDefinition`, `protocol/cartridge.schema.json`): `title` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a blueprint and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`), and `blueprints`, 1 to 16 blueprints of this cartridge (UNRESOLVED_REFERENCE at `site.blueprints[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Compiler `lib/loka/content/construction.ex`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
+Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `structures/<key>.json` (`StructureDefinition`, `protocol/cartridge.schema.json`): `name` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a structure and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`), and `structures`, 1 to 16 structures of this cartridge (UNRESOLVED_REFERENCE at `site.structures[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Compiler `lib/loka/content/construction.ex`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
 
-Built rooms S2 adds a service benefit `{kind: "build", blueprint, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `blueprint` and `site` resolve to a blueprint and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the blueprint and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.blueprint` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`.
+Built rooms S2 adds a service benefit `{kind: "build", structure, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `structure` and `site` resolve to a structure and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the structure and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.structure` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`.
 
 ## Narrate declarations
 

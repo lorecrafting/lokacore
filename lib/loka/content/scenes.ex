@@ -229,23 +229,11 @@ defmodule Loka.Content.Scenes do
           })
         ]
 
-      {_, _, p} ->
-        if get_in(p, ["outcomes", ended["outcome"]]) == %{"scene" => rel_ref(m, s["key"])},
-          do: [],
-          else: [diag("OUTCOME_MISMATCH", at(rel, path ++ ["outcome"]))]
-
+      # The point's outcome is this scene's own (Dialogues.points/2) unless DUPLICATE_DEFINITION.
       _ ->
         []
     end
   end
-
-  defp rel_ref(m, key),
-    do: %{
-      "cartridge_id" => m["id"],
-      "cartridge_version" => m["version"],
-      "kind" => "scene",
-      "key" => key
-    }
 
   defp outcome(rel, steps, s, "story_point", m, defs) do
     case resolve(s["on"]["story_point"], "story_point", m, defs) do

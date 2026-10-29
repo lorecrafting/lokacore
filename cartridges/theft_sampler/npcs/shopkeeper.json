@@ -2,7 +2,7 @@
   "keywords": [
     "shopkeeper"
   ],
-  "short": "npc.shopkeeper.short",
+  "name": "npc.shopkeeper.short",
   "room_line": "npc.shopkeeper.room",
   "description": "npc.shopkeeper.description",
   "room": "market",

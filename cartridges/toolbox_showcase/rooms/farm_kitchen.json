@@ -1,5 +1,5 @@
 {
-  "title": "room.farm_kitchen.title",
+  "name": "room.farm_kitchen.title",
   "description": "room.farm_kitchen.description",
   "exits": {
     "north": {

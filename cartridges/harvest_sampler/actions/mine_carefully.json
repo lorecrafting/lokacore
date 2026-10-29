@@ -1,5 +1,5 @@
 {
-  "label": "action.mine_carefully",
+  "name": "action.mine_carefully",
   "command": "harvest",
   "target": {
     "kind": "entity",
@@ -11,12 +11,5 @@
     "method"
   ],
   "priority": 0,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "accessibility": "action.mine_carefully"
 }

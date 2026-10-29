@@ -21,7 +21,6 @@ export function birth(
   const origin = {
     kind: 'spawned' as const,
     by: plan,
-    bundle: spec.bundle,
     slot,
     generation,
     occurrence_id,
@@ -33,12 +32,8 @@ export function birth(
       spec.home,
       writer_group,
     ),
-    ...(spec[spec.loot_role]
-      ? spawnPair(
-          identity(mint() as EntityId, spec[spec.loot_role]!, spec.loot_role, origin),
-          member_id,
-          writer_group,
-        )
+    ...(spec.loot
+      ? spawnPair(identity(mint() as EntityId, spec.loot, 'loot', origin), member_id, writer_group)
       : []),
     hpBirth(plan, member_id, spec.hp.start, at, writer_group),
   ];
@@ -47,7 +42,7 @@ export function birth(
 function identity(
   id: EntityId,
   definition: DefinitionRef,
-  role: 'deer' | 'hide' | 'hound' | 'pelt',
+  role: 'hunter' | 'prey' | 'loot',
   origin: Omit<
     Extract<Extract<DeltaOp, { op: 'entity.create' }>['identity']['origin'], { kind: 'spawned' }>,
     'role'

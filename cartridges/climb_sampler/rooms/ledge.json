@@ -1,5 +1,5 @@
 {
-  "title": "room.ledge.title",
+  "name": "room.ledge.title",
   "description": "room.ledge.description",
   "exits": {
     "up": {

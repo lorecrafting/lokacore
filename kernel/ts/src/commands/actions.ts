@@ -14,14 +14,13 @@ import {
   type TargetSpec,
   type TextKey,
   type UnavailableReason,
-  type VersionedPolicy,
+  type Policy,
 } from '../contracts.gen.ts';
 import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { permits } from '../mechanics/status/permits.ts';
-import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
 import { accepts, aimedOffers, hiddenTarget, primaryTarget } from './action_input.ts';
@@ -48,7 +47,7 @@ export type Offered = {
   readonly target: TargetSpec;
   readonly input: readonly ActionInputParameter[];
   readonly priority: number;
-  readonly policy: VersionedPolicy;
+  readonly policy?: Policy;
   readonly command: Key;
   readonly recipe?: ActionRecipe;
   readonly quest?: DefinitionRef;
@@ -108,7 +107,7 @@ function engine(world: World, actor: CharacterId): ActionSet {
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
-        const verb_ = { key, label, target, input, priority: 0, policy: ALWAYS, command: key };
+        const verb_ = { key, label, target, input, priority: 0, command: key };
         return [key, { ...verb_, engine: true }];
       }),
   );
@@ -120,7 +119,7 @@ function engine(world: World, actor: CharacterId): ActionSet {
 // whose key is an action's, a recipe's, a quest's or a registered command's (DUPLICATE_DEFINITION).
 function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = keyed(world).map((recipe): [string, Offered] => {
-    const { key, label, priority, policy } = recipe;
+    const { key, name: label, priority, policy } = recipe;
     // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
     const target: TargetSpec =
       recipe.target.kind === 'use'
@@ -129,10 +128,9 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const command = 'perform' as Key;
     return [key, { key, label, target, input: [], priority, policy, command, recipe }];
   });
-  const actions = Object.values(world.cartridge.actions).map((a): [string, Offered] => [
-    a.key,
-    { ...a, label: a.label as TextKey },
-  ]);
+  const actions = Object.values(world.cartridge.actions).map(
+    ({ name, ...a }): [string, Offered] => [a.key, { ...a, label: name as TextKey }],
+  );
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const quests = Object.values(world.cartridge.quests ?? {}).flatMap(({ key, offer }) => {
     const quest = { cartridge_id, cartridge_version, kind: 'quest', key } as DefinitionRef;
@@ -262,7 +260,7 @@ export function refusalReason(
   const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
-    holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
+    holds(world, actor, a.policy, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
   if (used || !matching.some((a) => ok(a))) return used ?? { code: 'invalid_state' };
   return craftRefused(world, matching[0]!.recipe, actor, steps); // after policy, as the offer (hs-10)

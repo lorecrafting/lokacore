@@ -1,5 +1,5 @@
 {
-  "title": "room.pit.title",
+  "name": "room.pit.title",
   "description": "room.pit.description",
   "exits": {
     "west": {

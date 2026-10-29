@@ -2,7 +2,7 @@
   "keywords": [
     "pickaxe"
   ],
-  "short": "item.pickaxe.short",
+  "name": "item.pickaxe.short",
   "room_line": "item.pickaxe.room",
   "description": "item.pickaxe.description",
   "location": {

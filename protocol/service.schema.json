@@ -15,7 +15,7 @@
         "action": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "label": {
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "narration": {
@@ -38,7 +38,7 @@
         "key",
         "provider",
         "action",
-        "label",
+        "name",
         "narration",
         "currency",
         "price",
@@ -55,7 +55,7 @@
             "key": "innkeeper"
           },
           "action": "rent_room",
-          "label": "service.room",
+          "name": "service.room",
           "narration": "service.rented",
           "currency": {
             "cartridge_id": "service_probe",
@@ -305,13 +305,13 @@
           "additionalProperties": false
         },
         {
-          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "build"
             },
-            "blueprint": {
+            "structure": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "site": {
@@ -367,7 +367,7 @@
           },
           "required": [
             "kind",
-            "blueprint",
+            "structure",
             "site",
             "direction"
           ],
@@ -382,7 +382,7 @@
           }
         },
         {
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
           "type": "object",
           "properties": {
             "kind": {

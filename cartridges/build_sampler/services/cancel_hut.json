@@ -2,7 +2,7 @@
   "provider": "carpenter",
   "currency": "pennies",
   "action": "cancel_hut",
-  "label": "service.cancel_hut",
+  "name": "service.cancel_hut",
   "narration": "service.cancel_hut.used",
   "price": 1,
   "benefit": {

@@ -1,12 +1,9 @@
 {
   "npc": "hedge_wizard",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "ward_taught",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "ward_taught",
+    "equals": true
   },
   "prompt": "dialogue.wizard_done.prompt",
   "roles": {

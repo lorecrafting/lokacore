@@ -1,5 +1,5 @@
 {
-  "title": "room.courtyard.title",
+  "name": "room.courtyard.title",
   "description": "room.courtyard.description",
   "exits": {
     "south": {

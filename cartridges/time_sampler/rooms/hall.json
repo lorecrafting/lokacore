@@ -1,5 +1,5 @@
 {
-  "title": "room.hall.title",
+  "name": "room.hall.title",
   "description": "room.hall.description",
   "exits": {
     "north": {
@@ -14,11 +14,8 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "lunar": "full"
-        }
+        "op": "sky",
+        "lunar": "full"
       },
       "description": "room.hall.full_moon"
     }

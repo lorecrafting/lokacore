@@ -15,7 +15,7 @@ defmodule Loka.ContentPropertyTest do
 
     talk = %{
       "npc" => "clerk_a",
-      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+      "policy" => %{"op" => "all", "items" => []},
       "prompt" => "service.deposit",
       "roles" => %{"clerk" => %{"role" => "npc", "npc" => "clerk_a"}},
       "choices" => %{
@@ -28,7 +28,7 @@ defmodule Loka.ContentPropertyTest do
     }
 
     pick = %{
-      "label" => "service.deposit",
+      "name" => "service.deposit",
       "requirement" => "service.deposit",
       "qualification" => talk["policy"],
       "growth" => [10, 20]

@@ -2,7 +2,7 @@
   "keywords": [
     "pebble"
   ],
-  "short": "item.pebble.short",
+  "name": "item.pebble.short",
   "room_line": "item.pebble.room",
   "description": "item.pebble.description",
   "location": {

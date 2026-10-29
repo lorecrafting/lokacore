@@ -1,13 +1,6 @@
 {
-  "label": "skill.smithing.label",
+  "name": "skill.smithing.label",
   "requirement": "skill.smithing.requirement",
-  "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "growth": [
     1,
     2

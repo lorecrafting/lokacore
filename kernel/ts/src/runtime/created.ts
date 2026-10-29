@@ -16,12 +16,10 @@ type Draft = {
   entityResourceSpecs?: Record<string, World['resourceSpecs'][string]>;
 };
 
-/** A created corpse stays fixed; a spawned pelt uses ordinary item custody. */
+/** A created corpse stays fixed; spawned loot uses ordinary item custody. */
 export function movable(world: World, id: EntityId): boolean {
   const origin = world.state.created?.[id]?.origin;
-  return (
-    !origin || (origin.kind === 'spawned' && (origin.role === 'pelt' || origin.role === 'hide'))
-  );
+  return !origin || (origin.kind === 'spawned' && origin.role === 'loot');
 }
 
 export function hydrate(world: World, state: State, loading = false): World | undefined {
@@ -33,7 +31,7 @@ export function hydrate(world: World, state: State, loading = false): World | un
       if (
         loading &&
         identity.origin.kind === 'spawned' &&
-        identity.origin.role === 'hound' &&
+        identity.origin.role === 'hunter' &&
         !houndValid(world, state, id, identity, draft)
       )
         return undefined;
@@ -59,7 +57,7 @@ function ordered(state: State) {
     !i?.origin
       ? 3
       : i.origin.kind === 'spawned'
-        ? i.origin.role === 'hound' || i.origin.role === 'deer'
+        ? i.origin.role === 'hunter' || i.origin.role === 'prey'
           ? 0
           : 1
         : 2;
@@ -91,7 +89,8 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   )
     return false;
   draft.entities ??= { ...world.entities };
-  draft.entities[id] = { ...template, kind: member ? 'npc' : 'item' } as Entity;
+  const { name, ...rest } = template;
+  draft.entities[id] = { ...rest, short: name, kind: member ? 'npc' : 'item' } as Entity;
   draft.knownEntities ??= { ...world.knownEntities };
   const entity = draft.entities[id];
   draft.knownEntities[id] = {
@@ -144,17 +143,17 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
 }
 
 type Built = Extract<Identity['origin'], { kind: 'built' }>;
-// Built rooms S2: the room is the blueprint, entered from its site by the origin's direction.
+// Built rooms S2: the room is the structure, entered from its site by the origin's direction.
 function raise(world: World, state: State, id: string, identity: Identity, draft: Draft): boolean {
   const { site, direction } = identity.origin as Built;
-  const blueprint = world.cartridge.blueprints?.[refString(identity.definition)];
+  const structure = world.cartridge.structures?.[refString(identity.definition)];
   const declared = world.cartridge.rooms[refString(site)]?.site;
   const siteId = world.roomIds[refString(site)];
   if (
-    !blueprint ||
+    !structure ||
     !siteId ||
     !declared?.directions.includes(direction) ||
-    !declared.blueprints.some((b) => same(b, identity.definition))
+    !declared.structures.some((b) => same(b, identity.definition))
   )
     return false;
   // A DefinitionRef key is [a-z][a-z0-9_]*, so the room key spells the uuid with underscores.
@@ -168,7 +167,7 @@ function raise(world: World, state: State, id: string, identity: Identity, draft
   const razed = !!state.built?.[id];
   if (!razed) draft.rooms[siteId] = { ...at, exits: { ...at.exits, [direction]: { to: ref } } };
   draft.rooms[id] = {
-    ...blueprint,
+    ...structure,
     key: room,
     exits: razed ? {} : { [OPPOSITE[direction]]: { to: site } },
   };

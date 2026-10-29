@@ -8,7 +8,7 @@ const { ref, prefix } = f;
 const id = (kind: string, key: string) => `${prefix}:${kind}/${key}`;
 const shown = (kind: string, key: string) => ({
   keywords: [key],
-  short: `${kind}.${key}.short`,
+  name: `${kind}.${key}.short`,
   room_line: `${kind}.${key}.room`,
   description: `${kind}.${key}.description`,
 });
@@ -32,13 +32,13 @@ export function light(c: any) {
   c.rooms[id('room', 'well_lane')].exits.down = { to: ref('room', 'well_shaft') };
   c.rooms[id('room', 'chandler')] = {
     key: 'chandler',
-    title: 'room.chandler.title',
+    name: 'room.chandler.title',
     description: 'room.chandler.description',
     exits: { east: { to: ref('room', 'well_lane') } },
   };
   c.rooms[id('room', 'well_shaft')] = {
     key: 'well_shaft',
-    title: 'room.well_shaft.title',
+    name: 'room.well_shaft.title',
     description: 'room.well_shaft.description',
     dark_description: 'room.well_shaft.dark',
     details: {
@@ -197,12 +197,12 @@ export function lightActionFixture(
     c.actions[id('action', key)] = {
       key,
       command,
-      label: `action.${command}`,
+      name: `action.${command}`,
       accessibility: `action.${command}`,
       target,
       input,
       priority: 1,
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
     };
     c.text[`action.${command}`] ??= command;
   });

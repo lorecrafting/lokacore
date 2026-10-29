@@ -1,4 +1,4 @@
-// schedule@1, behavior@1 and calendar@1 (Early R7/R8 S; 04 §5.4; 06 §13; 21 §4, §10): the
+// schedule@1 and calendar@1 (Early R7/R8 S; 04 §5.4; 06 §13; 21 §4, §10): the
 // fresh world's first job, the due-job drain in wait and in a recipe's duration, run_job and its
 // job CommandId, the loader's schedule and calendar checks, and coil_rope's narration participants
 // (Early R7/R8 N). Worlds are the ferry known answer
@@ -389,7 +389,7 @@ test("an item participant is pinned to the item's EntityId", () => {
       [`${F}:item/rope`]: {
         key: 'rope',
         keywords: ['rope'],
-        short,
+        name: short,
         room_line,
         description,
         location,

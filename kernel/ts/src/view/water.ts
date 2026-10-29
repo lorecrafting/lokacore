@@ -31,7 +31,7 @@ function corpseViews(world: World, actor: CharacterId, steps: Steps): CorpseReco
     corpse_recovery.push({
       corpse_id,
       room_id: plan.room_id,
-      room_title: world.rooms[plan.room_id].title,
+      room_title: world.rooms[plan.room_id].name,
       roots: plan.roots.map((id) => ({ id, name: world.entities[id].short })),
     });
   }

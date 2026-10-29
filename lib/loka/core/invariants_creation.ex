@@ -52,7 +52,7 @@ defmodule Loka.Core.InvariantsCreation do
     do:
       previous["writer_group"] == op["writer_group"] and i["id"] == op["entity_id"] and
         ((get_in(s, ["known_entities", op["destination_id"], "kind"]) == "room" and
-            get_in(i, ["origin", "role"]) != "pelt" and
+            get_in(i, ["origin", "role"]) != "loot" and
             (get_in(i, ["origin", "kind"]) != "spawned" or
                get_in(s, ["population_specs", Compose.key(get_in(i, ["origin", "by"])), "home"]) ==
                  op["destination_id"])) or
@@ -68,8 +68,8 @@ defmodule Loka.Core.InvariantsCreation do
         &(&1["op"] == "entity.create" and get_in(&1, ["identity", "origin", "kind"]) == "spawned")
       )
 
-    hounds = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "hound"))
-    pelts = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "pelt"))
+    hounds = Enum.filter(spawned, &(get_in(&1, ~w(identity origin role)) in ~w(hunter prey)))
+    pelts = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "loot"))
 
     Enum.all?(hounds, fn h ->
       id = get_in(h, ["identity", "id"])
@@ -80,7 +80,7 @@ defmodule Loka.Core.InvariantsCreation do
         pelts,
         &(&1["writer_group"] == group and get_in(&1, ["identity", "origin", "member_id"]) == id)
       ) ==
-        if(get_in(state, ["population_specs", Compose.key(origin["by"]), "pelt"]), do: 1, else: 0) and
+        if(get_in(state, ["population_specs", Compose.key(origin["by"]), "loot"]), do: 1, else: 0) and
         Enum.count(
           ops,
           &(&1["op"] == "resource.initialize" and &1["writer_group"] == group and
@@ -163,7 +163,7 @@ defmodule Loka.Core.InvariantsCreation do
 
     get_in(state, ["containers", id]) == room and is_map(origin) and is_map(slot) and
       Map.take(origin, ~w(kind role member_id)) ==
-        %{"kind" => "spawned", "role" => "hound", "member_id" => id} and
+        %{"kind" => "spawned", "role" => "hunter", "member_id" => id} and
       Map.take(slot, ~w(member_id generation replacement_due)) ==
         %{"member_id" => id, "generation" => origin["generation"], "replacement_due" => nil}
   end
@@ -181,7 +181,7 @@ defmodule Loka.Core.InvariantsCreation do
     origin = get_in(state, ["created", id, "origin"])
     spec = get_in(state, ["population_specs", Compose.key(op["plan"])])
 
-    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hound" and
+    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hunter" and
       origin["member_id"] == id and origin["by"] == op["plan"] and
       origin["slot"] == op["slot"] and
       origin["generation"] == get_in(op, ["value", "generation"]) and
@@ -204,11 +204,11 @@ defmodule Loka.Core.InvariantsCreation do
   end
 
   defp paired?(%{"origin" => parent} = p, %{"origin" => child}) do
-    parent["kind"] == "spawned" and parent["role"] == "hound" and
-      child["kind"] == "spawned" and child["role"] == "pelt" and
+    parent["kind"] == "spawned" and parent["role"] in ~w(hunter prey) and
+      child["kind"] == "spawned" and child["role"] == "loot" and
       p["id"] == child["member_id"] and
-      Map.take(parent, ~w(by bundle slot generation occurrence_id member_id)) ==
-        Map.take(child, ~w(by bundle slot generation occurrence_id member_id))
+      Map.take(parent, ~w(by slot generation occurrence_id member_id)) ==
+        Map.take(child, ~w(by slot generation occurrence_id member_id))
   end
 
   defp paired?(_, _), do: false
@@ -232,7 +232,7 @@ defmodule Loka.Core.InvariantsCreation do
       end)
 
     create != nil and create["writer_group"] == op["writer_group"] and
-      origin["kind"] == "spawned" and origin["role"] == "hound" and
+      origin["kind"] == "spawned" and origin["role"] in ~w(hunter prey) and
       origin["member_id"] == op["entity_id"] and spec != nil and
       op["resource"] == resource and op["value"] == spec["hp"]["start"] and
       op["at"] >= s["clock"] and op["at"] <= horizon and
@@ -284,16 +284,15 @@ defmodule Loka.Core.InvariantsCreation do
   defp spawn_provenance?(s, i, origin) do
     spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
 
-    spec != nil and origin["bundle"] == spec["bundle"] and
-      origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
-      if(origin["role"] == "hound",
+    spec != nil and origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
+      if(origin["role"] in ~w(hunter prey),
         do: origin["member_id"] == i["id"],
         else: origin["member_id"] != i["id"]
       )
   end
 
   defp built_provenance?(s, i, origin) do
-    i["definition"]["kind"] == "blueprint" and
+    i["definition"]["kind"] == "structure" and
       Enum.any?(Map.get(s, "known_entities", %{}), fn {_, e} ->
         e["kind"] == "body" and e["owner_id"] == origin["owner"]
       end)

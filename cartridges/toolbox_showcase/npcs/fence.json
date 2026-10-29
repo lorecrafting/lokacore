@@ -2,7 +2,7 @@
   "keywords": [
     "fence"
   ],
-  "short": "npc.fence.short",
+  "name": "npc.fence.short",
   "room_line": "npc.fence.room",
   "description": "npc.fence.description",
   "room": "pawn_alley",
@@ -11,13 +11,10 @@
   },
   "locks": {
     "get": {
-      "policy_version": 1,
-      "root": {
-        "op": "not",
-        "item": {
-          "op": "all",
-          "items": []
-        }
+      "op": "not",
+      "item": {
+        "op": "all",
+        "items": []
       }
     }
   },

@@ -193,7 +193,7 @@ test('subject reads the shocked golem and self the wet player', () => {
   const soaked = (subject: string) =>
     edited((r) => {
       delete r[rule('drench')].apply[0].npc; // item_dropped's subject: the player's body
-      r[rule('shock_on_wet')].when.root.subject = subject;
+      r[rule('shock_on_wet')].when.subject = subject;
     });
   for (const [subject, stunned] of [
     ['subject', false],

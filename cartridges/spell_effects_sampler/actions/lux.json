@@ -1,5 +1,5 @@
 {
-  "label": "spell.lux",
+  "name": "spell.lux",
   "aliases": [
     "lux"
   ],
@@ -9,13 +9,6 @@
     "learned": "lux_known"
   },
   "priority": 0,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

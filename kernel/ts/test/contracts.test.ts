@@ -162,7 +162,7 @@ test('wisp attempts compose to their literal answers', () => {
         key: 'hp',
       },
       per_tick: -1,
-      label: 'condition.poisoned',
+      name: 'condition.poisoned',
       narration: {
         applied: 'narration.poison.applied',
         tick: 'narration.poison.tick',

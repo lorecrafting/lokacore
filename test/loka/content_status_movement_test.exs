@@ -22,7 +22,7 @@ defmodule Loka.ContentStatusMovementTest do
       {"barriers/mist_gate.json",
        %{
          "keywords" => ["gate"],
-         "short" => "barrier.mist_gate.short",
+         "name" => "barrier.mist_gate.short",
          "initial" => "open",
          "tags" => ["chasm"]
        }},

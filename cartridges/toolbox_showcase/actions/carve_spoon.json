@@ -1,5 +1,5 @@
 {
-  "label": "actions.carve_spoon",
+  "name": "actions.carve_spoon",
   "aliases": [
     "carve"
   ],
@@ -10,12 +10,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "skill_compare",
-      "skill": "whittling",
-      "at_least": 1
-    }
+    "op": "skill_compare",
+    "skill": "whittling",
+    "at_least": 1
   },
   "check": {
     "key": "carve_spoon",

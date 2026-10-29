@@ -54,7 +54,7 @@ defmodule Loka.Content.Skills do
         {_, {rel, _, s}} <- defs["skill"],
         field <- ~w(qualification prerequisite),
         is_map_key(s, field),
-        do: {rel, [field, "root"], s[field]["root"]}
+        do: {rel, [field], s[field]}
       )
 
   def check(nil, _, _, _), do: []
@@ -83,7 +83,7 @@ defmodule Loka.Content.Skills do
   defp texts(rel, s, text),
     do:
       for(
-        field <- ~w(label requirement profession),
+        field <- ~w(name requirement profession),
         is_map_key(s, field),
         text != :unknown and not is_map_key(text, s[field]),
         do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
@@ -104,7 +104,7 @@ defmodule Loka.Content.Skills do
     banned = if s["hidden"] == true, do: [me], else: [me | hidden]
 
     if Enum.any?(
-         Loka.Content.Policies.nodes(p["root"], []),
+         Loka.Content.Policies.nodes(p, []),
          &(match?({%{"op" => "skill_compare", "skill" => _}, _}, &1) and
              elem(&1, 0)["skill"] in banned)
        ),
@@ -138,7 +138,7 @@ defmodule Loka.Content.Skills do
         {_, {rel, [], d}} <- defs["dialogue"] || %{},
         {field, true} <- [
           {"policy", reads?(d["policy"], hidden?)},
-          {"label", !!d["label"] and teaches?(d, hidden?)},
+          {"name", !!d["name"] and teaches?(d, hidden?)},
           {"riddle", !!d["riddle"] and teaches?(d, hidden?)}
         ],
         do: bad(at(rel, [field]))
@@ -146,8 +146,7 @@ defmodule Loka.Content.Skills do
 
   # Only skill_compare (in a policy) and skill.acquire (in a sequence) carry a "skill".
   defp reads?(p, hidden?),
-    do:
-      Enum.any?(Loka.Content.Policies.nodes(p["root"], []), fn {n, _} -> hidden?.(n["skill"]) end)
+    do: Enum.any?(Loka.Content.Policies.nodes(p, []), fn {n, _} -> hidden?.(n["skill"]) end)
 
   defp teaches?(d, hidden?),
     do:

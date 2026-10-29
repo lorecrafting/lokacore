@@ -1,5 +1,5 @@
 {
-  "title": "room.orchard.title",
+  "name": "room.orchard.title",
   "description": "room.orchard.description",
   "exits": {
     "west": {

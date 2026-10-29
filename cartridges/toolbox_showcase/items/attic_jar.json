@@ -2,7 +2,7 @@
   "keywords": [
     "jar"
   ],
-  "short": "item.attic_jar.short",
+  "name": "item.attic_jar.short",
   "room_line": "item.attic_jar.room",
   "description": "item.attic_jar.description",
   "mass_grams": 800,

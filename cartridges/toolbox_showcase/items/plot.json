@@ -2,7 +2,7 @@
   "keywords": [
     "plot"
   ],
-  "short": "item.plot.short",
+  "name": "item.plot.short",
   "room_line": "item.plot.room",
   "description": "item.plot.description",
   "mass_grams": 20000,
@@ -17,76 +17,61 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "growing"
-            },
-            {
-              "op": "time_since",
-              "fact": "sown_at",
-              "item": "plot",
-              "at_least": 64800
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "growing"
+          },
+          {
+            "op": "time_since",
+            "fact": "sown_at",
+            "item": "plot",
+            "at_least": 64800
+          }
+        ]
       },
       "description": "item.plot.heavy"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "growing"
-            },
-            {
-              "op": "time_since",
-              "fact": "sown_at",
-              "item": "plot",
-              "at_least": 3600
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "growing"
+          },
+          {
+            "op": "time_since",
+            "fact": "sown_at",
+            "item": "plot",
+            "at_least": 3600
+          }
+        ]
       },
       "description": "item.plot.shoots"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "withered"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "withered"
       },
       "description": "item.plot.withered"
     }
   ],
   "locks": {
     "put": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_plot",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_plot",
+      "equals": true
     },
     "get": {
-      "policy_version": 1,
-      "root": {
-        "op": "fact_compare",
-        "fact": "owns_plot",
-        "equals": true
-      }
+      "op": "fact_compare",
+      "fact": "owns_plot",
+      "equals": true
     }
   },
   "words": {

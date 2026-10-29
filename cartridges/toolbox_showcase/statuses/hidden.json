@@ -2,7 +2,7 @@
   "duration": 3600,
   "tick_every": 60,
   "resource": "hp",
-  "label": "condition.hidden",
+  "name": "condition.hidden",
   "narration": {
     "applied": "narration.hidden.applied",
     "tick": "narration.hidden.tick",

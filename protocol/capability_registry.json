@@ -315,15 +315,6 @@
     ]
   },
   {
-    "key": "behavior",
-    "version": 1,
-    "portability": "portable",
-    "residency": "portable_capability",
-    "definitions": [
-      "schedule"
-    ]
-  },
-  {
     "key": "schedule",
     "version": 1,
     "portability": "portable",
@@ -332,6 +323,9 @@
       "wait",
       "run_job",
       "elapsed"
+    ],
+    "definitions": [
+      "schedule"
     ],
     "policies": [
       "time_window"
@@ -346,8 +340,7 @@
     "portability": "portable",
     "residency": "portable_capability",
     "definitions": [
-      "population",
-      "population_bundle"
+      "population"
     ],
     "commands": [
       "shoo"
@@ -636,7 +629,7 @@
     "residency": "portable_capability",
     "commands": [],
     "definitions": [
-      "blueprint"
+      "structure"
     ],
     "events": []
   }

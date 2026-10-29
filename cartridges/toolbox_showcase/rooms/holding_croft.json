@@ -1,5 +1,5 @@
 {
-  "title": "room.holding_croft.title",
+  "name": "room.holding_croft.title",
   "description": "room.holding_croft.description",
   "exits": {
     "down": {
@@ -28,7 +28,7 @@
     "directions": [
       "north"
     ],
-    "blueprints": [
+    "structures": [
       "hut_plain"
     ]
   }

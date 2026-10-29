@@ -5,14 +5,14 @@
   "title": "Damage Sampler",
   "ancestries": {
     "fighter": {
-      "label": "ancestry.fighter.label",
+      "name": "ancestry.fighter.label",
       "description": "ancestry.fighter.description",
       "attribute": "str",
       "modifier": 1,
       "skill": "swords"
     },
     "farmer": {
-      "label": "ancestry.farmer.label",
+      "name": "ancestry.farmer.label",
       "description": "ancestry.farmer.description",
       "attribute": "str",
       "modifier": 1
@@ -32,7 +32,6 @@
       "combat": 1,
       "schedule": 1,
       "death": 1,
-      "behavior": 1,
       "description_variant": 1,
       "calendar": 1,
       "position": 1,

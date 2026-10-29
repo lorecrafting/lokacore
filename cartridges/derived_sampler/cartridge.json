@@ -22,7 +22,6 @@
       "status": 1,
       "schedule": 1,
       "death": 1,
-      "behavior": 1,
       "description_variant": 1,
       "calendar": 1,
       "position": 1
@@ -39,19 +38,19 @@
   },
   "ancestries": {
     "strong": {
-      "label": "ancestry.strong.label",
+      "name": "ancestry.strong.label",
       "description": "ancestry.strong.description",
       "attribute": "str",
       "modifier": 10
     },
     "nimble": {
-      "label": "ancestry.nimble.label",
+      "name": "ancestry.nimble.label",
       "description": "ancestry.nimble.description",
       "attribute": "dex",
       "modifier": 5
     },
     "hardy": {
-      "label": "ancestry.hardy.label",
+      "name": "ancestry.hardy.label",
       "description": "ancestry.hardy.description",
       "attribute": "con",
       "modifier": 6

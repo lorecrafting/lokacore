@@ -36,12 +36,11 @@
       }
     },
     "facts": {},
-    "policies": {},
     "actions": {},
     "rooms": {
       "rooms_sampler@0.0.1:room/boathouse": {
         "key": "boathouse",
-        "title": "room.boathouse.title",
+        "name": "room.boathouse.title",
         "description": "room.boathouse.description",
         "exits": {
           "east": {
@@ -56,7 +55,7 @@
       },
       "rooms_sampler@0.0.1:room/ferry_landing": {
         "key": "ferry_landing",
-        "title": "room.ferry_landing.title",
+        "name": "room.ferry_landing.title",
         "description": "room.ferry_landing.description",
         "exits": {
           "north": {
@@ -79,7 +78,7 @@
       },
       "rooms_sampler@0.0.1:room/well_lane": {
         "key": "well_lane",
-        "title": "room.well_lane.title",
+        "name": "room.well_lane.title",
         "description": "room.well_lane.description",
         "exits": {
           "south": {
@@ -131,6 +130,6 @@
       }
     }
   },
-  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"rooms_sampler\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Rooms Sampler\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"rooms_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"rooms_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"rooms_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"rooms_sampler@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"rooms_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"rooms_sampler@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"}}",
-  "sha256": "8c08c9df75c2c82b16f13e6ee86b18019c1669ddcc2674efb43b31a6fb3d6bee"
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"rooms_sampler\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Rooms Sampler\",\"version\":\"0.0.1\"},\"resources\":{\"rooms_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"rooms_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"rooms_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"rooms_sampler@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"name\":\"room.boathouse.title\"},\"rooms_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"name\":\"room.ferry_landing.title\"},\"rooms_sampler@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"rooms_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"name\":\"room.well_lane.title\"}},\"text\":{\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"}}",
+  "sha256": "50fb543d6529ba2943c5dc713b7b854749109960ef81d69e9976ea793cc7733e"
 }

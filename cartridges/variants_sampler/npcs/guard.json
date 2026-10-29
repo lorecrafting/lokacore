@@ -2,16 +2,13 @@
   "keywords": [
     "guard"
   ],
-  "short": "npc.guard.short",
+  "name": "npc.guard.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "time_window",
-          "from": 0,
-          "to": 6
-        }
+        "op": "time_window",
+        "from": 0,
+        "to": 6
       },
       "description": "npc.guard.short_asleep"
     }

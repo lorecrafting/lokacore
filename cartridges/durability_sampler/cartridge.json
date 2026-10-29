@@ -17,7 +17,6 @@
       "combat": 1,
       "schedule": 1,
       "death": 1,
-      "behavior": 1,
       "description_variant": 1,
       "calendar": 1,
       "position": 1,
@@ -35,14 +34,14 @@
   },
   "ancestries": {
     "smith": {
-      "label": "ancestry.smith.label",
+      "name": "ancestry.smith.label",
       "description": "ancestry.smith.description",
       "attribute": "str",
       "modifier": 10,
       "skill": "swords"
     },
     "scholar": {
-      "label": "ancestry.scholar.label",
+      "name": "ancestry.scholar.label",
       "description": "ancestry.scholar.description",
       "attribute": "dex",
       "modifier": 1,

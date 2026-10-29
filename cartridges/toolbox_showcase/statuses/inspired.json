@@ -8,7 +8,7 @@
       "modifier": 2
     }
   ],
-  "label": "condition.inspired",
+  "name": "condition.inspired",
   "narration": {
     "applied": "narration.inspired.applied",
     "tick": "narration.inspired.tick",

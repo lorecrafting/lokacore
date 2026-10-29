@@ -3,24 +3,21 @@
     "lever_door",
     "door"
   ],
-  "short": "barrier.lever_door.short",
+  "name": "barrier.lever_door.short",
   "initial": "closed",
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "any",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "lever_stage",
-          "equals": 3
-        },
-        {
-          "op": "visited_count",
-          "room": "lever_vault",
-          "at_least": 1
-        }
-      ]
-    }
+    "op": "any",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "lever_stage",
+        "equals": 3
+      },
+      {
+        "op": "visited_count",
+        "room": "lever_vault",
+        "at_least": 1
+      }
+    ]
   }
 }

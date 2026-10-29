@@ -6,8 +6,8 @@ defmodule Loka.ContentSkyTest do
   # without calendar units (no status line).
   test "sky names an authored weather, season or tide" do
     dir = Loka.ContentSource.copy("cartridges/sky_sampler")
-    root = "rooms/yard.variants[0].when.root"
-    sky = fn leaf -> &put_in(&1, ["variants", Access.at(0), "when", "root"], leaf) end
+    root = "rooms/yard.variants[0].when"
+    sky = fn leaf -> &put_in(&1, ["variants", Access.at(0), "when"], leaf) end
     calendar = fn path, v -> &put_in(&1, ["calendar" | path], v) end
     units = ~w(units_per_hour hours_per_day subdivisions_per_hour)
 

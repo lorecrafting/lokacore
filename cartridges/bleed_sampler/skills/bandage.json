@@ -1,12 +1,9 @@
 {
-  "label": "skill.bandage.label",
+  "name": "skill.bandage.label",
   "requirement": "skill.bandage.requirement",
   "qualification": {
-    "policy_version": 1,
-    "root": {
-      "op": "stat_compare",
-      "attribute": "dex",
-      "at_least": 10
-    }
+    "op": "stat_compare",
+    "attribute": "dex",
+    "at_least": 10
   }
 }

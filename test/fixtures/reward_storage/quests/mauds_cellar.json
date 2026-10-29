@@ -1,39 +1,36 @@
 {
-  "title": "fixture.quest",
+  "name": "fixture.quest",
   "objective": {
     "evidence": "current_state",
     "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": [
-          {
-            "op": "fact_compare",
-            "fact": "rat_1_killed",
-            "equals": true
-          },
-          {
-            "op": "fact_compare",
-            "fact": "rat_2_killed",
-            "equals": true
-          },
-          {
-            "op": "fact_compare",
-            "fact": "rat_3_killed",
-            "equals": true
-          },
-          {
-            "op": "fact_compare",
-            "fact": "rat_4_killed",
-            "equals": true
-          },
-          {
-            "op": "fact_compare",
-            "fact": "rat_5_killed",
-            "equals": true
-          }
-        ]
-      }
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "rat_1_killed",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "rat_2_killed",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "rat_3_killed",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "rat_4_killed",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "rat_5_killed",
+          "equals": true
+        }
+      ]
     }
   },
   "journal": {

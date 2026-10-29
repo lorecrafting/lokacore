@@ -1,5 +1,5 @@
 {
-  "title": "room.churchyard.title",
+  "name": "room.churchyard.title",
   "description": "room.churchyard.description",
   "exits": {},
   "details": {
@@ -20,12 +20,9 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "crypt_gate_open",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "crypt_gate_open",
+            "equals": true
           },
           "description": "detail.gate.open"
         }

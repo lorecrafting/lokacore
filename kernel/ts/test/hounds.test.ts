@@ -14,11 +14,11 @@ const run_id = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 
 const hounds = (w: World) =>
   Object.entries(w.state.created ?? {}).filter(
-    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'hound',
+    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'hunter',
   );
 const pelts = (w: World) =>
   Object.entries(w.state.created ?? {}).filter(
-    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'pelt',
+    ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'loot',
   );
 const live = (w: World) =>
   Object.values(w.state.population_slots ?? {}).filter(
@@ -73,7 +73,7 @@ test('genesis has four goblins in their slots, each holding its own pelt, and si
   assert.equal(Object.keys(w.state.population_slots ?? {}).length, 6);
   for (let slot = 1; slot <= 4; slot++) {
     const member = spawned(w, slot);
-    const pelt = spawned(w, slot, 'pelt');
+    const pelt = spawned(w, slot, 'loot');
     assert.equal((w.state.created?.[pelt]?.origin as any).member_id, member);
     assert.equal(w.state.containers[pelt], member);
   }
@@ -117,7 +117,7 @@ test('thirty days of segmented elapsed time retain six members and one plan succ
 // Breaks: equal-time population and fatal combat deliveries conflict, move the engaged victim, or lose its pelt in either real job-ID order.
 test('combat-first and population-first boundaries conserve the same fatal goblin slot and pelt', () => {
   const member = spawned(fresh(), 1);
-  const pelt = spawned(fresh(), 1, 'pelt');
+  const pelt = spawned(fresh(), 1, 'loot');
   const hp = key({ kind: 'resource', entity_id: member, resource: ref('resource', 'hp') });
   for (const [n, combatFirst] of [
     [3, true],

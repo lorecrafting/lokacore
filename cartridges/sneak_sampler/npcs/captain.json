@@ -2,7 +2,7 @@
   "keywords": [
     "captain"
   ],
-  "short": "npc.captain.short",
+  "name": "npc.captain.short",
   "room_line": "npc.captain.room",
   "description": "npc.captain.description",
   "room": "keep",
@@ -25,11 +25,8 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
+      "op": "all",
+      "items": []
     },
     "engage": "captain.spots"
   }

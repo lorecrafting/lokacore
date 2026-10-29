@@ -3,7 +3,7 @@ defmodule Loka.Content.Quests do
   Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8): each quest's owning capability is
   required (quest@1, by its quest_activated, as a recipe's check by check@1's events), its key is no registered
   command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
-  title, its offer's label (the offer is optional) and all journal texts have catalog entries
+  name, its offer's label (the offer is optional) and all journal texts have catalog entries
   (unless the catalog was rejected, `:unknown`), and a post_activation_event objective names an item of this cartridge. Its policy trees are checked
   with every other (`conditions/1`, `Loka.Content.Checks`).
   """
@@ -19,11 +19,11 @@ defmodule Loka.Content.Quests do
   defp policies(q) do
     base =
       for {field, %{"policy" => p}} <- [{"offer", q["offer"]}, {"objective", q["objective"]}],
-          do: {[field, "policy", "root"], p["root"]}
+          do: {[field, "policy"], p}
 
     base ++
       for {v, i} <- Enum.with_index(get_in(q, ["journal", "active_variants"]) || []),
-          do: {["journal", "active_variants", i, "when", "root"], v["when"]["root"]}
+          do: {["journal", "active_variants", i, "when"], v["when"]}
   end
 
   defp all(defs), do: for({_, {rel, [], q}} <- defs["quest"], do: {rel, q})
@@ -89,7 +89,7 @@ defmodule Loka.Content.Quests do
   defp texts(rel, q, text) do
     offer = for %{"label" => label} <- [q["offer"]], do: {["offer", "label"], label}
 
-    for {steps, key} <- [{["title"], q["title"]} | offer] ++ journal(q["journal"]),
+    for {steps, key} <- [{["name"], q["name"]} | offer] ++ journal(q["journal"]),
         not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
   end

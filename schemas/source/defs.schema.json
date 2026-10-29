@@ -80,15 +80,15 @@
           ],
           "type": "object"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
         "modifier": {
           "minimum": 1,
           "type": "integer"
         },
+        "name": { "$ref": "#/$defs/TextKey" },
         "skill": { "$ref": "#/$defs/DefinitionRef" }
       },
       "required": [
-        "label",
+        "name",
         "description",
         "attribute",
         "modifier"
@@ -283,14 +283,14 @@
     },
     "Chapter": {
       "additionalProperties": false,
-      "description": "An ordered chapter marker (mechanics.md Chapters): title is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
+      "description": "An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
       "properties": {
+        "name": { "$ref": "#/$defs/TextKey" },
         "outcome": { "$ref": "#/$defs/Key" },
-        "story_point": { "$ref": "#/$defs/DefinitionRef" },
-        "title": { "$ref": "#/$defs/TextKey" }
+        "story_point": { "$ref": "#/$defs/DefinitionRef" }
       },
       "required": [
-        "title"
+        "name"
       ],
       "type": "object"
     },
@@ -479,11 +479,8 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "traverse": { "$ref": "#/$defs/VersionedPolicy" }
+            "traverse": { "$ref": "#/$defs/Policy" }
           },
-          "required": [
-            "traverse"
-          ],
           "type": "object"
         },
         "to": { "$ref": "#/$defs/DefinitionRef" }
@@ -510,7 +507,7 @@
           ]
         },
         "text": { "$ref": "#/$defs/TextKey" },
-        "when": { "$ref": "#/$defs/VersionedPolicy" }
+        "when": { "$ref": "#/$defs/Policy" }
       },
       "required": [
         "sense",
@@ -689,13 +686,12 @@
     },
     "DescriptionVariant": {
       "additionalProperties": false,
-      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json VersionedPolicy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
+      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json Policy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
       "properties": {
         "description": { "$ref": "#/$defs/TextKey" },
-        "when": { "$ref": "#/$defs/VersionedPolicy" }
+        "when": { "$ref": "#/$defs/Policy" }
       },
       "required": [
-        "when",
         "description"
       ],
       "type": "object"
@@ -917,6 +913,11 @@
             ]
           },
           "type": "array"
+        },
+        "story_point": {
+          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
         }
       },
       "required": [
@@ -2020,7 +2021,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Owned by status@1.",
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or structure's variant. Owned by status@1.",
           "properties": {
             "op": { "const": "status_active" },
             "status": { "$ref": "#/$defs/DefinitionRef" },
@@ -2109,7 +2110,7 @@
           "type": "object"
         }
       ],
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
     },
     "QuestJournal": {
       "additionalProperties": false,
@@ -2122,10 +2123,9 @@
             "additionalProperties": false,
             "properties": {
               "text": { "$ref": "#/$defs/TextKey" },
-              "when": { "$ref": "#/$defs/VersionedPolicy" }
+              "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
-              "when",
               "text"
             ],
             "type": "object"
@@ -2206,11 +2206,10 @@
           "additionalProperties": false,
           "properties": {
             "evidence": { "const": "current_state" },
-            "policy": { "$ref": "#/$defs/VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/Policy" }
           },
           "required": [
-            "evidence",
-            "policy"
+            "evidence"
           ],
           "type": "object"
         },
@@ -2463,9 +2462,8 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "description": "Built rooms S6 (detail-target recipes only, at most one per sequence, construction@1): raise structure at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
           "properties": {
-            "blueprint": { "$ref": "#/$defs/DefinitionRef" },
             "direction": {
               "enum": [
                 "north",
@@ -2476,11 +2474,12 @@
                 "down"
               ]
             },
-            "op": { "const": "build" }
+            "op": { "const": "build" },
+            "structure": { "$ref": "#/$defs/DefinitionRef" }
           },
           "required": [
             "op",
-            "blueprint",
+            "structure",
             "direction"
           ],
           "type": "object"
@@ -2895,9 +2894,8 @@
               "escrow"
             ]
           },
-          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
           "properties": {
-            "blueprint": { "$ref": "#/$defs/DefinitionRef" },
             "direction": {
               "enum": [
                 "north",
@@ -2940,11 +2938,12 @@
             },
             "fact": { "$ref": "#/$defs/DefinitionRef" },
             "kind": { "const": "build" },
-            "site": { "$ref": "#/$defs/DefinitionRef" }
+            "site": { "$ref": "#/$defs/DefinitionRef" },
+            "structure": { "$ref": "#/$defs/DefinitionRef" }
           },
           "required": [
             "kind",
-            "blueprint",
+            "structure",
             "site",
             "direction"
           ],
@@ -2952,7 +2951,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
           "properties": {
             "direction": {
               "enum": [
@@ -3323,22 +3322,6 @@
         "liquid": { "$ref": "#/$defs/DefinitionRef" },
         "tag": { "$ref": "#/$defs/Tag" }
       },
-      "type": "object"
-    },
-    "VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/Policy" }
-      },
-      "required": [
-        "policy_version",
-        "root"
-      ],
       "type": "object"
     },
     "VesselSpec": {
@@ -3839,7 +3822,7 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "traverse": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "traverse": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -4034,6 +4017,11 @@
             ]
           },
           "type": "array"
+        },
+        "story_point": {
+          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
+          "type": "string"
         }
       },
       "type": "object"
@@ -4691,7 +4679,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Owned by status@1.",
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or structure's variant. Owned by status@1.",
           "properties": {
             "op": { "const": "status_active" },
             "status": { "$ref": "#/$defs/partial.DefinitionRef" },
@@ -4757,7 +4745,7 @@
           "type": "object"
         }
       ],
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
     },
     "partial.QuestJournal": {
       "additionalProperties": false,
@@ -4770,10 +4758,9 @@
             "additionalProperties": false,
             "properties": {
               "text": { "$ref": "#/$defs/TextKey" },
-              "when": { "$ref": "#/$defs/VersionedPolicy" }
+              "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
-              "when",
               "text"
             ],
             "type": "object"
@@ -4847,7 +4834,7 @@
           "additionalProperties": false,
           "properties": {
             "evidence": { "const": "current_state" },
-            "policy": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -5118,9 +5105,8 @@
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
           "properties": {
-            "blueprint": { "$ref": "#/$defs/partial.DefinitionRef" },
             "direction": {
               "enum": [
                 "north",
@@ -5157,13 +5143,14 @@
             },
             "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
             "kind": { "const": "build" },
-            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "structure": { "$ref": "#/$defs/partial.DefinitionRef" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
           "properties": {
             "direction": {
               "enum": [
@@ -5324,18 +5311,6 @@
       },
       "type": "object"
     },
-    "partial.VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/partial.Policy" }
-      },
-      "type": "object"
-    },
     "partial.VesselSpec": {
       "additionalProperties": false,
       "description": "Opted finite vessel shell with authored positive capacity and initial contents.",
@@ -5382,7 +5357,7 @@
     },
     "partial.source.ActionDefinition": {
       "additionalProperties": false,
-      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
+      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, name (its localization key), target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
       "properties": {
         "accessibility": {
           "maxLength": 128,
@@ -5395,12 +5370,12 @@
           "items": { "$ref": "#/$defs/ActionInputParameter" },
           "type": "array"
         },
-        "label": {
+        "name": {
           "maxLength": 128,
           "pattern": "^[a-z][a-z0-9_.]*$",
           "type": "string"
         },
-        "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
         "priority": { "type": "integer" },
         "target": { "$ref": "#/$defs/partial.TargetSpec" },
         "with": { "type": "object" }
@@ -5409,7 +5384,7 @@
     },
     "partial.source.ActionRecipe": {
       "additionalProperties": false,
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
       "properties": {
         "aliases": {
           "items": { "$ref": "#/$defs/Alias" },
@@ -5494,7 +5469,7 @@
           "type": "integer"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "outcomes": {
           "additionalProperties": false,
           "properties": {
@@ -5535,7 +5510,7 @@
           },
           "type": "object"
         },
-        "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
         "priority": { "type": "integer" },
         "reason": { "$ref": "#/$defs/partial.TextKey" },
         "target": { "$ref": "#/$defs/partial.RecipeTarget" },
@@ -5546,7 +5521,7 @@
     },
     "partial.source.BarrierDefinition": {
       "additionalProperties": false,
-      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); short, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
         "initial": { "$ref": "#/$defs/BarrierState" },
@@ -5557,11 +5532,11 @@
           "minItems": 1,
           "type": "array"
         },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "opens_when": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
         },
-        "short": { "$ref": "#/$defs/partial.TextKey" },
         "tags": {
           "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
           "items": { "$ref": "#/$defs/Tag" },
@@ -5607,43 +5582,6 @@
       },
       "type": "object"
     },
-    "partial.source.BlueprintDefinition": {
-      "additionalProperties": false,
-      "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
-      "properties": {
-        "description": { "$ref": "#/$defs/partial.TextKey" },
-        "extends": { "$ref": "#/$defs/Key" },
-        "locks": {
-          "additionalProperties": false,
-          "properties": {
-            "enter": { "$ref": "#/$defs/partial.VersionedPolicy" }
-          },
-          "type": "object"
-        },
-        "max_per_owner": {
-          "maximum": 1000,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "tags": {
-          "items": { "$ref": "#/$defs/Tag" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "title": { "$ref": "#/$defs/partial.TextKey" },
-        "variants": {
-          "items": { "$ref": "#/$defs/DescriptionVariant" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
     "partial.source.DialogueDefinition": {
       "additionalProperties": false,
       "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
@@ -5658,12 +5596,12 @@
           "$ref": "#/$defs/SpokenKeyword",
           "description": "Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle."
         },
-        "label": {
+        "name": {
           "$ref": "#/$defs/partial.TextKey",
-          "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
+          "description": "A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
         },
         "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "policy": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/partial.Policy" },
         "prompt": { "$ref": "#/$defs/partial.TextKey" },
         "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
         "riddle": {
@@ -5702,7 +5640,7 @@
     },
     "partial.source.ItemDefinition": {
       "additionalProperties": false,
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its short and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); name, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its name and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "affects": {
           "items": { "$ref": "#/$defs/ItemAffect" },
@@ -5792,10 +5730,10 @@
         "location": { "$ref": "#/$defs/partial.ItemLocation" },
         "locks": {
           "additionalProperties": false,
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/partial.VersionedPolicy" },
-            "put": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "get": { "$ref": "#/$defs/partial.Policy" },
+            "put": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -5805,10 +5743,10 @@
           "minimum": 0,
           "type": "integer"
         },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "readable": { "$ref": "#/$defs/partial.ItemReadable" },
         "room_line": { "$ref": "#/$defs/partial.TextKey" },
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
-        "short": { "$ref": "#/$defs/partial.TextKey" },
         "short_variants": { "$ref": "#/$defs/TextVariants" },
         "slot": { "$ref": "#/$defs/SlotKey" },
         "tags": {
@@ -5846,7 +5784,7 @@
           "minimum": 1,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "unit_label": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
@@ -5854,7 +5792,7 @@
     },
     "partial.source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -5867,7 +5805,7 @@
                   "grants": { "$ref": "#/$defs/DefinitionRef" },
                   "text": { "$ref": "#/$defs/TextKey" },
                   "topic": { "$ref": "#/$defs/DefinitionRef" },
-                  "when": { "$ref": "#/$defs/VersionedPolicy" }
+                  "when": { "$ref": "#/$defs/Policy" }
                 },
                 "required": [
                   "topic",
@@ -5975,7 +5913,7 @@
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
                         },
-                        "when": { "$ref": "#/$defs/VersionedPolicy" }
+                        "when": { "$ref": "#/$defs/Policy" }
                       },
                       "required": [
                         "room"
@@ -5990,7 +5928,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -6009,8 +5947,8 @@
               "type": "object"
             },
             "engage": { "$ref": "#/$defs/partial.TextKey" },
-            "friendly": { "$ref": "#/$defs/partial.VersionedPolicy" },
-            "hostile": { "$ref": "#/$defs/partial.VersionedPolicy" },
+            "friendly": { "$ref": "#/$defs/partial.Policy" },
+            "hostile": { "$ref": "#/$defs/partial.Policy" },
             "refuse": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "Book hostile refusal: the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal."
@@ -6059,7 +5997,7 @@
           "additionalProperties": false,
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "get": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -6082,6 +6020,7 @@
           },
           "type": "object"
         },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "perception": {
           "additionalProperties": false,
           "properties": {
@@ -6105,35 +6044,10 @@
           "type": "array"
         },
         "shop": { "$ref": "#/$defs/partial.Shop" },
-        "short": { "$ref": "#/$defs/partial.TextKey" },
         "short_variants": { "$ref": "#/$defs/TextVariants" },
         "spawn_template": { "const": true },
         "with": { "type": "object" },
         "words": { "$ref": "#/$defs/partial.NameWords" }
-      },
-      "type": "object"
-    },
-    "partial.source.PopulationBundle": {
-      "additionalProperties": false,
-      "description": "One NPC, directly held item and public NPC corpse template for a bounded population.",
-      "properties": {
-        "corpse": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "extends": { "$ref": "#/$defs/Key" },
-        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "loot_role": {
-          "enum": [
-            "pelt",
-            "hide"
-          ]
-        },
-        "member_role": {
-          "enum": [
-            "hound",
-            "deer"
-          ]
-        },
-        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "with": { "type": "object" }
       },
       "type": "object"
     },
@@ -6148,10 +6062,9 @@
           "type": "array"
         },
         "birth_when": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
-        "bundle": { "$ref": "#/$defs/partial.DefinitionRef" },
         "cap": {
           "maximum": 64,
           "minimum": 1,
@@ -6163,6 +6076,7 @@
           "minimum": 1,
           "type": "integer"
         },
+        "corpse": { "$ref": "#/$defs/partial.DefinitionRef" },
         "day_target": {
           "maximum": 64,
           "minimum": 0,
@@ -6179,6 +6093,14 @@
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
+        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "member_role": {
+          "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
+          "enum": [
+            "hunter",
+            "prey"
+          ]
+        },
         "night_end": {
           "minimum": 0,
           "type": "integer"
@@ -6192,6 +6114,7 @@
           "minimum": 0,
           "type": "integer"
         },
+        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
         "pack": {
           "additionalProperties": false,
           "properties": {
@@ -6290,7 +6213,7 @@
           "type": "integer"
         },
         "wander_when": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "Toolbox row W12: while false at a wander boundary, no member wanders. The same leaf limit as birth_when."
         },
         "with": { "type": "object" }
@@ -6299,7 +6222,7 @@
     },
     "partial.source.QuestDefinition": {
       "additionalProperties": false,
-      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
       "properties": {
         "deadline": {
           "additionalProperties": false,
@@ -6372,7 +6295,6 @@
               "minItems": 2,
               "type": "array"
             },
-            "hound_population": { "$ref": "#/$defs/partial.DefinitionRef" },
             "narration": {
               "additionalProperties": false,
               "properties": {
@@ -6384,6 +6306,7 @@
               },
               "type": "object"
             },
+            "population": { "$ref": "#/$defs/partial.DefinitionRef" },
             "route": {
               "items": {
                 "additionalProperties": false,
@@ -6413,12 +6336,13 @@
         },
         "extends": { "$ref": "#/$defs/Key" },
         "journal": { "$ref": "#/$defs/partial.QuestJournal" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "objective": { "$ref": "#/$defs/partial.QuestObjective" },
         "offer": {
           "additionalProperties": false,
           "properties": {
             "label": { "$ref": "#/$defs/partial.TextKey" },
-            "policy": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
@@ -6454,7 +6378,6 @@
           "type": "object"
         },
         "repeatable": { "const": true },
-        "title": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -6472,25 +6395,6 @@
         "apply": {
           "items": {
             "anyOf": [
-              {
-                "additionalProperties": false,
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "properties": {
-                  "item": { "$ref": "#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "#/$defs/DefinitionRef" },
-                  "op": { "const": "signal" },
-                  "signal": { "$ref": "#/$defs/Key" },
-                  "with": {
-                    "$ref": "#/$defs/DefinitionRef",
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
-                  }
-                },
-                "required": [
-                  "op",
-                  "signal"
-                ],
-                "type": "object"
-              },
               {
                 "additionalProperties": false,
                 "properties": {
@@ -6771,14 +6675,6 @@
         "extends": { "$ref": "#/$defs/Key" },
         "on": {
           "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "event": { "const": "signal" },
-                "signal": { "$ref": "#/$defs/Key" }
-              },
-              "type": "object"
-            },
             {
               "additionalProperties": false,
               "properties": {
@@ -7076,7 +6972,7 @@
           "const": true,
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
-        "when": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "when": { "$ref": "#/$defs/partial.Policy" },
         "with": { "type": "object" },
         "zone": { "$ref": "#/$defs/Key" }
       },
@@ -7115,7 +7011,7 @@
     },
     "partial.source.RoomDefinition": {
       "additionalProperties": false,
-      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A navigable place (21 §5 Place/Room): its key, its name and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
         "actions": {
           "items": { "$ref": "#/$defs/ActionContribution" },
@@ -7153,21 +7049,16 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "enter": { "$ref": "#/$defs/partial.VersionedPolicy" }
+            "enter": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "sanctuary": { "type": "boolean" },
         "site": {
           "additionalProperties": false,
-          "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "properties": {
-            "blueprints": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 16,
-              "minItems": 1,
-              "type": "array"
-            },
             "directions": {
               "items": {
                 "enum": [
@@ -7182,6 +7073,12 @@
               "maxItems": 6,
               "minItems": 1,
               "type": "array"
+            },
+            "structures": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
             }
           },
           "type": "object"
@@ -7194,7 +7091,6 @@
           "type": "array",
           "uniqueItems": true
         },
-        "title": { "$ref": "#/$defs/partial.TextKey" },
         "variants": {
           "items": { "$ref": "#/$defs/DescriptionVariant" },
           "maxItems": 16,
@@ -7268,6 +7164,7 @@
             "control": { "const": "presentation_only" },
             "description": { "$ref": "#/$defs/partial.TextKey" },
             "extends": { "$ref": "#/$defs/Key" },
+            "name": { "$ref": "#/$defs/partial.TextKey" },
             "on": {
               "additionalProperties": false,
               "properties": {
@@ -7304,7 +7201,6 @@
               "items": { "$ref": "#/$defs/SceneStep" },
               "type": "array"
             },
-            "title": { "$ref": "#/$defs/partial.TextKey" },
             "with": { "type": "object" }
           },
           "type": "object"
@@ -7320,7 +7216,7 @@
         "benefit": { "$ref": "#/$defs/partial.ServiceBenefit" },
         "currency": { "$ref": "#/$defs/partial.DefinitionRef" },
         "extends": { "$ref": "#/$defs/Key" },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "narration": { "$ref": "#/$defs/partial.TextKey" },
         "price": {
           "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
@@ -7352,16 +7248,16 @@
           "const": true,
           "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused."
         },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "prerequisite": {
-          "$ref": "#/$defs/partial.VersionedPolicy",
+          "$ref": "#/$defs/partial.Policy",
           "description": "Homestead hs-11 (docs/system/mechanics.md Skill trees): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused."
         },
         "profession": {
           "$ref": "#/$defs/partial.TextKey",
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
         },
-        "qualification": { "$ref": "#/$defs/partial.VersionedPolicy" },
+        "qualification": { "$ref": "#/$defs/partial.Policy" },
         "requirement": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
@@ -7422,7 +7318,6 @@
             "debuff"
           ]
         },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
         "modifies": {
           "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it.",
           "items": { "$ref": "#/$defs/ItemAffect" },
@@ -7456,6 +7351,7 @@
           },
           "type": "object"
         },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "narration": {
           "additionalProperties": false,
           "properties": {
@@ -7467,7 +7363,7 @@
             },
             "skipped": {
               "$ref": "#/$defs/partial.TextKey",
-              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's label."
+              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             },
             "tick": { "$ref": "#/$defs/partial.TextKey" }
           },
@@ -7521,24 +7417,39 @@
       },
       "type": "object"
     },
-    "partial.source.StoryPointDefinition": {
+    "partial.source.StructureDefinition": {
       "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
+      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
+        "description": { "$ref": "#/$defs/partial.TextKey" },
         "extends": { "$ref": "#/$defs/Key" },
-        "outcomes": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "properties": {
-              "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/partial.DefinitionRef" },
-              "scene": { "$ref": "#/$defs/partial.DefinitionRef" }
-            },
-            "type": "object"
+        "locks": {
+          "additionalProperties": false,
+          "properties": {
+            "enter": { "$ref": "#/$defs/partial.Policy" }
           },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         },
+        "max_per_owner": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
+        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "tags": {
+          "items": { "$ref": "#/$defs/Tag" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "variants": {
+          "items": { "$ref": "#/$defs/DescriptionVariant" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -7549,7 +7460,7 @@
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
         "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -7568,7 +7479,7 @@
           "minimum": 0,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
+        "name": { "$ref": "#/$defs/partial.TextKey" },
         "narration": { "$ref": "#/$defs/partial.TextKey" },
         "recipient": { "$ref": "#/$defs/partial.DefinitionRef" },
         "recovery_rooms": {
@@ -7582,23 +7493,9 @@
       },
       "type": "object"
     },
-    "partial.source.VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "extends": { "$ref": "#/$defs/Key" },
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/partial.Policy" },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
     "source.ActionDefinition": {
       "additionalProperties": false,
-      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
+      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, name (its localization key), target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
       "properties": {
         "accessibility": {
           "maxLength": 128,
@@ -7610,29 +7507,28 @@
           "items": { "$ref": "#/$defs/ActionInputParameter" },
           "type": "array"
         },
-        "label": {
+        "name": {
           "maxLength": 128,
           "pattern": "^[a-z][a-z0-9_.]*$",
           "type": "string"
         },
-        "policy": { "$ref": "#/$defs/VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/Policy" },
         "priority": { "type": "integer" },
         "target": { "$ref": "#/$defs/TargetSpec" }
       },
       "required": [
-        "label",
+        "name",
         "target",
         "command",
         "priority",
         "input",
-        "policy",
         "accessibility"
       ],
       "type": "object"
     },
     "source.ActionRecipe": {
       "additionalProperties": false,
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (RecipeCraft), the items a station recipe uses up and makes; a spell recipe has none (SCHEMA_VIOLATION). Result bands join later.",
       "properties": {
         "aliases": {
           "items": { "$ref": "#/$defs/Alias" },
@@ -7763,7 +7659,7 @@
           "minimum": 1,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "name": { "$ref": "#/$defs/TextKey" },
         "outcomes": {
           "additionalProperties": false,
           "properties": {
@@ -7815,25 +7711,24 @@
           ],
           "type": "object"
         },
-        "policy": { "$ref": "#/$defs/VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/Policy" },
         "priority": { "type": "integer" },
         "reason": { "$ref": "#/$defs/TextKey" },
         "target": { "$ref": "#/$defs/RecipeTarget" },
         "tip": { "$ref": "#/$defs/TextKey" }
       },
       "required": [
-        "label",
+        "name",
         "aliases",
         "target",
         "priority",
-        "policy",
         "outcomes"
       ],
       "type": "object"
     },
     "source.BarrierDefinition": {
       "additionalProperties": false,
-      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); short, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
         "initial": { "$ref": "#/$defs/BarrierState" },
         "key_item": { "$ref": "#/$defs/DefinitionRef" },
@@ -7843,11 +7738,11 @@
           "minItems": 1,
           "type": "array"
         },
+        "name": { "$ref": "#/$defs/TextKey" },
         "opens_when": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
         },
-        "short": { "$ref": "#/$defs/TextKey" },
         "tags": {
           "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
           "items": { "$ref": "#/$defs/Tag" },
@@ -7858,7 +7753,7 @@
       },
       "required": [
         "keywords",
-        "short",
+        "name",
         "initial"
       ],
       "type": "object"
@@ -7907,48 +7802,6 @@
       ],
       "type": "object"
     },
-    "source.BlueprintDefinition": {
-      "additionalProperties": false,
-      "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
-      "properties": {
-        "description": { "$ref": "#/$defs/TextKey" },
-        "locks": {
-          "additionalProperties": false,
-          "properties": {
-            "enter": { "$ref": "#/$defs/VersionedPolicy" }
-          },
-          "required": [
-            "enter"
-          ],
-          "type": "object"
-        },
-        "max_per_owner": {
-          "maximum": 1000,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "ruin": { "$ref": "#/$defs/DefinitionRef" },
-        "tags": {
-          "items": { "$ref": "#/$defs/Tag" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "title": { "$ref": "#/$defs/TextKey" },
-        "variants": {
-          "items": { "$ref": "#/$defs/DescriptionVariant" },
-          "maxItems": 16,
-          "minItems": 1,
-          "type": "array"
-        },
-        "weathering": { "$ref": "#/$defs/DefinitionRef" }
-      },
-      "required": [
-        "title",
-        "description"
-      ],
-      "type": "object"
-    },
     "source.DialogueDefinition": {
       "additionalProperties": false,
       "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
@@ -7962,12 +7815,12 @@
           "$ref": "#/$defs/SpokenKeyword",
           "description": "Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle."
         },
-        "label": {
+        "name": {
           "$ref": "#/$defs/TextKey",
-          "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
+          "description": "A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk."
         },
         "npc": { "$ref": "#/$defs/DefinitionRef" },
-        "policy": { "$ref": "#/$defs/VersionedPolicy" },
+        "policy": { "$ref": "#/$defs/Policy" },
         "prompt": { "$ref": "#/$defs/TextKey" },
         "quest": { "$ref": "#/$defs/DefinitionRef" },
         "riddle": {
@@ -8009,7 +7862,6 @@
       },
       "required": [
         "npc",
-        "policy",
         "prompt",
         "roles",
         "choices"
@@ -8018,7 +7870,7 @@
     },
     "source.ItemDefinition": {
       "additionalProperties": false,
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its short and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); name, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its name and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "affects": {
           "items": { "$ref": "#/$defs/ItemAffect" },
@@ -8113,26 +7965,10 @@
         "location": { "$ref": "#/$defs/ItemLocation" },
         "locks": {
           "additionalProperties": false,
-          "allOf": [
-            {
-              "anyOf": [
-                {
-                  "required": [
-                    "put"
-                  ]
-                },
-                {
-                  "required": [
-                    "get"
-                  ]
-                }
-              ]
-            }
-          ],
-          "description": "Toolbox row G7 (mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is read with this item as target; failing it refuses permission_denied.",
+          "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/VersionedPolicy" },
-            "put": { "$ref": "#/$defs/VersionedPolicy" }
+            "get": { "$ref": "#/$defs/Policy" },
+            "put": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
@@ -8142,10 +7978,10 @@
           "minimum": 0,
           "type": "integer"
         },
+        "name": { "$ref": "#/$defs/TextKey" },
         "readable": { "$ref": "#/$defs/ItemReadable" },
         "room_line": { "$ref": "#/$defs/TextKey" },
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
-        "short": { "$ref": "#/$defs/TextKey" },
         "short_variants": { "$ref": "#/$defs/TextVariants" },
         "slot": { "$ref": "#/$defs/SlotKey" },
         "tags": {
@@ -8161,7 +7997,7 @@
       },
       "required": [
         "keywords",
-        "short",
+        "name",
         "room_line",
         "description",
         "location"
@@ -8188,11 +8024,11 @@
           "minimum": 1,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "name": { "$ref": "#/$defs/TextKey" },
         "unit_label": { "$ref": "#/$defs/TextKey" }
       },
       "required": [
-        "label",
+        "name",
         "unit_label",
         "grams_per_unit",
         "drink_amount"
@@ -8201,7 +8037,7 @@
     },
     "source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -8214,7 +8050,7 @@
                   "grants": { "$ref": "#/$defs/DefinitionRef" },
                   "text": { "$ref": "#/$defs/TextKey" },
                   "topic": { "$ref": "#/$defs/DefinitionRef" },
-                  "when": { "$ref": "#/$defs/VersionedPolicy" }
+                  "when": { "$ref": "#/$defs/Policy" }
                 },
                 "required": [
                   "topic",
@@ -8336,7 +8172,7 @@
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
                         },
-                        "when": { "$ref": "#/$defs/VersionedPolicy" }
+                        "when": { "$ref": "#/$defs/Policy" }
                       },
                       "required": [
                         "room"
@@ -8351,7 +8187,7 @@
               }
             ]
           },
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "propertyNames": { "pattern": "^(0|[1-9][0-9]*)$" },
           "type": "object"
         },
@@ -8374,8 +8210,8 @@
               "type": "object"
             },
             "engage": { "$ref": "#/$defs/TextKey" },
-            "friendly": { "$ref": "#/$defs/VersionedPolicy" },
-            "hostile": { "$ref": "#/$defs/VersionedPolicy" },
+            "friendly": { "$ref": "#/$defs/Policy" },
+            "hostile": { "$ref": "#/$defs/Policy" },
             "refuse": {
               "$ref": "#/$defs/TextKey",
               "description": "Book hostile refusal: the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal."
@@ -8423,11 +8259,8 @@
           "additionalProperties": false,
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
           "properties": {
-            "get": { "$ref": "#/$defs/VersionedPolicy" }
+            "get": { "$ref": "#/$defs/Policy" }
           },
-          "required": [
-            "get"
-          ],
           "type": "object"
         },
         "mount": {
@@ -8452,6 +8285,7 @@
           ],
           "type": "object"
         },
+        "name": { "$ref": "#/$defs/TextKey" },
         "perception": {
           "additionalProperties": false,
           "properties": {
@@ -8478,43 +8312,16 @@
           "type": "array"
         },
         "shop": { "$ref": "#/$defs/Shop" },
-        "short": { "$ref": "#/$defs/TextKey" },
         "short_variants": { "$ref": "#/$defs/TextVariants" },
         "spawn_template": { "const": true },
         "words": { "$ref": "#/$defs/NameWords" }
       },
       "required": [
         "keywords",
-        "short",
+        "name",
         "room_line",
         "description",
         "room"
-      ],
-      "type": "object"
-    },
-    "source.PopulationBundle": {
-      "additionalProperties": false,
-      "description": "One NPC, directly held item and public NPC corpse template for a bounded population.",
-      "properties": {
-        "corpse": { "$ref": "#/$defs/DefinitionRef" },
-        "item": { "$ref": "#/$defs/DefinitionRef" },
-        "loot_role": {
-          "enum": [
-            "pelt",
-            "hide"
-          ]
-        },
-        "member_role": {
-          "enum": [
-            "hound",
-            "deer"
-          ]
-        },
-        "npc": { "$ref": "#/$defs/DefinitionRef" }
-      },
-      "required": [
-        "npc",
-        "corpse"
       ],
       "type": "object"
     },
@@ -8529,10 +8336,9 @@
           "type": "array"
         },
         "birth_when": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
-        "bundle": { "$ref": "#/$defs/DefinitionRef" },
         "cap": {
           "maximum": 64,
           "minimum": 1,
@@ -8544,6 +8350,7 @@
           "minimum": 1,
           "type": "integer"
         },
+        "corpse": { "$ref": "#/$defs/DefinitionRef" },
         "day_target": {
           "maximum": 64,
           "minimum": 0,
@@ -8559,6 +8366,14 @@
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
+        "item": { "$ref": "#/$defs/DefinitionRef" },
+        "member_role": {
+          "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
+          "enum": [
+            "hunter",
+            "prey"
+          ]
+        },
         "night_end": {
           "minimum": 0,
           "type": "integer"
@@ -8572,6 +8387,7 @@
           "minimum": 0,
           "type": "integer"
         },
+        "npc": { "$ref": "#/$defs/DefinitionRef" },
         "pack": {
           "additionalProperties": false,
           "properties": {
@@ -8700,12 +8516,13 @@
           "type": "integer"
         },
         "wander_when": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "Toolbox row W12: while false at a wander boundary, no member wanders. The same leaf limit as birth_when."
         }
       },
       "required": [
-        "bundle",
+        "npc",
+        "corpse",
         "home",
         "area",
         "cap",
@@ -8720,7 +8537,7 @@
     },
     "source.QuestDefinition": {
       "additionalProperties": false,
-      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
       "properties": {
         "deadline": {
           "additionalProperties": false,
@@ -8810,7 +8627,6 @@
               "minItems": 2,
               "type": "array"
             },
-            "hound_population": { "$ref": "#/$defs/DefinitionRef" },
             "narration": {
               "additionalProperties": false,
               "properties": {
@@ -8829,6 +8645,7 @@
               ],
               "type": "object"
             },
+            "population": { "$ref": "#/$defs/DefinitionRef" },
             "route": {
               "items": {
                 "additionalProperties": false,
@@ -8864,23 +8681,23 @@
             "survived_fact",
             "faction",
             "faction_delta",
-            "hound_population",
+            "population",
             "narration",
             "actions"
           ],
           "type": "object"
         },
         "journal": { "$ref": "#/$defs/QuestJournal" },
+        "name": { "$ref": "#/$defs/TextKey" },
         "objective": { "$ref": "#/$defs/QuestObjective" },
         "offer": {
           "additionalProperties": false,
           "properties": {
             "label": { "$ref": "#/$defs/TextKey" },
-            "policy": { "$ref": "#/$defs/VersionedPolicy" }
+            "policy": { "$ref": "#/$defs/Policy" }
           },
           "required": [
-            "label",
-            "policy"
+            "label"
           ],
           "type": "object"
         },
@@ -8924,11 +8741,10 @@
           ],
           "type": "object"
         },
-        "repeatable": { "const": true },
-        "title": { "$ref": "#/$defs/TextKey" }
+        "repeatable": { "const": true }
       },
       "required": [
-        "title",
+        "name",
         "objective"
       ],
       "type": "object"
@@ -8974,25 +8790,6 @@
         "apply": {
           "items": {
             "anyOf": [
-              {
-                "additionalProperties": false,
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "properties": {
-                  "item": { "$ref": "#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "#/$defs/DefinitionRef" },
-                  "op": { "const": "signal" },
-                  "signal": { "$ref": "#/$defs/Key" },
-                  "with": {
-                    "$ref": "#/$defs/DefinitionRef",
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
-                  }
-                },
-                "required": [
-                  "op",
-                  "signal"
-                ],
-                "type": "object"
-              },
               {
                 "additionalProperties": false,
                 "properties": {
@@ -9272,18 +9069,6 @@
         },
         "on": {
           "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "event": { "const": "signal" },
-                "signal": { "$ref": "#/$defs/Key" }
-              },
-              "required": [
-                "event",
-                "signal"
-              ],
-              "type": "object"
-            },
             {
               "additionalProperties": false,
               "properties": {
@@ -9671,7 +9456,7 @@
           "const": true,
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
-        "when": { "$ref": "#/$defs/VersionedPolicy" },
+        "when": { "$ref": "#/$defs/Policy" },
         "zone": { "$ref": "#/$defs/Key" }
       },
       "required": [
@@ -9727,7 +9512,7 @@
     },
     "source.RoomDefinition": {
       "additionalProperties": false,
-      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A navigable place (21 §5 Place/Room): its key, its name and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
         "actions": {
           "items": { "$ref": "#/$defs/ActionContribution" },
@@ -9764,24 +9549,16 @@
           "additionalProperties": false,
           "description": "Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "properties": {
-            "enter": { "$ref": "#/$defs/VersionedPolicy" }
+            "enter": { "$ref": "#/$defs/Policy" }
           },
-          "required": [
-            "enter"
-          ],
           "type": "object"
         },
+        "name": { "$ref": "#/$defs/TextKey" },
         "sanctuary": { "type": "boolean" },
         "site": {
           "additionalProperties": false,
-          "description": "Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "properties": {
-            "blueprints": {
-              "items": { "$ref": "#/$defs/DefinitionRef" },
-              "maxItems": 16,
-              "minItems": 1,
-              "type": "array"
-            },
             "directions": {
               "items": {
                 "enum": [
@@ -9796,11 +9573,17 @@
               "maxItems": 6,
               "minItems": 1,
               "type": "array"
+            },
+            "structures": {
+              "items": { "$ref": "#/$defs/DefinitionRef" },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
             }
           },
           "required": [
             "directions",
-            "blueprints"
+            "structures"
           ],
           "type": "object"
         },
@@ -9812,7 +9595,6 @@
           "type": "array",
           "uniqueItems": true
         },
-        "title": { "$ref": "#/$defs/TextKey" },
         "variants": {
           "items": { "$ref": "#/$defs/DescriptionVariant" },
           "maxItems": 16,
@@ -9825,7 +9607,7 @@
         }
       },
       "required": [
-        "title",
+        "name",
         "description",
         "exits"
       ],
@@ -9921,6 +9703,7 @@
           "properties": {
             "control": { "const": "presentation_only" },
             "description": { "$ref": "#/$defs/TextKey" },
+            "name": { "$ref": "#/$defs/TextKey" },
             "on": {
               "additionalProperties": false,
               "properties": {
@@ -9964,14 +9747,13 @@
             "steps": {
               "items": { "$ref": "#/$defs/SceneStep" },
               "type": "array"
-            },
-            "title": { "$ref": "#/$defs/TextKey" }
+            }
           },
           "required": [
             "on",
             "control",
             "steps",
-            "title",
+            "name",
             "description",
             "on_end"
           ],
@@ -9987,7 +9769,7 @@
         "action": { "$ref": "#/$defs/Key" },
         "benefit": { "$ref": "#/$defs/ServiceBenefit" },
         "currency": { "$ref": "#/$defs/DefinitionRef" },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "name": { "$ref": "#/$defs/TextKey" },
         "narration": { "$ref": "#/$defs/TextKey" },
         "price": {
           "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
@@ -10000,7 +9782,7 @@
       "required": [
         "provider",
         "action",
-        "label",
+        "name",
         "narration",
         "currency",
         "price",
@@ -10031,22 +9813,21 @@
           "const": true,
           "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused."
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "name": { "$ref": "#/$defs/TextKey" },
         "prerequisite": {
-          "$ref": "#/$defs/VersionedPolicy",
+          "$ref": "#/$defs/Policy",
           "description": "Homestead hs-11 (docs/system/mechanics.md Skill trees): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused."
         },
         "profession": {
           "$ref": "#/$defs/TextKey",
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
         },
-        "qualification": { "$ref": "#/$defs/VersionedPolicy" },
+        "qualification": { "$ref": "#/$defs/Policy" },
         "requirement": { "$ref": "#/$defs/TextKey" }
       },
       "required": [
-        "label",
-        "requirement",
-        "qualification"
+        "name",
+        "requirement"
       ],
       "type": "object"
     },
@@ -10104,7 +9885,6 @@
             "debuff"
           ]
         },
-        "label": { "$ref": "#/$defs/TextKey" },
         "modifies": {
           "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it.",
           "items": { "$ref": "#/$defs/ItemAffect" },
@@ -10138,6 +9918,7 @@
           },
           "type": "object"
         },
+        "name": { "$ref": "#/$defs/TextKey" },
         "narration": {
           "additionalProperties": false,
           "properties": {
@@ -10149,7 +9930,7 @@
             },
             "skipped": {
               "$ref": "#/$defs/TextKey",
-              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's label."
+              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             },
             "tick": { "$ref": "#/$defs/TextKey" }
           },
@@ -10213,60 +9994,47 @@
         "duration",
         "tick_every",
         "resource",
-        "label",
+        "name",
         "narration"
       ],
       "type": "object"
     },
-    "source.StoryPointDefinition": {
+    "source.StructureDefinition": {
       "additionalProperties": false,
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
+      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
-        "outcomes": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "allOf": [
-              {
-                "anyOf": [
-                  {
-                    "required": [
-                      "scene"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "dialogue",
-                      "choice"
-                    ]
-                  }
-                ]
-              },
-              {
-                "not": {
-                  "anyOf": [
-                    {
-                      "required": [
-                        "dialogue",
-                        "scene"
-                      ]
-                    }
-                  ]
-                }
-              }
-            ],
-            "properties": {
-              "choice": { "$ref": "#/$defs/Key" },
-              "dialogue": { "$ref": "#/$defs/DefinitionRef" },
-              "scene": { "$ref": "#/$defs/DefinitionRef" }
-            },
-            "type": "object"
+        "description": { "$ref": "#/$defs/TextKey" },
+        "locks": {
+          "additionalProperties": false,
+          "properties": {
+            "enter": { "$ref": "#/$defs/Policy" }
           },
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
-        }
+        },
+        "max_per_owner": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": { "$ref": "#/$defs/TextKey" },
+        "ruin": { "$ref": "#/$defs/DefinitionRef" },
+        "tags": {
+          "items": { "$ref": "#/$defs/Tag" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "variants": {
+          "items": { "$ref": "#/$defs/DescriptionVariant" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "weathering": { "$ref": "#/$defs/DefinitionRef" }
       },
       "required": [
-        "outcomes"
+        "name",
+        "description"
       ],
       "type": "object"
     },
@@ -10275,10 +10043,10 @@
       "description": "A declared localized topic mapped to its player Boolean knowledge fact.",
       "properties": {
         "fact": { "$ref": "#/$defs/DefinitionRef" },
-        "label": { "$ref": "#/$defs/TextKey" }
+        "name": { "$ref": "#/$defs/TextKey" }
       },
       "required": [
-        "label",
+        "name",
         "fact"
       ],
       "type": "object"
@@ -10296,7 +10064,7 @@
           "minimum": 0,
           "type": "integer"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
+        "name": { "$ref": "#/$defs/TextKey" },
         "narration": { "$ref": "#/$defs/TextKey" },
         "recipient": { "$ref": "#/$defs/DefinitionRef" },
         "recovery_rooms": {
@@ -10317,24 +10085,8 @@
         "fare",
         "recovery_rooms",
         "action",
-        "label",
+        "name",
         "narration"
-      ],
-      "type": "object"
-    },
-    "source.VersionedPolicy": {
-      "additionalProperties": false,
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
-      "properties": {
-        "policy_version": {
-          "const": 1,
-          "type": "integer"
-        },
-        "root": { "$ref": "#/$defs/Policy" }
-      },
-      "required": [
-        "policy_version",
-        "root"
       ],
       "type": "object"
     },
@@ -10403,11 +10155,6 @@
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
-        "blueprints": {
-          "additionalProperties": { "$ref": "#/$defs/source.blueprints" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
         "dialogues": {
           "additionalProperties": { "$ref": "#/$defs/source.dialogues" },
           "propertyNames": { "$ref": "#/$defs/Key" },
@@ -10425,16 +10172,6 @@
         },
         "npcs": {
           "additionalProperties": { "$ref": "#/$defs/source.npcs" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
-        "policies": {
-          "additionalProperties": { "$ref": "#/$defs/source.policies" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
-        "population_bundles": {
-          "additionalProperties": { "$ref": "#/$defs/source.population_bundles" },
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
@@ -10483,8 +10220,8 @@
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
-        "story_points": {
-          "additionalProperties": { "$ref": "#/$defs/source.story_points" },
+        "structures": {
+          "additionalProperties": { "$ref": "#/$defs/source.structures" },
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
@@ -10572,30 +10309,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.BleedDefinition" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.blueprints": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.BlueprintDefinition" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.BlueprintDefinition" }
       },
       "if": {
         "required": [
@@ -10817,54 +10530,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.NpcDefinition" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.policies": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.VersionedPolicy" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.VersionedPolicy" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.population_bundles": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.PopulationBundle" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.PopulationBundle" }
       },
       "if": {
         "required": [
@@ -11111,16 +10776,16 @@
         "type": "object"
       }
     },
-    "source.story_points": {
+    "source.structures": {
       "else": {
-        "else": { "$ref": "#/$defs/source.StoryPointDefinition" },
+        "else": { "$ref": "#/$defs/source.StructureDefinition" },
         "if": {
           "required": [
             "extends"
           ],
           "type": "object"
         },
-        "then": { "$ref": "#/$defs/partial.source.StoryPointDefinition" }
+        "then": { "$ref": "#/$defs/partial.source.StructureDefinition" }
       },
       "if": {
         "required": [

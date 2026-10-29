@@ -8,7 +8,6 @@ import { read } from './read.ts';
 const prefix = 'ferry_sampler@0.0.1:';
 const dialogue = (c: any) => c.dialogues[prefix + 'dialogue/bram'];
 const quest = (c: any) => c.quests[prefix + 'quest/lantern'];
-const variant = (c: any) => quest(c).journal.active_variants[0];
 function load(change: (c: any) => void = () => {}, installed = INSTALLED) {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
   c.manifest.requires.kernel_api.at_least = '1.9';
@@ -27,17 +26,14 @@ function load(change: (c: any) => void = () => {}, installed = INSTALLED) {
     active_variants: [
       {
         when: {
-          policy_version: 1,
-          root: {
-            op: 'fact_compare',
-            fact: {
-              cartridge_id: 'ferry_sampler',
-              cartridge_version: '0.0.1',
-              kind: 'fact',
-              key: 'search_plan',
-            },
-            equals: 'player_led',
+          op: 'fact_compare',
+          fact: {
+            cartridge_id: 'ferry_sampler',
+            cartridge_version: '0.0.1',
+            kind: 'fact',
+            key: 'search_plan',
           },
+          equals: 'player_led',
         },
         text: 'narration.bram.carry',
       },
@@ -52,7 +48,7 @@ function load(change: (c: any) => void = () => {}, installed = INSTALLED) {
 }
 
 // Breaks: a malformed riddle answer or journal policy version installs (references: content_riddle_test.exs).
-test('loader accepts API1.9 and rejects a malformed riddle answer and policy version', () => {
+test('loader accepts API1.9 and rejects a malformed riddle answer', () => {
   assert.ok(load().ok);
   const cases: [string, string, (c: any) => void][] = [
     [
@@ -60,13 +56,6 @@ test('loader accepts API1.9 and rejects a malformed riddle answer and policy ver
       'SCHEMA_VIOLATION',
       (c) => {
         dialogue(c).riddle.answer = 'Lantern';
-      },
-    ],
-    [
-      'policy version',
-      'SCHEMA_VIOLATION',
-      (c) => {
-        variant(c).when.policy_version = 2;
       },
     ],
   ];

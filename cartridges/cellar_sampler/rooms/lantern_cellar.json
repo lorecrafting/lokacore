@@ -1,5 +1,5 @@
 {
-  "title": "room.lantern_cellar.title",
+  "name": "room.lantern_cellar.title",
   "description": "room.lantern_cellar.description",
   "exits": {
     "up": {

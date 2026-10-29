@@ -1,5 +1,5 @@
 {
-  "label": "service.raise_hut",
+  "name": "service.raise_hut",
   "command": "use_service",
   "target": {
     "kind": "entity",
@@ -13,12 +13,9 @@
   ],
   "priority": 0,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "owns_plot",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "owns_plot",
+    "equals": true
   },
   "accessibility": "service.raise_hut"
 }

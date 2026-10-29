@@ -1,5 +1,5 @@
 {
-  "title": "room.antechamber.title",
+  "name": "room.antechamber.title",
   "description": "room.antechamber.description",
   "exits": {
     "north": {
@@ -17,23 +17,17 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "plate_disarmed",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "plate_disarmed",
+            "equals": true
           },
           "description": "detail.flagstones.disarmed"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "plate_found",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "plate_found",
+            "equals": true
           },
           "description": "detail.flagstones.found"
         }

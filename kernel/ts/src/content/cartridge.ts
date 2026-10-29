@@ -82,7 +82,6 @@ const schemaStage = (doc: Json) =>
 // The schema's propertyNames pattern already holds the key's shape and kind.
 const DEFINITION_MAPS = [
   'facts',
-  'policies',
   'actions',
   'rooms',
   'npcs',
@@ -104,7 +103,7 @@ const DEFINITION_MAPS = [
   'bleeds',
   'statuses',
   'replenish',
-  'blueprints',
+  'structures',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -114,8 +113,8 @@ function keyStage(c: Obj): Diagnostic[] {
       const expected: [string, string, unknown][] = [
         ['cartridge_id', id, c.manifest.id],
         ['cartridge_version', version, c.manifest.version],
+        ['key', key, def.key],
       ];
-      if (map !== 'policies') expected.push(['key', key, def.key]);
       for (const [field, declared, want] of expected)
         if (declared !== want)
           out.push(

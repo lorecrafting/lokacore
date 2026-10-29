@@ -64,7 +64,7 @@ export const decide: Rule<'barrier'> = (world, command, mint, steps = { n: 0 }) 
   const line = engineLine(
     `barrier.${outcome}`,
     { actor: bodyOf(world, actor_id)! },
-    { barrier: world.cartridge.barriers![refString(barrier)].short },
+    { barrier: world.cartridge.barriers![refString(barrier)].name },
   );
   return accepted(world, outcome, [op], [event(world, command, mint, 1, changed)], [line]);
 };
@@ -96,7 +96,7 @@ export function transition(
   if (from !== need) return type === 'open' && from === 'locked' ? 'exit_locked' : 'invalid_state';
   const def = world.cartridge.barriers![refString(barrier)];
   // Toolbox row 10: an authored condition (an hour window, a moon phase) gates opening only.
-  if (type === 'open' && def.opens_when && !holds(world, actor_id, def.opens_when.root, { steps }))
+  if (type === 'open' && def.opens_when && !holds(world, actor_id, def.opens_when, { steps }))
     return 'invalid_state';
   const item = def.key_item;
   const keyed = type === 'lock' || type === 'unlock';

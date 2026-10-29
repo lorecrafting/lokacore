@@ -9,7 +9,7 @@ defmodule Loka.Content.Expedition do
       {"shelter_room", "room"},
       {"survived_fact", "fact"},
       {"faction", "fact"},
-      {"hound_population", "population"}
+      {"population", "population"}
     ]
 
     Enum.reduce(fields, e, fn {field, kind}, acc -> Map.update!(acc, field, &ref(&1, kind, m)) end)
@@ -43,7 +43,7 @@ defmodule Loka.Content.Expedition do
       {"shelter_room", "room"},
       {"survived_fact", "fact"},
       {"faction", "fact"},
-      {"hound_population", "population"}
+      {"population", "population"}
     ]
 
     named = Enum.flat_map(fields, &reference(rel, ["expedition"], &1, e, ctx.m, ctx.defs))
@@ -138,7 +138,7 @@ defmodule Loka.Content.Expedition do
     for {field, kind} <- [
           {"survived_fact", "fact"},
           {"faction", "fact"},
-          {"hound_population", "population"}
+          {"population", "population"}
         ],
         resolved = resolve(e[field], kind, ctx.m, ctx.defs),
         match?({_, _, _}, resolved) and not valid_fact?(field, elem(resolved, 2)),
@@ -152,5 +152,5 @@ defmodule Loka.Content.Expedition do
   defp valid_fact?("faction", row),
     do: get_in(row, ["value_type", "type"]) == "int" and row["scopes"] == ["player"]
 
-  defp valid_fact?("hound_population", row), do: is_map(row["pack"])
+  defp valid_fact?("population", row), do: is_map(row["pack"])
 end

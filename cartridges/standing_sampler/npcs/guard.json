@@ -2,7 +2,7 @@
   "keywords": [
     "guard"
   ],
-  "short": "npc.guard.short",
+  "name": "npc.guard.short",
   "room_line": "npc.guard.room",
   "description": "npc.guard.description",
   "room": "gate",
@@ -19,23 +19,20 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": [
-          {
-            "op": "fact_compare",
-            "fact": "village_standing",
-            "equals": -2
-          },
-          {
-            "op": "fact_compare",
-            "fact": "trust",
-            "equals": 0,
-            "subject": "target"
-          }
-        ]
-      }
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "village_standing",
+          "equals": -2
+        },
+        {
+          "op": "fact_compare",
+          "fact": "trust",
+          "equals": 0,
+          "subject": "target"
+        }
+      ]
     },
     "engage": "npc.guard.engage"
   }

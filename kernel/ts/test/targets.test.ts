@@ -167,7 +167,7 @@ test('a guard killed by a poison tick earlier in the advance does not strike', (
     tick_every: 150,
     resource: resourceRef(w, 'hp'),
     per_tick: -1,
-    label: 'combat.goblin_targeted',
+    name: 'combat.goblin_targeted',
     narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
   };
   const statuses = { 'targets_sampler@0.0.1:status/poison': spec };
@@ -197,7 +197,7 @@ test('a poisoned second goblin ticks and takes the player and guard blows in one
       tick_every: 150,
       resource: resourceRef(w, 'hp'),
       per_tick: -1,
-      label: 'combat.goblin_targeted',
+      name: 'combat.goblin_targeted',
       narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
     },
   };
@@ -231,7 +231,7 @@ test('poison ticks on the body and on the goblin in two groups, then one round, 
     tick_every: 150,
     resource: resourceRef(w, 'hp'),
     per_tick: -1,
-    label: 'combat.goblin_targeted',
+    name: 'combat.goblin_targeted',
     narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
   };
   const statuses = { 'targets_sampler@0.0.1:status/poison': spec };
@@ -400,7 +400,7 @@ test('a stunned guard takes no blow beside the player', () => {
         resource: resourceRef(w, 'hp'),
       };
       const statuses = {
-        [`${K}status/stunned`]: { ...spec, allows: ['look'], label: 'combat.npc_hit', narration },
+        [`${K}status/stunned`]: { ...spec, allows: ['look'], name: 'combat.npc_hit', narration },
       };
       w = { ...w, cartridge: { ...w.cartridge, statuses } as never } as World;
       const job = 'cccccccc-6666-4666-8666-000000000098' as never;

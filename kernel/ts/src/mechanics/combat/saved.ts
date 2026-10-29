@@ -55,7 +55,7 @@ function packValid(world: World, row: EncounterRow, plan: { cap: number }, planB
       return (
         (i > 0 && ids[i - 1] >= member) ||
         origin?.kind !== 'spawned' ||
-        origin.role !== 'hound' ||
+        origin.role !== 'hunter' ||
         origin.member_id !== member ||
         !same(origin.by, planBy)
       );

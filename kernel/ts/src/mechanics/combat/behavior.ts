@@ -14,7 +14,7 @@ import { left } from '../trail.ts';
 /** Exact C3 slot membership at admission; the roster never refills. */
 export function admission(world: World, target: EntityId, steps: Steps): EntityId[] | undefined {
   const origin = world.state.created?.[target]?.origin;
-  if (origin?.kind !== 'spawned' || origin.role !== 'hound') return;
+  if (origin?.kind !== 'spawned' || origin.role !== 'hunter') return;
   const plan = world.populationSpecs[key(origin.by)]?.plan;
   if (!plan?.pack || suppressed(world, origin.by)) return;
   const room = world.state.containers[target];
@@ -37,7 +37,7 @@ export function admission(world: World, target: EntityId, steps: Steps): EntityI
       const member = world.state.created?.[id]?.origin;
       if (
         member?.kind !== 'spawned' ||
-        member.role !== 'hound' ||
+        member.role !== 'hunter' ||
         !same(member.by, origin.by) ||
         member.member_id !== id ||
         member.generation !== slot.generation ||
@@ -64,7 +64,7 @@ export function flight(
   steps: Steps,
 ): { ops: DeltaOp[]; direction: Key; there: EntityId } | undefined {
   const origin = world.state.created?.[id]?.origin;
-  if (origin?.kind !== 'spawned' || origin.role !== 'hound') return;
+  if (origin?.kind !== 'spawned' || origin.role !== 'hunter') return;
   const plan = world.populationSpecs[key(origin.by)]?.plan;
   if (!plan?.pack) return;
   const here = world.state.containers[id];

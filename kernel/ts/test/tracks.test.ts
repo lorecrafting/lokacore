@@ -64,7 +64,7 @@ const start = (c = content) => {
   n = 0;
   return newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 };
-const roomKey = (w: World, id: string) => w.rooms[id]?.title.split('.')[1];
+const roomKey = (w: World, id: string) => w.rooms[id]?.name.split('.')[1];
 const where = (w: World, e: string) => roomKey(w, w.state.containers[e]!);
 const member = (w: World, plan: string) =>
   Object.keys(w.state.created ?? {}).find((e) => {
@@ -169,7 +169,7 @@ test("a hunter follows the player's fresh trail; a cold or shut one gives its pl
     [`${REF}:barrier/door`]: {
       key: 'door',
       keywords: ['door'],
-      short: 'item.fur.short',
+      name: 'item.fur.short',
       initial: 'closed',
     },
   };

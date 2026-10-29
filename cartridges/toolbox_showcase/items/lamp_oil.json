@@ -3,7 +3,7 @@
     "oil",
     "flask"
   ],
-  "short": "item.lamp_oil.short",
+  "name": "item.lamp_oil.short",
   "room_line": "item.lamp_oil.room",
   "description": "item.lamp_oil.description",
   "mass_grams": 100,

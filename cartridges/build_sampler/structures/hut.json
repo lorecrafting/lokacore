@@ -1,0 +1,32 @@
+{
+  "name": "structure.hut.title",
+  "description": "structure.hut.description",
+  "max_per_owner": 1,
+  "variants": [
+    {
+      "when": {
+        "op": "status_active",
+        "subject": "room",
+        "status": "ruin"
+      },
+      "description": "structure.hut.description.ruin"
+    },
+    {
+      "when": {
+        "op": "fact_compare",
+        "fact": "owns_plot",
+        "equals": true
+      },
+      "description": "structure.hut.description.owned"
+    }
+  ],
+  "locks": {
+    "enter": {
+      "op": "fact_compare",
+      "fact": "owns_plot",
+      "equals": true
+    }
+  },
+  "weathering": "weathering",
+  "ruin": "ruin"
+}

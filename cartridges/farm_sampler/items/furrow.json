@@ -2,7 +2,7 @@
   "keywords": [
     "furrow"
   ],
-  "short": "item.furrow.short",
+  "name": "item.furrow.short",
   "room_line": "item.furrow.room",
   "description": "item.furrow.description",
   "location": {
@@ -17,45 +17,39 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "growing"
-            },
-            {
-              "op": "time_since",
-              "fact": "sown_at",
-              "item": "furrow",
-              "at_least": 64800
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "growing"
+          },
+          {
+            "op": "time_since",
+            "fact": "sown_at",
+            "item": "furrow",
+            "at_least": 64800
+          }
+        ]
       },
       "description": "item.bed.heavy"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "all",
-          "items": [
-            {
-              "op": "status_active",
-              "subject": "target",
-              "status": "growing"
-            },
-            {
-              "op": "time_since",
-              "fact": "sown_at",
-              "item": "furrow",
-              "at_least": 3600
-            }
-          ]
-        }
+        "op": "all",
+        "items": [
+          {
+            "op": "status_active",
+            "subject": "target",
+            "status": "growing"
+          },
+          {
+            "op": "time_since",
+            "fact": "sown_at",
+            "item": "furrow",
+            "at_least": 3600
+          }
+        ]
       },
       "description": "item.bed.shoots"
     }

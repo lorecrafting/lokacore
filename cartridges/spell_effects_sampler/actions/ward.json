@@ -1,5 +1,5 @@
 {
-  "label": "spell.ward",
+  "name": "spell.ward",
   "aliases": [
     "ward"
   ],
@@ -9,13 +9,6 @@
     "learned": "ward_known"
   },
   "priority": 0,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

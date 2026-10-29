@@ -90,7 +90,7 @@ export const spokenBy = (
         (d) =>
           d.keyword === word &&
           (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
-          holds(world, actor, d.policy.root, { target, steps }) &&
+          holds(world, actor, d.policy, { target, steps }) &&
           offered(world, actor, d, steps).length > 0,
       );
 
@@ -116,7 +116,7 @@ export const talkRefused = (
 export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
   const talked = Object.values(world.cartridge.dialogues ?? {}).filter((d) => !d.keyword); // row G9
-  return talked.flatMap(({ key, npc, policy, label }) => {
+  return talked.flatMap(({ key, npc, policy, name: label }) => {
     const speaker = world.entityIds[refString(npc)]!;
     if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
     const target = { kind: 'entity', scopes: ['room_occupants'] } as const;

@@ -31,9 +31,9 @@ export function bellSource(c: any) {
   c.recipes[`${prefix}:recipe/ring_bell`] = {
     key: 'ring_bell',
     aliases: ['ring'],
-    label: 'actions.ring_bell',
+    name: 'actions.ring_bell',
     priority: 10,
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    policy: { op: 'all', items: [] },
     target: { kind: 'detail', detail: 'bell', room: ref('room', 'drill_yard') },
     outcomes: {
       success: {

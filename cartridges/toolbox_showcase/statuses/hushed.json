@@ -2,7 +2,7 @@
   "duration": 120,
   "tick_every": 60,
   "resource": "hp",
-  "label": "condition.hushed",
+  "name": "condition.hushed",
   "narration": {
     "applied": "narration.hushed.applied",
     "tick": "narration.hushed.tick",

@@ -1,5 +1,5 @@
 {
-  "title": "room.lane.title",
+  "name": "room.lane.title",
   "description": "room.lane.description",
   "exits": {
     "west": {
@@ -10,7 +10,7 @@
     "directions": [
       "north"
     ],
-    "blueprints": [
+    "structures": [
       "hut_plain",
       "hut_timbered"
     ]

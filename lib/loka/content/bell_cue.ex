@@ -30,7 +30,7 @@ defmodule Loka.Content.BellCue do
       refs ++
       if(is_map(text) and Map.has_key?(text, cue["text"]),
         do: [],
-        else: [diag("UNRESOLVED_TEXT_KEY", at("cartridge.json", ["world", "bell_cue", "text"]))]
+        else: [diag("UNRESOLVED_REFERENCE", at("cartridge.json", ["world", "bell_cue", "text"]))]
       )
   end
 

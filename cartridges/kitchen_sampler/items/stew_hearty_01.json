@@ -3,16 +3,13 @@
     "stew",
     "hearty"
   ],
-  "short": "item.stew_hearty.short",
+  "name": "item.stew_hearty.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "spoiling"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "spoiling"
       },
       "description": "item.stew_hearty.short_spoiling"
     }

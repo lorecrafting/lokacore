@@ -7,7 +7,7 @@ export const id = (kind: string, key: string) => `${prefix}:${kind}/${key}`;
 const skin = (key: string, keywords: string[]) => ({
   key,
   keywords,
-  short: `item.${key}.short`,
+  name: `item.${key}.short`,
   room_line: `item.${key}.room`,
   description: `item.${key}.description`,
   mass_grams: 500,
@@ -25,7 +25,7 @@ function liquid(c: any) {
   c.liquids = {
     [id('liquid', 'water')]: {
       key: 'water',
-      label: 'liquid.water',
+      name: 'liquid.water',
       unit_label: 'liquid.units',
       grams_per_unit: 250,
       drink_amount: 1,
@@ -36,7 +36,7 @@ function liquid(c: any) {
   c.items[id('item', 'tithe_ledger')] = {
     key: 'tithe_ledger',
     keywords: ['ledger'],
-    short: 'item.tithe_ledger.short',
+    name: 'item.tithe_ledger.short',
     room_line: 'item.tithe_ledger.room',
     description: 'item.tithe_ledger.description',
     mass_grams: 200,

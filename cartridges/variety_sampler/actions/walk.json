@@ -1,5 +1,5 @@
 {
-  "label": "actions.walk",
+  "name": "actions.walk",
   "aliases": [
     "walk"
   ],
@@ -9,13 +9,6 @@
     "detail": "floor"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

@@ -86,7 +86,7 @@ test('expedition quest requires its owned declarations and bounded route/reward'
         'survived_fact',
         'faction',
         'faction_delta',
-        'hound_population',
+        'population',
         'narration',
         'actions',
       ],

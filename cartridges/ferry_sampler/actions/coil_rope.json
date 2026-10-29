@@ -1,5 +1,5 @@
 {
-  "label": "actions.coil_rope",
+  "name": "actions.coil_rope",
   "aliases": [
     "coil"
   ],
@@ -9,13 +9,6 @@
     "detail": "mooring_post"
   },
   "priority": 10,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "duration": 3600,
   "outcomes": {
     "success": {

@@ -48,12 +48,12 @@ const command = (w: World, until = 68400): Command => ({
 const alias = (command: string) => ({
   key: 'clock_alias',
   command,
-  label: 'action.wait',
+  name: 'action.wait',
   accessibility: 'action.wait',
   priority: 0,
   target: { kind: 'none' },
   input: ['until'],
-  policy: { policy_version: 1, root: { op: 'all', items: [] } },
+  policy: { op: 'all', items: [] },
 });
 const withAlias = (w: World, name: string) =>
   ({

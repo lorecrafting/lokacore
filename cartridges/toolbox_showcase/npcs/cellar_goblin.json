@@ -2,17 +2,14 @@
   "keywords": [
     "goblin"
   ],
-  "short": "npc.goblin.short",
+  "name": "npc.goblin.short",
   "room_line": "npc.goblin.room",
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "afraid"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "afraid"
       },
       "description": "npc.goblin.room_afraid"
     }

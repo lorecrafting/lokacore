@@ -295,7 +295,7 @@ test('captured scene choices and exact keyed availability reject foreign and sta
   const blocked = route(
     fresh((c) => {
       for (const k of ['dream_next', 'dream_choose'])
-        c.actions[`${prefix}:action/${k}`].policy.root = {
+        c.actions[`${prefix}:action/${k}`].policy = {
           op: 'fact_compare',
           fact: ref('fact', 'dream_seen'),
           equals: true,

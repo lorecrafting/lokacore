@@ -1,5 +1,7 @@
 {
-  "bundle": "den_goblins",
+  "npc": "den_goblin",
+  "item": "ear",
+  "corpse": "npc_corpse",
   "home": "chief_den",
   "area": [
     "chief_den",

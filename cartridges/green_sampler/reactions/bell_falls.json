@@ -4,12 +4,9 @@
     "fact": "rope_taut"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "rope_taut",
-      "equals": true
-    }
+    "op": "fact_compare",
+    "fact": "rope_taut",
+    "equals": true
   },
   "apply": [
     {

@@ -2,7 +2,7 @@
   "keywords": [
     "wight"
   ],
-  "short": "npc.wight.short",
+  "name": "npc.wight.short",
   "room_line": "npc.wight.room",
   "description": "npc.wight.description",
   "room": "crypt",

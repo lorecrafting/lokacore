@@ -3,7 +3,7 @@
     "tam",
     "carter"
   ],
-  "short": "npc.tam.short",
+  "name": "npc.tam.short",
   "room_line": "npc.tam.room",
   "description": "npc.tam.description",
   "room": "warden_gate",
@@ -12,11 +12,8 @@
     "11": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "sky",
-            "weather": "rain"
-          }
+          "op": "sky",
+          "weather": "rain"
         },
         "room": "church",
         "goal": "npc.tam.goal_church"

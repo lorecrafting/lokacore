@@ -2,7 +2,7 @@
   "keywords": [
     "rat"
   ],
-  "short": "item.dead_rat.short",
+  "name": "item.dead_rat.short",
   "room_line": "item.dead_rat.room",
   "description": "item.dead_rat.description",
   "mass_grams": 200,

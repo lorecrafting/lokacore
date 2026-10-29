@@ -1,12 +1,9 @@
 {
-  "label": "actions.trace_sigil",
+  "name": "actions.trace_sigil",
   "aliases": ["trace"],
   "target": { "kind": "detail", "room": "tower", "detail": "sigil" },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": { "op": "quest_state", "quest": "apprentice", "state": "active" }
-  },
+  "policy": { "op": "quest_state", "quest": "apprentice", "state": "active" },
   "outcomes": {
     "success": {
       "sequence": [{ "op": "fact.assign", "fact": "sigil_traced", "value": true }],

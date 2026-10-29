@@ -276,7 +276,7 @@ test('FD1: a reaction to a delayed write adds to the same fact in one advance', 
       ...rule,
       key: 'echo',
       on: { event: 'fact_changed', fact },
-      when: { policy_version: 1, root: { op: 'fact_compare', fact, equals: 1 } },
+      when: { op: 'fact_compare', fact, equals: 1 },
     };
   };
   const at1000 = elapsed(world(echo), 1000);
@@ -317,7 +317,7 @@ const shaken = (c: any) => {
       tick_every: 600,
       per_tick: -1,
       resource: R('resource', 'mv'),
-      label: 'band.hurt',
+      name: 'band.hurt',
       narration: { applied: 'band.hurt', tick: 'band.hurt', expired: 'band.hurt' },
     },
   };
@@ -407,7 +407,7 @@ test('FD1: a delayed chain past the step budget in one wait faults budget_exceed
       key: 'link',
       on: { event: 'fact_changed', fact: shocks },
       after: 1,
-      when: { policy_version: 1, root: { op: 'all', items } },
+      when: { op: 'all', items },
       apply: [{ op: 'fact.adjust', fact: shocks, amount: 1 }],
     };
   };

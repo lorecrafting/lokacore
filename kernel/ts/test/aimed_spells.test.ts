@@ -55,7 +55,7 @@ function aimedChange(c: Record<string, any>) {
   aim(c, 'flamma', ['room_occupants'], 'npc');
   aim(c, 'ward', ['room_occupants'], 'npc');
   aim(c, 'lux', ['inventory'], 'item');
-  c.recipes[R('lux')].policy.root = { op: 'has_tag', subject: 'target', tag: 'silver' };
+  c.recipes[R('lux')].policy = { op: 'has_tag', subject: 'target', tag: 'silver' };
   c.items[`${P}:item/orb`].tags = ['silver'];
 }
 const loaded = variant(aimedChange);

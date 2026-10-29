@@ -21,7 +21,7 @@ defmodule Loka.Core.ComposeBleed do
       is_integer(next["next_tick_at"]) and next["next_tick_at"] >= now and
       is_binary(next["job_id"]) and is_map(next["effect"]) and
       get_in(state, ["known_entities", next["source_id"], "kind"]) == "npc" and
-      get_in(state, ["created", next["source_id"], "origin", "role"]) == "hound"
+      get_in(state, ["created", next["source_id"], "origin", "role"]) == "hunter"
   end
 
   defp generation?(%{"active" => true} = prior, next),

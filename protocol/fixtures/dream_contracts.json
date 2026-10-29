@@ -101,7 +101,7 @@
             "text": "scene.bell_rung.bell"
           }
         ],
-        "title": "room.ferry_landing.title",
+        "name": "room.ferry_landing.title",
         "description": "room.ferry_landing.title",
         "on_end": {
           "assign": [
@@ -1155,17 +1155,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "green_busy"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -1195,17 +1192,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "green_busy"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -1235,17 +1229,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "green_busy"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -1276,17 +1267,14 @@
           "outcome": "talk"
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "green_busy"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -1316,17 +1304,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "green_busy"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -1397,9 +1382,9 @@
     },
     {
       "base": "SceneDefinition::presentation_only",
-      "name": "SceneDefinition::presentation_only/ required title",
+      "name": "SceneDefinition::presentation_only/ required name",
       "path": [
-        "title"
+        "name"
       ],
       "valid": false,
       "omit": true

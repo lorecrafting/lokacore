@@ -2,7 +2,7 @@
   "provider": "farmer",
   "currency": "pennies",
   "action": "barter",
-  "label": "service.knife_for_pelts",
+  "name": "service.knife_for_pelts",
   "narration": "service.knife_for_pelts.used",
   "price": 0,
   "benefit": {

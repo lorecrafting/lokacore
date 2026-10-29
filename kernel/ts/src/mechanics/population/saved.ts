@@ -58,7 +58,7 @@ function originValid(
   const origin = world.state.created?.[slot.member_id!]?.origin;
   return (
     origin?.kind === 'spawned' &&
-    origin.role === 'deer' &&
+    origin.role === 'prey' &&
     origin.member_id === slot.member_id &&
     origin.slot === index &&
     origin.generation === slot.generation &&
@@ -79,7 +79,7 @@ function sightJobValid(world: World, id: string, job: JobRow): boolean {
     ];
   return (
     !!spec?.plan.sight &&
-    spec.member_role === 'deer' &&
+    spec.member_role === 'prey' &&
     !validate('DeltaOp', {
       op: 'job.schedule',
       writer_group: 0,
@@ -92,7 +92,7 @@ function sightJobValid(world: World, id: string, job: JobRow): boolean {
     sight.generation >= 1 &&
     sight.seen_at + spec.plan.sight.delay === job.due_time &&
     origin?.kind === 'spawned' &&
-    origin.role === 'deer' &&
+    origin.role === 'prey' &&
     origin.member_id === sight.member_id &&
     origin.slot === sight.slot &&
     origin.generation === sight.generation &&

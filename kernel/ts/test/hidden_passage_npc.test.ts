@@ -101,7 +101,7 @@ for (const face of ['hidden', 'climb'] as const)
       (id) =>
         w.state.containers[id] === willow &&
         w.state.created![id]!.origin.kind === 'spawned' &&
-        w.state.created![id]!.origin.role === 'deer',
+        w.state.created![id]!.origin.role === 'prey',
     )!;
     assert.ok(deer);
     const hidden = hide(w, willow, 'south', face);
@@ -154,7 +154,7 @@ function walking(state: 'closed' | 'locked', held: boolean) {
   const [item] = Object.entries(w.entityIds).find(([k]) => k.includes(':item/'))!;
   const [, cartridge_id, cartridge_version, k] = /^(.+)@(.+):item\/(.+)$/.exec(item)!;
   const key_item = { cartridge_id, cartridge_version, kind: 'item', key: k };
-  const def = { key: door.key, keywords: ['door'], short: 'x', initial: state, key_item };
+  const def = { key: door.key, keywords: ['door'], name: 'x', initial: state, key_item };
   const cartridge = {
     ...w.cartridge,
     barriers: {

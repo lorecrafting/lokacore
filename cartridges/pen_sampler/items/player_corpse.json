@@ -3,7 +3,7 @@
     "corpse",
     "player_corpse"
   ],
-  "short": "item.player_corpse.short",
+  "name": "item.player_corpse.short",
   "room_line": "item.player_corpse.room",
   "description": "item.player_corpse.description",
   "location": {
@@ -13,13 +13,10 @@
   "container": true,
   "locks": {
     "put": {
-      "policy_version": 1,
-      "root": {
-        "op": "not",
-        "item": {
-          "op": "all",
-          "items": []
-        }
+      "op": "not",
+      "item": {
+        "op": "all",
+        "items": []
       }
     }
   }

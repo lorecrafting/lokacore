@@ -23,7 +23,6 @@
       "scene": 1,
       "description_variant": 1,
       "calendar": 1,
-      "behavior": 1,
       "schedule": 1,
       "death": 1,
       "combat": 1
@@ -43,10 +42,10 @@
   },
   "chapters": [
     {
-      "title": "chapter.lantern"
+      "name": "chapter.lantern"
     },
     {
-      "title": "chapter.bank",
+      "name": "chapter.bank",
       "story_point": "lantern_resolved",
       "outcome": "carry"
     }

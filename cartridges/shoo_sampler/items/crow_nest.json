@@ -2,7 +2,7 @@
   "keywords": [
     "crow_nest"
   ],
-  "short": "item.crow_nest.short",
+  "name": "item.crow_nest.short",
   "room_line": "item.crow_nest.room",
   "description": "item.crow_nest.description",
   "mass_grams": 250,

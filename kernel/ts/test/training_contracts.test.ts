@@ -17,11 +17,10 @@ test('new typed contracts require independent fields and reject boundary values'
       'SkillDefinition',
       {
         key: 'swords',
-        label: 'skill.swords',
+        name: 'skill.swords',
         requirement: 'skill.requirement',
-        qualification: { policy_version: 1, root: { op: 'all', items: [] } },
       },
-      ['key', 'label', 'requirement', 'qualification'],
+      ['key', 'name', 'requirement'],
     ],
     [
       'WeaponProfile',

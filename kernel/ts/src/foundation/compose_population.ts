@@ -67,7 +67,7 @@ export function initializePopulationResource(
   return check(
     row === undefined &&
       created?.group === op.writer_group &&
-      origin?.role === ((spec as Obj | undefined)?.member_role ?? 'hound') &&
+      origin?.role === ((spec as Obj | undefined)?.member_role ?? 'hunter') &&
       origin.member_id === op.entity_id &&
       same(op.resource, { ...(origin.by as Obj), kind: 'resource', key: 'hp' }) &&
       op.at >= ctx.state.clock &&

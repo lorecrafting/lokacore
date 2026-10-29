@@ -126,7 +126,7 @@ test('a false wander_when keeps every deer where it was born', () => {
   const free = elapsed(world(), 150);
   const held = elapsed(
     world((c) => {
-      c.populations[DEER].wander_when = { policy_version: 1, root: { op: 'not', item: never } };
+      c.populations[DEER].wander_when = { op: 'not', item: never };
     }),
     150,
   );
@@ -145,10 +145,7 @@ test('a false wander_when keeps every deer where it was born', () => {
 test('one long elapsed command reads wander_when at each occurrence time', () => {
   const hollow = (w: World) => [1, 2, 3].map((i) => w.state.containers[born(w, DEER, i)!]);
   const at3 = world((c) => {
-    c.populations[DEER].wander_when = {
-      policy_version: 1,
-      root: { op: 'time_window', from: 3, to: 4 },
-    };
+    c.populations[DEER].wander_when = { op: 'time_window', from: 3, to: 4 };
   });
   for (const w of [elapsed(at3, 1000), elapsed(at3, 1000, [], 1000)])
     assert.deepEqual(
@@ -162,10 +159,7 @@ test('one long elapsed command reads wander_when at each occurrence time', () =>
 test('one long elapsed command reads birth_when at each occurrence time', () => {
   const at5 = slay(
     world((c) => {
-      c.populations[DEER].birth_when = {
-        policy_version: 1,
-        root: { op: 'time_window', from: 5, to: 6 },
-      };
+      c.populations[DEER].birth_when = { op: 'time_window', from: 5, to: 6 };
     }),
     DEER,
     2,

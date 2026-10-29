@@ -145,7 +145,7 @@ test('ring bell assigns the fact, then fact_changed, then the custom event, and 
 test('an assign that keeps its value takes no position and emits no fact_changed', () => {
   const w = world((c) => {
     const r = c.recipes[RECIPE];
-    r.policy.root = { op: 'all', items: [] };
+    r.policy = { op: 'all', items: [] };
     r.outcomes.success.sequence.splice(1, 0, r.outcomes.success.sequence[0]);
   });
   const { decision } = step(w, ring(), 0);
@@ -273,7 +273,7 @@ test('a cartridge action overrides the engine verb of its key, policy included',
   const w = world((c) => {
     c.actions['recipe_sampler@0.0.1:action/look'] = {
       key: 'look',
-      label: 'actions.ring_bell',
+      name: 'actions.ring_bell',
       target: { kind: 'none' },
       command: 'look',
       priority: 20,
@@ -324,7 +324,7 @@ test("a command no offered action's target or input accepts is refused like an u
   const w = world((c) => {
     const action = (key: string, command: string, target: object, input: string[]) => ({
       key,
-      label: 'actions.ring_bell',
+      name: 'actions.ring_bell',
       target,
       command,
       priority: 0,
@@ -364,12 +364,12 @@ test("an entity target in the action's scope is admitted", () => {
     const loaded = load((c) => {
       c.actions['items_sampler@0.0.1:action/inspect'] = {
         key: 'inspect',
-        label: 'item.satchel.short',
+        name: 'item.satchel.short',
         target: { kind: 'entity', scopes: [scope] },
         command: 'look',
         priority: 0,
         input: [],
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        policy: { op: 'all', items: [] },
         accessibility: 'item.satchel.short',
       };
       c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;

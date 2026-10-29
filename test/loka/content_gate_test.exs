@@ -34,7 +34,7 @@ defmodule Loka.ContentGateTest do
     }
   end
 
-  defp variant, do: ["details", "oak_door", "variants", Access.at(0), "when", "root", "barrier"]
+  defp variant, do: ["details", "oak_door", "variants", Access.at(0), "when", "barrier"]
 
   # Breaks: a barrier, an exit's barrier, a key_item or a barrier_state dropped or reshaped.
   test "gate_sampler compiles to its Python known answer without warnings" do
@@ -103,7 +103,7 @@ defmodule Loka.ContentGateTest do
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "rooms/gatehouse.details.oak_door.variants[0].when.root.barrier",
+                  "rooms/gatehouse.details.oak_door.variants[0].when.barrier",
                   trapdoor
                 )
               ]}
@@ -113,7 +113,7 @@ defmodule Loka.ContentGateTest do
            }) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "barriers/oak_door.short", %{
+                d("UNRESOLVED_REFERENCE", "barriers/oak_door.name", %{
                   "target" => "barrier.oak_door.short"
                 })
               ]}
@@ -162,14 +162,14 @@ defmodule Loka.ContentGateTest do
               [
                 undeclared.("barriers/cell_door"),
                 undeclared.("barriers/oak_door"),
-                undeclared.("rooms/gatehouse.details.oak_door.variants[0].when.root.op")
+                undeclared.("rooms/gatehouse.details.oak_door.variants[0].when.op")
               ]}
   end
 
   # Review #50 A2/N2. Breaks: faces paired by destination room rather than by connection (room and
   # opposite direction), so two passages between the same rooms cannot carry two doors.
   test "two passages between the same rooms may carry different barriers", %{dir: dir} do
-    blue = %{"keywords" => ["hatch"], "short" => "barrier.oak_door.short", "initial" => "open"}
+    blue = %{"keywords" => ["hatch"], "name" => "barrier.oak_door.short", "initial" => "open"}
     way = fn b -> %{"to" => "courtyard", "barrier" => b} end
     back = fn b -> %{"to" => "gatehouse", "barrier" => b} end
 

@@ -2,7 +2,7 @@
   "keywords": [
     "jar"
   ],
-  "short": "item.jar.short",
+  "name": "item.jar.short",
   "room_line": "item.jar.room",
   "description": "item.jar.description",
   "mass_grams": 800,

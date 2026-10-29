@@ -1,5 +1,5 @@
 {
-  "title": "room.sea_cave.title",
+  "name": "room.sea_cave.title",
   "description": "room.sea_cave.description",
   "exits": {
     "west": {
@@ -27,11 +27,8 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "tide": "high"
-        }
+        "op": "sky",
+        "tide": "high"
       },
       "description": "room.sea_cave.high_tide"
     }

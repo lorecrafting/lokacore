@@ -1,5 +1,7 @@
 {
-  "bundle": "hens",
+  "npc": "hen",
+  "item": "feather",
+  "corpse": "npc_corpse",
   "home": "holding_croft",
   "area": [
     "holding_croft",
@@ -14,21 +16,15 @@
   "wander_interval": 3600,
   "replacement_delay": 86400,
   "birth_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "population_count",
-      "plan": "hens",
-      "at_least": 2
-    }
+    "op": "population_count",
+    "plan": "hens",
+    "at_least": 2
   },
   "wander_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "not",
-      "item": {
-        "op": "all",
-        "items": []
-      }
+    "op": "not",
+    "item": {
+      "op": "all",
+      "items": []
     }
   }
 }

@@ -104,7 +104,7 @@ function packMembers(
   const containers = (state.containers ?? {}) as Record<string, string>;
   const slots = (state.population_slots ?? {}) as Record<string, Row>;
   const origin = created[primary]?.origin as Row | undefined;
-  if (origin?.kind !== 'spawned' || origin.role !== 'hound') return false;
+  if (origin?.kind !== 'spawned' || origin.role !== 'hunter') return false;
   const spec = ((state.population_specs ?? {}) as Record<string, Row>)[encode(origin.by)];
   if (
     !(spec?.plan as Row | undefined)?.pack ||
@@ -131,7 +131,7 @@ function packMember(
     known[id]?.kind === 'npc' &&
     containers[id] === room &&
     member?.kind === 'spawned' &&
-    member.role === 'hound' &&
+    member.role === 'hunter' &&
     member.member_id === id &&
     encode(member.by) === encode(plan) &&
     slot?.member_id === id &&

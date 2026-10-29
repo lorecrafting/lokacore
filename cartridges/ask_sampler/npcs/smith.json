@@ -2,7 +2,7 @@
   "keywords": [
     "smith"
   ],
-  "short": "npc.smith.short",
+  "name": "npc.smith.short",
   "room_line": "npc.smith.room",
   "description": "npc.smith.description",
   "room": "square",
@@ -18,13 +18,10 @@
         "topic": "smugglers",
         "text": "smith.smugglers",
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "trust",
-            "equals": 1,
-            "subject": "target"
-          }
+          "op": "fact_compare",
+          "fact": "trust",
+          "equals": 1,
+          "subject": "target"
         }
       }
     ]

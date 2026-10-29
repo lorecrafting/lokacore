@@ -3,41 +3,32 @@
     "sword",
     "iron"
   ],
-  "short": "item.sword.short",
+  "name": "item.sword.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "edge",
-          "equals": 0,
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "edge",
+        "equals": 0,
+        "subject": "target"
       },
       "description": "item.sword.short_broken"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "quality",
-          "equals": "fine",
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "quality",
+        "equals": "fine",
+        "subject": "target"
       },
       "description": "item.sword.short_fine"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "quality",
-          "equals": "crude",
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "quality",
+        "equals": "crude",
+        "subject": "target"
       },
       "description": "item.sword.short_crude"
     }

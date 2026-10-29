@@ -173,7 +173,7 @@ export function liquidNarration(
     {
       key: `liquid.${type}` as never,
       bindings: {
-        kind: world.cartridge.liquids![refString(kind)].label,
+        kind: world.cartridge.liquids![refString(kind)].name,
         unit_label: world.cartridge.liquids![refString(kind)].unit_label,
         quantity,
       },

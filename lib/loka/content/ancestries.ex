@@ -36,7 +36,7 @@ defmodule Loka.Content.Ancestries do
     path = ["ancestries", key]
 
     labels =
-      for field <- ~w(label description),
+      for field <- ~w(name description),
           text != :unknown and not is_map_key(text, choice[field]),
           do: diag("UNRESOLVED_REFERENCE", at("cartridge.json", path ++ [field]))
 

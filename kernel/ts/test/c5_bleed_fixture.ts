@@ -13,7 +13,7 @@ const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')
 export function fixture(chance = 100, hp = 10, change?: (c: any) => void) {
   const fresh = sampler.genesis(change);
   const hounds = Object.entries(fresh.state.created ?? {}).filter(
-    ([, e]) => e.origin?.kind === 'spawned' && e.origin.role === 'hound',
+    ([, e]) => e.origin?.kind === 'spawned' && e.origin.role === 'hunter',
   );
   const target = hounds[0]![0] as never;
   const room = fresh.state.containers[target];

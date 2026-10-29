@@ -171,7 +171,7 @@
       }
     },
     {
-      "id": "population-bundle-requires-crow-binding",
+      "id": "crow-binding-requires-population-kind",
       "state": {
         "clock": 100
       },
@@ -183,10 +183,13 @@
           "job": {
             "cartridge_id": "fen",
             "cartridge_version": "0.0.1",
-            "kind": "population_bundle",
+            "kind": "reaction",
             "key": "crows"
           },
-          "due_time": 250
+          "due_time": 250,
+          "crow_member_id": "11111111-1111-4111-8111-111111111111",
+          "crow_generation": 1,
+          "crow_phase": "acquire"
         }
       ],
       "expected": {
@@ -210,7 +213,61 @@
               "job": {
                 "cartridge_id": "fen",
                 "cartridge_version": "0.0.1",
-                "kind": "population_bundle",
+                "kind": "reaction",
+                "key": "crows"
+              },
+              "due_time": 250,
+              "status": "pending",
+              "crow_member_id": "11111111-1111-4111-8111-111111111111",
+              "crow_generation": 1,
+              "crow_phase": "acquire"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "crow-phase-alone-is-refused",
+      "state": {
+        "clock": 100
+      },
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "77777777-7777-4777-8777-777777777777",
+          "job": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "crows"
+          },
+          "due_time": 250,
+          "crow_phase": "acquire"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "77777777-7777-4777-8777-777777777777"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "77777777-7777-4777-8777-777777777777"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
                 "key": "crows"
               },
               "due_time": 250,

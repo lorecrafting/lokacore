@@ -1,5 +1,5 @@
 {
-  "label": "actions.don_hood",
+  "name": "actions.don_hood",
   "aliases": [
     "don"
   ],
@@ -9,13 +9,6 @@
     "detail": "rack"
   },
   "priority": 5,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

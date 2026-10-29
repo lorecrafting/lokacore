@@ -2,7 +2,7 @@
   "provider": "clerk_a",
   "currency": "pennies",
   "action": "withdraw",
-  "label": "service.withdraw",
+  "name": "service.withdraw",
   "narration": "service.withdraw.used",
   "price": 1,
   "benefit": {

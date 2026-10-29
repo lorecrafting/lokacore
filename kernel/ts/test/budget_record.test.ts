@@ -30,13 +30,13 @@ const world = (): World => {
   const TRUE = { op: 'time_window', from: 0, to: 12 }; // true at 06:00
   c.actions[`${G}:action/move`] = {
     key: 'move',
-    label: 'room.belfry.title', // any key of the catalog
+    name: 'room.belfry.title', // any key of the catalog
     accessibility: 'room.belfry.title',
     target: { kind: 'none' },
     command: 'move',
     priority: 0,
     input: ['direction'],
-    policy: { policy_version: 1, root: { op: 'all', items: Array(32769).fill(TRUE) } },
+    policy: { op: 'all', items: Array(32769).fill(TRUE) },
   };
   const text = encode(c);
   const h = createHash('sha256').update(text).digest('hex');

@@ -50,7 +50,7 @@ export const describe = (
 ): TextKey =>
   of.dark_description && dark(world, actor, steps)
     ? of.dark_description
-    : (of.variants?.find((v) => holds(world, actor, v.when.root, { target, steps }))?.description ??
+    : (of.variants?.find((v) => holds(world, actor, v.when, { target, steps }))?.description ??
       of.description);
 
 /** An entity's `field` text as `actor` sees it: its `<field>_variants`, the entity the target (toolbox row W6). */

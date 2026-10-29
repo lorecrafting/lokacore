@@ -2,7 +2,7 @@
   "keywords": [
     "crown"
   ],
-  "short": "item.crown.short",
+  "name": "item.crown.short",
   "room_line": "item.crown.room",
   "description": "item.crown.description",
   "location": {

@@ -28,7 +28,7 @@ defmodule Loka.ContentAttributesTest do
       update_in(src("cartridge.json"), ["requires", "capabilities"], &Map.merge(&1, caps))
     )
 
-    write.("actions/pray.json", put_in(src("actions/pray.json"), ["policy", "root"], root))
+    write.("actions/pray.json", put_in(src("actions/pray.json"), ["policy"], root))
     if attributes, do: write.("attributes.json", %{"attributes" => attributes})
     Loka.Content.compile(dir)
   end
@@ -75,7 +75,7 @@ defmodule Loka.ContentAttributesTest do
              "resource_sampler@0.0.1:attribute/str" => %{"key" => "str", "start" => 14}
            }
 
-    assert a["recipes"][@pray]["policy"]["root"]["items"] == [
+    assert a["recipes"][@pray]["policy"]["items"] == [
              %{"op" => "stat_compare", "attribute" => ref("attribute", "str"), "at_least" => 14},
              %{"op" => "resource_compare", "resource" => ref("resource", "mv"), "at_least" => 2}
            ]
@@ -85,7 +85,7 @@ defmodule Loka.ContentAttributesTest do
   # reference unchecked, or a schema bound of a leaf or of attributes.json lost, each compiling
   # what the loader rejects.
   test "unlocked, unresolved and malformed attributes and leaves", %{tmp_dir: dir} do
-    root = "actions/pray.policy.root"
+    root = "actions/pray.policy"
     str = %{"str" => %{"start" => 14}}
     {s, u} = {"SCHEMA_VIOLATION", "UNKNOWN_FIELD"}
 
@@ -137,10 +137,11 @@ defmodule Loka.ContentAttributesTest do
     m = JSON.decode!(File.read!(Path.join(hello, "cartridge.json")))
     m = put_in(m, ["requires", "capabilities", "attributes"], 1)
     File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
-    policy = %{"policy_version" => 1, "root" => pool("hp", 1)}
-    File.write!(Path.join(dir, "policies/village_arrived.json"), JSON.encode!(policy))
+    talk = Path.join(dir, "actions/talk.json")
+    action = put_in(JSON.decode!(File.read!(talk)), ["policy"], pool("hp", 1))
+    File.write!(talk, JSON.encode!(action))
     target = %{"target" => "hello_sampler@0.0.1:resource/hp"}
-    path = "policies/village_arrived.root.resource"
+    path = "actions/talk.policy.resource"
     assert Loka.Content.compile(dir) == {:error, [d("UNRESOLVED_REFERENCE", path, target)]}
   end
 

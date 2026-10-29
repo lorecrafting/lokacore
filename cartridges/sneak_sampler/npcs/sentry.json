@@ -2,7 +2,7 @@
   "keywords": [
     "sentry"
   ],
-  "short": "npc.sentry.short",
+  "name": "npc.sentry.short",
   "room_line": "npc.sentry.room",
   "description": "npc.sentry.description",
   "room": "gate",
@@ -25,11 +25,8 @@
   },
   "disposition": {
     "hostile": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
+      "op": "all",
+      "items": []
     },
     "engage": "sentry.spots"
   }

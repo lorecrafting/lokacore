@@ -4,11 +4,8 @@
     "room": "chapel"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "has_item",
-      "item": "ring"
-    }
+    "op": "has_item",
+    "item": "ring"
   },
   "apply": [
     {

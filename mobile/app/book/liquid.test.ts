@@ -114,7 +114,7 @@ function alias(c: any, type: string, variant: string) {
     c.actions[id('action', key)] = {
       key,
       command,
-      label: `action.${command}`,
+      name: `action.${command}`,
       accessibility: `action.${command}`,
       priority: 0,
       target: {
@@ -122,12 +122,12 @@ function alias(c: any, type: string, variant: string) {
         scopes: [command === 'fill' ? 'inspectable_details' : 'inventory'],
       },
       input: [],
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
     };
   const action = c.actions[id('action', aliases[type as keyof typeof aliases])];
   if (variant === 'target') action.target = { kind: 'none' };
   if (variant === 'input') action.input = ['direction'];
-  if (variant === 'policy') action.policy.root = { op: 'not', item: { op: 'all', items: [] } };
+  if (variant === 'policy') action.policy = { op: 'not', item: { op: 'all', items: [] } };
   c.rooms[id('room', 'well_lane')].actions = [{ op: 'replace', actions: Object.values(aliases) }];
   for (const [item, quantity] of [
     ['waterskin', 3],

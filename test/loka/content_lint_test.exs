@@ -5,13 +5,13 @@ defmodule Loka.ContentLintTest do
 
   alias Loka.Content.Lint
 
-  @refuses %{"policy_version" => 1, "root" => %{"op" => "npc_present", "npc" => "wight"}}
-  @always %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+  @refuses %{"op" => "npc_present", "npc" => "wight"}
+  @always %{"op" => "all", "items" => []}
   @tide %{"op" => "sky", "tide" => "high"}
   @visits %{"op" => "visited_count", "room" => "shore_steps", "at_least" => 3}
 
   defp lint(files), do: Lint.findings(files)
-  defp variant(items), do: %{"when" => %{"root" => %{"op" => "all", "items" => items}}}
+  defp variant(items), do: %{"when" => %{"op" => "all", "items" => items}}
 
   test "check 1: a recipe whose policy refuses names a reason (M1, flamma)" do
     assert lint(%{"actions/flamma.json" => %{"policy" => @refuses}}) ==
@@ -20,7 +20,6 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"actions/flamma.json" => %{"policy" => @refuses, "reason" => "reason.flamma"}}) ==
              []
 
-    assert lint(%{"actions/look.json" => %{"policy" => @always}}) == []
     # Break: a built-in action (with command, no reason field to add) gets an unfixable finding.
     assert lint(%{"actions/look.json" => %{"command" => "look", "policy" => @refuses}}) == []
   end
@@ -61,14 +60,14 @@ defmodule Loka.ContentLintTest do
     titled = put_in(room, ["details", "slate", "readable", "title"], "detail.slate.title")
     assert lint(%{"rooms/lever_hall.json" => titled, "text.json" => linked}) == []
 
-    talk = "text.json: action.talk has no text, yet a dialogue has no label of its own"
+    talk = "text.json: action.talk has no text, yet a dialogue has no name of its own"
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{}}) == [talk]
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => ""}}) == [talk]
 
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => "Talk to"}}) ==
              []
 
-    assert lint(%{"dialogues/bram.json" => %{"label" => "action.bram"}, "text.json" => %{}}) == []
+    assert lint(%{"dialogues/bram.json" => %{"name" => "action.bram"}, "text.json" => %{}}) == []
     assert lint(%{"dialogues/bram.json" => %{"keyword" => "ember"}, "text.json" => %{}}) == []
   end
 
@@ -113,11 +112,11 @@ defmodule Loka.ContentLintTest do
     for ok <- ["Hire him", "Wait...", "\"Aye,\" he says.", "“Aye,” he says."],
         do: assert(Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => ok})) == [])
 
-    act = %{"actions/walk.json" => %{"label" => "l"}, "text.json" => %{"l" => "Walk."}}
+    act = %{"actions/walk.json" => %{"name" => "l"}, "text.json" => %{"l" => "Walk."}}
     assert Lint.findings(act) == ["actions/walk.json: label l ends in a period"]
 
     st = fn key, text ->
-      Lint.findings(%{"statuses/s.json" => %{"label" => key}, "text.json" => %{key => text}})
+      Lint.findings(%{"statuses/s.json" => %{"name" => key}, "text.json" => %{key => text}})
     end
 
     assert st.("condition.wet", "Wet") == [
@@ -126,6 +125,12 @@ defmodule Loka.ContentLintTest do
 
     assert st.("condition.wet", "wet") == []
     assert st.("condition.bleeding", "Bleeding") == []
+  end
+
+  # F6. Breaks: the label rules read a dialogue's own `label`, so its displayed `name` goes unlinted.
+  test "the label rules read a dialogue's own name with today's message" do
+    d = %{"dialogues/hal.json" => %{"name" => "n"}, "text.json" => %{"n" => "Hire him."}}
+    assert Lint.findings(d) == ["dialogues/hal.json: label n ends in a period"]
   end
 
   test "a do-nothing Leave or Close choice is refused in a talk with more than one choice" do
@@ -195,20 +200,42 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"resources.json" => %{"resources" => %{"hp" => %{}}}}) == []
   end
 
+  # Breaks: the rule dropped, a gate key (qualification) left out, a nested gate (a quest offer)
+  # not walked, or an optional trigger (hostile, absent means never) flagged.
+  test "an always-true policy, when or qualification is written by omission" do
+    # Break: an always policy with no reason also reported as refusing.
+    assert lint(%{"actions/look.json" => %{"policy" => @always}}) ==
+             ["actions/look.json: policy always holds; omit it"]
+
+    assert lint(%{"skills/s.json" => %{"qualification" => @always}}) ==
+             ["skills/s.json: qualification always holds; omit it"]
+
+    assert lint(%{"quests/q.json" => %{"offer" => %{"policy" => @always}}}) ==
+             ["quests/q.json: offer.policy always holds; omit it"]
+
+    assert lint(%{"npcs/n.json" => %{"disposition" => %{"hostile" => @always}}}) == []
+  end
+
   test "check 6: no description variant is shadowed by an earlier one that always wins first" do
     shadow = "rooms/shore_steps.json: variants[1] is shadowed by variants[0]"
     room = &%{"rooms/shore_steps.json" => %{"variants" => &1}}
 
     assert lint(room.([variant([@visits]), variant([@visits, @tide])])) == [shadow]
-    assert lint(room.([variant([]), variant([@tide])])) == [shadow]
+
+    assert lint(room.([variant([]), variant([@tide])])) ==
+             [shadow, "rooms/shore_steps.json: variants.0.when always holds; omit it"]
+
     assert lint(room.([variant([@visits, @tide]), variant([@visits])])) == []
     any = %{"op" => "any", "items" => [@visits, @tide]}
-    assert lint(room.([%{"when" => %{"root" => any}}, variant([@visits])])) == []
-    assert lint(room.([%{"when" => %{"root" => any}}, variant([any, @visits])])) == [shadow]
+    assert lint(room.([%{"when" => any}, variant([@visits])])) == []
+    assert lint(room.([%{"when" => any}, variant([any, @visits])])) == [shadow]
     detail = %{"details" => %{"post" => %{"variants" => [variant([]), variant([@tide])]}}}
 
     assert lint(%{"rooms/shore_steps.json" => detail}) ==
-             ["rooms/shore_steps.json details.post: variants[1] is shadowed by variants[0]"]
+             [
+               "rooms/shore_steps.json details.post: variants[1] is shadowed by variants[0]",
+               "rooms/shore_steps.json: details.post.variants.0.when always holds; omit it"
+             ]
 
     assert lint(room.([%{"description" => "d"}, variant([@tide])])) ==
              ["rooms/shore_steps.json: variants[0] has no when", shadow]
@@ -266,8 +293,8 @@ defmodule Loka.ContentLintTest do
           {"npcs/n.json", %{"drops" => [%{"item" => "ear", "chance" => 1}]}},
           {"npcs/n.json", shop.(%{"item" => "ear", "buy" => 1})},
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["ear"]}})},
-          {"population_bundles/b.json", %{"item" => "ear"}},
-          {"population_bundles/b.json", %{"corpse" => "ear"}},
+          {"populations/b.json", %{"item" => "ear"}},
+          {"populations/b.json", %{"corpse" => "ear"}},
           {"cartridge.json", %{"world" => %{"death" => %{"npc_corpse" => "ear"}}}},
           {"cartridge.json", %{"world" => %{"death" => %{"player_corpse" => "ear"}}}},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"output" => "ear"}}}}
@@ -285,14 +312,14 @@ defmodule Loka.ContentLintTest do
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["lamp_oil"]}})},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
           {"dialogues/d.json",
-           %{"label" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
+           %{"name" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
           {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})}
         ],
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)
 
     # Holding it for a quest or a recipe guard checks the item; neither takes it out of play.
-    quest = %{"objective" => %{"policy" => %{"root" => has}}}
-    guard = %{"policy" => %{"root" => has}, "reason" => "reason.r"}
+    quest = %{"objective" => %{"policy" => has}}
+    guard = %{"policy" => has, "reason" => "reason.r"}
     assert lint(Map.merge(flask, %{"actions/r.json" => guard, "quests/q.json" => quest})) == dry
 
     assert lint(%{"items/ear.json" => %{"location" => %{"in" => "template"}}}) ==
@@ -343,9 +370,8 @@ defmodule Loka.ContentLintTest do
   defp queried(l) when is_list(l), do: Enum.flat_map(l, &queried/1)
   defp queried(_), do: []
 
-  # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge since Ashmere's
-  # retirement (loka-4hik). Out: every *_sampler (samplers break rules on purpose),
-  # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
+  # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge (loka-4hik). Out:
+  # every *_sampler (samplers break rules on purpose) and lantern_proof. Findings over the
   # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
   # fails, and so does a baseline grown past its cap.
   @baseline_cap 204

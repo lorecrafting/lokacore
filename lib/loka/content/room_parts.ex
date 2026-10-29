@@ -88,9 +88,9 @@ defmodule Loka.Content.RoomParts do
   @doc "Each variant's condition in the schema-valid rooms, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
-    for {_, {rel, [], r}} <- Enum.concat(defs["room"], defs["blueprint"]),
+    for {_, {rel, [], r}} <- Enum.concat(defs["room"], defs["structure"]),
         {steps, root} <-
-          for({s, v} <- variants(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
+          for({s, v} <- variants(r), do: {s ++ ["when"], v["when"]}) ++
             locks(r),
         do: {rel, steps, root}
   end
@@ -99,12 +99,12 @@ defmodule Loka.Content.RoomParts do
   defp locks(r) do
     enter =
       if p = get_in(r, ["locks", "enter"]),
-        do: [{["locks", "enter", "root"], p["root"]}],
+        do: [{["locks", "enter"], p}],
         else: []
 
     enter ++
       for {dir, %{"locks" => %{"traverse" => p}}} <- Map.get(r, "exits", %{}),
-          do: {["exits", dir, "locks", "traverse", "root"], p["root"]}
+          do: {["exits", dir, "locks", "traverse"], p}
   end
 
   @doc """

@@ -3,7 +3,7 @@
     "wat",
     "shepherd"
   ],
-  "short": "npc.wat.short",
+  "name": "npc.wat.short",
   "room_line": "npc.wat.room",
   "description": "npc.wat.description",
   "room": "shepherd_hut",
@@ -25,12 +25,9 @@
     "14": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "letter_burnt",
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": "letter_burnt",
+          "equals": true
         },
         "room": "warden_gate",
         "goal": "npc.wat.goal_gate"
@@ -49,23 +46,17 @@
   "room_line_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "letter_burnt",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "letter_burnt",
+        "equals": true
       },
       "description": "npc.wat.room_ash"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "chilled"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "chilled"
       },
       "description": "npc.wat.room_chilled"
     }
@@ -73,23 +64,17 @@
   "description_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "letter_burnt",
-          "equals": true
-        }
+        "op": "fact_compare",
+        "fact": "letter_burnt",
+        "equals": true
       },
       "description": "npc.wat.description_ash"
     },
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "status_active",
-          "subject": "target",
-          "status": "chilled"
-        }
+        "op": "status_active",
+        "subject": "target",
+        "status": "chilled"
       },
       "description": "npc.wat.description_chilled"
     }

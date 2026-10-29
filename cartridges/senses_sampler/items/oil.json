@@ -2,7 +2,7 @@
   "keywords": [
     "oil"
   ],
-  "short": "item.oil.short",
+  "name": "item.oil.short",
   "room_line": "item.oil.room",
   "description": "item.oil.description",
   "location": {

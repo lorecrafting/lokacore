@@ -6,7 +6,7 @@ defmodule Loka.Content.Entities do
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
 
-  @text ~w(short room_line description)
+  @text ~w(name room_line description)
 
   @doc "The schema-valid NPCs and items as `{kind, rel, definition}`."
   @spec all(map()) :: [{String.t(), String.t(), map()}]
@@ -79,7 +79,7 @@ defmodule Loka.Content.Entities do
   defp roots(e) do
     for(
       {steps, %{"when" => w}} <- variants(e) ++ cases(e),
-      do: {steps ++ ["when", "root"], w["root"]}
+      do: {steps ++ ["when"], w}
     ) ++
       policies(e, "disposition", ~w(hostile friendly)) ++
       policies(e, "locks", ~w(get put)) ++
@@ -89,11 +89,11 @@ defmodule Loka.Content.Entities do
   # Toolbox row FD7: each ask answer's condition (read with the NPC as the target).
   defp answers(e) do
     for {%{"when" => w}, i} <- Enum.with_index(get_in(e, ["ask", "answers"]) || []),
-        do: {["ask", "answers", i, "when", "root"], w["root"]}
+        do: {["ask", "answers", i, "when"], w}
   end
 
   defp policies(e, field, keys) do
-    for k <- keys, p = get_in(e, [field, k]), p != nil, do: {[field, k, "root"], p["root"]}
+    for k <- keys, p = get_in(e, [field, k]), p != nil, do: {[field, k], p}
   end
 
   # Toolbox row W10: each case of a source daily_schedule hour list, and (row W26) a lone walking
@@ -182,7 +182,7 @@ defmodule Loka.Content.Entities do
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
   @doc """
-  Every text of each entity as `{rel, entity key, steps, text key}`: short, room_line and
+  Every text of each entity as `{rel, entity key, steps, text key}`: name, room_line and
   description, then each text variant's description.
   """
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]

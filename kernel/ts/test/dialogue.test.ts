@@ -209,7 +209,7 @@ test("the rule enforces the target's dialogue policy whatever talk admitted it",
     const d = structuredClone(c.dialogues[`${F}:dialogue/bram`]);
     d.key = 'ada';
     d.npc = d.roles.bram.npc = ref('npc', 'ada');
-    d.policy.root.state = 'resolved';
+    d.policy.state = 'resolved';
     c.dialogues[`${F}:dialogue/ada`] = d;
   });
   const active = ok(ada, accept, 1, ACCEPT).world;
@@ -217,13 +217,13 @@ test("the rule enforces the target's dialogue policy whatever talk admitted it",
   const alias = world((c) => {
     c.actions[`${F}:action/chat`] = {
       key: 'chat',
-      label: 'action.talk',
+      name: 'action.talk',
       accessibility: 'action.talk',
       target: { kind: 'entity', scopes: ['room_occupants'] },
       command: 'talk',
       priority: 0,
       input: [],
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      policy: { op: 'all', items: [] },
     };
   });
   refused(alias, talk, 'invalid_state');

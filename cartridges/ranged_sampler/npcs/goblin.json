@@ -2,7 +2,7 @@
   "keywords": [
     "goblin"
   ],
-  "short": "npc.goblin.short",
+  "name": "npc.goblin.short",
   "room_line": "npc.goblin.room",
   "description": "npc.goblin.description",
   "room": "den",

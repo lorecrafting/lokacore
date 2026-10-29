@@ -67,7 +67,7 @@ defmodule Loka.Content.Dreams do
         else: [bad(at(rel, steps ++ ["steps"]))]
 
     order ++
-      texts(rel, steps, s, ~w(title description), text) ++
+      texts(rel, steps, s, ~w(name description), text) ++
       Enum.flat_map(Enum.with_index(s["steps"]), fn {line, i} ->
         line(rel, steps ++ ["steps", i], line, text)
       end)
@@ -123,10 +123,7 @@ defmodule Loka.Content.Dreams do
 
     expected = %{
       "evidence" => "current_state",
-      "policy" => %{
-        "policy_version" => 1,
-        "root" => %{"op" => "fact_compare", "fact" => memory, "equals" => true}
-      }
+      "policy" => %{"op" => "fact_compare", "fact" => memory, "equals" => true}
     }
 
     valid =

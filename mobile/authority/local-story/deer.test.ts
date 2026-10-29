@@ -110,7 +110,7 @@ test('pending sight and confirmed flight cold-reopen with conserved deer custody
   const deer = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
       identity.origin.kind === 'spawned' &&
-      identity.origin.role === 'deer' &&
+      identity.origin.role === 'prey' &&
       identity.definition.key === 'willow_deer',
   )![0];
   assert.equal(
@@ -199,7 +199,7 @@ test('missed round and +300 flight cold-reopen with closed combat', (t) => {
   const deer = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
       identity.origin.kind === 'spawned' &&
-      identity.origin.role === 'deer' &&
+      identity.origin.role === 'prey' &&
       identity.definition.key === 'willow_deer',
   )![0];
   const attack = story.invoke({
@@ -343,7 +343,7 @@ test('fatal deer and its owned hide cold-reopen without replacement', (t) => {
   const deer = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
       identity.origin.kind === 'spawned' &&
-      identity.origin.role === 'deer' &&
+      identity.origin.role === 'prey' &&
       identity.definition.key === 'willow_deer',
   )![0];
   const attack = story.invoke({
@@ -362,7 +362,7 @@ test('fatal deer and its owned hide cold-reopen without replacement', (t) => {
   const hide = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
       identity.origin.kind === 'spawned' &&
-      identity.origin.role === 'hide' &&
+      identity.origin.role === 'loot' &&
       identity.origin.member_id === deer,
   )![0];
   p.sql.close();
@@ -396,7 +396,7 @@ test('real COMMIT faults preserve all-prior or all-next deer rows and one replay
       const deer = Object.entries(story.world().state.created ?? {}).find(
         ([, identity]) =>
           identity.origin.kind === 'spawned' &&
-          identity.origin.role === 'deer' &&
+          identity.origin.role === 'prey' &&
           identity.definition.key === 'willow_deer',
       )![0];
       if (transition === 'death') {
@@ -507,7 +507,7 @@ test('real COMMIT faults preserve all-prior or all-next deer rows and one replay
         const hide = Object.entries(state.created ?? {}).find(
           ([, identity]) =>
             identity.origin.kind === 'spawned' &&
-            identity.origin.role === 'hide' &&
+            identity.origin.role === 'loot' &&
             identity.origin.member_id === deer,
         )![0];
         assert.equal(state.containers[hide], corpse);

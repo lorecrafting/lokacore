@@ -2,7 +2,7 @@
   "keywords": [
     "anvil"
   ],
-  "short": "item.anvil.short",
+  "name": "item.anvil.short",
   "room_line": "item.anvil.room",
   "description": "item.anvil.description",
   "location": {

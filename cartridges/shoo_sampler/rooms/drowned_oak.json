@@ -1,5 +1,5 @@
 {
-  "title": "room.drowned_oak.title",
+  "name": "room.drowned_oak.title",
   "description": "room.drowned_oak.description",
   "exits": {
     "north": {

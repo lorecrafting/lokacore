@@ -14,8 +14,8 @@ import { INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const all = (n: number) => ({
-  policy_version: 1,
-  root: { op: 'all', items: Array(n).fill({ op: 'time_window', from: 0, to: 12 }) },
+  op: 'all',
+  items: Array(n).fill({ op: 'time_window', from: 0, to: 12 }),
 });
 const world = (name: string, edit: (c: any) => void): World => {
   const c = structuredClone(read(`protocol/fixtures/cartridge_${name}_hash.json`).value);
@@ -48,7 +48,7 @@ test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed quer
     const w = world('gate', (c) => {
       c.actions['gate_sampler@0.0.1:action/unlock'] = {
         key: 'unlock',
-        label: 'room.cell.title', // any key of the catalog
+        name: 'room.cell.title', // any key of the catalog
         accessibility: 'room.cell.title',
         target: { kind: 'none' },
         command: 'unlock',
@@ -111,9 +111,9 @@ test('a choose counts policy and objective: 32766 leaves fit, 32767 exceed query
   const chosen = (n: number) => {
     const F = 'ferry_sampler@0.0.1';
     let w = world('ferry', (c) => {
-      const has = c.quests[`${F}:quest/lantern`].objective.policy.root;
+      const has = c.quests[`${F}:quest/lantern`].objective.policy;
       c.quests[`${F}:quest/lantern`].objective.policy = { ...all(n) };
-      c.quests[`${F}:quest/lantern`].objective.policy.root.items.unshift(has);
+      c.quests[`${F}:quest/lantern`].objective.policy.items.unshift(has);
     });
     const quest = {
       cartridge_id: 'ferry_sampler',

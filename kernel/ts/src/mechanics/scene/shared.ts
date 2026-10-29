@@ -12,7 +12,6 @@ import type {
 } from '../../contracts.gen.ts';
 import { bodyOf, has, values, refString, type World } from '../../runtime/decision.ts';
 import { value } from '../fact.ts';
-import { ALWAYS } from '../policy.ts';
 import type { ActionSet } from '../../commands/actions.ts';
 
 const reference = (world: World, kind: string, key: string): DefinitionRef => ({
@@ -72,7 +71,7 @@ function legacyStarts(world: World, e: DomainEvent): ReactionRule[] {
     .map((s) => ({
       key: s.key as Key,
       on: { event: 'fact_changed', fact: fact(world, s) },
-      when: { policy_version: 1, root: { op: 'fact_compare', fact: fact(world, s), equals: 0 } },
+      when: { op: 'fact_compare', fact: fact(world, s), equals: 0 },
       apply: [{ op: 'fact.assign', fact: fact(world, s), value: 1 }],
     }));
 }
@@ -86,7 +85,6 @@ export const modal = (): ActionSet => ({
     target: { kind: 'none' },
     input: ['scene', 'line'],
     priority: 0,
-    policy: ALWAYS,
     engine: true,
   },
 });

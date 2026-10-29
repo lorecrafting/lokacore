@@ -2,7 +2,7 @@
   "keywords": [
     "bag"
   ],
-  "short": "item.bag.short",
+  "name": "item.bag.short",
   "room_line": "item.bag.room",
   "description": "item.bag.description",
   "location": {

@@ -3,14 +3,11 @@
     "hour_door",
     "door"
   ],
-  "short": "barrier.hour_door.short",
+  "name": "barrier.hour_door.short",
   "initial": "closed",
   "opens_when": {
-    "policy_version": 1,
-    "root": {
-      "op": "time_window",
-      "from": 2,
-      "to": 4
-    }
+    "op": "time_window",
+    "from": 2,
+    "to": 4
   }
 }

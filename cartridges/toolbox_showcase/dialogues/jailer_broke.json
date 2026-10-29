@@ -1,25 +1,22 @@
 {
   "npc": "jailer",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "fact_compare",
-          "fact": "wanted",
-          "equals": true
-        },
-        {
-          "op": "not",
-          "item": {
-            "op": "resource_compare",
-            "resource": "pennies",
-            "at_least": 3
-          }
+    "op": "all",
+    "items": [
+      {
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
+      },
+      {
+        "op": "not",
+        "item": {
+          "op": "resource_compare",
+          "resource": "pennies",
+          "at_least": 3
         }
-      ]
-    }
+      }
+    ]
   },
   "prompt": "dialogue.jailer.prompt",
   "roles": {

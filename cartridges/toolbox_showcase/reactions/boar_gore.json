@@ -5,11 +5,8 @@
     "attacker": "boar"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "npc_present",
-      "npc": "boar"
-    }
+    "op": "npc_present",
+    "npc": "boar"
   },
   "apply": [
     {

@@ -21,7 +21,6 @@
           "containment": 1,
           "policy": 1,
           "action_recipe": 1,
-          "behavior": 1,
           "calendar": 1,
           "resource": 1,
           "schedule": 1,
@@ -44,7 +43,6 @@
         "containment": 1,
         "policy": 1,
         "action_recipe": 1,
-        "behavior": 1,
         "calendar": 1,
         "resource": 1,
         "schedule": 1,
@@ -72,11 +70,10 @@
         "key": "search_plan"
       }
     },
-    "policies": {},
     "actions": {},
     "rooms": {
       "chapters_sampler@0.0.1:room/ferry_landing": {
-        "title": "room.ferry_landing.title",
+        "name": "room.ferry_landing.title",
         "description": "room.ferry_landing.description",
         "exits": {
           "north": {
@@ -100,7 +97,7 @@
         "key": "ferry_landing"
       },
       "chapters_sampler@0.0.1:room/village_green": {
-        "title": "room.village_green.title",
+        "name": "room.village_green.title",
         "description": "room.village_green.description",
         "exits": {
           "south": {
@@ -121,7 +118,7 @@
           "bram",
           "ferryman"
         ],
-        "short": "npc.bram.short",
+        "name": "npc.bram.short",
         "room_line": "npc.bram.room",
         "description": "npc.bram.description",
         "room": {
@@ -149,7 +146,7 @@
     },
     "recipes": {
       "chapters_sampler@0.0.1:recipe/coil_rope": {
-        "label": "actions.coil_rope",
+        "name": "actions.coil_rope",
         "aliases": [
           "coil"
         ],
@@ -164,13 +161,6 @@
           "detail": "mooring_post"
         },
         "priority": 10,
-        "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
-        },
         "duration": 3600,
         "outcomes": {
           "success": {
@@ -266,7 +256,7 @@
           "lantern",
           "brass_lantern"
         ],
-        "short": "item.lantern.short",
+        "name": "item.lantern.short",
         "room_line": "item.lantern.room",
         "description": "item.lantern.description",
         "location": {
@@ -283,29 +273,19 @@
     },
     "quests": {
       "chapters_sampler@0.0.1:quest/lantern": {
-        "title": "quest.lantern.title",
+        "name": "quest.lantern.title",
         "offer": {
-          "label": "quest.lantern.accept",
-          "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "all",
-              "items": []
-            }
-          }
+          "label": "quest.lantern.accept"
         },
         "objective": {
           "evidence": "current_state",
           "policy": {
-            "policy_version": 1,
-            "root": {
-              "op": "has_item",
-              "item": {
-                "cartridge_id": "chapters_sampler",
-                "cartridge_version": "0.0.1",
-                "kind": "item",
-                "key": "lantern"
-              }
+            "op": "has_item",
+            "item": {
+              "cartridge_id": "chapters_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "item",
+              "key": "lantern"
             }
           }
         },
@@ -321,17 +301,14 @@
           "key": "bram"
         },
         "policy": {
-          "policy_version": 1,
-          "root": {
-            "op": "quest_state",
-            "quest": {
-              "cartridge_id": "chapters_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "quest",
-              "key": "lantern"
-            },
-            "state": "active"
-          }
+          "op": "quest_state",
+          "quest": {
+            "cartridge_id": "chapters_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "lantern"
+          },
+          "state": "active"
         },
         "prompt": "dialogue.bram.prompt",
         "roles": {
@@ -428,10 +405,10 @@
     },
     "chapters": [
       {
-        "title": "chapter.landing"
+        "name": "chapter.landing"
       },
       {
-        "title": "chapter.dusk",
+        "name": "chapter.dusk",
         "story_point": {
           "cartridge_id": "chapters_sampler",
           "cartridge_version": "0.0.1",
@@ -440,7 +417,7 @@
         }
       },
       {
-        "title": "chapter.reeds",
+        "name": "chapter.reeds",
         "story_point": {
           "cartridge_id": "chapters_sampler",
           "cartridge_version": "0.0.1",
@@ -451,6 +428,6 @@
       }
     ]
   },
-  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"chapters\":[{\"title\":\"chapter.landing\"},{\"story_point\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"},\"title\":\"chapter.dusk\"},{\"outcome\":\"carry\",\"story_point\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"},\"title\":\"chapter.reeds\"}],\"dialogues\":{\"chapters_sampler@0.0.1:dialogue/bram\":{\"choices\":{\"leave_it\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]},\"take_it\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}}},\"entry\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"chapters_sampler@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"chapters_sampler@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"chapters_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Chapters Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"chapters_sampler@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"quests\":{\"chapters_sampler@0.0.1:quest/lantern\":{\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"offer\":{\"label\":\"quest.lantern.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.lantern.title\"}},\"recipes\":{\"chapters_sampler@0.0.1:recipe/coil_rope\":{\"aliases\":[\"coil\"],\"duration\":3600,\"key\":\"coil_rope\",\"label\":\"actions.coil_rope\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.coil_rope.actor\",\"participants\":{\"actor\":{\"role\":\"actor\"},\"bram\":{\"npc\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"}}},\"sequence\":[{\"event\":\"rope_coiled\",\"op\":\"event.emit\"}]}},\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":10,\"target\":{\"detail\":\"mooring_post\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}}},\"resources\":{\"chapters_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"chapters_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"chapters_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"chapters_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"post\",\"mooring_post\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"chapters_sampler@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"story_points\":{\"chapters_sampler@0.0.1:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"take_it\",\"dialogue\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave_it\",\"dialogue\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.talk\":\"Talk\",\"actions.coil_rope\":\"Coil the mooring rope\",\"chapter.dusk\":\"Dusk\",\"chapter.landing\":\"Landing\",\"chapter.reeds\":\"Reeds\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"dialogue.bram.carry\":\"Carry it along the bank\",\"dialogue.bram.leave\":\"Leave it with the search party\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at the reeds. \\\"Are you coming with us, or do you mean to go along the bank yourself?\\\"\",\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] sits on a coil of rope.\",\"item.lantern.short\":\"a brass lantern\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once and points you down the bank.\",\"narration.bram.leave\":\"You hand Bram the lantern. He lifts it toward the reeds and calls the others in.\",\"narration.coil_rope.actor\":\"You coil the wet rope around the post, slowly, the way Bram does it.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.title\":\"Bram's lantern\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}}",
-  "sha256": "98c73da3bb6df1e683dda21d482ae77bb279ec5ee60bd2ad99d86d1115784a3c"
+  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"chapters\":[{\"name\":\"chapter.landing\"},{\"name\":\"chapter.dusk\",\"story_point\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"}},{\"name\":\"chapter.reeds\",\"outcome\":\"carry\",\"story_point\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"}}],\"dialogues\":{\"chapters_sampler@0.0.1:dialogue/bram\":{\"choices\":{\"leave_it\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]},\"take_it\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}}},\"entry\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"chapters_sampler@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"chapters_sampler@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"name\":\"item.lantern.short\",\"room_line\":\"item.lantern.room\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"chapters_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Chapters Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"chapters_sampler@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"name\":\"npc.bram.short\",\"room\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\"}},\"quests\":{\"chapters_sampler@0.0.1:quest/lantern\":{\"key\":\"lantern\",\"name\":\"quest.lantern.title\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"item\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}},\"offer\":{\"label\":\"quest.lantern.accept\"}}},\"recipes\":{\"chapters_sampler@0.0.1:recipe/coil_rope\":{\"aliases\":[\"coil\"],\"duration\":3600,\"key\":\"coil_rope\",\"name\":\"actions.coil_rope\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.coil_rope.actor\",\"participants\":{\"actor\":{\"role\":\"actor\"},\"bram\":{\"npc\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"}}},\"sequence\":[{\"event\":\"rope_coiled\",\"op\":\"event.emit\"}]}},\"priority\":10,\"target\":{\"detail\":\"mooring_post\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}}},\"resources\":{\"chapters_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"chapters_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"chapters_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"chapters_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"post\",\"mooring_post\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"name\":\"room.ferry_landing.title\"},\"chapters_sampler@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"name\":\"room.village_green.title\"}},\"story_points\":{\"chapters_sampler@0.0.1:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"take_it\",\"dialogue\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave_it\",\"dialogue\":{\"cartridge_id\":\"chapters_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.talk\":\"Talk\",\"actions.coil_rope\":\"Coil the mooring rope\",\"chapter.dusk\":\"Dusk\",\"chapter.landing\":\"Landing\",\"chapter.reeds\":\"Reeds\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"dialogue.bram.carry\":\"Carry it along the bank\",\"dialogue.bram.leave\":\"Leave it with the search party\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at the reeds. \\\"Are you coming with us, or do you mean to go along the bank yourself?\\\"\",\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] sits on a coil of rope.\",\"item.lantern.short\":\"a brass lantern\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once and points you down the bank.\",\"narration.bram.leave\":\"You hand Bram the lantern. He lifts it toward the reeds and calls the others in.\",\"narration.coil_rope.actor\":\"You coil the wet rope around the post, slowly, the way Bram does it.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.title\":\"Bram's lantern\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}}",
+  "sha256": "b1df54bfcde5b1efd4912b13e7878fb98dba8f850b489e4e219b9cfdf55b028c"
 }

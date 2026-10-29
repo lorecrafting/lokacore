@@ -1,5 +1,5 @@
 {
-  "label": "actions.search_pool_cleft",
+  "name": "actions.search_pool_cleft",
   "aliases": [
     "search"
   ],
@@ -9,13 +9,6 @@
     "detail": "pool_cleft"
   },
   "priority": 10,
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "outcomes": {
     "success": {
       "sequence": [

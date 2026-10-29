@@ -1,5 +1,5 @@
 {
-  "title": "room.crossroads.title",
+  "name": "room.crossroads.title",
   "description": "room.crossroads.description",
   "exits": {
     "east": {

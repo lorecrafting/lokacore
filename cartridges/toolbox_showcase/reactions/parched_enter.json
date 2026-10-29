@@ -4,21 +4,18 @@
     "room": "fell_top"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "sky",
-          "weather": "drought"
-        },
-        {
-          "op": "has_tag",
-          "subject": "room",
-          "tag": "exposed"
-        }
-      ]
-    }
+    "op": "all",
+    "items": [
+      {
+        "op": "sky",
+        "weather": "drought"
+      },
+      {
+        "op": "has_tag",
+        "subject": "room",
+        "tag": "exposed"
+      }
+    ]
   },
   "apply": [
     {

@@ -1,5 +1,7 @@
 {
-  "bundle": "hounds",
+  "npc": "hound",
+  "item": "fur",
+  "corpse": "npc_corpse",
   "home": "clearing",
   "area": [
     "clearing",

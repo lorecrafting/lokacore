@@ -2,7 +2,7 @@
   "keywords": [
     "egg"
   ],
-  "short": "item.egg_02.short",
+  "name": "item.egg_02.short",
   "room_line": "item.egg_02.room",
   "description": "item.egg_02.description",
   "location": {

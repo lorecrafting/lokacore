@@ -2,17 +2,14 @@
   "keywords": [
     "stranger"
   ],
-  "short": "npc.stranger.short",
+  "name": "npc.stranger.short",
   "short_variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "fact_compare",
-          "fact": "knows_name",
-          "equals": true,
-          "subject": "target"
-        }
+        "op": "fact_compare",
+        "fact": "knows_name",
+        "equals": true,
+        "subject": "target"
       },
       "description": "npc.stranger.short_named"
     }

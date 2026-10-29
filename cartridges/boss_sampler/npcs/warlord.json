@@ -2,7 +2,7 @@
   "keywords": [
     "warlord"
   ],
-  "short": "npc.warlord.short",
+  "name": "npc.warlord.short",
   "room_line": "npc.warlord.room",
   "description": "npc.warlord.description",
   "room": "hall",
@@ -21,12 +21,9 @@
     "0": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "withdrawn",
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": "withdrawn",
+          "equals": true
         },
         "room": "lair"
       },
@@ -35,12 +32,9 @@
     "1": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "withdrawn",
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": "withdrawn",
+          "equals": true
         },
         "room": "lair"
       },
@@ -49,12 +43,9 @@
     "2": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "withdrawn",
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": "withdrawn",
+          "equals": true
         },
         "room": "lair"
       },
@@ -63,12 +54,9 @@
     "3": [
       {
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": "withdrawn",
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": "withdrawn",
+          "equals": true
         },
         "room": "lair"
       },

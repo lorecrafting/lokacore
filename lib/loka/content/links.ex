@@ -44,7 +44,7 @@ defmodule Loka.Content.Links do
       self = detail_of(steps)
 
       {rel, steps, key, self, targets,
-       if(self || steps == ["title"], do: [], else: root_details(r, details))}
+       if(self || steps == ["name"], do: [], else: root_details(r, details))}
     end
   end
 
@@ -57,13 +57,13 @@ defmodule Loka.Content.Links do
     details -- grouped
   end
 
-  # The title, description and variants of room `r`, then each detail's description and
+  # The name, description and variants of room `r`, then each detail's description and
   # variants (RoomParts.variants), as {steps, text key}.
   defp texts(r) do
     details = for {k, d} <- Map.get(r, "details", %{}), do: {["details", k], d}
 
     [
-      {["title"], r["title"]}
+      {["name"], r["name"]}
       | for({s, d} <- [{[], r} | details], do: {s ++ ["description"], d["description"]})
     ] ++
       for {s, v} <- RoomParts.variants(r), do: {s ++ ["description"], v["description"]}

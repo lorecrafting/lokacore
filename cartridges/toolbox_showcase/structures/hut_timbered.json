@@ -1,0 +1,14 @@
+{
+  "name": "structure.hut_timbered.title",
+  "description": "structure.hut_timbered.description",
+  "max_per_owner": 1,
+  "variants": [
+    {
+      "when": {
+        "op": "item_present",
+        "tag": "rug"
+      },
+      "description": "structure.hut_timbered.description.rug"
+    }
+  ]
+}

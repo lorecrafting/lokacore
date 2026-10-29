@@ -2,7 +2,7 @@
   "keywords": [
     "bread"
   ],
-  "short": "item.hall_bread.short",
+  "name": "item.hall_bread.short",
   "room_line": "item.hall_bread.room",
   "description": "item.hall_bread.description",
   "location": {

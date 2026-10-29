@@ -2,7 +2,7 @@
   "keywords": [
     "crate"
   ],
-  "short": "item.yard_crate.short",
+  "name": "item.yard_crate.short",
   "room_line": "item.yard_crate.room",
   "description": "item.yard_crate.description",
   "mass_grams": 5000,
@@ -18,13 +18,10 @@
   ],
   "locks": {
     "get": {
-      "policy_version": 1,
-      "root": {
-        "op": "not",
-        "item": {
-          "op": "all",
-          "items": []
-        }
+      "op": "not",
+      "item": {
+        "op": "all",
+        "items": []
       }
     }
   },

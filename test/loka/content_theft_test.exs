@@ -62,7 +62,7 @@ defmodule Loka.ContentTheftTest do
 
     nope = %{"op" => "fact_compare", "fact" => "nope", "equals" => true}
 
-    assert diags.([{"npcs/vault.json", &put_in(&1, ["locks", "get", "root"], nope)}]) ==
-             [{"UNRESOLVED_REFERENCE", "npcs/vault.locks.get.root.fact"}]
+    assert diags.([{"npcs/vault.json", &put_in(&1, ["locks", "get"], nope)}]) ==
+             [{"UNRESOLVED_REFERENCE", "npcs/vault.locks.get.fact"}]
   end
 end

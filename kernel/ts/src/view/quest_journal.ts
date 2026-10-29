@@ -37,7 +37,7 @@ export function chapter(world: World, actor: CharacterId): ChapterView | undefin
     )
       index = i;
   }
-  return { index, title: chapters[index]!.title };
+  return { index, title: chapters[index]!.name };
 }
 
 export function journal(world: World, actor: CharacterId, steps: Steps): QuestView[] {
@@ -47,12 +47,12 @@ export function journal(world: World, actor: CharacterId, steps: Steps): QuestVi
       const progress = { ...patrolProgress(world, actor, id, steps), ...remaining(world, id, q) };
       const expedition = expeditionProgress(world, id);
       const d = world.cartridge.quests![refString(q.quest)];
-      const shown = { ...progress, ...expedition, quest: q.quest, state: q.state, title: d.title };
+      const shown = { ...progress, ...expedition, quest: q.quest, state: q.state, title: d.name };
       const j = d.journal;
       if (!j) return shown;
       const variant =
         q.state === 'active'
-          ? j.active_variants?.find((v) => holds(world, actor, v.when.root))?.text
+          ? j.active_variants?.find((v) => holds(world, actor, v.when))?.text
           : undefined;
       const failed = expedition.expedition?.status === 'failed';
       const met =
@@ -109,7 +109,7 @@ function expeditionProgress(world: World, id: string) {
       status: row.status,
       ...(next && {
         next_room: next.to,
-        next_title: world.rooms[world.roomIds[refString(next.to)]].title,
+        next_title: world.rooms[world.roomIds[refString(next.to)]].name,
         ...(world.state.containers[row.body_id] === world.roomIds[refString(next.from)] && {
           direction: next.direction,
         }),
@@ -127,8 +127,8 @@ function patrolProgress(world: World, actor: CharacterId, id: string, steps: Ste
           patrol: {
             leader_id: found.npc_id,
             leader_name: describeEntity(world, actor, found.npc_id, 'short', steps),
-            room_title: world.rooms[walked.here].title,
-            next_title: world.rooms[walked.there].title,
+            room_title: world.rooms[walked.here].name,
+            next_title: world.rooms[walked.there].name,
             room: walked.settings.route[found.cursor],
             next_room: walked.settings.route[walked.next],
             direction: found.status === 'awaiting' ? walked.pending_direction : walked.direction,

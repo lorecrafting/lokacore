@@ -16,11 +16,11 @@ const world = (carving: object) =>
     cartridge: {
       skills: {
         'x@0.0.1:skill/carving': carving,
-        'x@0.0.1:skill/whittling': { prerequisite: { root: {} } },
+        'x@0.0.1:skill/whittling': { prerequisite: {} },
       },
     },
   }) as never;
-const hidden = world({ hidden: true, prerequisite: { root: {} } });
+const hidden = world({ hidden: true, prerequisite: {} });
 const d = { choices: { learn: teach('carving'), leave: {}, whittle: teach('whittling') } } as never;
 
 // Breaks: a row may drop a choice that teaches no skill or a shown one, even gated (whittle),

@@ -1,5 +1,5 @@
 {
-  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/green_sampler (Early R7/R8 R; 05 §11; CartridgeArtifact.content_hash): reaction@1 with eight reaction rules (reaction.schema.json ReactionRule): two on someone entering the green (one only between 19:00 and 20:00, a time_window when), one on green_busy changing with a fact_compare when, one on entering the belfry, and four on two facts changing that never settle; five instance-scoped bool facts, two NPCs with daily schedules (Bram: landing from hour 6, green from hour 19; Maud: green from hour 6, landing from hour 20), three rooms and a calendar start at 06:00. Assembled by hand from the source files (manifest without entry and calendar plus resource@1, the lock, facts keyed by name with each . made _, empty policies and actions, each room, NPC and reaction with key added and short references expanded, the default pools, entry, text, calendar), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/green_sampler (Early R7/R8 R; 05 §11; CartridgeArtifact.content_hash): reaction@1 with eight reaction rules (reaction.schema.json ReactionRule): two on someone entering the green (one only between 19:00 and 20:00, a time_window when), one on green_busy changing with a fact_compare when, one on entering the belfry, and four on two facts changing that never settle; five instance-scoped bool facts, two NPCs with daily schedules (Bram: landing from hour 6, green from hour 19; Maud: green from hour 6, landing from hour 20), three rooms and a calendar start at 06:00. Assembled by hand from the source files (manifest without entry and calendar plus resource@1, the lock, facts keyed by name with each . made _, empty actions, each room, NPC and reaction with key added and short references expanded, the default pools, entry, text, calendar), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
   "value": {
     "actions": {},
     "calendar": {
@@ -80,7 +80,6 @@
         "schedule": 1,
         "movement": 1,
         "containment": 1,
-        "behavior": 1,
         "calendar": 1,
         "fact": 1,
         "reaction": 1,
@@ -105,7 +104,6 @@
           "schedule": 1,
           "movement": 1,
           "containment": 1,
-          "behavior": 1,
           "calendar": 1,
           "fact": 1,
           "reaction": 1,
@@ -123,7 +121,7 @@
           "bram",
           "ferryman"
         ],
-        "short": "npc.bram.short",
+        "name": "npc.bram.short",
         "room_line": "npc.bram.room",
         "description": "npc.bram.description",
         "room": {
@@ -152,7 +150,7 @@
         "keywords": [
           "maud"
         ],
-        "short": "npc.maud.short",
+        "name": "npc.maud.short",
         "room_line": "npc.maud.room",
         "description": "npc.maud.description",
         "room": {
@@ -178,7 +176,6 @@
         "key": "maud"
       }
     },
-    "policies": {},
     "reactions": {
       "green_sampler@0.0.1:reaction/bell_falls": {
         "on": {
@@ -191,17 +188,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "rope_taut"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "rope_taut"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -228,17 +222,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "rope_taut"
-            },
-            "equals": false
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "rope_taut"
+          },
+          "equals": false
         },
         "apply": [
           {
@@ -265,17 +256,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "green_busy"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -326,12 +314,9 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "time_window",
-            "from": 19,
-            "to": 20
-          }
+          "op": "time_window",
+          "from": 19,
+          "to": 20
         },
         "apply": [
           {
@@ -382,17 +367,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "bell_up"
-            },
-            "equals": true
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "bell_up"
+          },
+          "equals": true
         },
         "apply": [
           {
@@ -419,17 +401,14 @@
           }
         },
         "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "green_sampler",
-              "cartridge_version": "0.0.1",
-              "kind": "fact",
-              "key": "bell_up"
-            },
-            "equals": false
-          }
+          "op": "fact_compare",
+          "fact": {
+            "cartridge_id": "green_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "bell_up"
+          },
+          "equals": false
         },
         "apply": [
           {
@@ -471,7 +450,7 @@
     },
     "rooms": {
       "green_sampler@0.0.1:room/belfry": {
-        "title": "room.belfry.title",
+        "name": "room.belfry.title",
         "description": "room.belfry.description",
         "exits": {
           "west": {
@@ -486,7 +465,7 @@
         "key": "belfry"
       },
       "green_sampler@0.0.1:room/ferry_landing": {
-        "title": "room.ferry_landing.title",
+        "name": "room.ferry_landing.title",
         "description": "room.ferry_landing.description",
         "exits": {
           "north": {
@@ -501,7 +480,7 @@
         "key": "ferry_landing"
       },
       "green_sampler@0.0.1:room/village_green": {
-        "title": "room.village_green.title",
+        "name": "room.village_green.title",
         "description": "room.village_green.description",
         "exits": {
           "south": {
@@ -539,6 +518,6 @@
       "npc.maud.description": "Maud knows everything said on the green by evening, and goes down to the landing to say it again."
     }
   },
-  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"green_sampler@0.0.1:fact/bell_up\":{\"key\":\"bell_up\",\"meaning\":\"The belfry bell has swung up.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/gossip_spread\":{\"key\":\"gossip_spread\",\"meaning\":\"The green's gossip has started.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/green_busy\":{\"key\":\"green_busy\",\"meaning\":\"Someone has come up to the green today.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/lamps_lit\":{\"key\":\"lamps_lit\",\"meaning\":\"The green's lamps were lit at dusk.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/rope_taut\":{\"key\":\"rope_taut\",\"meaning\":\"The bell rope is pulled taut.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"reaction\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"green_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"reaction\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Green Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"green_sampler@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"},\"green_sampler@0.0.1:npc/maud\":{\"daily_schedule\":{\"20\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"description\":\"npc.maud.description\",\"key\":\"maud\",\"keywords\":[\"maud\"],\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"room_line\":\"npc.maud.room\",\"short\":\"npc.maud.short\"}},\"policies\":{},\"reactions\":{\"green_sampler@0.0.1:reaction/bell_falls\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}],\"key\":\"bell_falls\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"green_sampler@0.0.1:reaction/bell_rises\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"bell_rises\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"green_sampler@0.0.1:reaction/gossip\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gossip_spread\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"gossip\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"green_sampler@0.0.1:reaction/green_noticed\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"green_noticed\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"green_sampler@0.0.1:reaction/lamps_lit\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lamps_lit\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"lamps_lit\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"when\":{\"policy_version\":1,\"root\":{\"from\":19,\"op\":\"time_window\",\"to\":20}}},\"green_sampler@0.0.1:reaction/ring\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"ring\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"belfry\",\"kind\":\"room\"}}},\"green_sampler@0.0.1:reaction/rope_pulls\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"rope_pulls\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"green_sampler@0.0.1:reaction/rope_slacks\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}],\"key\":\"rope_slacks\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"resources\":{\"green_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"green_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"green_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"green_sampler@0.0.1:room/belfry\":{\"description\":\"room.belfry.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"belfry\",\"title\":\"room.belfry.title\"},\"green_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"green_sampler@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"belfry\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"text\":{\"npc.bram.description\":\"A ferryman with rope-scarred hands. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"npc.maud.description\":\"Maud knows everything said on the green by evening, and goes down to the landing to say it again.\",\"npc.maud.room\":\"[Maud] is here, listening to everyone at once.\",\"npc.maud.short\":\"Maud\",\"room.belfry.description\":\"A bell the size of a cart hangs from a beam, its rope wound around a cleat.\",\"room.belfry.title\":\"Belfry\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing below the village.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass. Lamps hang from its lowest branches, and a squat belfry stands to the east.\",\"room.village_green.title\":\"Village Green\"}}",
-  "sha256": "1ec34e40b9c9c0bce5e9c2af2aac4fd7bb43aec550ea0cb171461651500fba07"
+  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"green_sampler@0.0.1:fact/bell_up\":{\"key\":\"bell_up\",\"meaning\":\"The belfry bell has swung up.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/gossip_spread\":{\"key\":\"gossip_spread\",\"meaning\":\"The green's gossip has started.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/green_busy\":{\"key\":\"green_busy\",\"meaning\":\"Someone has come up to the green today.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/lamps_lit\":{\"key\":\"lamps_lit\",\"meaning\":\"The green's lamps were lit at dusk.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"green_sampler@0.0.1:fact/rope_taut\":{\"key\":\"rope_taut\",\"meaning\":\"The bell rope is pulled taut.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"calendar\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"reaction\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"green_sampler\",\"requires\":{\"capabilities\":{\"calendar\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"reaction\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Green Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"green_sampler@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"name\":\"npc.bram.short\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\"},\"green_sampler@0.0.1:npc/maud\":{\"daily_schedule\":{\"20\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"description\":\"npc.maud.description\",\"key\":\"maud\",\"keywords\":[\"maud\"],\"name\":\"npc.maud.short\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"room_line\":\"npc.maud.room\"}},\"reactions\":{\"green_sampler@0.0.1:reaction/bell_falls\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}],\"key\":\"bell_falls\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"}},\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}},\"green_sampler@0.0.1:reaction/bell_rises\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"bell_rises\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"}},\"when\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}},\"green_sampler@0.0.1:reaction/gossip\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"gossip_spread\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"gossip\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"}},\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}},\"green_sampler@0.0.1:reaction/green_noticed\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"green_noticed\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"green_sampler@0.0.1:reaction/lamps_lit\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lamps_lit\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"lamps_lit\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"when\":{\"from\":19,\"op\":\"time_window\",\"to\":20}},\"green_sampler@0.0.1:reaction/ring\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"ring\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"belfry\",\"kind\":\"room\"}}},\"green_sampler@0.0.1:reaction/rope_pulls\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"rope_pulls\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"}},\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}},\"green_sampler@0.0.1:reaction/rope_slacks\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}],\"key\":\"rope_slacks\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"}},\"when\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"resources\":{\"green_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"green_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"green_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"green_sampler@0.0.1:room/belfry\":{\"description\":\"room.belfry.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"belfry\",\"name\":\"room.belfry.title\"},\"green_sampler@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"name\":\"room.ferry_landing.title\"},\"green_sampler@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"belfry\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"green_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"name\":\"room.village_green.title\"}},\"text\":{\"npc.bram.description\":\"A ferryman with rope-scarred hands. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"npc.maud.description\":\"Maud knows everything said on the green by evening, and goes down to the landing to say it again.\",\"npc.maud.room\":\"[Maud] is here, listening to everyone at once.\",\"npc.maud.short\":\"Maud\",\"room.belfry.description\":\"A bell the size of a cart hangs from a beam, its rope wound around a cleat.\",\"room.belfry.title\":\"Belfry\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing below the village.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass. Lamps hang from its lowest branches, and a squat belfry stands to the east.\",\"room.village_green.title\":\"Village Green\"}}",
+  "sha256": "5be70678178f1e10277957d319296b9032dc91778b867d342279eec2eb9c0f56"
 }

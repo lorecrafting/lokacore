@@ -222,11 +222,11 @@ the dedicated chapter/literal fixtures prove the family's real transitions.
 
 ## Events
 
-A `DomainEvent` (`kernel/ts/src/runtime/decision.ts:227`) has an IdSource id, the world, player scope,
+A `DomainEvent` (`kernel/ts/src/runtime/decision.ts:279`, `event`) has an IdSource id, the world, player scope,
 the actor, the world's logical time, a one-based causal `position`, and the command as
 `causation_id` and `correlation_id`. A job's `entity_entered_room` is at instance scope and the
-job's due time, caused by the `run_job` (`mechanics/schedule/behavior.ts:58`); the proposal renumbers positions and
-correlates everything to the player's command (`runtime/proposal.ts:183`). The modal scene subset
+job's due time, caused by the `run_job` (`mechanics/schedule/daily.ts:93`); the proposal renumbers positions and
+correlates everything to the player's command (`runtime/proposal.ts:160`). The modal scene subset
 emits `scene_ended {scene}` on the final continue at position 2, leaving position 1
 for its line fact's fact_changed; start is the fact's 0→1 change, with no scene_started
 ([scene@1](mechanics.md#scene1-mechanicsscenerulets)).
@@ -1039,7 +1039,7 @@ player-accessible population verb.
 Story admission remains TypeScript; added state/delta/precondition semantics and
 creation validation retain both-kernel literal conformance then differential proof.
 
-Each immutable spawned identity binds declared plan and bundle, slot, generation,
+Each immutable spawned identity binds declared plan, slot, generation,
 creation occurrence and hound member ID, with role hound or pelt. The hound binds
 itself; its one pelt binds that exact hound, with matching origin fields. Allocate
 hound before pelt in slot order using the existing occurrence allocator. IDs must

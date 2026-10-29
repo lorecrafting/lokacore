@@ -2,12 +2,9 @@
   "npc": "maud",
   "quest": "mauds_cellar",
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "quest_state",
-      "quest": "mauds_cellar",
-      "state": "active"
-    }
+    "op": "quest_state",
+    "quest": "mauds_cellar",
+    "state": "active"
   },
   "prompt": "fixture.turn_in",
   "roles": {

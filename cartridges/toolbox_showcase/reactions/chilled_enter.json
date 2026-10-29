@@ -4,28 +4,25 @@
     "room": "fell_top"
   },
   "when": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": [
-        {
-          "op": "sky",
-          "weather": "frost"
-        },
-        {
-          "op": "has_tag",
-          "subject": "room",
-          "tag": "exposed"
-        },
-        {
-          "op": "not",
-          "item": {
-            "op": "wearing",
-            "tag": "warm"
-          }
+    "op": "all",
+    "items": [
+      {
+        "op": "sky",
+        "weather": "frost"
+      },
+      {
+        "op": "has_tag",
+        "subject": "room",
+        "tag": "exposed"
+      },
+      {
+        "op": "not",
+        "item": {
+          "op": "wearing",
+          "tag": "warm"
         }
-      ]
-    }
+      }
+    ]
   },
   "apply": [
     {

@@ -6,7 +6,7 @@ import type {
   DeltaOp,
   DomainEvent,
   EntityId,
-  VersionedPolicy,
+  Policy,
 } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
@@ -16,7 +16,7 @@ import { living } from '../death/shared.ts';
 import { barrierState } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { npcPassage, relock } from '../movement/shared.ts';
-import { happened } from '../schedule/behavior.ts';
+import { happened } from '../schedule/daily.ts';
 import { moves } from '../status/bars.ts';
 import { chase, left, once } from '../trail.ts';
 import { birth } from './birth.ts';
@@ -52,8 +52,8 @@ export function births(
   return { ops, ids };
 }
 /** A plan gate (row W12), absent or holding at the occurrence's time `due`; it reads no actor. */
-const gate = (world: World, when: VersionedPolicy | undefined, due: number) =>
-  !when || holds({ ...world, state: { ...world.state, clock: due } }, '' as CharacterId, when.root);
+const gate = (world: World, when: Policy | undefined, due: number) =>
+  !when || holds({ ...world, state: { ...world.state, clock: due } }, '' as CharacterId, when);
 
 /** A slot within the target with no living member whose replacement is due by `due`. */
 export const eligible = (slot: number, row: Slots[number]['row'], target: number, due: number) =>

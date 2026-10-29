@@ -153,10 +153,11 @@ test('conditions evaluate all, any, not and fact_compare over committed facts', 
     );
 });
 
-// Breaks: variants tried in another order, the last match taken, or no fallback to the base.
+// Breaks: variants tried in another order, the last match taken, no fallback to the base, or a
+// variant with no `when` skipped (absent holds, F3).
 test('describe shows the first variant whose condition holds, else the base', () => {
   const v = (root: object, description: string) => ({
-    when: { policy_version: 1, root },
+    when: root,
     description,
   });
   const of = (...variants: object[]) => ({ description: 'base', variants }) as never;
@@ -164,6 +165,7 @@ test('describe shows the first variant whose condition holds, else the base', ()
   assert.equal(describe(w, CHARACTER, of(v(F, 'first'), v(F, 'second'))), 'first');
   assert.equal(describe(w, CHARACTER, of(v(T, 'first'), v(F, 'second'))), 'second');
   assert.equal(describe(w, CHARACTER, of(v(T, 'first'))), 'base');
+  assert.equal(describe(w, CHARACTER, of(v(T, 'first'), { description: 'always' })), 'always');
   assert.equal(describe(w, CHARACTER, { description: 'base' } as never), 'base');
 });
 

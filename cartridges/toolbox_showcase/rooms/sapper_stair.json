@@ -1,5 +1,5 @@
 {
-  "title": "room.sapper_stair.title",
+  "name": "room.sapper_stair.title",
   "description": "room.sapper_stair.description",
   "exits": {
     "up": {
@@ -39,23 +39,17 @@
       "variants": [
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "plate_disarmed",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "plate_disarmed",
+            "equals": true
           },
           "description": "detail.flagstones.disarmed"
         },
         {
           "when": {
-            "policy_version": 1,
-            "root": {
-              "op": "fact_compare",
-              "fact": "plate_found",
-              "equals": true
-            }
+            "op": "fact_compare",
+            "fact": "plate_found",
+            "equals": true
           },
           "description": "detail.flagstones.found"
         }

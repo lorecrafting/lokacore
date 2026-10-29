@@ -1,5 +1,5 @@
 {
-  "label": "actions.pick_lock",
+  "name": "actions.pick_lock",
   "aliases": [
     "pick"
   ],
@@ -10,12 +10,9 @@
   },
   "priority": 5,
   "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "fact_compare",
-      "fact": "chest_picked",
-      "equals": false
-    }
+    "op": "fact_compare",
+    "fact": "chest_picked",
+    "equals": false
   },
   "check": {
     "key": "pick_lock",

@@ -1,5 +1,5 @@
 {
-  "title": "room.yard.title",
+  "name": "room.yard.title",
   "description": "room.yard.description",
   "tags": [
     "exposed"
@@ -12,11 +12,8 @@
   "variants": [
     {
       "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "weather": "rain"
-        }
+        "op": "sky",
+        "weather": "rain"
       },
       "description": "room.yard.rain"
     }

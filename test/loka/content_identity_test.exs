@@ -24,12 +24,11 @@ defmodule Loka.ContentIdentityTest do
              {"UNDECLARED_CAPABILITY", "npcs/stranger.short_variants[0]"}
            ]
 
-    hooded = ["name_variants", Access.at(0), "when", "root", "status"]
+    hooded = ["name_variants", Access.at(0), "when", "status"]
 
     assert diags.([id.(hooded, "nope")]) ==
              [
-               {"UNRESOLVED_REFERENCE",
-                "cartridge.world.identity.name_variants[0].when.root.status"}
+               {"UNRESOLVED_REFERENCE", "cartridge.world.identity.name_variants[0].when.status"}
              ]
 
     assert diags.([id.(["name_variants", Access.at(0), "description"], "identity.nope")]) ==
@@ -38,18 +37,18 @@ defmodule Loka.ContentIdentityTest do
              ]
 
     target = %{"fact" => "knows_name", "subject" => "target"}
-    knows = ["world", "identity", "name_variants", Access.at(1), "when", "root"]
+    knows = ["world", "identity", "name_variants", Access.at(1), "when"]
 
     assert diags.([{"cartridge.json", &update_in(&1, knows, fn r -> Map.merge(r, target) end)}]) ==
              [
                {"FACT_SCOPE_UNSUPPORTED",
-                "cartridge.world.identity.name_variants[1].when.root.subject"}
+                "cartridge.world.identity.name_variants[1].when.subject"}
              ]
 
     since = %{"op" => "time_since", "fact" => "wanted", "at_least" => 1}
 
-    assert diags.([id.(["name_variants", Access.at(1), "when", "root"], since)]) ==
-             [{"SCHEMA_VIOLATION", "cartridge.world.identity.name_variants[1].when.root.fact"}]
+    assert diags.([id.(["name_variants", Access.at(1), "when"], since)]) ==
+             [{"SCHEMA_VIOLATION", "cartridge.world.identity.name_variants[1].when.fact"}]
 
     assert diags.([id.(["name"], "identity.nope")]) ==
              [{"UNRESOLVED_REFERENCE", "cartridge.world.identity.name"}]

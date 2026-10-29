@@ -1,5 +1,5 @@
 {
-  "title": "room.kitchen.title",
+  "name": "room.kitchen.title",
   "description": "room.kitchen.description",
   "exits": {
     "north": {
