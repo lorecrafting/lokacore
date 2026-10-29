@@ -184,11 +184,11 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
-  @codes Loka.Core.Contracts.defs()["DiagnosticCode"]["enum"]
   @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json); raises on a code outside DiagnosticCode."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()
   def diag(code, path, data \\ %{}, suggested \\ []) do
-    code in @codes or raise ArgumentError, "#{inspect(code)} is not a DiagnosticCode"
+    code in Loka.Core.Contracts.defs()["DiagnosticCode"]["enum"] or
+      raise ArgumentError, "#{inspect(code)} is not a DiagnosticCode"
 
     %{
       "severity" => "error",
