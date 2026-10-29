@@ -5,7 +5,7 @@ Status: stub. Area: [Crafting traditions and chains](../../worldbuilding/README.
 **Purpose.** Whether raw resources vary in quality and come and go (SWG's shifting resources), and why in lore.
 
 **Must answer.**
-- Do resources have attributes that feed recipe stats, through which weights?
+- Do resources have attributes that feed scripted action stats, through which weights?
 - Do resource types expire and rotate, on what clock, by what in-world cause?
 - How does rotation read in a text game (a vein runs dry, a season turns)?
 

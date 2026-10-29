@@ -21,7 +21,7 @@ def k(kind, key):
 
 value = renamed(json.loads(Path('protocol/fixtures/cartridge_ferry_hash.json').read_text())['value'])
 value['manifest']['title'] = 'Journal Sampler'
-del value['recipes']
+del value['scripted_actions']
 value['quests'][k('quest', 'lantern')]['journal'] = {
     'active': 'quest.lantern.find', 'objectives_met': 'quest.lantern.return',
     'resolved': 'quest.lantern.done', 'failed': 'quest.lantern.failed',

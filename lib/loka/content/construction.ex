@@ -32,12 +32,12 @@ defmodule Loka.Content.Construction do
     )
   end
 
-  # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
+  # Built rooms S6: a scripted action build step sits in the success outcome of a detail target whose room is a site listing its
   # structure and direction, at most one per sequence, with world.construction, the build refusal
   # texts. The listed structure
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
-    for {_, {rel, [], r}} <- defs["recipe"] || %{},
+    for {_, {rel, [], r}} <- defs["scripted_action"] || %{},
         {name, o} <- r["outcomes"],
         {s, i} <- Enum.with_index(o["sequence"]),
         s["op"] == "build",

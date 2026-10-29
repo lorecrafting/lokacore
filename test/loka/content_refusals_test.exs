@@ -66,8 +66,8 @@ defmodule Loka.ContentRefusalsTest do
            )
   end
 
-  # Breaks: an action-started scene can bind a different detail than its Begin recipe targets.
-  test "action scene detail must match its Begin recipe", %{scene_sampler: dir} do
+  # Breaks: an action-started scene can bind a different detail than its Begin scripted action targets.
+  test "action scene detail must match its Begin scripted action", %{scene_sampler: dir} do
     scene = %{
       "on" => %{
         "action" => "coil_rope",
@@ -98,6 +98,21 @@ defmodule Loka.ContentRefusalsTest do
              api,
              {"scenes/coil.json", put_in(scene, ["on", "detail"], "notice")},
              {"rooms/ferry_landing.json", notice}
+           ])
+
+    # Breaks: an action key in neither the built-in nor the scripted map resolves (one action/ namespace).
+    assert {"UNRESOLVED_REFERENCE", "scenes/coil.on.action"} in codes(dir, [
+             api,
+             {"scenes/coil.json", put_in(scene, ["on", "action"], "nope")}
+           ])
+
+    # Breaks: a built-in action (its target names no room or detail) starts an action scene.
+    builtin = JSON.decode!(File.read!("cartridges/build_sampler/actions/mend_hut.json"))
+
+    assert {"OUTCOME_MISMATCH", "scenes/coil.on"} in codes(dir, [
+             api,
+             {"actions/mend_hut.json", builtin},
+             {"scenes/coil.json", put_in(scene, ["on", "action"], "mend_hut")}
            ])
 
     # Breaks: an action scene that names neither room nor detail is admitted.

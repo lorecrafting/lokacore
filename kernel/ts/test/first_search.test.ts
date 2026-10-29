@@ -243,9 +243,9 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
   assert.equal(result.decision.events[2].actor_id, actor);
 });
 
-// Breaks: a notice-only unavailable recipe or an absent recipe vacuously agrees with an
+// Breaks: a notice-only unavailable scripted action or an absent scripted action vacuously agrees with an
 // accepted perform, including the board-child channel; matching refusal must still agree.
-test('Notice-only recipe admission agreement searches standalone and board-child offers', () => {
+test('Notice-only scripted action admission agreement searches standalone and board-child offers', () => {
   const view = gameView(fresh());
   const action = {
     action_key: 'study_tracks',
@@ -314,12 +314,12 @@ test('Notice-only recipe admission agreement searches standalone and board-child
   );
 });
 
-// Breaks: recipes under board children remain duplicated on World or disappear from the
-// notice projection while their exact canonical subject is still admitted by the recipe rule.
-test('board-child readable recipes project exclusively on the child Notice', () => {
+// Breaks: scripted actions under board children remain duplicated on World or disappear from the
+// notice projection while their exact canonical subject is still admitted by the scripted action rule.
+test('board-child readable scripted actions project exclusively on the child Notice', () => {
   let w = genesis((c) => {
-    c.recipes = {};
-    c.recipes[`${prefix}:recipe/study_tracks`] = {
+    c.scripted_actions = {};
+    c.scripted_actions[`${prefix}:action/study_tracks`] = {
       key: 'study_tracks',
       name: 'actions.study_tracks',
       aliases: ['study'],

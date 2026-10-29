@@ -1,5 +1,5 @@
-// A scene started by a detail recipe and ended by an acknowledged story point (scene@1, kernel 1.15),
-// over the scene_sampler KAT with one inline Begin recipe, scene and story point.
+// A scene started by a detail scripted action and ended by an acknowledged story point (scene@1, kernel 1.15),
+// over the scene_sampler KAT with one inline Begin scripted action, scene and story point.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, step, type World } from '../src/index.ts';
@@ -23,7 +23,7 @@ const begin = (c: any) => {
   c.manifest.requires.kernel_api.at_least = '1.15';
   const details = c.rooms[`${prefix}:room/ferry_landing`].details;
   details.notice = { aliases: ['notice'], description: 'detail.mooring_post' };
-  c.recipes[`${prefix}:recipe/begin`] = {
+  c.scripted_actions[`${prefix}:action/begin`] = {
     key: 'begin',
     name: 'actions.coil_rope',
     aliases: ['begin'],
@@ -39,7 +39,12 @@ const begin = (c: any) => {
   };
   c.scenes[SCENE] = {
     key: 'begin',
-    on: { action: ref('recipe', 'begin'), room, detail: 'mooring_post', outcome: 'success' },
+    on: {
+      action: ref('action', 'begin'),
+      room,
+      detail: 'mooring_post',
+      outcome: 'success',
+    },
     control: 'modal',
     steps: [
       { type: 'narrate', text: 'scene.bell_rung.bell' },

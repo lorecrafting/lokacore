@@ -8,7 +8,7 @@ Integration rows such as W22 Fire live in it. It replaces Chapter 1 as the regre
 it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-1)).
 
 **Coverage** (2026-10-28, at b9309910c, `node kernel/ts/play/coverage.ts <artifact>` over the 30
-showcase transcripts, `walk_*` included): 128 of 140 reactions fired, 46 of 49 recipes completed,
+showcase transcripts, `walk_*` included): 128 of 140 reactions fired, 46 of 49 scripted actions completed,
 25 of 34 choices taken, 3 of 3 quests done.
 To re-pin a `walk_*` transcript after a content change, run `node kernel/ts/play/record.ts <transcript.jsonl>`: it replays the transcript's own commands and rewrites it. To record a new walk, drive `Rec` in a script (`new Rec(ctx)`, its moves, `r.save(out)`).
 
@@ -94,7 +94,7 @@ district goes through five steps (owner input and PM ruling, 2026-10-10):
    and the expected outcome of each step.
 2. **Build (Opus developer).** An ordinary slice implements the brief: cartridge content, hash
    fixture, the district's rooms in the simulator's showcase pass (`kernel/ts/test/sim.test.ts`),
-   walkthrough or recorder recipe and tests, using only installed mechanics, plus one Book e2e
+   walkthrough or recorder scripted action and tests, using only installed mechanics, plus one Book e2e
    playthrough of the district's happy path in the real UI (owner, loka-y6yg.6).
 3. **Review (Opus reviewer).** Reviewed against the brief like any slice.
 4. **Playtest (Fable).** Before the owner plays it, a blind Fable agent plays the district in

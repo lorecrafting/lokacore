@@ -25,7 +25,7 @@
       "calendar": 1,
       "position": 1,
       "liquid": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "inspectable_detail": 1,
       "target_resolution": 1
     },

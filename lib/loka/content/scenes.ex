@@ -155,7 +155,7 @@ defmodule Loka.Content.Scenes do
   end
 
   defp start_ref(rel, steps, on, "action", m, defs) do
-    action = resolve(on["action"], "recipe", m, defs)
+    action = resolve(on["action"], "action", m, defs)
     room = if is_map_key(on, "room"), do: resolve(on["room"], "room", m, defs)
 
     unresolved = fn field ->
@@ -170,8 +170,8 @@ defmodule Loka.Content.Scenes do
   defp start_ref(rel, steps, on, kind, m, defs),
     do: reference(rel, steps ++ ["on"], kind, on, m, defs)
 
-  defp start_match(rel, steps, on, {_, _, recipe}, {_, _, room}) do
-    target = recipe["target"]
+  defp start_match(rel, steps, on, {_, _, scripted}, {_, _, room}) do
+    target = scripted["target"]
 
     if target["room"] == on["room"] and target["detail"] == on["detail"] and
          is_map_key(Map.get(room, "details", %{}), on["detail"]),

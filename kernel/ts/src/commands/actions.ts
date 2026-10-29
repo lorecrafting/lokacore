@@ -3,14 +3,14 @@ import {
   CAPABILITY_OWNERS,
   type ActionContribution,
   type ActionInputParameter,
-  type ActionRecipe,
+  type ScriptedAction,
   type CharacterId,
   type CommandPayload,
   type ContinuationId,
   type DefinitionRef,
   type EntityId,
   type Key,
-  type RecipeTarget,
+  type ScriptedTarget,
   type TargetSpec,
   type TextKey,
   type UnavailableReason,
@@ -31,12 +31,12 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
-import { castAdmission, craftRefused, useAdmission } from '../mechanics/action_recipe/shared.ts';
-import { spellOf } from '../mechanics/action_recipe/shared.ts';
+import { castAdmission, craftRefused, useAdmission } from '../mechanics/scripted_action/shared.ts';
+import { spellOf } from '../mechanics/scripted_action/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
- * recipe when it is one (whose invocation needs no target: the recipe names its own), the quest
+ * scripted action when it is one (whose invocation needs no target: the scripted action names its own), the quest
  * when it is a quest's offer (accept_quest of that quest), the speaker when it is a dialogue's
  * talk (its only target), the continuation when it is close_choice of the pending choice, and
  * whether it is an engine verb, whose rule is its target and input contract (see accepts).
@@ -49,7 +49,7 @@ export type Offered = {
   readonly priority: number;
   readonly policy?: Policy;
   readonly command: Key;
-  readonly recipe?: ActionRecipe;
+  readonly scripted?: ScriptedAction;
   readonly quest?: DefinitionRef;
   readonly speaker?: EntityId;
   readonly dialogue?: DefinitionRef;
@@ -100,7 +100,7 @@ function engine(world: World, actor: CharacterId): ActionSet {
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, actor))
       // Row 29a: cast only in a cartridge with a spell.
       .filter(
-        ([verb]) => verb !== 'cast' || allRecipes(world).some((r) => r.target.kind === 'spell'),
+        ([verb]) => verb !== 'cast' || allScripted(world).some((r) => r.target.kind === 'spell'),
       )
       // Row G9: no speech while a conversation is open (the speech rule refuses it too).
       .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, actor))
@@ -113,20 +113,20 @@ function engine(world: World, actor: CharacterId): ActionSet {
   );
 }
 
-// The cartridge's actions, recipes, aimed spells, offers of quests `actor` has no instance of (a
+// The cartridge's actions, scripted actions, aimed spells, offers of quests `actor` has no instance of (a
 // quest may have none) and talks of dialogues whose speaker is in the actor's room (several per
-// speaker), by key: disjoint, since the compiler rejects a recipe, quest or dialogue
-// whose key is an action's, a recipe's, a quest's or a registered command's (DUPLICATE_DEFINITION).
+// speaker), by key: disjoint, since the compiler rejects a scripted action, quest or dialogue
+// whose key is an action's, a scripted action's, a quest's or a registered command's (DUPLICATE_DEFINITION).
 function cartridge(world: World, actor: CharacterId): ActionSet {
-  const recipes = keyed(world).map((recipe): [string, Offered] => {
-    const { key, name: label, priority, policy } = recipe;
-    // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
+  const scripted_actions = keyed(world).map((scripted): [string, Offered] => {
+    const { key, name: label, priority, policy } = scripted;
+    // A use scripted action (row G4) is listed on the held tool, paired with each target (view/use.ts).
     const target: TargetSpec =
-      recipe.target.kind === 'use'
+      scripted.target.kind === 'use'
         ? { kind: 'entity', scopes: ['room_contents', 'inventory'] }
         : { kind: 'none' };
     const command = 'perform' as Key;
-    return [key, { key, label, target, input: [], priority, policy, command, recipe }];
+    return [key, { key, label, target, input: [], priority, policy, command, scripted }];
   });
   const actions = Object.values(world.cartridge.actions).map(
     ({ name, ...a }): [string, Offered] => [a.key, { ...a, label: name as TextKey }],
@@ -139,7 +139,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
   });
-  return Object.fromEntries([...actions, ...recipes, ...quests, ...talks(world, actor)]);
+  return Object.fromEntries([...actions, ...scripted_actions, ...quests, ...talks(world, actor)]);
 }
 
 /**
@@ -194,22 +194,22 @@ const barred = (world: World, actor: CharacterId, type: string) =>
   !permits(world, actor)(type) &&
   Object.values(composed(world, actor)).some((a) => a.command === type);
 
-/** The target id of a recipe's detail (the compiler checks it exists). */
-export const detailOf = (world: World, t: Extract<RecipeTarget, { kind: 'detail' }>): EntityId =>
+/** The target id of a scripted action's detail (the compiler checks it exists). */
+export const detailOf = (world: World, t: Extract<ScriptedTarget, { kind: 'detail' }>): EntityId =>
   Object.keys(world.details).find(
     (id) =>
       world.details[id].room === world.roomIds[refString(t.room)] &&
       world.details[id].key === t.detail,
   ) as EntityId;
 
-/** The detail an offered recipe acts on; none for another action or a use recipe (row G4). */
+/** The detail an offered scripted action acts on; none for another action or a use scripted action (row G4). */
 export const detailAt = (world: World, a: Offered) =>
-  a.recipe?.target.kind === 'detail' ? detailOf(world, a.recipe.target) : undefined;
+  a.scripted?.target.kind === 'detail' ? detailOf(world, a.scripted.target) : undefined;
 
 /**
  * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
  * resolves to that Command and accepts its target and input (unsupported_capability), or for
- * perform a key that names no recipe of the cartridge or for accept_quest a quest it does not
+ * perform a key that names no scripted action of the cartridge or for accept_quest a quest it does not
  * declare (not_found), or none that does is available, its policy failing (invalid_state). Each
  * policy leaf it evaluates adds one to the decision's `steps` (04 §5.4 query_steps). Given the
  * invoked `action`, only that action of the set is matched. A projection may supply the already
@@ -222,7 +222,7 @@ export const refusal = (...args: Parameters<typeof refusalReason>) => refusalRea
 const untimed = (world: World, p: CommandPayload) =>
   p.type === 'wait' && !!world.cartridge.manifest.time_policy && !fighting(world, p.actor_id);
 
-/** refusal with its reason: a failed spell policy carries the recipe's `reason` text (loka-j64e). */
+/** refusal with its reason: a failed spell policy carries the scripted action's `reason` text (loka-j64e). */
 // size: allow 43, the reason rides the same admission chain as the code
 export function refusalReason(
   world: World,
@@ -243,10 +243,10 @@ export function refusalReason(
   const matching = offers.filter(
     (a) =>
       (action === undefined || a.key === action) &&
-      (perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload, steps)),
+      (perform ? a.scripted && a.key === payload.action : accepts(world, actor, a, payload, steps)),
   );
   const unknown =
-    (perform && !recipeKeys(world).includes(payload.action)) ||
+    (perform && !scriptedKeys(world).includes(payload.action)) ||
     (payload.type === 'accept_quest' && !world.cartridge.quests?.[refString(payload.quest)]);
   if (unknown || !matching.length)
     return {
@@ -256,38 +256,38 @@ export function refusalReason(
           ? 'invalid_state'
           : 'unsupported_capability',
     };
-  const use = useAdmission(world, matching[0]!.recipe, payload, steps); // row G4
+  const use = useAdmission(world, matching[0]!.scripted, payload, steps); // row G4
   const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
     holds(world, actor, a.policy, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
   if (used || !matching.some((a) => ok(a))) return used ?? { code: 'invalid_state' };
-  return craftRefused(world, matching[0]!.recipe, actor, steps); // after policy, as the offer (hs-10)
+  return craftRefused(world, matching[0]!.scripted, actor, steps); // after policy, as the offer (hs-10)
 }
 
 // A spell (row 29a) is cast by its word, never performed by its key (an aimed one is offered).
-const allRecipes = (world: World) => Object.values(world.cartridge.recipes ?? {});
-const keyed = (world: World) => allRecipes(world).filter((r) => r.target.kind !== 'spell');
-const recipeKeys = (world: World) => keyed(world).map((r) => r.key);
+const allScripted = (world: World) => Object.values(world.cartridge.scripted_actions ?? {});
+const keyed = (world: World) => allScripted(world).filter((r) => r.target.kind !== 'spell');
+const scriptedKeys = (world: World) => keyed(world).map((r) => r.key);
 
 /**
- * A recipe's admission for `actor_id` acting through `body`, after its policy and target, shared
+ * A scripted action's admission for `actor_id` acting through `body`, after its policy and target, shared
  * by the rule and the GameView: cooldown while the time since the actor's last admitted attempt
- * is below the recipe's cooldown (never overflows: 0 <= last <= now), then insufficient_resource
+ * is below the scripted action's cooldown (never overflows: 0 <= last <= now), then insufficient_resource
  * when the body cannot pay the costs (mechanics/resource.ts pay); else the paid ops and levels, the last
  * attempt's time and now. Read-only, before any draw.
  */
 export function admission(
   world: World,
-  recipe: ActionRecipe,
+  scripted: ScriptedAction,
   actor_id: CharacterId,
   body: EntityId,
 ) {
   const from = world.state.clock;
-  const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: recipe.key })];
-  if (recipe.cooldown && last !== undefined && sub(from, last) < recipe.cooldown)
+  const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: scripted.key })];
+  if (scripted.cooldown && last !== undefined && sub(from, last) < scripted.cooldown)
     return 'cooldown' as const;
-  const paid = pay(world, body, recipe.costs ?? []);
+  const paid = pay(world, body, scripted.costs ?? []);
   return paid ? { paid, last, from } : ('insufficient_resource' as const);
 }

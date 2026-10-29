@@ -60,12 +60,12 @@ Derived at `hydrate`: a `RoomDefinition` from the blueprint with the row's stage
 
 | Phase | Mechanism (proposal) | Reuses | Conservation |
 |---|---|---|---|
-| Start | recipe `build {blueprint}` at a site (target: the site's detail), G7 `build` access on the site; policy checks caps and materials in reach | action_recipe, G7, caps leaf `built_count {owner, at_least}` | materials move to the consumed holder in the same delta (`one_container_per_item`) |
+| Start | recipe `build {blueprint}` at a site (target: the site's detail), G7 `build` access on the site; policy checks caps and materials in reach | scripted_action, G7, caps leaf `built_count {owner, at_least}` | materials move to the consumed holder in the same delta (`one_container_per_item`) |
 | Construction | the recipe writes the row at `under_construction` and opens a 20b job due at clock + `labour`; the site shows an authored "framing" detail variant; cancel returns the materials (20b cancel path) | engine jobs (`mechanics/bleed/job.ts` pattern), 20b claim and cancel | returned materials come back from the consumed holder: needs a `consumed -> holder` move, the same op 19b replenish introduces |
 | Completion | the job's `run_job` sets `complete`, mints the room id (its own CommandId, `jobCommandId`, so replay mints the same), places fixtures, emits `custom_event built` for reactions | job completion, `created` hydrate, W1 reactions | fixtures are created items, declared in the blueprint (a registered source, as spec 09 asks) |
 | Use | enter, rest, store; G7 locks `enter`, `put`, `get`, `furnish` with `owner` and `role` leaves; S1 furnishing | G7, containment, position regen | none |
 | Upkeep and decay | a `weathering` status on the room (G3 status holder) with expiry every `decay.every` real minutes; its expiry reaction lowers `condition` by `decay.by`; at 0 the stage becomes `ruin`: description and exits stay, locks stop holding, fixtures keep working or not per variant | G3 statuses, W1 `status_expired` reaction, row 41 pattern | none |
-| Repair | recipe `repair` consuming `repair` materials, condition back to 100, stage `complete` | action_recipe | materials to the consumed holder |
+| Repair | recipe `repair` consuming `repair` materials, condition back to 100, stage `complete` | scripted_action | materials to the consumed holder |
 | Demolish | owner action `raze`: items inside move to the site room, NPCs inside move to the site, stage `razed`, exits removed from the layer; the row stays as a tombstone so the id is never reused and old receipts still resolve | containment moves, escort-style NPC relocation, A2 tombstone rule | items never vanish; only the structure does |
 | Ownership and trade | row 24 buys the plot (the site's G7 `build` grant); transfer is a G7 grant change; S3 later adds residents by population plans whose `home` may be a built room | rows 24, G7, C3 populations | none |
 

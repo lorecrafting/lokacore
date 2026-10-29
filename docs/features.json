@@ -22,7 +22,7 @@
     "invariants": [
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "Toolbox row G6 senses sampler: cues in GameView with direction, cue_perceived for NPC reactions to recipe outcomes"
+    "implemented_in": "Toolbox row G6 senses sampler: cues in GameView with direction, cue_perceived for NPC reactions to scripted action outcomes"
   },
   "movement": {
     "spec": "21 §5 Place/Room, Connection; 05 §17; 04 §5; 00 §4.1 scan, §4.10",
@@ -139,7 +139,7 @@
     "spec": "21 §4 Resource, §7 Cost; 04 §5.3 Resource adjustment, §15 condition bands; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources",
     "contracts": [
       "ResourceSpec",
-      "RecipeCost",
+      "ActionCost",
       "DeltaOp",
       "MutationTarget",
       "ResourceView",
@@ -158,7 +158,7 @@
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration; Early R7/R8 G condition bands in GameView"
+    "implemented_in": "R5 S6b default HP/MA/MV pools, scripted action costs and resource.adjust steps, 1 MV per move, hourly regeneration; Early R7/R8 G condition bands in GameView"
   },
   "containment": {
     "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12; mechanics.md containment@1 carrying",
@@ -195,16 +195,16 @@
     ],
     "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs; C1 c1-locks (#135) custody: take through open containers, contents in the GameView; M3 voluntary positive-load Take ceiling from cartridge mass/carry settings, bounded shared rule/projection query"
   },
-  "action_recipe": {
-    "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
+  "scripted_action": {
+    "spec": "06 §19 ActionSet algebra, §20 ScriptedAction; 21 §7 ScriptedAction / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
     "contracts": [
-      "ActionRecipe",
-      "RecipeStep",
-      "RecipeTarget",
+      "ScriptedAction",
+      "ActionStep",
+      "ScriptedTarget",
       "ActionContribution",
       "CommandPayload",
       "EventPayload",
-      "RecipeCheck"
+      "ActionCheck"
     ],
     "modules": [
       "kernel/ts/src/commands/actions.ts",
@@ -224,12 +224,12 @@
   "check": {
     "spec": "21 §7 Check; 21 §4 Deterministic RNG; 04 §5.0; 00a check_passed objectives",
     "contracts": [
-      "RecipeCheck",
+      "ActionCheck",
       "EventPayload",
-      "ActionRecipe"
+      "ScriptedAction"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/action_recipe/rule.ts",
+      "kernel/ts/src/mechanics/scripted_action/rule.ts",
       "kernel/ts/src/foundation/rng.ts"
     ],
     "fixtures": [
@@ -239,7 +239,7 @@
       "rejection_consumes_nothing",
       "fault_discards_whole_proposal"
     ],
-    "implemented_in": "R5 S6a luck check in recipes, check_passed and check_failed; R5 S6b threshold check on a resource"
+    "implemented_in": "R5 S6a luck check in scripted actions, check_passed and check_failed; R5 S6b threshold check on a resource"
   },
   "schedule": {
     "spec": "21 §4 Time; 04 §1, §5.4; 00 §4.2; command.schema.json LogicalTime; numeric-profile.md job CommandId; 06 §13 Behavior/schedule profiles; 21 §10",
@@ -268,7 +268,7 @@
       "rejection_consumes_nothing",
       "job_complete_owned_by_run"
     ],
-    "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a recipe's duration), run_job and its job CommandId; an NPC's daily location schedule"
+    "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a scripted action's duration), run_job and its job CommandId; an NPC's daily location schedule"
   },
   "barrier": {
     "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1 (amendment 2026-10-03: an item site)",
@@ -382,12 +382,12 @@
     "spec": "06 §43; 04 §5.2 steps 7-8, §15; 21 §4 NarrationSpec",
     "contracts": [
       "Text",
-      "RecipeNarration",
+      "ActionNarration",
       "NarrationParticipant",
       "DecisionResult"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/action_recipe/rule.ts"
+      "kernel/ts/src/mechanics/scripted_action/rule.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -395,7 +395,7 @@
     "invariants": [
       "retry_replays_receipt"
     ],
-    "implemented_in": "Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
+    "implemented_in": "Early R7/R8 N a scripted action narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
     "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3; mechanics.md Chapters (C1 slice 9)",

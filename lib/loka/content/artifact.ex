@@ -26,7 +26,7 @@ defmodule Loka.Content.Artifact do
   @optional ~w(
     item
     npc
-    recipe
+    scripted_action
     barrier
     quest
     reaction
@@ -46,7 +46,7 @@ defmodule Loka.Content.Artifact do
     structure
   )
 
-  # items, npcs, recipes, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The
+  # items, npcs, scripted actions, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
     m = Resources.requires(m)
@@ -71,6 +71,9 @@ defmodule Loka.Content.Artifact do
   defp keyed(m, kind, defs),
     do:
       Map.new(defs[kind], fn {key, {_, _, v}} ->
-        {"#{m["id"]}@#{m["version"]}:#{kind}/#{key}", Loka.Content.Schedules.split(v)}
+        {"#{m["id"]}@#{m["version"]}:#{ref_kind(kind)}/#{key}", Loka.Content.Schedules.split(v)}
       end)
+
+  defp ref_kind("scripted_action"), do: "action"
+  defp ref_kind(kind), do: kind
 end

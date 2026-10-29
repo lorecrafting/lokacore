@@ -19,7 +19,7 @@ import {
 import { allocator, rejected, type Mint, type Rule, type Steps, type World } from './decision.ts';
 import { invariants as factInvariants } from '../mechanics/fact_typed.ts';
 import { needsAncestry, refusal } from '../commands/actions.ts';
-import * as action_recipe from '../mechanics/action_recipe/rule.ts';
+import * as scripted_action from '../mechanics/scripted_action/rule.ts';
 import * as knowledge from '../mechanics/knowledge/rule.ts';
 import * as attributes from '../mechanics/attributes/rule.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -63,7 +63,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   bleed: bleed.decide,
   expedition: expedition.decide,
   transport: transport.decide,
-  action_recipe: action_recipe.decide,
+  scripted_action: scripted_action.decide,
   schedule: schedule.decide,
   barrier: barrier.decide,
   quest: quest.decide,
@@ -77,8 +77,8 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
-// them (mechanics/fact.ts, mechanics/policy.ts, mechanics/resource.ts, mechanics/reaction.ts; details in commands/target.ts and look; a recipe's
-// check in mechanics/action_recipe/rule.ts). Each has feature map cells.
+// them (mechanics/fact.ts, mechanics/policy.ts, mechanics/resource.ts, mechanics/reaction.ts; details in commands/target.ts and look; a scripted action's
+// check in mechanics/scripted_action/rule.ts). Each has feature map cells.
 const RULELESS = [
   'water',
   'status',

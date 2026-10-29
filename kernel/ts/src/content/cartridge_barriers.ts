@@ -27,7 +27,7 @@ const opens = (c: Obj, r: DefinitionRef | undefined, keys: Set<string>) => {
  * reach; an item is in reach when it starts in a reached room, inside an item in reach that
  * passes so, or is receivable from a co-located NPC. Without `keys` every locked barrier stays
  * shut (the content reports, cartridge.md). ponytail: initial states and item locations only, no
- * recipes, facts or NPC movement; 05 §17 reachability and the Lab's state-space search replace it.
+ * scripted actions, facts or NPC movement; 05 §17 reachability and the Lab's state-space search replace it.
  */
 export function reach(c: Obj, keys = true): { rooms: Set<string>; items: Set<string> } {
   const items = Object.entries((c.items ?? {}) as Obj);

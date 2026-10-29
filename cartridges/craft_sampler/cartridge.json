@@ -17,7 +17,7 @@
       "equipment": 1,
       "fact": 1,
       "policy": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "check": 1,
       "skills": 1,
       "dialogue": 1,

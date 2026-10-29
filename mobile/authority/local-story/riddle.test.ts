@@ -375,10 +375,10 @@ test('a malformed retained riddle source offers typed recovery and Start over', 
 // Breaks: a live redraw strands unchanged answer controls, freshness ignores a changed bank or
 // continuation, or the result reads another receipt's narration.
 test('answer input refreshes only across unchanged riddle context and reads its own receipt', (t) => {
-  // Real elapsed time (which refuses timed recipes), so a pulse changes the view token.
+  // Real elapsed time (which refuses timed scripted actions), so a pulse changes the view token.
   const a = setup(':memory:', (c) => {
     c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
-    delete c.recipes[`${c.manifest.id}@0.0.1:recipe/coil_rope`].duration;
+    delete c.scripted_actions[`${c.manifest.id}@0.0.1:action/coil_rope`].duration;
   });
   t.after(() => a.sql.close());
   a.start();

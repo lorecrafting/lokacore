@@ -96,7 +96,7 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
  * A NEW invocation as the typed Command its action in the actor's current ActionSet resolves to
  * (04 §2), or a terminal rejection: unsupported_capability when the set has no such action, or its
  * Command takes not that many targets or not that input. The rest (target presence, policy) is
- * step's. A quest's offer fills the quest it accepts, as a recipe fills its key, and close_choice
+ * step's. A quest's offer fills the quest it accepts, as a scripted action fills its key, and close_choice
  * the pending continuation it closes (commands/actions.ts resolved).
  */
 export function resolve(
@@ -107,14 +107,14 @@ export function resolve(
   const a = Object.hasOwn(set, i.action_key) ? set[i.action_key] : undefined;
   if (!a) return rejected('unsupported_capability');
   // A target past the Command's slots lands under an unknown key, which validate rejects; a detail
-  // recipe keeps perform's one slot (item_id is a use recipe's tool, row G4).
-  const slots = a.recipe?.target.kind === 'detail' ? ['target_id'] : (TARGETS[a.command] ?? []);
+  // scripted action keeps perform's one slot (item_id is a use scripted action's tool, row G4).
+  const slots = a.scripted?.target.kind === 'detail' ? ['target_id'] : (TARGETS[a.command] ?? []);
   const targets = Object.fromEntries(i.target_ids.map((t, n) => [slots[n], t]));
   const named = a.dialogue
     ? { dialogue: a.dialogue }
-    : a.recipe?.target.kind === 'spell'
-      ? { word: a.recipe.target.word }
-      : a.recipe
+    : a.scripted?.target.kind === 'spell'
+      ? { word: a.scripted.target.word }
+      : a.scripted
         ? { action: a.key }
         : a.quest
           ? { quest: a.quest }

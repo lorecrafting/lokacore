@@ -444,9 +444,9 @@ test('homestead 10 branch: eel by night, salmon on a wet day, nothing on a miss'
 
 const eat = (w: World, k: string) => play(w, { type: 'eat', item_id: id(w, 'item', k) });
 const str = (w: World) => attribute(w, 'str');
-const cookAt = (w: World, recipe: string) => ({
+const cookAt = (w: World, scripted: string) => ({
   type: 'perform',
-  action: recipe,
+  action: scripted,
   target_id: detail(w, 'hearth'),
 });
 let fed: World; // step 11 just after the stew, fed still active

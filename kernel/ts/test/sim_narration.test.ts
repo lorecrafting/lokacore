@@ -4,9 +4,9 @@ import { test } from 'node:test';
 import type { Command, DecisionResult } from '../src/contracts.gen.ts';
 import { changeKey } from './sim_batch.ts';
 
-// Breaks: a key taken from a rejected step or an empty delta, or a recipe filed under its command type or
-// under a verb's key (a silent recipe named take would be reported as the take verb).
-test('changeKey names an accepted change by its command type, and a recipe by type and key', () => {
+// Breaks: a key taken from a rejected step or an empty delta, or a scripted action filed under its command type or
+// under a verb's key (a silent scripted action named take would be reported as the take verb).
+test('changeKey names an accepted change by its command type, and a scripted action by type and key', () => {
   const cmd = (payload: object) => ({ payload }) as unknown as Command;
   const ok = (n: number) =>
     ({ kind: 'accepted', delta: { ops: Array(n).fill({}) } }) as unknown as DecisionResult;

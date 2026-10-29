@@ -6,7 +6,7 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 
 // Breaks: the real Book drops the Glade's refused Chop wood (no axe), as before pass-1 R2, or
-// says only "not now" without the recipe's authored reason (loka-y6yg.56).
+// says only "not now" without the scripted action's authored reason (loka-y6yg.56).
 test('glade without an axe: the real Book says why Chop wood is refused', (t) => {
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   t.after(() => b.sql.close());

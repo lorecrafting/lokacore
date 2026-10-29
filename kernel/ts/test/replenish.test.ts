@@ -139,19 +139,19 @@ test('loader: a container reserve loads', () => {
   );
 });
 
-// Homestead hs-1: the sampler with a `dig` recipe on the seam whose custom_event `dig` runs `apply`.
+// Homestead hs-1: the sampler with a `dig` scripted action on the seam whose custom_event `dig` runs `apply`.
 const RUN = { op: 'replenish.run', key: ref('replenish', 'seam_regrowth') };
 const digging =
   (apply: object[] = [RUN]) =>
   (c: any) => {
     c.manifest.requires.kernel_api.at_least = '1.101';
-    for (const k of ['action_recipe', 'reaction'])
+    for (const k of ['scripted_action', 'reaction'])
       c.manifest.requires.capabilities[k] = c.lock.capabilities[k] = 1;
     // The step emits no event: it needs no fact@1 (which owns fact_changed).
     delete c.manifest.requires.capabilities.fact;
     delete c.lock.capabilities.fact;
-    c.recipes = {
-      [`${S}recipe/dig`]: {
+    c.scripted_actions = {
+      [`${S}action/dig`]: {
         key: 'dig',
         name: 'action.mine',
         aliases: ['dig'],

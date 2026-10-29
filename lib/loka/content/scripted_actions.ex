@@ -1,38 +1,38 @@
-defmodule Loka.Content.Recipes do
+defmodule Loka.Content.ScriptedActions do
   @moduledoc """
-  Action recipes and rooms' action contributions (action.schema.json ActionRecipe,
-  ActionContribution; 06 §19-§20; 05 §28). A recipe's policy tree is checked with every other
+  Scripted actions and rooms' action contributions (action.schema.json ScriptedAction,
+  ActionContribution; 06 §19-§20; 05 §28). A scripted action's policy tree is checked with every other
   (`Loka.Content.Checks`); this module checks the rest, given a valid manifest.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
-  alias Loka.Content.RecipeTips
+  alias Loka.Content.ActionTips
 
   # A step uses its op through the event it produces, a check through check@1's events.
   @step_event %{"fact.assign" => "fact_changed", "event.emit" => "custom_event"}
 
-  @doc "Each schema-valid recipe's policy root, as `{rel, steps, root}`."
+  @doc "Each schema-valid scripted action's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs),
     do: for({rel, r} <- all(defs), do: {rel, ["policy"], r["policy"]})
 
-  defp all(defs), do: for({_, {rel, [], r}} <- defs["recipe"], do: {rel, r})
+  defp all(defs), do: for({_, {rel, [], r}} <- defs["scripted_action"], do: {rel, r})
 
   @doc """
-  For a v2 source with a valid manifest (else none): each recipe's owner (action_recipe), its
+  For a v2 source with a valid manifest (else none): each scripted action's owner (scripted_action), its
   check's (check@1, by its events) and each step's of any outcome (by its event; a
   resource.adjust has none, like a cost: resource@1 comes with the default pools) is required;
   its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room (a use target's tool liquid a liquid of it; row G4), each fact.assign a fact with a value of its type, each
-  status.cure a status and only on a use recipe (SCHEMA_VIOLATION) (a spell's word and
+  status.cure a status and only on a use scripted action (SCHEMA_VIOLATION) (a spell's word and
   row 29b effect steps: `Loka.Content.Spells`),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
-  its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
-  and its name and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
+  its check's key is no other scripted action's check's (DUPLICATE_DEFINITION),
+  and its name and narrations have catalog entries (unless `text` is `:unknown`); no scripted action's
   key is an action's or a
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
-  contribution names a registered command, an action, a recipe or a quest (its offer).
+  contribution names a registered command, an action, a scripted action or a quest (its offer).
   """
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
   def check(m, _, v2, _) when m == nil or v2 == nil, do: []
@@ -49,14 +49,14 @@ defmodule Loka.Content.Recipes do
       shared: shared_checks(defs)
     }
 
-    Enum.flat_map(all(defs), &recipe(&1, ctx)) ++
+    Enum.flat_map(all(defs), &scripted(&1, ctx)) ++
       contributions(defs, actions) ++
       uses(defs) ++
-      RecipeTips.reasons(all(defs), ctx) ++
+      ActionTips.reasons(all(defs), ctx) ++
       Loka.Content.Replenish.craft(m, defs, text)
   end
 
-  # Toolbox row G4: a status.cure step sits on a use recipe (a detail holds no status).
+  # Toolbox row G4: a status.cure step sits on a use scripted action (a detail holds no status).
   defp uses(defs) do
     for {rel, r} <- all(defs),
         r["target"]["kind"] != "use",
@@ -69,7 +69,7 @@ defmodule Loka.Content.Recipes do
     if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
   end
 
-  defp recipe({rel, r}, ctx) do
+  defp scripted({rel, r}, ctx) do
     Enum.concat([
       owners(rel, r, ctx),
       refs(rel, r, ctx),
@@ -77,7 +77,7 @@ defmodule Loka.Content.Recipes do
       duplicate(rel, r, ctx),
       mismatch(rel, r),
       duration(rel, r, ctx),
-      RecipeTips.check(rel, r, ctx),
+      ActionTips.check(rel, r, ctx),
       shared(rel, r, ctx.shared)
     ])
   end
@@ -88,9 +88,9 @@ defmodule Loka.Content.Recipes do
       else: []
   end
 
-  # An inline check's key is its check definition's key: no two checks (a recipe's or a dialogue
+  # An inline check's key is its check definition's key: no two checks (a scripted action's or a dialogue
   # choice's, row 14) may share one.
-  @doc "The check keys (each recipe's and each dialogue choice's, row 14) more than one check has."
+  @doc "The check keys (each scripted action's and each dialogue choice's, row 14) more than one check has."
   def shared_checks(defs) do
     choices =
       for {_, {_, [], d}} <- defs["dialogue"] || %{},
@@ -174,7 +174,7 @@ defmodule Loka.Content.Recipes do
     check =
       if is_map_key(r, "check"), do: owned(at(rel, ["check"]), "check_passed", events), else: []
 
-    owned(at(rel, []), "recipe", {caps, owners(registry, ["definitions"])}) ++
+    owned(at(rel, []), "scripted_action", {caps, owners(registry, ["definitions"])}) ++
       check ++
       for {s, steps} <- steps(r),
           event = @step_event[s["op"]],
@@ -218,7 +218,7 @@ defmodule Loka.Content.Recipes do
   defp resources(rel, r, m, defs),
     do: for({n, steps} <- resourced(r), d <- reference(rel, steps, "resource", n, m, defs), do: d)
 
-  # Each part of a recipe naming a resource: its costs, a threshold check and resource.adjust
+  # Each part of a scripted action naming a resource: its costs, a threshold check and resource.adjust
   # steps, with its path.
   defp resourced(r) do
     costs = for {c, i} <- Enum.with_index(Map.get(r, "costs", [])), do: {c, ["costs", i]}
@@ -275,11 +275,11 @@ defmodule Loka.Content.Recipes do
         do: unresolved(rel, ["actions", i, "actions", j], key)
   end
 
-  # Commands and this cartridge's action, recipe (a spell is cast by word), quest, dialogue keys.
+  # Commands and this cartridge's action, scripted action (a spell is cast by word), quest, dialogue keys.
   defp known(defs, actions) do
     others = for kind <- ~w(quest dialogue), {_, {_, [], d}} <- defs[kind], do: d["key"]
-    recipes = for {_, r} <- all(defs), r["target"]["kind"] != "spell", do: r["key"]
-    MapSet.union(MapSet.new(commands() ++ others ++ recipes), actions)
+    scripted_actions = for {_, r} <- all(defs), r["target"]["kind"] != "spell", do: r["key"]
+    MapSet.union(MapSet.new(commands() ++ others ++ scripted_actions), actions)
   end
 
   defp unresolved(rel, steps, target),

@@ -308,7 +308,7 @@ test('pending move retry adopts its original durable receipt once without a seco
   );
 });
 
-// Breaks: the shared freshness path refreshes a withdrawn Notice recipe or ignores its
+// Breaks: the shared freshness path refreshes a withdrawn Notice scripted action or ignores its
 // detail/room/scene/combat membership, letting an old page send a fresh invocation.
 test('withdrawn or changed-context Notice controls retain their captured stale token', () => {
   const a = preview();

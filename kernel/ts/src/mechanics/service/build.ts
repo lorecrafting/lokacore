@@ -27,7 +27,7 @@ import { living } from '../death/shared.ts';
 type Build = Pick<
   Extract<ServiceDefinition['benefit'], { kind: 'build' }>,
   'structure' | 'site' | 'direction'
->; // a build service's or (S6) a recipe build step's
+>; // a build service's or (S6) a scripted action build step's
 const refused = (key: string) => ({
   code: 'invalid_state' as const,
   message: { key: key as TextKey },

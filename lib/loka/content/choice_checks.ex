@@ -1,9 +1,9 @@
 defmodule Loka.Content.ChoiceChecks do
   @moduledoc """
   Toolbox row 14: a dialogue choice's opposed check (dialogue.schema.json DialogueCheck). A checked choice needs
-  check@1 (its check_passed); its key is no recipe's or other choice's check's
+  check@1 (its check_passed); its key is no scripted action's or other choice's check's
   (DUPLICATE_DEFINITION); its skill, attribute and failure text resolve; it names exactly one of
-  rating and npc (SCHEMA_VIOLATION invalid_value), its npc as a recipe check's (row G3); and it
+  rating and npc (SCHEMA_VIOLATION invalid_value), its npc as a scripted action check's (row G3); and it
   carries only label, narration, sequence, availability and check, in a dialogue with no quest and
   no riddle, with no skill.acquire step (OUTCOME_MISMATCH at the check).
   """
@@ -22,7 +22,7 @@ defmodule Loka.Content.ChoiceChecks do
       failure_text(rel, at, c["failure"], ctx.text) ++
       rated(rel, at, c, ctx) ++
       plain(rel, at, o, d) ++
-      if(c["key"] in Loka.Content.Recipes.shared_checks(ctx.defs),
+      if(c["key"] in Loka.Content.ScriptedActions.shared_checks(ctx.defs),
         do: [diag("DUPLICATE_DEFINITION", at(rel, at))],
         else: []
       )
@@ -40,7 +40,7 @@ defmodule Loka.Content.ChoiceChecks do
 
   defp rated(rel, at, c, ctx) do
     case {is_map_key(c, "rating"), is_map_key(c, "npc")} do
-      {false, true} -> Loka.Content.Recipes.rater(rel, at, c, ctx.m, ctx.defs)
+      {false, true} -> Loka.Content.ScriptedActions.rater(rel, at, c, ctx.m, ctx.defs)
       {true, false} -> []
       _ -> [diag("SCHEMA_VIOLATION", at(rel, at), %{"error" => "invalid_value"})]
     end

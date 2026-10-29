@@ -53,7 +53,7 @@ export function ids(c: any): Record<string, string> {
   );
 }
 
-// bleed_sampler's den made dark, its search target glowing: the only way to its `search` recipe is
+// bleed_sampler's den made dark, its search target glowing: the only way to its `search` scripted action is
 // the self-luminous Notice (light@1).
 export function glowBundle() {
   return fragment('protocol/fixtures/bleed_sampler_hash.json').bundle((c) => {

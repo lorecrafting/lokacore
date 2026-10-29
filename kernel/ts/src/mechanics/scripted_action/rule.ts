@@ -1,14 +1,14 @@
-// action_recipe@1 (capability_registry.json): perform one ActionRecipe of the cartridge as one
+// scripted_action@1 (capability_registry.json): perform one ScriptedAction of the cartridge as one
 // logical decision (06 §20; 21 §7; 04 §5.2). step admits only an action of the actor's
 // ActionSet whose policy holds (commands/actions.ts refusal); here the key is re-resolved in that set: no
-// recipe by that key is not_found, a target_id other than the recipe's detail invalid_target, the
+// scripted action by that key is not_found, a target_id other than the scripted action's detail invalid_target, the
 // detail outside the actor's room not_present, then commands/actions.ts admission: a perform before the
-// actor's last admitted attempt plus the recipe's cooldown cooldown, and costs the actor's body
+// actor's last admitted attempt plus the scripted action's cooldown cooldown, and costs the actor's body
 // cannot pay insufficient_resource. A rejection draws no RNG and changes nothing (04 §5.0).
-// Accepted: the costs are paid first (resource.adjust ops); then a recipe's check (check@1) is
+// Accepted: the costs are paid first (resource.adjust ops); then a scripted action's check (check@1) is
 // resolved, a luck draw from the world's RNG or a threshold on a resource's value at admission,
 // and emits check_passed or check_failed at position 1; its result selects the outcome, success
-// or failure (the decision's outcome; performed for a recipe without a check), and a failure
+// or failure (the decision's outcome; performed for a scripted action without a check), and a failure
 // commits its costs, draw, cooldown, time and steps exactly like success (04 §5.0). Then that
 // outcome's sequence in order: each fact.assign a delta op whose expected value is the fact as the
 // steps before it left it, each resource.adjust one from the resource's value as the costs and
@@ -18,20 +18,20 @@
 // reads the outcome's narration, each of its participants pinned here to its EntityId (an NPC's
 // or item's, the actor's body), so the committed line never resolves them again (06 §43). A cooldown adds a cooldown.start at the admission time, and a
 // duration one time.advance after the steps (the host runs its due jobs in this proposal,
-// runtime/proposal.ts propose; 04 §5.4); events keep the admission time. A recipe with a tip
+// runtime/proposal.ts propose; 04 §5.4); events keep the admission time. A scripted action with a tip
 // (toolbox row W23) first assigns its seen_tip_<key> after the steps, while unseen, and the actor
-// then also reads the tip after the outcome's line. Result bands join later. A use recipe
+// then also reads the tip after the outcome's line. Result bands join later. A use scripted action
 // (toolbox row G4) acts on the invoked target with the invoked held tool (shared.ts useRefused); its
 // status.cure steps end the target's active status (status/shared.ts cureOps). A spell (toolbox row
 // 29a) is the same run, reached by cast's word instead of perform's key (shared.ts spellOf; step's
 // castAdmission refused an unknown, unlearned or barred word).
-// A recipe's craft (Homestead hs-10; shared.ts crafted) moves its consume's first items held
+// A scripted action's craft (Homestead hs-10; shared.ts crafted) moves its consume's first items held
 // directly to consume.to on every accepted perform, and unless the outcome is failure one yield
 // item from yield.from to the body with item_acquired before the steps (made). A build step (Built
 // rooms S6, success outcome only) raises its structure at the target's room for the actor
 // (service/build.ts created); admission refused it while unbuildable (shared.ts craftRefused).
 import type {
-  ActionRecipe,
+  ScriptedAction,
   CharacterId,
   DefinitionRef,
   DeltaOp,
@@ -39,8 +39,8 @@ import type {
   EventPayload,
   FactValue,
   NarrationParticipant,
-  RecipeNarration,
-  RecipeStep,
+  ActionNarration,
+  ActionStep,
 } from '../../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
 import {
@@ -67,24 +67,24 @@ import { effect, fightBack, type Effected } from './spell.ts';
 import { fresh, trailLead } from '../trail.ts';
 import { created } from '../service/build.ts';
 
-// size: allow 44, the craft's consume and yield join the one recipe run (Homestead hs-10)
-export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
+// size: allow 44, the craft's consume and yield join the one scripted action run (Homestead hs-10)
+export const decide: Rule<'scripted_action'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
-  const recipe = recipeOf(world, p);
+  const scripted = scriptedOf(world, p);
   const body = bodyOf(world, p.actor_id);
-  if (!recipe || !body) return rejected(p.type === 'cast' ? 'invalid_state' : 'not_found');
+  if (!scripted || !body) return rejected(p.type === 'cast' ? 'invalid_state' : 'not_found');
   const { actor_id } = p;
-  const action = recipe.key;
-  const subject_id = subjectOf(world, recipe, p, body, steps);
+  const action = scripted.key;
+  const subject_id = subjectOf(world, scripted, p, body, steps);
   if (typeof subject_id !== 'string') return subject_id;
-  const admitted = admission(world, recipe, actor_id, body);
+  const admitted = admission(world, scripted, actor_id, body);
   if (typeof admitted === 'string') return rejected(admitted);
   const { paid, last, from } = admitted;
-  const craft = crafted(world, recipe, body, steps); // Homestead hs-10
+  const craft = crafted(world, scripted, body, steps); // Homestead hs-10
   if ('code' in craft) return rejected(craft.code);
-  const { check, duration } = recipe;
+  const { check, duration } = scripted;
   const rolled = check && resolve(world, command, mint, check, subject_id, body);
-  const { sequence, narration } = recipe.outcomes[rolled?.outcome ?? 'success']!;
+  const { sequence, narration } = scripted.outcomes[rolled?.outcome ?? 'success']!;
   const ops = [...paid.ops, ...craft.consumed];
   const start: Run = { ...START, ...paid, ops, rng: rolled?.rng ?? world.state.rng }; // row 29b: a kill's drops
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
@@ -93,13 +93,13 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   const begun = made(world, command, mint, practice, kept);
   const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
   const end = duration ? add(from, duration) : from; // a fight's first round never inside the cast
-  const run = tip(world, actor_id, recipe, fightBack(world, actor_id, body, ran, mint, end));
+  const run = tip(world, actor_id, scripted, fightBack(world, actor_id, body, ran, mint, end));
   const said = { key: narration.actor, ...pinned(world, narration.participants, body) };
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
     rolled?.outcome === 'failure' ? [] : [event(world, command, mint, run.position + 1, done)];
   const since = last === undefined ? {} : { from: last };
-  const cooldown: DeltaOp[] = recipe.cooldown
+  const cooldown: DeltaOp[] = scripted.cooldown
     ? [{ op: 'cooldown.start', writer_group: 0, actor_id, action, ...since, at: from }]
     : [];
   const time: DeltaOp[] = duration ? [{ op: 'time.advance', writer_group: 0, from, to: end }] : [];
@@ -113,18 +113,18 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   );
 };
 
-// The recipe a perform names by key in the actor's set, or (row 29a) the spell a cast names by word.
-const recipeOf = (world: World, p: Command['payload']) =>
+// The scripted action a perform names by key in the actor's set, or (row 29a) the spell a cast names by word.
+const scriptedOf = (world: World, p: Command['payload']) =>
   p.type === 'cast'
     ? spellOf(world, p.actor_id, p.word)
-    : resolved(world, p.actor_id)[p.action]?.recipe;
+    : resolved(world, p.actor_id)[p.action]?.scripted;
 
-// The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
+// The entity the scripted action acts on, or the decision refusing it: its detail, in the actor's room (no
 // item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach
 // fault faults the decision); or (row 29a) a spell's caster's body, an aimed one's target_id.
 function subjectOf(
   world: World,
-  { target }: ActionRecipe,
+  { target }: ScriptedAction,
   p: Command['payload'],
   body: EntityId,
   steps: Steps,
@@ -144,18 +144,18 @@ function subjectOf(
   return world.details[id].room === world.state.containers[body] ? id : rejected('not_present');
 }
 
-// Toolbox row W23: the first accepted perform of a recipe with a tip assigns its engine-owned
+// Toolbox row W23: the first accepted perform of a scripted action with a tip assigns its engine-owned
 // seen_tip_<key> true, and the actor reads the tip once, after the outcome's lines.
-function tip(world: World, actor: CharacterId, recipe: ActionRecipe, run: Run): Run {
-  if (!recipe.tip) return run;
-  const fact = seenTip(world, recipe.key);
+function tip(world: World, actor: CharacterId, scripted: ScriptedAction, run: Run): Run {
+  if (!scripted.tip) return run;
+  const fact = seenTip(world, scripted.key);
   if (value(world, actor, fact) === true) return run;
   const tipped = assigned(world, actor, run, { fact, value: true });
-  return { ...tipped, lines: [...tipped.lines, { key: recipe.tip }] };
+  return { ...tipped, lines: [...tipped.lines, { key: scripted.tip }] };
 }
 
 // The narration's participants as EntityIds; the compiler checked each npc or item resolves.
-function pinned(world: World, participants: RecipeNarration['participants'], body: EntityId) {
+function pinned(world: World, participants: ActionNarration['participants'], body: EntityId) {
   if (!participants) return {};
   const id = (p: NarrationParticipant) =>
     p.role === 'actor' ? body : world.entityIds[refString(p.role === 'npc' ? p.npc : p.item)]!;
@@ -174,13 +174,13 @@ const DRAWS = 8;
 // The check's result, its event at position 1 and the RNG after it: luck draws one uniform
 // integer in [0, 100) and passes below chance; threshold draws nothing and passes when the
 // body's value of the resource at admission (before costs) is at least difficulty
-// (action.schema.json RecipeCheck); opposed draws nothing and passes when the actor's skill level
+// (action.schema.json ActionCheck); opposed draws nothing and passes when the actor's skill level
 // or attribute is at least its rating (mechanics.md rows 5, G5 and G3).
 function resolve(
   world: World,
   command: Command,
   mint: Mint,
-  check: NonNullable<ActionRecipe['check']>,
+  check: NonNullable<ScriptedAction['check']>,
   subject_id: EntityId,
   body: EntityId,
 ) {
@@ -212,7 +212,7 @@ function resolve(
   return { outcome, rng, event: event(world, command, mint, 1, payload), lead };
 }
 
-type Command = Parameters<Rule<'action_recipe'>>[1];
+type Command = Parameters<Rule<'scripted_action'>>[1];
 // levels: resource values as the costs and steps so far left them; lines and rng: row 29b effects.
 type Run = Effected & {
   readonly facts: Readonly<Record<string, FactValue>>; // by MutationTarget text, as set so far
@@ -237,9 +237,9 @@ const made = (world: World, command: Command, mint: Mint, run: Run, moves: reado
 // One step of the sequence over the run so far.
 const step =
   (world: World, command: Command, mint: Mint, subject_id: EntityId, body: EntityId) =>
-  (r: Run, s: RecipeStep): Run => {
+  (r: Run, s: ActionStep): Run => {
     if (s.op === 'build') {
-      const site = recipeOf(world, command.payload)!.target; // a detail (the compiler's build check)
+      const site = scriptedOf(world, command.payload)!.target; // a detail (the compiler's build check)
       if (site.kind !== 'detail') return r;
       const b = { structure: s.structure, site: site.room, direction: s.direction };
       return { ...r, ops: [...r.ops, ...created(world, b, command.payload.actor_id, mint)] };

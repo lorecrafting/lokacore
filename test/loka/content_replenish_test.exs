@@ -81,10 +81,10 @@ defmodule Loka.ContentReplenishTest do
            )
   end
 
-  # Homestead hs-1: the sampler with a `dig` recipe whose custom_event `dig` runs `step`.
+  # Homestead hs-1: the sampler with a `dig` scripted action whose custom_event `dig` runs `step`.
   defp digging(step, at_least \\ "1.101", rule \\ %{}) do
     # The step emits no event: it needs no fact@1 (which owns fact_changed).
-    caps = &(&1 |> Map.delete("fact") |> Map.merge(%{"action_recipe" => 1, "reaction" => 1}))
+    caps = &(&1 |> Map.delete("fact") |> Map.merge(%{"scripted_action" => 1, "reaction" => 1}))
 
     [
       {"cartridge.json",

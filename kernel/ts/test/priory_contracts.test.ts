@@ -11,7 +11,7 @@ const ledger = `${prefix}:item/mill_ledger`;
 
 // Break: malformed readable metadata is accepted.
 // Topic, knowledge type and readable reference checks are the compiler's (content_priory_test.exs,
-// content_refusals_test.exs, content_recipes_test.exs).
+// content_refusals_test.exs, content_scripted_actions_test.exs).
 test('item writing fails closed on malformed readable metadata', () => {
   assert.ok(codex.load().ok);
   for (const invalid of [
@@ -103,8 +103,8 @@ const knows = (w: World, topic: string) =>
   value(w, w.character, ref('fact', `topic_${topic}_known`));
 
 // Break (topics/shared.ts grant): Read of a topic already known, by an earlier Read or by a
-// recipe grant, assigns its fact again instead of leaving the world unchanged.
-test('reading a book whose topic is already known writes nothing, after a Read or a recipe grant', () => {
+// scripted action grant, assigns its fact again instead of leaving the world unchanged.
+test('reading a book whose topic is already known writes nothing, after a Read or a scripted action grant', () => {
   const noted = readBook(walk(codex.genesis(), 'south'), 'carters_note');
   assert.equal(knows(noted.world, 'missing_cart'), true);
   const note = noted.world.entityIds[`${prefix}:item/carters_note`];

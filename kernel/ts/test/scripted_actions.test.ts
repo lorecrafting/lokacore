@@ -1,4 +1,4 @@
-// The ActionSet algebra and ActionRecipe execution (R5 S5; 06 §19-§20; ADR-016; 21 §7; 04 §5.2,
+// The ActionSet algebra and ScriptedAction execution (R5 S5; 06 §19-§20; ADR-016; 21 §7; 04 §5.2,
 // §5.4). The world is built from the bell known answer (protocol/fixtures/cartridge_bell_hash.json),
 // or from a copy of it changed by one field and re-hashed with node:crypto over sorted-key
 // JSON.stringify (the canonical form for these values). Ids and the state hash are Python's
@@ -29,7 +29,7 @@ const IDS = [
   'dc69e85d-a2c1-815e-a631-9c6b94c780d3', // 2
 ];
 const SEED = [1, 2, 3, 4];
-const RECIPE = 'recipe_sampler@0.0.1:recipe/ring_bell';
+const SCRIPTED = 'recipe_sampler@0.0.1:action/ring_bell';
 const ROOM = 'recipe_sampler@0.0.1:room/belfry';
 
 const sorted = (v: any): any =>
@@ -117,7 +117,7 @@ test('the five ActionSet operations compose by stable key', () => {
   for (const [op, expected] of rows) assert.deepEqual(apply(set, op as never, c), expected, op);
 });
 
-// Breaks (04 §5.2 steps 4-5; S4 review F1): fact_changed after the recipe's own event, the
+// Breaks (04 §5.2 steps 4-5; S4 review F1): fact_changed after the scripted action's own event, the
 // assign not proposed or its change not adopted, a missing event, action_completed missing or
 // not last (review F2), no narration, or the S3 variants not following the committed fact.
 test('ring bell assigns the fact, then fact_changed, then the custom event, and narrates', () => {
@@ -137,14 +137,14 @@ test('ring bell assigns the fact, then fact_changed, then the custom event, and 
   );
   assert.equal(gameView(w).place.description.key, 'room.belfry.rung');
   assert.equal(describe(w, w.character, w.details[BELL]), 'detail.bell.rung');
-  assert.deepEqual(plain(step(world(), ring(), 0).decision), plain(decision)); // the recipe's own target
+  assert.deepEqual(plain(step(world(), ring(), 0).decision), plain(decision)); // the scripted action's own target
 });
 
 // Breaks: an assign that keeps its value emits fact_changed, the second assign's expected value
 // read from committed state instead of the sequence so far, or positions left with a gap.
 test('an assign that keeps its value takes no position and emits no fact_changed', () => {
   const w = world((c) => {
-    const r = c.recipes[RECIPE];
+    const r = c.scripted_actions[SCRIPTED];
     r.policy = { op: 'all', items: [] };
     r.outcomes.success.sequence.splice(1, 0, r.outcomes.success.sequence[0]);
   });
@@ -179,13 +179,13 @@ test('perform is rejected for another target, key or room, and once its policy f
   }
 });
 
-// Breaks (brief item 7): a recipe commits a value its FactSpec does not allow, or part of the
+// Breaks (brief item 7): a scripted action commits a value its FactSpec does not allow, or part of the
 // sequence commits before the fault. The loader rejects such an artifact (FACT_TYPE_MISMATCH,
 // #46 A1), so the value is changed in the loaded cartridge: adopt's check is the second line.
-test('a recipe assigning a wrongly typed value faults with nothing committed', () => {
+test('a scripted action assigning a wrongly typed value faults with nothing committed', () => {
   const ok = world();
   const cartridge = structuredClone(ok.cartridge) as any;
-  cartridge.recipes[RECIPE].outcomes.success.sequence[0].value = 'yes';
+  cartridge.scripted_actions[SCRIPTED].outcomes.success.sequence[0].value = 'yes';
   const w = { ...ok, cartridge };
   const r = step(w, ring(), 0);
   assert.deepEqual(plain(r.decision), {
@@ -204,7 +204,7 @@ const shown = (key: string, label: string, available = true) => ({
   input: key === 'move' ? ['direction'] : key === 'wait' ? ['until'] : [],
   ...(available ? {} : { reason: { code: 'invalid_state' } }),
 });
-// A recipe aimed at a detail is offered on that detail's page (loka-x6t.120), so its notice's
+// A scripted action aimed at a detail is offered on that detail's page (loka-x6t.120), so its notice's
 // cards come first, then the World list.
 const places = (w: World) => {
   const v = gameView(w);
@@ -214,9 +214,9 @@ const places = (w: World) => {
 };
 const bellPage = (w: World) => plain(gameView(w).notices?.find((n) => n.key === 'bell')?.actions);
 
-// Breaks: a recipe listed away from its detail's page or not greyed once its policy fails, the
+// Breaks: a scripted action listed away from its detail's page or not greyed once its policy fails, the
 // lists not by priority then key, or engine verbs of capabilities the cartridge does not lock (take).
-test("the place's actions: the recipe on its detail's page while here, the verbs on the World", () => {
+test("the place's actions: the scripted action on its detail's page while here, the verbs on the World", () => {
   const w = world();
   // wait: the compiler adds schedule@1 with the pools (review #49 A1).
   const verbs = ['look', 'move', 'scan', 'wait'].map((v) => shown(v, `action.${v}`));
@@ -278,7 +278,7 @@ test('a cartridge action overrides the engine verb of its key, policy included',
       command: 'look',
       priority: 20,
       input: [],
-      policy: c.recipes[RECIPE].policy,
+      policy: c.scripted_actions[SCRIPTED].policy,
       accessibility: 'actions.ring_bell',
     };
   });
@@ -329,7 +329,7 @@ test("a command no offered action's target or input accepts is refused like an u
       command,
       priority: 0,
       input,
-      policy: c.recipes[RECIPE].policy,
+      policy: c.scripted_actions[SCRIPTED].policy,
       accessibility: 'actions.ring_bell',
     });
     const inventory = { kind: 'entity', scopes: ['inventory'] };
@@ -397,11 +397,11 @@ test("an entity target in the action's scope is admitted", () => {
 // Row FD1, a root delivery: ring_bell's action_completed is stamped at 0, before its 60 s
 // advance. Breaks: the delay is not clamped past the advance, so the job due at 30 faults the
 // command (nonfuture_job), or it is clamped later than 61.
-test('FD1: a delayed rule on a 60 s recipe, after 30, is due at 61', () => {
+test('FD1: a delayed rule on a 60 s scripted action, after 30, is due at 61', () => {
   const w = world((c) => {
     c.manifest.requires.kernel_api.at_least = '1.90';
     c.manifest.requires.capabilities.reaction = c.lock.capabilities.reaction = 1;
-    c.recipes[RECIPE].duration = 60;
+    c.scripted_actions[SCRIPTED].duration = 60;
     const fact = ref('fact', 'rung_at');
     c.facts['recipe_sampler@0.0.1:fact/rung_at'] = {
       key: 'rung_at',

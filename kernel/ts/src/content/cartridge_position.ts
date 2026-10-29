@@ -6,13 +6,13 @@ import { markerSpec, spec } from './cartridge_scenes.ts';
 import type { Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 
-/** Toolbox row W23: the FactSpec the compiler adds for a recipe's tip (recipes.ex tip_spec). */
+/** Toolbox row W23: the FactSpec the compiler adds for a scripted action's tip (action_tips.ex tip_spec). */
 const tipSpec = (key: string) => ({
   key: `seen_tip_${key}`,
   version: 1,
   value_type: { type: 'bool', default: false },
   scopes: ['player'],
-  meaning: `Recipe ${key}'s tip was shown (action_recipe@1): only that recipe writes it.`,
+  meaning: `Scripted action ${key}'s tip was shown (scripted_action@1): only that scripted action writes it.`,
 });
 
 /** The FactSpec the compiler adds under position@1 (cartridge.md Compiler), byte for byte. */
@@ -62,7 +62,7 @@ export function expectedFacts(c: Obj): Obj {
     expected[`skill_${s.key}`] = skillSpec(s.key);
     if (s.growth) expected[`uses_${s.key}`] = usesSpec(s.key, s.growth);
   }
-  for (const r of Object.values((c.recipes ?? {}) as Obj))
+  for (const r of Object.values((c.scripted_actions ?? {}) as Obj))
     if (r.tip) expected[`seen_tip_${r.key}`] = tipSpec(r.key);
   return { ...expected, ...trailFacts(c) };
 }

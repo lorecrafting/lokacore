@@ -80,7 +80,7 @@ async function session(script: string | undefined) {
   if (tty) input.prompt();
   for await (const text of input) {
     if (!tty) process.stdout.write(`> ${text}\n`);
-    const action = recipe(r, text);
+    const action = scripted(r, text);
     const parsed = action ?? parse(text);
     if (parsed === 'quit') break;
     if (parsed === 'brief')
@@ -239,22 +239,22 @@ function accept(r: Run, words: string) {
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
-// The recipes of the player's ActionSet with the longest leading phrase of the words as an
-// alias (commands/actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
-function recipe(r: Run, text: string): { perform: Offered[]; rest: string } | undefined {
+// The scripted actions of the player's ActionSet with the longest leading phrase of the words as an
+// alias (commands/actions.ts; 06 §20 aliases; two scripted actions may share one), and the words after it.
+function scripted(r: Run, text: string): { perform: Offered[]; rest: string } | undefined {
   const words = text.trim().toLowerCase().split(/\s+/);
-  const recipes = Object.values(resolved(r.world, r.world.character)).filter(
-    (a) => a.recipe?.target.kind === 'detail', // ponytail: no text form for a use recipe (G4) yet
+  const scripted_actions = Object.values(resolved(r.world, r.world.character)).filter(
+    (a) => a.scripted?.target.kind === 'detail', // ponytail: no text form for a use scripted action (G4) yet
   );
   for (let n = words.length; n > 0; n--) {
     const alias = words.slice(0, n).join('_');
-    const perform = recipes.filter((x) => x.recipe!.aliases.includes(alias as never));
+    const perform = scripted_actions.filter((x) => x.scripted!.aliases.includes(alias as never));
     if (perform.length) return { perform, rest: words.slice(n).join(' ') };
   }
 }
 
 // The target first: the unique id of the words after the alias (none and ambiguous build no
-// Command), else the room. Then the recipes whose detail that is: one builds a perform Command,
+// Command), else the room. Then the scripted actions whose detail that is: one builds a perform Command,
 // several ask which (by label, in key order), none builds nothing.
 function perform(r: Run, p: { perform: Offered[]; rest: string }) {
   const named = normalize(p.rest).length > 0;
@@ -263,7 +263,7 @@ function perform(r: Run, p: { perform: Offered[]; rest: string }) {
   const here = r.world.state.containers[r.world.body];
   const fits = p.perform
     .filter((a) => {
-      const detail = detailAt(r.world, a)!; // a detail recipe (recipe above)
+      const detail = detailAt(r.world, a)!; // a detail scripted action (scripted action above)
       return named ? detail === id : r.world.details[detail].room === here;
     })
     .sort((a, b) => (a.key < b.key ? -1 : 1));

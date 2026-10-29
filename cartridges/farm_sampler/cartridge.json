@@ -17,7 +17,7 @@
       "policy": 1,
       "tags": 1,
       "fact": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "reaction": 1,
       "status": 1,
       "schedule": 1,

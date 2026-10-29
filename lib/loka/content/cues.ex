@@ -1,7 +1,7 @@
 defmodule Loka.Content.Cues do
   @moduledoc """
   Toolbox row G6: every declared sense cue (a room's, detail's, item's and its fuel source's,
-  NPC's, status's or recipe outcome's) is owned by sense_cue@1 and names a text key.
+  NPC's, status's or scripted action outcome's) is owned by sense_cue@1 and names a text key.
   """
   import Loka.Content.Source, only: [diag: 3, at: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -11,7 +11,7 @@ defmodule Loka.Content.Cues do
     {"npc", [[]]},
     {"item", [[], ["fuel"]]},
     {"status", [[]]},
-    {"recipe", [["outcomes", "success"], ["outcomes", "failure"]]}
+    {"scripted_action", [["outcomes", "success"], ["outcomes", "failure"]]}
   ]
 
   @doc "Each cue as `{rel, steps, cue}`."

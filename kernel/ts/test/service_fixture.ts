@@ -165,7 +165,7 @@ export function onlyService(c: any) {
     'populations',
     'barriers',
     'attributes',
-    'recipes',
+    'scripted_actions',
     'replenish',
     'statuses',
     'items',

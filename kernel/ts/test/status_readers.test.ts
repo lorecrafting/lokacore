@@ -192,7 +192,7 @@ test('hushed: speech is refused invalid_state and unlisted, until the status end
     { type: 'shout', word: 'hello' },
   ])
     assert.equal(code(send(w, payload)), 'invalid_state', payload.type);
-  const caps = { ...content.lock.capabilities, action_recipe: 1 }; // cast locked, no spell offered
+  const caps = { ...content.lock.capabilities, scripted_action: 1 }; // cast locked, no spell offered
   const spellless = shrine({
     ...content,
     lock: { ...content.lock, capabilities: caps },

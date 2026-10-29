@@ -35,7 +35,7 @@ unit less, as the compiler requires it below `duration`) to retune.
 
 ## Pattern 4: the forced strongbox (a fuse)
 
-- Recipe `force_strongbox` at `tollhouse` detail `strongbox_lock` (rating 1), alias `force`, check
+- Scripted action `force_strongbox` at `tollhouse` detail `strongbox_lock` (rating 1), alias `force`, check
   `{key: force_strongbox, kind: opposed, attribute: str}` (str 10 beats 1: forcing a cheap lock is
   easy and loud; picking is the quiet skill), policy `all(strongbox_picked false, strongbox_forced
   false)`, success `fact.assign strongbox_forced true`, a failure outcome with its line
@@ -102,7 +102,7 @@ emits `status_expired` only (an expired job skips the tick, `kernel/ts/src/mecha
   (G11), so a player who burnt at standing 0 must first mend it with the Reeve's `help`: that is the
   cartridge's existing rule and a detour, named in the playtest script.
 - `readable.parish_roll` gains one line: Hal, Wat's brother, taken up at the toll gate at the fair.
-- Deduction recipe `think_letter` at `church` detail `lectern`, a distinct alias (`think` is
+- Deduction scripted action `think_letter` at `church` detail `lectern`, a distinct alias (`think` is
   `think_lectern`'s on the same detail), policy `all(topic_parish_known, topic_surety_known, not
   topic_letter_known)`, success `fact.assign topic_letter_known true`; topic `letter` labelled
   "What the letter carried" (`think_lectern` shape, [row 46](../system/mechanics.md#lore-codex-and-deduction-toolbox-row-46)).

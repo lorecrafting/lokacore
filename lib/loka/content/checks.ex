@@ -3,7 +3,9 @@ defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
-  alias Loka.Content.{Barriers, Dialogues, Entities, Exits, Quests, Reactions, Recipes, RoomParts}
+
+  alias Loka.Content.{Barriers, Dialogues, Entities, Exits, Quests, Reactions, RoomParts}
+  alias Loka.Content.ScriptedActions
   alias Loka.Core.Canonical
 
   @ref_fields Map.merge(Loka.Content.LeafRefs.all(), Loka.Content.LeafRefs.steps())
@@ -78,7 +80,7 @@ defmodule Loka.Content.Checks do
         end
       end)
 
-  # A recipe narration's participant (NarrationParticipant): the npc or item its role selects.
+  # A scripted action narration's participant (NarrationParticipant): the npc or item its role selects.
   def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),
     do: Map.update!(p, k, &ref(&1, k, m))
 
@@ -130,7 +132,7 @@ defmodule Loka.Content.Checks do
     |> Loka.Content.NpcFields.expand(m, &expand/2)
   end
 
-  # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
+  # A scripted action's target (ScriptedTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
 
@@ -167,7 +169,7 @@ defmodule Loka.Content.Checks do
       |> Map.update!("items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
       |> Map.merge(if h["careful"], do: %{"careful" => expand(h["careful"], m)}, else: %{})
 
-  # Recipe costs and thresholds expand only their owned reference fields.
+  # Scripted action costs and thresholds expand only their owned reference fields.
   def expand(%{"kind" => k, "attribute" => a} = n, m) when k in ~w(attribute_threshold opposed),
     do:
       Map.merge(
@@ -237,7 +239,7 @@ defmodule Loka.Content.Checks do
 
   # A scene's action trigger.
   def expand(%{"action" => a, "outcome" => _} = t, m) when is_binary(a),
-    do: Map.replace_lazy(%{t | "action" => ref(a, "recipe", m)}, "room", &ref(&1, "room", m))
+    do: Map.replace_lazy(%{t | "action" => ref(a, "action", m)}, "room", &ref(&1, "room", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)
@@ -311,8 +313,8 @@ defmodule Loka.Content.Checks do
   item's and NPC's owning capability is required, exits and the entry name rooms of this
   cartridge, items' locations and NPCs' rooms name definitions of their kind, items and NPCs
   start without a containment cycle or over capacity, each room's, item's, NPC's and action's
-  text keys have a catalog entry (unless the catalog was rejected, `:unknown`). Recipes and
-  rooms' action contributions are `Loka.Content.Recipes.check/4`.
+  text keys have a catalog entry (unless the catalog was rejected, `:unknown`). Scripted actions and
+  rooms' action contributions are `Loka.Content.ScriptedActions.check/4`.
   """
   @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
   def rooms(_, _, nil, _), do: []
@@ -422,7 +424,7 @@ defmodule Loka.Content.Checks do
       for({rel, a} <- actions(defs), do: {rel, ["policy"], a["policy"]}),
       RoomParts.conditions(defs),
       Entities.conditions(defs),
-      Recipes.conditions(defs),
+      ScriptedActions.conditions(defs),
       Quests.conditions(defs),
       Reactions.conditions(defs),
       Dialogues.conditions(defs),

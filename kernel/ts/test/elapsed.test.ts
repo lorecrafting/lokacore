@@ -24,7 +24,7 @@ function source() {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
   c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
   c.manifest.requires.kernel_api.at_least = '1.1';
-  delete c.recipes[`${F}:recipe/coil_rope`].duration;
+  delete c.scripted_actions[`${F}:action/coil_rope`].duration;
   return c;
 }
 function load(c: any) {

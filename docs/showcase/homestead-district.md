@@ -14,7 +14,7 @@ Conventions as in [plan 1](hub-and-first-districts.md): snake_case ids, the deve
 the signpost, the game clock (07:00 day 1 is 25200; a game hour 3600 and 72 real seconds). Two
 cartridge-wide facts matter here:
 
-- **No recipe `duration`.** The showcase's `time_policy` is `real_elapsed`, and a recipe with a
+- **No scripted action `duration`.** The showcase's `time_policy` is `real_elapsed`, and a scripted action with a
   `duration` is refused at load (`INVALID_TIME_POLICY`, `kernel/ts/src/content/cartridge.ts`). The
   `fish` (60) and `chop` (600) durations of the samplers are dropped; nothing else changes.
 - **Seasons are days.** The showcase season period is four days (spring day 1, summer day 2, autumn
@@ -92,7 +92,7 @@ Sealed holders (no exits, never entered) hold the yields: `woodpile` (8 `log`s),
 
 | Room | Exits | Holds |
 |---|---|---|
-| `holding_lane` (sign) | east `fell_gate`, west `carpenter_shop`, south `farm_yard`, up `holding_croft`; **site** `{directions: [north], structures: [hut_plain, hut_timbered]}` (`craft_sampler/rooms/lane.json`) | detail `sign_homestead`; detail `plot_stakes` (rating 1; the raise recipe's target) |
+| `holding_lane` (sign) | east `fell_gate`, west `carpenter_shop`, south `farm_yard`, up `holding_croft`; **site** `{directions: [north], structures: [hut_plain, hut_timbered]}` (`craft_sampler/rooms/lane.json`) | detail `sign_homestead`; detail `plot_stakes` (rating 1; the raise scripted action's target) |
 | `carpenter_shop` | east `holding_lane` | **the carpenter**; detail `saw_bench` (rating 1); `axe`; `cot` (tag `bed`, 1500 g: the axe, cot, rug and sticks fit the 5000 g carry); `rug` (tag `rug`); 2 `stick`s |
 | `farm_yard` | north `holding_lane`, west `glade`, east `pond`, south `farm_kitchen` | **the farmer**; `plot` (container, 20000 g, `immune: [growing]`, `locks {get, put}` on `owns_plot`, description variants on `time_since sown_at` 3600 and 64800 and on `withered`; `farm_sampler/items/plot.json`); `sack` (tie, starts closed; holds `seed_01`); `watering_can` (vessel, water 4); `holding_apple`; `dead_rat` |
 | `glade` | east `farm_yard` | detail `oak` (rating 1; `chop`); 3 `pelt`s on the frame |
@@ -117,7 +117,7 @@ Structure `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
 > the cook south of the yard turns two fish into a stew for a penny, or teaches you to do it at her
 > hearth. Up the croft has hens, a pool that bites at any hour, and a plot where a seed from the yard sack can be sown too.
 
-### NPCs, services, recipes, reactions
+### NPCs, services, scripted actions, reactions
 
 - **The carpenter**: stays; dialogues in key order (hs-14 filters a choice when the talk opens):
   `carpenter_lessons` with choices `whittling` (free, `skill.acquire whittling`), `woodcutting`
@@ -128,7 +128,7 @@ Structure `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
   `raise_hut_plain` price 5 `benefit {kind: build, structure: hut_plain, site: holding_lane,
   direction: north}`; `raze_hut` price 2 `benefit {kind: raze, site: holding_lane, direction:
   north}`; `raise_croft_hut` and `raze_croft_hut` for the sandbox site.
-- Recipes (`craft_sampler/recipes`): `carve_spoon` at `saw_bench` (policy `skill_compare whittling
+- Scripted actions (`craft_sampler/scripted_actions`): `carve_spoon` at `saw_bench` (policy `skill_compare whittling
   at_least 1`, check `{kind: opposed, skill: whittling}` against rating 1, `craft.consume {items:
   [stick_01..04], quantity: 1, to: midden, reason: craft.carve_spoon.needs}`, `craft.yield {items:
   [spoon_01, spoon_02], from: woodpile}`; a failure consumes the stick and yields nothing); `chop`
@@ -151,13 +151,13 @@ Structure `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
 - Farming (`farm_sampler`): reaction `sow` `on {item_acquired, item: seed_01}` `when all(not sky
   {season: winter}, not has_item seed_01)` (the seed put into the plot, which holds it) `apply
   [status.cure withered, status.apply {growing, item: plot}, fact.stamp sown_at, replenish.run
-  spent_furrow]`; `water` use recipe (tool `{tag: liquid_holding, liquid: water}` on the plot,
+  spent_furrow]`; `water` use scripted action (tool `{tag: liquid_holding, liquid: water}` on the plot,
   policy `status_active {subject: target, status: growing}`, `status.apply {watered, item: plot}`);
   reactions on `status_expired growing`: `ripen` `when status_active {subject: subject, status:
   watered}` moves `turnip_01` from `larder` to the plot and the seed to `midden` (`item.move`),
   `wither` otherwise applies `withered`; `replenish seed_return {items: [seed_01], from: midden, to:
   sack, cap 1, count 1, every 172800}`.
-- Fishing (`fishing_sampler`): `fish` use recipe (tool `{tag: rod}` on `pond_water`, policy `has_tag
+- Fishing (`fishing_sampler`): `fish` use scripted action (tool `{tag: rod}` on `pond_water`, policy `has_tag
   {subject: target, tag: water}`, check `{kind: luck, chance: 50}`, `cooldown` 600, success
   `event.emit bite`); reactions on `custom_event bite`: `trout` `when time_window {from: 6, to: 18}`
   `replenish.run trout`, `eel` for the night window, `salmon` `when sky {weather: rain}`; the three
@@ -167,7 +167,7 @@ Structure `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
 - Cooking (`kitchen_sampler`): the cook's service `stew` price 1 `{entitlement: ordered, escrow
   {items: [trout_01, trout_02, eel_01, salmon_01], quantity: 2, custody: larder, ready_after: 300,
   output: stew_plain_01}}`; `stew_plain_01` `edible {resource: mv, amount: 10, applies: [fed]}`;
-  dialogue `cook_lesson` with `cooking` free; recipes at `hearth`: `cook_stew` (policy
+  dialogue `cook_lesson` with `cooking` free; scripted actions at `hearth`: `cook_stew` (policy
   `skill_compare cooking at_least 1`, check opposed `cooking` against rating 1, consume 2 fish to
   `larder`, yield `stew_hearty_01..03` from `larder`; eating one applies `hearty`), `cook_feast`
   (`skill_compare cooking at_least 2`, three fish, yields `feast_01`).

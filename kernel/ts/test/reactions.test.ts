@@ -342,7 +342,7 @@ test('4097 events exceed the events budget; 4096 commit', () => {
     }));
     const r = adopt(
       w,
-      admit('action_recipe', accepted(w, 'x', [], events as never) as never),
+      admit('scripted_action', accepted(w, 'x', [], events as never) as never),
       SET,
       allocator(w, SET),
       0,

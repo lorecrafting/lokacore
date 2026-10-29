@@ -1,13 +1,13 @@
-// Toolbox row G4: each use recipe offered on a held tool, once per item it is admitted on, by
-// step's own admission (commands/actions.ts refusal: mechanics/action_recipe/shared.ts useRefused,
-// then the recipe's policy) and the recipe's cooldown and costs; target_ids [target, tool] fill
+// Toolbox row G4: each use scripted action offered on a held tool, once per item it is admitted on, by
+// step's own admission (commands/actions.ts refusal: mechanics/scripted_action/shared.ts useRefused,
+// then the scripted action's policy) and the scripted action's cooldown and costs; target_ids [target, tool] fill
 // perform's target_id, item_id.
 import { LIMITS } from '../contracts.gen.ts';
 import type { AdvertisedAction, CharacterId, EntityId, Key } from '../contracts.gen.ts';
 import { admission, refusal, type ActionSet } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { toolHeld } from '../mechanics/lookups.ts';
-import { fits } from '../mechanics/action_recipe/shared.ts';
+import { fits } from '../mechanics/scripted_action/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 
 export function useActions(
@@ -21,12 +21,13 @@ export function useActions(
   if (!body || toolHeld(world, body, tool as EntityId, steps) !== true) return [];
   return Object.values(set)
     .filter(
-      (a) => a.recipe?.target.kind === 'use' && fits(world, tool as EntityId, a.recipe.target.tool),
+      (a) =>
+        a.scripted?.target.kind === 'use' && fits(world, tool as EntityId, a.scripted.target.tool),
     )
     .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
     .flatMap((a) => {
       const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
-      const admitted = admission(world, a.recipe!, actor, body);
+      const admitted = admission(world, a.scripted!, actor, body);
       const pairs: AdvertisedAction[] = [];
       for (const id of Object.keys(world.entities)) {
         if (++steps.n > LIMITS.query_steps)

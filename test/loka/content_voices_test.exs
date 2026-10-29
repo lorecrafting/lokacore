@@ -7,7 +7,7 @@ defmodule Loka.ContentVoicesTest do
   test "skill_compare: reference and owner; asides refused" do
     dir = Loka.ContentSource.copy("cartridges/voices_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-    no_recipe = {"actions/read_glyphs.json", nil}
+    no_scripted = {"actions/read_glyphs.json", nil}
 
     unowned =
       {"cartridge.json",
@@ -19,7 +19,7 @@ defmodule Loka.ContentVoicesTest do
               &put_in(&1, ["room_line_variants", Access.at(0), "when", "skill"], "ghost")}
            ], "npcs/sage.room_line_variants[0].when.skill",
            %{"target" => "voices_sampler@0.0.1:skill/ghost"}},
-          {[unowned, no_recipe], "npcs/sage.room_line_variants[0].when.op",
+          {[unowned, no_scripted], "npcs/sage.room_line_variants[0].when.op",
            %{"capability" => "skills"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)

@@ -59,7 +59,7 @@ export function sequence(
 }
 
 // A dialogue choice's opposed check (toolbox row 14; mechanics.md dialogue skill checks): read at
-// the choose like a recipe's (skills.ts opposed; no RNG), its check event at position 1 with the
+// the choose like a scripted action's (skills.ts opposed; no RNG), its check event at position 1 with the
 // named NPC, else the speaker, as subject, then one use of a skill with growth. A pass returns that start for the
 // choice's own sequence; a failure is the whole decision: the actor reads the check's failure,
 // nothing else of the choice applies and the conversation closes (the retry rule: a new talk

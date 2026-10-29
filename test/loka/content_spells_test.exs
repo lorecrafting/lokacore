@@ -74,8 +74,8 @@ defmodule Loka.ContentSpellsTest do
     end
   end
 
-  # Breaks: the recipe reason check dropped, or 1.100 read as a string (below 1.99).
-  test "a recipe reason names a text key; 1.100 is above 1.99" do
+  # Breaks: the scripted action reason check dropped, or 1.100 read as a string (below 1.99).
+  test "a scripted action reason names a text key; 1.100 is above 1.99" do
     dir = Loka.ContentSource.copy(@dir)
     api = &{"cartridge.json", fn m -> put_in(m, ["requires", "kernel_api"], &1) end}
     reason = &{"actions/ward.json", &1}

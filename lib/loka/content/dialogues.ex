@@ -19,7 +19,9 @@ defmodule Loka.Content.Dialogues do
 
   def check(m, defs, {_, text}, {_, settings}, registry) do
     caps = m["requires"]["capabilities"]
-    keys = for kind <- ~w(action recipe quest), {_, {_, [], d}} <- defs[kind], do: d["key"]
+
+    keys =
+      for kind <- ~w(action scripted_action quest), {_, {_, [], d}} <- defs[kind], do: d["key"]
 
     ctx = %{
       m: m,

@@ -40,15 +40,15 @@ test('target_present holds for a target in reach and never without one', () => {
   }
 });
 
-// Breaks: admission evaluating the action's policy without its target (an alias, a recipe or a
+// Breaks: admission evaluating the action's policy without its target (an alias, a scripted action or a
 // take whose policy is target_present refused invalid_state by step though the GameView lists
-// it), notably a Command that names its target item_id rather than target_id; or a detail recipe
+// it), notably a Command that names its target item_id rather than target_id; or a detail scripted action
 // admitting a forged item_id, which lands in the receipt (mechanics.md, Use X on Y).
-test('the target reaches admission for a talk alias, a recipe and a take', () => {
+test('the target reaches admission for a talk alias, a scripted action and a take', () => {
   const w = after(
     world((c) => {
       c.actions[`${F}:action/chat`] = chat(PRESENT);
-      c.recipes[`${F}:recipe/coil_rope`].policy = PRESENT;
+      c.scripted_actions[`${F}:action/coil_rope`].policy = PRESENT;
       // Overrides the engine take (no policy: always holds); only this policy admits a take.
       c.actions[`${F}:action/take`] = { ...chat(PRESENT), key: 'take', command: 'take' };
       c.actions[`${F}:action/take`].target.scopes = ['room_contents'];
@@ -74,7 +74,7 @@ test('the target reaches admission for a talk alias, a recipe and a take', () =>
     stepped(w, { type: 'perform', action: 'coil_rope', item_id: lantern }),
     'invalid_target',
   );
-  // An invocation naming two targets for a detail recipe keeps its pre-G4 code (receipts).
+  // An invocation naming two targets for a detail scripted action keeps its pre-G4 code (receipts).
   const invocation = {
     action_key: 'coil_rope',
     actor_id: w.character,

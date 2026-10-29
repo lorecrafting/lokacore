@@ -22,7 +22,7 @@ walk('1-kitchen', 'Kitchen: learn cooking, cook a hearty stew at the hearth, eat
   await screen.getByRole('button', 'Learn cooking').tap();
   const leave = () => screen.getByRole('button', /^Leave/).first();
   for (let i = 0; i < 3 && (await settle(), await leave().isVisible()); i++) await leave().tap();
-  await screen.getByRole('button', 'hearth, open').tap(); // the recipe is on its page (loka-x6t.120)
+  await screen.getByRole('button', 'hearth, open').tap(); // the scripted action is on its page (loka-x6t.120)
   await screen.getByRole('button', 'Cook a hearty stew').tap();
   await settle();
   await screen.getByRole('button', LABEL.leave).first().tap();

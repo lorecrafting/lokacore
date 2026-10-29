@@ -286,7 +286,7 @@
     ]
   },
   {
-    "contract": "RecipeCost",
+    "contract": "ActionCost",
     "value": {},
     "errors": [
       {
@@ -300,7 +300,7 @@
     ]
   },
   {
-    "contract": "RecipeCost",
+    "contract": "ActionCost",
     "value": {
       "resource": {
         "cartridge_id": "c",
@@ -323,7 +323,7 @@
     ]
   },
   {
-    "contract": "RecipeCost",
+    "contract": "ActionCost",
     "value": {
       "resource": {
         "cartridge_id": "c",
@@ -341,7 +341,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "ring_bell",
       "name": "actions.ring_bell",
@@ -407,7 +407,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "ring_bell",
       "name": "actions.ring_bell",
@@ -555,7 +555,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "ring_bell",
       "name": "actions.ring_bell",
@@ -621,7 +621,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "ring_bell",
       "name": "actions.ring_bell",
@@ -697,7 +697,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "ring_bell",
       "name": "actions.ring_bell",
@@ -778,7 +778,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "resource.adjust"
     },
@@ -794,7 +794,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "resource.adjust",
       "resource": {
@@ -981,7 +981,7 @@
     "value": {
       "format": "loka-cartridge-v2",
       "resources": {
-        "c@1.0.0:recipe/x": 1
+        "c@1.0.0:action/x": 1
       }
     },
     "errors": [
@@ -1006,11 +1006,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/resources/c@1.0.0:recipe~1x",
+        "path": "/resources/c@1.0.0:action~1x",
         "code": "invalid_type"
       },
       {
-        "path": "/resources/c@1.0.0:recipe~1x",
+        "path": "/resources/c@1.0.0:action~1x",
         "code": "pattern_mismatch"
       },
       {
@@ -9926,7 +9926,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {},
     "errors": [
       {
@@ -9936,7 +9936,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "detail"
     },
@@ -9952,7 +9952,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "item"
     },
@@ -9964,7 +9964,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "detail",
       "room": {
@@ -9984,7 +9984,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "fact.assign"
     },
@@ -10000,7 +10000,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "event.emit",
       "x": 1
@@ -10017,7 +10017,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "fact.assign",
       "fact": {
@@ -10037,7 +10037,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "component.set"
     },
@@ -10049,7 +10049,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {},
     "errors": [
       {
@@ -10079,7 +10079,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "k",
       "name": "l",
@@ -10113,7 +10113,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "k",
       "name": "l",
@@ -10151,7 +10151,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "k",
       "name": "l",
@@ -10192,7 +10192,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "k",
       "name": "l",
@@ -10555,8 +10555,8 @@
         "kind": "room",
         "key": "r"
       },
-      "recipes": {
-        "c@1.0.0:action/x": 1
+      "scripted_actions": {
+        "c@1.0.0:room/x": 1
       }
     },
     "errors": [
@@ -10569,11 +10569,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/recipes/c@1.0.0:action~1x",
+        "path": "/scripted_actions/c@1.0.0:room~1x",
         "code": "invalid_type"
       },
       {
-        "path": "/recipes/c@1.0.0:action~1x",
+        "path": "/scripted_actions/c@1.0.0:room~1x",
         "code": "pattern_mismatch"
       }
     ]
@@ -10610,7 +10610,7 @@
     ]
   },
   {
-    "contract": "RecipeCheck",
+    "contract": "ActionCheck",
     "value": {},
     "errors": [
       {
@@ -10628,7 +10628,7 @@
     ]
   },
   {
-    "contract": "RecipeCheck",
+    "contract": "ActionCheck",
     "value": {
       "key": "k",
       "kind": "luck",
@@ -10642,7 +10642,7 @@
     ]
   },
   {
-    "contract": "RecipeCheck",
+    "contract": "ActionCheck",
     "value": {
       "key": "k",
       "kind": "luck",
@@ -10656,7 +10656,7 @@
     ]
   },
   {
-    "contract": "RecipeCheck",
+    "contract": "ActionCheck",
     "value": {
       "key": "k",
       "kind": "luck",
@@ -10670,7 +10670,7 @@
     ]
   },
   {
-    "contract": "RecipeCheck",
+    "contract": "ActionCheck",
     "value": {
       "key": "k",
       "kind": "skill",
@@ -10684,7 +10684,7 @@
     ]
   },
   {
-    "contract": "RecipeCheck",
+    "contract": "ActionCheck",
     "value": {
       "key": "K",
       "kind": "luck",
@@ -10703,7 +10703,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pry_lid",
       "name": "actions.ring_bell",
@@ -10779,7 +10779,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pry_lid",
       "name": "actions.ring_bell",
@@ -10856,7 +10856,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pry_lid",
       "name": "actions.ring_bell",
@@ -10933,7 +10933,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pry_lid",
       "name": "actions.ring_bell",
@@ -11009,7 +11009,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pry_lid",
       "name": "actions.ring_bell",
@@ -11089,7 +11089,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pry_lid",
       "name": "actions.ring_bell",
@@ -13052,7 +13052,7 @@
     ]
   },
   {
-    "contract": "RecipeNarration",
+    "contract": "ActionNarration",
     "value": {
       "participants": {}
     },
@@ -13064,7 +13064,7 @@
     ]
   },
   {
-    "contract": "RecipeNarration",
+    "contract": "ActionNarration",
     "value": {
       "actor": "k",
       "bindings": {}
@@ -13077,7 +13077,7 @@
     ]
   },
   {
-    "contract": "RecipeNarration",
+    "contract": "ActionNarration",
     "value": {
       "actor": "k",
       "participants": {
@@ -15284,7 +15284,7 @@
             "description_variant": 1,
             "containment": 1,
             "policy": 1,
-            "action_recipe": 1,
+            "scripted_action": 1,
             "calendar": 1,
             "resource": 1,
             "schedule": 1,
@@ -15306,7 +15306,7 @@
           "description_variant": 1,
           "containment": 1,
           "policy": 1,
-          "action_recipe": 1,
+          "scripted_action": 1,
           "calendar": 1,
           "resource": 1,
           "schedule": 1,
@@ -16339,7 +16339,7 @@
             "description_variant": 1,
             "containment": 1,
             "policy": 1,
-            "action_recipe": 1,
+            "scripted_action": 1,
             "calendar": 1,
             "resource": 1,
             "schedule": 1,
@@ -16363,7 +16363,7 @@
           "description_variant": 1,
           "containment": 1,
           "policy": 1,
-          "action_recipe": 1,
+          "scripted_action": 1,
           "calendar": 1,
           "resource": 1,
           "schedule": 1,
@@ -16493,8 +16493,8 @@
           "key": "bram"
         }
       },
-      "recipes": {
-        "scene_sampler@0.0.1:recipe/coil_rope": {
+      "scripted_actions": {
+        "scene_sampler@0.0.1:action/coil_rope": {
           "name": "actions.coil_rope",
           "aliases": [
             "coil"
@@ -17391,7 +17391,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "try",
       "name": "try.label",
@@ -17443,7 +17443,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "try",
       "name": "try.label",
@@ -19302,7 +19302,7 @@
   },
   {
     "name": "build_step_without_direction",
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "build",
       "structure": {
@@ -19321,7 +19321,7 @@
   },
   {
     "name": "build_step_direction_not_a_direction",
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "build",
       "structure": {
@@ -19341,7 +19341,7 @@
   },
   {
     "name": "build_step_without_structure",
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "build",
       "direction": "north"
@@ -19355,7 +19355,7 @@
   },
   {
     "name": "build_step_with_unknown_property",
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "build",
       "structure": {
@@ -19393,7 +19393,7 @@
   },
   {
     "name": "opposed_check_no_side",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -19454,7 +19454,7 @@
   },
   {
     "name": "opposed_check_both_sides",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -19527,7 +19527,7 @@
   },
   {
     "name": "opposed_check_no_key_extra",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -20761,7 +20761,7 @@
   },
   {
     "name": "opposed_check_npc_on_skill",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -22921,7 +22921,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "use"
     },
@@ -22933,7 +22933,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "use",
       "tool": {
@@ -22977,7 +22977,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "status.cure"
     },
@@ -22989,7 +22989,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "status.cure",
       "status": {
@@ -23013,7 +23013,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "status.apply"
     },
@@ -23025,7 +23025,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "status.apply",
       "status": {
@@ -23044,7 +23044,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "damage",
       "npc": {
@@ -23063,7 +23063,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "damage",
       "npc": {
@@ -23082,7 +23082,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "damage",
       "npc": {
@@ -23102,7 +23102,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "damage",
       "npc": {
@@ -23122,7 +23122,7 @@
     ]
   },
   {
-    "contract": "RecipeStep",
+    "contract": "ActionStep",
     "value": {
       "op": "damage",
       "npc": {
@@ -23142,7 +23142,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "spell",
       "learned": {
@@ -23160,7 +23160,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "spell",
       "word": "Lux",
@@ -23184,7 +23184,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "spell",
       "word": "lux"
@@ -23197,7 +23197,7 @@
     ]
   },
   {
-    "contract": "RecipeTarget",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "spell",
       "word": "lux",
@@ -28310,7 +28310,7 @@
   },
   {
     "name": "track_check_fields",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -28377,7 +28377,7 @@
   },
   {
     "name": "track_check_no_plan",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -28438,7 +28438,7 @@
   },
   {
     "name": "track_check_no_key",
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "pick_gate",
       "name": "actions.pick_gate",
@@ -29058,8 +29058,8 @@
     ]
   },
   {
-    "name": "recipe_target_storylet_retired",
-    "contract": "RecipeTarget",
+    "name": "scripted_target_storylet_retired",
+    "contract": "ScriptedTarget",
     "value": {
       "kind": "storylet"
     },
@@ -29920,7 +29920,7 @@
     ]
   },
   {
-    "contract": "ActionRecipe",
+    "contract": "ScriptedAction",
     "value": {
       "key": "ring_bell",
       "name": "actions.ring_bell",
@@ -29986,7 +29986,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {},
     "errors": [
       {
@@ -29996,7 +29996,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "consume": {}
     },
@@ -30016,7 +30016,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "consume": {
         "items": [],
@@ -30040,7 +30040,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "consume": {
         "items": [
@@ -30167,7 +30167,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "consume": {
         "items": [
@@ -30198,7 +30198,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "consume": {
         "items": [
@@ -30229,7 +30229,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "consume": {
         "items": [
@@ -30261,7 +30261,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "yield": {}
     },
@@ -30277,7 +30277,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "yield": {
         "items": [],
@@ -30300,7 +30300,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "yield": {
         "items": [
@@ -30714,7 +30714,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "yield": {
         "items": [
@@ -30745,7 +30745,7 @@
     ]
   },
   {
-    "contract": "RecipeCraft",
+    "contract": "ActionCraft",
     "value": {
       "yield": {
         "items": [

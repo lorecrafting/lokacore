@@ -57,9 +57,9 @@ const lines = (r: ReturnType<typeof step>) =>
   ((r.decision as { narration?: { key: string }[] }).narration ?? []).map((t) => t.key);
 const wightHp = (w: World) => level(w, w.entityIds[`${P}:npc/wight`]!, resourceRef(w, 'hp'));
 
-const R = (key: string) => `${P}:recipe/${key}`;
+const R = (key: string) => `${P}:action/${key}`;
 const W = `${P}:npc/wight`;
-const success = (c: Record<string, any>, k: string) => c.recipes[R(k)].outcomes.success;
+const success = (c: Record<string, any>, k: string) => c.scripted_actions[R(k)].outcomes.success;
 
 /** The sampler's artifact changed by `change`, loaded again (the loader's result). */
 function variant(change: (c: Record<string, any>) => void) {
@@ -198,11 +198,11 @@ test('two light.ignite steps on one orb light it once', () => {
 // Breaks: a spell with a duration is admitted in a fight (its time.advance runs the round job inside
 // the cast and faults), or the refusal also bars a spell without one.
 test('in a fight only a spell without a duration is cast', () => {
-  // A recipe duration needs a world without real-time (as standing_sampler): no time_policy, regen.
+  // A scripted action duration needs a world without real-time (as standing_sampler): no time_policy, regen.
   const slow = cartridge((c) => {
     delete c.manifest.time_policy;
     for (const r of Object.values<Record<string, unknown>>(c.resources)) delete r.regen;
-    c.recipes[R('ward')].duration = 150;
+    c.scripted_actions[R('ward')].duration = 150;
   });
   let w = ok(cast(crypt(true, slow), 'lux'));
   w = ok(play(w, { type: 'attack', target_id: w.entityIds[W] }));
@@ -256,7 +256,7 @@ test('a bolt with a duration starts the fight an interval after the cast ends', 
   const slow = cartridge((c) => {
     delete c.manifest.time_policy;
     for (const r of Object.values<Record<string, unknown>>(c.resources)) delete r.regen;
-    c.recipes[R('flamma')].duration = 300;
+    c.scripted_actions[R('flamma')].duration = 300;
   });
   const w = ok(cast(crypt(true, slow), 'lux'));
   const hit = ok(cast(w, 'flamma'));

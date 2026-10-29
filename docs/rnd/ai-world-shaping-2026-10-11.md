@@ -114,7 +114,7 @@ Three consequences:
 2. **Patches must be ordered in the receipt log.** A patch applied between receipt n and n+1 changes what n+1 can decide. So a patch needs a position: simplest is "a patch is a receipt" with a `content_patch` DecisionResult whose `delta` is the definition delta. Then replay is one sequence and `rejection_consumes_nothing` still holds.
 3. **Receipt integrity must be closed before any AI input is trusted on replay.** DIFFERENCES.md row 1: a receipt whose stored response was altered still replays as `saved`. This matters little when the recorded producer is the kernel, and a lot when it is a model. `result_digest` is already carried to R12 (future.md "Production Story app").
 
-The prose cache deserves one more line: because committed narration binds `participants` to EntityIds at commit (cartridge.md "Text", `action_recipe/rule.ts:89`), a prose model can be given exactly the entities and events of one receipt and nothing else. That is the natural contradiction guard.
+The prose cache deserves one more line: because committed narration binds `participants` to EntityIds at commit (cartridge.md "Text", `scripted_action/rule.ts:89`), a prose model can be given exactly the entities and events of one receipt and nothing else. That is the natural contradiction guard.
 
 ## 5. Staged R&D plan
 
