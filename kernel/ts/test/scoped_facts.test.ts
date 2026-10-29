@@ -177,7 +177,7 @@ test('row W2 needs a known subject, at fact sites only', () => {
 // a subject (a hand_over, a riddle answer with a wrong_limit, a legacy deadline quest's dialogue)
 // loads, and that save would not reopen; or one whose receipt recovery checks at the speaker (a
 // payment, a riddle without a wrong_limit) is refused; or subject "target" loads in a reaction,
-// quest, barrier or skill, which has no target.
+// quest, barrier, skill or room lock, which has no target.
 test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
   const smith = `${S}:dialogue/smith_talk`;
   const at = (k: string) =>
@@ -214,6 +214,9 @@ test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () =
     const paths = variant((_, c) => (c[kind] = { [k]: { policy: root } }));
     assert.deepEqual(paths, [`.cartridge.${kind}[${JSON.stringify(k)}].policy.subject`]);
   }
+  const room = Object.keys(source.rooms)[0];
+  const lock = variant((_, c) => (c.rooms[room].locks = { enter: root }));
+  assert.deepEqual(lock, [`.cartridge.rooms[${JSON.stringify(room)}].locks.enter.subject`]);
   assert.deepEqual(scopeSites(source), []);
 });
 

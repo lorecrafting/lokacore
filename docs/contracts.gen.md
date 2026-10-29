@@ -639,7 +639,7 @@ The one observation record format, its stores and correlation ids, and the game-
 
 The core policy AST (06 §21; 21 §3.2, §4 Policy; 14 §R3A). Typed, pure and fail-closed: an unknown operator is invalid.
 
-- **Policy**: A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all.
+- **Policy**: A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all.
   - `all`: Every item holds; an empty list is the policy with no condition.
   - `any`: At least one item holds.
   - `not`: The item does not hold.
