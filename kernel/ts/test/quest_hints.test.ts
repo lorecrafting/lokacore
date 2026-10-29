@@ -185,17 +185,7 @@ test('a failed checked perform still shows the tip once and assigns seen_tip_', 
 test('the loader checks a recipe tip like the compiler', () => {
   const R = 'quest_sampler@0.0.1:recipe/search_floor';
   const recipe = `.cartridge.recipes["${R}"]`;
-  const seen = 'quest_sampler@0.0.1:fact/seen_tip_search_floor';
   const rows: [(c: Obj) => void, string, string][] = [
-    [
-      (c) => {
-        const step = c.recipes[R].outcomes.success.sequence[0];
-        step.fact = { ...step.fact, key: 'seen_tip_search_floor' };
-      },
-      'RESERVED_FACT',
-      `${recipe}.outcomes.success.sequence[0].fact`,
-    ],
-    [(c) => delete c.facts[seen], 'RESERVED_FACT', `.cartridge.facts["${seen}"]`],
     [(c) => (c.recipes[R].tip = 'tip.nope'), 'UNRESOLVED_REFERENCE', `${recipe}.tip`],
     [
       (c) => {

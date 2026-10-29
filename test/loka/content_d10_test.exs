@@ -21,7 +21,8 @@ defmodule Loka.ContentD10Test do
     ]
   end
 
-  # Breaks: malformed drawing metadata or a Knock face references nonexistent content.
+  # Breaks: malformed drawing metadata, a map without knowledge@1, or a Knock face references
+  # nonexistent content.
   test "map coverage, coordinate collisions and Knock references fail before artifact output", %{
     dir: dir
   } do
@@ -39,6 +40,9 @@ defmodule Loka.ContentD10Test do
            "UNRESOLVED_REFERENCE", "map_positions[0].room"},
           {map, &List.update_at(&1, 0, fn r -> Map.put(r, "x", 0.5) end), "SCHEMA_VIOLATION",
            "map_positions[0].x"},
+          {"cartridge.json",
+           &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "knowledge") end),
+           "UNDECLARED_CAPABILITY", "map_positions"},
           {"rooms/smithy.json", &knock.(&1, "npc", "absent"), "UNRESOLVED_REFERENCE",
            "rooms/smithy.exits.south.knock.npc"},
           {"rooms/smithy.json", &knock.(&1, "room", "smithy"), "BARRIER_MISMATCH",

@@ -222,15 +222,6 @@ test('the loader refuses each bad trail declaration', () => {
       (c) => (c.manifest.requires.kernel_api.at_least = '1.84'),
       ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
     ],
-    [(c) => (c.facts[fact('trail_hounds_exit')].meaning = 'Mine.'), ['RESERVED_FACT']],
-    [
-      (c) => {
-        const seq = c.recipes[recipe('track_clearing')].outcomes.success.sequence;
-        seq.push({ ...structuredClone(seq[0]), value: 1 });
-        seq[1].fact.key = 'trail_hounds_at';
-      },
-      ['RESERVED_FACT'],
-    ],
     [
       (c) => delete c.world.trails.leads.north,
       ['UNRESOLVED_REFERENCE', '.cartridge.world.trails.leads', { target: 'north' }],

@@ -76,38 +76,6 @@ test('the v2 known answer loads with its fixture hash', () => {
   assert.equal(result.hash, kat.sha256);
 });
 
-// Breaks: the loader trusts compiled references (an exit to nowhere reaches the rules).
-test('an exit or entry naming no room of this cartridge is UNRESOLVED_REFERENCE', () => {
-  const to = { cartridge_id: 'rooms_sampler', cartridge_version: '0.0.1', kind: 'room', key: 'x' };
-  fails(
-    mutant((c) => (c.rooms[FL].exits.north.to = to)),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.rooms["${FL}"].exits.north.to`,
-    { target: 'rooms_sampler@0.0.1:room/x' },
-  );
-  fails(
-    mutant((c) => (c.entry = { ...c.entry, cartridge_id: 'other' })),
-    'UNRESOLVED_REFERENCE',
-    '.cartridge.entry',
-    { target: 'other@0.0.1:room/ferry_landing' },
-  );
-  fails(
-    mutant((c) => (c.entry = { ...c.entry, kind: 'fact' })),
-    'UNRESOLVED_REFERENCE',
-    '.cartridge.entry',
-    { target: 'rooms_sampler@0.0.1:fact/ferry_landing' },
-  );
-});
-
-// Breaks: play would print a raw key.
-test('a room text key missing from the catalog is UNRESOLVED_REFERENCE', () =>
-  fails(
-    mutant((c) => delete c.text['room.ferry_landing.title']),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.rooms["${FL}"].title`,
-    { target: 'room.ferry_landing.title' },
-  ));
-
 // Breaks: rooms load when their owning capability is not locked (05 §6).
 test('rooms without movement in the lock are UNDECLARED_CAPABILITY', () =>
   fails(
@@ -139,28 +107,6 @@ test('a v1 artifact carrying rooms is UNKNOWN_FIELD', () =>
     {},
   ));
 
-// Review F5. Breaks: a v2 action's label reaches the player as a raw key.
-test('an action text key missing from the catalog is UNRESOLVED_REFERENCE', () =>
-  fails(
-    mutant((c) => {
-      c.manifest.requires.capabilities.policy = 1;
-      c.lock.capabilities.policy = 1;
-      c.actions['rooms_sampler@0.0.1:action/go'] = {
-        key: 'go',
-        label: 'room.boathouse.title',
-        target: { kind: 'none' },
-        command: 'move',
-        priority: 0,
-        input: [],
-        policy: { policy_version: 1, root: { op: 'all', items: [] } },
-        accessibility: 'actions.go.a11y',
-      };
-    }),
-    'UNRESOLVED_REFERENCE',
-    '.cartridge.actions["rooms_sampler@0.0.1:action/go"].accessibility',
-    { target: 'actions.go.a11y' },
-  ));
-
 // R5 S2 details (room.schema.json InspectableDetail), from cartridge_details_hash.json.
 const details = read('protocol/fixtures/cartridge_details_hash.json');
 const DFL = 'details_sampler@0.0.1:room/ferry_landing';
@@ -177,29 +123,8 @@ test('the details known answer loads with its fixture hash', () => {
   assert.equal(result.hash, details.sha256);
 });
 
-// Breaks: the loader trusts a compiled detail's text key (play prints the raw key).
-test("a detail's text key missing from the catalog is UNRESOLVED_REFERENCE", () =>
-  fails(
-    withDetails((c) => delete c.text['detail.notice']),
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.rooms["${DFL}"].details.notice.description`,
-    { target: 'detail.notice' },
-  ));
-
-// Breaks: a detail whose first alias (its name in "Which do you mean") is shared, or is no
-// form a lookup produces (an empty word, a leading at or article), loads.
-test('a detail whose first alias is shared or untypable is UNREACHABLE_DETAIL', () => {
-  for (const first of ['post', 'the_notice', 'notice_', 'a'])
-    fails(
-      withDetails((c) => (c.rooms[DFL].details.notice.aliases = [first, 'notice'])),
-      'UNREACHABLE_DETAIL',
-      `.cartridge.rooms["${DFL}"].details.notice`,
-      {},
-    );
-});
-
-// Breaks: readable content loads without its capability or leaves either catalog key unresolved.
-test('readables require their lock and resolve label and text', () => {
+// Breaks: readable content loads without its capability.
+test('readables require their lock', () => {
   const c = withDetails((c) => {
     c.rooms[DFL].details.notice.readable = { label: 'read.label', text: 'read.text' };
     c.text['read.label'] = 'Read notice';
@@ -210,9 +135,4 @@ test('readables require their lock and resolve label and text', () => {
   c.manifest.requires.capabilities.readable = 1;
   c.lock.capabilities.readable = 1;
   assert.ok(load(c).ok);
-  for (const field of ['label', 'text']) {
-    const missing = structuredClone(c);
-    delete missing.text[`read.${field}`];
-    fails(missing, 'UNRESOLVED_REFERENCE', `${at}.${field}`, { target: `read.${field}` });
-  }
 });

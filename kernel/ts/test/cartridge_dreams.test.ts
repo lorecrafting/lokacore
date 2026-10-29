@@ -44,13 +44,6 @@ test('loader refuses impossible Rest, graph and exclusive end bindings', () => {
       (c: any) => (scene(c).on_end.assign[0].fact = ref('fact', 'slept_paid')),
     ],
     [
-      'foreign memory writer',
-      (c: any) =>
-        (c.dialogues[`${prefix}:dialogue/bram`].choices.carry.sequence = [
-          { op: 'fact.assign', fact: ref('fact', 'dream_seen'), value: true },
-        ]),
-    ],
-    [
       'inherited quest producer',
       (c: any) =>
         (c.dialogues[`${prefix}:dialogue/bram`].choices.carry.accept = ref('quest', 'a_room')),

@@ -6,31 +6,10 @@ import { validate } from '../src/foundation/validate.ts';
 const reaction = `.cartridge.reactions["${prefix}:reaction/bell_suppress_goblins"]`;
 const R = (c: any) => c.reactions[`${prefix}:reaction/bell_suppress_goblins`];
 
-// Breaks: a declared audible room/fact/text or a suppression plan/trigger silently resolves to a
-// missing or wrong definition.
+// Breaks: a suppression plan/trigger silently resolves to a missing or wrong definition.
 test('D9 cue references and typed suppression declaration fail closed', () => {
   assert.equal(load().ok, true);
   for (const [change, code, path] of [
-    [
-      (c: any) => c.world.bell_cue.rooms.push(ref('room', 'absent')),
-      'UNRESOLVED_REFERENCE',
-      '.cartridge.world.bell_cue.rooms[2]',
-    ],
-    [
-      (c: any) => (c.world.bell_cue.fact = ref('room', 'drill_yard')),
-      'UNRESOLVED_REFERENCE',
-      '.cartridge.world.bell_cue.fact',
-    ],
-    [
-      (c: any) => (c.world.bell_cue.fact = ref('fact', 'lever_stage')),
-      'FACT_TYPE_MISMATCH',
-      '.cartridge.world.bell_cue.fact',
-    ],
-    [
-      (c: any) => (c.world.bell_cue.text = 'absent'),
-      'UNRESOLVED_REFERENCE',
-      '.cartridge.world.bell_cue.text',
-    ],
     [
       (c: any) => (R(c).apply[0].plan = ref('population', 'absent')),
       'SCHEMA_VIOLATION',

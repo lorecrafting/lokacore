@@ -139,10 +139,10 @@ test("a case's time window is read at the hour's due time, not the end of the wa
   assert.equal(room(w), roomId(w, 'green'));
 });
 
-// Breaks: the loader skips schedule_cases (an unknown room, goal text or condition fact loads and
+// Breaks: the loader skips schedule_cases (an unknown room, or goal text loads and
 // fails in play), accepts a case hour the daily_schedule does not list (its job never runs it),
 // or loads a case below kernel_api 1.47 (twin of content_schedules_test.exs).
-test('the loader checks schedule_cases rooms, goal texts, conditions, hours and the 1.47 floor', () => {
+test('the loader checks schedule_cases rooms, goal texts, hours and the 1.47 floor', () => {
   const at0 = `.cartridge.npcs[${JSON.stringify(MAUD)}].schedule_cases.8[0]`;
   const rows: [(c: any) => void, string, string, object][] = [
     [
@@ -156,12 +156,6 @@ test('the loader checks schedule_cases rooms, goal texts, conditions, hours and 
       'UNRESOLVED_REFERENCE',
       `${at0}.goal`,
       { target: 'npc.maud.gone' },
-    ],
-    [
-      (c) => (c.npcs[MAUD].schedule_cases['8'][0].when.root.fact.key = 'ghost'),
-      'UNRESOLVED_REFERENCE',
-      `${at0}.when.root.fact`,
-      { target: `${C}:fact/ghost` },
     ],
     [
       (c) => (c.npcs[MAUD].schedule_cases['9'] = c.npcs[MAUD].schedule_cases['8']),

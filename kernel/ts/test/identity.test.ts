@@ -154,7 +154,7 @@ test('the guard collars a wanted character unless disguised', () => {
 });
 
 // Breaks: world.identity loading below its floor (also with no variant in the cartridge), its
-// name or variants skipped by the reference or time_since pass, or a target-subject fact read in a
+// variants skipped by the time_since pass, or a target-subject fact read in a
 // variant whose target is the character's own body.
 test('world.identity loader refusals', () => {
   assert.deepEqual(
@@ -178,14 +178,6 @@ test('world.identity loader refusals', () => {
       delete c.npcs[`${S}:npc/stranger`].short_variants;
     }),
     ['UNDECLARED_CAPABILITY', '.cartridge.world.identity.name_variants[0]'],
-  );
-  assert.deepEqual(
-    diagnostic((c) => (c.world.identity.name = 'identity.nope')),
-    ['UNRESOLVED_REFERENCE', '.cartridge.world.identity.name'],
-  );
-  assert.deepEqual(
-    diagnostic((c) => (c.world.identity.name_variants[0].when.root.status = ref('status', 'nope'))),
-    ['UNRESOLVED_REFERENCE', '.cartridge.world.identity.name_variants[0].when.root.status'],
   );
   assert.deepEqual(
     diagnostic((c) =>

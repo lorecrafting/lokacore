@@ -97,18 +97,11 @@ test('new typed contracts require independent fields and reject boundary values'
   assert.ok(validate('EventPayload', p).length);
 });
 
-// Breaks: loader permits counterfeit acquisition writers, unresolved requirements or unfunded teachers.
-// Equipment slot, weapon and block checks are the compiler's (content_training_test.exs).
-test('skill loader owns reserved acquisition, qualifications, teacher funding and real equipment shapes', () => {
+// Breaks: loader permits counterfeit acquisition writers or unfunded teachers. Requirement,
+// equipment slot, weapon and block checks are the compiler's (content_training_test.exs).
+test('skill loader owns reserved acquisition and teacher funding', () => {
   assert.ok(load(c).ok);
   const mutants: ((c: any) => void)[] = [
-    (c) => delete c.facts['cellar_sampler@0.0.9:fact/skill_swords'],
-    (c) => (c.facts['cellar_sampler@0.0.9:fact/skill_swords'].value_type.default = true),
-    (c) =>
-      (c.skills['cellar_sampler@0.0.9:skill/swords'].qualification.root.attribute = ref(
-        'attribute',
-        'missing',
-      )),
     (c) => delete c.npcs['cellar_sampler@0.0.9:npc/teacher'].resource_starts,
     (c) => {
       const lesson = c.dialogues['cellar_sampler@0.0.9:dialogue/learn_swords'];
@@ -128,35 +121,5 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
     const m = structuredClone(c);
     mutate(m);
     assert.equal(load(m).ok, false);
-  }
-  // A scene ending that writes the reserved skill fact counterfeits acquisition (the scenes arm of
-  // the reserved-writer walk); the same ending writing an ordinary fact loads.
-  for (const [fact, code] of [
-    ['rat_1_killed', undefined],
-    ['skill_swords', 'RESERVED_FACT'],
-  ] as const) {
-    const m = structuredClone(c);
-    const P = 'cellar_sampler@0.0.9';
-    m.story_points[`${P}:story_point/lantern_resolved`].outcomes.kept = {
-      scene: ref('scene', 'lantern_kept'),
-    };
-    m.facts[`${P}:fact/story_point_lantern_resolved`] = {
-      key: 'story_point_lantern_resolved',
-      version: 1,
-      value_type: {
-        type: 'enum',
-        values: ['unreached', 'carry', 'kept', 'leave'],
-        default: 'unreached',
-      },
-      scopes: ['player'],
-      meaning: "Story point lantern_resolved's reached outcome (scene@1): only scene@1 writes it.",
-    };
-    m.scenes[`${P}:scene/lantern_kept`].on_end = {
-      story_point: ref('story_point', 'lantern_resolved'),
-      outcome: 'kept',
-      assign: [{ fact: ref('fact', fact), value: true }],
-    };
-    const r = load(m);
-    assert.equal(r.ok ? undefined : r.diagnostic.code, code, fact);
   }
 });

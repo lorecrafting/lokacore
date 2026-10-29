@@ -174,41 +174,6 @@ test('row W6 fields and leaves need kernel_api 1.46; an item room-line variant d
   }
 });
 
-// Breaks: the loader stops walking an NPC's or item's new variant lists, so a variant naming an
-// undeclared status or text key loads and fails in play (twin of content_variants_test.exs).
-test("the loader checks a new variant list's references and text keys", () => {
-  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  const maud = `${C}:npc/maud`;
-  const sword = `${C}:item/sword`;
-  const rows: [(c: any) => void, string, string][] = [
-    [
-      (c) => (c.npcs[maud].description_variants[0].when.root.status.key = 'ghost'),
-      `.cartridge.npcs[${JSON.stringify(maud)}].description_variants[0].when.root.status`,
-      `${C}:status/ghost`,
-    ],
-    [
-      (c) => (c.items[sword].short_variants[0].description = 'item.sword.gone'),
-      `.cartridge.items[${JSON.stringify(sword)}].short_variants[0].description`,
-      'item.sword.gone',
-    ],
-  ];
-  for (const [change, path, target] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data], [
-      'UNRESOLVED_REFERENCE',
-      path,
-      { target },
-    ]);
-  }
-});
-
 // Breaks (twin of test/loka/content_variants_test.exs): a status kind (loka-x6t.64) outside buff
 // and debuff loads.
 test('loader: a status kind is buff or debuff', () => {

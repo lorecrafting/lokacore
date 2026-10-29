@@ -124,21 +124,6 @@ test('the loader refuses each unsound growth or opposed declaration', () => {
       'UNRESOLVED_REFERENCE',
       `${gate}.check.skill`,
     ],
-    [
-      (c) =>
-        (c.recipes[`${P}:recipe/pick_gate`].outcomes.success.sequence[0] = {
-          op: 'fact.assign',
-          fact: {
-            cartridge_id: P.split('@')[0],
-            cartridge_version: '0.0.1',
-            kind: 'fact',
-            key: 'uses_pick',
-          },
-          value: 5,
-        }),
-      'RESERVED_FACT',
-      `${gate}.outcomes.success.sequence[0].fact`,
-    ],
   ];
   for (const [change, code, path] of rows) {
     const c = structuredClone(source);

@@ -208,7 +208,7 @@ test('7. the vault refuses and hides its ledger; nested items stay out of reach'
 });
 
 // Breaks (twin of test/loka/content_theft_test.exs): each loader refusal below loading.
-test('8. loader: vault lock, reserved stolen fact, fence offers, floors, stolen fact scope, references', () => {
+test('8. loader: vault lock, fence offers, floors, stolen fact scope, references', () => {
   const F = `${S}:npc/fence`;
   const API = '.cartridge.manifest.requires.kernel_api.at_least';
   const api = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.93');
@@ -219,16 +219,6 @@ test('8. loader: vault lock, reserved stolen fact, fence offers, floors, stolen 
   assert.deepEqual(
     diagnostic((c) => delete c.npcs[`${S}:npc/vault`].locks),
     ['SCHEMA_VIOLATION', `.cartridge.services["${S}:service/deposit"].benefit.vault`],
-  );
-  assert.deepEqual(
-    diagnostic((c) =>
-      c.reactions[`${S}:reaction/theft_seen`].apply.push({
-        op: 'fact.assign',
-        fact: ref('fact', 'stolen'),
-        value: true,
-      }),
-    ),
-    ['RESERVED_FACT', `.cartridge.reactions["${S}:reaction/theft_seen"].apply[1].fact`],
   );
   assert.deepEqual(
     diagnostic((c) => {
@@ -277,16 +267,5 @@ test('8. loader: vault lock, reserved stolen fact, fence offers, floors, stolen 
   assert.deepEqual(
     diagnostic((c) => (c.world.theft.narration.seen = 'nope')),
     ['UNRESOLVED_REFERENCE', '.cartridge.world.theft.narration.seen'],
-  );
-  assert.deepEqual(
-    diagnostic(
-      (c) =>
-        (c.npcs[`${S}:npc/vault`].locks.get.root = {
-          op: 'fact_compare',
-          fact: ref('fact', 'nope'),
-          equals: true,
-        }),
-    ),
-    ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${S}:npc/vault"].locks.get.root.fact`],
   );
 });

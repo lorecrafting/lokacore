@@ -1,12 +1,9 @@
-// The loader's barrier checks (barrier@1; room.schema.json BarrierDefinition, Connection.barrier;
-// 21 §5 Barrier; 05 §17, §25), twin of lib/loka/content/barriers.ex: references, coherent faces
-// and keys that can be reached.
-import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
-import { same } from '../foundation/compose.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
+// Exit directions and barrier reach (barrier@1; 05 §17), kept for runtime/created.ts,
+// mechanics/movement/sequence.ts and play/reach.ts; the compiler checks barriers (barriers.ex).
+import type { DefinitionRef } from '../contracts.gen.ts';
+import type { Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 
-type Named = (r: Obj, kind: string, path: string) => void;
 export const OPPOSITE: Readonly<Record<string, string>> = {
   north: 'south',
   south: 'north',
@@ -15,40 +12,6 @@ export const OPPOSITE: Readonly<Record<string, string>> = {
   up: 'down',
   down: 'up',
 };
-
-// Each exit's barrier names a barrier of this cartridge; an exit with a barrier and its reciprocal
-// face (its destination's exit in the opposite direction, when that leads back) name the same
-// one (BARRIER_MISMATCH at each face that has a barrier or a disagreeing reciprocal); an item's
-// barrier (a container's lid, c1-locks) names one that no exit and no other item names
-// (BARRIER_MISMATCH at the item's barrier); each barrier's key_item names an item of it; and no
-// locked barrier's key is out of reach (BARRIER_UNREACHABLE_KEY, lockout).
-export function barriers(c: Obj, named: Named): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  const sites: string[] = []; // every exit's and item's barrier, once per naming
-  for (const [ref, r] of Object.entries(c.rooms as Obj))
-    for (const [dir, exit] of Object.entries(r.exits as Obj)) {
-      const at = `.cartridge.rooms${step(ref)}.exits.${dir}`;
-      if (exit.barrier) named(exit.barrier, 'barrier', `${at}.barrier`);
-      if (exit.barrier) sites.push(key(exit));
-      const back = c.rooms[refString(exit.to)]?.exits?.[OPPOSITE[dir]];
-      const face = back && refString(back.to) === ref ? back : undefined;
-      if ((exit.barrier || face?.barrier) && !(face && same(face.barrier, exit.barrier)))
-        out.push(diag('BARRIER_MISMATCH', at));
-    }
-  const items = Object.entries((c.items ?? {}) as Obj).filter(([, i]) => i.barrier);
-  for (const [ref, i] of items) {
-    named(i.barrier, 'barrier', `.cartridge.items${step(ref)}.barrier`);
-    sites.push(key(i));
-  }
-  for (const [ref, i] of items)
-    if (sites.filter((b) => b === key(i)).length > 1)
-      out.push(diag('BARRIER_MISMATCH', `.cartridge.items${step(ref)}.barrier`));
-  for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
-    if (b.key_item) named(b.key_item, 'item', `.cartridge.barriers${step(ref)}.key_item`);
-  return [...out, ...lockout(c)];
-}
-
-const key = (site: Obj) => refString(site.barrier);
 
 const barrierOf = (c: Obj, r?: DefinitionRef) => (r ? c.barriers?.[refString(r)] : undefined);
 
@@ -87,29 +50,6 @@ export function reach(c: Obj, keys = true): { rooms: Set<string>; items: Set<str
         if (open(e.barrier) && c.rooms[refString(e.to)]) add(rooms, refString(e.to));
   }
   return { rooms, items: held };
-}
-
-/**
- * BARRIER_UNREACHABLE_KEY at each locked barrier on an exit of a room in reach (with keys), or on
- * an item in reach (c1-locks), whose key never comes within reach. A barrier whose key_item names
- * no item is left to UNRESOLVED_REFERENCE.
- */
-function lockout(c: Obj): Diagnostic[] {
-  const { rooms, items: keys } = reach(c);
-  const items = Object.entries((c.items ?? {}) as Obj);
-  const sites = [
-    ...[...rooms].flatMap((r) => Object.values((c.rooms[r]?.exits ?? {}) as Obj)),
-    ...items.filter(([ref]) => keys.has(ref)).map(([, i]) => i),
-  ];
-  const stuck = new Set<string>();
-  for (const s of sites) {
-    const b = barrierOf(c, s.barrier);
-    const known = !b?.key_item || c.items?.[refString(b.key_item)];
-    if (b && known && !opens(c, s.barrier, keys)) stuck.add(refString(s.barrier));
-  }
-  return [...stuck].map((ref) =>
-    diag('BARRIER_UNREACHABLE_KEY', `.cartridge.barriers${step(ref)}`),
-  );
 }
 
 // Static potential only: runtime still requires live/present bound roles and quest/carry admission.

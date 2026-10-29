@@ -14,8 +14,6 @@ const ledger = `${prefix}:item/mill_ledger`;
 test('item writing, topic refs, text and unique player Boolean mappings fail closed', () => {
   assert.ok(codex.load().ok);
   for (const mutate of [
-    (c: any) => (c.items[ledger].readable.text = 'missing'),
-    (c: any) => (c.items[ledger].readable.label = 'missing'),
     (c: any) =>
       (c.facts[`${prefix}:fact/topic_mill_known`].value_type = {
         type: 'int',
