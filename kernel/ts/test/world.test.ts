@@ -20,6 +20,7 @@ import {
   step as kernelStep,
 } from '../src/runtime/world.ts';
 import { read } from './read.ts';
+import { fresh as showcase, go } from './showcase_fixture.ts';
 
 // Every rule call sees a deep-frozen world, so a rule that mutates it throws here (ADR-072).
 const freeze = <T>(v: T): T => {
@@ -141,6 +142,21 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
     ],
     time: 0,
   });
+});
+
+// Break: an action with no policy (absent holds, F3) is no longer offered. Expected: the hearth
+// notice of the item-fuel story view (mobile/app/stories/views/item-fuel.json).
+test('the showcase loft offers gather_ash, whose source has no policy', () => {
+  const loft = gameView(go(showcase('5ca5e000-0000-4000-8000-0000000000b1'), 'up').world);
+  assert.deepEqual(loft.notices?.find((n) => n.key === 'hearth')?.actions, [
+    {
+      available: true,
+      action_key: 'gather_ash',
+      label: 'actions.gather_ash',
+      target: { kind: 'none' },
+      input: [],
+    },
+  ]);
 });
 
 // Break: a lookup that returns the character for any body.

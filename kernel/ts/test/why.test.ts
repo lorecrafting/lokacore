@@ -165,6 +165,11 @@ test('W5, W6: dialogue and recipe policies read on the world before the step', (
       [true, true],
     ],
   );
+  // Break: a definition with no policy (absent holds, F3) is annotated as if it had a root and throws.
+  const bare = load((c) => delete c.recipes[`${S}recipe/coil_rope`].policy);
+  assert.deepEqual(why(bare, trace, 2, { recipe: 'coil_rope' }).recipe, {
+    rule: `${S}recipe/coil_rope`,
+  });
 });
 
 // Break: the prefix guard removed (at 4 the edited rule writes bell_heard; the recording has none).

@@ -1,14 +1,7 @@
 {
   "title": "quest.cull.title",
   "offer": {
-    "label": "quest.cull.accept",
-    "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
-    }
+    "label": "quest.cull.accept"
   },
   "objective": {
     "evidence": "current_state",

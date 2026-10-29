@@ -1,12 +1,5 @@
 {
   "npc": "bess",
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prompt": "dialogue.bess_talk.prompt",
   "roles": {
     "bess": {

@@ -52,7 +52,7 @@ export function journal(world: World, actor: CharacterId, steps: Steps): QuestVi
       if (!j) return shown;
       const variant =
         q.state === 'active'
-          ? j.active_variants?.find((v) => holds(world, actor, v.when.root))?.text
+          ? j.active_variants?.find((v) => holds(world, actor, v.when?.root))?.text
           : undefined;
       const failed = expedition.expedition?.status === 'failed';
       const met =

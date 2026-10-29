@@ -1,8 +1,7 @@
 {
   "title": "quest.apprentice.title",
   "offer": {
-    "label": "quest.apprentice.accept",
-    "policy": { "policy_version": 1, "root": { "op": "all", "items": [] } }
+    "label": "quest.apprentice.accept"
   },
   "objective": {
     "evidence": "current_state",

@@ -1,12 +1,5 @@
 {
   "npc": "ada",
-  "policy": {
-    "policy_version": 1,
-    "root": {
-      "op": "all",
-      "items": []
-    }
-  },
   "prompt": "dialogue.ada.prompt",
   "roles": {
     "ada": {

@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: room point of view, arrival and flight lines (loka-glj8, PR #477)](2026-10-28-room-point-of-view-review.md): **APPROVE**
 - [Review: C2 slice F, `story_point` on the dialogue choice (F11)](2026-10-28-c2-f-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice E, blueprints -> structures (F8, loka-ivjq.8)](2026-10-28-c2-e-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice B1, `policy` optional and absent holds (F3, loka-ivjq.3)](2026-10-28-c2-b1-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice 0+A, prep, signals removal, diag guard, behavior@1 removal (loka-ivjq.3)](2026-10-28-c2-a-review.md): **APPROVE WITH NOTES**
 - [Review: batch C1 final head (loka-ivjq.20 S7, loka-ivjq.2 F2)](2026-10-28-c1-final-review.md): **APPROVE WITH NOTES**
 - [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **APPROVE**
