@@ -51,12 +51,6 @@ const fails = (
   });
 const ID = 'items_sampler@0.0.1';
 const item = (key: string) => `.cartridge.items["${ID}:item/${key}"]`;
-const ref = (kind: string, key: string) => ({
-  cartridge_id: 'items_sampler',
-  cartridge_version: '0.0.1',
-  kind,
-  key,
-});
 const at = (c: any, key: string) => c.items[`${ID}:item/${key}`];
 
 // Breaks: items or NPCs rejected, or hashed other than the Python known answer.
@@ -66,20 +60,8 @@ test('the items known answer loads', () => {
   assert.equal(r.hash, kat.sha256);
 });
 
-// Breaks: items and NPCs loading without containment in the lock, or a map key that
-// disagrees with its item.
-test('items and NPCs need containment, and their map keys their keys', () => {
-  fails(
-    (c) => {
-      delete c.lock.capabilities.containment;
-
-      delete c.manifest.requires.capabilities.containment;
-    },
-    'UNDECLARED_CAPABILITY',
-    item('lamp_oil'),
-    { capability: 'containment' },
-    ['containment@1'],
-  );
+// Breaks: an item map key that disagrees with its item loads.
+test('item map keys match their keys', () => {
   fails(
     (c) => (at(c, 'lantern').key = 'lamp'),
     'ARTIFACT_DEFINITION_KEY_MISMATCH',

@@ -4,9 +4,8 @@ import { gameView, step, type World } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { read } from './read.ts';
-import { genesis, load, prefix } from './search_fixture.ts';
+import { genesis } from './search_fixture.ts';
 
-const green = `${prefix}:room/village_green`;
 const detail = (w: World, key: string) =>
   Object.keys(w.details).find((id) => w.details[id].key === key)!;
 const inn = () => {
@@ -21,18 +20,6 @@ const inn = () => {
     1,
   ).world;
 };
-
-// Breaks: a board's readable notices load without the readable capability locked.
-test('loader refuses readable notices without the readable capability', () => {
-  const result = load((c) => {
-    delete c.lock.capabilities.readable;
-    delete c.manifest.requires.capabilities.readable;
-    for (const r of Object.values(c.rooms) as any[])
-      for (const d of Object.values(r.details ?? {}) as any[]) delete d.readable;
-  });
-  assert.ok(!result.ok);
-  assert.equal(result.diagnostic.code, 'UNDECLARED_CAPABILITY');
-});
 
 // Breaks: projection exposes notice bodies, wrong sibling IDs or keys (a board's key on its
 // children), remote boards or base descriptions

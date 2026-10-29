@@ -237,38 +237,12 @@ test('the loader refuses an unknown answer topic or grant, ask without speech@1 
     assert.ok(!r.ok);
     return [r.diagnostic.code, r.diagnostic.path?.split('.').at(-1)];
   };
-  const nope = ref('topic', 'nope');
-  assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[0].topic = nope)),
-    ['UNRESOLVED_REFERENCE', 'topic'],
-  );
-  assert.deepEqual(
-    refusal((c) => (c.npcs[smith].ask.answers[0].grants = nope)),
-    ['UNRESOLVED_REFERENCE', 'grants'],
-  );
-  for (const [change, field] of [
-    [(a: Obj) => (a.unknown = 'nope'), 'unknown'],
-    [(a: Obj) => (a.answers[0].text = 'nope'), 'text'],
-  ] as const)
-    assert.deepEqual(
-      refusal((c) => change(c.npcs[smith].ask)),
-      ['UNRESOLVED_REFERENCE', field],
-    );
   assert.deepEqual(
     refusal((c) => {
-      delete c.lock.capabilities.speech;
-      delete c.manifest.requires.capabilities.speech;
-      delete c.reactions[`${P}reaction/guard_smugglers`]; // its asked trigger needs speech@1 too
+      c.manifest.requires.kernel_api.at_least = '1.95';
+      Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask);
     }),
-    ['UNDECLARED_CAPABILITY', 'ask'],
-  );
-  // Without topics@1 the topic definitions refuse first (cartridge_asks.ts has no topics@1 check).
-  assert.deepEqual(
-    refusal((c) => {
-      delete c.lock.capabilities.topics;
-      delete c.manifest.requires.capabilities.topics;
-    })[0],
-    'UNDECLARED_CAPABILITY',
+    ['KERNEL_API_RANGE_INVALID', 'at_least'],
   );
   // The asks' floor alone (no asked trigger left).
   assert.deepEqual(

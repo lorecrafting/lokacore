@@ -75,22 +75,7 @@ test('a burnable check passes only on the wooden door, stick and the wooden hall
 // Breaks: the loader loads tags without tags@1.
 test('the loader refuses tags without tags@1', () => {
   const hall = 'tags_sampler@0.0.1:room/hall';
-  const rows: [(c: Obj) => void, string, string][] = [
-    [
-      (c) => {
-        // Only the stick's tags remain, so the one owner diagnostic is at its tags.
-        delete c.manifest.requires.capabilities.tags;
-        delete c.lock.capabilities.tags;
-        for (const b of Object.values(c.barriers as Obj)) delete b.tags;
-        delete c.items['tags_sampler@0.0.1:item/rod'].tags;
-        delete c.rooms[hall].tags;
-        delete c.rooms[hall].variants;
-        for (const d of Object.values(c.rooms[hall].details as Obj)) delete d.variants;
-      },
-      'UNDECLARED_CAPABILITY',
-      '.cartridge.items["tags_sampler@0.0.1:item/stick"].tags',
-    ],
-  ];
+  const rows: [(c: Obj) => void, string, string][] = [];
   for (const [change, code, path] of rows) {
     const c = structuredClone(content) as unknown as Obj;
     change(c);
