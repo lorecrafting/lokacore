@@ -1,4 +1,4 @@
-import { jobId } from '../schedule/behavior.ts';
+import { jobId } from '../schedule/daily.ts';
 import {
   accepted,
   bodyOf,

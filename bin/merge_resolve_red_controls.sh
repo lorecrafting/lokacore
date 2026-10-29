@@ -1,8 +1,8 @@
 #!/bin/sh
 # bin/merge_resolve.py (bin/pm_merge.sh) resolves a mechanics.md tail (a section both sides appended
-# kept once), a kernel_api line and a generated-file conflict, and leaves unresolved: a tail that
+# kept once), a kernel_api line and a generated-file conflict (a hash fixture included), and leaves unresolved: a tail that
 # repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of mechanics.md, a review record that differs
-# beyond whitespace, an edit of the last mechanics.md line and a conflict in a TypeScript source.
+# beyond whitespace, an edit of the last mechanics.md line, a conflict in a TypeScript source and one in a hand-kept hash fixture.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 src=$(cd "$(dirname "$0")/.." && pwd)
@@ -13,13 +13,14 @@ git clone -q --shared "$src" "$t/r"
 cd "$t/r"
 g() { git -c user.name=t -c user.email=t@t -c merge.conflictStyle=diff3 "$@"; }
 fail() { echo "merge_resolve control failed: $*" >&2; exit 1; }
-m=docs/system/mechanics.md w=kernel/ts/src/runtime/world.ts s=docs/system-graph.gen.json f=kernel/ts/src/runtime/fresh.ts
+m=docs/system/mechanics.md w=kernel/ts/src/runtime/world.ts s=docs/system-graph.gen.json hf=protocol/fixtures/toolbox_showcase_hash.json f=kernel/ts/src/runtime/fresh.ts
 base=$(git rev-parse HEAD)
 side() { # <branch> <section> <kernel_api>
   g checkout -q -b "$1" "$base"
   printf '\n## Shared\n\nshared line\n\n## %s\n\n%s text\n' "$2" "$2" >> $m
   perl -pi -e "s/kernel_api: '[0-9.]+'/kernel_api: '$3'/" $w
   echo "$1" > $s
+  echo "{\"side\": \"$1\"}" > $hf
   g commit -qam "$1"
 }
 side a A 1.9
@@ -30,6 +31,7 @@ g merge -q b >/dev/null 2>&1 && fail 'the sides did not conflict'
 python3 "$src/bin/merge_resolve.py" >/dev/null || fail 'additive conflicts not resolved'
 cmp -s $m "$t/expected.md" || fail 'mechanics.md tail is not ours then theirs'
 grep -q "kernel_api: '1.10'," $w || fail 'kernel_api is not the higher version'
+[ "$(cat $hf)" = '{"side": "b"}' ] || fail "$hf (a regenerated family) is not theirs"
 mise exec -- elixir bin/contracts.exs --check >/dev/null || fail "$s not regenerated"
 [ -z "$(git diff --name-only --diff-filter=U)" ] || fail 'a file is left unmerged'
 g merge --abort
@@ -64,6 +66,10 @@ g merge -q c >/dev/null 2>&1 && fail 'the sides did not conflict'
 python3 "$src/bin/merge_resolve.py" >/dev/null && fail "an edit of $m or a conflict in $f was resolved"
 [ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$m $f " ] || fail "$m and $f are not left unmerged"
 g merge --abort
+hk=protocol/fixtures/capability_lock_hash.json # kept by hand: theirs would silently drop ours
+for i in 1 2; do g checkout -q -b "hk$i" "$base"; echo "{\"side\": $i}" > $hk; g commit -qam "hk$i"; done
+g merge -q hk1 >/dev/null 2>&1 && fail 'the hash fixtures did not conflict'
+left 'a hand-kept hash fixture' $hk
 # Both sides add at one spot (a section, a table row): ours then theirs, the result valid.
 ap() { # <name> <file> <perl edit of the file for side 1> <for side 2>: merges two branches from base, expecting a conflict
   for i in 1 2; do eval "e=\$$((i + 2))"; g checkout -q -b "$1$i" "$base"; perl -0pi -e "$e" "$2"; g commit -qam "$1$i"; done

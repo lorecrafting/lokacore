@@ -24,6 +24,30 @@ defmodule Loka.Content.Artifact do
     }
   end
 
+  @optional ~w(
+    item
+    npc
+    recipe
+    barrier
+    quest
+    reaction
+    dialogue
+    story_point
+    scene
+    attribute
+    skill
+    topic
+    liquid
+    service
+    transport
+    population
+    population_bundle
+    bleed
+    status
+    replenish
+    structure
+  )
+
   # items, npcs, recipes, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
@@ -31,7 +55,7 @@ defmodule Loka.Content.Artifact do
 
     optional =
       for k <-
-            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle bleed status replenish structure),
+            @optional,
           defs[k] != %{},
           into: %{},
           do:

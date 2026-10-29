@@ -16,7 +16,7 @@ import { living } from '../death/shared.ts';
 import { barrierState } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { npcPassage, relock } from '../movement/shared.ts';
-import { happened } from '../schedule/behavior.ts';
+import { happened } from '../schedule/daily.ts';
 import { moves } from '../status/bars.ts';
 import { chase, left, once } from '../trail.ts';
 import { birth } from './birth.ts';

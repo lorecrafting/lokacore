@@ -147,7 +147,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   several dialogues; no dialogue role named `actor`; a choice's `accept` names a quest, in a
   dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); an action with outcomes has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
-  (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
+  (`EMPTY_TIME_WINDOW`); a schedule needs `schedule@1` and a calendar `calendar@1`;
 - `calendar` may author a nonnegative multi-day `start`, positive `units_per_hour` and
   `hours_per_day`, a positive `subdivisions_per_hour` dividing the hour, and ordered solar
   and lunar cuts. The compiler checks safe day arithmetic, cut order and bounds,
@@ -234,12 +234,12 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/bundles.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
-`lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`, `lib/loka/content/signals.ex`,
+`lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
 `lib/loka/content/zones.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
-behaviours, lower signals, expand zone rules, refuse repeated definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a signal or a zone;
+behaviours, expand zone rules, refuse repeated definitions again. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour or a zone;
 the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
@@ -367,41 +367,6 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
 inline; its artifact equals the hand-keyed one byte for byte.
 
-**Signals.** A message from one reaction to others, lowered to a counter fact.
-1. In a reaction's `apply`, `{"op": "signal", "signal": "<name>"}` lowers to
-   `{"op": "fact.adjust", "fact": "signal_<name>", "amount": 1}` at the same index, so a check on
-   the lowered step (capability) reports at the author's step (`reactions/ring.apply[0].op`).
-2. The trigger `"on": {"event": "signal", "signal": "<name>"}` lowers to
-   `{"event": "fact_changed", "fact": "signal_<name>"}`.
-3. Each name sent adds `signal_<name>` to `facts.json` (created when absent; an undecodable one
-   takes nothing, its `INVALID_JSON` fails the build): version 1, `int` 0 to 9007199254740990,
-   default 0, scope `player` (a listener runs for the sending character), meaning
-   `Signal <name> (compiler-generated).`
-4. The pass adds nothing to `cartridge.json`: the author declares `fact@1` and `reaction@1`, and the existing checks report what is missing.
-5. Limits:
-   - After 9007199254740990 sends the counter is full: the adjust clamps, writes nothing new and
-     the listeners stay silent (`kernel/ts/src/mechanics/fact.ts:254`). The maximum is one below
-     the largest safe integer because `add` (`kernel/ts/src/foundation/int.ts:17`) overflows
-     before the clamp at 2^53-1 (loka-kgd.195).
-   - Each send writes the player's fact row.
-   - A rule that only sends is still a write for `mix loka.lint`; add `"silent": true`, which the
-     compiler drops.
-   - Senders are reaction steps only. Recipes keep `event.emit` / `custom_event`; dialogues keep
-     `fact.adjust`.
-
-| Case | Code | Path | data |
-|---|---|---|---|
-| An authored fact named exactly `signal_<name>` | `FACT_NAME_COLLISION` | `facts.facts.signal_<name>` | `{}` |
-| A listener whose name no sending step uses | `UNRESOLVED_REFERENCE` | `<src>.on.signal` | `{"target": "<name>"}` |
-| A sending step whose name is not a Key, or whose `signal_<name>` is not (a name over 57 characters), or with its own `fact` or `amount` | `SCHEMA_VIOLATION` | `<src>.apply[<i>].op` | `{"error": "unknown_variant"}` |
-| A trigger with its own `fact` | `SCHEMA_VIOLATION` | `<src>.on.event` | `{"error": "unknown_variant"}` |
-
-The dotted `signal.<name>` collides through the ordinary fact-name check. A refused step or
-trigger stays unlowered, so the schema reports it at the author's path. When a name or its
-`signal_<name>` is refused for not being a Key, its listeners report nothing of their own. [signal_sugar](../../test/fixtures/signal_sugar/) is the
-working example; it compiles to the same artifact as its hand-expanded twin
-[signal_expanded](../../test/fixtures/signal_expanded/).
-
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
 - A reaction with `"zone": "<Key>"` and no `on.room` is replaced by one copy per room listing
@@ -457,8 +422,8 @@ rules byte for byte.
   name.
 - Prose lowers first, so all copies share the rule's generated key
   `behaviour.<name>.reactions.<rule>...`. Flattening runs first, so a holder inherits
-  `behaviours` through `extends` and an abstract holder gets no copy. Signals and zones run
-  after, so a behaviour rule may send a signal or carry a `zone`.
+  `behaviours` through `extends` and an abstract holder gets no copy. Zones run
+  after, so a behaviour rule may carry a `zone`.
 
 | Case | Code | Path | data |
 |---|---|---|---|
@@ -488,7 +453,7 @@ shortcuts above (`lib/loka/content/source_schema.ex`); a test fails when the com
 are stale, and `kernel/ts/test/source_schema.test.ts` validates every committed cartridge file
 with them. They accept every shortcut: no `key`, an `abstract` parent (checked only as an
 object), an `extends` child (no inherited member required), `with`, `{"prose": ...}` wherever a
-text key goes (root files too), the signal step and trigger, `zone` and `zones`, and
+text key goes (root files too), `zone` and `zones`, and
 `behaviours`. They are a writing aid, not a gate: nothing reads them, the compiler remains the
 judge, and they do not check references, bundle-member keys against file stems, or the
 `resources` and `attributes` entries beyond being objects, or a behaviour's rule bodies beyond

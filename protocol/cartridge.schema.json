@@ -434,7 +434,6 @@
                 "dialogue": 1,
                 "topics": 1,
                 "check": 1,
-                "behavior": 1,
                 "schedule": 1
               },
               "client_features": []
@@ -459,7 +458,6 @@
               "dialogue": 1,
               "topics": 1,
               "check": 1,
-              "behavior": 1,
               "schedule": 1
             }
           },
@@ -668,7 +666,6 @@
                   "dialogue": 1,
                   "topics": 1,
                   "check": 1,
-                  "behavior": 1,
                   "schedule": 1
                 },
                 "client_features": []
@@ -693,7 +690,6 @@
                 "dialogue": 1,
                 "topics": 1,
                 "check": 1,
-                "behavior": 1,
                 "schedule": 1
               }
             },

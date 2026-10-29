@@ -243,18 +243,21 @@
     "implemented_in": "R5 S6a luck check in recipes, check_passed and check_failed; R5 S6b threshold check on a resource"
   },
   "schedule": {
-    "spec": "21 §4 Time; 04 §1, §5.4; 00 §4.2; command.schema.json LogicalTime; numeric-profile.md job CommandId",
+    "spec": "21 §4 Time; 04 §1, §5.4; 00 §4.2; command.schema.json LogicalTime; numeric-profile.md job CommandId; 06 §13 Behavior/schedule profiles; 21 §10",
     "contracts": [
       "CommandPayload",
       "LogicalTime",
       "Policy",
       "DeltaOp",
-      "MutationTarget"
+      "MutationTarget",
+      "NpcDefinition"
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
       "kernel/ts/src/runtime/world.ts",
-      "kernel/ts/src/foundation/id_source.ts"
+      "kernel/ts/src/foundation/id_source.ts",
+      "kernel/ts/src/mechanics/schedule/daily.ts",
+      "kernel/ts/src/mechanics/schedule/rule.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_dusk_hash.json",
@@ -266,7 +269,7 @@
       "rejection_consumes_nothing",
       "job_complete_owned_by_run"
     ],
-    "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a recipe's duration), run_job and its job CommandId"
+    "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a recipe's duration), run_job and its job CommandId; an NPC's daily location schedule"
   },
   "barrier": {
     "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1 (amendment 2026-10-03: an item site)",
@@ -335,24 +338,6 @@
       "rejection_consumes_nothing"
     ],
     "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#138) selected lifecycle and outcome journal text"
-  },
-  "behavior": {
-    "spec": "06 §13 Behavior/schedule profiles; 21 §10",
-    "contracts": [
-      "NpcDefinition"
-    ],
-    "modules": [
-      "kernel/ts/src/mechanics/schedule/behavior.ts",
-      "kernel/ts/src/mechanics/schedule/rule.ts"
-    ],
-    "fixtures": [
-      "protocol/fixtures/cartridge_ferry_hash.json"
-    ],
-    "invariants": [
-      "delta_preconditions_hold",
-      "job_complete_owned_by_run"
-    ],
-    "implemented_in": "Early R7/R8 S an NPC's daily location schedule, run by schedule@1's jobs"
   },
   "calendar": {
     "spec": "21 §4 Time; command.schema.json LogicalTime",

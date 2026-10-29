@@ -4,12 +4,12 @@
 // due jobs in the same proposal (runtime/proposal.ts propose), each a run_job decided here.
 //
 // run_job is authority-internal (04 §1): only the host's drain builds it, never a client
-// invocation. It runs one pending job of an NPC's daily schedule (mechanics/schedule/behavior.ts), reading the
+// invocation. It runs one pending job of an NPC's daily schedule (mechanics/schedule/daily.ts), reading the
 // time from the job's due time: the NPC moves to the room listed for that hour (or its first holding
-// case, toolbox row W10: behavior.ts placeOf) unless it is
+// case, toolbox row W10: daily.ts placeOf) unless it is
 // there already, the job completes, and the next job is scheduled at the schedule's next listed
 // hour, its id this run_job's first IdSource ordinal; a move reports the NPC's
-// entity_entered_room (mechanics/schedule/behavior.ts entered), its id the second. A job that is not pending is
+// entity_entered_room (mechanics/schedule/daily.ts entered), its id the second. A job that is not pending is
 // invalid_state, except a crossed-hour sub-step (decideAt `at` later than its due time), which
 // schedules no job when its next hour is crossed too (so its arrival takes the first ordinal).
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
@@ -37,7 +37,7 @@ import {
   placeOf,
   runClock,
   scheduleOf,
-} from './behavior.ts';
+} from './daily.ts';
 import { relock, walkPath } from '../movement/shared.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';

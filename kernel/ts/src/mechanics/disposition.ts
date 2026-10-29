@@ -23,7 +23,7 @@ import {
 import { holds } from './policy.ts';
 import { living } from './death/shared.ts';
 import { engaged, encounterId, npcRef } from './combat/shared.ts';
-import { jobId } from './schedule/behavior.ts';
+import { jobId } from './schedule/daily.ts';
 import { attacked } from './crow/behavior.ts';
 import { running } from './scene/shared.ts';
 import { activeStatuses, concealed, cureOps } from './status/shared.ts';

@@ -1,10 +1,10 @@
-# size: allow 318, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline
+# size: allow 320, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Behaviours, Bundles, Extends, Prose, Signals, Zones}
+  alias Loka.Content.{Behaviours, Bundles, Extends, Prose, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -58,9 +58,8 @@ defmodule Loka.Content.Source do
   defp shortcuts(files, faults) do
     {files, clashes} = Prose.lower(files)
     {files, held} = Behaviours.expand(files)
-    {files, unsent} = Signals.lower(files)
     {files, zoned} = Zones.expand(files)
-    {files, Enum.map(faults ++ clashes ++ held ++ unsent ++ zoned, &bundle_diag/1)}
+    {files, Enum.map(faults ++ clashes ++ held ++ zoned, &bundle_diag/1)}
   end
 
   defp read(dir) do
@@ -183,9 +182,12 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
-  @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json)."
+  @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json); raises on a code outside DiagnosticCode."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()
   def diag(code, path, data \\ %{}, suggested \\ []) do
+    code in Loka.Core.Contracts.defs()["DiagnosticCode"]["enum"] or
+      raise ArgumentError, "#{inspect(code)} is not a DiagnosticCode"
+
     %{
       "severity" => "error",
       "code" => code,

@@ -5,11 +5,13 @@
   ends inside a section, or a duplicate heading afterwards, refuses;
 - docs/MECHANICS-TOOLBOX.md: the same for table rows (a row id on both sides refuses);
 - kernel/ts/src/runtime/world.ts: one conflict whose sides are each one kernel_api line keeps the higher;
-- a generated file or docs/reviews/README.md takes theirs, as does a review record whose sides differ
-  only in whitespace (another review record is left); then every generator reruns.
+- a generated file (GENERATED, GENERATED_GLOBS) or docs/reviews/README.md takes theirs, as does a review record whose sides differ
+  only in whitespace (another review record is left); then every generator reruns (a GENERATED_GLOBS
+  family needs `sh bin/regen.sh` after the merge).
 Exit 0: all resolved and staged, not committed. Exit 1: prints the files it left; abort the merge.
 Needs merge.conflictStyle=diff3 (the base section proves an append).
   python3 bin/merge_resolve.py"""
+import fnmatch
 import os
 import re
 import subprocess
@@ -26,7 +28,14 @@ GENERATED = {
     "docs/checks.gen.json",
     "docs/toolbox.gen.json",
     "docs/features.gen.md",
+    "test/loka/lint_baseline.txt",
+    "protocol/fixtures/toolbox_showcase_hash.json",  # the one hash fixture bin/regen.sh rebuilds; the others are kept by hand
 }
+GENERATED_GLOBS = [  # bin/regen.sh rebuilds these; `*` crosses `/`
+    "cartridges/*/transcripts/*.jsonl",
+    "mobile/app/stories/live/*.sql",
+    "schemas/source/*.json",
+]
 GENERATORS = [
     ["mise", "exec", "--", "elixir", "bin/contracts.exs"],
     ["mise", "exec", "--", "elixir", "bin/features.exs"],
@@ -118,7 +127,7 @@ for f in conflicted:
         with open(f, "w") as fh:
             fh.write(merged)
         git("add", f)
-    elif f in GENERATED or f == "docs/reviews/README.md" or (f.startswith("docs/reviews/") and same_but_whitespace(f)):
+    elif f in GENERATED or any(fnmatch.fnmatchcase(f, g) for g in GENERATED_GLOBS) or f == "docs/reviews/README.md" or (f.startswith("docs/reviews/") and same_but_whitespace(f)):
         theirs.append(f)
     else:
         left.append(f)

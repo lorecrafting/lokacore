@@ -111,7 +111,7 @@ and not repeated here.
 
 ## Architecture and engine
 
-- No custom authoring language or script interpreter: cartridge source stays JSON with compile-time shortcuts (`extends`, behaviours, zones, `signal`, `wait`) lowered to today's cartridge, YAML later; an AI-assisted visual builder sits on top ([record](../decisions/owner-decision-authoring-builder-2026-10-23.md)).
+- No custom authoring language or script interpreter: cartridge source stays JSON with compile-time shortcuts (`extends`, behaviours, zones, `wait`) lowered to today's cartridge, YAML later; an AI-assisted visual builder sits on top ([record](../decisions/owner-decision-authoring-builder-2026-10-23.md)). Custom events (`event.emit`/`custom_event`) are the one inter-rule message (C2, 2026-10-28).
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
   [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)

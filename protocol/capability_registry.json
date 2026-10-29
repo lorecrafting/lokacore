@@ -315,15 +315,6 @@
     ]
   },
   {
-    "key": "behavior",
-    "version": 1,
-    "portability": "portable",
-    "residency": "portable_capability",
-    "definitions": [
-      "schedule"
-    ]
-  },
-  {
     "key": "schedule",
     "version": 1,
     "portability": "portable",
@@ -332,6 +323,9 @@
       "wait",
       "run_job",
       "elapsed"
+    ],
+    "definitions": [
+      "schedule"
     ],
     "policies": [
       "time_window"
