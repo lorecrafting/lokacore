@@ -79,8 +79,7 @@ defmodule Loka.ContentTest do
   defp ref(kind, key, version \\ "1.0.0"),
     do: %{"cartridge_id" => "c", "cartridge_version" => version, "kind" => kind, "key" => key}
 
-  defp policy(root), do: root
-  defp act(root), do: %{@talk | "policy" => policy(root)}
+  defp act(root), do: %{@talk | "policy" => root}
   defp manifest(path, value), do: put_in(@manifest, path, value)
 
   # Break: wrong key mapping, key order, hash input or artifact framing.
@@ -107,7 +106,7 @@ defmodule Loka.ContentTest do
                [d("DUPLICATE_KEY", "actions/talk.target.kind")]
 
       root = %{"op" => "all", "items" => [@present]}
-      talk = JSON.encode!(%{@talk | "policy" => policy(root)})
+      talk = JSON.encode!(%{@talk | "policy" => root})
       text = String.replace(talk, ~s("op":"target_present"), ~s("op":"target_present","op":"x"))
 
       assert errors(tmp, %{"actions/talk.json" => {:raw, text}}) ==
@@ -117,9 +116,9 @@ defmodule Loka.ContentTest do
     test "UNKNOWN_FIELD: stray .json files (dot directories too), an authored key, an unregistered field",
          %{tmp_dir: tmp} do
       assert errors(tmp, %{
-               "polices/x.json" => policy(@present),
-               "policies/x.json" => policy(@present),
-               ".hidden/x.json" => policy(@present),
+               "polices/x.json" => @present,
+               "policies/x.json" => @present,
+               ".hidden/x.json" => @present,
                "notes.txt" => {:raw, "ignored"},
                "actions/talk.json" => Map.put(@talk, "key", "talk"),
                "cartridge.json" => Map.merge(@manifest, %{"unregistered" => true, "key" => "c"})
@@ -220,7 +219,7 @@ defmodule Loka.ContentTest do
         ]
       }
 
-      talk = %{@talk | "policy" => policy(%{"op" => "has_item", "item" => ref("item", "x")})}
+      talk = %{@talk | "policy" => %{"op" => "has_item", "item" => ref("item", "x")}}
       caps = Map.put(@manifest["requires"]["capabilities"], "containment", 1)
 
       assert errors(tmp, %{

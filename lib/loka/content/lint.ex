@@ -51,8 +51,8 @@ defmodule Loka.Content.Lint do
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
   end
 
-  defp file(["actions", _], rel, %{"policy" => _} = r)
-       when not is_map_key(r, "reason") and not is_map_key(r, "command"),
+  defp file(["actions", _], rel, %{"policy" => p} = r)
+       when p != @always and not is_map_key(r, "reason") and not is_map_key(r, "command"),
        do: ["#{rel}: policy refuses with no reason"]
 
   defp file(["reactions", _], rel, %{"apply" => steps} = r) do

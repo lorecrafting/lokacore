@@ -197,7 +197,8 @@ defmodule Loka.ContentLintTest do
   # Breaks: the rule dropped, a gate key (qualification) left out, a nested gate (a quest offer)
   # not walked, or an optional trigger (hostile, absent means never) flagged.
   test "an always-true policy, when or qualification is written by omission" do
-    assert lint(%{"actions/look.json" => %{"policy" => @always, "reason" => "reason.look"}}) ==
+    # Break: an always policy with no reason also reported as refusing.
+    assert lint(%{"actions/look.json" => %{"policy" => @always}}) ==
              ["actions/look.json: policy always holds; omit it"]
 
     assert lint(%{"skills/s.json" => %{"qualification" => @always}}) ==
