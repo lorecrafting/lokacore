@@ -45,7 +45,6 @@ export function onlyFood(c: any) {
     'barriers',
     'attributes',
     'recipes',
-    'policies',
     'actions',
     'facts',
     'npcs',
