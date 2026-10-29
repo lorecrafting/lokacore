@@ -45,7 +45,7 @@ defmodule Loka.ContentCombatTest do
   }
   @npc %{
     "keywords" => ["rat"],
-    "short" => "t",
+    "name" => "t",
     "room_line" => "t",
     "description" => "t",
     "room" => "cellar",
@@ -64,9 +64,9 @@ defmodule Loka.ContentCombatTest do
           [
             {"cartridge.json", manifest},
             {"npcs/rat.json", npc},
-            {"rooms/cellar.json", %{"title" => "t", "description" => "t", "exits" => %{}}},
+            {"rooms/cellar.json", %{"name" => "t", "description" => "t", "exits" => %{}}},
             {"rooms/shrine.json",
-             %{"title" => "t", "description" => "t", "exits" => %{}, "sanctuary" => true}},
+             %{"name" => "t", "description" => "t", "exits" => %{}, "sanctuary" => true}},
             {"facts.json", %{"facts" => %{"rat_dead" => fact}}},
             {"text.json", %{"t" => "Test"}}
           ] ++
@@ -74,7 +74,7 @@ defmodule Loka.ContentCombatTest do
                {"items/" <> name <> ".json",
                 %{
                   "keywords" => ["corpse"],
-                  "short" => "t",
+                  "name" => "t",
                   "room_line" => "t",
                   "description" => "t",
                   "location" => %{"in" => "template"},

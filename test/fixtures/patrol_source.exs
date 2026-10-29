@@ -23,7 +23,7 @@ defmodule Loka.PatrolSource do
 
     for {key, back} <- [{"watch_post", "north_gate"}, {"east_gate", "village_green"}] do
       put(dir, "rooms/#{key}.json", %{
-        "title" => "room.#{key}.title",
+        "name" => "room.#{key}.title",
         "description" => "room.#{key}.description",
         "exits" => %{"west" => %{"to" => back}}
       })
@@ -33,7 +33,7 @@ defmodule Loka.PatrolSource do
   defp patrol(dir) do
     put(dir, "npcs/tobin.json", %{
       "keywords" => ["tobin"],
-      "short" => "npc.tobin.short",
+      "name" => "npc.tobin.short",
       "room_line" => "npc.tobin.room",
       "description" => "npc.tobin.description",
       "room" => "watch_post"
@@ -49,7 +49,7 @@ defmodule Loka.PatrolSource do
     end)
 
     put(dir, "quests/watch_rounds.json", %{
-      "title" => "quest.watch_rounds.title",
+      "name" => "quest.watch_rounds.title",
       "objective" => %{"evidence" => "patrol"},
       "patrol" => %{
         "npc" => "tobin",
@@ -72,7 +72,7 @@ defmodule Loka.PatrolSource do
       "npc" => "tobin",
       "roles" => %{"leader" => %{"role" => "npc", "npc" => "tobin"}},
       "prompt" => "watch.prompt",
-      "label" => "watch.talk",
+      "name" => "watch.talk",
       "choices" => %{
         "start" => Map.put(choice("start"), "accept", "watch_rounds"),
         "continue" => choice("continue"),

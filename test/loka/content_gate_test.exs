@@ -113,7 +113,7 @@ defmodule Loka.ContentGateTest do
            }) ==
              {:error,
               [
-                d("UNRESOLVED_REFERENCE", "barriers/oak_door.short", %{
+                d("UNRESOLVED_REFERENCE", "barriers/oak_door.name", %{
                   "target" => "barrier.oak_door.short"
                 })
               ]}
@@ -169,7 +169,7 @@ defmodule Loka.ContentGateTest do
   # Review #50 A2/N2. Breaks: faces paired by destination room rather than by connection (room and
   # opposite direction), so two passages between the same rooms cannot carry two doors.
   test "two passages between the same rooms may carry different barriers", %{dir: dir} do
-    blue = %{"keywords" => ["hatch"], "short" => "barrier.oak_door.short", "initial" => "open"}
+    blue = %{"keywords" => ["hatch"], "name" => "barrier.oak_door.short", "initial" => "open"}
     way = fn b -> %{"to" => "courtyard", "barrier" => b} end
     back = fn b -> %{"to" => "gatehouse", "barrier" => b} end
 

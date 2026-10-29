@@ -62,7 +62,7 @@
     "actions": {},
     "rooms": {
       "position_sampler@0.0.1:room/inn_common": {
-        "title": "room.inn_common.title",
+        "name": "room.inn_common.title",
         "description": "room.inn_common.description",
         "exits": {
           "north": {
@@ -83,7 +83,7 @@
         "key": "inn_common"
       },
       "position_sampler@0.0.1:room/inn_rooms": {
-        "title": "room.inn_rooms.title",
+        "name": "room.inn_rooms.title",
         "description": "room.inn_rooms.description",
         "exits": {
           "south": {
@@ -110,7 +110,7 @@
           "door",
           "inn_door"
         ],
-        "short": "barrier.inn_door.short",
+        "name": "barrier.inn_door.short",
         "initial": "closed",
         "key": "inn_door"
       }
@@ -152,6 +152,6 @@
       "barrier.inn_door.short": "the door to the rooms"
     }
   },
-  "canonical": "{\"actions\":{},\"barriers\":{\"position_sampler@0.0.1:barrier/inn_door\":{\"initial\":\"closed\",\"key\":\"inn_door\",\"keywords\":[\"door\",\"inn_door\"],\"short\":\"barrier.inn_door.short\"}},\"entry\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_common\",\"kind\":\"room\"},\"facts\":{\"position_sampler@0.0.1:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"barrier\":1,\"fact\":1,\"movement\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"position_sampler\",\"requires\":{\"capabilities\":{\"barrier\":1,\"fact\":1,\"movement\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Position Sampler\",\"version\":\"0.0.1\"},\"resources\":{\"position_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"position_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"position_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"position_sampler@0.0.1:room/inn_common\":{\"description\":\"room.inn_common.description\",\"exits\":{\"north\":{\"barrier\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_common\",\"title\":\"room.inn_common.title\"},\"position_sampler@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"south\":{\"barrier\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_common\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"}},\"text\":{\"barrier.inn_door.short\":\"the door to the rooms\",\"room.inn_common.description\":\"Benches by a low fire. A door leads north to the rooms.\",\"room.inn_common.title\":\"The Common Room\",\"room.inn_rooms.description\":\"A narrow passage of doors.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}}",
-  "sha256": "04ce72db0a6d03ee2058ec689461de937df4d2fd07056196ade5111f1d3d079b"
+  "canonical": "{\"actions\":{},\"barriers\":{\"position_sampler@0.0.1:barrier/inn_door\":{\"initial\":\"closed\",\"key\":\"inn_door\",\"keywords\":[\"door\",\"inn_door\"],\"name\":\"barrier.inn_door.short\"}},\"entry\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_common\",\"kind\":\"room\"},\"facts\":{\"position_sampler@0.0.1:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"barrier\":1,\"fact\":1,\"movement\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"position_sampler\",\"requires\":{\"capabilities\":{\"barrier\":1,\"fact\":1,\"movement\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Position Sampler\",\"version\":\"0.0.1\"},\"resources\":{\"position_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"position_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"position_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"position_sampler@0.0.1:room/inn_common\":{\"description\":\"room.inn_common.description\",\"exits\":{\"north\":{\"barrier\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_common\",\"name\":\"room.inn_common.title\"},\"position_sampler@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"south\":{\"barrier\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"position_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_common\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"name\":\"room.inn_rooms.title\"}},\"text\":{\"barrier.inn_door.short\":\"the door to the rooms\",\"room.inn_common.description\":\"Benches by a low fire. A door leads north to the rooms.\",\"room.inn_common.title\":\"The Common Room\",\"room.inn_rooms.description\":\"A narrow passage of doors.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}}",
+  "sha256": "718e29ba4cf005794dc1559379577fa0a619f9bb91d5ee485f461c01f33a6a84"
 }

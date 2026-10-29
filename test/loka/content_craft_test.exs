@@ -133,9 +133,9 @@ defmodule Loka.ContentCraftTest do
     assert edit.([read.("skills/joinery", "qualification") | hidden]) == :ok
 
     label =
-      {"dialogues/old_carver_carving.json", &Map.put(&1, "label", "old_carver.carving.prompt")}
+      {"dialogues/old_carver_carving.json", &Map.put(&1, "name", "old_carver.carving.prompt")}
 
-    assert edit.([label | hidden]) == [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.label"}]
+    assert edit.([label | hidden]) == [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.name"}]
     assert edit.([label]) == :ok
 
     riddle =

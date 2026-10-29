@@ -95,11 +95,11 @@ defmodule Loka.ContentErrandTest do
     assert compile(dir, %{"text.json" => text}) ==
              {:error,
               [
+                d("UNRESOLVED_REFERENCE", "quests/lantern.name", %{
+                  "target" => "quest.lantern.title"
+                }),
                 d("UNRESOLVED_REFERENCE", "quests/lantern.offer.label", %{
                   "target" => "quest.lantern.accept"
-                }),
-                d("UNRESOLVED_REFERENCE", "quests/lantern.title", %{
-                  "target" => "quest.lantern.title"
                 })
               ]}
   end
@@ -129,7 +129,7 @@ defmodule Loka.ContentErrandTest do
              {:error, [d("DUPLICATE_DEFINITION", "quests/take")]}
 
     action = %{
-      "label" => "quest.lantern.accept",
+      "name" => "quest.lantern.accept",
       "accessibility" => "quest.lantern.accept",
       "target" => %{"kind" => "none"},
       "command" => "look",
@@ -154,7 +154,7 @@ defmodule Loka.ContentErrandTest do
       "rooms/ferry_landing.json" =>
         put_in(src("rooms/ferry_landing.json"), ["details"], %{"post" => post}),
       "actions/lantern.json" => %{
-        "label" => "quest.lantern.accept",
+        "name" => "quest.lantern.accept",
         "aliases" => ["lantern"],
         "target" => %{"kind" => "detail", "room" => "ferry_landing", "detail" => "post"},
         "priority" => 0,

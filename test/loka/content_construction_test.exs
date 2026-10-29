@@ -25,8 +25,8 @@ defmodule Loka.ContentConstructionTest do
     for {edits, expected} <- [
           {[exit], [{"SITE_EXIT_CONFLICT", "rooms/lane.site.directions[0]"}]},
           {[missing], [{"UNRESOLVED_REFERENCE", "rooms/lane.site.structures[1]"}]},
-          {[hut(["title"], "structure.hut.nope")],
-           [{"UNRESOLVED_REFERENCE", "structures/hut.title"}]},
+          {[hut(["name"], "structure.hut.nope")],
+           [{"UNRESOLVED_REFERENCE", "structures/hut.name"}]},
           {[hut(["variants", Access.at(0), "description"], "structure.hut.nope")],
            [{"UNRESOLVED_REFERENCE", "structures/hut.variants[0].description"}]},
           {[hut(["locks", "enter", "fact"], "nope")],

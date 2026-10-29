@@ -24,7 +24,7 @@ defmodule Loka.ContentWaterTest do
 
   defp bottom(up) do
     %{
-      "title" => "room.well_bottom.title",
+      "name" => "room.well_bottom.title",
       "description" => "room.well_bottom.description",
       "exits" => %{"up" => up}
     }
@@ -35,7 +35,7 @@ defmodule Loka.ContentWaterTest do
       %{
         "cartridge.json" => &cartridge(&1, @water),
         "skills/swim.json" => %{
-          "label" => "skill.swim.label",
+          "name" => "skill.swim.label",
           "requirement" => "skill.swim.requirement",
           "qualification" => %{"op" => "all", "items" => []}
         },
