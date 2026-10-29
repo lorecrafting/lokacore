@@ -181,7 +181,6 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
-  const { named } = check;
   if (c.format !== 'loka-cartridge-v2') return out;
   // -- B2
   // -- C1
