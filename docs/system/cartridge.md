@@ -191,9 +191,10 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   `scene_<key>` fact (`facts.facts.scene_<key>`) and each action, reaction or dialogue
   fact.assign of it are RESERVED_FACT at the same write-site paths as position;
   fact_compare and reaction on.fact reads remain legal;
-- story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
-  one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
-  `lib/loka/content/dialogues.ex:2`);
+- story points: a dialogue choice's `story_point: "<key>/<outcome>"` and a scene's `on_end`
+  declare the point's outcomes; a second claim of one outcome is `DUPLICATE_DEFINITION` at its
+  site, and a claiming choice's dialogue resolves a quest (`OUTCOME_MISMATCH`;
+  `lib/loka/content/dialogues.ex`);
 - chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
   (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
   (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a

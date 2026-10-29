@@ -116,33 +116,36 @@ defmodule Loka.ContentScenesTest do
               ]}
   end
 
-  # Breaks: an end outcome the story point does not resolve to this scene, or one fact
-  # assigned twice at scene end, loads.
-  test "scene end must agree with its story point", %{tmp_dir: dir} do
+  # Breaks: a scene end not derived into its story point's outcomes, an end outcome a choice
+  # already claims, or one fact assigned twice at scene end, loads.
+  test "scene end reaches its own story point outcome", %{tmp_dir: dir} do
     scene = src("scenes/bell_rung.json")
     m = put_in(src("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.15")
-    point = src("story_points/lantern_resolved.json")
-    rung = put_in(point, ["outcomes", "rung"], %{"scene" => "bell_rung"})
     assign = %{"fact" => "bell_heard", "value" => true}
     ended = %{"story_point" => "lantern_resolved", "outcome" => "rung", "assign" => [assign]}
+    files = &%{"cartridge.json" => m, "scenes/bell_rung.json" => Map.put(scene, "on_end", &1)}
 
-    files = fn s, p ->
-      %{
-        "cartridge.json" => m,
-        "scenes/bell_rung.json" => Map.put(scene, "on_end", s),
-        "story_points/lantern_resolved.json" => p
-      }
-    end
+    assert {:ok, bytes, _} = compile(Path.join(dir, "end"), files.(ended))
 
-    assert {:ok, _, _} = compile(Path.join(dir, "end"), files.(ended, rung))
+    # The derived point is the canonical one plus this scene's outcome.
+    id = "scene_sampler@0.0.1:story_point/lantern_resolved"
+    canonical = JSON.decode!(@kat["canonical"])["story_points"][id]
 
-    for {name, s, p, path, code} <- [
-          {"outcome", %{ended | "outcome" => "carry"}, point, "on_end.outcome",
-           "OUTCOME_MISMATCH"},
-          {"assign", %{ended | "assign" => [assign, assign]}, rung, "on_end.assign",
+    scene_ref = %{
+      canonical["outcomes"]["carry"]["dialogue"]
+      | "kind" => "scene",
+        "key" => "bell_rung"
+    }
+
+    assert JSON.decode!(bytes)["cartridge"]["story_points"][id] ==
+             put_in(canonical, ["outcomes", "rung"], %{"scene" => scene_ref})
+
+    for {name, s, path, code} <- [
+          {"outcome", %{ended | "outcome" => "carry"}, "on_end", "DUPLICATE_DEFINITION"},
+          {"assign", %{ended | "assign" => [assign, assign]}, "on_end.assign",
            "DUPLICATE_DEFINITION"}
         ] do
-      assert compile(Path.join(dir, name), files.(s, p)) ==
+      assert compile(Path.join(dir, name), files.(s)) ==
                {:error, [d(code, "scenes/bell_rung." <> path)]}
     end
   end

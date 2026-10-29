@@ -9,7 +9,11 @@ defmodule Loka.ContentEscortTest do
 
   defp source(dir) do
     File.cp_r!("cartridges/ferry_sampler", dir)
-    File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
+
+    update(dir, "dialogues/bram.json", fn d ->
+      update_in(d, ["choices"], &Map.new(&1, fn {c, o} -> {c, Map.delete(o, "story_point")} end))
+    end)
+
     File.cp!(Path.join(dir, "quests/lantern.json"), Path.join(dir, "quests/other.json"))
 
     update(dir, "cartridge.json", fn m ->

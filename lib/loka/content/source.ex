@@ -1,4 +1,4 @@
-# size: allow 311, the behaviours pass and the source schema dirs join the existing source-shortcut pipeline
+# size: allow 318, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -27,7 +27,6 @@ defmodule Loka.Content.Source do
              | :quest
              | :reaction
              | :dialogue
-             | :story_point
              | :scene
              | :skill
              | :topic
@@ -142,7 +141,6 @@ defmodule Loka.Content.Source do
     "quests" => :quest,
     "reactions" => :reaction,
     "dialogues" => :dialogue,
-    "story_points" => :story_point,
     "scenes" => :scene,
     "skills" => :skill,
     "topics" => :topic,
@@ -263,12 +261,21 @@ defmodule Loka.Content.Source do
     |> elem(0)
   end
 
+  # Source only (Dialogues.points/2 derives CompiledCartridge.story_points and strips it).
+  @choice_point %{
+    "description" =>
+      "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+    "type" => "string",
+    "pattern" => "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$"
+  }
+
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
   def contracts do
     defs = Loka.Core.Contracts.defs()
 
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",
