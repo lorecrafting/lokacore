@@ -2,7 +2,7 @@ defmodule Loka.ContentHarvestToolTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/harvest_sampler")}
 
-  # Break (toolbox row 19; twin of the loader row in kernel/ts/test/harvest_tool.test.ts): a
+  # Break (toolbox row 19): a
   # harvest tool gate compiles without tags@1.
   test "a harvest tool needs tags@1", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])

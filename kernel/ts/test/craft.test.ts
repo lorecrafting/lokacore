@@ -184,9 +184,7 @@ test('reopening between the two carves gives the same ids', () => {
   assert.equal(b.world.state.containers[ordered(w, 'spoon_01', 'spoon_02')[0]!], b.world.body);
 });
 
-// Breaks: the loader admits a template or non-container holder, an unresolved item, holder or
-// reason, a duplicate item, or a craft on a spell (twin of test/loka/content_craft_test.exs;
-// the floor is loader_floors.json's "a craft" case).
+// Loads the compiled craft cartridge after an edit, re-hashed.
 const reload = (edit: (c: any) => void) => {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   edit(c);

@@ -16,7 +16,7 @@ defmodule Loka.Content.Population do
   @gates ~w(birth_when wander_when)
   @actorless ~w(all any not population_count time_window sky barrier_state)
 
-  @doc "Each plan gate's located policy root (row W12; twin of the TS loader's nodes/1)."
+  @doc "Each plan gate's located policy root (row W12)."
   def conditions(defs),
     do:
       for(

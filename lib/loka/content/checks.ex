@@ -416,7 +416,7 @@ defmodule Loka.Content.Checks do
 
   defp actions(defs), do: for({_, {rel, [], a}} <- defs["action"], do: {rel, a})
 
-  @doc "Every located policy root from the source definitions (twin of the TS loader's nodes/1)."
+  @doc "Every located policy root from the source definitions."
   def trees(defs) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),

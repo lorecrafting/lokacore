@@ -2,7 +2,7 @@ defmodule Loka.ContentEscrowTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/escrow_sampler")}
 
-  # Breaks (toolbox row 20a; twin of the loader rows in kernel/ts/test/escrow.test.ts): an escrow
+  # Breaks (toolbox row 20a): an escrow
   # compiles with an input that is not an item, a custody that is not a room, a
   # quantity above the inputs, a shop offer or a repeated item as an input, or without its texts.
   test "escrow keeps item inputs, a room custody and its texts", %{dir: dir} do
@@ -43,7 +43,7 @@ defmodule Loka.ContentEscrowTest do
     end
   end
 
-  # Breaks (toolbox row 20b; twin of the loader rows in kernel/ts/test/escrow.test.ts): a claim
+  # Breaks (toolbox row 20b): a claim
   # names a service with no ready_after, the output lies
   # outside custody or is no item, or a claim or cancel lacks its refusal texts.
   test "claim and cancel keep a timed commission and their texts", %{dir: dir} do

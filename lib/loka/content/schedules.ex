@@ -4,8 +4,7 @@ defmodule Loka.Content.Schedules do
   `{when?, room, goal?, walks?}` and a short room key last, or (toolbox row W26) one walking case
   `{room, walks: true}`. The checks: that order and each case
   room; the artifact splits each such hour into the fallback room
-  and `schedule_cases`. Goal texts and conditions are Loka.Content.Entities'. Twin of
-  kernel/ts/src/content/cartridge_schedules.ts.
+  and `schedule_cases`. Goal texts and conditions are Loka.Content.Entities'.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]

@@ -3,7 +3,7 @@ defmodule Loka.Content.Delayed do
   Toolbox row FD1: a reaction's `after`, the fact.stamp step and the time_since leaf: a delayed rule carries no step that reads its event (barrier.set, item.move, npc.move,
   population.suppress, a co_present or tagged step, a quest step: RS-4's subject) and no `when`
   leaf with `subject: "subject"`;
-  a stamped or timed fact is an int fact with no maximum and a minimum absent or at most 0. Twin of kernel/ts/src/content/cartridge_delayed.ts.
+  a stamped or timed fact is an int fact with no maximum and a minimum absent or at most 0.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [resolve: 4]
@@ -70,7 +70,7 @@ defmodule Loka.Content.Delayed do
     end
   end
 
-  # Each node of a policy tree, with its path, walked like the TS loader's walk.
+  # Each node of a policy tree, with its path.
   defp nodes(rel, path, %{"op" => "not", "item" => x} = n),
     do: [{rel, path, n} | nodes(rel, path ++ ["item"], x)]
 

@@ -5,8 +5,8 @@ defmodule Loka.ContentClimbTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/climb_sampler")}
 
   # Breaks: a climb face naming an unknown item or fell text compiles, or its
-  # short item reference is not expanded (toolbox row 30; twin of the loader rows in
-  # kernel/ts/test/climb.test.ts; hp is a default pool in a source, so no pool row).
+  # short item reference is not expanded (toolbox row 30; hp is a default pool in a source, so no
+  # pool row).
   test "a climb face keeps its item and text references", %{dir: dir} do
     assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
 
@@ -31,8 +31,7 @@ defmodule Loka.ContentClimbTest do
     end
   end
 
-  # Breaks: a patrol leg over a climb face compiles, so the leader walks it (twin of the loader
-  # row in kernel/ts/test/climb.test.ts).
+  # Breaks: a patrol leg over a climb face compiles, so the leader walks it.
   test "a patrol route over a climb face is refused" do
     dir = Loka.PatrolSource.copy()
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}

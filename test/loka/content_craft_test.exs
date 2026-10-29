@@ -11,7 +11,7 @@ defmodule Loka.ContentCraftTest do
 
   defp part(part, key, v), do: &put_in(&1, ["craft", part, key], v)
 
-  # Break (Homestead hs-10; twin of the loader rows in kernel/ts/test/craft.test.ts): a craft
+  # Break (Homestead hs-10): a craft
   # compiles with a template or non-container holder, an unresolved item, holder or reason, a
   # duplicate item, or on a spell.
   test "a craft needs resolved, placed holders, distinct items, a catalog reason, a station",
@@ -58,7 +58,7 @@ defmodule Loka.ContentCraftTest do
     assert [{"SCHEMA_VIOLATION", "actions/carve_spoon.target.kind"}] = codes(dir, storylet)
   end
 
-  # Break (hs-11; twin of the loader test in kernel/ts/test/craft.test.ts): a skill prerequisite
+  # Break (hs-11): a skill prerequisite
   # naming its own skill, or an unknown skill, compiles.
   test "a skill prerequisite resolves and never names its own skill", %{dir: dir} do
     # The leaf sits under all and not, so a walker that skips nesting misses it.
@@ -156,7 +156,7 @@ defmodule Loka.ContentCraftTest do
     assert edit.([riddle]) == :ok
   end
 
-  # Break (Built rooms S6; twin of the loader test in kernel/ts/test/craft.test.ts): a build step
+  # Break (Built rooms S6): a build step
   # compiles off a detail target, on a room that is no site, twice in one sequence, without
   # world.construction or the refusal texts, or naming a blueprint or direction the site does not
   # list.

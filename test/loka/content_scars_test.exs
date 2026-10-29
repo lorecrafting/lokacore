@@ -7,7 +7,7 @@ defmodule Loka.ContentScarsTest do
     Enum.map(diags, &{&1["code"], &1["path"]})
   end
 
-  # Breaks (row W8; twin of the loader rows in kernel/ts/test/scars.test.ts): a permanent status
+  # Breaks (row W8): a permanent status
   # compiles with a per_tick, or one modifying an attribute the derived
   # hp maximum reads compiles (loka-kgd.50).
   test "a permanent status never ticks, never moves the hp maximum", %{dir: dir} do

@@ -6,7 +6,7 @@ defmodule Loka.ContentSpellEffectsTest do
 
   # Breaks (toolbox row 29b): the compiler accepts an effect step on a recipe that is not a spell,
   # a damage step naming no NPC of the cartridge, or light.ignite
-  # without light@1 (the TS loader refuses them too; spell_effects.test.ts).
+  # without light@1.
   test "effect steps sit on spells, resolve and declare their owner" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
@@ -43,8 +43,7 @@ defmodule Loka.ContentSpellEffectsTest do
   end
 
   # Breaks (loka-x6t.109): the compiler accepts a damage step without npc on an unaimed spell, an
-  # aimed scope outside room_occupants and inventory, or aimed on a use target (the TS loader
-  # refuses them too; aimed_spells.test.ts).
+  # aimed scope outside room_occupants and inventory, or aimed on a use target.
   test "aimed rows refused" do
     dir = Loka.ContentSource.copy(@dir)
     floor = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.119")}

@@ -1,7 +1,7 @@
 defmodule Loka.Content.Cues do
   @moduledoc """
   Toolbox row G6: every declared sense cue (a room's, detail's, item's and its fuel source's,
-  NPC's, status's or recipe outcome's) is owned by sense_cue@1 and names a text key. Twin of kernel/ts/src/content/cartridge_senses.ts.
+  NPC's, status's or recipe outcome's) is owned by sense_cue@1 and names a text key.
   """
   import Loka.Content.Source, only: [diag: 3, at: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]

@@ -218,7 +218,7 @@ test('a claimed stew keeps until it is next acquired, then films and lands in th
   assert.equal(w.state.containers[stew], room(w, 'midden'));
 });
 
-// Breaks: an empty edible `applies` list (minItems) loads. The 1.101 floor row is in loader_floors.json.
+// Breaks: an empty edible `applies` list (minItems) loads.
 test('the loader refuses an empty applies list', () => {
   const r = reload(base, (c) => (c.items[`${S}:item/stew_plain_01`].edible.applies = []));
   assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [

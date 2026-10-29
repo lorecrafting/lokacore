@@ -7,7 +7,7 @@ defmodule Loka.ContentStatusReadersTest do
     Enum.map(ds, &{&1["code"], &1["path"]})
   end
 
-  # Breaks (status readers 4 and 5; twin of the loader row in kernel/ts/test/status_readers.test.ts):
+  # Breaks (status readers 4 and 5):
   # a blocks or allows entry naming no command (or the authority-internal elapsed) compiles.
   test "reader fields name player commands", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -21,7 +21,7 @@ defmodule Loka.ContentStatusReadersTest do
     end
   end
 
-  # Breaks (status readers 6 and 8; twin of the loader row in kernel/ts/test/status_readers.test.ts):
+  # Breaks (status readers 6 and 8):
   # a perception or a concealment (each alone) without per_tick is refused, or an empty perception compiles. `soaked`: no entry reaction applies it (row 16).
   test "perception and concealment stand in for per_tick", %{dir: dir} do
     api = &{"cartridge.json", fn c -> put_in(c, ["requires", "kernel_api", "at_least"], &1) end}
@@ -39,7 +39,7 @@ defmodule Loka.ContentStatusReadersTest do
            ])
   end
 
-  # Breaks (status reader 9; twin of the loader row in kernel/ts/test/status_room.test.ts): a step
+  # Breaks (status reader 9): a step
   # naming a room compiles beside an npc, an item or co_present, or naming no room of
   # the cartridge.
   test "a room step stands alone and names a room", %{dir: dir} do

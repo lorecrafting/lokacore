@@ -1,7 +1,6 @@
 // Settle S3-1 (N1) on the compiled settle sampler (mechanics.md "Settle S3-1: narrate"): the
 // `arrival_line` rule says `settle.arrival_line` when the character enters `road` (west of the
-// entry `square`). The calendar starts at 600. The 1.103 floor is loader_floors.json's
-// "a narrate step" case. Twin of test/loka/content_settle_test.exs.
+// entry `square`). The calendar starts at 600. Twin of test/loka/content_settle_test.exs.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';

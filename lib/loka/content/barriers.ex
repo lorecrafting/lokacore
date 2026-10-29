@@ -1,7 +1,7 @@
 defmodule Loka.Content.Barriers do
   @moduledoc """
   Barriers in a v2 source (room.schema.json BarrierDefinition, Connection.barrier; 21 §5
-  Barrier; 05 §17, §25), twin of `kernel/ts/src/content/cartridge_barriers.ts`: each barrier's owning
+  Barrier; 05 §17, §25): each barrier's owning
   capability is required and its key_item names an item; each exit's barrier names a barrier,
   and an exit with a barrier and its reciprocal face (the destination's exit in the opposite
   direction, when that leads back) name the same one (BARRIER_MISMATCH); an item's barrier (a
@@ -63,8 +63,7 @@ defmodule Loka.Content.Barriers do
       else: [diag("BARRIER_MISMATCH", at(rel, path ++ ["knock"])) | refs]
   end
 
-  # Toolbox row 11: a hidden face names its fact and has no barrier (so no door verb finds it);
-  # twin of the hidden_until rows in cartridge_knowledge.ts.
+  # Toolbox row 11: a hidden face names its fact and has no barrier (so no door verb finds it).
   defp hidden(m, defs) do
     faces =
       for {_, {rel, [], r}} <- defs["room"],
@@ -79,8 +78,8 @@ defmodule Loka.Content.Barriers do
     if e["barrier"], do: [diag("BARRIER_MISMATCH", at(rel, path)) | refs], else: refs
   end
 
-  # Toolbox row 30: a climb face names its item; twin of the climb rows
-  # in cartridge_knowledge.ts (fell: RoomParts; hp is a default pool here, so no pool check).
+  # Toolbox row 30: a climb face names its item (fell: RoomParts; hp is a default pool here, so
+  # no pool check).
   defp climbs(m, defs) do
     faces =
       for {_, {rel, [], r}} <- defs["room"],

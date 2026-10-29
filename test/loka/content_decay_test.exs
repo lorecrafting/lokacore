@@ -1,7 +1,7 @@
 defmodule Loka.ContentDecayTest do
   use ExUnit.Case, async: true
 
-  # Breaks (toolbox row 41; twin of the loader test in kernel/ts/test/decay.test.ts): item.move's
+  # Breaks (toolbox row 41): item.move's
   # room, or a trigger's status or item filter, is never resolved.
   test "item.move keeps a resolved room and triggers resolve their filters" do
     dir = Loka.ContentSource.copy("cartridges/decay_sampler")

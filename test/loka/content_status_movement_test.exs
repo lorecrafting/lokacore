@@ -38,7 +38,7 @@ defmodule Loka.ContentStatusMovementTest do
       {"statuses/warded.json",
        &(&1 |> Map.delete("resistances") |> Map.put("movement", %{"cost_percent" => 50}))}
 
-  # Breaks (status reader 7; twin of the loader test in kernel/ts/test/status_movement.test.ts): the
+  # Breaks (status reader 7): the
   # compiler refuses a status movement, a room's air, chasm or water tag, an item's water tag or a
   # barrier's chasm tag (a movement status needs no per_tick), or drops movement from the artifact.
   test "movement and terrain tags compile; movement stands in for per_tick", %{dir: dir} do

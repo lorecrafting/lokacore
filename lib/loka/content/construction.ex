@@ -4,8 +4,7 @@ defmodule Loka.Content.Construction do
   names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints of this
   cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
   their capabilities, and its title and descriptions have catalog entries; a site or
-  world.construction needs construction@1. Twin of kernel/ts/src/content/cartridge_construction.ts
-  (the TS loader checks blueprint parts in cartridge_refs.ts). Variant and enter-lock conditions
+  world.construction needs construction@1. Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4, ref: 3]
@@ -35,7 +34,7 @@ defmodule Loka.Content.Construction do
 
   # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
   # blueprint and direction, at most one per sequence, with world.construction, the build refusal
-  # texts (twin of builds in cartridge_construction.ts). The listed blueprint
+  # texts. The listed blueprint
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
     for {_, {rel, [], r}} <- defs["recipe"] || %{},

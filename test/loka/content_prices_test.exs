@@ -2,7 +2,7 @@ defmodule Loka.ContentPricesTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/prices_sampler")}
 
-  # Breaks (toolbox row W11; twin of the loader rows in kernel/ts/test/prices.test.ts): a stock
+  # Breaks (toolbox row W11): a stock
   # table compiles with a price per count that does not match its set, a set not
   # led by the offer's item, a flat buy other than the first price, a repeated or unknown item, or a plain offer's item.
   test "a stock table keeps one price per item, the offer's item first", %{

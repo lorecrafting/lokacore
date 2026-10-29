@@ -3,8 +3,7 @@ defmodule Loka.Content.Theft do
   Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): world.theft
   names this cartridge's skill, attribute and an instance-scoped per_subject bool
   stolen fact, and every bank vault NPC then carries a get lock; without world.theft an NPC lock or
-  a stolen offer is refused (ruling 2026-10-15). Twin of
-  kernel/ts/src/content/cartridge_theft.ts.
+  a stolen offer is refused (ruling 2026-10-15).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
