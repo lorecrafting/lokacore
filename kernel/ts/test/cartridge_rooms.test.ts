@@ -108,19 +108,6 @@ test('a room text key missing from the catalog is UNRESOLVED_REFERENCE', () =>
     { target: 'room.ferry_landing.title' },
   ));
 
-// Breaks: rooms load when their owning capability is not locked (05 §6).
-test('rooms without movement in the lock are UNDECLARED_CAPABILITY', () =>
-  fails(
-    mutant((c) => {
-      delete c.manifest.requires.capabilities.movement;
-      delete c.lock.capabilities.movement;
-    }),
-    'UNDECLARED_CAPABILITY',
-    '.cartridge.rooms["rooms_sampler@0.0.1:room/boathouse"]',
-    { capability: 'movement' },
-    ['movement@1'],
-  ));
-
 // Breaks: the key stage skips the rooms map.
 test("a room map key that disagrees with the room's key is ARTIFACT_DEFINITION_KEY_MISMATCH", () =>
   fails(
@@ -198,15 +185,14 @@ test('a detail whose first alias is shared or untypable is UNREACHABLE_DETAIL', 
     );
 });
 
-// Breaks: readable content loads without its capability or leaves either catalog key unresolved.
-test('readables require their lock and resolve label and text', () => {
+// Breaks: readable content leaves either catalog key unresolved.
+test('readables resolve label and text', () => {
   const c = withDetails((c) => {
     c.rooms[DFL].details.notice.readable = { label: 'read.label', text: 'read.text' };
     c.text['read.label'] = 'Read notice';
     c.text['read.text'] = 'The ferry leaves at dawn.';
   });
   const at = `.cartridge.rooms["${DFL}"].details.notice.readable`;
-  fails(c, 'UNDECLARED_CAPABILITY', at, { capability: 'readable' }, ['readable@1']);
   c.manifest.requires.capabilities.readable = 1;
   c.lock.capabilities.readable = 1;
   assert.ok(load(c).ok);

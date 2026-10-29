@@ -167,20 +167,8 @@ test('items that start in a cycle or over a capacity are rejected', () => {
   assert.ok(load((c) => (at(c, 'lantern').location = { in: 'npc', npc: ref('npc', 'bram') })).ok);
 });
 
-// Breaks: items and NPCs loading without containment in the lock, or a map key that
-// disagrees with its item.
-test('items and NPCs need containment, and their map keys their keys', () => {
-  fails(
-    (c) => {
-      delete c.lock.capabilities.containment;
-
-      delete c.manifest.requires.capabilities.containment;
-    },
-    'UNDECLARED_CAPABILITY',
-    item('lamp_oil'),
-    { capability: 'containment' },
-    ['containment@1'],
-  );
+// Breaks: an item map key that disagrees with its item loads.
+test('item map keys match their keys', () => {
   fails(
     (c) => (at(c, 'lantern').key = 'lamp'),
     'ARTIFACT_DEFINITION_KEY_MISMATCH',

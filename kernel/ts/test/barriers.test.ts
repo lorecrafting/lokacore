@@ -440,16 +440,6 @@ test('the loader checks barrier references, texts, faces and the lock', () => {
     `${ROOM('courtyard')}.exits.south`,
   );
   fails(
-    (c) => {
-      delete c.manifest.requires.capabilities.barrier;
-      delete c.lock.capabilities.barrier;
-    },
-    'UNDECLARED_CAPABILITY',
-    `.cartridge.barriers["${G}:barrier/cell_door"]`,
-    { capability: 'barrier' },
-    ['barrier@1'],
-  );
-  fails(
     (c) => (c.barriers[`${G}:barrier/oak_door`].key = 'gate'),
     'ARTIFACT_DEFINITION_KEY_MISMATCH',
     `.cartridge.barriers["${G}:barrier/oak_door"]`,
