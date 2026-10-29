@@ -68,7 +68,7 @@ defmodule Loka.Core.InvariantsCreation do
         &(&1["op"] == "entity.create" and get_in(&1, ["identity", "origin", "kind"]) == "spawned")
       )
 
-    hounds = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "hunter"))
+    hounds = Enum.filter(spawned, &(get_in(&1, ~w(identity origin role)) in ~w(hunter prey)))
     pelts = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "loot"))
 
     Enum.all?(hounds, fn h ->
@@ -204,7 +204,7 @@ defmodule Loka.Core.InvariantsCreation do
   end
 
   defp paired?(%{"origin" => parent} = p, %{"origin" => child}) do
-    parent["kind"] == "spawned" and parent["role"] == "hunter" and
+    parent["kind"] == "spawned" and parent["role"] in ~w(hunter prey) and
       child["kind"] == "spawned" and child["role"] == "loot" and
       p["id"] == child["member_id"] and
       Map.take(parent, ~w(by slot generation occurrence_id member_id)) ==
@@ -232,7 +232,7 @@ defmodule Loka.Core.InvariantsCreation do
       end)
 
     create != nil and create["writer_group"] == op["writer_group"] and
-      origin["kind"] == "spawned" and origin["role"] == "hunter" and
+      origin["kind"] == "spawned" and origin["role"] in ~w(hunter prey) and
       origin["member_id"] == op["entity_id"] and spec != nil and
       op["resource"] == resource and op["value"] == spec["hp"]["start"] and
       op["at"] >= s["clock"] and op["at"] <= horizon and
@@ -285,7 +285,7 @@ defmodule Loka.Core.InvariantsCreation do
     spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
 
     spec != nil and origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
-      if(origin["role"] == "hunter",
+      if(origin["role"] in ~w(hunter prey),
         do: origin["member_id"] == i["id"],
         else: origin["member_id"] != i["id"]
       )

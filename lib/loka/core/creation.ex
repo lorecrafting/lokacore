@@ -52,7 +52,7 @@ defmodule Loka.Core.Creation do
 
     spec != nil and origin["slot"] <= spec["cap"] and
       identity["definition"] == spec[origin["role"]] and
-      if(origin["role"] == "hunter",
+      if(origin["role"] in ~w(hunter prey),
         do: origin["member_id"] == identity["id"],
         else: origin["member_id"] != identity["id"]
       )
@@ -87,7 +87,7 @@ defmodule Loka.Core.Creation do
 
     held =
       child_origin["kind"] == "spawned" and child_origin["role"] == "loot" and
-        parent_origin["kind"] == "spawned" and parent_origin["role"] == "hunter" and
+        parent_origin["kind"] == "spawned" and parent_origin["role"] in ~w(hunter prey) and
         op["destination_id"] == parent_origin["member_id"] and
         Map.take(child_origin, ~w(by slot generation occurrence_id member_id)) ==
           Map.take(parent_origin, ~w(by slot generation occurrence_id member_id))
@@ -107,7 +107,7 @@ defmodule Loka.Core.Creation do
         &(&1["op"] == "entity.create" and get_in(&1, ["identity", "origin", "kind"]) == "spawned")
       )
 
-    hounds = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) == "hunter"))
+    hounds = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) in ~w(hunter prey)))
     pelts = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) == "loot"))
 
     Enum.all?(hounds, fn h ->
