@@ -6076,30 +6076,6 @@
       },
       "type": "object"
     },
-    "partial.source.PopulationBundle": {
-      "additionalProperties": false,
-      "description": "One NPC, directly held item and public NPC corpse template for a bounded population.",
-      "properties": {
-        "corpse": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "extends": { "$ref": "#/$defs/Key" },
-        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "loot_role": {
-          "enum": [
-            "pelt",
-            "hide"
-          ]
-        },
-        "member_role": {
-          "enum": [
-            "hound",
-            "deer"
-          ]
-        },
-        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "with": { "type": "object" }
-      },
-      "type": "object"
-    },
     "partial.source.PopulationPlan": {
       "additionalProperties": false,
       "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
@@ -6114,7 +6090,6 @@
           "$ref": "#/$defs/partial.VersionedPolicy",
           "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
-        "bundle": { "$ref": "#/$defs/partial.DefinitionRef" },
         "cap": {
           "maximum": 64,
           "minimum": 1,
@@ -6126,6 +6101,7 @@
           "minimum": 1,
           "type": "integer"
         },
+        "corpse": { "$ref": "#/$defs/partial.DefinitionRef" },
         "day_target": {
           "maximum": 64,
           "minimum": 0,
@@ -6142,6 +6118,14 @@
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
+        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "member_role": {
+          "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
+          "enum": [
+            "hunter",
+            "prey"
+          ]
+        },
         "night_end": {
           "minimum": 0,
           "type": "integer"
@@ -6155,6 +6139,7 @@
           "minimum": 0,
           "type": "integer"
         },
+        "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
         "pack": {
           "additionalProperties": false,
           "properties": {
@@ -6335,7 +6320,6 @@
               "minItems": 2,
               "type": "array"
             },
-            "hound_population": { "$ref": "#/$defs/partial.DefinitionRef" },
             "narration": {
               "additionalProperties": false,
               "properties": {
@@ -6347,6 +6331,7 @@
               },
               "type": "object"
             },
+            "population": { "$ref": "#/$defs/partial.DefinitionRef" },
             "route": {
               "items": {
                 "additionalProperties": false,
@@ -8450,32 +8435,6 @@
       ],
       "type": "object"
     },
-    "source.PopulationBundle": {
-      "additionalProperties": false,
-      "description": "One NPC, directly held item and public NPC corpse template for a bounded population.",
-      "properties": {
-        "corpse": { "$ref": "#/$defs/DefinitionRef" },
-        "item": { "$ref": "#/$defs/DefinitionRef" },
-        "loot_role": {
-          "enum": [
-            "pelt",
-            "hide"
-          ]
-        },
-        "member_role": {
-          "enum": [
-            "hound",
-            "deer"
-          ]
-        },
-        "npc": { "$ref": "#/$defs/DefinitionRef" }
-      },
-      "required": [
-        "npc",
-        "corpse"
-      ],
-      "type": "object"
-    },
     "source.PopulationPlan": {
       "additionalProperties": false,
       "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
@@ -8490,7 +8449,6 @@
           "$ref": "#/$defs/VersionedPolicy",
           "description": "Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler)."
         },
-        "bundle": { "$ref": "#/$defs/DefinitionRef" },
         "cap": {
           "maximum": 64,
           "minimum": 1,
@@ -8502,6 +8460,7 @@
           "minimum": 1,
           "type": "integer"
         },
+        "corpse": { "$ref": "#/$defs/DefinitionRef" },
         "day_target": {
           "maximum": 64,
           "minimum": 0,
@@ -8517,6 +8476,14 @@
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
+        "item": { "$ref": "#/$defs/DefinitionRef" },
+        "member_role": {
+          "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
+          "enum": [
+            "hunter",
+            "prey"
+          ]
+        },
         "night_end": {
           "minimum": 0,
           "type": "integer"
@@ -8530,6 +8497,7 @@
           "minimum": 0,
           "type": "integer"
         },
+        "npc": { "$ref": "#/$defs/DefinitionRef" },
         "pack": {
           "additionalProperties": false,
           "properties": {
@@ -8663,7 +8631,8 @@
         }
       },
       "required": [
-        "bundle",
+        "npc",
+        "corpse",
         "home",
         "area",
         "cap",
@@ -8768,7 +8737,6 @@
               "minItems": 2,
               "type": "array"
             },
-            "hound_population": { "$ref": "#/$defs/DefinitionRef" },
             "narration": {
               "additionalProperties": false,
               "properties": {
@@ -8787,6 +8755,7 @@
               ],
               "type": "object"
             },
+            "population": { "$ref": "#/$defs/DefinitionRef" },
             "route": {
               "items": {
                 "additionalProperties": false,
@@ -8822,7 +8791,7 @@
             "survived_fact",
             "faction",
             "faction_delta",
-            "hound_population",
+            "population",
             "narration",
             "actions"
           ],
@@ -10428,11 +10397,6 @@
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
-        "population_bundles": {
-          "additionalProperties": { "$ref": "#/$defs/source.population_bundles" },
-          "propertyNames": { "$ref": "#/$defs/Key" },
-          "type": "object"
-        },
         "populations": {
           "additionalProperties": { "$ref": "#/$defs/source.populations" },
           "propertyNames": { "$ref": "#/$defs/Key" },
@@ -10817,30 +10781,6 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.VersionedPolicy" }
-      },
-      "if": {
-        "required": [
-          "abstract"
-        ],
-        "type": "object"
-      },
-      "then": {
-        "properties": {
-          "abstract": { "const": true }
-        },
-        "type": "object"
-      }
-    },
-    "source.population_bundles": {
-      "else": {
-        "else": { "$ref": "#/$defs/source.PopulationBundle" },
-        "if": {
-          "required": [
-            "extends"
-          ],
-          "type": "object"
-        },
-        "then": { "$ref": "#/$defs/partial.source.PopulationBundle" }
       },
       "if": {
         "required": [
