@@ -39,6 +39,9 @@ const load = (cartridge: unknown) => {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 };
 
+// C1 B1 deleted these cases' TS loader floors (plan D3); slice F2 deletes this test and its fixture.
+const unfloored = new Set([4, 5, 39, 80, 81, 82, 92]); // fixture case indexes
+
 // Breaks: a loader floor check dropped, moved to another floor or reporting another code or path
 // (each case compiled at its floor loads; the same artifact at below is refused).
 test('each fixture floor: the loader accepts the floor and refuses just below it', () => {
@@ -79,7 +82,8 @@ test('each fixture floor: the loader accepts the floor and refuses just below it
       const { cartridge } = JSON.parse(readFileSync(`${dir}.json`, 'utf8'));
       assert.equal(load(cartridge), 'loaded', `${c.source} at ${c.floor}`);
       cartridge.manifest.requires.kernel_api.at_least = c.below;
-      assert.deepEqual(load(cartridge), c.loader, `${c.source} at ${c.below}`);
+      if (!unfloored.has(n))
+        assert.deepEqual(load(cartridge), c.loader, `${c.source} at ${c.below}`);
       if (c.without) {
         const counter = JSON.parse(readFileSync(join(scratch, `${n}w.json`), 'utf8')).cartridge;
         assert.equal(load(counter), 'loaded', `${c.source} without its feature at ${c.below}`);

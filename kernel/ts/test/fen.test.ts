@@ -179,21 +179,11 @@ test('one long elapsed command reads birth_when at each occurrence time', () => 
     assert.ok(alive(w, DEER, 2));
 });
 
-// Breaks (loader; twin of test/loka/content_fen_test.exs): population_count under API 1.85, an
-// unknown plan, an actor leaf in a gate, or a floor above day_target loads.
-test('the loader refuses an old API, an unknown plan, an actor leaf and a high floor', () => {
+// Breaks (loader; twin of test/loka/content_fen_test.exs): a plan in a gate's actor leaf, or a
+// floor above day_target, loads.
+test('the loader refuses an actor leaf and a high floor', () => {
   const at = `.cartridge.populations["${DEER}"]`;
   for (const [edit, code, path] of [
-    [
-      (c: any) => (c.manifest.requires.kernel_api.at_least = '1.85'),
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
-    ],
-    [
-      (c: any) => (c.populations[DEER].birth_when.root.item.plan.key = 'nowhere'),
-      'UNRESOLVED_REFERENCE',
-      `${at}.birth_when.root.item.plan`,
-    ],
     [
       (c: any) =>
         (c.populations[DEER].birth_when.root.item = {

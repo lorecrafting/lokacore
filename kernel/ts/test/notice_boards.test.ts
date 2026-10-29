@@ -22,58 +22,8 @@ const inn = () => {
   ).world;
 };
 
-// Breaks: loader trusts cross-room/self/board/duplicate references or missing title catalog keys.
-test('loader rejects invalid board membership, title references and readable ownership', () => {
-  for (const [name, change, suffix, target] of [
-    [
-      'remote',
-      (d: any) => (d.rumor_board.notice_board.notices[0].detail = 'tracks'),
-      '.notices[0].detail',
-      'tracks',
-    ],
-    [
-      'self',
-      (d: any) => (d.rumor_board.notice_board.notices[0].detail = 'rumor_board'),
-      '.notices[0].detail',
-      'rumor_board',
-    ],
-    ['ordinary', (d: any) => delete d.lost_whistle.readable, '.notices[0].detail', 'lost_whistle'],
-    [
-      'duplicate',
-      (d: any) => (d.rumor_board.notice_board.notices[1].detail = 'lost_whistle'),
-      '.notices[1].detail',
-      'lost_whistle',
-    ],
-    [
-      'title',
-      (d: any) => (d.rumor_board.notice_board.title = 'missing.title'),
-      '.title',
-      'missing.title',
-    ],
-    [
-      'child title',
-      (d: any) => (d.rumor_board.notice_board.notices[1].title = 'missing.title'),
-      '.notices[1].title',
-      'missing.title',
-    ],
-    [
-      'board readable',
-      (d: any) =>
-        (d.rumor_board.readable = { label: 'actions.read_tracks', text: 'readable.tracks' }),
-      '',
-      undefined,
-    ],
-  ] as const) {
-    const result = load((c) => change(c.rooms[green].details));
-    assert.ok(!result.ok, name);
-    assert.equal(result.diagnostic.code, 'UNRESOLVED_REFERENCE', name);
-    assert.equal(
-      result.diagnostic.path,
-      `.cartridge.rooms["${green}"].details.rumor_board.notice_board${suffix}`,
-      name,
-    );
-    assert.deepEqual(result.diagnostic.data, target === undefined ? {} : { target }, name);
-  }
+// Breaks: a board's readable notices load without the readable capability locked.
+test('loader refuses readable notices without the readable capability', () => {
   const result = load((c) => {
     delete c.lock.capabilities.readable;
     delete c.manifest.requires.capabilities.readable;
