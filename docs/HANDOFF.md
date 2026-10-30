@@ -5,54 +5,43 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #495; written 2026-10-29 by Claude Code (Opus 5.5), PM
-session cff5016d (resumed after a terminal crash killed session 97831846's agents). Owner (2026-10-28, quoted):
-"you can use fable when you think it would help, we have a lot of weekly limit ... this will be my last week
-before a break so yeah make it right!" Owner is away from Storybook until all work is done; the picks Monitor
-is off. Owner delegated every open decision (quoted): "whatever your best recommendation on all is, or whatever
-is open, you decide with your best recommendation"; rulings are in the notes of loka-ivjq.20, .3, .4, .29.
-Owner asked to be told when the "How Loka works" page is up.
+AS OF main after #501 (157bcaf48); written 2026-10-30 by Claude Code (Opus 5.5), PM session cff5016d.
+Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of weekly limit ...
+this will be my last week before a break so yeah make it right!" Owner delegated every open decision (quoted):
+"whatever your best recommendation on all is, or whatever is open, you decide with your best recommendation";
+rulings are in the notes of loka-ivjq.20, .3, .4, .29.
 
 ## Now
 
-Merged 2026-10-29: #493 (batch C2: policy wrapper gone, policy optional, policies/population_bundles/story_points
-kinds gone, one `name` field, structures; transport@1 kept; docs/reviews/2026-10-29-c2-final-review.md) and #495
-(batch C3: one Step and one Check for reactions, scripted actions, dialogue choices and service benefits; recipe
-is now scripted action; reaction `event.emit` (refused in delayed rules); docs/reviews/2026-10-29-c3-final-review.md).
-Rulings for both: loka-ivjq.3 and .4 notes. Nothing is in flight.
+The overnight plan (owner-approved 2026-10-29, quoted: "okay lets do all those") is done. POLISH IS READY:
+`bin/polish_session.sh update` brought main (#501) into the session worktree and restarted Storybook
+(http://localhost:6006); the picks Monitor is armed (re-arm on its 30-minute expiry). Nothing is in flight.
 
-- Done 2026-10-29: "How Loka works" explainer (Evennia-oriented, with architecture and Realm sections):
-  https://claude.ai/artifact/HYVKe5JiSfmBQB25cx5Zgb. Merged #496 (docs/rnd Realm live-ops proposal, loka-cw9y kept open as the Realm live-ops epic).
-- OVERNIGHT PLAN, owner-approved 2026-10-29 (quoted: "okay lets do all those"), in order, done before polish:
-  (1) loka-tb31 P1: regen re-pins transcript and value-fixture hashes; (2) C4 naming batch loka-ivjq.29:
-  PM picks under the standing delegation, low-risk renames only, nothing that changes a save, each pick
-  recorded for owner ratification; (3) loka-t37i docs drift (eight stale doc facts); (4) retro for C2/C3
-  (lessons: hash re-pin cost, unenforced reviewer mutation timebox loka-tafk, early-start slices, merge-order
-  conflicts). Morning: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is
-  ready, then polish (Next 3).
-- Fix first after that: loka-tb31 (P1): regen does not re-pin transcript or value-fixture hashes; every
-  parallel C3 slice merge conflicted in 30-50 of them and cost 20-30 min of scripted re-pinning. Also the
-  unenforced reviewer mutation timebox (C3 final sweep ran ~90 of 45 min) and mutate_diff treating renamed
-  files as new.
+Merged overnight, each with a fresh review and green ci/book-e2e on the exact head:
+- #497 loka-t37i: stale doc facts in mechanics.md/protocol.md, cites made symbol links (leftovers loka-ba87, loka-q7i0).
+- #498 loka-tafk: `bin/mutate.sh` stops itself at `MUTATE_MINUTES` (default 30), exit 3 (follow-up loka-xppq).
+- #499 loka-tb31 (+gsgj): `sh bin/regen.sh` alone rebuilds every compiled hash fixture (value ones included), re-pins
+  every transcript pin and watches the capability registry; containers_cartridge_{items,locks,sampler} compile from
+  source (follow-up loka-273d: four stale python generators).
+- #500 loka-xtia: C2/C3 retro lessons in docs/lessons/pm.md.
+- #501 batch C4 loka-ivjq.29: variety@1 -> alternates@1; capability keys attribute/skill/topic/tag (singular);
+  map_positions.json -> layout.json; short_variants -> name_variants; records docs/reviews/2026-10-30-c4-{a,b,final}-review.md.
+
+- Owner to ratify on return (PM decided under delegation): C4 picks and the pin ruling (loka-ivjq.29 notes: OUT
+  #2b crow, #5 water, #9 one format, #11 citations; capability-lock change in a save's pin is not save shape;
+  SAVE_FORMAT unchanged); C2 D2/D5/D8 and transport@1 kept; C3 rulings in loka-ivjq.4 notes.
+- Fix next (P2 housekeeping): loka-3pr5 merge_resolve.py should take either side for transcripts, live saves and gen
+  files (pm_merge refused C4 A after B); loka-o6r3 mutate_diff follows renames; loka-xppq MUTATE_MINUTES guard.
 - Batch lessons, applied in every brief: each slice merges the latest integration branch before handback;
-  CI kernel/elixir jobs are the full red-test list; handback carries its own check table and its
-  /code-review result; load gate refuses spawns above 8; mutation work is timeboxed at 30 min per slice and
-  survivors in carried-over logic are filed, not fixed. A slice that only changes compiler source merges
-  cleanly; one that touches the corpus conflicts in hashes until loka-tb31 lands.
-- Follow-ups filed 2026-10-29: C2/C3 review test gaps (loka-3ywg, barrier opens_when, R/P survivors,
-  sequence.ts:99-101), items_sampler containment hash, cartridge_journal_hash.py stale keys, payment deletion
-  (D4), loka-zeyz behavior rows.
-- Owner to ratify on return (PM decided under delegation): C2 D2/D5/D8 and transport@1 kept; C3 rulings in
-  loka-ivjq.4 notes (delayed event.emit refused, slice X, V's missing_property at benefit.site).
+  handback carries its own check table and /code-review result; machine load under 8; mutation is tool-timeboxed.
 - Draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
 
-1. "How Loka works" page, then loka-tb31.
-2. Simplification epic loka-ivjq: C1-C3 done (F2-F8, F11, F12); C4 naming (loka-ivjq.29) next; F9/F10 after .17.
-3. Then polish: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is ready
-   (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide: [polish tour](design/polish-tour.md)).
-4. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
+1. Polish: owner at Storybook (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide:
+   [polish tour](design/polish-tour.md)).
+2. Simplification epic loka-ivjq: C1-C4 done; F9/F10 after .17.
+3. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
    loka-tjhk flee line on a second fight's page; loka-nw03 formal methods plan; audit leftovers loka-u9x8,
    mz8m, yjuk, kovp; loka-kgd.194.21 population.ex crash on rejected text.json; approved before chapter work:
    loka-kgd.173 sim invariants, .174 Book visibility check, .175 scale benchmark.
