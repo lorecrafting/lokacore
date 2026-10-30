@@ -118,3 +118,27 @@ export const ClosedConversation: StoryObj = {
   ...pageStory(NpcClosedView),
   name: 'Closed conversation',
 };
+
+// An NPC's mood is its name and description variants (owner 2026-10-30, W6): the afraid goblin.
+// Breaks: the page title or description ignores the view's variant keys, or the title is not capitalised.
+const moodView = {
+  ...NpcSilentView,
+  view: {
+    ...NpcSilentView.view,
+    entities: NpcSilentView.view.entities.map((e) => ({
+      ...e,
+      name: 'npc.goblin.short_afraid',
+      description: 'npc.goblin.description_afraid',
+    })),
+  },
+};
+export const Mood: StoryObj = {
+  ...pageStory(moodView),
+  name: 'Mood (afraid goblin)',
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('A cowering goblin')).toBeVisible();
+    await expect(
+      await canvas.findByText('The goblin shrinks against the wall, eyes on the way out.'),
+    ).toBeVisible();
+  },
+};

@@ -16,7 +16,6 @@ defmodule Loka.ContentVariantsTest do
           {"items/lantern.json", &Map.put(&1, "name_variants", @variant)},
           {"items/lantern.json", &Map.put(&1, "description_variants", @variant)},
           {"npcs/bram.json", &Map.put(&1, "name_variants", @variant)},
-          {"npcs/bram.json", &Map.put(&1, "room_line_variants", @variant)},
           {"npcs/bram.json", &Map.put(&1, "description_variants", @variant)}
         ],
         do: assert({:ok, _, _} = Loka.ContentSource.compile(dir, [change]))

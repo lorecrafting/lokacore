@@ -9,7 +9,6 @@ import { describe } from '../src/mechanics/description_variant/rule.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
-import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
@@ -353,11 +352,15 @@ function assertFlight(x: World) {
 }
 let den: World;
 let stair: World;
+const mood = (w: World, id: string) =>
+  gameView(w).entities.flatMap((e) => (e.id === id ? [e.name, e.words?.bare, e.description] : []));
+const CALM = ['npc.goblin.short', 'npc.den_goblin.bare', 'npc.goblin.description'];
+const AFRAID = ['npc.goblin.short_afraid', undefined, 'npc.goblin.description_afraid'];
 
-// Breaks: the den or its pack is missing, a said begone frightens (loudness dropped), the shout
-// misses the pack (the word),
-// lands on the chief (immune dropped) or the player, the afraid span or its room line differs,
-// or the afraid goblins stand and fight (fear dropped, or the flight is off fear).
+// Breaks: the den or its pack is missing, a said begone frightens (loudness dropped), the shout misses
+// the pack (the word), lands on the chief (immune dropped) or the player, the afraid span or its mood
+// differs (a mood variant without its `when`, so a calm goblin cowers; or its words kept, so the Book
+// draws "a goblin"), or the afraid goblins stand and fight (fear dropped, or the flight is off fear).
 test('traps 8: in the den the shout frightens both goblins, not the chief; they flee south', () => {
   stair = go(go(w, 'west').world, 'west').world;
   w = go(go(stair, 'north').world, 'north').world;
@@ -366,15 +369,16 @@ test('traps 8: in the den the shout frightens both goblins, not the chief; they 
   const [a, b] = goblinsIn(w, 'chief_den');
   assert.ok(a && b, 'two goblins in the den');
   assert.deepEqual(statuses(play(w, { type: 'say', word: 'begone' }).world, a!), []);
+  assert.deepEqual(mood(w, a!), CALM);
   const s = play(w, { type: 'shout', word: 'begone' });
   assert.deepEqual(s.lines, ['narration.afraid.applied', 'narration.afraid.applied']);
   w = s.world;
   const T = w.state.clock;
   assert.deepEqual([afraidEnds(w, a), afraidEnds(w, b)], [T + 600, T + 600]);
   assert.deepEqual([statuses(w, npc(w, 'chief')), statuses(w, w.body)], [[], []]);
-  assert.equal(describeEntity(w, w.character, a as never, 'room_line'), 'npc.goblin.room_afraid');
-  assert.equal(describeEntity(w, w.character, npc(w, 'chief'), 'room_line'), 'npc.chief.room');
-  validate('GameView', gameView(w));
+  assert.deepEqual(mood(w, a!), AFRAID);
+  assert.deepEqual(mood(w, npc(w, 'chief')).slice(2), ['npc.chief.description']);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   w = assertFlight(w);
 });
 
@@ -485,7 +489,7 @@ test("traps sandbox twins: the cellar pack fears the shout and its chief's fall,
     [statuses(s, a!), statuses(s, b!), statuses(s, chief)],
     [['afraid'], ['afraid'], []],
   );
-  assert.equal(describeEntity(s, s.character, a as never, 'room_line'), 'npc.goblin.room_afraid');
+  assert.deepEqual(mood(s, a!), AFRAID);
   const { r1 } = flight(s, a!);
   assert.deepEqual(goblinsIn(r1.world, 'sapper_stair'), [a]);
   const k = play(x, { type: 'attack', target_id: chief });

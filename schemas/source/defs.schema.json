@@ -6136,7 +6136,7 @@
     },
     "partial.source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -6381,7 +6381,6 @@
         },
         "room": { "$ref": "#/$defs/partial.DefinitionRef" },
         "room_line": { "$ref": "#/$defs/partial.TextKey" },
-        "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "services": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 8,
@@ -7985,7 +7984,7 @@
     },
     "source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -8253,7 +8252,6 @@
         },
         "room": { "$ref": "#/$defs/DefinitionRef" },
         "room_line": { "$ref": "#/$defs/TextKey" },
-        "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "services": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 8,

@@ -93,7 +93,7 @@ test('Maud is bruised and the sword notched after the 07:00 raid; the guard slee
   assert.deepEqual(shown(w, 'npc', 'guard'), ['npc.guard.short', 'npc.guard.description']);
   w = wait(w, 7200); // 07:00 Maud walks into the raided yard, 08:00 back at the counter
   assert.deepEqual(shown(w, 'npc', 'maud'), ['npc.maud.short', 'npc.maud.description_bruised']);
-  assert.match(room(content, w), /\nMaud, bruised, wipes the counter\.\n/);
+  assert.match(room(content, w), /\nMaud wipes the counter\.\n/); // an NPC's room line has no variants
   assert.equal(
     detail(content, w, id(w, 'npc', 'maud') as EntityId),
     'Maud, bruised, wipes the counter.\n',

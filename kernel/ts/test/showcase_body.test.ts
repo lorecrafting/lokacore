@@ -146,16 +146,16 @@ test('body 7: Wat arrives at 08:00, is chilled, leaves at 09:00, ticks at 10:00,
   assert.ok(!arrival.lines.includes('narration.chilled.applied'), JSON.stringify(arrival.lines));
   x = arrival.world;
   assert.equal(where(x, 'wat'), x.roomIds[ref('room', 'fell_top')]);
-  const line = (v: World) => describeEntity(v, v.character, id(v, 'npc', 'wat'), 'room_line');
-  assert.equal(line(x), 'npc.wat.room_chilled');
+  const line = (v: World) => describeEntity(v, v.character, id(v, 'npc', 'wat'), 'description');
+  assert.equal(line(x), 'npc.wat.description_chilled');
   assert.equal(shown(x, 'wat')?.description, 'npc.wat.description_chilled');
   x = wait(x, 9 * HOUR).world;
   assert.equal(where(x, 'wat'), x.roomIds[ref('room', 'shepherd_hut')]);
   x = wait(x, 10 * HOUR).world;
   assert.equal(hpOf(x, 'wat'), 9);
-  assert.equal(line(x), 'npc.wat.room_chilled');
+  assert.equal(line(x), 'npc.wat.description_chilled');
   x = wait(x, 10 * HOUR + 1800).world;
-  assert.equal(line(x), 'npc.wat.room');
+  assert.equal(line(x), 'npc.wat.description');
 });
 
 // Breaks: bread or water ends the wrong status, or bread feeds the hunger pool instead of mv.

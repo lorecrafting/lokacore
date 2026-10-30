@@ -29011,6 +29011,32 @@
     ]
   },
   {
+    "name": "npc_room_line_variants_retired",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "name": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "room_line_variants": []
+    },
+    "errors": [
+      {
+        "path": "/room_line_variants",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "name": "entity_view_asides_retired",
     "contract": "EntityView",
     "value": {

@@ -339,7 +339,8 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
   assert.deepEqual(labels(s), ['condition.wanted']);
   assert.equal(where(s, s.body), room(s, 'market_row')); // seen in his room: no arrest yet
   const guard = npc(s, 'guard');
-  assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room_wanted');
+  const wanted = describeEntity(s, s.character, guard, 'description');
+  assert.equal(wanted, 'npc.guard.description_wanted');
   const back = go(walk(s, 'south'), 'north');
   assert.deepEqual(back.lines, ['movement.moved', 'npc.guard.arrest', 'trial.charge']);
   // The arrest ends the move in the cell, not entered by a way back: "You arrive." (loka-glj8).
@@ -462,8 +463,8 @@ test('economy yard theft: lift the yard purse hidden and seen; the fence pays ou
   const watchman = npc(back, 'watchman');
   assert.equal(engaged(back, back.body)?.row.npc_id, watchman);
   assert.equal(
-    describeEntity(back, back.character, watchman, 'room_line'),
-    'npc.watchman.room_wanted',
+    describeEntity(back, back.character, watchman, 'description'),
+    'npc.watchman.description_wanted',
   );
   const round = wait(back, back.state.clock + 150).events;
   assert.equal(
@@ -474,11 +475,10 @@ test('economy yard theft: lift the yard purse hidden and seen; the fence pays ou
   assert.deepEqual(labels(y), ['condition.hidden']);
   const t = lift(y, 'yard_purse');
   assert.deepEqual([t.lines, fact(t.world, 'wanted')], [['theft.unseen'], undefined]);
-  const mark = (w: World, f: 'room_line' | 'description') =>
-    describeEntity(w, w.character, npc(w, 'mark'), f);
+  const mark = (w: World) => describeEntity(w, w.character, npc(w, 'mark'), 'description');
   assert.deepEqual(
-    [mark(y, 'room_line'), mark(t.world, 'room_line'), mark(t.world, 'description')],
-    ['npc.mark.room', 'npc.mark.room_robbed', 'npc.mark.description_robbed'],
+    [mark(y), mark(t.world)],
+    ['npc.mark.description', 'npc.mark.description_robbed'],
   ); // E4: the robbed mark reads empty-belted
   y = walk(t.world, 'up', 'west');
   y = play(y, trade(y, 'sell', 'yard_purse', 3, 'fence')).world;
