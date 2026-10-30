@@ -179,7 +179,7 @@ export const Plural: StoryObj = {
 
 // Breaks (owner 2026-10-30, W6 moods; PR #507): an NPC's mood name loses its own words (so two
 // afraid goblins split into two links) or merges with the calm goblin of its kind. The calm goblin
-// shares the run's article (Crowded's rule), so it reads "and goblin" (PM question on PR #507).
+// ends in the same noun, so its article is written again: "and a goblin" (owner 2026-10-30).
 const afraid = (i: number): ReturnType<typeof crowd>[number] => ({
   ...npc,
   id: `goblin-afraid-${i}`,
