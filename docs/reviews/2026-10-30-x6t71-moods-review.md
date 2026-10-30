@@ -49,3 +49,17 @@ Results: 1-5 and 7 hold; 6 fails (finding 1).
   - "combat.ts:32 x2 red-narrow (hand, showcase_traps)": confirmed.
 - `/code-review medium` is reported in the PR body.
 - CI at `488c569df` (`gh run list --commit`): graph-diff, ci and book-e2e completed success.
+
+## Re-check: fix round 1 at `c04f53cba847064cff62619674c2049ac7205746`
+
+Scope: commit `c04f53cba` only, plus the callers of `named` (`view/combat.ts:40`, `view/view.ts:226`). Verdict: **APPROVE WITH NOTES**.
+
+- **Finding 1, fixed.** `invalid.json` adds four `NameVariants` rows. I reran the schema sweep: removing `required`, `minItems` or `maxItems` now fails a fixture row. Removing `additionalProperties` still leaves the tests green, but that mutant is equivalent: `kernel/ts/src/foundation/validate.ts:95` already treats declared properties as closed, so the `room_line` row gets `unknown_property` either way. `TextVariants` behaves the same way. The `when`/`description` refs and `ItemDefinition.name_variants` -> `TextVariants` were outside finding 1 and stay as they were.
+- **Finding 2, fixed.** `gameview.schema.json:528,682,2149,2170` now describe the words of the holding variant; `contracts.gen.ts` is regenerated to match.
+- **Nit 3, fixed.** The PR body now says only the Elixir compiler checks the text keys (`entities.ex` `variant_texts`).
+- **Nit 4, fixed.** `view/combat.ts:28-33`: `named` now takes the name and the words from the same holding variant. This is the selection `describeEntity` makes for `short`, which has no `dark_description`; the other short-name callers (`line.ts:20`, `knowledge.ts:99`, `view.ts:285`) agree with it. Hand mutants, all red-narrow on `showcase_traps.test.ts`/`play_items.test.ts`:
+  - `v.words` -> `e.words`;
+  - `find` -> `findLast`;
+  - `{ target: id, steps }` -> `{ steps }`.
+  The two-variants-one-key case still has no test; that was a nit.
+- CI at `c04f53cba` (`gh run list --commit`): graph-diff, ci and book-e2e completed success.
