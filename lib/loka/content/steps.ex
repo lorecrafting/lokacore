@@ -54,7 +54,7 @@ defmodule Loka.Content.Steps do
   @doc """
   `steps` at `path` of `rel` in `context` (:reaction, :action, :choice or :service):
   SCHEMA_VIOLATION invalid_value at an op or field the context does not run, the owning event
-  an op needs (`ctx.events`), and each step's references (`ctx.m`, `ctx.defs`).
+  an op needs (`ctx.events`), and the references of the fields it runs (`ctx.m`, `ctx.defs`).
   """
   def check(rel, path, steps, context, ctx) do
     for {s, i} <- Enum.with_index(steps), d <- step(rel, path ++ [i], s, context, ctx), do: d

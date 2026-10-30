@@ -78,12 +78,12 @@ defmodule Loka.Content.Construction do
 
   defp on_site(nil, _, _, _, _), do: []
 
-  # An unresolved structure is Steps' UNRESOLVED_REFERENCE, not a second diagnostic here.
+  # Only a structure that resolves can be off the site's list (Steps reports an unresolved one).
   defp on_site(site, s, rel, path, {m, defs}) do
     for {f, ok} <- [
           {"structure",
            s["structure"] in site["structures"] or
-             resolve(s["structure"], "structure", m, defs) == :unresolved},
+             not match?({_, _, _}, resolve(s["structure"], "structure", m, defs))},
           {"direction", s["direction"] in site["directions"]}
         ],
         not ok,
