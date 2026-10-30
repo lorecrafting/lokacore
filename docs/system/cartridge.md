@@ -177,7 +177,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   refusal (barrier@1, containment@1);
 - under position@1 the position fact is the engine's: an authored fact named `position`
   (`facts.facts.position`) and a `fact.assign` of it in an action's outcome, a reaction's `steps` or
-  a dialogue choice are `RESERVED_FACT` (at the fact, `actions/nap.outcomes.success.sequence[0].fact`);
+  a dialogue choice are `RESERVED_FACT` (at the fact, `actions/nap.outcomes.success.steps[0].fact`);
   reading it is allowed;
 - scenes: each `on.story_point` resolves and its `on.outcome` names one of that point's
   keys; every narrate text is catalogued (`UNRESOLVED_REFERENCE`, data.target the full
@@ -231,9 +231,40 @@ Optional item `give_allowed: false` refuses Give; absence preserves ordinary Giv
 a reserved engine fact. Both validators enforce references, types and ownership; source short
 fact references expand for this new spelling. Current bundled content follows the [chapter pin](#current-bundled-chapter).
 there is no per-feature minimum-version detector for legacy quest-resolving receive, fact.adjust or Put under the
-[pre-production policy](../decisions/owner-decision-forward-development-2026-10-05.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
-now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
-single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
+[pre-production policy](../decisions/owner-decision-forward-development-2026-10-05.md). Generic manifest range/schema validation remains. An unknown dialogue choice step `op`
+reports `unknown_variant` (the `Step` `op` discriminator); an op the choice context does not run is
+SCHEMA_VIOLATION `invalid_value` at its `op` ([Steps and checks](#steps-and-checks)); valid legacy dialogue and hand_over semantics are unchanged.
+
+### Steps and checks
+
+One `Step` (`protocol/step.schema.json`, discriminated by `op`) serves four contexts: a reaction's
+`steps`, a scripted action outcome's `steps`, a dialogue choice's `steps` (a choice's terms, such as
+`accept`, `hand_over`, `payment` or `patrol`, are its own fields; its effects are `steps`), and a service's `benefit`, which is
+one Step. One `Check` (same file) serves scripted actions and dialogue choices; a dialogue choice runs only the
+`opposed` kind and needs `failure`, a scripted action refuses `failure` and `rating`, and a check key
+is unique across both (`lib/loka/content/check_kinds.ex`). The schema admits every op in every context; the
+compiler (`lib/loka/content/steps.ex` `@ops`) refuses an op a context does not run, or a field it
+does not run there, with SCHEMA_VIOLATION `invalid_value` at that `op` or field, and an op whose
+owning event's capability is not declared with UNDECLARED_CAPABILITY at its `op`. "all" means every
+field of the op; a list names the only fields run besides `op`.
+
+| `op` | Owning event | Reaction | Action outcome | Dialogue choice | Service benefit |
+| --- | --- | --- | --- | --- | --- |
+| `fact.assign` | `fact_changed` | all | `fact`, `value` | `fact`, `value` | |
+| `fact.adjust` | `fact_changed` | all | | `fact`, `amount` | |
+| `fact.stamp` | `fact_changed` | all | | | |
+| `event.emit` | `custom_event` | all | all | | |
+| `quest.activate` | `quest_activated` | all | | | |
+| `quest.resolve` | `quest_resolved` | all | | | |
+| `barrier.set` | `barrier_changed` | all | | | |
+| `npc.move` | `entity_entered_room` | all | | | |
+| `quest.fail`, `population.suppress`, `population.spawn`, `experience.grant`, `narrate`, `item.move`, `replenish.run` | | all | | | |
+| `status.apply` | | all | `npc`, `status` | | |
+| `status.cure` | | all | all | | |
+| `damage`, `light.ignite`, `resource.adjust` | | | all | | |
+| `build` | | | `structure`, `direction` | | all |
+| `skill.acquire`, `topic.grant` | | | | all | |
+| `entitlement`, `meal`, `drink`, `repair`, `claim`, `cancel`, `deposit`, `withdraw`, `mend`, `raze` | | | | | all |
 
 ### Source shortcuts
 
@@ -922,7 +953,7 @@ each with its own `use_transport` action whose `policy` is
 
 ## Escrow declarations
 
-[Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `ServiceBenefit`): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. The compiler (`lib/loka/content/services.ex`) refuses an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
+[Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `benefit`, a [Step](#steps-and-checks)): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. The compiler (`lib/loka/content/services.ex`) refuses an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
 
 ## Claim and cancel declarations
 
@@ -931,7 +962,7 @@ each with its own `use_transport` action whose `policy` is
 - `ready_after`: an integer, 1 to 31536000.
 - `output`: an item ref.
 
-`ready_after` needs `output`; an `output` alone is a [barter](#barter-declarations). It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source).
+`ready_after` needs `output`; an `output` alone is a [barter](#barter-declarations). It also adds two service benefit ops, `{op: "claim", service}` and `{op: "cancel", service}` (`protocol/step.schema.json` `Step`), each naming a service ref (short keys in source).
 
 The compiler (`lib/loka/content/services.ex`) refuses:
 
@@ -959,7 +990,7 @@ Required cartridge text: an escrow with `output`: `service.no_output`.
 
 ## Property and bank declarations
 
-[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two `ServiceBenefit` kinds (`protocol/service.schema.json`), `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
+[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two service benefit ops (`protocol/step.schema.json` `Step`), `{op: "deposit", account, vault, amount}` and `{op: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
 
 The compiler (`lib/loka/content/services.ex`) refuses:
 
@@ -1125,7 +1156,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Dialogue check declarations
 
-[Dialogue skill checks](mechanics.md#dialogue-skill-checks-toolbox-row-14) read a dialogue choice's optional `check` (`DialogueChoice.check`, `Check` in `protocol/step.schema.json`): `{key, kind: "opposed", failure}` with exactly one of `skill` or `attribute` and exactly one of `rating` (an integer) or `npc` (source: short keys, expanded like an action check's). It needs check@1 (`UNDECLARED_CAPABILITY` at the check). The compiler (`lib/loka/content/check_kinds.ex`) refuses an unresolved skill, attribute or `failure` text (`UNRESOLVED_REFERENCE`), both or neither of `rating` and `npc` (`SCHEMA_VIOLATION` `invalid_value` at the check), an `npc` as an action check's (row G3), a key shared with an action's or another choice's check (`DUPLICATE_DEFINITION`), and a checked choice with any field but `label`, `narration`, `sequence`, `availability` and `check`, a `skill.acquire` step, or in a dialogue with a quest or riddle (`OUTCOME_MISMATCH` at the check).
+[Dialogue skill checks](mechanics.md#dialogue-skill-checks-toolbox-row-14) read a dialogue choice's optional `check` (`DialogueChoice.check`, `Check` in `protocol/step.schema.json`): `{key, kind: "opposed", failure}` with exactly one of `skill` or `attribute` and exactly one of `rating` (an integer) or `npc` (source: short keys, expanded like an action check's). It needs check@1 (`UNDECLARED_CAPABILITY` at the check). The compiler (`lib/loka/content/check_kinds.ex`) refuses an unresolved skill, attribute or `failure` text (`UNRESOLVED_REFERENCE`), both or neither of `rating` and `npc` (`SCHEMA_VIOLATION` `invalid_value` at the check), an `npc` as an action check's (row G3), a key shared with an action's or another choice's check (`DUPLICATE_DEFINITION`), and a checked choice with any field but `label`, `narration`, `steps`, `availability` and `check`, a `skill.acquire` step, or in a dialogue with a quest or riddle (`OUTCOME_MISMATCH` at the check).
 
 ## Entity and pair fact declarations
 
@@ -1157,7 +1188,7 @@ Author rule: an NPC with `disposition.hostile` refuses every dialogue while host
 
 ## Lore deduction declarations
 
-[Lore codex and deduction](mechanics.md#lore-codex-and-deduction-toolbox-row-46) adds no field: a deduction is an ordinary action with outcomes whose `policy` is `{op: "all", items}` with at least two `fact_compare` items `equals: true` on declared topics' facts (plus, for once only, a `not` of the granted topic's fact) and whose success `sequence` has a `fact.assign` of another declared topic's fact to `true`. Its target should be a plain detail: an action on a readable or perception detail is listed among that detail's actions, not the place's, so the Journal cannot offer its card. GameView `deductions` (the sampler requires it); no loader check is added, since no declaration changes. A badge is a declared topic whose fact `entity_entered_room` reactions assign under `visited_count` (knowledge@1, variety@1).
+[Lore codex and deduction](mechanics.md#lore-codex-and-deduction-toolbox-row-46) adds no field: a deduction is an ordinary action with outcomes whose `policy` is `{op: "all", items}` with at least two `fact_compare` items `equals: true` on declared topics' facts (plus, for once only, a `not` of the granted topic's fact) and whose success `steps` have a `fact.assign` of another declared topic's fact to `true`. Its target should be a plain detail: an action on a readable or perception detail is listed among that detail's actions, not the place's, so the Journal cannot offer its card. GameView `deductions` (the sampler requires it); no loader check is added, since no declaration changes. A badge is a declared topic whose fact `entity_entered_room` reactions assign under `visited_count` (knowledge@1, variety@1).
 
 
 ## Away recap declarations
@@ -1194,13 +1225,13 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Durability declarations
 
-[Durability, crafting quality and repair](mechanics.md#durability-crafting-quality-and-repair-toolbox-row-21) adds two fields. An item's `weapon` may declare `durability {fact, wear}` (`protocol/entity.schema.json` `WeaponProfile`): `fact` is a fact DefinitionRef (a short key in source) naming an int fact with `per_subject: true`, scopes exactly `["instance"]` and a safe integer `minimum` and `maximum`; `wear` is an integer 1 to 2^31-1. A service's `benefit` may be `{kind: "repair", fact, amount}` (`protocol/service.schema.json` `ServiceBenefit`): `fact` (a short key in source) must be some item's `weapon.durability.fact`, `amount` an integer 1 to 2^31-1, and the cartridge text must hold the service's refusals `service.unaffordable`, `service.nothing_to_repair` and `service.full_durability`. An unknown fact is UNRESOLVED_REFERENCE; a durability fact of another shape is SCHEMA_VIOLATION at `weapon.durability.fact`, a repair fact no weapon names at `benefit.fact`; a missing refusal text is UNRESOLVED_REFERENCE at the service. The services checks are in `lib/loka/content/services.ex`; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/durability_sampler` is the sampler.
+[Durability, crafting quality and repair](mechanics.md#durability-crafting-quality-and-repair-toolbox-row-21) adds two fields. An item's `weapon` may declare `durability {fact, wear}` (`protocol/entity.schema.json` `WeaponProfile`): `fact` is a fact DefinitionRef (a short key in source) naming an int fact with `per_subject: true`, scopes exactly `["instance"]` and a safe integer `minimum` and `maximum`; `wear` is an integer 1 to 2^31-1. A service's `benefit` may be `{op: "repair", fact, amount}` (`protocol/step.schema.json` `Step`): `fact` (a short key in source) must be some item's `weapon.durability.fact`, `amount` an integer 1 to 2^31-1, and the cartridge text must hold the service's refusals `service.unaffordable`, `service.nothing_to_repair` and `service.full_durability`. An unknown fact is UNRESOLVED_REFERENCE; a durability fact of another shape is SCHEMA_VIOLATION at `weapon.durability.fact`, a repair fact no weapon names at `benefit.fact`; a missing refusal text is UNRESOLVED_REFERENCE at the service. The services checks are in `lib/loka/content/services.ex`; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/durability_sampler` is the sampler.
 
 ## Spell declarations
 
 [Spell cast admission](mechanics.md#spell-cast-admission-toolbox-row-29a) adds one action target variant, one command and one policy leaf (`protocol/action.schema.json`, `protocol/command.schema.json`, `protocol/policy.schema.json`). An action's `target` may be `{kind: "spell", word}`: `word` is a `SpokenKeyword` (1 to 32 lowercase ASCII letters) that no other spell of the cartridge has (DUPLICATE_DEFINITION at each one's `target.word`); the player casts it by typing the word (`cast {word}`), never by the action key. Its requirements are the action's own fields: `policy` (a learned `fact_compare`, `level_compare {at_least}`, `stat_compare`, `has_item`), `costs` (mana and reagent pools) and `cooldown`. `level_compare` is owned by attributes@1. A spell target also names `learned` (required since [word bar S2](mechanics.md#spell-cast-admission-toolbox-row-29a)): a bool fact of this cartridge, player scope (UNRESOLVED_REFERENCE, FACT_TYPE_MISMATCH at `target.learned`; a per-subject fact is FACT_SCOPE_UNSUPPORTED). An opposed check on a spell must name an `npc` (SCHEMA_VIOLATION at the check). A room's action contribution that names a spell's key is UNRESOLVED_REFERENCE. The compiler checks these (`lib/loka/content/scripted_actions.ex`, `spells.ex` and `levelling.ex`). Sampler: `cartridges/spells_sampler`. A spell target may add `aimed {scopes}` (`scopes` one or more of `room_occupants`, `room_contents`, `inventory`; any other is SCHEMA_VIOLATION); the spell is then [cast at one target](mechanics.md#spell-cast-admission-toolbox-row-29a) (loka-x6t.109).
 
-[Spell effects](mechanics.md#spell-effects-toolbox-row-29b) add three outcome steps a spell's sequence may hold (`Step`, `protocol/step.schema.json`): `status.apply {status, npc?}`, `damage {npc?, kind, amount}` (`kind` a `DamageKind`, `amount` 1 or more) and `light.ignite {item?}` (`npc` and `item` required unless the spell is aimed, SCHEMA_VIOLATION at the field) (an item with a fuel source). Each names this cartridge's status, NPC or item (UNRESOLVED_REFERENCE at the field), sits only on a spell action (SCHEMA_VIOLATION at its `op`). Its owner must be declared (UNDECLARED_CAPABILITY at its `op`): status@1 for `status.apply` (by `status_applied`), death@1 for `damage` (by `entity_died`), light@1 for `light.ignite` (by the `ignite` command). The compiler checks these (`lib/loka/content/spells.ex` and `scripted_actions.ex`). Sampler: `cartridges/spell_effects_sampler`.
+[Spell effects](mechanics.md#spell-effects-toolbox-row-29b) add three outcome steps a spell's `steps` may hold (`Step`, `protocol/step.schema.json`): `status.apply {status, npc?}`, `damage {npc?, kind, amount}` (`kind` a `DamageKind`, `amount` 1 or more) and `light.ignite {item?}` (`npc` and `item` required unless the spell is aimed, SCHEMA_VIOLATION at the field) (an item with a fuel source). Each names this cartridge's status, NPC or item (UNRESOLVED_REFERENCE at the field), sits only on a spell action (SCHEMA_VIOLATION at its `op`). Its owner must be declared (UNDECLARED_CAPABILITY at its `op`): status@1 for `status.apply` (by `status_applied`), death@1 for `damage` (by `entity_died`), light@1 for `light.ignite` (by the `ignite` command). The compiler checks these (`lib/loka/content/spells.ex` and `scripted_actions.ex`). Sampler: `cartridges/spell_effects_sampler`.
 
 ## Encounter declarations
 
@@ -1250,7 +1281,7 @@ Retired ([storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3)): `Scripted
 
 Built rooms S1 (Beads `loka-kgd.109.1`; construction@1) adds three declarations; nothing builds yet. `structures/<key>.json` (`StructureDefinition`, `protocol/cartridge.schema.json`): `name` and `description` text keys, optional `variants` (`DescriptionVariant`) and `tags` as a room's, optional `locks.enter` (a policy) as a room's; a structure and its tags and variants need their owners (UNDECLARED_CAPABILITY), a variant description its catalog entry (UNRESOLVED_REFERENCE). A room's `site` (`protocol/room.schema.json`): `directions`, 1 to 6 compass directions, none an exit of that room (SITE_EXIT_CONFLICT at `rooms/<key>.site.directions[i]`), and `structures`, 1 to 16 structures of this cartridge (UNRESOLVED_REFERENCE at `site.structures[i]`). `world.construction {max_total}`: a positive integer, the cartridge's cap on built rooms. A site and `world.construction` need construction@1 (UNDECLARED_CAPABILITY at `rooms/<key>.site` or `cartridge.world.construction`). Compiler `lib/loka/content/construction.ex`. Sampler: `cartridges/build_sampler` (`test/loka/content_construction_test.exs`, `kernel/ts/test/construction.test.ts`).
 
-Built rooms S2 adds a service benefit `{kind: "build", structure, site, direction}` (`protocol/service.schema.json`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `structure` and `site` resolve to a structure and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the structure and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.structure` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`.
+Built rooms S2 adds a service benefit `{op: "build", structure, site, direction}` (`protocol/step.schema.json` `Step`; [mechanics](mechanics.md#built-rooms-toolbox-row-s2-foundation)): `structure` and `site` resolve to a structure and a room (UNRESOLVED_REFERENCE), and the site's `site` lists both the structure and the direction (SCHEMA_VIOLATION `invalid_value` at `services/<key>.benefit.structure` or `.benefit.direction`). Compiler `lib/loka/content/services.ex`.
 
 ## Narrate declarations
 

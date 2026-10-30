@@ -42,7 +42,7 @@ value['text'] = json.loads(Path('cartridges/journal_sampler/text.json').read_tex
 canonical = json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 Path('protocol/fixtures/cartridge_journal_hash.json').write_text(json.dumps({
-    'description': 'Independent Python known answer for journal_sampler: frozen ferry artifact renamed, recipe removed, hand-written Lantern stage/outcome journal plus event-earned oar quest and landing item. Catalog copied verbatim from source. c1-journal; mechanics.md quest@1; quest.schema.json QuestJournal. No kernel supplies expected values.',
+    'description': 'Independent Python known answer for journal_sampler: frozen ferry artifact renamed, scripted action removed, hand-written Lantern stage/outcome journal plus event-earned oar quest and landing item. Catalog copied verbatim from source. c1-journal; mechanics.md quest@1; quest.schema.json QuestJournal. No kernel supplies expected values.',
     'value': value, 'canonical': canonical, 'sha256': sha,
 }, indent=2, ensure_ascii=False) + '\n')
 print(sha)
