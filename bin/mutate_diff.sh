@@ -9,8 +9,8 @@
 # and the first failing test line of a killed mutant.
 # MUTATE_MINUTES (default 30, an integer) budgets the whole run: the test lookup and baseline runs count,
 # a row reached past the budget is not set up, and bin/mutate.sh gets the whole minutes left (rounded
-# down). Rows past the budget print as TIMEBOX (unrun,
-# so the tests are not done) and the exit status is 3, never a clean pass.
+# down). Rows past the budget print as TIMEBOX (unrun, so the tests are not done) and the exit status
+# is 3, never a clean pass. ponytail: checked between rows, so one slow xref or baseline run overruns.
 # Renamed files are followed (git diff -M): only the lines a rename changed are candidates.
 # Exits 1 when a row is SURVIVED, else as bin/mutate.sh. A SURVIVED or NO-TESTS row clears with the
 # same change as a hand-written bin/mutate.sh mutant shown red by a named test (developer.md step 2).
@@ -22,13 +22,16 @@
 # a tab, Elixir lines inside a """ block (docs), and a line carrying `mutate-skip: <reason>` (non-logic).
 # ponytail: one hop only; a module tested two hops away reads as NO-TESTS or SURVIVED (cleared by hand as above).
 [ $# -eq 1 ] || { echo "usage: $0 <base>" >&2; exit 2; }
-case ${MUTATE_MINUTES:-30} in *[!0-9]*) echo "usage: MUTATE_MINUTES must be an integer" >&2; exit 2 ;; esac
 here=$(cd "$(dirname "$0")" && pwd)
 cd "$(git rev-parse --show-toplevel)" || exit 2
 exec python3 -I - "$1" "$here/mutate.sh" <<'PY'
 import os, re, shutil, subprocess, sys, tempfile, time
 base, mutate = sys.argv[1], sys.argv[2]
-deadline = time.time() + 60 * int(os.environ.get('MUTATE_MINUTES') or 30)
+minutes = os.environ.get('MUTATE_MINUTES') or '30'
+if not re.fullmatch('[0-9]+', minutes):
+    sys.stderr.write('usage: MUTATE_MINUTES must be an integer\n')
+    sys.exit(2)
+deadline = time.time() + 60 * int(minutes)
 d = subprocess.run(['git', 'diff', '-U0', '--no-color', '-M', '--diff-filter=AMR', base + '...HEAD', '--',
                     '*.ts', '*.tsx', '*.mjs', '*.ex'], capture_output=True, text=True)
 if d.returncode:
@@ -122,11 +125,11 @@ def narrow(mod, log):
 tmp = tempfile.mkdtemp()
 lst, plan, base_red = open(os.path.join(tmp, 'list'), 'w'), [], {}
 for i, (f, n, old, new, label) in enumerate(rows):
-    if time.time() >= deadline:  # setup (xref, baseline) counts inside the budget
-        plan.append(('TIMEBOX', f, n, label, None))
-        continue
     if open(f).read().count(old) != 1:
         plan.append(('NOT-UNIQUE', f, n, label, None))
+        continue
+    if time.time() >= deadline:  # setup (xref, baseline) counts inside the budget
+        plan.append(('TIMEBOX', f, n, label, None))
         continue
     log = os.path.join(tmp, '%d.out' % i)
     cmd = narrow(f, log)
