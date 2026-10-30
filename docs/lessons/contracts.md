@@ -40,3 +40,6 @@ file covers: [the protocol map](../../protocol/README.md).
   Differential runs compare accepted inputs, so an Elixir fuel-guard bypass survived all
   159 core tests (B4-S1)
   ([B4 save review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-b4-light-save-second-review.md)).
+- A new cartridge definition map (keyed `id@version:kind/key`) joins `DEFINITION_MAPS` in
+  `kernel/ts/src/content/cartridge.ts`, or its key mismatches load; `cartridge.test.ts` reads the
+  schema and fails on a missing one (emotes and populations, loka-e69q).

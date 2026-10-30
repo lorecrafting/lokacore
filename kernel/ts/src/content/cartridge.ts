@@ -80,7 +80,7 @@ const schemaStage = (doc: Json) =>
 
 // Each map key's cartridge_id, cartridge_version and key against the manifest and definition.
 // The schema's propertyNames pattern already holds the key's shape and kind.
-const DEFINITION_MAPS = [
+export const DEFINITION_MAPS = [
   'facts',
   'actions',
   'rooms',
@@ -105,6 +105,7 @@ const DEFINITION_MAPS = [
   'statuses',
   'replenish',
   'structures',
+  'populations',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];

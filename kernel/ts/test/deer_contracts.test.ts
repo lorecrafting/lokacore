@@ -114,3 +114,18 @@ test('new deer wire guards refuse malformed occurrences', () => {
   for (const [contract, value, path, code] of cases)
     assert.deepEqual(validate(contract, value), [{ path, code }], `${contract}${path}`);
 });
+
+// Breaks: the loader's key stage skips `populations`, so a plan whose key differs from its map key loads.
+test('a population map key that disagrees with its plan is ARTIFACT_DEFINITION_KEY_MISMATCH', () => {
+  const at = `${shoo.prefix}:population/willow_deer`;
+  const r = shoo.load((c) => (c.populations[at].key = 'other'));
+  assert.ok(!r.ok);
+  assert.deepEqual(
+    [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data],
+    [
+      'ARTIFACT_DEFINITION_KEY_MISMATCH',
+      `.cartridge.populations["${at}"]`,
+      { field: 'key', declared: 'willow_deer', expected: 'other' },
+    ],
+  );
+});
