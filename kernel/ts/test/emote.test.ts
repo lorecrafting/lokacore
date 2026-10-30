@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
-import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
+import { bodyOf, refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/view/view.ts';
@@ -128,4 +128,65 @@ test("Nell's bow names no target that is elsewhere, unseen or herself", () => {
     assert.deepEqual(lines(subject, at), [
       { key: 'emote.performed', participants: { actor: nell }, bindings: { emote: 'bow' } },
     ]);
+});
+
+// Breaks: the line is told by a non-NPC, a dead NPC or an emoter the reader does not see, a narrate step
+// loses its text, or a step without `to` still names its subject.
+test('told: only a living NPC the reader sees emotes; no `to`, no target', () => {
+  const den = play(start(), { type: 'move', direction: 'east' }).w;
+  const g = goblins(den)[0]! as never;
+  const steps = Object.values(content.reactions!).flatMap((r) => r.steps);
+  const cower = steps.find((s) => s.op === 'emote' && !s.npc)!;
+  const lines = (at: World, subject: unknown, s = cower) =>
+    told(at, at.character, s as never, { subject: subject as never, steps: { n: 0 } });
+  const one = [
+    { key: 'emote.performed', participants: { actor: g }, bindings: { emote: 'cower' } },
+  ];
+  assert.deepEqual(lines(den, g), one);
+  assert.deepEqual(
+    told(den, den.character, { op: 'narrate', text: 'x.y' } as never, { steps: { n: 0 } }),
+    [{ key: 'x.y' }],
+  );
+  const [row] = Object.entries(den.state.resources!).filter(([k]) => k.includes(g));
+  const dead = {
+    ...den,
+    state: {
+      ...den.state,
+      resources: { ...den.state.resources, [row![0]]: { ...row![1], value: 0 } },
+    },
+  } as World;
+  const hidden = {
+    cartridge_id: 'emote_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'fact',
+    key: 'hidden',
+  };
+  const unseen = {
+    ...den,
+    cartridge: {
+      ...den.cartridge,
+      facts: { ...den.cartridge.facts, [refString(hidden as never)]: { scopes: ['instance'] } },
+    },
+    entities: { ...den.entities, [g]: { ...den.entities[g], perception: { discovered: hidden } } },
+  } as never as World;
+  for (const [at, subject] of [
+    [den, undefined],
+    [den, bodyOf(den, den.character)],
+    [dead, g],
+    [unseen, g],
+  ] as const)
+    assert.deepEqual(lines(at, subject), []);
+  // Nell's bow without `to`, its subject the captive she sees: no target.
+  const inn = play(play(start(), { type: 'move', direction: 'north' }).w, {
+    type: 'say',
+    word: 'fetch',
+  }).w;
+  const bow = steps.find((s) => s.op === 'emote' && s.npc)!;
+  const nell = inn.entityIds[Object.keys(inn.entityIds).find((r) => r.endsWith(':npc/nell'))!];
+  const captive =
+    inn.entityIds[Object.keys(inn.entityIds).find((r) => r.endsWith(':npc/captive'))!];
+  assert.equal(lines(inn, captive, bow)[0]?.bindings?.target, 'npc.captive.short');
+  assert.deepEqual(lines(inn, captive, { ...bow, to: undefined } as never), [
+    { key: 'emote.performed', participants: { actor: nell }, bindings: { emote: 'bow' } },
+  ]);
 });
