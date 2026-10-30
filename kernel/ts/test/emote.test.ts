@@ -208,14 +208,16 @@ test('the emote contracts refuse an emote without a key, a bad emote map key and
   assert.notDeepEqual(validate('GameView', { ...view, emotes: [] }), []);
 });
 
-// Breaks if an empty emote table projects `emotes: []`, a GameView the contract refuses.
-test('an empty emote table projects no emotes', () => {
-  const w = newWorld(
-    { ...content, emotes: {} },
-    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'),
-    [1, 2, 3, 4],
-  );
-  const view = gameView(w);
-  assert.equal('emotes' in view, false);
-  assert.deepEqual(validate('GameView', view), []);
+// Breaks if the projection's size guard is off by one: an empty table projects `emotes: []` (a GameView
+// the contract refuses), or a one-emote table projects none.
+test('an emote table projects every emote, and an empty one none', () => {
+  const view = (emotes: Cartridge['emotes']) =>
+    gameView(
+      newWorld({ ...content, emotes }, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]),
+    );
+  const empty = view({});
+  assert.equal('emotes' in empty, false);
+  assert.deepEqual(validate('GameView', empty), []);
+  const [one] = Object.entries(content.emotes!);
+  assert.deepEqual(view(Object.fromEntries([one])).emotes, [one[1]]);
 });
