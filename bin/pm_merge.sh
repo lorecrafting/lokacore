@@ -28,16 +28,18 @@ pre=$(git rev-parse HEAD)
 
 merge() { # <ref> <message>
   if git -c merge.conflictStyle=diff3 merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
-  c=$(git diff --name-only --diff-filter=U)
+  c=$(git diff --name-only --diff-filter=U); : >"${TMPDIR:-/tmp}/pm_resolve.out" # a stale run's leftovers never name this one's
   # The known additive conflicts (bin/merge_resolve.py: mechanics.md sections, toolbox rows, the kernel_api
-  # line, generated files, docs/reviews/README.md and whitespace-only review records) are resolved by the batch's own
-  # resolver (a batch can add globs); regen.sh rebuilds the generated families it took theirs on. Any other conflict stops the merge.
+  # line, generated files, content_hash-only transcripts, docs/reviews/README.md and whitespace-only review records) are resolved
+  # by the batch's own resolver (a batch can add globs); regen.sh, here only, rebuilds the generated families it took theirs on.
+  # Any other conflict stops the merge, naming only the files the resolver left.
   if [ -n "$c" ] && python3 bin/merge_resolve.py >"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 &&
     nice -n 10 sh bin/regen.sh >>"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 && git add -u &&
     git commit -q --no-edit >/dev/null 2>&1; then
     echo "MERGED $1 (resolved: $(echo $c))"; return 0
   fi
-  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git reset -q --hard; return 1 # also drops a failed regen's edits, which merge --abort keeps
+  l=$(sed -n 's/^unresolved: //p' "${TMPDIR:-/tmp}/pm_resolve.out")
+  echo "CONFLICT $1: ${l:-$(echo $c)} (\$TMPDIR/pm_resolve.out)"; git reset -q --hard; return 1 # also drops a failed regen's edits, which merge --abort keeps
 }
 merge "$sha" "Merge $slice: $subj" || exit 1
 merge "$rec" "Merge review record for $subj" || { git reset -q --hard "$pre"; exit 1; }
