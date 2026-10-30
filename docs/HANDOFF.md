@@ -14,7 +14,12 @@ rulings are in the notes of loka-ivjq.20, .3, .4, .29.
 ## Now
 
 Polish-foundation session done (owner 2026-10-30, quoted: "Ok the five items oyu suggested, please work on them").
-NOTHING IN FLIGHT. POLISH IS READY: `bin/polish_session.sh update` brought main (#509) into the session worktree;
+IN FLIGHT: retro housekeeping PR (loka-yqde scratch subfolders, loka-wam0 lint cancellations measured first,
+loka-e69q DEFINITION_MAPS check), branch `housekeeping/retro-2026-10-30`, worktree `retro-2026-10-30`; brief in
+the Beads notes of all three (owner approved 2026-10-30, quoted: "ok lets go with your recommendation"); a developer
+was spawned at 11:29 by PM session e74a58c9. Next: check `gh pr list --head housekeeping/retro-2026-10-30`; if no PR,
+inspect the worktree and spawn a fresh developer from the brief (keep its commits); then one Opus reviewer (PR
+comments, no record), merge with `bin/merge_pr.sh <PR> loka-yqde,loka-wam0,loka-e69q`. POLISH IS READY: `bin/polish_session.sh update` brought main (#509) into the session worktree;
 Storybook http://localhost:6006 shows the new stories: Book/LogLines "NPC emotes", Pages/Room "Goblins cower",
 "An afraid goblin and a calm one", "Two afraid goblins", Pages/NPC "Mood (afraid goblin)".
 
