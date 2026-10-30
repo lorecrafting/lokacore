@@ -219,7 +219,7 @@ function readerActions(
   return {
     accessible: true,
     accessibilityRole: 'button' as const,
-    accessibilityLabel: said ? `${said}, Map` : 'Map',
+    accessibilityLabel: said ? `${said}, ${LABEL.map}` : LABEL.map,
     accessibilityActions: [
       { name: 'activate' },
       ...exits.map((x) => ({

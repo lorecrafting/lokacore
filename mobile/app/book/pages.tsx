@@ -181,7 +181,7 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
     </Text>
   );
   return p.onPress ? (
-    <Tap label={`${p.title}, look`} onPress={p.onPress}>
+    <Tap label={LABEL.look(p.title)} onPress={p.onPress}>
       {heading}
     </Tap>
   ) : (

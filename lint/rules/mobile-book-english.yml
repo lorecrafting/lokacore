@@ -21,16 +21,20 @@ ignores:
   - mobile/app/book/Status.tsx
   - mobile/app/book/StatusIcon.tsx
 # Prose is JSX text with a letter, or a string or template piece with two words, a letter before an
-# end stop, a word at a piece's edge, or a capitalised word. Keys, test ids, styles and roles are one
-# lowercase or camel token, so they never match; a key name compared to a key (`k === 'Escape'`) is
-# not prose either.
+# end stop, a word at a piece's edge, a capitalised word, or a word after a comma. Keys, test ids,
+# styles and roles are one lowercase or camel token, so they never match; a key name compared with
+# === or !== to a key (`k === 'Escape'`) is not prose either.
 rule:
   any:
     - kind: jsx_text
       regex: '[A-Za-z]'
     - kind: string_fragment
-      regex: '[A-Za-z]+ [A-Za-z]+|[A-Za-z][.:!?…] *$|[A-Za-z] $|^ [A-Za-z]|^[A-Z][a-z]+\b'
+      regex: '[A-Za-z]+ [A-Za-z]+|[A-Za-z][.:!?…] *$|[A-Za-z] $|^ [A-Za-z]|^[A-Z][a-z]+\b|[,;] [A-Za-z]'
       not:
         inside:
           kind: string
-          inside: { kind: binary_expression, has: { regex: '(^|\.)(k|key)$' } }
+          inside:
+            kind: binary_expression
+            all:
+              - has: { field: operator, regex: '^[!=]==$' }
+              - has: { regex: '(^|\.)(k|key)$' }

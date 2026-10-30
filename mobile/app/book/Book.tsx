@@ -41,6 +41,7 @@ import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
+import { LABEL } from './labels.ts';
 import { PageTurn } from './PageTurn.tsx';
 import {
   firstPages,
@@ -258,7 +259,9 @@ function Bottom(p: BottomProps) {
       {nav && navigation(p)}
       {p.say.open && shield(() => p.say.setOpen(false))}
       {!view.ancestry_choices && !detail && statusLine(p)}
-      {detail && pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
+      {detail && pending && (
+        <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>
+      )}
       {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>

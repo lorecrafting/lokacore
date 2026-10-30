@@ -13,3 +13,5 @@ invalid: # one per alternative of the rule, in its order
   - "const f = `more ${n}`;"
   - "const f = `${n} more`;"
   - "const f = <Page title=\"Map\" />;"
+  - "const f = `${t}, look`;"
+  - "const f = r.key + ' points left';"

@@ -96,6 +96,7 @@ export const LABEL = {
   expeditionProgress: (cursor: number, required: number) => `${cursor} of ${required} entries.`,
   shelterUsed: 'Shelter used.',
   hint: (hint: string) => `Hint: ${hint}`,
+  look: (title: string) => `${title}, look`,
 } as const;
 
 // A collapsed group's count in the room sentence, "two crows", from two; digits from 10 (loka-6qi).
