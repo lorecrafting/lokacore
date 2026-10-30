@@ -213,7 +213,7 @@ export type Mint = () => string;
  * (status@1's); reactions activate quest-owned instances and land statuses; a choice resolves its
  * dialogue's quest (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give);
  * a spell (row 29b) lands a status (status_applied) and kills (entity_died), a craft (hs-10) hands its
- * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event;
+ * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event, as a reaction's or delayed job's event.emit does (C3 D7);
  * a meal (row hs-5) lands its `applies`. */
 export const COMPOSES = {
   expedition: ['quest'],

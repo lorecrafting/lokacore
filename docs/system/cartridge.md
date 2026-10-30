@@ -176,7 +176,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   be reached (its own key inside a locked chest, circular keys); every other case is a runtime
   refusal (barrier@1, containment@1);
 - under position@1 the position fact is the engine's: an authored fact named `position`
-  (`facts.facts.position`) and a `fact.assign` of it in an action's outcome, a reaction's `apply` or
+  (`facts.facts.position`) and a `fact.assign` of it in an action's outcome, a reaction's `steps` or
   a dialogue choice are `RESERVED_FACT` (at the fact, `actions/nap.outcomes.success.sequence[0].fact`);
   reading it is allowed;
 - scenes: each `on.story_point` resolves and its `on.outcome` names one of that point's
@@ -729,7 +729,7 @@ JSON document. Nothing is committed or checked in CI; only its unit test runs.
   `transcripts.test.ts` does. Each produced line is compared with the recorded line at its
   ordinal; the first difference stops the tool.
 - **Reactions.** No committed event names the rule that produced it, so the replay runs a copy of
-  the cartridge in which each reaction's `apply` ends with one more `narrate` step whose text is a
+  the cartridge in which each reaction's `steps` ends with one more `narrate` step whose text is a
   key unique to that rule ([reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts)).
   Narration is neither a trace field nor state, so the marked replay must still equal the
   recording, and the byte check above proves it on every transcript. A rule is exercised when its
@@ -1145,7 +1145,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Standing and disposition declarations
 
-[Standing and disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) add these fields. A reaction step `{op: "fact.adjust", fact, amount, npc?, item?}` (`protocol/reaction.schema.json`) names a bounded int fact (`minimum` and `maximum` declared; else FACT_TYPE_MISMATCH at `apply[<i>].fact`), its `npc` and `item` short keys as a reaction `fact.assign`'s. An NPC's `disposition {hostile?, friendly?, engage?, refuse?}` (`protocol/entity.schema.json`) holds two versioned policies, their references short keys, and two catalog keys (an unknown key is UNRESOLVED_REFERENCE at `npcs/<key>.disposition.refuse`); the compiler (`lib/loka/content/standing.ex`; expansion in `npc_fields.ex`, conditions and the engage text in `entities.ex`) refuses it on a spawn template, an `engage` present unless the NPC has both `hostile` and an `attack` (or absent when it has both), and a `refuse` without `hostile`: SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.disposition`. A shop's `buy_discount` takes exactly one of `skill` or `friendly: true`; `friendly` needs the same NPC's `disposition.friendly` (else RESOURCE_SPEC_INVALID, `lib/loka/content/commerce.ex`). Subject `target` in a disposition condition reads the NPC ([W2](#entity-and-pair-fact-declarations)).
+[Standing and disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) add these fields. A reaction step `{op: "fact.adjust", fact, amount, npc?, item?}` (`protocol/reaction.schema.json`) names a bounded int fact (`minimum` and `maximum` declared; else FACT_TYPE_MISMATCH at `steps[<i>].fact`), its `npc` and `item` short keys as a reaction `fact.assign`'s. An NPC's `disposition {hostile?, friendly?, engage?, refuse?}` (`protocol/entity.schema.json`) holds two versioned policies, their references short keys, and two catalog keys (an unknown key is UNRESOLVED_REFERENCE at `npcs/<key>.disposition.refuse`); the compiler (`lib/loka/content/standing.ex`; expansion in `npc_fields.ex`, conditions and the engage text in `entities.ex`) refuses it on a spawn template, an `engage` present unless the NPC has both `hostile` and an `attack` (or absent when it has both), and a `refuse` without `hostile`: SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.disposition`. A shop's `buy_discount` takes exactly one of `skill` or `friendly: true`; `friendly` needs the same NPC's `disposition.friendly` (else RESOURCE_SPEC_INVALID, `lib/loka/content/commerce.ex`). Subject `target` in a disposition condition reads the NPC ([W2](#entity-and-pair-fact-declarations)).
 
 [Arrest](mechanics.md#arrest-and-trial-toolbox-row-35) (row 35) adds `disposition.arrest {to, narration}` (`protocol/entity.schema.json`): `to` a room short key, `narration` a TextKey. It needs `hostile` and no `engage` (else SCHEMA_VIOLATION at the disposition), an unknown room or text is UNRESOLVED_REFERENCE at `disposition.arrest.to` or `.narration`.
 
@@ -1216,7 +1216,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Witness and move declarations
 
-[Witness ledger and reaction moves](mechanics.md#witness-ledger-and-reaction-moves-toolbox-row-fd5-loka-kgd22) add two optional declarations (`protocol/reaction.schema.json`). A `witness` filter on an `item_acquired`, `item_dropped`, `action_completed`, `check_passed`, `check_failed`, `entity_died` or `attack_result` trigger names an NPC of this cartridge (UNRESOLVED_REFERENCE at `on.witness`), never a spawn template (SCHEMA_VIOLATION at `on.witness`); on any other kind it is UNKNOWN_FIELD. The step `npc.move {npc?, room?}` names an NPC and a room of this cartridge when present (UNRESOLVED_REFERENCE at `apply[i].npc` or `apply[i].room`), the NPC never a spawn template (SCHEMA_VIOLATION at `apply[i].npc`); a delayed rule (`after`) may not carry it (SCHEMA_VIOLATION `invalid_value` at the step's `op`). The compiler refuses each. Settle S4-1: `npc.move {plan, room}` names a population plan of this cartridge (UNRESOLVED_REFERENCE at `apply[i].plan`), never with `npc` and never without `room` (SCHEMA_VIOLATION `invalid_value` at `apply[i].plan`).
+[Witness ledger and reaction moves](mechanics.md#witness-ledger-and-reaction-moves-toolbox-row-fd5-loka-kgd22) add two optional declarations (`protocol/reaction.schema.json`). A `witness` filter on an `item_acquired`, `item_dropped`, `action_completed`, `check_passed`, `check_failed`, `entity_died` or `attack_result` trigger names an NPC of this cartridge (UNRESOLVED_REFERENCE at `on.witness`), never a spawn template (SCHEMA_VIOLATION at `on.witness`); on any other kind it is UNKNOWN_FIELD. The step `npc.move {npc?, room?}` names an NPC and a room of this cartridge when present (UNRESOLVED_REFERENCE at `steps[i].npc` or `steps[i].room`), the NPC never a spawn template (SCHEMA_VIOLATION at `steps[i].npc`); a delayed rule (`after`) may not carry it (SCHEMA_VIOLATION `invalid_value` at the step's `op`). The compiler refuses each. Settle S4-1: `npc.move {plan, room}` names a population plan of this cartridge (UNRESOLVED_REFERENCE at `steps[i].plan`), never with `npc` and never without `room` (SCHEMA_VIOLATION `invalid_value` at `steps[i].plan`).
 
 ## Identity declarations
 
@@ -1240,7 +1240,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Delayed reaction declarations
 
-[Delayed reactions](mechanics.md#delayed-reactions-toolbox-row-fd1) add three optional declarations. A reaction rule's `after` (`protocol/reaction.schema.json` `ReactionRule`), a positive integer of logical seconds; a rule with `after` carrying a `barrier.set`, `item.move` or `population.suppress` step, or a `status.apply` with `co_present` or `tag`, is SCHEMA_VIOLATION `invalid_value` at that step's `op` (reactions/aftershock.apply[0].op). A reaction step `fact.stamp {fact, npc?, item?}` (owned by fact@1, emits fact_changed) and a policy leaf `time_since {fact, npc?, item?, at_least}` (`protocol/policy.schema.json`, owned by fact@1): each fact resolves (UNRESOLVED_REFERENCE at its `fact`) and is an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at its `fact`); `npc` and `item` follow `fact_compare`'s per_subject rule (FACT_SCOPE_UNSUPPORTED).
+[Delayed reactions](mechanics.md#delayed-reactions-toolbox-row-fd1) add three optional declarations. A reaction rule's `after` (`protocol/reaction.schema.json` `ReactionRule`), a positive integer of logical seconds; a rule with `after` carrying a `barrier.set`, `item.move` or `population.suppress` step, or a `status.apply` with `co_present` or `tag`, is SCHEMA_VIOLATION `invalid_value` at that step's `op` (reactions/aftershock.steps[0].op). A reaction step `fact.stamp {fact, npc?, item?}` (owned by fact@1, emits fact_changed) and a policy leaf `time_since {fact, npc?, item?, at_least}` (`protocol/policy.schema.json`, owned by fact@1): each fact resolves (UNRESOLVED_REFERENCE at its `fact`) and is an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at its `fact`); `npc` and `item` follow `fact_compare`'s per_subject rule (FACT_SCOPE_UNSUPPORTED).
 
 ## Storylet declarations
 
@@ -1254,7 +1254,7 @@ Built rooms S2 adds a service benefit `{kind: "build", structure, site, directio
 
 ## Narrate declarations
 
-[Settle S3-1](mechanics.md#settle-s3-1-narrate-n1) adds a reaction step `{op: "narrate", text}` (`protocol/reaction.schema.json` `ReactionRule`), owned by reaction@1. `text` is a key of the text catalog (UNRESOLVED_REFERENCE at the step's `text`: reactions/arrival_line.apply[0].text). A rule with `after` may carry it.
+[Settle S3-1](mechanics.md#settle-s3-1-narrate-n1) adds a reaction step `{op: "narrate", text}` (`protocol/reaction.schema.json` `ReactionRule`), owned by reaction@1. `text` is a key of the text catalog (UNRESOLVED_REFERENCE at the step's `text`: reactions/arrival_line.steps[0].text). A rule with `after` may carry it.
 
 ## Map position declarations
 

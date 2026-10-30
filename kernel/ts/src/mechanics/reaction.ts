@@ -185,12 +185,11 @@ export function sequence(
       ops.push(...refill);
     } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
     else if (step.op === 'narrate') narration.push({ key: step.text });
-    else if (step.op === 'event.emit' && about.subject) emit(custom(world, step, about.subject));
-    else {
+    else if (step.op !== 'event.emit') {
       const assigned = assignment(world, actor, step, group, own, cause);
       if (assigned) ops.push(assigned);
       if (assigned && assigned.expected !== assigned.value) position++;
-    }
+    } else if (about.subject) emit(custom(world, step, about.subject)); // none without a body
   }
   ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
