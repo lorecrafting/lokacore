@@ -52,7 +52,7 @@ defmodule Loka.Content.Status do
   defp trigger?({_, {_, _, %{} = r}}),
     do:
       String.starts_with?(r["on"]["event"], "status_") or
-        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and (&1["item"] || &1["npc"])))
+        Enum.any?(r["steps"], &(&1["op"] == "status.apply" and (&1["item"] || &1["npc"])))
 
   defp trigger?(_), do: false
 
@@ -143,7 +143,7 @@ defmodule Loka.Content.Status do
 
   defp pierced_by(_, _, _, _), do: []
 
-  @doc "Row 16: expands a pierced_by; `expand` (Checks.expand) expands the rest."
+  @doc "Row 16: expands a pierced_by; `expand` (Resolve.expand) expands the rest."
   # Row hs-5: an edible's `applies` names statuses as its `cures` do.
   def edible(e, m, expand) do
     {lists, rest} = Map.split(e, ~w(cures applies))

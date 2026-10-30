@@ -2,10 +2,10 @@
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
-  alias Loka.Content.{Position, Refs}
+  alias Loka.Content.{Position, Refs, Steps}
 
   defp benefit_fields(b) do
-    case b["kind"] do
+    case b["op"] do
       k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
       k when k in ~w(claim cancel) -> [{"service", "service"}]
       k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
@@ -13,12 +13,13 @@ defmodule Loka.Content.Services do
       k when k in ~w(mend raze) -> [{"site", "room"}]
       "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
       "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
+      _ -> []
     end
   end
 
   defp service_benefit(b, m) do
     Enum.reduce(benefit_fields(b), b, fn {field, kind}, result ->
-      Map.update!(result, field, &ref(&1, kind, m))
+      Map.replace_lazy(result, field, &ref(&1, kind, m))
     end)
     |> escrow_refs(m)
   end
@@ -77,7 +78,7 @@ defmodule Loka.Content.Services do
   defp account(s), do: s["benefit"]["account"]
   defp home(s), do: {s["benefit"]["vault"], s["currency"]}
 
-  defp bank?(b), do: b["kind"] in ~w(deposit withdraw)
+  defp bank?(b), do: b["op"] in ~w(deposit withdraw)
 
   # Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
   # setting it would open an order with no inputs and no job (Built rooms S3: or a build commission).
@@ -86,7 +87,7 @@ defmodule Loka.Content.Services do
       for {rel, %{"benefit" => %{"escrow" => %{"ready_after" => _}} = b}} <- declared,
           do: {b["fact"], rel}
 
-    for {rel, %{"benefit" => %{"kind" => k, "fact" => f}}} <- declared,
+    for {rel, %{"benefit" => %{"op" => k, "fact" => f}}} <- declared,
         k in ~w(entitlement build),
         Enum.any?(owners, fn {o, owner} -> o == f and owner != rel end),
         do: bad(at(rel, ["benefit", "fact"]))
@@ -99,7 +100,17 @@ defmodule Loka.Content.Services do
         do: bad(at(rel, ["services"]))
   end
 
+  # C3 D5: the benefit is one Step the service context runs; a schema-refused one is checked no
+  # further, while an unresolved reference still lets the rest of the service report.
   defp service(rel, s, m, defs, text) do
+    ds = Steps.check(rel, ["benefit"], s["benefit"], :service, %{m: m, defs: defs, events: nil})
+
+    if Enum.any?(ds, &(&1["code"] == "SCHEMA_VIOLATION")),
+      do: ds,
+      else: ds ++ admitted(rel, s, m, defs, text)
+  end
+
+  defp admitted(rel, s, m, defs, text) do
     npc = resolved(s["provider"], "npc", m, defs)
     checks = bindings(s, npc, m, defs) ++ benefit(s["benefit"], npc, s, m, defs) ++ [free(s)]
 
@@ -110,7 +121,7 @@ defmodule Loka.Content.Services do
 
   # Row kgd.70: only an escrowed entitlement may be free (a barter); any other benefit is paid.
   defp free(%{"price" => p, "benefit" => b}),
-    do: {p != 0 or (b["kind"] == "entitlement" and is_map_key(b, "escrow")), ["price"]}
+    do: {p != 0 or (b["op"] == "entitlement" and is_map_key(b, "escrow")), ["price"]}
 
   defp benefit_refs(rel, %{"service" => r}, m, defs),
     do: unresolved(r, "service", at(rel, ["benefit", "service"]), m, defs)
@@ -120,12 +131,8 @@ defmodule Loka.Content.Services do
       unresolved(a, "fact", at(rel, ["benefit", "account"]), m, defs) ++
         unresolved(v, "npc", at(rel, ["benefit", "vault"]), m, defs)
 
-  defp benefit_refs(rel, %{"kind" => "build", "structure" => b, "site" => r}, m, defs),
-    do:
-      unresolved(b, "structure", at(rel, ["benefit", "structure"]), m, defs) ++
-        unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
-
-  defp benefit_refs(rel, %{"kind" => k, "site" => r}, m, defs) when k in ~w(mend raze),
+  # A build's structure is Steps' reference (LeafRefs.steps/0).
+  defp benefit_refs(rel, %{"op" => k, "site" => r}, m, defs) when k in ~w(build mend raze),
     do: unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
 
   defp benefit_refs(_, _, _, _), do: []
@@ -215,48 +222,48 @@ defmodule Loka.Content.Services do
   defp service_texts(s),
     do: Enum.map(reasons(s["benefit"]), &{[], &1}) ++ Enum.map(~w(name narration), &{[&1], s[&1]})
 
-  defp reasons(%{"kind" => "entitlement"} = b), do: entitlement_texts(b["escrow"])
+  defp reasons(%{"op" => "entitlement"} = b), do: entitlement_texts(b["escrow"])
 
-  defp reasons(%{"kind" => "repair"}),
+  defp reasons(%{"op" => "repair"}),
     do: ~w(service.unaffordable service.nothing_to_repair service.full_durability)
 
-  defp reasons(%{"kind" => "claim"}),
+  defp reasons(%{"op" => "claim"}),
     do: ~w(service.unaffordable service.no_order service.not_ready service.no_output)
 
-  defp reasons(%{"kind" => "cancel"}), do: ~w(service.unaffordable service.no_order service.ready)
+  defp reasons(%{"op" => "cancel"}), do: ~w(service.unaffordable service.no_order service.ready)
 
-  defp reasons(%{"kind" => k}) when k in ~w(deposit withdraw),
+  defp reasons(%{"op" => k}) when k in ~w(deposit withdraw),
     do: ~w(service.unaffordable service.no_funds)
 
-  defp reasons(%{"kind" => "build"} = b),
+  defp reasons(%{"op" => "build"} = b),
     do:
       ~w(service.unaffordable service.site_taken service.construction_full) ++
         if(b["escrow"], do: ~w(service.order_open service.missing_inputs), else: [])
 
-  defp reasons(%{"kind" => "mend"} = b),
+  defp reasons(%{"op" => "mend"} = b),
     do:
       ~w(service.unaffordable service.nothing_to_mend) ++
         if(b["escrow"], do: ~w(service.missing_inputs), else: [])
 
-  defp reasons(%{"kind" => "raze"}),
+  defp reasons(%{"op" => "raze"}),
     do: ~w(service.unaffordable service.nothing_to_raze service.occupied)
 
   defp reasons(_), do: ~w(service.unaffordable service.full_mv service.sold_out)
 
-  defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
+  defp benefit(%{"op" => "entitlement", "fact" => r}, _, _, m, defs) do
     f = resolved(r, "fact", m, defs)
     [{player_bool?(f) and f["value_type"]["default"] == false, ["benefit", "fact"]}]
   end
 
   # Toolbox row 21: a repair restores a fact some weapon's durability names.
-  defp benefit(%{"kind" => "repair", "fact" => r}, _, _, _, defs) do
+  defp benefit(%{"op" => "repair", "fact" => r}, _, _, _, defs) do
     named = for {_, {_, _, %{"weapon" => %{"durability" => d}}}} <- defs["item"], do: d["fact"]
     [{r in named, ["benefit", "fact"]}]
   end
 
   # Toolbox row 20b: claim and cancel name a timed commission; Built rooms S3: a claim one with
   # an output (a build raises its room instead); row kgd.70: a barter (no ready_after) leaves none.
-  defp benefit(%{"kind" => k, "service" => r}, _, _, m, defs) when k in ~w(claim cancel) do
+  defp benefit(%{"op" => k, "service" => r}, _, _, m, defs) when k in ~w(claim cancel) do
     c = resolved(r, "service", m, defs)
     e = c["benefit"]["escrow"] || %{}
     settles = is_map_key(e, "ready_after") and (k == "cancel" or is_map_key(e, "output"))
@@ -265,7 +272,7 @@ defmodule Loka.Content.Services do
 
   # Toolbox row 25: the account is a bounded int player fact from 0 no other engine writer owns;
   # the vault holds the currency; both can hold `amount`.
-  defp benefit(%{"kind" => k, "account" => a, "vault" => v, "amount" => n}, _, s, m, defs)
+  defp benefit(%{"op" => k, "account" => a, "vault" => v, "amount" => n}, _, s, m, defs)
        when k in ~w(deposit withdraw) do
     f = resolved(a, "fact", m, defs)
     vault = resolved(v, "npc", m, defs)
@@ -280,7 +287,7 @@ defmodule Loka.Content.Services do
   end
 
   # Built rooms S2: a resolved site lists the direction and a resolved structure.
-  defp benefit(%{"kind" => "build", "structure" => b, "site" => r} = build, _, _, m, defs) do
+  defp benefit(%{"op" => "build", "structure" => b, "site" => r} = build, _, _, m, defs) do
     case Refs.resolve(r, "room", m, defs) do
       {_, _, room} ->
         site = room["site"] || %{}
@@ -297,7 +304,7 @@ defmodule Loka.Content.Services do
   end
 
   # Built rooms S4, S5: a resolved site lists the direction; a mend's site has a structure with a ruin.
-  defp benefit(%{"kind" => k, "site" => r} = b, _, _, m, defs) when k in ~w(mend raze) do
+  defp benefit(%{"op" => k, "site" => r} = b, _, _, m, defs) when k in ~w(mend raze) do
     case Refs.resolve(r, "room", m, defs) do
       {_, _, room} ->
         site = room["site"] || %{}
@@ -319,7 +326,7 @@ defmodule Loka.Content.Services do
 
   # Built rooms S3: a build commission's fact is an entitlement's (a player bool from false).
   defp build_fact(%{"fact" => r}, m, defs),
-    do: benefit(%{"kind" => "entitlement", "fact" => r}, nil, nil, m, defs)
+    do: benefit(%{"op" => "entitlement", "fact" => r}, nil, nil, m, defs)
 
   defp build_fact(_, _, _), do: []
 
@@ -334,7 +341,7 @@ defmodule Loka.Content.Services do
 
   defp holds?(_, _), do: true
 
-  defp stock(%{"kind" => "meal"} = b, npc, s, m, defs) do
+  defp stock(%{"op" => "meal"} = b, npc, s, m, defs) do
     stock = resolved(b["stock"], "resource", m, defs)
 
     [
@@ -343,7 +350,7 @@ defmodule Loka.Content.Services do
     ]
   end
 
-  defp stock(%{"kind" => "drink"} = b, _, s, m, defs) do
+  defp stock(%{"op" => "drink"} = b, _, s, m, defs) do
     item = resolved(b["vessel"], "item", m, defs)
     liquid = resolved(b["liquid"], "liquid", m, defs)
     [{held_vessel?(item, s, b) and serves?(item, liquid), ["benefit", "vessel"]}]

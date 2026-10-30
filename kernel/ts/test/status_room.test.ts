@@ -50,7 +50,7 @@ function edited(edit: (c: any) => void = () => {}) {
     perception: { sight: 'blind' },
   };
   delete c.resources['ward_sampler@0.0.1:resource/mv'].regen; // a pool a missing row reads as start
-  shrine(c).apply = [{ op: 'status.apply', status: gloom, room: denRef }];
+  shrine(c).steps = [{ op: 'status.apply', status: gloom, room: denRef }];
   edit(c);
   const canonical = encode(c);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
@@ -148,7 +148,7 @@ test('neither a held light nor dark sight sees in a darkened room', () => {
   const S2 = S('warded');
   const night = edited((c) => {
     c.statuses[S2] = { ...c.statuses[S2], perception: { sight: 'dark_sight' } };
-    shrine(c).apply.push({ op: 'status.apply', status: { ...C, kind: 'status', key: 'warded' } });
+    shrine(c).steps.push({ op: 'status.apply', status: { ...C, kind: 'status', key: 'warded' } });
   });
   assert.ok(night.ok, JSON.stringify(night));
   n = 0;
@@ -193,7 +193,7 @@ const told = (target: 'shrine' | 'den', observed = true) => {
     const keys = lines.map((l) => [l, `narration.gloom.${l}`]);
     c.statuses[S('gloom')].narration = Object.fromEntries(keys);
     for (const [, key] of keys) c.text[key] = 'The gloom.';
-    shrine(c).apply[0].room = { ...denRef, key: target };
+    shrine(c).steps[0].room = { ...denRef, key: target };
   });
   assert.ok(c.ok, JSON.stringify(c));
   n = 0;

@@ -1,6 +1,6 @@
 // `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]`
 // (docs/system/cartridge.md#transcript-coverage-loka-kgd1942): replays a cartridge's transcripts
-// and prints the reactions, recipes, dialogue choices and quests none of them exercises, as one
+// and prints the reactions, scripted actions, dialogue choices and quests none of them exercises, as one
 // canonical JSON document. A report for authors, not a check.
 import { existsSync, globSync, readFileSync } from 'node:fs';
 import { relative } from 'node:path';
@@ -28,7 +28,7 @@ export function marked(c: Cartridge) {
   const reactions = Object.fromEntries(
     refs.map((ref, i) => {
       const r = c.reactions![ref]!;
-      return [ref, { ...r, apply: [...r.apply, { op: 'narrate', text: `coverage.m${i}` }] }];
+      return [ref, { ...r, steps: [...r.steps, { op: 'narrate', text: `coverage.m${i}` }] }];
     }),
   );
   const ruleOf = (key: string) => refs[Number(MARK.exec(key)?.[1] ?? NaN)];
@@ -71,7 +71,7 @@ export function replay(
 export function coverage(c: Cartridge, traces: Trace[]) {
   const { cartridge, ruleOf } = marked(c);
   const seen = new Set<string>();
-  const done = new Set<string>(); // completed recipe keys
+  const done = new Set<string>(); // completed scripted action keys
   traces.forEach((t, i) => {
     try {
       replay(cartridge, t, (before, d, n) => {
@@ -81,7 +81,7 @@ export function coverage(c: Cartridge, traces: Trace[]) {
           throw new Error(`narration cap reached at ordinal ${n}`);
         for (const n of d.narration ?? []) seen.add(ruleOf(n.key) ?? '');
         for (const { payload: p } of d.events) {
-          // action_recipe/rule.ts:78 (action = recipe.key), :99-101 (none on failure)
+          // scripted_action/rule.ts:77 (action = scripted.key), :98-100 (none on failure)
           if (p.type === 'action_completed') done.add(p.action);
           if (p.type === 'quest_resolved') seen.add(refString(p.quest)); // quest/lifecycle.ts:261
           if (p.type !== 'choice_resolved') continue;
@@ -100,7 +100,7 @@ export function coverage(c: Cartridge, traces: Trace[]) {
     transcripts: traces.length,
     never: {
       reactions: unseen(Object.keys(c.reactions ?? {})),
-      recipes: Object.entries(c.recipes ?? {})
+      scripted_actions: Object.entries(c.scripted_actions ?? {})
         .flatMap(([ref, r]) => (done.has(r.key) ? [] : [ref]))
         .sort(),
       choices: choices(c).filter(({ dialogue, choice }) => !seen.has(`${dialogue}#${choice}`)),

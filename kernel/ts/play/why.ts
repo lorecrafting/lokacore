@@ -1,7 +1,7 @@
-// `node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]`
+// `node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--action <key> | --dialogue <key>]`
 // (docs/system/cartridge.md#rule-explainer-loka-kgd1943): replays a transcript up to one step,
 // decides that step and prints, per reaction rule, its trigger match, deliveries and `when`
-// leaves; on demand one recipe's or dialogue's policy. A report for authors, not a check.
+// leaves; on demand one scripted action's or dialogue's policy. A report for authors, not a check.
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import type {
@@ -24,7 +24,7 @@ import { replayRecords } from './replay.ts';
 import { decideReplay, start, type Run } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
-type Asked = { recipe?: string; dialogue?: string };
+type Asked = { action?: string; dialogue?: string };
 const leaves = (p: Policy): Policy[] =>
   p.op === 'all' || p.op === 'any'
     ? p.items.flatMap(leaves)
@@ -60,7 +60,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   const held = (ref: string, i: number) => {
     const { key, on, when } = rules[ref]!;
     const leaf = leaves(when!)[i]!;
-    const probed = { key, on, when: leaf, apply: [{ op: 'narrate', text: probe }] };
+    const probed = { key, on, when: leaf, steps: [{ op: 'narrate', text: probe }] };
     const reactions = { ...rules, [ref]: probed };
     return said(decide({ ...cartridge, reactions } as Cartridge), (k) => k === probe);
   };
@@ -120,12 +120,14 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
       ),
     }));
 
-// The policies asked for, on the world before the step: a recipe's target is the command's,
+// The policies asked for, on the world before the step: a scripted action's target is the command's,
 // a dialogue's its authored NPC (dialogue/selection.ts:93; ponytail: not a choose row's bound
 // speaker, dialogue/shared.ts:93; read speakerOf once a fixture binds a speaker other than the npc).
 const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
-  ...(on.recipe !== undefined && {
-    recipe: policy(c.recipes, on.recipe, before, command, () => primaryTarget(command.payload)),
+  ...(on.action !== undefined && {
+    action: policy(c.scripted_actions, on.action, before, command, () =>
+      primaryTarget(command.payload),
+    ),
   }),
   ...(on.dialogue !== undefined && {
     dialogue: policy(
@@ -150,7 +152,7 @@ function policy<D extends { key: string; policy?: Policy }>(
   const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
   if (!d) throw new Usage(`no definition keyed ${key}`);
   const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
-  const actor = (command.payload as { actor_id: CharacterId }).actor_id; // recipes' and talk's commands carry one
+  const actor = (command.payload as { actor_id: CharacterId }).actor_id; // scripted actions' and talk's commands carry one
   const root = d.policy;
   if (!root) return { rule };
   const at = (i: number) => ({ holds: holds(world, actor, leaves(root)[i]!, ctx()) });
@@ -159,10 +161,10 @@ function policy<D extends { key: string; policy?: Policy }>(
 
 if (import.meta.main) {
   const [file, path, n, ...rest] = process.argv.slice(2);
-  const flag = rest.length === 2 ? /^--(recipe|dialogue)$/.exec(rest[0]!)?.[1] : undefined;
+  const flag = rest.length === 2 ? /^--(action|dialogue)$/.exec(rest[0]!)?.[1] : undefined;
   if (!n || (rest.length && !flag)) {
     console.error(
-      'usage: node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--recipe <key> | --dialogue <key>]',
+      'usage: node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal> [--action <key> | --dialogue <key>]',
     );
     process.exit(2);
   }

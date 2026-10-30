@@ -1,4 +1,4 @@
-// Toolbox row G4 on the compiled use sampler: two use recipes keyed by properties, never by ids.
+// Toolbox row G4 on the compiled use sampler: two use scripted actions keyed by properties, never by ids.
 // quench: a held liquid_holding tool with water, on a target with an active burning status, cures
 // it (status.cure). oil: a held tool with oil, on a target tagged metal, sets its entity fact oiled.
 // Nobody authored the bucket-cart or oilcan-winch pair.
@@ -114,12 +114,12 @@ test('the offered quench agrees with admission (gameview_agrees_with_admission)'
   assert.ok(check('gameview_agrees_with_admission', observation));
 });
 
-// Breaks: a second cure of the same status in one sequence proposes a second transition from the
+// Breaks: a second cure of the same status in one outcome proposes a second transition from the
 // already-ended row, so the decision faults instead of curing once.
-test('curing twice in one sequence ends the status once', () => {
-  const twice = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
-  const success = twice.recipes['use_sampler@0.0.1:recipe/quench'].outcomes.success;
-  success.sequence = [success.sequence[0], success.sequence[0]];
+test('curing twice in one outcome ends the status once', () => {
+  const twice = structuredClone(content) as Cartridge & { scripted_actions: Record<string, any> };
+  const success = twice.scripted_actions['use_sampler@0.0.1:action/quench'].outcomes.success;
+  success.steps = [success.steps[0], success.steps[0]];
   stream.n = 0;
   let w = newWorld(twice, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   for (const k of ['bucket', 'torch']) w = ok(play(w, { type: 'take', item_id: e(w, k) }));
@@ -152,11 +152,11 @@ test('a burning item in an open crate is neither offered nor quenched', () => {
   assert.equal(code(play(x, { type: 'perform', action: 'quench', ...ids })), 'not_present');
 });
 
-// Breaks: a pair blocked by the recipe's cooldown is listed available (or dropped), or its reason
+// Breaks: a pair blocked by the scripted action's cooldown is listed available (or dropped), or its reason
 // differs from the rule's rejection.
 test('a cooling-down oil pair is listed unavailable with the code the step returns', () => {
-  const cooled = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
-  cooled.recipes['use_sampler@0.0.1:recipe/oil'].cooldown = 600;
+  const cooled = structuredClone(content) as Cartridge & { scripted_actions: Record<string, any> };
+  cooled.scripted_actions['use_sampler@0.0.1:action/oil'].cooldown = 600;
   stream.n = 0;
   let w = newWorld(cooled, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   w = ok(play(w, { type: 'take', item_id: e(w, 'oilcan') }));

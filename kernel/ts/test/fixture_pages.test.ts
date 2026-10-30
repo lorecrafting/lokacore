@@ -1,4 +1,4 @@
-// Fixture pages (loka-x6t.120; mechanics.md inspectable_detail@1): a recipe aimed at a room detail
+// Fixture pages (loka-x6t.120; mechanics.md inspectable_detail@1): a scripted action aimed at a room detail
 // is offered on that detail's NoticeView only, never in view.actions, and the detail is projected
 // with its authored title (kernel_api 1.120) or its description. The spells sampler edited
 // in-test: kernel_api 1.120, the hearth titled "The cold hearth"; the sigil keeps no title.
@@ -82,7 +82,7 @@ const guard = (w: World, v: unknown) =>
 
 // Breaks: the World card stays (gather_ash or trace_sigil in view.actions), the detail gets no
 // page, or the title falls back wrongly (authored title lost, or the sigil not on its description).
-test('a recipe aimed at a detail is its page card, titled by title or description', () => {
+test('a scripted action aimed at a detail is its page card, titled by title or description', () => {
   const v = view(world());
   assert.deepEqual(
     listed(v).filter((k: string) => ['gather_ash', 'trace_sigil'].includes(k)),
@@ -131,8 +131,8 @@ test('the page card performs and the view agrees with admission', () => {
   );
 });
 
-// Break: every detail becomes a page, not only one a recipe targets (or one of the kinds).
-test('a detail no recipe targets and of no page kind gets no page', () => {
+// Break: every detail becomes a page, not only one a scripted action targets (or one of the kinds).
+test('a detail no scripted action targets and of no page kind gets no page', () => {
   const v = view(
     world((c) => {
       c.rooms[TOWER].details.rug = { aliases: ['rug'], description: 'detail.hearth' };
@@ -144,7 +144,7 @@ test('a detail no recipe targets and of no page kind gets no page', () => {
 // Breaks: a failing policy drops the card (or shows it available), or the perform is admitted.
 test("a card whose policy fails lists unavailable with the policy's reason; perform refused", () => {
   const w = world((c) => {
-    c.recipes[`${P}:recipe/gather_ash`].policy = { op: 'level_compare', at_least: 5 };
+    c.scripted_actions[`${P}:action/gather_ash`].policy = { op: 'level_compare', at_least: 5 };
   });
   const card = notice(view(w), 'hearth').actions[0];
   assert.deepEqual([card.available, card.reason?.code], [false, 'invalid_state']);
@@ -152,8 +152,8 @@ test("a card whose policy fails lists unavailable with the policy's reason; perf
   assert.equal(r.decision.kind === 'rejected' && r.decision.error.code, 'invalid_state');
 });
 
-// Breaks: the guard passes a World list carrying a detail recipe, or fails the projected view.
-test('world_lists_no_fixture_action: false with a detail recipe in actions, true without', () => {
+// Breaks: the guard passes a World list carrying a detail scripted action, or fails the projected view.
+test('world_lists_no_fixture_action: false with a detail scripted action in actions, true without', () => {
   const w = world();
   const v = view(w);
   assert.equal(guard(w, v), true);
@@ -162,9 +162,9 @@ test('world_lists_no_fixture_action: false with a detail recipe in actions, true
   assert.equal(guard(w, bad), false);
 });
 
-// Break: a bed detail's page replaces its actions with the bed's Rest, dropping the recipe card
-// aimed at it (offered nowhere, since view.actions never lists a detail recipe).
-test('a recipe aimed at a bed detail keeps its card on that page', () => {
+// Break: a bed detail's page replaces its actions with the bed's Rest, dropping the scripted action card
+// aimed at it (offered nowhere, since view.actions never lists a detail scripted action).
+test('a scripted action aimed at a bed detail keeps its card on that page', () => {
   const v = view(
     world((c) => {
       for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])

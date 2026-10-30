@@ -192,7 +192,7 @@ test('one balance Note after the description on a page with a priced service', a
     label: 'service.fee',
     price,
     benefit: {
-      kind: 'entitlement',
+      op: 'entitlement',
       fact: { ...v.resources![0]!.resource, kind: 'fact', key: 'paid' },
     },
     action: { ...action('use_service'), command: 'use_service', target_ids: [nell.id] },

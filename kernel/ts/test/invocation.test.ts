@@ -65,20 +65,20 @@ test('a mismatch reports the step, both results and the state as canonical bytes
 // Breaks (04 §5.0): a fault or a failed attempt reported as a rejection or the reverse, a
 // rejection or fault changing the world, or a failed attempt not committing its draw. The bell's
 // ring_bell is changed in the loaded cartridge (the loader would reject both artifacts): assigning
-// a value its FactSpec does not allow, which adopt faults precondition_failed (recipes.test.ts),
+// a value its FactSpec does not allow, which adopt faults precondition_failed (scripted_actions.test.ts),
 // or given a luck check of chance 20, which the seed's first roll of 20 fails, leaving the RNG at
 // [7, 0, 1026, 12288] (checks.test.ts, from numeric-vectors.json).
 test('fault, rejection and failed attempt stay distinct; only the attempt changes the world', () => {
   const ok = world('cartridge_bell_hash.json');
-  const bell = (change: (recipe: any) => void): World => {
+  const bell = (change: (scripted: any) => void): World => {
     const cartridge = structuredClone(ok.cartridge) as any;
-    change(cartridge.recipes['recipe_sampler@0.0.1:recipe/ring_bell']);
+    change(cartridge.scripted_actions['recipe_sampler@0.0.1:action/ring_bell']);
     return { ...ok, cartridge };
   };
-  const bad = bell((r) => (r.outcomes.success.sequence[0].value = 'yes'));
+  const bad = bell((r) => (r.outcomes.success.steps[0].value = 'yes'));
   const luck = bell((r) => {
     r.check = { key: 'ring_true', kind: 'luck', chance: 20 };
-    r.outcomes.failure = { sequence: [], narration: { actor: 'narration.ring_bell.actor' } };
+    r.outcomes.failure = { steps: [], narration: { actor: 'narration.ring_bell.actor' } };
   });
   const invoke = (w: World, action_key: string) =>
     attempt(

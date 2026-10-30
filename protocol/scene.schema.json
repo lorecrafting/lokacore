@@ -19,7 +19,7 @@
               ]
             },
             "on": {
-              "description": "What starts the scene: a story point reached, a quest outcome, or an action recipe's success; an action start names the recipe's room and detail.",
+              "description": "What starts the scene: a story point reached, a quest outcome, or a scripted action's success; an action start names the scripted action's room and detail.",
               "type": "object",
               "properties": {
                 "story_point": {

@@ -7,7 +7,7 @@
     "op": "npc_present",
     "npc": "listener"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "inspired",

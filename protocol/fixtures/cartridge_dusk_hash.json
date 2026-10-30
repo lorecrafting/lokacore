@@ -1,5 +1,5 @@
 {
-  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/check_sampler (R5 S6a; 05 §11; CartridgeArtifact.content_hash): two ActionRecipes (action.schema.json ActionRecipe) in the optional recipes map, ring_bell gated on the hour of day by time_window from 18 to 6 (schedule@1) with a duration, and pick_lock with a luck check (RecipeCheck, check@1), success and failure outcomes and a duration; one instance bool fact, one room with two details, one with a description variant; text with touch links. Assembled by hand from the source files (manifest without entry, the lock, empty actions, the room and each recipe with key added and short references expanded, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding. R5 S6b (PM ruling on the owner's request that existing cartridges get the pools): the compiler adds resource@1 to requires and the lock and the default pools hp 0..20 start 20 gain 5, ma 0..100 start 100 gain 4 and mv 0..82 start 82 gain 18 (resource.schema.json ResourceSpec), added here by hand to the previous value.",
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/check_sampler (R5 S6a; 05 §11; CartridgeArtifact.content_hash): two ScriptedActions (action.schema.json ScriptedAction) in the optional scripted_actions map, ring_bell gated on the hour of day by time_window from 18 to 6 (schedule@1) with a duration, and pick_lock with a luck check (step.schema.json Check, check@1), success and failure outcomes and a duration; one instance bool fact, one room with two details, one with a description variant; text with touch links. Assembled by hand from the source files (manifest without entry, the lock, empty actions, the room and each scripted action with key added and short references expanded, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding. R5 S6b (PM ruling on the owner's request that existing cartridges get the pools): the compiler adds resource@1 to requires and the lock and the default pools hp 0..20 start 20 gain 5, ma 0..100 start 100 gain 4 and mv 0..82 start 82 gain 18 (resource.schema.json ResourceSpec), added here by hand to the previous value.",
   "value": {
     "format": "loka-cartridge-v2",
     "manifest": {
@@ -20,7 +20,7 @@
           "description_variant": 1,
           "fact": 1,
           "policy": 1,
-          "action_recipe": 1,
+          "scripted_action": 1,
           "check": 1,
           "schedule": 1,
           "resource": 1
@@ -39,7 +39,7 @@
         "description_variant": 1,
         "fact": 1,
         "policy": 1,
-        "action_recipe": 1,
+        "scripted_action": 1,
         "check": 1,
         "schedule": 1,
         "resource": 1
@@ -100,8 +100,8 @@
         "key": "churchyard"
       }
     },
-    "recipes": {
-      "check_sampler@0.0.1:recipe/pick_lock": {
+    "scripted_actions": {
+      "check_sampler@0.0.1:action/pick_lock": {
         "name": "actions.pick_lock",
         "aliases": [
           "pick"
@@ -138,7 +138,7 @@
         "duration": 600,
         "outcomes": {
           "success": {
-            "sequence": [
+            "steps": [
               {
                 "op": "fact.assign",
                 "fact": {
@@ -155,7 +155,7 @@
             }
           },
           "failure": {
-            "sequence": [],
+            "steps": [],
             "narration": {
               "actor": "narration.pick_lock.failure"
             }
@@ -163,7 +163,7 @@
         },
         "key": "pick_lock"
       },
-      "check_sampler@0.0.1:recipe/ring_bell": {
+      "check_sampler@0.0.1:action/ring_bell": {
         "name": "actions.ring_bell",
         "aliases": [
           "ring"
@@ -187,7 +187,7 @@
         "duration": 60,
         "outcomes": {
           "success": {
-            "sequence": [
+            "steps": [
               {
                 "op": "event.emit",
                 "event": "bell_rung"
@@ -243,6 +243,6 @@
       }
     }
   },
-  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"churchyard\",\"kind\":\"room\"},\"facts\":{\"check_sampler@0.0.1:fact/crypt_gate_open\":{\"key\":\"crypt_gate_open\",\"meaning\":\"The crypt gate's lock was picked; the gate stands open.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"check_sampler\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Check Sampler\",\"version\":\"0.0.1\"},\"recipes\":{\"check_sampler@0.0.1:recipe/pick_lock\":{\"aliases\":[\"pick\"],\"check\":{\"chance\":50,\"key\":\"pick_lock\",\"kind\":\"luck\"},\"duration\":600,\"key\":\"pick_lock\",\"name\":\"actions.pick_lock\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.pick_lock.failure\"},\"sequence\":[]},\"success\":{\"narration\":{\"actor\":\"narration.pick_lock.success\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crypt_gate_open\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crypt_gate_open\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"},\"priority\":5,\"target\":{\"detail\":\"gate\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"churchyard\",\"kind\":\"room\"}}},\"check_sampler@0.0.1:recipe/ring_bell\":{\"aliases\":[\"ring\"],\"duration\":60,\"key\":\"ring_bell\",\"name\":\"actions.ring_bell\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.ring_bell.actor\"},\"sequence\":[{\"event\":\"bell_rung\",\"op\":\"event.emit\"}]}},\"policy\":{\"from\":18,\"op\":\"time_window\",\"to\":6},\"priority\":10,\"target\":{\"detail\":\"bell\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"churchyard\",\"kind\":\"room\"}}}},\"resources\":{\"check_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"check_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"check_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"check_sampler@0.0.1:room/churchyard\":{\"description\":\"room.churchyard.description\",\"details\":{\"bell\":{\"aliases\":[\"bell\",\"lych_bell\"],\"description\":\"detail.bell\"},\"gate\":{\"aliases\":[\"gate\",\"lock\",\"crypt_gate\"],\"description\":\"detail.gate\",\"variants\":[{\"description\":\"detail.gate.open\",\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crypt_gate_open\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}]}},\"exits\":{},\"key\":\"churchyard\",\"name\":\"room.churchyard.title\"}},\"text\":{\"actions.pick_lock\":\"Pick the lock\",\"actions.ring_bell\":\"Ring the bell\",\"detail.bell\":\"A little bronze bell. By custom it is rung only between dusk and dawn.\",\"detail.gate\":\"An iron gate, its lock furred with rust.\",\"detail.gate.open\":\"The iron gate hangs open on the crypt steps.\",\"narration.pick_lock.failure\":\"The pick slips in the rusted lock. It holds.\",\"narration.pick_lock.success\":\"The lock gives with a gritty click. The gate swings open.\",\"narration.ring_bell.actor\":\"You ring the lych bell. Its thin note carries over the graves.\",\"room.churchyard.description\":\"Leaning stones crowd the grass. A small [bell](bell) hangs in the lych gate, and an iron [gate](gate) bars the crypt steps.\",\"room.churchyard.title\":\"Churchyard\"}}",
-  "sha256": "33402dc4ae134f8166e9bab708f041128a58d6dc77b0d5c4cbc71e0e2ccc0964"
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"churchyard\",\"kind\":\"room\"},\"facts\":{\"check_sampler@0.0.1:fact/crypt_gate_open\":{\"key\":\"crypt_gate_open\",\"meaning\":\"The crypt gate's lock was picked; the gate stands open.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1,\"scripted_action\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"check_sampler\",\"requires\":{\"capabilities\":{\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1,\"scripted_action\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Check Sampler\",\"version\":\"0.0.1\"},\"resources\":{\"check_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"check_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"check_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"check_sampler@0.0.1:room/churchyard\":{\"description\":\"room.churchyard.description\",\"details\":{\"bell\":{\"aliases\":[\"bell\",\"lych_bell\"],\"description\":\"detail.bell\"},\"gate\":{\"aliases\":[\"gate\",\"lock\",\"crypt_gate\"],\"description\":\"detail.gate\",\"variants\":[{\"description\":\"detail.gate.open\",\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crypt_gate_open\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}]}},\"exits\":{},\"key\":\"churchyard\",\"name\":\"room.churchyard.title\"}},\"scripted_actions\":{\"check_sampler@0.0.1:action/pick_lock\":{\"aliases\":[\"pick\"],\"check\":{\"chance\":50,\"key\":\"pick_lock\",\"kind\":\"luck\"},\"duration\":600,\"key\":\"pick_lock\",\"name\":\"actions.pick_lock\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.pick_lock.failure\"},\"steps\":[]},\"success\":{\"narration\":{\"actor\":\"narration.pick_lock.success\"},\"steps\":[{\"fact\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crypt_gate_open\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"crypt_gate_open\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"},\"priority\":5,\"target\":{\"detail\":\"gate\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"churchyard\",\"kind\":\"room\"}}},\"check_sampler@0.0.1:action/ring_bell\":{\"aliases\":[\"ring\"],\"duration\":60,\"key\":\"ring_bell\",\"name\":\"actions.ring_bell\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.ring_bell.actor\"},\"steps\":[{\"event\":\"bell_rung\",\"op\":\"event.emit\"}]}},\"policy\":{\"from\":18,\"op\":\"time_window\",\"to\":6},\"priority\":10,\"target\":{\"detail\":\"bell\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"check_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"churchyard\",\"kind\":\"room\"}}}},\"text\":{\"actions.pick_lock\":\"Pick the lock\",\"actions.ring_bell\":\"Ring the bell\",\"detail.bell\":\"A little bronze bell. By custom it is rung only between dusk and dawn.\",\"detail.gate\":\"An iron gate, its lock furred with rust.\",\"detail.gate.open\":\"The iron gate hangs open on the crypt steps.\",\"narration.pick_lock.failure\":\"The pick slips in the rusted lock. It holds.\",\"narration.pick_lock.success\":\"The lock gives with a gritty click. The gate swings open.\",\"narration.ring_bell.actor\":\"You ring the lych bell. Its thin note carries over the graves.\",\"room.churchyard.description\":\"Leaning stones crowd the grass. A small [bell](bell) hangs in the lych gate, and an iron [gate](gate) bars the crypt steps.\",\"room.churchyard.title\":\"Churchyard\"}}",
+  "sha256": "c8efd78092cf5ef9f208064ab18e6d01a511e745eaeca5f7682161357ef6a487"
 }

@@ -30,7 +30,7 @@
     "press": {
       "label": "dialogue.nell_rumour.press",
       "narration": "narration.nell_rumour.press",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "topic_fire_known",

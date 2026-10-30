@@ -212,7 +212,7 @@ the full inset width, a long name wraps and never truncates, and the open list s
 page's scroll; opening scrolls the first row into view. Web keyboard: Tab and Shift-Tab move
 through the rows in order, Enter or Space picks, Escape or the device's Back closes; screen readers hear the option's
 name with its expanded state, then each row's name. Behaviour: [Book UI](system/book-ui.md#item-details-and-takedrop).
-States for its story: closed; open with available rows; open with an unavailable row; recipes
+States for its story: closed; open with available rows; open with an unavailable row; scripted actions
 mixed in one list; pending.
 
 **Fixture link** (no component until a projection consumer): inline in prose; ink colour with a

@@ -1,7 +1,7 @@
 // Toolbox rows 13 and G12 on the compiled barrier sampler, content only (mechanics.md pick and
 // force): a keyless chest whose lid opens once its lock (rated 1) is picked, a fragile wooden door
 // (rated 5) whose failed pick jams it and which then gives to STR 8, and an iron door that no
-// force recipe reaches; pick grows [1], not taught.
+// force scripted action reaches; pick grows [1], not taught.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';

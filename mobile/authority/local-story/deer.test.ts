@@ -157,7 +157,7 @@ test('reaction spawn into a sighted plan with the player home cold-reopens', (t)
       [ref('reaction', 'herd')]: {
         key: 'herd',
         on: { event: 'clock_hour' },
-        apply: [{ op: 'population.spawn', plan }],
+        steps: [{ op: 'population.spawn', plan }],
       },
     };
   });

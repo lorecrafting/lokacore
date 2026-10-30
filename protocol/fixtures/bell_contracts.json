@@ -13,7 +13,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.resolve",
           "quest": {
@@ -42,7 +42,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.fail",
           "quest": {
@@ -101,7 +101,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.resolve",
           "quest": {
@@ -129,7 +129,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.fail",
           "outcome": "lost"
@@ -181,7 +181,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "quest": {
             "cartridge_id": "village_chapter",
@@ -209,7 +209,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.resolve",
           "outcome": "prior"
@@ -232,7 +232,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "quest": {
             "cartridge_id": "village_chapter",
@@ -260,7 +260,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.fail",
           "quest": {
@@ -288,7 +288,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.resolve",
           "quest": {
@@ -317,7 +317,7 @@
           "key": "chapel_bell_rung"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.fail",
           "quest": {

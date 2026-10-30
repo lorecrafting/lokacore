@@ -154,12 +154,12 @@ defmodule Loka.ContentCraftTest do
   end
 
   # Break (Built rooms S6): a build step
-  # compiles off a detail target, on a room that is no site, twice in one sequence, without
+  # compiles off a detail target, on a room that is no site, twice in one outcome, without
   # world.construction or the refusal texts, or naming a structure or direction the site does not
   # list.
   test "a build step needs a site detail, its listed structure and direction, once, on success",
        %{dir: dir} do
-    seq = "actions/raise_timbered_hut.outcomes.success.sequence"
+    seq = "actions/raise_timbered_hut.outcomes.success.steps"
     raise = "actions/raise_timbered_hut.json"
 
     builds = fn edits ->
@@ -167,7 +167,7 @@ defmodule Loka.ContentCraftTest do
       Enum.map(diags, &{&1["code"], &1["path"]})
     end
 
-    step = &put_in(&1, ["outcomes", "success", "sequence", Access.at(0), &2], &3)
+    step = &put_in(&1, ["outcomes", "success", "steps", Access.at(0), &2], &3)
 
     use =
       &(&1
@@ -176,7 +176,7 @@ defmodule Loka.ContentCraftTest do
 
     use = &(use.(&1) |> update_in(["outcomes"], fn o -> Map.delete(o, "failure") end))
     oak = %{"kind" => "detail", "room" => "glade", "detail" => "oak"}
-    twice = &update_in(&1, ["outcomes", "success", "sequence"], fn [b] -> [b, b] end)
+    twice = &update_in(&1, ["outcomes", "success", "steps"], fn [b] -> [b, b] end)
 
     cases = [
       {[{raise, use}], "SCHEMA_VIOLATION", "[0].op"},
@@ -189,15 +189,21 @@ defmodule Loka.ContentCraftTest do
        "[0].op"},
       {[{"rooms/lane.json", &put_in(&1, ["site", "structures"], ["hut_plain"])}],
        "SCHEMA_VIOLATION", "[0].structure"},
-      {[{raise, &step.(&1, "direction", "east")}], "SCHEMA_VIOLATION", "[0].direction"}
+      {[{raise, &step.(&1, "direction", "east")}], "SCHEMA_VIOLATION", "[0].direction"},
+      # Steps' :action build row runs only structure and direction (site is a service's).
+      {[{raise, &step.(&1, "site", "lane")}], "SCHEMA_VIOLATION", "[0].site"}
     ]
 
     for {edits, code, path} <- cases, do: assert({code, seq <> path} in builds.(edits))
 
     failed =
-      &put_in(&1, ["outcomes", "failure", "sequence"], &1["outcomes"]["success"]["sequence"])
+      &put_in(&1, ["outcomes", "failure", "steps"], &1["outcomes"]["success"]["steps"])
 
-    at = "actions/raise_timbered_hut.outcomes.failure.sequence[0].op"
+    # Breaks: an unresolved structure also gets on_site's SCHEMA_VIOLATION (one problem, two diagnostics).
+    nope = [{raise, &step.(&1, "structure", "nope_hut")}]
+    assert builds.(nope) == [{"UNRESOLVED_REFERENCE", seq <> "[0].structure"}]
+
+    at = "actions/raise_timbered_hut.outcomes.failure.steps[0].op"
     assert {"SCHEMA_VIOLATION", at} in builds.([{raise, failed}])
   end
 end

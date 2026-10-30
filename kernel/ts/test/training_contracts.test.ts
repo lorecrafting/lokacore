@@ -52,13 +52,13 @@ test('new typed contracts require independent fields and reject boundary values'
   const choice = {
     label: 'lesson.label',
     narration: 'lesson.result',
-    sequence: [{ op: 'skill.acquire', skill: ref('skill', 'swords') }],
+    steps: [{ op: 'skill.acquire', skill: ref('skill', 'swords') }],
     lesson_payment: { to: 'teacher', resource: ref('resource', 'pennies'), amount: 4 },
   };
   assert.deepEqual(validate('DialogueChoice', choice), []);
   for (const field of ['op', 'skill']) {
     const m = structuredClone(choice);
-    delete (m.sequence[0] as any)[field];
+    delete (m.steps[0] as any)[field];
     assert.ok(validate('DialogueChoice', m).length, field);
   }
   for (const field of ['to', 'resource', 'amount']) {

@@ -185,7 +185,7 @@
       "document": "04-command-event-effect-protocol.md",
       "heading": "## 19. Action availability"
     },
-    "statement": "GameView actions list no recipe aimed at a room detail; it is offered on that detail's NoticeView only (docs/system/mechanics.md inspectable_detail@1; loka-x6t.120).",
+    "statement": "GameView actions list no scripted action aimed at a room detail; it is offered on that detail's NoticeView only (docs/system/mechanics.md inspectable_detail@1; loka-x6t.120).",
     "implemented_in": "typescript"
   }
 ]

@@ -1,8 +1,8 @@
 defmodule Loka.Content.NpcFields do
-  @moduledoc "Expands an NPC definition's schedule, immune list, (toolbox row G3) attributes and (row W6) text variants (row G11) disposition conditions and (row 35) arrest room and (row G7) lock conditions and (row FD7) ask answers to local DefinitionRefs; part of Loka.Content.Checks.expand."
+  @moduledoc "Expands an NPC definition's schedule, immune list, (toolbox row G3) attributes and (row W6) text variants (row G11) disposition conditions and (row 35) arrest room and (row G7) lock conditions and (row FD7) ask answers to local DefinitionRefs; part of Loka.Content.Resolve.expand."
   import Loka.Content.Source, only: [ref: 3]
 
-  # `expand` is Loka.Content.Checks.expand/2, passed in so this module does not call back into it.
+  # `expand` is Loka.Content.Resolve.expand/2, passed in so this module does not call back into it.
   def expand(npc, m, expand) do
     npc
     |> update("daily_schedule", fn s -> Map.new(s, fn {h, r} -> {h, room(r, m, expand)} end) end)

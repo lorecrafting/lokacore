@@ -1164,7 +1164,7 @@
           },
           "equals": true
         },
-        "apply": [
+        "steps": [
           {
             "op": "fact.assign",
             "fact": {
@@ -1201,7 +1201,7 @@
           },
           "equals": true
         },
-        "apply": [
+        "steps": [
           {
             "op": "fact.assign",
             "fact": {
@@ -1238,7 +1238,7 @@
           },
           "equals": true
         },
-        "apply": [
+        "steps": [
           {
             "op": "fact.assign",
             "fact": {
@@ -1276,7 +1276,7 @@
           },
           "equals": true
         },
-        "apply": [
+        "steps": [
           {
             "op": "fact.assign",
             "fact": {
@@ -1313,7 +1313,7 @@
           },
           "equals": true
         },
-        "apply": [
+        "steps": [
           {
             "op": "fact.assign",
             "fact": {

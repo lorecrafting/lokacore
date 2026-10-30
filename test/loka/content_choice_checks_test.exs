@@ -33,7 +33,7 @@ defmodule Loka.ContentChoiceChecksTest do
        }), {"OUTCOME_MISMATCH", at <> "intimidate.check"}},
       {guard,
        persuade.(
-         &Map.update!(&1, "sequence", fn s ->
+         &Map.update!(&1, "steps", fn s ->
            s ++ [%{"op" => "skill.acquire", "skill" => "intimidate"}]
          end)
        ), {"OUTCOME_MISMATCH", at <> "persuade.check"}},
@@ -47,16 +47,58 @@ defmodule Loka.ContentChoiceChecksTest do
     end
   end
 
-  # Breaks: the duplicate-key scan drops recipes or choices, so a recipe and a dialogue choice
+  # Breaks: the choice is checked in another step context or none, or CheckKinds.context(:choice) is dropped,
+  # so a field, op or check the dialogue choice never runs compiles (the old DialogueChoice schema refused each).
+  test "a dialogue choice refuses steps and checks outside the choice context", %{dir: dir} do
+    guard = "dialogues/guard.json"
+    at = "dialogues/guard.choices.persuade."
+    persuade = fn f -> &update_in(&1, ["choices", "persuade"], f) end
+    step = fn s -> persuade.(&Map.put(&1, "steps", [s])) end
+    assign = %{"op" => "fact.assign", "fact" => "gate_open", "value" => true}
+    check = fn f -> persuade.(&Map.update!(&1, "check", f)) end
+
+    cases = [
+      {step.(Map.put(assign, "npc", "guard")), at <> "steps[0].npc"},
+      {step.(Map.put(assign, "item", "x")), at <> "steps[0].item"},
+      {step.(%{"op" => "fact.adjust", "fact" => "gate_open", "amount" => 1, "npc" => "guard"}),
+       at <> "steps[0].npc"},
+      {step.(%{"op" => "fact.stamp", "fact" => "gate_open"}), at <> "steps[0].op"}
+    ]
+
+    for {change, path} <- cases do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [{guard, change}])
+
+      assert {"SCHEMA_VIOLATION", path} in Enum.map(diags, &{&1["code"], &1["path"]}),
+             inspect({path, diags})
+    end
+
+    # Breaks: a luck check is resolved as opposed (its absent attribute, rating and npc), adding diagnostics.
+    luck = check.(fn _ -> %{"key" => "persuade_guard", "kind" => "luck", "chance" => 50} end)
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{guard, luck}])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) == [
+             {"SCHEMA_VIOLATION", at <> "check.kind"}
+           ]
+
+    # Breaks: failure_text reads a missing failure as a text reference, adding a second diagnostic.
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [{guard, check.(&Map.delete(&1, "failure"))}])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) == [
+             {"SCHEMA_VIOLATION", at <> "check.failure"}
+           ]
+  end
+
+  # Breaks: the duplicate-key scan drops scripted actions or choices, so a scripted action and a dialogue choice
   # (one check DefinitionRef) both define one key and compile.
-  test "check keys gather every recipe check and every dialogue choice check" do
+  test "check keys gather every scripted action check and every dialogue choice check" do
     defs = %{
-      "recipe" => %{"a" => {"actions/a.json", [], %{"check" => %{"key" => "k"}}}},
+      "scripted_action" => %{"a" => {"actions/a.json", [], %{"check" => %{"key" => "k"}}}},
       "dialogue" => %{
         "d" => {"dialogues/d.json", [], %{"choices" => %{"x" => %{"check" => %{"key" => "k"}}}}}
       }
     }
 
-    assert Loka.Content.Recipes.shared_checks(defs) == MapSet.new(["k"])
+    assert Loka.Content.CheckKinds.shared_checks(defs) == MapSet.new(["k"])
   end
 end

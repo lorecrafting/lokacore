@@ -8,7 +8,7 @@
     "quest": "cull",
     "state": "active"
   },
-  "apply": [
+  "steps": [
     {
       "op": "quest.resolve",
       "quest": "cull",

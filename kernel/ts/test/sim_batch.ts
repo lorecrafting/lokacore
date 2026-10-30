@@ -100,10 +100,10 @@ export async function fresh(
   }
 }
 
-/** A step's action key (a recipe's key, else the command type) when it commits a change. */
+/** A step's action key (a scripted action's key, else the command type) when it commits a change. */
 export function changeKey(command: Command, d: DecisionResult): string | undefined {
   const p = command.payload as { type: string; action?: string };
-  // A recipe key is prefixed, so a silent recipe named like a verb is reported as the recipe.
+  // A scripted action key is prefixed, so a silent scripted action named like a verb is reported as the scripted action.
   const key = p.action ? `${p.type}:${p.action}` : p.type;
   return d.kind === 'accepted' && d.delta.ops.length ? key : undefined;
 }

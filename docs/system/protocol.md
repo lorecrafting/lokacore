@@ -63,10 +63,10 @@ storage half):
    ([save.md](save.md#replies)).
 4. **Resolve** (`commands/invocation.ts:75`): the action key must be in the actor's current ActionSet,
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
-   look/talk one `target_id`; perform `target_id`, then a use recipe's held tool as `item_id` ([row G4](mechanics.md#use-x-on-y-toolbox-row-g4)); take/drop one `item_id`; give `item_id`, `recipient_id`);
-   a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; an
+   look/talk one `target_id`; perform `target_id`, then a use scripted action's held tool as `item_id` ([row G4](mechanics.md#use-x-on-y-toolbox-row-g4)); take/drop one `item_id`; give `item_id`, `recipient_id`);
+   a scripted action fills its key, a quest offer its quest, `close_choice` the pending continuation; an
    input fills its field (`cast`'s `word` names a spell, [row 29a](mechanics.md#spell-cast-admission-toolbox-row-29a)); an
-   aimed spell is offered on its target's entry, never in `spell_words`, and its offer fills `word` from its recipe and `target_id` from `target_ids` (loka-x6t.109); the
+   aimed spell is offered on its target's entry, never in `spell_words`, and its offer fills `word` from its scripted action and `target_id` from `target_ids` (loka-x6t.109); the
    result must validate as a Command.
 5. **Step** (`kernel/ts/src/runtime/world.ts:117`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
    refuses ordinary player commands as `invalid_state` before ActionSet matching;
@@ -76,7 +76,7 @@ storage half):
    `unsupported_capability`. Admission (`:146`): the nil CommandId is `permission_denied`
    (`:179`), another world or actor `not_found`, and the ActionSet must offer an action that
    resolves to this Command and accepts its target and input (`commands/actions.ts:186`:
-   `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
+   `unsupported_capability`; a scripted action or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
    (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:210`).
@@ -142,7 +142,7 @@ and metadata validation in [resource@1](mechanics.md#resource1-kerneltssrcmechan
 Independent precondition replay uses the effective spec's authored `gain_every` boundaries
 for legacy pools, retaining the hour boundary only when that field is absent.
 Optional `resource.adjust.at` is an authoritative due-job settlement time, never a
-cartridge recipe/player input. Require committed base clock <= at <= the explicit
+cartridge action/player input. Require committed base clock <= at <= the explicit
 advance horizon, with equality at the base clock legal. When present, use that exact
 clock for resource precondition, regeneration, override-row validation and written
 row timestamp; when omitted all frozen base-clock behavior below remains unchanged.
@@ -240,13 +240,13 @@ bell-first case, a typed Q2 failure transition without a new event.
 An actor's actions (`kernel/ts/src/commands/actions.ts:154`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS`, `:86`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, wear, remove, stand, sit, rest, sleep, each with its target kind and input; policy always true), then the
-cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
+cartridge's actions, scripted actions, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
 intersect; `:59`), then the answers to a pending choice (`choose`, `close_choice`), which no
-ordinary contribution removes; the combat restriction below takes precedence. A recipe's
+ordinary contribution removes; the combat restriction below takes precedence. A scripted action's
 admission adds `cooldown` and `insufficient_resource`
-([action_recipe@1](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)).
+([scripted_action@1](mechanics.md#scripted_action1-mechanicsscripted_actionrulets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
 the GameView lists them only on the exits they act on and on the items with a barrier
 (containers, c1-locks), never with the place's actions. On an item each is advertised with the
@@ -282,7 +282,7 @@ is exactly `flee`, `stand`, `look` or `scan`, with the sole later C5 `bandage`
 exception under its [exact-item/current-effect admission](#bleed-and-bandage-composition).
 This final restriction follows engine, cartridge, room and pending-choice contributions;
 a key or alias cannot change the allowed command set.
-Recipes (`perform`), repeated Attack, Move, dialogue/choices, other inventory/equipment/door actions,
+Scripted actions (`perform`), repeated Attack, Move, dialogue/choices, other inventory/equipment/door actions,
 Wait and nonstanding position changes are unavailable. Projection, invocation resolution and
 direct Command admission use this same restricted set. Excluded invocation keys use the
 existing `unsupported_capability` result; a known direct Command excluded during combat
@@ -353,7 +353,7 @@ now: those admission and barrier@1's check accept, all available), also when pas
 whose barrier does not bar the way carries `sight` (the destination room id and title and the
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
 (04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`
-or any recipe aimed at a room detail (those are its NoticeView's `actions`, mechanics.md inspectable_detail@1),
+or any scripted action aimed at a room detail (those are its NoticeView's `actions`, mechanics.md inspectable_detail@1),
 nor the current position's verb; `position`, the actor's position, present exactly when the
 cartridge locks `position@1` (04 §15 as amended by c1-position);
 `entities` in the room and `inventory` of the body, each with its short name, explicit
@@ -363,7 +363,7 @@ to Take, including an alias and reachable contents, uses the same carrying predi
 rule after its existing policy/reach checks: `too_heavy` or `over_load` is advertised unavailable with that
 reason. `gameview_agrees_with_admission` checks that carrying refusal against the view,
 using the supplied action identity and resolved Take command for an alias; a budget fault is
-not a gameplay refusal. An offered action or a `spell_words` entry refused `insufficient_resource` for its recipe costs (pass-2 R1), or a
+not a gameplay refusal. An offered action or a `spell_words` entry refused `insufficient_resource` for its scripted action costs (pass-2 R1), or a
 dialogue choice whose `lesson_payment` the body cannot pay, carries `reason.message`
 `{key: "resource.short", bindings: {resource, amount}}`: the first cost the body cannot pay after
 the ones before it, by resource key (pass-1 R1). `resource.short` is an engine key the Book words
@@ -404,7 +404,7 @@ the band table, `visible` and `living`; writes, events, jobs and save rows: none
 optional view field, as ConditionView `duration`).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/view/action_lists.ts:33`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes (including standalone and board-child Notice actions), and for the door and container verbs and `wear`/`remove`, matched by the Command each
+scripted actions (including standalone and board-child Notice actions), and for the door and container verbs and `wear`/`remove`, matched by the Command each
 listed action resolves to (a cartridge alias included): one listed on its exit or item (a nested
 one in `contents` included) is never refused with a code the view predicts (`not_present`
 among them), one not listed is never accepted, and none of `wear`/`remove` is a place action; a
@@ -433,10 +433,10 @@ has `id`, `key`, `title: TextKey`, selected `description: TextKey` and ordered `
 with `id`, `key` (its own detail Key), `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
 nonempty and bounded to 64. IDs are existing detail target IDs; bodies are never projected.
 Standalone notices have the same `id`, `key`, `title` and selected `description` shape. Each Notice
-optionally has `actions`, existing AdvertisedAction rows: exact-subject recipes for
-that readable detail, available or with their actual refusal reason. These recipes are omitted
+optionally has `actions`, existing AdvertisedAction rows: exact-subject scripted actions for
+that readable detail, available or with their actual refusal reason. These scripted actions are omitted
 from World actions; Read remains in its existing exact-target entry channel. The view is
-descriptive even when Read is unavailable. Existing exact-target place actions govern Read entry; Notice actions govern detail recipes, including policy, alias and modal restrictions.
+descriptive even when Read is unavailable. Existing exact-target place actions govern Read entry; Notice actions govern detail scripted actions, including policy, alias and modal restrictions.
 Older snapshots without these optional fields keep their meaning and wire tag.
 
 An AdvertisedAction may supply optional concrete `target_ids`; Put supplies its final item/container
@@ -696,10 +696,10 @@ original provider/service for confirmed narration routing and save validation.
 
 `ServiceDefinition` binds its original
 provider, exact authored action key, currency, price, label/narration and one
-closed `ServiceBenefit`: entitlement fact, meal stock/debit/MV, or provider-held
+`benefit` [Step](cartridge.md#steps-and-checks) (`protocol/step.schema.json`), its `op` one the service context runs: entitlement fact, meal stock/debit/MV, or provider-held
 vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
 projects the captured provider target, service reference/quote, declared benefit
-and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
+and keyed admission. `ServiceDefinition` and `ServiceOffer` each declare a literal
 valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
 paid, full MV, sold out and unavailable exact payment without changing error codes.
 `GameError` and `UnavailableReason` may also carry `cause`, a closed `RefusalCause`
@@ -729,7 +729,7 @@ choice resolution, events and narration share writer group0. No acquisition tabl
 practice field, custom money ledger or portable foundation op is added. Ordinary
 fact writers refuse the reserved acquisition target. Content and generated contracts
 must describe this actual typed hook and reserved ownership, not a narrative Boolean
-assignment that happens to use a skill name. `DialogueChoice.sequence` carries
+assignment that happens to use a skill name. `DialogueChoice.steps` carries
 `{op: skill.acquire, skill}` and `lesson_payment` carries `{to, resource, amount}`,
 where `to` is the bound original speaker role. `ItemDefinition.weapon` carries
 `{skill, attack}`; `block_chance` is the shield's authored chance. The optional

@@ -30,7 +30,7 @@ type Any = any;
 // among the place's actions; a listed take is never refused not_present. A position verb
 // (position@1, c1-position) uses the selected action_key when supplied, else any matching place
 // action: available, it is never refused invalid_state; unavailable or absent, never accepted.
-// A cast at a target is its spell's offer there: `words` maps each spell word to its recipe key.
+// A cast at a target is its spell's offer there: `words` maps each spell word to its scripted action key.
 export const gameview_agrees_with_admission = ({
   view,
   command,
@@ -100,14 +100,14 @@ const aimedEntry = (view: GameView, p: Any, key: string | undefined) =>
 
 /**
  * The observation's maps from the actor's resolved set: each key's command, each aimed spell word's
- * key, and the keys of recipes aimed at a room detail (loka-x6t.120).
+ * key, and the keys of scripted actions aimed at a room detail (loka-x6t.120).
  */
 export const offerMaps = (actions: readonly Offered[]) => ({
   resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
-  details: actions.filter((a) => a.recipe?.target.kind === 'detail').map((a) => a.key),
+  details: actions.filter((a) => a.scripted?.target.kind === 'detail').map((a) => a.key),
   words: Object.fromEntries(
     actions.flatMap((a) =>
-      a.recipe?.target.kind === 'spell' ? [[a.recipe.target.word, a.key]] : [],
+      a.scripted?.target.kind === 'spell' ? [[a.scripted.target.word, a.key]] : [],
     ),
   ),
 });
@@ -134,7 +134,7 @@ function placeAgrees(
 }
 
 // The codes the view can show on an entry: an exit's passage, position (position@1) and fare; a
-// recipe's policy and admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
+// scripted action's policy and admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
 // action with a policy on an engine command joins when a cartridge authors one.
 const SHOWN: Readonly<Record<string, readonly string[]>> = {
   move: [
@@ -167,7 +167,7 @@ function advertised(
   commandOf: (a: AdvertisedAction) => string | undefined,
 ): ExitView | AdvertisedAction | undefined {
   if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);
-  // Toolbox row G4: a use recipe's perform is its [target, tool] pair on the held tool.
+  // Toolbox row G4: a use scripted action's perform is its [target, tool] pair on the held tool.
   if (p.type === 'perform' && p.item_id !== undefined)
     return entityView(view, p.item_id)?.actions.find(
       (a) =>
@@ -293,6 +293,6 @@ function dreamAgrees(view: Any, p: Any, decision: Any, key?: string) {
     : decision.kind === 'rejected' && decision.error.code === entry.reason.code;
 }
 
-/** World lists no recipe aimed at a room detail: that is its NoticeView's card (loka-x6t.120). */
+/** World lists no scripted action aimed at a room detail: that is its NoticeView's card (loka-x6t.120). */
 export const world_lists_no_fixture_action = (o: { view: GameView; details: readonly string[] }) =>
   o.view.actions.every((a) => !o.details.includes(a.action_key));

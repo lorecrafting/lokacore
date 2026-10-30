@@ -21,7 +21,8 @@ defmodule Loka.Content.Spells do
 
   def check(m, defs, registry, settings) do
     targets =
-      for {_, {rel, [], %{"target" => %{"kind" => "spell"} = t}}} <- defs["recipe"] || %{},
+      for {_, {rel, [], %{"target" => %{"kind" => "spell"} = t}}} <-
+            defs["scripted_action"] || %{},
           do: {rel, t}
 
     effects = effects(defs)
@@ -73,11 +74,11 @@ defmodule Loka.Content.Spells do
   end
 
   defp effects(defs) do
-    for {_, {rel, [], r}} <- defs["recipe"] || %{},
+    for {_, {rel, [], r}} <- defs["scripted_action"] || %{},
         {name, o} <- r["outcomes"],
-        {%{"op" => op} = s, i} <- Enum.with_index(o["sequence"]),
+        {%{"op" => op} = s, i} <- Enum.with_index(o["steps"]),
         op in @effects,
-        do: {rel, r, ["outcomes", name, "sequence", i, "op"], op, s}
+        do: {rel, r, ["outcomes", name, "steps", i, "op"], op, s}
   end
 
   defp placed(effects) do

@@ -26,8 +26,8 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
 
 /** A service offer's price note: a bank fee (row 25), or the MV a meal or drink restores. */
 export function priceNote({ benefit: b, price }: Offer): string {
-  if (b.kind === 'deposit' || b.kind === 'withdraw') return `fee ${price}p`;
-  const mv = b.kind === 'meal' || b.kind === 'drink' ? `; up to +${b.amount} MV, capped` : '';
+  if (b.op === 'deposit' || b.op === 'withdraw') return `fee ${price}p`;
+  const mv = b.op === 'meal' || b.op === 'drink' ? `; up to +${b.amount} MV, capped` : '';
   return `${price}p${mv}`;
 }
 
@@ -77,7 +77,7 @@ export function corpseButtons(v: GameView, text: Say): Press[] {
 
 // A claim's or cancel's commission key; another service has none.
 const follows = (s: Offer) =>
-  s.benefit.kind === 'claim' || s.benefit.kind === 'cancel' ? s.benefit.service.key : undefined;
+  s.benefit.op === 'claim' || s.benefit.op === 'cancel' ? s.benefit.service.key : undefined;
 
 // Refusals the kernel gives only past its open-order check (mechanics/service/shared.ts `open`,
 // `pay`); hp, combat, policy or binding refuse before it, so they say nothing of an order.

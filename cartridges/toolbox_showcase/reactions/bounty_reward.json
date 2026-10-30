@@ -4,7 +4,7 @@
     "quest": "bounty",
     "outcome": "done"
   },
-  "apply": [
+  "steps": [
     {
       "op": "experience.grant",
       "amount": 20

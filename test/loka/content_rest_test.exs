@@ -46,17 +46,17 @@ defmodule Loka.ContentRestTest do
     "meaning" => "The cartridge's own."
   }
 
-  # A recipe outcome, a dialogue choice and a reaction writing position, and an authored fact
+  # A scripted action outcome, a dialogue choice and a reaction writing position, and an authored fact
   # named position; with `read` the reaction only reads it.
   defp writes(read \\ false) do
-    recipe =
+    scripted =
       update_in(
         src("actions/coil_rope.json"),
-        ["outcomes", "success", "sequence"],
+        ["outcomes", "success", "steps"],
         &[@write | &1]
       )
 
-    dialogue = put_in(src("dialogues/bram.json"), ["choices", "carry", "sequence"], [@write])
+    dialogue = put_in(src("dialogues/bram.json"), ["choices", "carry", "steps"], [@write])
     plan = %{"op" => "fact.assign", "fact" => "search_plan", "value" => "party_led"}
     on = %{"event" => "fact_changed", "fact" => "search_plan"}
 
@@ -65,16 +65,16 @@ defmodule Loka.ContentRestTest do
         do: %{
           "on" => on,
           "when" => %{"op" => "fact_compare", "fact" => "position", "equals" => "sitting"},
-          "apply" => [plan]
+          "steps" => [plan]
         },
-        else: %{"on" => on, "apply" => [@write]}
+        else: %{"on" => on, "steps" => [@write]}
 
     facts = put_in(src("facts.json"), ["facts", "position"], @own)
 
     if read,
       do: %{"reactions/settle.json" => reaction},
       else: %{
-        "actions/coil_rope.json" => recipe,
+        "actions/coil_rope.json" => scripted,
         "dialogues/bram.json" => dialogue,
         "reactions/settle.json" => reaction,
         "facts.json" => facts
@@ -98,10 +98,10 @@ defmodule Loka.ContentRestTest do
     assert {:error, ds} = compile(Path.join(dir, "writes"), true, writes())
 
     assert Enum.sort_by(ds, & &1["path"]) == [
-             d("actions/coil_rope.outcomes.success.sequence[0].fact"),
-             d("dialogues/bram.choices.carry.sequence[0].fact"),
+             d("actions/coil_rope.outcomes.success.steps[0].fact"),
+             d("dialogues/bram.choices.carry.steps[0].fact"),
              d("facts.facts.position"),
-             d("reactions/settle.apply[0].fact")
+             d("reactions/settle.steps[0].fact")
            ]
 
     assert {:ok, _, _} = compile(Path.join(dir, "reads"), true, writes(true))

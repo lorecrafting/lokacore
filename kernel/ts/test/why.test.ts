@@ -133,11 +133,11 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
 
 // Break: an on-demand policy read on the world after the step (at 1 the quest is active after
 // accept_quest; at 2 the lantern is held after take).
-test('W5, W6: dialogue and recipe policies read on the world before the step', () => {
+test('W5, W6: dialogue and scripted action policies read on the world before the step', () => {
   const c = load((c) => {
     c.manifest.requires.capabilities.target_resolution = c.lock.capabilities.target_resolution = 1;
     const present = { op: 'target_present' }; // reads the target: undefined is false
-    c.recipes[`${S}recipe/coil_rope`].policy = {
+    c.scripted_actions[`${S}action/coil_rope`].policy = {
       op: 'all',
       items: [{ op: 'has_item', item: ref('item', 'lantern') }, present],
     };
@@ -154,18 +154,18 @@ test('W5, W6: dialogue and recipe policies read on the world before the step', (
       [true, true],
     ], // at 4, choose: the row's bound speaker
   );
-  const recipe = (n: number) => (why(c, trace, n, { recipe: 'coil_rope' }).recipe as any).policy;
+  const scripted = (n: number) => (why(c, trace, n, { action: 'coil_rope' }).action as any).policy;
   assert.deepEqual(
-    [2, 3].map((n) => recipe(n).items.map((x: any) => x.holds)),
+    [2, 3].map((n) => scripted(n).items.map((x: any) => x.holds)),
     [
       [false, true],
       [true, true],
     ],
   );
   // Break: a definition with no policy (absent holds, F3) is annotated as if it had a root and throws.
-  const bare = load((c) => delete c.recipes[`${S}recipe/coil_rope`].policy);
-  assert.deepEqual(why(bare, trace, 2, { recipe: 'coil_rope' }).recipe, {
-    rule: `${S}recipe/coil_rope`,
+  const bare = load((c) => delete c.scripted_actions[`${S}action/coil_rope`].policy);
+  assert.deepEqual(why(bare, trace, 2, { action: 'coil_rope' }).action, {
+    rule: `${S}action/coil_rope`,
   });
 });
 
@@ -181,8 +181,11 @@ test('W7: a prefix that no longer replays throws', () => {
 test('W10: a step at the narration cap throws', () => {
   const base = load(); // set after the loader, as marked() does: a reaction narrate needs a newer kernel_api
   const bell = base.reactions![BELL]!;
-  const apply = [...bell.apply, ...Array(64).fill({ op: 'narrate', text: 'scene.bell' })];
-  const c = { ...base, reactions: { ...base.reactions, [BELL]: { ...bell, apply } } } as Cartridge;
+  const apply = [...bell.steps, ...Array(64).fill({ op: 'narrate', text: 'scene.bell' })];
+  const c = {
+    ...base,
+    reactions: { ...base.reactions, [BELL]: { ...bell, steps: apply } },
+  } as Cartridge;
   assert.throws(() => why(c, trace, 7), /^Error: narration cap reached at ordinal 7$/);
 });
 
@@ -216,13 +219,13 @@ test('W8: the CLI prints the explanation and refuses bad arguments', () => {
       ['0'],
       ['1.5'],
       ['8'],
-      ['7', '--recipe', 'nope'],
-      ['7', '--recipe', 'coil_rope', '--dialogue', 'bram'],
+      ['7', '--action', 'nope'],
+      ['7', '--action', 'coil_rope', '--dialogue', 'bram'],
       ['7', '--other', 'x'],
       [],
     ])
       assert.equal(run(...args).status, 2, args.join(' '));
-    assert.equal(run('7', '--recipe', 'nope').stderr, 'no definition keyed nope\n'); // no path: not the transcript's
+    assert.equal(run('7', '--action', 'nope').stderr, 'no definition keyed nope\n'); // no path: not the transcript's
     writeFileSync(
       file,
       artifact((c) => (c.reactions[BELL].when.equals = 1)),

@@ -1,10 +1,10 @@
 // schedule@1 and calendar@1 (Early R7/R8 S; 04 §5.4; 06 §13; 21 §4, §10): the
-// fresh world's first job, the due-job drain in wait and in a recipe's duration, run_job and its
+// fresh world's first job, the due-job drain in wait and in a scripted action's duration, run_job and its
 // job CommandId, the loader's schedule and calendar checks, and coil_rope's narration participants
 // (Early R7/R8 N). Worlds are the ferry known answer
 // (protocol/fixtures/cartridge_ferry_hash.json: the world starts at 06:00 with Bram at the ferry
 // landing, his daily schedule landing from hour 6 and village green from hour 19, a one-hour
-// coil_rope recipe at the landing), variants re-hashed with node:crypto over their canonical
+// coil_rope scripted action at the landing), variants re-hashed with node:crypto over their canonical
 // bytes. Ids are IdSource and job CommandIds over the literal inputs, computed with
 // Python hashlib (numeric profile); times are hand-derived from the fixed calendar units
 // (command.schema.json LogicalTime: 3600 a hour, 86400 a day), and pre-release-proof.md's Bram
@@ -251,9 +251,9 @@ test('a run_job submitted to step is refused and changes nothing', () => {
   assert.equal(out.world, w);
 });
 
-// Breaks: a recipe's duration skipping a due job (04 §5.4: an action's time cost is an explicit
-// advance), the job's ops sharing the recipe's writer group.
-test("a recipe's duration runs the job due inside it in the player's proposal", () => {
+// Breaks: a scripted action's duration skipping a due job (04 §5.4: an action's time cost is an explicit
+// advance), the job's ops sharing the scripted action's writer group.
+test("a scripted action's duration runs the job due inside it in the player's proposal", () => {
   const w = wait(world(), H(18) + 1800).world;
   const { decision, world: after } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }), 0);
   assert.equal(decision.kind, 'accepted');
@@ -267,7 +267,7 @@ test("a recipe's duration runs the job due inside it in the player's proposal", 
       ['job.schedule', 1],
     ],
   );
-  // The recipe's own events first (custom_event, action_completed), then Bram's arrival.
+  // The scripted action's own events first (custom_event, action_completed), then Bram's arrival.
   assert.deepEqual(
     decision.kind === 'accepted' && decision.events.map((e) => [e.position, e.payload.type]),
     [
@@ -290,7 +290,7 @@ test('a body starts with its resources at their start values at the calendar sta
 
 // Breaks: an advance over the job budgets committing part of itself (time or jobs) instead of
 // faulting whole (04 §5.4): 65 due jobs each schedule one, over created_jobs (64).
-test('an advance over a job budget faults whole, in a wait and in a recipe', () => {
+test('an advance over a job budget faults whole, in a wait and in a scripted action', () => {
   const w = world();
   const many = Object.fromEntries(
     Array.from({ length: 65 }, (_, i) => [
@@ -324,7 +324,7 @@ test('a root over a job budget names its limit, pending_jobs before due_jobs_per
   });
   const SET = { id: CMD, payload: { actor_id: w.character } } as never;
   const adopted = (w: World, ops: object[], events: object[] = []) => {
-    const root = admit('action_recipe', accepted(w, 'x', ops as never, events as never) as never);
+    const root = admit('scripted_action', accepted(w, 'x', ops as never, events as never) as never);
     return adopt(w, root, SET, allocator(w, SET), 0);
   };
   const limit = (w: World, ops: object[]) => adopted(w, ops).limit;
@@ -358,12 +358,12 @@ const fails = (f: (c: any) => void, code: string, path: string, data = {}) =>
 // Narration participants (Early R7/R8 N; 06 §43 "pinned text keys and bindings"): ferry's
 // coil_rope names the actor and Bram. BODY is ordinal 1 under the nil CommandId (runtime/fresh.ts).
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157';
-const COIL = `.cartridge.recipes["${F}:recipe/coil_rope"].outcomes.success.narration.participants`;
-const coil = (c: any) => c.recipes[`${F}:recipe/coil_rope`].outcomes.success.narration;
+const COIL = `.cartridge.scripted_actions["${F}:action/coil_rope"].outcomes.success.narration.participants`;
+const coil = (c: any) => c.scripted_actions[`${F}:action/coil_rope`].outcomes.success.narration;
 
 // Breaks: participants dropped from the committed line, the actor pinned to its CharacterId
 // instead of its body, or an NPC to the wrong entity.
-test("a recipe's committed narration pins its participants' EntityIds", () => {
+test("a scripted action's committed narration pins its participants' EntityIds", () => {
   const w = world();
   const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }), 0);
   assert.deepEqual(validate('DecisionResult', decision), []);

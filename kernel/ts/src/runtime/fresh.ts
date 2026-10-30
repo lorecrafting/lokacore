@@ -163,7 +163,7 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
         (s) =>
           (clock !== 0 || s.regen || spent(cartridge, s.key)) &&
           !Object.values(cartridge.services ?? {}).some(
-            (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
+            (service) => service.benefit.op === 'meal' && service.benefit.stock.key === s.key,
           ),
       )
       .map((s) => {

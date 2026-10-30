@@ -19,7 +19,7 @@
     "learn": {
       "label": "cook.cooking.choice",
       "narration": "cook.cooking.learned",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "cooking"

@@ -4,12 +4,12 @@ defmodule Loka.Content.Compiler do
   alias Loka.Content.{
     Ancestries,
     Artifact,
-    Checks,
+    Resolve,
     Construction,
     Dialogues,
     Quests,
     Reactions,
-    Recipes,
+    ScriptedActions,
     Replenish,
     Requires
   }
@@ -93,9 +93,9 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Theft.check(manifest, defs, located, v2),
       Loka.Content.Mounts.check(manifest, defs, located),
       Loka.Content.Asks.check(manifest, defs),
-      Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
-      Checks.rooms(manifest, defs, v2, registry),
-      Recipes.check(manifest, defs, v2, registry),
+      Resolve.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
+      Resolve.rooms(manifest, defs, v2, registry),
+      ScriptedActions.check(manifest, defs, v2, registry),
       Quests.check(manifest, defs, v2, registry),
       Reactions.check(manifest, defs, v2, registry),
       Dialogues.check(manifest, defs, v2, located, registry),
@@ -121,13 +121,13 @@ defmodule Loka.Content.Compiler do
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Standing.check(manifest, defs) ++
         Loka.Content.Replenish.check(manifest, defs) ++
-        Loka.Content.Delayed.check(manifest, defs, Checks.trees(defs)) ++
+        Loka.Content.Delayed.check(manifest, defs, Resolve.trees(defs)) ++
         Loka.Content.Construction.check(manifest, defs, v2, located, registry)
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue scene liquid service transport population replenish structure),
+         ~w(room item npc scripted_action barrier quest reaction dialogue scene liquid service transport population replenish structure),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -190,7 +190,7 @@ defmodule Loka.Content.Compiler do
       |> Combat.settings(m)
       |> Loka.Content.Theft.settings(m)
       |> Loka.Content.Mounts.settings(m)
-      |> Checks.expand(m)
+      |> Resolve.expand(m)
       |> Map.merge(Map.take(extra, ["alternates", "speech"]))
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (keys then unresolved).
@@ -209,7 +209,7 @@ defmodule Loka.Content.Compiler do
     {"room", :room, "RoomDefinition"},
     {"item", :item, "ItemDefinition"},
     {"npc", :npc, "NpcDefinition"},
-    {"recipe", :recipe, "ActionRecipe"},
+    {"scripted_action", :scripted_action, "ScriptedAction"},
     {"barrier", :barrier, "BarrierDefinition"},
     {"quest", :quest, "QuestDefinition"},
     {"reaction", :reaction, "ReactionRule"},
@@ -266,7 +266,7 @@ defmodule Loka.Content.Compiler do
   end
 
   defp expand({rel, steps, v}, m),
-    do: {rel, steps, v |> Checks.expand(m) |> Construction.expand(m) |> Replenish.consume(m)}
+    do: {rel, steps, v |> Resolve.expand(m) |> Construction.expand(m) |> Replenish.consume(m)}
 
   defp expand(:invalid, _), do: :invalid
 

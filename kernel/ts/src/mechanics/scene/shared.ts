@@ -37,7 +37,7 @@ export function running(world: World, actor: CharacterId): SceneView | undefined
   }
 }
 
-/** Reaction-shaped deliveries: on is unused here; sequence consumes when and apply. */
+/** Reaction-shaped deliveries: on is unused here; sequence consumes when and steps. */
 export function starts(world: World, e: DomainEvent): ReactionRule[] {
   return [...restStarts(world, e), ...legacyStarts(world, e)];
 }
@@ -72,7 +72,7 @@ function legacyStarts(world: World, e: DomainEvent): ReactionRule[] {
       key: s.key as Key,
       on: { event: 'fact_changed', fact: fact(world, s) },
       when: { op: 'fact_compare', fact: fact(world, s), equals: 0 },
-      apply: [{ op: 'fact.assign', fact: fact(world, s), value: 1 }],
+      steps: [{ op: 'fact.assign', fact: fact(world, s), value: 1 }],
     }));
 }
 

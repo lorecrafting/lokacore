@@ -46,7 +46,7 @@ export function assignmentEvidence(
   events: readonly DomainEvent[],
   speaker: EntityId,
 ) {
-  for (const step of option.sequence ?? []) {
+  for (const step of option.steps ?? []) {
     if (step.op === 'fact.adjust') continue;
     const assignment = assignmentOf(s, step);
     if (!assignment) return false;
@@ -69,14 +69,15 @@ export function assignmentEvidence(
   return true;
 }
 
-function assignmentOf(s: Story, step: NonNullable<DialogueChoice['sequence']>[number]) {
+function assignmentOf(s: Story, step: NonNullable<DialogueChoice['steps']>[number]) {
   if (step.op === 'fact.adjust') return undefined;
   if (step.op === 'skill.acquire') return { fact: acquisition(step.skill), value: true };
   if (step.op === 'topic.grant') {
     const fact = s.world.cartridge.topics?.[refString(step.topic)]?.fact;
     return fact && { fact, value: true };
   }
-  return step;
+  // steps.ex: the choice context's ops; any other gives no evidence.
+  return step.op === 'fact.assign' ? step : undefined;
 }
 
 function changedEvidence(

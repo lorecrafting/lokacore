@@ -22,7 +22,7 @@
       "position": 1,
       "fact": 1,
       "policy": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "light": 1,
       "status": 1,
       "reaction": 1,

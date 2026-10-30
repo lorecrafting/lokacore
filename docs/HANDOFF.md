@@ -28,8 +28,8 @@ Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.m
   and amendments: loka-ivjq.3 notes. pm_merge uses main's merge_resolve.py (loka-hhs6): when it refuses a
   generated-only conflict, merge by hand in the batch worktree with the batch's own resolver, regen,
   commit, push.
-- Then C3: "C3 PLAN" (Fable) in loka-ivjq.4 notes; owner ratified D1 (two maps, rename recipe -> scripted
-  action); naming #7 #12 folded in; C3 rebuilds the glossary. After C3: a Fable "How Loka works"
+- Then C3: "C3 PLAN" (Fable) in loka-ivjq.4 notes; owner ratified D1 (two maps; the old action name becomes
+  scripted action); naming #7 #12 folded in; C3 rebuilds the glossary. After C3: a Fable "How Loka works"
   explainer page (Artifact), link to the owner. Then C4 naming batch (loka-ivjq.29), then polish (Next 3).
 - C1 lessons, applied in every brief: parallel slices clash in shared tests, so each slice merges the
   latest integration branch before handback; bash_guard refuses local full suites, CI kernel/elixir jobs

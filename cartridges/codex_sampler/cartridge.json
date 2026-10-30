@@ -19,7 +19,7 @@
       "readable": 1,
       "topics": 1,
       "reaction": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "knowledge": 1,
       "variety": 1
     },

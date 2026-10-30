@@ -1,6 +1,6 @@
 // Toolbox row FD2 on the compiled voices sampler: the skill_compare leaf (asides retired,
 // loka-x6t.125). Studying the runes raises lore (growth [1, 2]); the sage's line and the
-// decipher recipe follow the level.
+// decipher scripted action follow the level.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -63,7 +63,7 @@ const seen = (w: World) => {
 const fresh = () => newWorld(content, ctx('6f1c2b3a-4d5e-4f60-8a7b-9c0d1e2f3a4b'), [5, 6, 7, 8]);
 
 // Breaks: skill_compare reading the attribute, membership alone or a strict comparison; the
-// leaf not gating room_line_variants or a recipe policy.
+// leaf not gating room_line_variants or a scripted action policy.
 test('lore 0, 1 and 2: the scholar line and the decipher action wait for lore 2', () => {
   let w = fresh();
   const before = { sage: 'npc.sage.line', decipher: false };

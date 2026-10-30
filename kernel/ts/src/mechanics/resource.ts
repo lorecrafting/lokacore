@@ -9,7 +9,7 @@ import type {
   EntityId,
   Key,
   MutationTarget,
-  RecipeCost,
+  ActionCost,
   ResourceRegen,
   Text,
   TextKey,
@@ -83,7 +83,7 @@ export function level(world: World, entity: EntityId, resource: DefinitionRef): 
 /**
  * The resource.adjust of `resource` by `by` (checked arithmetic), from its value as `levels`
  * left it in this decision (else its current value), and the levels after it. `saturate` (a
- * recipe step, RecipeStep: add by, stopping at the bounds) stops the result at the resource's
+ * scripted action step, Step: add by, stopping at the bounds) stops the result at the resource's
  * bounds; otherwise a result out of bounds is left for composition to fault. The op itself is
  * always exact.
  */
@@ -118,7 +118,7 @@ export function adjust(
 export function pay(
   world: World,
   entity: EntityId,
-  costs: readonly RecipeCost[],
+  costs: readonly ActionCost[],
 ): { ops: Adjust[]; levels: Levels } | undefined {
   let levels: Levels = {};
   const ops: Adjust[] = [];
@@ -135,7 +135,7 @@ export function pay(
 export function shortfall(
   world: World,
   entity: EntityId,
-  costs: readonly RecipeCost[],
+  costs: readonly ActionCost[],
 ): Text | undefined {
   const c = costs.find((_, i) => !pay(world, entity, costs.slice(0, i + 1)));
   return (
@@ -147,7 +147,7 @@ export function shortfall(
 }
 
 /** `{ message }` naming the unpaid cost when `code` is insufficient_resource (pass-1 R1), else {}. */
-export function unpaid(world: World, body: EntityId, code: unknown, costs: readonly RecipeCost[]) {
+export function unpaid(world: World, body: EntityId, code: unknown, costs: readonly ActionCost[]) {
   const message = code === 'insufficient_resource' && shortfall(world, body, costs);
   return message ? { message } : {};
 }

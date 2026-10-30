@@ -3,7 +3,7 @@
     "event": "status_expired",
     "status": "spoiling"
   },
-  "apply": [
+  "steps": [
     {
       "op": "item.move",
       "room": "midden"

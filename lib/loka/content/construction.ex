@@ -5,7 +5,7 @@ defmodule Loka.Content.Construction do
   cartridge (UNRESOLVED_REFERENCE); a structure, its tags and description variants are owned by
   their capabilities, and its name and descriptions have catalog entries; a site or
   world.construction needs construction@1. Variant and enter-lock conditions
-  join Checks.trees/1 through RoomParts.conditions/1.
+  join Resolve.trees/1 through RoomParts.conditions/1.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4, ref: 3]
   import Loka.Content.Refs, only: [owned: 3, owners: 2, resolve: 4]
@@ -32,35 +32,35 @@ defmodule Loka.Content.Construction do
     )
   end
 
-  # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
-  # structure and direction, at most one per sequence, with world.construction, the build refusal
+  # Built rooms S6: a scripted action build step sits in the success outcome of a detail target whose room is a site listing its
+  # structure and direction, at most one per outcome, with world.construction, the build refusal
   # texts. The listed structure
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
-    for {_, {rel, [], r}} <- defs["recipe"] || %{},
+    for {_, {rel, [], r}} <- defs["scripted_action"] || %{},
         {name, o} <- r["outcomes"],
-        {s, i} <- Enum.with_index(o["sequence"]),
+        {s, i} <- Enum.with_index(o["steps"]),
         s["op"] == "build",
-        d <- build(m, defs, text, settings, {rel, name, r, s, o["sequence"], i}),
+        d <- build(m, defs, text, settings, {rel, name, r, s, o["steps"], i}),
         do: d
   end
 
-  defp build(m, defs, text, settings, {rel, name, r, s, sequence, i}) do
-    path = ["outcomes", name, "sequence", i]
+  defp build(m, defs, text, settings, {rel, name, r, s, steps, i}) do
+    path = ["outcomes", name, "steps", i]
     site = build_site(r["target"], m, defs)
     op = at(rel, path ++ ["op"])
 
     for(
-      true <- [misplaced?(sequence, i, name, site, settings)],
+      true <- [misplaced?(steps, i, name, site, settings)],
       do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
     ) ++
-      refusal_texts(text, op) ++ on_site(site, s, rel, path)
+      refusal_texts(text, op) ++ on_site(site, s, rel, path, {m, defs})
   end
 
-  # A second build in the sequence, a build outside success, off a site or without world.construction.
-  defp misplaced?(sequence, i, name, site, settings),
+  # A second build in the steps, a build outside success, off a site or without world.construction.
+  defp misplaced?(steps, i, name, site, settings),
     do:
-      Enum.any?(Enum.take(sequence, i), &(&1["op"] == "build")) or name != "success" or
+      Enum.any?(Enum.take(steps, i), &(&1["op"] == "build")) or name != "success" or
         site == nil or get_in(settings, ["world", "construction"]) == nil
 
   defp refusal_texts(text, op) do
@@ -76,11 +76,14 @@ defmodule Loka.Content.Construction do
          else: (_ -> nil)
   end
 
-  defp on_site(nil, _, _, _), do: []
+  defp on_site(nil, _, _, _, _), do: []
 
-  defp on_site(site, s, rel, path) do
+  # Only a structure that resolves can be off the site's list (Steps reports an unresolved one).
+  defp on_site(site, s, rel, path, {m, defs}) do
     for {f, ok} <- [
-          {"structure", s["structure"] in site["structures"]},
+          {"structure",
+           s["structure"] in site["structures"] or
+             not match?({_, _, _}, resolve(s["structure"], "structure", m, defs))},
           {"direction", s["direction"] in site["directions"]}
         ],
         not ok,

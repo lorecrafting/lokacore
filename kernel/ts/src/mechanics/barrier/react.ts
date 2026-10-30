@@ -20,7 +20,7 @@ const LINE: readonly BarrierState[] = ['open', 'closed', 'locked'];
 
 export function setBarrier(
   world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'barrier.set' }>,
+  step: Extract<ReactionRule['steps'][number], { op: 'barrier.set' }>,
   cause: DomainEvent,
   subject: string | undefined,
   group: number,

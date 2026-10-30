@@ -194,7 +194,7 @@ test('magic 4b: ward needs level 2 at the exact threshold', () => {
   const at = (grant: number) => {
     const c = structuredClone(content) as any;
     c.attributes[ref('attribute', 'cha')].start = 7;
-    c.reactions[ref('reaction', 'errand_reward')].apply.find(
+    c.reactions[ref('reaction', 'errand_reward')].steps.find(
       (s: any) => s.op === 'experience.grant',
     ).amount = grant;
     const v = read(taught(c));
@@ -468,9 +468,9 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
   // The spell route: ward retargeted at the golem tells its line only while the golem is seen.
   const warded = (v: World) => {
     const c = structuredClone(v.cartridge) as any;
-    const ward = c.recipes[ref('recipe', 'ward')];
+    const ward = c.scripted_actions[ref('action', 'ward')];
     ward.costs = []; // the earlier casts spent the ma
-    ward.outcomes.success.sequence = [
+    ward.outcomes.success.steps = [
       { op: 'status.apply', status: status('wet'), npc: { ...C, kind: 'npc', key: 'golem' } },
     ];
     const r = act({ ...v, cartridge: c }, { type: 'cast', word: 'ward' });

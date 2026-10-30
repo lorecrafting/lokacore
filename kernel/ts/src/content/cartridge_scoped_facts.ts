@@ -37,7 +37,7 @@ const targetless = (at: string) =>
   /^\.cartridge\.rooms\[[^\]]*\](\.exits\.[a-z_]+)?\.locks\.(enter|traverse)\b/.test(at);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 // Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
-const wielded = (o?: Obj) => o?.wear !== undefined || o?.kind === 'repair';
+const wielded = (o?: Obj) => o?.wear !== undefined || o?.op === 'repair';
 const fieldsOf = (o: Obj) =>
   SUBJECTS.filter((f) => (f !== 'subject' || o.op === 'fact_compare') && Object.hasOwn(o, f));
 
@@ -86,9 +86,9 @@ export function scopeSites(c: Obj): Diagnostic[] {
         BOUND.some((f) => Object.hasOwn(o, f)) ||
         (d.riddle?.choice_id === key && d.riddle.wrong_limit !== undefined)
       )
-        (o.sequence ?? []).forEach((x: Obj, i: number) => {
+        (o.steps ?? []).forEach((x: Obj, i: number) => {
           if (x.fact && subjective(x.fact))
-            out.push(`.cartridge.dialogues${step(ref)}.choices${step(key)}.sequence[${i}].fact`);
+            out.push(`.cartridge.dialogues${step(ref)}.choices${step(key)}.steps[${i}].fact`);
         });
   }
   return out.map((at) => diag('FACT_SCOPE_UNSUPPORTED', at));

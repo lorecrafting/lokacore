@@ -28,7 +28,7 @@ export function bellSource(c: any) {
     aliases: ['bell'],
     description: 'detail.bell',
   };
-  c.recipes[`${prefix}:recipe/ring_bell`] = {
+  c.scripted_actions[`${prefix}:action/ring_bell`] = {
     key: 'ring_bell',
     aliases: ['ring'],
     name: 'actions.ring_bell',
@@ -38,14 +38,14 @@ export function bellSource(c: any) {
     outcomes: {
       success: {
         narration: { actor: 'narration.ring_bell' },
-        sequence: [{ op: 'fact.assign', fact, value: true }],
+        steps: [{ op: 'fact.assign', fact, value: true }],
       },
     },
   };
   c.reactions[`${prefix}:reaction/bell_suppress_goblins`] = {
     key: 'bell_suppress_goblins',
     on: { event: 'fact_changed', fact },
-    apply: [
+    steps: [
       { op: 'population.suppress', plan: ref('population', 'goblins'), duration: SUPPRESSION },
     ],
   };

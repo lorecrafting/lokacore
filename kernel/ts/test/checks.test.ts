@@ -1,4 +1,4 @@
-// The logical clock, wait, recipe duration and luck checks (R5 S6a; 21 §4 Time, Deterministic
+// The logical clock, wait, scripted action duration and luck checks (R5 S6a; 21 §4 Time, Deterministic
 // RNG, §7 Check; 04 §5.0, §5.4; 00 §4.2). Worlds are the bell known answer
 // (protocol/fixtures/cartridge_bell_hash.json) with ring_bell given a check, a failure outcome and
 // a duration, re-hashed with node:crypto over sorted-key JSON.stringify. The seed is the numeric
@@ -29,7 +29,7 @@ const IDS = [
 ];
 const SEED = [1, 2, 3, 4];
 const AFTER_ONE_DRAW = [7, 0, 1026, 12288];
-const RECIPE = 'recipe_sampler@0.0.1:recipe/ring_bell';
+const SCRIPTED = 'recipe_sampler@0.0.1:action/ring_bell';
 
 const sorted = (v: any): any =>
   Array.isArray(v)
@@ -58,11 +58,11 @@ const world = (f: (c: any) => void = () => {}): World => {
 // emits bell_muffled.
 const checked = (chance: number) =>
   world((c) => {
-    const r = c.recipes[RECIPE];
+    const r = c.scripted_actions[SCRIPTED];
     r.check = { key: 'ring_true', kind: 'luck', chance };
     r.duration = 90;
     r.outcomes.failure = {
-      sequence: [{ op: 'event.emit', event: 'bell_muffled' }],
+      steps: [{ op: 'event.emit', event: 'bell_muffled' }],
       narration: { actor: 'narration.ring_bell.observers' },
     };
   });
@@ -167,7 +167,7 @@ test('a luck check of chance 20 fails on the roll of 20: accepted, draw and time
 });
 
 // 04 §5.0. Breaks: a rejection that draws, advances time or commits anything.
-test('a rejected perform of a checked recipe draws nothing and changes nothing', () => {
+test('a rejected perform of a checked scripted action draws nothing and changes nothing', () => {
   const w = checked(50);
   const down = step(w, cmd({ type: 'move', direction: 'down' }), 0).world;
   const rung = step(checked(99), ring, 0).world; // policy: the bell is not yet rung
@@ -181,9 +181,9 @@ test('a rejected perform of a checked recipe draws nothing and changes nothing',
   }
 });
 
-// Breaks: a recipe without a check drawing or changing its outcome, or ignoring its duration.
-test('a recipe without a check keeps outcome performed and the RNG; duration still advances', () => {
-  const w = world((c) => (c.recipes[RECIPE].duration = 3600));
+// Breaks: a scripted action without a check drawing or changing its outcome, or ignoring its duration.
+test('a scripted action without a check keeps outcome performed and the RNG; duration still advances', () => {
+  const w = world((c) => (c.scripted_actions[SCRIPTED].duration = 3600));
   const { decision, world: after } = step(w, ring, 0);
   assert.ok(decision.kind === 'accepted');
   assert.equal(decision.outcome, 'performed');

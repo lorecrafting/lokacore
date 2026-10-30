@@ -23,9 +23,9 @@ defmodule Loka.ContentTheftTest do
     assert diags.([no_lock]) == [vault]
 
     assert diags.([
-             {"reactions/theft_seen.json", &update_in(&1, ["apply"], fn a -> a ++ [stolen] end)}
+             {"reactions/theft_seen.json", &update_in(&1, ["steps"], fn a -> a ++ [stolen] end)}
            ]) ==
-             [{"RESERVED_FACT", "reactions/theft_seen.apply[1].fact"}]
+             [{"RESERVED_FACT", "reactions/theft_seen.steps[1].fact"}]
 
     stock = %{"items" => ["purse", "coin"], "buy" => [6, 6]}
 

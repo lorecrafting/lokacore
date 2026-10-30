@@ -1,6 +1,6 @@
-defmodule Loka.ContentRecipesTest do
-  # Action recipes and rooms' action contributions in the compiler (R5 S5; action.schema.json
-  # ActionRecipe, ActionContribution; 06 §19-§20; 05 §28). Expected diagnostics are hand-written
+defmodule Loka.ContentScriptedActionsTest do
+  # Scripted actions and rooms' action contributions in the compiler (R5 S5; action.schema.json
+  # ScriptedAction, ActionContribution; 06 §19-§20; 05 §28). Expected diagnostics are hand-written
   # from protocol/cartridge.schema.json DiagnosticCode; the known answer is
   # protocol/fixtures/cartridge_bell_hash.json (Python).
   use ExUnit.Case, async: true
@@ -30,7 +30,7 @@ defmodule Loka.ContentRecipesTest do
   defp text(v), do: JSON.encode!(v)
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
-  defp recipe(path, v), do: put_in(src("actions/ring_bell.json"), path, v)
+  defp scripted(path, v), do: put_in(src("actions/ring_bell.json"), path, v)
 
   defp d(code, path, data \\ %{}, suggested \\ []) do
     %{
@@ -51,8 +51,8 @@ defmodule Loka.ContentRecipesTest do
       "key" => key
     }
 
-  # Breaks: the recipe dropped or reshaped, its short target room or fact references left short,
-  # or the recipes map emitted under another name.
+  # Breaks: the scripted action dropped or reshaped, its short target room or fact references left short,
+  # or the scripted actions map emitted under another name.
   test "recipe_sampler compiles to its Python known answer without warnings" do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
@@ -68,37 +68,73 @@ defmodule Loka.ContentRecipesTest do
     r =
       src("actions/ring_bell.json")
       |> put_in(["target", "room"], full("room", "belfry"))
-      |> put_in(["outcomes", "success", "sequence"], seq)
+      |> put_in(["outcomes", "success", "steps"], seq)
 
     assert compile(dir, %{"actions/ring_bell.json" => r}) == {:ok, @expected, []}
   end
 
-  # Breaks: a recipe naming a room, detail or fact that does not exist compiles, or a wrongly
+  # Breaks: a scripted action naming a room, detail or fact that does not exist compiles, or a wrongly
   # typed value compiles and only faults at play time (brief item 7).
-  test "a recipe's unknown room, detail or fact or mistyped value fails", %{tmp_dir: dir} do
-    seq = ["outcomes", "success", "sequence"]
+  test "a scripted action's unknown room, detail or fact or mistyped value fails", %{tmp_dir: dir} do
+    seq = ["outcomes", "success", "steps"]
 
     cases = [
-      {recipe(["target", "room"], "crypt"),
+      {scripted(["target", "room"], "crypt"),
        d("UNRESOLVED_REFERENCE", "actions/ring_bell.target.room", %{
          "target" => "recipe_sampler@0.0.1:room/crypt"
        })},
-      {recipe(["target", "detail"], "gong"),
+      {scripted(["target", "detail"], "gong"),
        d("UNRESOLVED_REFERENCE", "actions/ring_bell.target.detail", %{"target" => "gong"})},
-      {recipe(seq, [%{"op" => "fact.assign", "fact" => "bell_tolled", "value" => true}]),
-       d("UNRESOLVED_REFERENCE", "actions/ring_bell.outcomes.success.sequence[0].fact", %{
+      {scripted(seq, [%{"op" => "fact.assign", "fact" => "bell_tolled", "value" => true}]),
+       d("UNRESOLVED_REFERENCE", "actions/ring_bell.outcomes.success.steps[0].fact", %{
          "target" => "recipe_sampler@0.0.1:fact/bell_tolled"
        })},
-      {recipe(seq, [%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => "yes"}]),
-       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.sequence[0].value")}
+      {scripted(seq, [%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => "yes"}]),
+       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.steps[0].value")}
     ]
 
     for {r, diag} <- cases,
         do: assert(compile(dir, %{"actions/ring_bell.json" => r}) == {:error, [diag]})
   end
 
+  # C3 D6 (loka-ivjq.4): Loka.Content.Steps' :action row. Breaks: a step op or field a scripted
+  # action does not run, or an opposed check's choice-only failure or rating, compiles (the
+  # kernel's scripted action rule would refuse or ignore it at play time).
+  test "a scripted action runs only the action steps and check fields", %{tmp_dir: dir} do
+    at = "actions/ring_bell.outcomes.success.steps[0]."
+    refused = &d("SCHEMA_VIOLATION", at <> &1, %{"error" => "invalid_value"})
+
+    cases = [
+      {%{"op" => "narrate", "text" => "narration.ring_bell.actor"}, [refused.("op")]},
+      {%{"op" => "skill.acquire", "skill" => "lockpicking"}, [refused.("op")]},
+      {%{"op" => "experience.grant", "amount" => 1}, [refused.("op")]},
+      {%{"op" => "fact.adjust", "fact" => "chapel_bell_rung", "amount" => 1}, [refused.("op")]},
+      {%{"op" => "drink", "vessel" => "cup", "liquid" => "ale", "recovery" => "r", "amount" => 1},
+       [refused.("op")]},
+      # Breaks: a refused field is still reference-checked (no npc bram), a second diagnostic.
+      {%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => true, "npc" => "bram"},
+       [refused.("npc")]}
+    ]
+
+    for {step, diags} <- cases do
+      r = scripted(["outcomes", "success", "steps"], [step])
+      assert {:error, ^diags} = compile(dir, %{"actions/ring_bell.json" => r})
+    end
+
+    src = Loka.ContentSource.copy("cartridges/barrier_sampler")
+    path = "actions/pick_lock.json"
+
+    for {field, v} <- [{"failure", "narration.pick_lock.failure"}, {"rating", 3}] do
+      diag =
+        d("SCHEMA_VIOLATION", "actions/pick_lock.check." <> field, %{"error" => "invalid_value"})
+
+      check = &put_in(&1, ["check", field], v)
+      assert Loka.ContentSource.compile(src, [{path, check}]) == {:error, [diag]}
+    end
+  end
+
   # Breaks: a label or narration key without catalog text compiles (the player sees a raw key).
-  test "a recipe's label and narration need catalog entries", %{tmp_dir: dir} do
+  test "a scripted action's label and narration need catalog entries", %{tmp_dir: dir} do
     text = Map.drop(src("text.json"), ["actions.ring_bell", "narration.ring_bell.observers"])
 
     assert compile(dir, %{"text.json" => text}) ==
@@ -115,10 +151,10 @@ defmodule Loka.ContentRecipesTest do
               ]}
   end
 
-  # Breaks: a recipe or a step's operation compiles without its owner required (05 §6), or a
-  # recipe shares an action's or an engine verb's key, one ActionSet identity with two
+  # Breaks: a scripted action or a step's operation compiles without its owner required (05 §6), or a
+  # scripted action shares an action's or an engine verb's key, one ActionSet identity with two
   # definitions (review F1).
-  test "recipes need their owners and a key no action has", %{tmp_dir: dir} do
+  test "scripted actions need their owners and a key no action has", %{tmp_dir: dir} do
     caps = src("cartridge.json")["requires"]["capabilities"]
 
     manifest = fn drop ->
@@ -126,14 +162,14 @@ defmodule Loka.ContentRecipesTest do
     end
 
     owner = fn path ->
-      d("UNDECLARED_CAPABILITY", path, %{"capability" => "action_recipe"}, ["action_recipe@1"])
+      d("UNDECLARED_CAPABILITY", path, %{"capability" => "scripted_action"}, ["scripted_action@1"])
     end
 
-    assert compile(dir, %{"cartridge.json" => manifest.(["action_recipe"])}) ==
+    assert compile(dir, %{"cartridge.json" => manifest.(["scripted_action"])}) ==
              {:error,
               [
                 owner.("actions/ring_bell"),
-                owner.("actions/ring_bell.outcomes.success.sequence[1].op")
+                owner.("actions/ring_bell.outcomes.success.steps[1].op")
               ]}
 
     action = %{
@@ -146,7 +182,7 @@ defmodule Loka.ContentRecipesTest do
       "accessibility" => "actions.ring_bell"
     }
 
-    # One actions/ directory: the clash is a bundled action beside the recipe's file.
+    # One actions/ directory: the clash is a bundled action beside the scripted action's file.
     assert compile(dir, %{"areas/belfry.json" => %{"actions" => %{"ring_bell" => action}}}) ==
              {:error,
               [
@@ -173,8 +209,8 @@ defmodule Loka.ContentRecipesTest do
   end
 
   # Breaks: actions/ files route by a field other than `command` (a mixed file is then
-  # refused at the wrong field or compiles), or a leftover recipes/ directory still loads.
-  test "an actions/ file with command is a built-in action, without it a recipe",
+  # refused at the wrong field or compiles), or a leftover scripted_actions/ directory still loads.
+  test "an actions/ file with command is a built-in action, without it a scripted action",
        %{tmp_dir: dir} do
     bell = src("actions/ring_bell.json")
 
@@ -203,11 +239,11 @@ defmodule Loka.ContentRecipesTest do
                 })
               ]}
 
-    assert compile(Path.join(dir, "old"), %{"recipes/ring_bell.json" => bell}) ==
-             {:error, [d("UNKNOWN_FIELD", "recipes/ring_bell")]}
+    assert compile(Path.join(dir, "old"), %{"scripted_actions/ring_bell.json" => bell}) ==
+             {:error, [d("UNKNOWN_FIELD", "scripted_actions/ring_bell")]}
   end
 
-  # Break: an undecodable actions/ file without `command` drops out of the recipes, so a room
+  # Break: an undecodable actions/ file without `command` drops out of the scripted actions, so a room
   # naming it adds UNRESOLVED_REFERENCE beside the real error (the refused-bundle hold, ruling 3).
   test "an undecodable actions/ file reports only its own error", %{tmp_dir: dir} do
     room =
@@ -233,8 +269,8 @@ defmodule Loka.ContentRecipesTest do
   end
 
   # Breaks: a room's contribution naming nothing compiles (a typo that silently changes
-  # nothing), or an engine verb, action or recipe key is refused.
-  test "a room's action contribution names a verb, action or recipe", %{tmp_dir: dir} do
+  # nothing), or an engine verb, action or scripted action key is refused.
+  test "a room's action contribution names a verb, action or scripted action", %{tmp_dir: dir} do
     room = fn keys ->
       Map.put(src("rooms/belfry.json"), "actions", [%{"op" => "subtract", "actions" => keys}])
     end

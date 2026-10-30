@@ -121,7 +121,7 @@ test('accept activates the quest: one quest.activate and its quest_activated', (
 
 // Breaks: a second activation admitted (or faulting instead of refused), or a forged accept of a
 // quest the cartridge does not declare reaching the rule or refused as anything but not_found
-// (perform's code for a recipe it does not declare).
+// (perform's code for a scripted action it does not declare).
 test('a second accept and an accept of an undeclared quest are refused', () => {
   const accepted = after(world(), ACCEPT);
   refused(accepted, ACCEPT, 'unsupported_capability');

@@ -26,7 +26,7 @@ Pins: one kernel test per district (`kernel/ts/test/showcase_body.test.ts`, `sho
 `showcase_social.test.ts`) walking the guided steps below and asserting each expected outcome, plus
 one app test for the away-recap block (social step 14), which only the Book renders; a
 content-hash fixture as the samplers keep (`kernel/ts/test/exposure.test.ts` canonical hash); the step
-tables double as the walkthrough for a recorder recipe. Tests pick world context ids whose per-day
+tables double as the walkthrough for a recorder scripted action. Tests pick world context ids whose per-day
 weather sequence gives each step the day it needs, as `exposure_sampler`'s tests do (weather is a hash
 of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-and-tide-toolbox-row-31)).
 
@@ -34,7 +34,7 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
 
 - `requires.kernel_api.at_least` 1.47; capabilities: everything the samplers below require
   (movement, containment, equipment, resource, fact, policy, reaction, status, schedule, calendar,
-  tags, description_variant, variety, knowledge, action_recipe, check, skills, attributes, liquid,
+  tags, description_variant, variety, knowledge, scripted_action, check, skills, attributes, liquid,
   readable, topics, quest, dialogue, scene, barrier, death, position, commerce, behavior
   (schedules) and combat (the Warden's `attack` and `engage`); the compiler names any missing one).
 - `entry`: `crossroads_inn`; `world.death.shrine`: `crossroads_inn`.
@@ -125,7 +125,7 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
   or `wearing` in this rule, since those read the player). Same shape for `rain` to `soaked`.
 - **Orla** (brewer): stays in `still_room`; `attributes {dex: 11}`; `description_variants` on
   `status_active inspired` ("Orla hums as she works").
-- **Drover** (sandbox): `attributes {str: 12}`; recipe `shove_drover` at detail `fold_post`,
+- **Drover** (sandbox): `attributes {str: 12}`; scripted action `shove_drover` at detail `fold_post`,
   check `{kind: opposed, attribute: str, npc: drover}`, policy `npc_present {npc: drover}`
   (`npc_attr_sampler`): passes only under `might` (13 ≥ 12).
 - Exposure reactions for the player, two per condition (`entity_entered_room` into `fell_top`
@@ -137,12 +137,12 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
 - Needs: reaction on `entity_entered_room` into `fell_top` applying `hungry` and `thirsty` (two
   steps, one rule; `needs_sampler`).
 - Potion: reaction `on {event: drank, kind: draught}` applies `might` (`buffs_sampler/reactions/potion.json`).
-- Song: recipe `play_song` at `hearth` (policy `has_item lute`, success emits a custom event as the
+- Song: scripted action `play_song` at `hearth` (policy `has_item lute`, success emits a custom event as the
   sampler does, `tip`: "A song reaches whoever is in the room with you."); reactions on
   `action_completed {action: play_song}`: one applying `inspired` to the performer, one with
   `when npc_present {npc: orla}` applying it with `npc: orla` (`buffs_sampler/reactions`). The
   sandbox twin `play_fold_song` at `fold_hearth` with the same reactions for the player only.
-- Knucklebones: recipe `throw_bones` at `knucklebones`, check `{kind: opposed, attribute: dex}`
+- Knucklebones: scripted action `throw_bones` at `knucklebones`, check `{kind: opposed, attribute: dex}`
   against the detail's rating 11 (`skills_sampler`), success and failure lines.
 
 ### Guided loop and expected outcomes
@@ -202,7 +202,7 @@ their description why the door is shut (a `sky` variant).
 > more than once: the words change, and by your third visit the shore knows you. The pools south
 > are all of this with every door open.
 
-### NPCs, items, recipes
+### NPCs, items, scripted actions
 
 - **Idony** (the watcher): stays on `cliff_path`; `short_variants` "a dozing watcher" while
   `time_window {from: 0, to: 6}`, `description_variants` on `sky {season: winter}`
@@ -212,9 +212,9 @@ their description why the door is shut (a `sky` variant).
   familiar one-liner), `sky {tide: high}` (the cave mouth under water: why the gate is shut),
   `sky {weather: rain}`, then one per season; so a season line shows only at low tide on a dry
   day, and the sandbox details show the rest.
-- Recipe `look_about` at `horizon`, narration key with two `alternates` (three lines in all;
+- Scripted action `look_about` at `horizon`, narration key with two `alternates` (three lines in all;
   `variety_sampler/cartridge.json`).
-- Recipe `search_cleft` at `cleft`: policy `time_window {from: 20, to: 5}` (the window wraps at
+- Scripted action `search_cleft` at `cleft`: policy `time_window {from: 20, to: 5}` (the window wraps at
   day end: 20:00 to 04:59), success
   `fact.assign stair_found true`, `tip`: "Searching costs nothing; some things only show in the
   dark." (`hidden_sampler/actions/search_panel.json`, `quest_sampler` tip). Sandbox twin
@@ -321,7 +321,7 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   `lean` (`check` intimidate rating 3: fails until level 3 is never reached with growth
   `[1, 2]`; shows a check that practice cannot beat), `leave`.
 
-### Reactions, recipes, quest, scene
+### Reactions, scripted actions, quest, scene
 
 - Gift: `on {event: item_acquired, item: apple}` `apply fact.adjust trust +1` (the holder is the
   subject; `standing_sampler/reactions/gift_apple.json`).
@@ -332,7 +332,7 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
 - Badge: five reactions, one per `entity_entered_room` into `village_green`, `warden_gate`,
   `tollhouse`, `mill`, `church`, each `when all(visited_count at_least 1 for the five rooms, not
   topic_walker_known)` `apply fact.assign topic_walker_known true` (`codex_sampler/reactions`).
-- Pick: recipe `pick_strongbox` at `strongbox_lock`, check opposed skill `pick`, policy
+- Pick: scripted action `pick_strongbox` at `strongbox_lock`, check opposed skill `pick`, policy
   `strongbox_picked false`, success assigns it; no jam (`barrier_sampler/actions/pick_lock.json`).
 - Force: `force_tollhouse_door` at `tollhouse_door`, check opposed `str`, policy all(`has_tag
   {barrier: tollhouse_door, tag: fragile}`, `tollhouse_forced false`), success assigns
@@ -340,7 +340,7 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   `force_iron_door` at `iron_door` with `has_tag {barrier: iron_door, tag: fragile}` (never holds),
   success assigns `iron_forced`, which the barrier's `opens_when` reads (`barrier_sampler`).
   Sandbox twins on `hall_strongbox` and `hall_cupboard`.
-- Deduction: recipe `think_lectern` at `lectern`, policy all(`topic_parish_known`,
+- Deduction: scripted action `think_lectern` at `lectern`, policy all(`topic_parish_known`,
   `topic_fire_known`, not `topic_heir_known`), success assigns `topic_heir_known`
   (`codex_sampler/actions/deduce_smugglers.json`); sandbox twin at `hall_lectern`.
 - Quest `carry_letter` (`quest_sampler/quests`): no `offer` (dialogue accept only); objective
@@ -377,7 +377,7 @@ world whose day 1 is rain (Tam visits the mill every day, so on a later day Nell
 | 6 | East; `pick_strongbox`. | First pick fails (level 0 < 1), second passes; the lid opens; take `mill_ledger`, read it: Lore lists "The mill". | pick x force x skill growth |
 | 7 | `force_iron_door`; `force_tollhouse_door`. | Iron: unavailable and refused (not fragile); wooden: passes (10 ≥ 5), the door opens north to the mill. | pick x force x skill growth |
 | 8 | Be at the mill at 10:00, the green at 11:00 (dry day). | 10:00 Tam arrives at the mill (`knows_fire` on Tam); 11:00 he arrives on the green and Nell's `knows_fire` turns true; Talk to Nell now opens `nell_rumour`; `press` passes (level 2 ≥ 2) and Lore lists "The fire". On the rain day, standing in the mill at 11:00 shows "Tam makes for the church porch out of the rain.", Nell learns nothing, and `nell_talk` opens instead. | rumour x dialogue check x codex; schedule cases x sky |
-| 9 | Church: read `parish_roll`; `think_lectern`. | Lore lists "The parish"; the Journal's Lore shows the deduction card (from "The parish" and "The fire"), twice: the church's and its `hall_lectern` twin's, the view listing every recipe whose topics are known wherever its detail is; performing the card whose detail is present (the church's, from the church; the twin is refused `not_present`, Beads loka-kgd.64) grants "The heir" once, then both cards are gone. Having walked green, gate, tollhouse, mill and church, "Wardle walker" is already listed from the fifth room. | visit tiers x codex badge |
+| 9 | Church: read `parish_roll`; `think_lectern`. | Lore lists "The parish"; the Journal's Lore shows the deduction card (from "The parish" and "The fire"), twice: the church's and its `hall_lectern` twin's, the view listing every scripted action whose topics are known wherever its detail is; performing the card whose detail is present (the church's, from the church; the twin is refused `not_present`, Beads loka-kgd.64) grants "The heir" once, then both cards are gone. Having walked green, gate, tollhouse, mill and church, "Wardle walker" is already listed from the fifth room. | visit tiers x codex badge |
 | 10 | Fresh world: on the green at 07:00 day 1, talk to the Reeve: `accept`; wait 5 real minutes (15000 units, to 11:10); take the `letter`; wait 5 more (15:20), then 5 more (19:30). The accept is pinned at 07:00 so the fell run lands on day 1 (frost): from about 09:30 on, the first chill tick or the deadline (accept + 60000) falls on day 2, where rain soaks instead of chilling. | Active on accept, "Time left" counting down from 60000; at +15000 the active hint ("The letter lies on the moot stone."); the take completes the objective (`objectives_complete`, Journal shows the `objectives_met` text and the countdown continues from activation, 45000 left); 5 real minutes after the take the first `objectives_met` hint, 10 after it the second. | quests x deadlines x hints |
 | 11 | At 19:30 day 1, north to the inn, north to the fell with no cloak (frost); wait to 21:30. | `chilled` applies with 15000 left; its first tick at 21:30 puts hp at 9 with 7800 left (deadline 23:40 day 1); the Journal shows both the condition and the time left. | deadlines x exposure |
 | 12 | East to Wat before 60000: `deliver`. | The letter moves to Wat; quest resolved with outcome `deliver`; story point reached; scene `letter_read` runs (two lines, acknowledge); on its end standing +1; the Journal shows the `deliver` outcome text. `burn` instead: outcome `burn`, scene `letter_ash`, standing -2, Wat keeps nothing. | scenes x dialogue x reactions |

@@ -489,7 +489,9 @@
       "properties": {
         "hostile": {
           "description": "Book hostile refusal: present while this NPC's disposition toward the viewer is hostile (toolbox row G11), a derived read; absent otherwise.",
-          "enum": [true]
+          "enum": [
+            true
+          ]
         },
         "refusal": {
           "description": "Book hostile refusal: the NPC's authored disposition.refuse line, present with hostile when authored.",
@@ -1259,7 +1261,7 @@
           "$ref": "#/$defs/SceneView"
         },
         "spell_words": {
-          "description": "Word bar S2 (toolbox row 29a): one entry per unaimed spell whose learned fact reads true for the actor (an aimed spell, is offered on its targets' entries as command cast instead), in recipe key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the recipe's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
+          "description": "Word bar S2 (toolbox row 29a): one entry per unaimed spell whose learned fact reads true for the actor (an aimed spell, is offered on its targets' entries as command cast instead), in scripted action key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the scripted action's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -1436,7 +1438,7 @@
             "additionalProperties": false
           },
           "minItems": 1,
-          "description": "Lore deductions (toolbox row 46): each recipe, in key order, whose policy is an all that requires at least two topics' facts true and whose success assigns another topic's fact true, while the actor knows those topics and not that one; action is the recipe's key, label its label, from the known topics' labels. Absent when none."
+          "description": "Lore deductions (toolbox row 46): each scripted action, in key order, whose policy is an all that requires at least two topics' facts true and whose success assigns another topic's fact true, while the actor knows those topics and not that one; action is the scripted action's key, label its label, from the known topics' labels. Absent when none."
         },
         "bleeding": {
           "$ref": "gameview.schema.json#/$defs/BleedingView"
@@ -2240,7 +2242,7 @@
         "description"
       ],
       "additionalProperties": false,
-      "description": "Current-room readable detail identity, authored detail key, authored page title and selected description; no body. Optional actions list exact-subject readable-detail recipes, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
+      "description": "Current-room readable detail identity, authored detail key, authored page title and selected description; no body. Optional actions list exact-subject readable-detail scripted actions, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
       "examples": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
@@ -2532,7 +2534,7 @@
           "maximum": 2147483647
         },
         "benefit": {
-          "$ref": "service.schema.json#/$defs/ServiceBenefit"
+          "$ref": "step.schema.json#/$defs/Step"
         },
         "action": {
           "$ref": "#/$defs/AdvertisedAction"
@@ -2558,7 +2560,7 @@
           "label": "service.room",
           "price": 3,
           "benefit": {
-            "kind": "entitlement",
+            "op": "entitlement",
             "fact": {
               "cartridge_id": "service_probe",
               "cartridge_version": "1.0.0",

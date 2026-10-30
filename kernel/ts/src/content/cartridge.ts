@@ -86,7 +86,7 @@ const DEFINITION_MAPS = [
   'rooms',
   'npcs',
   'items',
-  'recipes',
+  'scripted_actions',
   'resources',
   'attributes',
   'barriers',

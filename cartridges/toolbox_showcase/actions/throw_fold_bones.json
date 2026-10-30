@@ -16,7 +16,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "event.emit",
           "event": "bones"
@@ -27,7 +27,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.throw_bones.failure"
       }

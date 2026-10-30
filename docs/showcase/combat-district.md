@@ -244,7 +244,7 @@ against rows 6a and 6c for this cartridge.
 - `showcase_body.test.ts`'s hub pin: four exits.
 - No Book test: cues, Raise cards and condition lines are existing Book elements (cue wording and
   the Attack choice wording are pending the designer, Beads `loka-kgd.65`, `loka-x6t.14`); the Book
-  offers "ware" as a Shout chip (`speech.phrases`; `combat 3` pins the GameView offer); the recorder recipe still skips steps 2 and 3.
+  offers "ware" as a Shout chip (`speech.phrases`; `combat 3` pins the GameView offer); the recorder scripted action still skips steps 2 and 3.
 
 ## Matrix cells this plan covers
 

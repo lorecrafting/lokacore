@@ -7,7 +7,7 @@ defmodule Loka.ContentAttributesTest do
 
   @moduletag :tmp_dir
   @src "cartridges/resource_sampler"
-  @pray "resource_sampler@0.0.1:recipe/pray"
+  @pray "resource_sampler@0.0.1:action/pray"
   @stats %{"str" => 14, "dex" => 12, "con" => 13, "int" => 10, "spi" => 9, "per" => 11}
 
   # resource_sampler with `attributes` (nil: no attributes.json), attributes@1 locked when `lock`,
@@ -75,7 +75,7 @@ defmodule Loka.ContentAttributesTest do
              "resource_sampler@0.0.1:attribute/str" => %{"key" => "str", "start" => 14}
            }
 
-    assert a["recipes"][@pray]["policy"]["items"] == [
+    assert a["scripted_actions"][@pray]["policy"]["items"] == [
              %{"op" => "stat_compare", "attribute" => ref("attribute", "str"), "at_least" => 14},
              %{"op" => "resource_compare", "resource" => ref("resource", "mv"), "at_least" => 2}
            ]

@@ -4,7 +4,7 @@
   "description": "ReactionRule (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), owned by reaction@1.",
   "$defs": {
     "ReactionRule": {
-      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Apply may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
       "type": "object",
       "properties": {
         "key": {
@@ -514,268 +514,15 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "apply": {
+        "steps": {
           "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "fact.assign"
-                  },
-                  "fact": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "npc": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "item": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "with": {
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "value": {
-                    "$ref": "delta.schema.json#/$defs/FactValue"
-                  }
-                },
-                "required": [
-                  "op",
-                  "fact",
-                  "value"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "fact.adjust"
-                  },
-                  "fact": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "npc": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "item": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "with": {
-                    "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "amount": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "op",
-                  "fact",
-                  "amount"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "quest.activate"
-                  },
-                  "quest": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  }
-                },
-                "required": [
-                  "op",
-                  "quest"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "quest.resolve"
-                  },
-                  "quest": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "outcome": {
-                    "$ref": "action.schema.json#/$defs/Key"
-                  }
-                },
-                "required": [
-                  "op",
-                  "quest",
-                  "outcome"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "op": {
-                    "const": "quest.fail"
-                  },
-                  "quest": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                  },
-                  "outcome": {
-                    "$ref": "action.schema.json#/$defs/Key"
-                  }
-                },
-                "required": [
-                  "op",
-                  "quest",
-                  "outcome"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "description": "Suppress one authored population plan for duration logical seconds from this accepted fact-change cause, preserving current members and closing its current encounter.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "population.suppress" },
-                  "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "duration": { "type": "integer", "minimum": 1 }
-                },
-                "required": ["op", "plan", "duration"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "status.apply" },
-                  "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "room": {
-                    "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                    "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION)."
-                  },
-                  "co_present": {
-                    "enum": [true],
-                    "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION)."
-                  },
-                  "tag": {
-                    "$ref": "entity.schema.json#/$defs/Tag",
-                    "description": "Toolbox row W22 (only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing."
-                  }
-                },
-                "dependentRequired": { "tag": ["co_present"] },
-                "required": ["op", "status"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "barrier.set" },
-                  "to": { "$ref": "room.schema.json#/$defs/BarrierState" },
-                  "barrier": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "tag": { "$ref": "entity.schema.json#/$defs/Tag" }
-                },
-                "exactlyOneRequired": ["barrier", "tag"],
-                "required": ["op", "to"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row G3 reader 3: end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "status.cure" },
-                  "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
-                },
-                "required": ["op", "status"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Add amount experience to the acting character's levelling row (toolbox row 4), saturating at the ResourceInt maximum; needs world.levelling.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "experience.grant" },
-                  "amount": { "type": "integer", "minimum": 1, "maximum": 2147483647 }
-                },
-                "required": ["op", "amount"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "item.move" },
-                  "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
-                },
-                "required": ["op", "room"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1: plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "npc.move" },
-                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
-                },
-                "required": ["op"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row 37a (phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "population.spawn" },
-                  "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
-                },
-                "required": ["op", "plan"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Homestead hs-1: one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "replenish.run" },
-                  "key": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
-                },
-                "required": ["op", "key"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Settle S3-1: appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "narrate" },
-                  "text": { "$ref": "text.schema.json#/$defs/TextKey" }
-                },
-                "required": ["op", "text"],
-                "additionalProperties": false
-              },
-              {
-                "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
-                "type": "object",
-                "properties": {
-                  "op": { "const": "fact.stamp" },
-                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
-                },
-                "required": ["op", "fact"],
-                "additionalProperties": false
-              }
-            ]
-          }
+          "items": { "$ref": "step.schema.json#/$defs/Step" }
         }
       },
       "required": [
         "key",
         "on",
-        "apply"
+        "steps"
       ],
       "additionalProperties": false,
       "examples": [
@@ -800,7 +547,7 @@
             },
             "equals": true
           },
-          "apply": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -825,7 +572,7 @@
             },
             "outcome": "report"
           },
-          "apply": [
+          "steps": [
             {
               "op": "quest.activate",
               "quest": {

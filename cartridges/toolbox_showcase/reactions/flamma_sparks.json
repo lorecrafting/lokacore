@@ -3,7 +3,7 @@
     "event": "action_completed",
     "action": "flamma"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "burning",

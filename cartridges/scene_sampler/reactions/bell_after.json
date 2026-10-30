@@ -8,7 +8,7 @@
     "fact": "scene_bell_rung",
     "equals": -1
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "bell_heard",

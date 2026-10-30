@@ -18,7 +18,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": {
@@ -39,7 +39,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -135,7 +135,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "fact": {
             "cartridge_id": "reward_storage",
@@ -155,7 +155,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "amount": 5
@@ -170,7 +170,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": {
@@ -190,7 +190,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": {
@@ -212,7 +212,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": false,
           "fact": {
@@ -233,7 +233,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": false,
@@ -249,7 +249,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": {
@@ -270,7 +270,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "invalid_operation",
           "fact": {
@@ -291,7 +291,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "fact": {
             "cartridge_id": "reward_storage",
@@ -311,7 +311,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "value": 3
@@ -326,7 +326,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -346,7 +346,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -368,7 +368,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": false,
           "fact": {
@@ -389,7 +389,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": false,
@@ -405,7 +405,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -426,7 +426,7 @@
     "value": {
       "label": "label",
       "narration": "narration",
-      "sequence": [
+      "steps": [
         {
           "op": "invalid_operation",
           "fact": {

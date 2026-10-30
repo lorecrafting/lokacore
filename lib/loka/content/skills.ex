@@ -27,12 +27,12 @@ defmodule Loka.Content.Skills do
       "meaning" => "Skill #{key}'s use count (skills@1): only skills@1 writes it."
     }
 
-  # Recipe tips' seen_tip_<key> facts (RecipeTips.tip_facts) are reserved the same way, here.
+  # Scripted action tips' seen_tip_<key> facts (ActionTips.tip_facts) are reserved the same way, here.
   def facts(facts, m, defs) when is_map(facts) and m != nil do
     Enum.reduce(defs["skill"], {facts, []}, fn {key, skill}, acc ->
       Enum.reduce(reserved(key, skill), acc, &reserve(&1, skill, &2))
     end)
-    |> Loka.Content.RecipeTips.tip_facts(defs)
+    |> Loka.Content.ActionTips.tip_facts(defs)
   end
 
   def facts(facts, _, _), do: {facts, []}
@@ -151,7 +151,7 @@ defmodule Loka.Content.Skills do
   defp teaches?(d, hidden?),
     do:
       Enum.any?(Map.values(d["choices"]), fn o ->
-        Enum.any?(o["sequence"] || [], &hidden?.(&1["skill"]))
+        Enum.any?(o["steps"] || [], &hidden?.(&1["skill"]))
       end)
 
   defp hidden(m, defs),
@@ -243,9 +243,9 @@ defmodule Loka.Content.Skills do
 
   def choice(rel, steps, o, d, ctx) do
     refs =
-      for {s, i} <- Enum.with_index(o["sequence"] || []),
+      for {s, i} <- Enum.with_index(o["steps"] || []),
           s["op"] == "skill.acquire",
-          e <- reference(rel, steps ++ ["sequence", i], {"skill", "skill"}, s, ctx.m, ctx.defs),
+          e <- reference(rel, steps ++ ["steps", i], {"skill", "skill"}, s, ctx.m, ctx.defs),
           do: e
 
     refs ++ lesson(rel, steps, o, d, ctx)
@@ -269,7 +269,7 @@ defmodule Loka.Content.Skills do
       else: []
   end
 
-  defp grants(o), do: Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire"))
+  defp grants(o), do: Enum.count(o["steps"] || [], &(&1["op"] == "skill.acquire"))
 
   defp funded?(%{"role" => "npc", "npc" => ref}, resource, ctx) do
     case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do

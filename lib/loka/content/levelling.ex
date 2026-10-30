@@ -20,8 +20,8 @@ defmodule Loka.Content.Levelling do
 
     grants =
       for {_, {rel, [], r}} <- defs["reaction"] || %{},
-          {%{"op" => "experience.grant"}, i} <- Enum.with_index(r["apply"]),
-          do: at(rel, ["apply", i, "op"])
+          {%{"op" => "experience.grant"}, i} <- Enum.with_index(r["steps"]),
+          do: at(rel, ["steps", i, "op"])
 
     if levelling,
       do: declared(levelling, m, defs, text),

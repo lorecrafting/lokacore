@@ -1,6 +1,6 @@
 defmodule Loka.ContentRoadTest do
   # Resources, costs, threshold checks and cooldowns in the compiler (R5 S6b; resource.schema.json
-  # ResourceSpec; action.schema.json ActionRecipe). Expected diagnostics are hand-written from
+  # ResourceSpec; action.schema.json ScriptedAction). Expected diagnostics are hand-written from
   # protocol/cartridge.schema.json DiagnosticCode; the known answer is
   # protocol/fixtures/cartridge_road_hash.json (Python).
   use ExUnit.Case, async: true
@@ -66,7 +66,7 @@ defmodule Loka.ContentRoadTest do
     pray =
       put_in(
         src("actions/pray.json"),
-        ["outcomes", "success", "sequence", Access.at(0), "resource"],
+        ["outcomes", "success", "steps", Access.at(0), "resource"],
         ref("resource", "hp")
       )
 
@@ -127,7 +127,7 @@ defmodule Loka.ContentRoadTest do
              {:error, [d("UNKNOWN_FIELD", "resources.resources.hp.key")]}
   end
 
-  # Breaks: a recipe naming a resource the cartridge lacks compiles (the loader rejects it).
+  # Breaks: a scripted action naming a resource the cartridge lacks compiles (the loader rejects it).
   test "a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE",
        %{tmp_dir: dir} do
     target = %{"target" => "resource_sampler@0.0.1:resource/sp"}
@@ -144,14 +144,14 @@ defmodule Loka.ContentRoadTest do
            ) ==
              {:error, [d("UNRESOLVED_REFERENCE", "actions/shove_cart.check.resource", target)]}
 
-    step = ["outcomes", "success", "sequence", Access.at(0), "resource"]
+    step = ["outcomes", "success", "steps", Access.at(0), "resource"]
 
     assert compile(Path.join(dir, "c"), edit("actions/pray.json", step, "sp")) ==
              {:error,
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "actions/pray.outcomes.success.sequence[0].resource",
+                  "actions/pray.outcomes.success.steps[0].resource",
                   target
                 )
               ]}

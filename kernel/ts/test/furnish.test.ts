@@ -2,7 +2,7 @@
 // forge and a rug (tags bed, forge, rug) lie in the yard; the hut north of it holds a chest and a
 // bench. An item_present leaf holds while an item with the tag lies directly in the actor's room:
 // resting in the hut with the bed there applies well_rested (+2 mv every 600 s for 3600 s), the
-// bench's temper recipe needs the forge there, and the rug turns on the hut's variant line.
+// bench's temper scripted action needs the forge there, and the rug turns on the hut's variant line.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';

@@ -1,5 +1,5 @@
 // size: allow 350, food, water, practical skills, local Knock, G7 get locks and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
-import { aimedRefused, craftRefused, policyRefusal } from '../mechanics/action_recipe/shared.ts';
+import { aimedRefused, craftRefused, policyRefusal } from '../mechanics/scripted_action/shared.ts';
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -40,8 +40,8 @@ import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 import { chainRefused } from '../mechanics/locks.ts';
 
-// Shared query context projects exact offers in priority/key order. Recipes bind their detail (a
-// use recipe, row G4, lists only its pairs on the held tool, view/use.ts);
+// Shared query context projects exact offers in priority/key order. Scripted actions bind their detail (a
+// use scripted action, row G4, lists only its pairs on the held tool, view/use.ts);
 // door/equipment/light/food helpers use the same admission as their command rules.
 // An actor's current position is not offered again.
 const HIDDEN = [
@@ -68,7 +68,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const body = bodyOf(world, actor);
   const take = takeAdmission(world, actor, body, steps);
   const here = (a: Offered, d = detailAt(world, a)) =>
-    [undefined, 'spell'].includes(a.recipe?.target.kind) ||
+    [undefined, 'spell'].includes(a.scripted?.target.kind) ||
     (d !== undefined &&
       world.details[d].room === world.state.containers[body!] &&
       light.visible(world, actor, d, steps));
@@ -92,7 +92,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       ...listed(
         (a) =>
           a.target.kind === 'none' &&
-          !detailRecipe(world, a) &&
+          !detailScripted(world, a) &&
           !door(a) &&
           !equip(a) &&
           !light.VERBS.includes(a.command) &&
@@ -150,7 +150,7 @@ function entityOffered(
 ) {
   if (scope === 'worn' && !light.VERBS.includes(a.command))
     return a.command === 'cast' // an aimed spell at the light slot's lantern (loka-x6t.109)
-      ? !!a.recipe && !aimedRefused(world, actor, a.recipe, id, steps)
+      ? !!a.scripted && !aimedRefused(world, actor, a.scripted, id, steps)
       : a.command === 'remove' && (fits(world, actor, a, id) || !!heldOn(world, actor, a, id));
   if (light.VERBS.includes(a.command))
     return (
@@ -168,16 +168,16 @@ function entityOffered(
         a.target.scopes.includes(scope as never) &&
         (!equip(a) || fits(world, actor, a, id)) &&
         (a.command !== 'ask' || !!(world.entities[id] as NpcEntity | undefined)?.ask) && // row FD7
-        !aimedRefused(world, actor, a.recipe, id, steps);
+        !aimedRefused(world, actor, a.scripted, id, steps);
 }
 
 const commanded = (a: Offered) =>
   [...light.VERBS, 'harvest', 'expedition'].includes(a.command) ||
-  (a.command === 'cast' && !!a.recipe);
+  (a.command === 'cast' && !!a.scripted);
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 60, exact detail harvest, the row FD7 ask and a recipe's reason (loka-j64e, pass-1 R1) join shared action admission and projection
+// size: allow 60, exact detail harvest, the row FD7 ask and a scripted action's reason (loka-j64e, pass-1 R1) join shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -199,8 +199,8 @@ function advertise(
     ...(target_ids && { target_ids }),
     ...(patch && { target_ids: [id as EntityId] }),
   };
-  const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
-  const target = (a.recipe && a.command !== 'cast' ? detailAt(world, a) : id) as
+  const admitted = a.scripted && admission(world, a.scripted, actor, bodyOf(world, actor)!);
+  const target = (a.scripted && a.command !== 'cast' ? detailAt(world, a) : id) as
     EntityId | undefined;
   const gathered = harvestOffered(world, actor, a, target, steps);
   const excursion = expedition.actionRefused(world, actor, a, target);
@@ -210,8 +210,8 @@ function advertise(
       ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
       : 'not_found');
   const refused = holds(world, actor, a.policy, { target, steps })
-    ? (heldOn(world, actor, a, target) ?? craftRefused(world, a.recipe, actor, steps)) // hs-10
-    : policyRefusal(a.recipe); // the command's refusal of a failed policy, with its reason
+    ? (heldOn(world, actor, a, target) ?? craftRefused(world, a.scripted, actor, steps)) // hs-10
+    : policyRefusal(a.scripted); // the command's refusal of a failed policy, with its reason
   const code =
     refused?.code ??
     (talk ||
@@ -232,7 +232,7 @@ function advertise(
         ? askRefused(world, actor, target, steps)
         : undefined));
   // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
-  const short = unpaid(world, bodyOf(world, actor)!, admitted, a.recipe?.costs ?? []);
+  const short = unpaid(world, bodyOf(world, actor)!, admitted, a.scripted?.costs ?? []);
   return code
     ? { available: false, ...shown, reason: refused ?? { code, ...short } }
     : { available: true, ...shown };
@@ -338,5 +338,5 @@ function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
     : undefined;
 }
 
-// A recipe aimed at a detail is its NoticeView's card only (loka-x6t.120).
-const detailRecipe = (world: World, a: Offered) => detailAt(world, a) !== undefined;
+// A scripted action aimed at a detail is its NoticeView's card only (loka-x6t.120).
+const detailScripted = (world: World, a: Offered) => detailAt(world, a) !== undefined;

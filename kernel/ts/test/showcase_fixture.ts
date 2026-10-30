@@ -200,7 +200,7 @@ export function homestead(c: any) {
     'errand_reward',
   ]) {
     const x = c.reactions[ref('reaction', r)];
-    x.apply = x.apply.filter((op: any) => op.op !== 'narrate');
+    x.steps = x.steps.filter((op: any) => op.op !== 'narrate');
   }
   for (let w = 1; w <= 3; w++)
     for (let k = 0; k <= 9; k++) delete c.reactions[ref('reaction', `wheel_${w}_x_shows_${k}`)];
@@ -228,18 +228,18 @@ export function homestead(c: any) {
       'service/raze_croft_hut',
       'service/stew',
     ],
-    recipes: [
-      'recipe/chop',
-      'recipe/saw',
-      'recipe/carve_spoon',
-      'recipe/raise_timbered_hut',
-      'recipe/cook_feast',
-      'recipe/cook_stew',
-      'recipe/cook_stew_croft',
-      'recipe/fish',
-      'recipe/fish_croft',
-      'recipe/water_croft',
-      'recipe/water_plot',
+    scripted_actions: [
+      'action/chop',
+      'action/saw',
+      'action/carve_spoon',
+      'action/raise_timbered_hut',
+      'action/cook_feast',
+      'action/cook_stew',
+      'action/cook_stew_croft',
+      'action/fish',
+      'action/fish_croft',
+      'action/water_croft',
+      'action/water_plot',
     ],
     reactions: [
       'reaction/cot_rest',
@@ -383,7 +383,7 @@ export function homestead(c: any) {
   // spells (1.98) with flamma's sparks; ward's level and stat policy.
   delete c.manifest.requires.capabilities.light;
   delete c.lock.capabilities.light;
-  for (const k of ['lux', 'ward', 'flamma']) delete c.recipes[ref('recipe', k)];
+  for (const k of ['lux', 'ward', 'flamma']) delete c.scripted_actions[ref('action', k)];
   delete c.reactions[ref('reaction', 'flamma_sparks')];
   for (const k of ['lantern', 'attic_lantern', 'lamp_oil']) delete c.items[ref('item', k)];
   delete c.rooms[ref('room', 'crypt')].dark_description;

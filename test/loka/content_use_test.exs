@@ -4,17 +4,17 @@ defmodule Loka.ContentUseTest do
   @dir "cartridges/use_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row G4): the compiler accepts a status.cure on a detail recipe,
-  # an opposed check on a use recipe (no detail, so no rating), a use tool's
+  # Breaks (toolbox row G4): the compiler accepts a status.cure on a detail scripted action,
+  # an opposed check on a use scripted action (no detail, so no rating), a use tool's
   # liquid naming no liquid of the cartridge, or leaves its short liquid reference unexpanded.
-  test "use recipes: cures only on them, no rating-opposed check, liquid expands" do
+  test "use scripted actions: cures only on them, no rating-opposed check, liquid expands" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, artifact, []} = Loka.ContentSource.compile(dir, [])
 
     assert get_in(JSON.decode!(artifact), [
              "cartridge",
-             "recipes",
-             "use_sampler@0.0.1:recipe/oil",
+             "scripted_actions",
+             "use_sampler@0.0.1:action/oil",
              "target",
              "tool",
              "liquid"
@@ -25,7 +25,7 @@ defmodule Loka.ContentUseTest do
              "key" => "oil"
            }
 
-    # A status.cure on a detail recipe cures nothing (a detail holds no status): refused.
+    # A status.cure on a detail scripted action cures nothing (a detail holds no status): refused.
     detail = %{"kind" => "detail", "room" => "yard", "detail" => "pump"}
 
     on_detail = [
@@ -40,7 +40,7 @@ defmodule Loka.ContentUseTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, on_detail)
 
     assert pairs(diags) == [
-             {"SCHEMA_VIOLATION", "actions/quench.outcomes.success.sequence[0].op"}
+             {"SCHEMA_VIOLATION", "actions/quench.outcomes.success.steps[0].op"}
            ]
 
     opposed = %{"key" => "q", "kind" => "opposed", "attribute" => "str"}

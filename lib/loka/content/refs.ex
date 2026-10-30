@@ -81,11 +81,16 @@ defmodule Loka.Content.Refs do
     case defs[k] do
       %{^key => target} -> target
       :unknown -> :unknown
+      # One `action/` namespace over two maps: a built-in action, else a scripted action.
+      _ when k == "action" -> scripted(defs["scripted_action"], key)
       _ -> :unresolved
     end
   end
 
   def resolve(_, _, _, _), do: :unresolved
+
+  defp scripted(%{} = scripted, key), do: Map.get(scripted, key, :unresolved)
+  defp scripted(_, _), do: :unresolved
 
   defp typed?(v, %{"type" => "bool"}), do: is_boolean(v)
   defp typed?(v, %{"type" => "enum", "values" => vs}), do: v in vs

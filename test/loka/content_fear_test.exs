@@ -13,8 +13,8 @@ defmodule Loka.ContentFearTest do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
     for {field, key} <- [{"npc", "guard"}, {"item", "ear"}] do
-      named = &put_in(&1, ["apply", Access.at(0), field], key)
-      path = "reactions/leader_fell.apply[0].#{field}"
+      named = &put_in(&1, ["steps", Access.at(0), field], key)
+      path = "reactions/leader_fell.steps[0].#{field}"
       assert {"SCHEMA_VIOLATION", path} in diags(dir, [{"reactions/leader_fell.json", named}])
     end
   end

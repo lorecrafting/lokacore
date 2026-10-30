@@ -11,7 +11,7 @@
     "chat": {
       "label": "dialogue.peg.chat",
       "narration": "narration.peg.chat",
-      "sequence": []
+      "steps": []
     }
   }
 }

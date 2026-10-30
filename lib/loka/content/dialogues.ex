@@ -19,7 +19,9 @@ defmodule Loka.Content.Dialogues do
 
   def check(m, defs, {_, text}, {_, settings}, registry) do
     caps = m["requires"]["capabilities"]
-    keys = for kind <- ~w(action recipe quest), {_, {_, [], d}} <- defs[kind], do: d["key"]
+
+    keys =
+      for kind <- ~w(action scripted_action quest), {_, {_, [], d}} <- defs[kind], do: d["key"]
 
     ctx = %{
       m: m,
@@ -270,20 +272,17 @@ defmodule Loka.Content.Dialogues do
       receive_item(rel, steps, o, d, ctx) ++
       payment(rel, steps, o, d, ctx) ++
       Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
-      Loka.Content.ChoiceChecks.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.CheckKinds.choice(rel, steps, o, d, ctx) ++
       Loka.Content.Hub.choice(rel, steps, o, d, ctx.proven)
   end
 
   defp sequence(rel, steps, o, ctx) do
-    Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
-      if(s["op"] in ["skill.acquire", "topic.grant"],
-        do: [],
-        else:
-          owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
-            reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
-            adjusted(rel, steps ++ ["sequence", i], s, ctx)
-      )
-    end)
+    path = steps ++ ["steps"]
+
+    Loka.Content.Steps.check(rel, path, o["steps"] || [], :choice, ctx) ++
+      Enum.flat_map(Enum.with_index(o["steps"] || []), fn {s, i} ->
+        adjusted(rel, path ++ [i], s, ctx)
+      end)
   end
 
   # A choice's accept: a quest of this cartridge, in a dialogue that resolves none (accepting

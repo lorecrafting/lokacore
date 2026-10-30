@@ -1,4 +1,4 @@
-// Toolbox row 29b: a spell's effects, steps only a spell recipe holds (the compiler refuses them on
+// Toolbox row 29b: a spell's effects, steps only a spell scripted action holds (the compiler refuses them on
 // any other): status.apply through status@1's shared step (so a first application emits
 // status_applied), damage of a G2 kind after the NPC's resistances, and light.ignite through
 // light@1's ignite transition. The holders are the named NPC's or item's instance, else the caster.
@@ -7,7 +7,7 @@ import type {
   DeltaOp,
   EventPayload,
   EntityId,
-  RecipeStep,
+  Step,
   RngState,
   TextKey,
 } from '../../contracts.gen.ts';
@@ -50,8 +50,8 @@ export type Effected = {
   readonly lines: readonly { key: TextKey }[];
   readonly rng: RngState;
 };
-type Effect = Extract<RecipeStep, { op: 'status.apply' | 'damage' | 'light.ignite' }>;
-type Cast = Parameters<Rule<'action_recipe'>>[1];
+type Effect = Extract<Step, { op: 'status.apply' | 'damage' | 'light.ignite' }>;
+type Cast = Parameters<Rule<'scripted_action'>>[1];
 type Applied = Extract<EventPayload, { type: 'status_applied' }>;
 
 export function effect<R extends Effected>(

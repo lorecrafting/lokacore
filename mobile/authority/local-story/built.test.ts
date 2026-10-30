@@ -251,7 +251,7 @@ test('one advance across completion and the end of weathering raises the hut in 
   coldReopen(path, bundle);
 });
 
-// Built rooms S6 (save.md, Built rooms): a recipe-built hut is the same identity row as a hired one.
+// Built rooms S6 (save.md, Built rooms): a scripted action-built hut is the same identity row as a hired one.
 // Breaks: the raise's room not saved or not derived again on reopen (no hut, or the lane loses its
 // way north), or the raise's receipt replaying into a second room.
 test('a self-built hut survives cold reopen, its replay raises no second hut, and north enters it', (t) => {

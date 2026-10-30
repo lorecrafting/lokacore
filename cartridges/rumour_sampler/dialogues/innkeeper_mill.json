@@ -17,7 +17,7 @@
     "ask": {
       "label": "dialogue.mill.ask",
       "narration": "narration.mill.ask",
-      "sequence": []
+      "steps": []
     }
   }
 }

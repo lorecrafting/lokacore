@@ -3,7 +3,7 @@
     "event": "action_completed",
     "action": "don_hood"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "disguised"

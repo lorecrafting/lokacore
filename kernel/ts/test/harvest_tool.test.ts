@@ -133,7 +133,7 @@ test('careful harvest of the gated seam is refused without the tool, accepted wi
 
 // Breaks: the held-tool rule (lookups.ts toolHeld) refuses a wielded pickaxe (in a slot holder,
 // which reach refuses) or one in a carried open sack, for the harvest gate or for the G4 whittle
-// recipe (tool {tag: sharp}) on the stick; or a wielded tool lacks its whittle offer.
+// scripted action (tool {tag: sharp}) on the stick; or a wielded tool lacks its whittle offer.
 test('a wielded pickaxe, or one in a carried open sack, mines and whittles', () => {
   for (const w of [wear(held(), 'pickaxe'), sacked()]) {
     assert.notEqual(w.state.containers[item(w, 'pickaxe')], w.body);

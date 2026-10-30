@@ -11,7 +11,7 @@
     "help": {
       "label": "dialogue.maud.help",
       "narration": "narration.maud.help",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "village_standing",
@@ -22,7 +22,7 @@
     "wrong": {
       "label": "dialogue.maud.wrong",
       "narration": "narration.maud.wrong",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "village_standing",

@@ -13,7 +13,7 @@ defmodule Loka.ContentLintTest do
   defp lint(files), do: Lint.findings(files)
   defp variant(items), do: %{"when" => %{"op" => "all", "items" => items}}
 
-  test "check 1: a recipe whose policy refuses names a reason (M1, flamma)" do
+  test "check 1: a scripted action whose policy refuses names a reason (M1, flamma)" do
     assert lint(%{"actions/flamma.json" => %{"policy" => @refuses}}) ==
              ["actions/flamma.json: policy refuses with no reason"]
 
@@ -27,23 +27,23 @@ defmodule Loka.ContentLintTest do
   test "check 3: a reaction that writes state narrates or says it is silent (T4, plate_springs)" do
     apply = [%{"op" => "status.apply"}, %{"op" => "fact.assign"}]
 
-    assert lint(%{"reactions/plate_springs.json" => %{"apply" => apply}}) ==
+    assert lint(%{"reactions/plate_springs.json" => %{"steps" => apply}}) ==
              [
                ~s(reactions/plate_springs.json: writes state with no narrate step and no "silent": true)
              ]
 
-    assert lint(%{"reactions/a.json" => %{"apply" => [%{"op" => "fact.adjust"}]}}) ==
+    assert lint(%{"reactions/a.json" => %{"steps" => [%{"op" => "fact.adjust"}]}}) ==
              [~s(reactions/a.json: writes state with no narrate step and no "silent": true)]
 
     # status.cure says nothing by spec, and fact.stamp is a fact write (warmth_dries, water_croft).
     for op <- ~w(status.cure fact.stamp) do
-      assert lint(%{"reactions/w.json" => %{"apply" => [%{"op" => op}]}}) ==
+      assert lint(%{"reactions/w.json" => %{"steps" => [%{"op" => op}]}}) ==
                [~s(reactions/w.json: writes state with no narrate step and no "silent": true)]
     end
 
-    assert lint(%{"reactions/p.json" => %{"apply" => apply ++ [%{"op" => "narrate"}]}}) == []
-    assert lint(%{"reactions/p.json" => %{"apply" => apply, "silent" => true}}) == []
-    assert lint(%{"reactions/q.json" => %{"apply" => [%{"op" => "quest.fail"}]}}) == []
+    assert lint(%{"reactions/p.json" => %{"steps" => apply ++ [%{"op" => "narrate"}]}}) == []
+    assert lint(%{"reactions/p.json" => %{"steps" => apply, "silent" => true}}) == []
+    assert lint(%{"reactions/q.json" => %{"steps" => [%{"op" => "quest.fail"}]}}) == []
   end
 
   test "check 5: a readable has a title; a dialogue with no label needs action.talk (T5, UH)" do
@@ -72,8 +72,8 @@ defmodule Loka.ContentLintTest do
   end
 
   # loka-x6t.120 (book-ui.md fixture rule): a detail with a page is linked from its room's prose,
-  # and a recipe aimed at a detail gives that detail a title.
-  test "a detail with a page is linked from the prose; a recipe's target detail has a title" do
+  # and a scripted action aimed at a detail gives that detail a title.
+  test "a detail with a page is linked from the prose; a scripted action's target detail has a title" do
     hearth = %{"aliases" => ["hearth"], "description" => "detail.hearth"}
     room = %{"description" => "room.loft", "details" => %{"hearth" => hearth}}
     aim = %{"target" => %{"kind" => "detail", "room" => "loft", "detail" => "hearth"}}
@@ -81,14 +81,16 @@ defmodule Loka.ContentLintTest do
     linked = %{"room.loft" => "A low loft with a [hearth](hearth)."}
     files = &Map.merge(%{"rooms/loft.json" => room, "actions/gather_ash.json" => aim}, &1)
     unlinked = "rooms/loft.json: details.hearth has a page and no prose link"
-    untitled = "rooms/loft.json: details.hearth is a recipe target (gather_ash) and has no title"
+
+    untitled =
+      "rooms/loft.json: details.hearth is a scripted action target (gather_ash) and has no title"
 
     assert lint(files.(%{"text.json" => plain})) == [unlinked, untitled]
 
     titled = put_in(room, ["details", "hearth", "title"], "detail.hearth.title")
     assert lint(files.(%{"rooms/loft.json" => titled, "text.json" => linked})) == []
 
-    # A variant's prose links it too; a detail no recipe aims at and of no page kind needs neither.
+    # A variant's prose links it too; a detail no scripted action aims at and of no page kind needs neither.
     varied =
       Map.put(titled, "variants", [Map.put(variant([@tide]), "description", "room.loft.lit")])
 
@@ -166,7 +168,7 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(one) == []
     # a Leave label that does something (a hand-over sequence) is a real choice
-    assert Lint.findings(talk.(%{"label" => "s", "sequence" => []})) == []
+    assert Lint.findings(talk.(%{"label" => "s", "steps" => []})) == []
   end
 
   # Samplers break lint rules on purpose, but not label wording (loka-p2ey, loka-z2j2).
@@ -245,7 +247,7 @@ defmodule Loka.ContentLintTest do
   end
 
   # Breaks: a fill source the lint stops reading (vessel, room detail, fuel above 0), or a want it
-  # drops (use recipe, drink service, lamp). M8c: the dry flask a lantern burns.
+  # drops (use scripted action, drink service, lamp). M8c: the dry flask a lantern burns.
   test "check 7: a wanted liquid or a burned fuel supply has something that fills it (M8c)" do
     fills = &Enum.filter(lint(&1), fn l -> l =~ ~r/ (want|burn) it;/ end)
     lamp = %{"items/lantern.json" => %{"fuel" => %{"kind" => "source", "supply" => "lamp_oil"}}}
@@ -259,7 +261,7 @@ defmodule Loka.ContentLintTest do
     want = %{
       "actions/oil_winch.json" => %{"target" => %{"tool" => %{"liquid" => "oil"}}},
       "services/s.json" => %{
-        "benefit" => %{"kind" => "drink", "liquid" => "oil", "vessel" => "cask"}
+        "benefit" => %{"op" => "drink", "liquid" => "oil", "vessel" => "cask"}
       }
     }
 
@@ -317,7 +319,7 @@ defmodule Loka.ContentLintTest do
         ],
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)
 
-    # Holding it for a quest or a recipe guard checks the item; neither takes it out of play.
+    # Holding it for a quest or a scripted action guard checks the item; neither takes it out of play.
     quest = %{"objective" => %{"policy" => has}}
     guard = %{"policy" => has, "reason" => "reason.r"}
     assert lint(Map.merge(flask, %{"actions/r.json" => guard, "quests/q.json" => quest})) == dry
@@ -403,7 +405,7 @@ defmodule Loka.ContentLintTest do
     File.cp_r!("cartridges/build_sampler", dir)
     before = Loka.Content.lint(dir)
     write = %{"op" => "fact.assign", "fact" => "x", "value" => true}
-    base = %{"abstract" => true, "on" => %{"event" => "x"}, "apply" => [write]}
+    base = %{"abstract" => true, "on" => %{"event" => "x"}, "steps" => [write]}
     File.write!(Path.join(dir, "reactions/base.json"), Jason.encode!(base))
     File.write!(Path.join(dir, "reactions/child.json"), Jason.encode!(%{"extends" => "base"}))
 

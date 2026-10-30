@@ -105,7 +105,7 @@ defmodule Loka.ContentErrandTest do
   end
 
   # Breaks: a quest or quest_state compiling without quest@1 in the manifest, or a quest whose
-  # offer takes a registered command's, an action's or a recipe's key (the offer would replace it).
+  # offer takes a registered command's, an action's or a scripted action's key (the offer would replace it).
   test "a quest needs quest@1 and a key of its own", %{dir: dir} do
     m = src("cartridge.json")
     caps = ["requires", "capabilities"]
@@ -144,12 +144,12 @@ defmodule Loka.ContentErrandTest do
     caps = ["requires", "capabilities"]
     post = %{"aliases" => ["post"], "description" => "quest.lantern.title"}
 
-    recipe = %{
+    scripted = %{
       "cartridge.json" =>
         update_in(
           src("cartridge.json"),
           caps,
-          &Map.merge(&1, %{"action_recipe" => 1, "inspectable_detail" => 1})
+          &Map.merge(&1, %{"scripted_action" => 1, "inspectable_detail" => 1})
         ),
       "rooms/ferry_landing.json" =>
         put_in(src("rooms/ferry_landing.json"), ["details"], %{"post" => post}),
@@ -161,14 +161,14 @@ defmodule Loka.ContentErrandTest do
         "policy" => action["policy"],
         "outcomes" => %{
           "success" => %{
-            "sequence" => [%{"op" => "event.emit", "event" => "rang"}],
+            "steps" => [%{"op" => "event.emit", "event" => "rang"}],
             "narration" => %{"actor" => "quest.lantern.title"}
           }
         }
       }
     }
 
-    assert compile(dir, recipe) ==
+    assert compile(dir, scripted) ==
              {:error, [d("DUPLICATE_DEFINITION", "quests/lantern")]}
   end
 

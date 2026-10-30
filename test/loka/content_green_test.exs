@@ -40,7 +40,7 @@ defmodule Loka.ContentGreenTest do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
-  # Breaks: a trigger's short fact or room left short (Checks.expand; the loader would reject it).
+  # Breaks: a trigger's short fact or room left short (Resolve.expand; the loader would reject it).
   test "full trigger references compile to the same artifact", %{dir: dir} do
     files =
       Map.merge(
@@ -71,15 +71,31 @@ defmodule Loka.ContentGreenTest do
        })},
       {rule(
          "ring",
-         &put_in(&1, ["apply"], [%{"op" => "fact.assign", "fact" => "bell", "value" => true}])
+         &put_in(&1, ["steps"], [%{"op" => "fact.assign", "fact" => "bell", "value" => true}])
        ),
-       d("UNRESOLVED_REFERENCE", "reactions/ring.apply[0].fact", %{
+       d("UNRESOLVED_REFERENCE", "reactions/ring.steps[0].fact", %{
          "target" => "green_sampler@0.0.1:fact/bell"
        })},
       {rule(
          "ring",
-         &put_in(&1, ["apply"], [%{"op" => "fact.assign", "fact" => "bell_up", "value" => 1}])
-       ), d("FACT_TYPE_MISMATCH", "reactions/ring.apply[0].value", %{})}
+         &put_in(&1, ["steps"], [%{"op" => "fact.assign", "fact" => "bell_up", "value" => 1}])
+       ), d("FACT_TYPE_MISMATCH", "reactions/ring.steps[0].value", %{})},
+      # C3 D7: event.emit's custom_event is scripted_action@1's, which green does not declare.
+      {rule(
+         "ring",
+         &update_in(&1, ["steps"], fn s -> s ++ [%{"op" => "event.emit", "event" => "rang"}] end)
+       ),
+       d(
+         "UNDECLARED_CAPABILITY",
+         "reactions/ring.steps[1].op",
+         %{"capability" => "scripted_action"},
+         ["scripted_action@1"]
+       )},
+      # C3 D6: damage runs only in a scripted action.
+      {rule(
+         "ring",
+         &put_in(&1, ["steps"], [%{"op" => "damage", "amount" => 1, "kind" => "fire"}])
+       ), d("SCHEMA_VIOLATION", "reactions/ring.steps[0].op", %{"error" => "invalid_value"})}
     ]
 
     for {files, diag} <- cases,
@@ -122,7 +138,7 @@ defmodule Loka.ContentGreenTest do
              dir,
              others.("gossip")
              |> Map.merge(without.("fact"))
-             |> Map.merge(rule("gossip", &Map.merge(Map.delete(&1, "when"), %{"apply" => []})))
+             |> Map.merge(rule("gossip", &Map.merge(Map.delete(&1, "when"), %{"steps" => []})))
            ) ==
              {:error,
               [
@@ -139,7 +155,7 @@ defmodule Loka.ContentGreenTest do
               [
                 d(
                   "UNDECLARED_CAPABILITY",
-                  "reactions/ring.apply[0].op",
+                  "reactions/ring.steps[0].op",
                   %{"capability" => "fact"},
                   fact
                 )

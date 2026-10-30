@@ -387,8 +387,8 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.sql.close();
 });
 
-// Break: a targetless recipe exists only in a self-luminous Notice, so the World detail has no control.
-test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
+// Break: a targetless scripted action exists only in a self-luminous Notice, so the World detail has no control.
+test('self-luminous Notice invokes its projected targetless scripted action and retains the result', () => {
   const h = book(glowBundle());
   try {
     assert.ok(h.labels().includes('glows, open'));

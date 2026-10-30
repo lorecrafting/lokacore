@@ -64,7 +64,7 @@ test('S3-1: entering the road says the authored line once in the move receipt', 
 // Breaks: a line goes before the lines of the steps before it (unshift, not push).
 test('S3-1: a rule says its lines in step order', () => {
   const first = { op: 'narrate', text: 'room.road.title' };
-  const w = world((c) => c.reactions[RULE].apply.unshift(first));
+  const w = world((c) => c.reactions[RULE].steps.unshift(first));
   assert.deepEqual(lines(west(w).decision as never), ['movement.moved', 'room.road.title', LINE]);
 });
 
@@ -91,12 +91,12 @@ const ref = (kind: string, key: string) => ({
 const PLAN = ref('population', 'raiders');
 const BAND = ref('fact', 'band_out');
 const MOVE = 'settle_sampler@0.0.1:reaction/band_out';
-function hour(c: any, key: string, at: number, apply: object[]) {
+function hour(c: any, key: string, at: number, steps: object[]) {
   c.reactions[`settle_sampler@0.0.1:reaction/${key}`] = {
     key,
     on: { event: 'clock_hour' },
     when: { op: 'time_window', from: at, to: at + 1 },
-    apply,
+    steps,
   };
 }
 // Two raiders spawn at hour 7: slot 3 holds A, slot 2 holds B (this world context makes EntityId
@@ -117,7 +117,7 @@ function band(out: number, back?: number, spawn = true, edit = (_: any) => {}) {
       ...c.reactions[MOVE],
       key: 'band_in',
       when: { op: 'fact_compare', fact: BAND, equals: false },
-      apply: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'square') }],
+      steps: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'square') }],
     };
   }, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e12');
 }
@@ -174,7 +174,7 @@ test("S4-1: two plan moves of one band in one advance share each member's writer
     band(8, undefined, true, (c) => {
       c.facts[ROAD] = { ...c.facts['settle_sampler@0.0.1:fact/band_out'], key: 'band_road' };
       const road = ref('fact', 'band_road');
-      c.reactions['settle_sampler@0.0.1:reaction/out'].apply.push({
+      c.reactions['settle_sampler@0.0.1:reaction/out'].steps.push({
         op: 'fact.assign',
         fact: road,
         value: true,
@@ -184,7 +184,7 @@ test("S4-1: two plan moves of one band in one advance share each member's writer
         key: 'band_road',
         on: { event: 'fact_changed', fact: road },
         when: { op: 'fact_compare', fact: road, equals: true },
-        apply: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'road') }],
+        steps: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'road') }],
       };
     }),
     700,

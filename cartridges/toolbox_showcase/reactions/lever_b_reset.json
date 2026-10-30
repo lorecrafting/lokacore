@@ -11,7 +11,7 @@
       "equals": 1
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "narrate",
       "text": "narration.lever_reset"

@@ -22,7 +22,7 @@ defmodule Loka.ContentFirstSearchTest do
       {"reactions/start_search.json",
        %{
          "on" => %{"event" => "quest_resolved", "quest" => "lantern", "outcome" => "carry"},
-         "apply" => [%{"op" => "quest.activate", "quest" => "oar"}]
+         "steps" => [%{"op" => "quest.activate", "quest" => "oar"}]
        }}
     ]
   end
@@ -38,7 +38,7 @@ defmodule Loka.ContentFirstSearchTest do
       {"source quest", "UNRESOLVED_REFERENCE", search, &put_in(&1, ["on", "quest"], "absent")},
       {"malformed source", "SCHEMA_VIOLATION", search, &put_in(&1, ["on", "quest"], "bad key")},
       {"target quest", "UNRESOLVED_REFERENCE", search,
-       &put_in(&1, ["apply", Access.at(0), "quest"], "absent")},
+       &put_in(&1, ["steps", Access.at(0), "quest"], "absent")},
       {"actorless", "OUTCOME_MISMATCH", search,
        &Map.put(&1, "on", %{"event" => "fact_changed", "fact" => "tracks_found"})},
       {"quest owner", "UNDECLARED_CAPABILITY", "cartridge.json",

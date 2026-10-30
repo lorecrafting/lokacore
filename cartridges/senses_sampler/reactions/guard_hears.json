@@ -8,7 +8,7 @@
     "npc": "guard",
     "sense": "sound"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "guard_alerted",

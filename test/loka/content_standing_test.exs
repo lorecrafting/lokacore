@@ -17,11 +17,11 @@ defmodule Loka.ContentStandingTest do
     dir = Loka.ContentSource.copy("cartridges/standing_sampler")
     flag = %{"version" => 1, "value_type" => %{"type" => "bool", "default" => false}}
     flag = Map.merge(flag, %{"scopes" => ["instance"], "meaning" => "A flag."})
-    gift = &{"reactions/gift_apple.json", fn r -> put_in(r, ["apply", Access.at(0), &1], &2) end}
+    gift = &{"reactions/gift_apple.json", fn r -> put_in(r, ["steps", Access.at(0), &1], &2) end}
 
     rows = [
       {[{"facts.json", &put_in(&1, ["facts", "flag"], flag)}, gift.("fact", "flag")],
-       {"FACT_TYPE_MISMATCH", "reactions/gift_apple.apply[0].fact"}},
+       {"FACT_TYPE_MISMATCH", "reactions/gift_apple.steps[0].fact"}},
       {[{"npcs/guard.json", &Map.delete(&1, "attack")}],
        {"SCHEMA_VIOLATION", "npcs/guard.disposition"}},
       {[{"npcs/guard.json", &Map.put(&1, "spawn_template", true)}],
@@ -52,7 +52,7 @@ defmodule Loka.ContentStandingTest do
     assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [gift.("npc", "maud")])
     c = JSON.decode!(artifact)["cartridge"]
 
-    assert hd(c["reactions"]["standing_sampler@0.0.1:reaction/gift_apple"]["apply"])["npc"] ==
+    assert hd(c["reactions"]["standing_sampler@0.0.1:reaction/gift_apple"]["steps"])["npc"] ==
              @maud
   end
 

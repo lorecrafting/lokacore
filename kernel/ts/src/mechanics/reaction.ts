@@ -1,4 +1,4 @@
-// size: allow 445, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
+// size: allow 450, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -134,7 +134,7 @@ type Delivery = {
 const sight = (then: World, actor: CharacterId, steps: { n: number }) => (id: EntityId) =>
   visible(then, actor, id, steps);
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression, spawn, replenish runs and lines
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression, spawn (row 37a), replenish runs, custom events and lines
 export function sequence(
   world: World,
   root: CharacterId, // the root command's actor
@@ -157,7 +157,7 @@ export function sequence(
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload, actor_id = actor) =>
     events.push(event(then, { ...by, payload: { actor_id } }, mint, ++position, payload));
-  for (const step of rule.apply) {
+  for (const step of rule.steps) {
     if (step.op === 'quest.activate') {
       if (!activate(world, rule, actor, !!npc, step.quest, own.seen, group, ops, mint, emit))
         return { kind: 'fault', code: 'precondition_failed' };
@@ -178,19 +178,18 @@ export function sequence(
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move' || step.op === 'npc.move') {
       ops.push(...moved(then, step, actor, about, group, ops, holders, emit)); // rows 41, FD5
-    } else if (step.op === 'population.spawn') {
-      ops.push(...spawn(then, step, group, ops, mint)); // row 37a
-    } else if (step.op === 'replenish.run') {
-      const refill = replenishStep(then, step.key, group, steps, holders, roots); // hs-1
+    } else if (step.op === 'population.spawn') ops.push(...spawn(then, step, group, ops, mint));
+    else if (step.op === 'replenish.run') {
+      const refill = replenishStep(then, step.replenish, group, steps, holders, roots); // hs-1
       if (typeof refill === 'string') return { kind: 'fault', code: refill };
       ops.push(...refill);
     } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
     else if (step.op === 'narrate') narration.push({ key: step.text });
-    else {
+    else if (step.op !== 'event.emit') {
       const assigned = assignment(world, actor, step, group, own, cause);
       if (assigned) ops.push(assigned);
       if (assigned && assigned.expected !== assigned.value) position++;
-    }
+    } else if (about.subject) emit(custom(world, step, about.subject)); // none without a body
   }
   ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
@@ -270,6 +269,12 @@ const subjectOf = (cause: DomainEvent) => {
     : ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined);
 };
 const subject = (cause: DomainEvent, body?: EntityId) => subjectOf(cause) ?? body;
+// C3 D7: an event.emit step's custom_event about the delivery's subject.
+const custom = (world: World, step: { event: DefinitionRef['key'] }, subject_id: EntityId) => {
+  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
+  const event = { cartridge_id, cartridge_version, kind: 'event', key: step.event } as const;
+  return { type: 'custom_event', event, subject_id } as const;
+};
 // The characters holding `quest` open (player scope, active or objectives_complete), in order.
 const questHolders = (world: World, quest: DefinitionRef) =>
   Object.values(world.state.quests ?? {})
@@ -305,7 +310,7 @@ function holdersOf(
   if (!rooms) return one && dead.has(one) && !lasting ? [] : [one];
   return apply.tag ? itemsTagged(world, rooms, apply.tag) : npcsIn(world, rooms);
 }
-type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;
+type StatusStep = Extract<ReactionRule['steps'][number], { op: 'status.apply' | 'status.cure' }>;
 // A fact.assign, (row FD1) a fact.stamp of the delivery's time, or (row 15) a fact.adjust lowered
 // to one at the bounded sum (nothing when the fact cannot be adjusted); an entity or pair fact
 // (row W2) at the step's named NPC's or item's instance, else at the event's subject when that is
@@ -316,14 +321,13 @@ type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 
 function assignment(
   world: World,
   actor: CharacterId,
-  step: Extract<
-    ReactionRule['apply'][number],
-    { op: 'fact.assign' | 'fact.adjust' | 'fact.stamp' }
-  >,
+  step: ReactionRule['steps'][number],
   group: number,
   { set, holders }: { set: Record<string, FactValue>; holders: Map<string, number> },
   cause: DomainEvent,
 ) {
+  if (step.op !== 'fact.assign' && step.op !== 'fact.adjust' && step.op !== 'fact.stamp')
+    throw new KernelError('precondition_failed'); // outside steps.ex's reaction context
   const named = step.npc ?? step.item;
   const who = (named ? world.entityIds[refString(named)] : subject(cause)) || undefined;
   const thing = who !== undefined && (world.entities[who] || world.details[who]);
@@ -351,7 +355,7 @@ function assignment(
 // quest.resolve/fail for the trigger's own character, else each holder; undefined on a fault.
 function ending(
   world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'quest.resolve' | 'quest.fail' }>,
+  step: Extract<ReactionRule['steps'][number], { op: 'quest.resolve' | 'quest.fail' }>,
   group: number,
   steps: { n: number },
   emit: (payload: EventPayload, actor_id: CharacterId) => void,
@@ -370,7 +374,7 @@ function ending(
 function terminal(
   world: World,
   actor: CharacterId,
-  step: Extract<ReactionRule['apply'][number], { op: 'quest.resolve' | 'quest.fail' }>,
+  step: Extract<ReactionRule['steps'][number], { op: 'quest.resolve' | 'quest.fail' }>,
   group: number,
   steps: { n: number },
 ) {

@@ -172,7 +172,7 @@ defmodule Loka.Content.SourceSchema do
     %{
       "if" => %{"type" => "object", "required" => ["command"]},
       "then" => %{"$ref" => "source.ActionDefinition"},
-      "else" => %{"$ref" => "source.ActionRecipe"}
+      "else" => %{"$ref" => "source.ScriptedAction"}
     }
   end
 

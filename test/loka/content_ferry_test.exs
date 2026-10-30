@@ -40,7 +40,7 @@ defmodule Loka.ContentFerryTest do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
-  # Breaks: a schedule's short room left short (Checks.expand; the loader would reject it).
+  # Breaks: a schedule's short room left short (Resolve.expand; the loader would reject it).
   test "full schedule rooms compile to the same artifact", %{dir: dir} do
     full = %{"6" => ref("ferry_landing"), "19" => ref("village_green")}
     assert compile(dir, schedule(full)) == {:ok, @expected, []}
@@ -54,7 +54,7 @@ defmodule Loka.ContentFerryTest do
 
   @bram "actions/coil_rope.outcomes.success.narration.participants.bram"
 
-  # Breaks: a participant's short npc left short (Checks.expand; the loader would reject it).
+  # Breaks: a participant's short npc left short (Resolve.expand; the loader would reject it).
   test "a full participant reference compiles to the same artifact", %{dir: dir} do
     full = %{"role" => "npc", "npc" => Map.put(ref("bram"), "kind", "npc")}
     assert compile(dir, bram(full)) == {:ok, @expected, []}
@@ -172,7 +172,7 @@ defmodule Loka.ContentFerryTest do
     assert {:ok, _, []} = compile(dir, files)
   end
 
-  # Breaks: a dialogue's short speaker, quest, role or fact left short (Checks.expand; the loader
+  # Breaks: a dialogue's short speaker, quest, role or fact left short (Resolve.expand; the loader
   # would reject the artifact).
   test "a full-reference dialogue compiles to the same artifact", %{dir: dir} do
     full = fn kind, key -> Map.merge(ref(key), %{"kind" => kind}) end
@@ -183,7 +183,7 @@ defmodule Loka.ContentFerryTest do
         |> Map.merge(%{"npc" => full.("npc", "bram"), "quest" => full.("quest", "lantern")})
         |> put_in(~w(roles bram npc), full.("npc", "bram"))
         |> put_in(~w(roles lantern item), full.("item", "lantern"))
-        |> update_in(~w(choices carry sequence), fn [s] ->
+        |> update_in(~w(choices carry steps), fn [s] ->
           [%{s | "fact" => full.("fact", "search_plan")}]
         end)
       end)
@@ -224,11 +224,11 @@ defmodule Loka.ContentFerryTest do
       {dialogue(&put_in(&1, ~w(choices carry narration), "dialogue.none")),
        unresolved.(".choices.carry.narration", "dialogue.none")},
       {dialogue(
-         &update_in(&1, ~w(choices carry sequence), fn [s] -> [%{s | "fact" => "missing"}] end)
-       ), unresolved.(".choices.carry.sequence[0].fact", missing.("fact"))},
+         &update_in(&1, ~w(choices carry steps), fn [s] -> [%{s | "fact" => "missing"}] end)
+       ), unresolved.(".choices.carry.steps[0].fact", missing.("fact"))},
       {dialogue(
-         &update_in(&1, ~w(choices carry sequence), fn [s] -> [%{s | "value" => "lost"}] end)
-       ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.sequence[0].value", %{})},
+         &update_in(&1, ~w(choices carry steps), fn [s] -> [%{s | "value" => "lost"}] end)
+       ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.steps[0].value", %{})},
       {dialogue(&put_in(&1, ~w(roles actor), %{"role" => "npc", "npc" => "bram"})),
        d("DUPLICATE_DEFINITION", at <> ".roles.actor", %{})},
       {dialogue(&Map.put(&1, "choices", %{})),
@@ -364,7 +364,7 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: opted-in policy dropped from the compiled artifact, or legacy duration rules
-  # applied to an elapsed release despite removing the recipe's time skip.
+  # applied to an elapsed release despite removing the scripted action's time skip.
   test "elapsed release preserves its policy in its artifact", %{dir: dir} do
     assert {:ok, bytes, []} = compile(dir, elapsed_files())
     artifact = JSON.decode!(bytes)
@@ -395,8 +395,8 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: a cartridge alias can manufacture authority elapsed evidence or skip real time
-  # through Wait; duration recipes likewise cannot opt into elapsed time.
-  test "elapsed release refuses time-skip recipes and player clock aliases", %{dir: dir} do
+  # through Wait; duration scripted actions likewise cannot opt into elapsed time.
+  test "elapsed release refuses time-skip scripted actions and player clock aliases", %{dir: dir} do
     files = elapsed_files()
 
     action = %{

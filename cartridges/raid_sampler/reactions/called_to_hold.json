@@ -17,7 +17,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "quest.activate",
       "quest": "hold_the_gate"

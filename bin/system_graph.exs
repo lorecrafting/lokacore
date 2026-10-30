@@ -13,7 +13,7 @@ defmodule SystemGraph do
   @layer_order ~w(Content Capabilities Change State Save View)
   @layers %{
     "Content" =>
-      ~w(action cartridge dialogue entity liquid manifest quest reaction resource room scene service text transport water),
+      ~w(action cartridge dialogue entity liquid manifest quest reaction resource room scene service step text transport water),
     "Capabilities" => ~w(capability feature invariant policy),
     "Change" => ~w(command decision delta effect error event observation),
     "State" => ~w(account fact identity relation scope),

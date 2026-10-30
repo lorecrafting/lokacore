@@ -485,14 +485,14 @@ test('red control: wear listed but refused, or remove accepted but unlisted, tri
   }
 });
 
-// Breaks: the recipe half of the check (a perform's view entry, its shown codes) or the
-// reason-code clause is lost, and a view offering a recipe admission refuses goes unseen.
-test('red control: a recipe shown available, or refused for another code, trips gameview_agrees_with_admission', () => {
+// Breaks: the scripted action half of the check (a perform's view entry, its shown codes) or the
+// reason-code clause is lost, and a view offering a scripted action admission refuses goes unseen.
+test('red control: a scripted action shown available, or refused for another code, trips gameview_agrees_with_admission', () => {
   const view = (f: (a: AdvertisedAction) => AdvertisedAction) =>
     planted({
       gameView: (w) => {
         const v = gameView(w);
-        // a recipe aimed at a detail is offered on its notice (loka-x6t.120), the rest in actions
+        // a scripted action aimed at a detail is offered on its notice (loka-x6t.120), the rest in actions
         const notices = v.notices?.map((n) => ({ ...n, actions: n.actions?.map(f) }));
         return { ...v, actions: v.actions.map(f), ...(notices && { notices }) };
       },

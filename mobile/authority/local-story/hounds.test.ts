@@ -41,7 +41,7 @@ function populationOnly() {
       'liquids',
       'quests',
       'reactions',
-      'recipes',
+      'scripted_actions',
       'replenish',
       'scenes',
       'services',

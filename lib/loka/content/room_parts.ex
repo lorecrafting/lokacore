@@ -2,7 +2,7 @@ defmodule Loka.Content.RoomParts do
   @moduledoc """
   A room's inspectable details and description variants (21 §6; room.schema.json): their text
   keys, the details' reachability and where each variant sits in its room file. Room-level
-  checks and ownership are `Loka.Content.Checks.rooms/4`.
+  checks and ownership are `Loka.Content.Resolve.rooms/4`.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
 

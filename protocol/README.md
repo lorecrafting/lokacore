@@ -17,7 +17,8 @@ lists only what a file adds to that.
 | `text.schema.json` | localized text ids and bindings; the default-locale text catalog | 04 §15; 05 §18; 06 §43 | |
 | **Rules and state change** | | | |
 | `command.schema.json` | the portable Command registry | 04 §1, §3, §21; 14 §R3A | |
-| `action.schema.json` | action definitions, invocation, targets; ActionSet contributions and action recipes | 04 §1, §2, §18, §19; 06 §19, §20; 21 §7; 05 §28 | `cartridge_bell_hash.json` |
+| `step.schema.json` | Step: the one registered step vocabulary (reaction apply, scripted action sequence, dialogue choice sequence; service benefits from slice V), discriminated by op; Check: the one check vocabulary, discriminated by kind. Which op, field and check kind each context admits is `lib/loka/content/steps.ex` and `check_kinds.ex` | 04 §5.2, §5.3; 05 §28 | |
+| `action.schema.json` | action definitions, invocation, targets; ActionSet contributions and scripted actions | 04 §1, §2, §18, §19; 06 §19, §20; 21 §7; 05 §28 | `cartridge_bell_hash.json` |
 | `policy.schema.json` | the policy AST | 06 §21; 21 §3.2, §4; 14 §R3A | |
 | `fact.schema.json` | FactSpec, scoped facts | 03 §7, §13; 21 §3.9, §4 | |
 | `resource.schema.json` | ResourceSpec: bounded integer resources, the default HP/MA/MV pools, legacy hourly and opted position recovery | 21 §4; 00 §4 | `composition.json`, `cartridge_road_hash.json`, `resource_recovery.json` |

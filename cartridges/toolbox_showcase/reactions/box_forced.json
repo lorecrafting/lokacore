@@ -3,7 +3,7 @@
     "event": "fact_changed",
     "fact": "strongbox_forced"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "word_travels",

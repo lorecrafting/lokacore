@@ -45,7 +45,7 @@ defmodule Loka.ContentTimeTest do
     m = %{"id" => "c", "version" => "1.0.0"}
     root = %{"op" => "barrier_state", "barrier" => "gate", "equals" => "open"}
     door = %{"key_item" => "key", "opens_when" => root}
-    out = Loka.Content.Checks.expand(door, m)
+    out = Loka.Content.Resolve.expand(door, m)
     ref = &%{"cartridge_id" => "c", "cartridge_version" => "1.0.0", "kind" => &1, "key" => &2}
     assert out["key_item"] == ref.("item", "key")
     assert out["opens_when"]["barrier"] == ref.("barrier", "gate")

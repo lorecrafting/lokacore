@@ -7,7 +7,7 @@ defmodule Loka.Content.Barriers do
   direction, when that leads back) name the same one (BARRIER_MISMATCH); an item's barrier (a
   container's lid, c1-locks) names a barrier that no exit and no other item names
   (BARRIER_MISMATCH at the item's barrier); no locked barrier's key is out of reach
-  (BARRIER_UNREACHABLE_KEY). Text keys are `Loka.Content.Checks.rooms/4`'s.
+  (BARRIER_UNREACHABLE_KEY). Text keys are `Loka.Content.Resolve.rooms/4`'s.
   """
   import Loka.Content.Source, only: [diag: 2, at: 2, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6, resolve: 4]

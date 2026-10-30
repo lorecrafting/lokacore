@@ -6,7 +6,7 @@
     "op": "sky",
     "lunar": "new"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "raided",

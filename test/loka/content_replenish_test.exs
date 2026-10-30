@@ -81,10 +81,10 @@ defmodule Loka.ContentReplenishTest do
            )
   end
 
-  # Homestead hs-1: the sampler with a `dig` recipe whose custom_event `dig` runs `step`.
+  # Homestead hs-1: the sampler with a `dig` scripted action whose custom_event `dig` runs `step`.
   defp digging(step, at_least \\ "1.101", rule \\ %{}) do
     # The step emits no event: it needs no fact@1 (which owns fact_changed).
-    caps = &(&1 |> Map.delete("fact") |> Map.merge(%{"action_recipe" => 1, "reaction" => 1}))
+    caps = &(&1 |> Map.delete("fact") |> Map.merge(%{"scripted_action" => 1, "reaction" => 1}))
 
     [
       {"cartridge.json",
@@ -100,14 +100,14 @@ defmodule Loka.ContentReplenishTest do
          "policy" => %{"op" => "all", "items" => []},
          "outcomes" => %{
            "success" => %{
-             "sequence" => [%{"op" => "event.emit", "event" => "dig"}],
+             "steps" => [%{"op" => "event.emit", "event" => "dig"}],
              "narration" => %{"actor" => "narration.mine"}
            }
          }
        }},
       {"reactions/dig.json",
        Map.merge(
-         %{"on" => %{"event" => "custom_event", "custom" => "dig"}, "apply" => [step]},
+         %{"on" => %{"event" => "custom_event", "custom" => "dig"}, "steps" => [step]},
          rule
        )}
     ]
@@ -117,22 +117,22 @@ defmodule Loka.ContentReplenishTest do
   # with an unresolved key, on a rule with `after` (refused as item.move is), or
   # twice with one key in a rule.
   test "replenish.run needs a replenish entry and no after", %{dir: dir} do
-    run = %{"op" => "replenish.run", "key" => "seam_regrowth"}
+    run = %{"op" => "replenish.run", "replenish" => "seam_regrowth"}
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, digging(run))
 
-    assert {"UNRESOLVED_REFERENCE", "reactions/dig.apply[0].key"} in codes(
+    assert {"UNRESOLVED_REFERENCE", "reactions/dig.steps[0].replenish"} in codes(
              dir,
-             digging(%{run | "key" => "gone"})
+             digging(%{run | "replenish" => "gone"})
            )
 
-    assert {"SCHEMA_VIOLATION", "reactions/dig.apply[0].op"} in codes(
+    assert {"SCHEMA_VIOLATION", "reactions/dig.steps[0].op"} in codes(
              dir,
              digging(run, "1.101", %{"after" => 60})
            )
 
-    assert {"DUPLICATE_DEFINITION", "reactions/dig.apply[1].key"} in codes(
+    assert {"DUPLICATE_DEFINITION", "reactions/dig.steps[1].replenish"} in codes(
              dir,
-             digging(run, "1.101", %{"apply" => [run, run]})
+             digging(run, "1.101", %{"steps" => [run, run]})
            )
   end
 end

@@ -1,4 +1,4 @@
-// `loka play` with an ActionRecipe (R5 S5): the real CLI on the bell known-answer artifact.
+// `loka play` with a ScriptedAction (R5 S5): the real CLI on the bell known-answer artifact.
 // Expected lines are hand-written from the cartridge's text.json (touch links shown as plain
 // words) and the terminal's words for each outcome.
 import assert from 'node:assert/strict';
@@ -30,7 +30,7 @@ function play(lines: string[], file = artifact) {
     .map((s) => s.replace(/^(\[state|\[movement\.moved:|transcript:|hp \d+\/\d+) .*\n/gm, ''));
 }
 
-// Breaks: a recipe alias not recognized (alone or before target words), the words after it not
+// Breaks: a scripted action alias not recognized (alone or before target words), the words after it not
 // resolved to the target, the narration not shown, the variants not following the rung bell,
 // or a rejection shown with the wrong words.
 test('ring bell rings once, narrates, and the rooms and bell read differently after', () => {
@@ -58,12 +58,12 @@ const sorted = (v: any): any =>
       : v;
 
 // Astra A2: the bell known answer plus a gong in the bell tower rung by ring_gong and a second
-// bell recipe, all with the alias ring. Written twice, the recipes map in either order: the
+// bell scripted action, all with the alias ring. Written twice, the scripted actions map in either order: the
 // content hash is the same, so the answers must be too.
 function gongs(): string[] {
   const c = sorted(structuredClone(kat.value));
   const ref = (kind: string, key: string) => ({ ...c.entry, kind, key });
-  const bell = c.recipes['recipe_sampler@0.0.1:recipe/ring_bell'];
+  const bell = c.scripted_actions['recipe_sampler@0.0.1:action/ring_bell'];
   const tower = c.rooms['recipe_sampler@0.0.1:room/bell_tower'];
   tower.details = { gong: { aliases: ['gong'], description: 'detail.rope' } };
   const gong = {
@@ -75,11 +75,11 @@ function gongs(): string[] {
   gong.target = { kind: 'detail', room: ref('room', 'bell_tower'), detail: 'gong' };
   const success = {
     ...bell.outcomes.success,
-    sequence: [{ op: 'event.emit', event: 'gong_rung' }],
+    steps: [{ op: 'event.emit', event: 'gong_rung' }],
   };
   gong.outcomes = { success }; // leaves the bell unrung
-  c.recipes['recipe_sampler@0.0.1:recipe/ring_gong'] = gong;
-  c.recipes['recipe_sampler@0.0.1:recipe/toll_bell'] = {
+  c.scripted_actions['recipe_sampler@0.0.1:action/ring_gong'] = gong;
+  c.scripted_actions['recipe_sampler@0.0.1:action/toll_bell'] = {
     ...bell,
     key: 'toll_bell',
     name: 'actions.toll_bell',
@@ -90,7 +90,10 @@ function gongs(): string[] {
   const h = createHash('sha256').update(text).digest('hex');
   return [
     text,
-    JSON.stringify({ ...c, recipes: Object.fromEntries(Object.entries(c.recipes).reverse()) }),
+    JSON.stringify({
+      ...c,
+      scripted_actions: Object.fromEntries(Object.entries(c.scripted_actions).reverse()),
+    }),
   ].map((t, i) => {
     const file = join(dir, `gongs${i}.json`);
     writeFileSync(file, `{"cartridge":${t},"content_hash":"${h}"}`);
@@ -98,10 +101,10 @@ function gongs(): string[] {
   });
 }
 
-// Breaks: the first recipe with the alias chosen before the target is resolved (so ring gong
-// reaches ring_bell and is refused), the choice depending on the recipes map's order, or two
-// recipes that both take the target not asked about.
-test('an alias shared by recipes picks the one whose target the words name', () => {
+// Breaks: the first scripted action with the alias chosen before the target is resolved (so ring gong
+// reaches ring_bell and is refused), the choice depending on the scripted actions map's order, or two
+// scripted actions that both take the target not asked about.
+test('an alias shared by scripted actions picks the one whose target the words name', () => {
   for (const file of gongs())
     assert.deepEqual(
       play(['d', 'ring gong', 'u', 'ring bell', 'ring rope'], file),

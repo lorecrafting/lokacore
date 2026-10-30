@@ -79,14 +79,14 @@ test('A, B: a rule whose when failed, a choice keyed without its dialogue, an ac
   const authored = JSON.stringify(edited.reactions);
   assert.deepEqual(coverage(edited, [trace(SCENE)]).never, {
     reactions: [`${S}reaction/never_held`, `${S}reaction/never_matched`],
-    recipes: [`${S}recipe/coil_rope`],
+    scripted_actions: [`${S}action/coil_rope`],
     choices: [choice('bram', 'leave'), choice('bram_twin', 'carry'), choice('bram_twin', 'leave')],
     quests: [],
   });
   // Break: quest_activated (ordinal 1) counted as resolved.
   assert.deepEqual(coverage(edited, [trace(SCENE, 3)]).never, {
     reactions: [`${S}reaction/bell_after`, `${S}reaction/never_held`, `${S}reaction/never_matched`],
-    recipes: [`${S}recipe/coil_rope`],
+    scripted_actions: [`${S}action/coil_rope`],
     choices: [
       choice('bram', 'carry'),
       choice('bram', 'leave'),
@@ -106,14 +106,14 @@ test('A, B: a rule whose when failed, a choice keyed without its dialogue, an ac
   assert.throws(() => coverage(clash, [trace(SCENE)]), /text key coverage\.m0 collides/);
 });
 
-test('C, D: a failed perform counted as completed, a wrong recipe-to-action mapping', () => {
+test('C, D: a failed perform counted as completed, a wrong scripted action-to-action mapping', () => {
   const dusk = load('protocol/fixtures/cartridge_dusk_hash.json');
   const none = { reactions: [], choices: [], quests: [] };
   assert.deepEqual(coverage(dusk, [trace(DUSK, 6)]).never, {
     ...none,
-    recipes: ['check_sampler@0.0.1:recipe/pick_lock'],
+    scripted_actions: ['check_sampler@0.0.1:action/pick_lock'],
   });
-  assert.deepEqual(coverage(dusk, [trace(DUSK)]).never, { ...none, recipes: [] });
+  assert.deepEqual(coverage(dusk, [trace(DUSK)]).never, { ...none, scripted_actions: [] });
 });
 
 test('E: coverage of a stale transcript (the byte guard missing)', () => {
@@ -127,10 +127,10 @@ test('E: coverage of a stale transcript (the byte guard missing)', () => {
   const base = load('protocol/fixtures/cartridge_scene_hash.json');
   const bell = base.reactions![`${S}reaction/bell_after`]!;
   const narrate = { op: 'narrate', text: 'scene.bell' } as any;
-  const apply = [...bell.apply, ...Array(64).fill(narrate)];
+  const apply = [...bell.steps, ...Array(64).fill(narrate)];
   const loud = {
     ...base,
-    reactions: { ...base.reactions, [`${S}reaction/bell_after`]: { ...bell, apply } },
+    reactions: { ...base.reactions, [`${S}reaction/bell_after`]: { ...bell, steps: apply } },
   };
   assert.throws(() => coverage(loud, [trace(SCENE)]), /narration cap reached at ordinal 7/);
   // The header is compared too: a head whose ids differ from its recorded line 0.
@@ -158,7 +158,7 @@ test('F: the CLI wiring', (t) => {
   assert.equal(ok.status, 0, ok.stderr);
   assert.deepEqual(JSON.parse(ok.stdout).never, {
     reactions: [],
-    recipes: [`${S}recipe/coil_rope`],
+    scripted_actions: [`${S}action/coil_rope`],
     choices: [choice('bram', 'leave')],
     quests: [],
   });

@@ -7,7 +7,7 @@
     "op": "has_item",
     "item": "ring"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "blessed",

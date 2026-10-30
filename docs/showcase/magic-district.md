@@ -27,7 +27,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
 - Pools (`spells_sampler/resources.json`): `ma` 0..5 start 5 gain 0 with `regen {every: 3600,
   by_position {standing 1, sitting 1, resting 2, sleeping 2}}` (the mv shape; one breath an hour);
   `ash` 0..5 start 0 gain 0. Attribute `cha` already exists (6); no `wis`.
-- Spells, each `target {kind: spell, word, learned}` (`spells_sampler/recipes`): `lux` (learned
+- Spells, each `target {kind: spell, word, learned}` (`spells_sampler/scripted_actions`): `lux` (learned
   `lux_known`; aimed `{scopes: [inventory]}`; `costs [{ma, 2}, {ash, 1}]`; policy `has_tag
   {subject: target, tag: lamp}`; step `light.ignite` at the target), `flamma`
   (learned `flamma_known`; aimed `{scopes: [room_occupants]}`; `costs [{ma, 1}]`; policy
@@ -35,7 +35,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   policy `all(level_compare {at_least: 2}, stat_compare {cha, at_least: 7})`; `reason:
   reason.ward` ("Needs level 2 and CHA 7"); step `status.apply warded`). No spell
   has a `duration` (the showcase is `real_elapsed`; a timed spell is also refused in a fight).
-- Recipe `gather_ash` at `hearth` (`resource.adjust {ash, by: 1}`); `attic_hearth` twin. Both are
+- Scripted action `gather_ash` at `hearth` (`resource.adjust {ash, by: 1}`); `attic_hearth` twin. Both are
   cards on the hearth's page (its prose link), not the World page (loka-x6t.120).
 - Statuses: `warded` (600, tick 150, resource mv, `resistances {physical: 50}`; `ward_sampler`),
   `hushed` (120, `blocks ["say", "shout", "cast"]`), `wet` (600, tick 300, mv, `modifies str -1`),
@@ -101,7 +101,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   `fire_spreads` and `quench` (tool `{tag: liquid_holding, liquid: water}` on a burning item) serve
   the crypt unchanged.
 - Use pair `oil_winch`: `target {kind: use, tool: {liquid: oil}}`, policy `has_tag {subject:
-  target, tag: metal}`, success `fact.assign gate_oiled true` at the recipe's target (a pair fact, so oiling the lantern or the axe writes their row and the gate reads only the winch's) (`use_sampler/actions/oil.json`).
+  target, tag: metal}`, success `fact.assign gate_oiled true` at the scripted action's target (a pair fact, so oiling the lantern or the axe writes their row and the gate reads only the winch's) (`use_sampler/actions/oil.json`).
 
 ## Guided loop and expected outcomes
 

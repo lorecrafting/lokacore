@@ -8,7 +8,7 @@
     "from": 19,
     "to": 20
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "lamps_lit",

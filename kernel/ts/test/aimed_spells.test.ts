@@ -31,8 +31,8 @@ execFileSync('mix', ['loka.compile', 'cartridges/spell_effects_sampler', file], 
 const artifact = readFileSync(file);
 rmSync(scratch, { recursive: true });
 const P = 'spell_effects_sampler@0.0.1';
-const R = (key: string) => `${P}:recipe/${key}`;
-const rec = (k: string) => `.cartridge.recipes[${JSON.stringify(R(k))}]`;
+const R = (key: string) => `${P}:action/${key}`;
+const rec = (k: string) => `.cartridge.scripted_actions[${JSON.stringify(R(k))}]`;
 
 function variant(change: (c: Record<string, any>) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
@@ -45,8 +45,8 @@ function variant(change: (c: Record<string, any>) => void) {
   );
 }
 const aim = (c: Record<string, any>, k: string, scopes: string[], arg: string) => {
-  c.recipes[R(k)].target.aimed = { scopes };
-  delete c.recipes[R(k)].outcomes.success.sequence[0][arg];
+  c.scripted_actions[R(k)].target.aimed = { scopes };
+  delete c.scripted_actions[R(k)].outcomes.success.steps[0][arg];
 };
 /** The sampler with flamma, ward and lux aimed (kernel_api 1.119) and the orb tagged silver. */
 function aimedChange(c: Record<string, any>) {
@@ -55,7 +55,7 @@ function aimedChange(c: Record<string, any>) {
   aim(c, 'flamma', ['room_occupants'], 'npc');
   aim(c, 'ward', ['room_occupants'], 'npc');
   aim(c, 'lux', ['inventory'], 'item');
-  c.recipes[R('lux')].policy = { op: 'has_tag', subject: 'target', tag: 'silver' };
+  c.scripted_actions[R('lux')].policy = { op: 'has_tag', subject: 'target', tag: 'silver' };
   c.items[`${P}:item/orb`].tags = ['silver'];
 }
 const loaded = variant(aimedChange);
@@ -271,7 +271,7 @@ test('loader: aimed rows refused', () => {
     [
       (c) => (
         aimedChange(c),
-        (c.recipes[R('flamma')].target.aimed.scopes = ['inspectable_details'])
+        (c.scripted_actions[R('flamma')].target.aimed.scopes = ['inspectable_details'])
       ),
       'SCHEMA_VIOLATION',
       `${rec('flamma')}.target.aimed.scopes[0]`,
@@ -279,7 +279,7 @@ test('loader: aimed rows refused', () => {
     [
       (c) => (
         aimedChange(c),
-        (c.recipes[R('ward')].target = {
+        (c.scripted_actions[R('ward')].target = {
           kind: 'use',
           tool: { tag: 'silver' },
           aimed: { scopes: ['inventory'] },
@@ -355,8 +355,8 @@ test('a dead wight is no aimed target: invalid_target, no mana paid, not listed'
 // caster.
 test('a ward naming an npc not in the world lands on no one', () => {
   const r = variant((c) => {
-    const npc = c.recipes[R('flamma')].outcomes.success.sequence[0].npc;
-    c.recipes[R('ward')].outcomes.success.sequence[0].npc = npc;
+    const npc = c.scripted_actions[R('flamma')].outcomes.success.steps[0].npc;
+    c.scripted_actions[R('ward')].outcomes.success.steps[0].npc = npc;
   }) as { cartridge: Cartridge };
   const w = hall(r.cartridge);
   delete (w.entityIds as Record<string, unknown>)[`${P}:npc/wight`];

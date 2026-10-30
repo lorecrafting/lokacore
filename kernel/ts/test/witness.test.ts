@@ -151,7 +151,7 @@ test('an npc.move naming the baker and no room brings him to the taker', () => {
   const apply = [{ op: 'npc.move', npc: ref('npc', 'baker') }];
   const moving = {
     ...content,
-    reactions: { ...reactions, [rule]: { ...reactions[rule], on, apply } },
+    reactions: { ...reactions, [rule]: { ...reactions[rule], on, steps: apply } },
   };
   let w = newWorld(moving as Cartridge, ctx(CONTEXT), [1, 2, 3, 4]);
   w = take(w);

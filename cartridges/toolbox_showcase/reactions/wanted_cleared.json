@@ -8,7 +8,7 @@
     "fact": "wanted",
     "equals": false
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.cure",
       "status": "wanted"

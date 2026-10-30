@@ -160,7 +160,7 @@ test('a sight flight between two status or fact-row joins commits as step-by-ste
     const rule = {
       key,
       on: { event: 'status_ticked' },
-      apply: [{ op: 'fact.adjust', fact, amount: 1 }],
+      steps: [{ op: 'fact.adjust', fact, amount: 1 }],
     };
     const reactions = { ...at.cartridge.reactions, [ref('reaction', key)]: rule };
     const start = counted ? ({ ...at, cartridge: { ...at.cartridge, reactions } } as World) : at;

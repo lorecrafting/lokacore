@@ -164,11 +164,11 @@ defmodule Loka.Content.Source do
 
   @doc """
   The `kind` definitions as `{key, location, value}`; a bundled one is located at `{rel, steps}`.
-  `actions/` holds both `:action` (with `command`) and `:recipe` (without it); an unreadable
-  file stays an action, so it adds no recipe.
+  `actions/` holds both `:action` (with `command`) and `:scripted_action` (without it); an unreadable
+  file stays an action, so it adds no scripted action.
   """
   @spec of_kind([{String.t(), file(), term()}], atom()) :: [{String.t(), location(), term()}]
-  def of_kind(files, :recipe), do: Enum.reject(dir(files, :action), &command?/1)
+  def of_kind(files, :scripted_action), do: Enum.reject(dir(files, :action), &command?/1)
   def of_kind(files, :action), do: Enum.filter(dir(files, :action), &command?/1)
   def of_kind(files, kind), do: dir(files, kind)
 

@@ -72,7 +72,7 @@ defmodule Loka.ContentServicesTest do
     for {name, action, price, benefit} <- [
           {"kitchen_meal", "eat_kitchen_meal", 2,
            %{
-             "kind" => "meal",
+             "op" => "meal",
              "stock" => "meal_stock",
              "debit" => 1,
              "recovery" => "mv",
@@ -80,14 +80,13 @@ defmodule Loka.ContentServicesTest do
            }},
           {"kitchen_ale", "drink_kitchen_ale", 1,
            %{
-             "kind" => "drink",
+             "op" => "drink",
              "vessel" => "kitchen_cask",
              "liquid" => "ale",
              "recovery" => "mv",
              "amount" => 4
            }},
-          {"kitchen_room", "rent_kitchen_room", 3,
-           %{"kind" => "entitlement", "fact" => "bed_paid"}}
+          {"kitchen_room", "rent_kitchen_room", 3, %{"op" => "entitlement", "fact" => "bed_paid"}}
         ] do
       label = "service." <> String.replace_prefix(name, "kitchen_", "")
 
@@ -165,9 +164,9 @@ defmodule Loka.ContentServicesTest do
       {"facts.json", &put_in(&1, ["facts", "bed_paid", "value_type", "default"], true),
        "services/kitchen_room.benefit.fact"},
       {"dialogues/aldous_lesson.json",
-       &put_in(&1, ["choices", "learn", "sequence"], [
+       &put_in(&1, ["choices", "learn", "steps"], [
          %{"op" => "fact.assign", "fact" => "bed_paid", "value" => true}
-       ]), "dialogues/aldous_lesson.choices.learn.sequence[0].fact"}
+       ]), "dialogues/aldous_lesson.choices.learn.steps[0].fact"}
     ]
 
     for {file, change, path} <- mutations do

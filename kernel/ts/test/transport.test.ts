@@ -166,13 +166,13 @@ test('boarding remains inspectable with a disabled offer during a real encounter
   assert.equal(ride(fighting).decision.kind, 'rejected');
 });
 
-// Break: the transport page replaces its actions with the ride, dropping the recipe card aimed at
-// the post (offered nowhere, since view.actions never lists a detail recipe; loka-x6t.120).
-test('a recipe aimed at a transport detail keeps its card beside the ride', () => {
+// Break: the transport page replaces its actions with the ride, dropping the scripted action card aimed at
+// the post (offered nowhere, since view.actions never lists a detail scripted action; loka-x6t.120).
+test('a scripted action aimed at a transport detail keeps its card beside the ride', () => {
   const w = fresh((c) => {
-    c.lock.capabilities.action_recipe = c.manifest.requires.capabilities.action_recipe = 1;
-    c.recipes = {
-      [`${prefix}:recipe/polish_post`]: {
+    c.lock.capabilities.scripted_action = c.manifest.requires.capabilities.scripted_action = 1;
+    c.scripted_actions = {
+      [`${prefix}:action/polish_post`]: {
         key: 'polish_post',
         aliases: ['polish'],
         name: 'actions.polish_post',
@@ -182,7 +182,7 @@ test('a recipe aimed at a transport detail keeps its card beside the ride', () =
         outcomes: {
           success: {
             narration: { actor: 'narration.polish_post' },
-            sequence: [{ op: 'resource.adjust', resource: ref('resource', 'coins'), by: 1 }],
+            steps: [{ op: 'resource.adjust', resource: ref('resource', 'coins'), by: 1 }],
           },
         },
       },

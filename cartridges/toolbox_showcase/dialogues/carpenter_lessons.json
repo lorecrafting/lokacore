@@ -11,7 +11,7 @@
     "whittling": {
       "label": "dialogue.carpenter_lessons.whittling",
       "narration": "narration.carpenter_lessons.whittling",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "whittling"
@@ -21,7 +21,7 @@
     "woodcutting": {
       "label": "dialogue.carpenter_lessons.woodcutting",
       "narration": "narration.carpenter_lessons.woodcutting",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "woodcutting"
@@ -31,7 +31,7 @@
     "carving": {
       "label": "dialogue.carpenter_lessons.carving",
       "narration": "narration.carpenter_lessons.carving",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "carving"
@@ -46,7 +46,7 @@
     "carpentry": {
       "label": "dialogue.carpenter_lessons.carpentry",
       "narration": "narration.carpenter_lessons.carpentry",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "carpentry"
@@ -61,7 +61,7 @@
     "joinery": {
       "label": "dialogue.carpenter_lessons.joinery",
       "narration": "narration.carpenter_lessons.joinery",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "joinery"

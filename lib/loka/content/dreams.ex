@@ -47,7 +47,7 @@ defmodule Loka.Content.Dreams do
 
     producer =
       Enum.any?(ctx.defs["service"], fn
-        {_, {_, _, %{"benefit" => %{"kind" => "entitlement", "fact" => f}}}} ->
+        {_, {_, _, %{"benefit" => %{"op" => "entitlement", "fact" => f}}}} ->
           f == r["entitlement"]
 
         _ ->
@@ -168,7 +168,7 @@ defmodule Loka.Content.Dreams do
 
     reaction =
       Enum.any?(defs["reaction"], fn
-        {_, {_, _, r}} -> Enum.any?(r["apply"], &(&1["quest"] == quest))
+        {_, {_, _, r}} -> Enum.any?(r["steps"], &(&1["quest"] == quest))
         _ -> false
       end)
 

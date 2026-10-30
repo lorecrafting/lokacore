@@ -1,6 +1,6 @@
 defmodule Loka.Content.Replenish do
   @moduledoc """
-  Replenish entries and recipe crafts (toolbox row 19b, Homestead hs-10; docs/system/cartridge.md
+  Replenish entries and scripted action crafts (toolbox row 19b, Homestead hs-10; docs/system/cartridge.md
   Replenish and Craft declarations).
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, ref: 3]
@@ -16,7 +16,7 @@ defmodule Loka.Content.Replenish do
         kv -> kv
       end)
 
-  @doc "A recipe with its craft consume expanded (Checks.expand covers yield's items and from)."
+  @doc "A scripted action with its craft consume expanded (Resolve.expand covers yield's items and from)."
   @spec consume(term(), map()) :: term()
   def consume(%{"craft" => %{"consume" => c}} = r, m),
     do: put_in(r, ["craft", "consume"], expand(c, m))
@@ -43,12 +43,12 @@ defmodule Loka.Content.Replenish do
   end
 
   @doc """
-  Homestead hs-10 (docs/system/cartridge.md Craft declarations): a craft recipe sits on no spell, its consume and yield follow replenish's
+  Homestead hs-10 (docs/system/cartridge.md Craft declarations): a craft scripted action sits on no spell, its consume and yield follow replenish's
   item and holder rules, and consume's reason has a catalog entry (unless `text` is `:unknown`).
   """
   @spec craft(map(), map(), map() | :unknown) :: [map()]
   def craft(m, defs, text) do
-    crafts = for {_, {rel, [], %{"craft" => c} = r}} <- defs["recipe"], do: {rel, r, c}
+    crafts = for {_, {rel, [], %{"craft" => c} = r}} <- defs["scripted_action"], do: {rel, r, c}
 
     for {rel, r, c} <- crafts,
         d <- misplaced(rel, r) ++ parts(m, defs, rel, c) ++ reason(rel, c, text),

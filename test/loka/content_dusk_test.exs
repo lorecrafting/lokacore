@@ -1,6 +1,6 @@
 defmodule Loka.ContentDuskTest do
   # Luck checks, failure outcomes, durations and time_window in the compiler (R5 S6a;
-  # action.schema.json ActionRecipe, RecipeCheck; policy.schema.json time_window). Expected
+  # action.schema.json ScriptedAction; step.schema.json Check; policy.schema.json time_window). Expected
   # diagnostics are hand-written from protocol/cartridge.schema.json DiagnosticCode; the known
   # answer is protocol/fixtures/cartridge_dusk_hash.json (Python).
   use ExUnit.Case, async: true
@@ -40,19 +40,21 @@ defmodule Loka.ContentDuskTest do
     step = %{"op" => "fact.assign", "fact" => "crypt_gate_open", "value" => false}
 
     {:ok, artifact, []} =
-      compile(dir, pick(["outcomes", "failure", "sequence"], fn _ -> [step] end))
+      compile(dir, pick(["outcomes", "failure", "steps"], fn _ -> [step] end))
 
     [failure] =
-      JSON.decode!(artifact)["cartridge"]["recipes"]["check_sampler@0.0.1:recipe/pick_lock"][
+      JSON.decode!(artifact)["cartridge"]["scripted_actions"][
+        "check_sampler@0.0.1:action/pick_lock"
+      ][
         "outcomes"
-      ]["failure"]["sequence"]
+      ]["failure"]["steps"]
 
     assert failure["fact"]["kind"] == "fact"
   end
 
-  # Breaks: a checked recipe without a failure outcome, or a failure outcome without a check,
+  # Breaks: a checked scripted action without a failure outcome, or a failure outcome without a check,
   # compiles (the loader rejects both).
-  test "a recipe has a failure outcome exactly when it has a check", %{dir: dir} do
+  test "a scripted action has a failure outcome exactly when it has a check", %{dir: dir} do
     mismatch = {:error, [d("OUTCOME_MISMATCH", "actions/pick_lock.outcomes")]}
     drop = fn key -> fn r -> Map.delete(r, key) end end
     assert compile(dir, pick(["outcomes"], drop.("failure"))) == mismatch
@@ -66,12 +68,12 @@ defmodule Loka.ContentDuskTest do
   test "a failure outcome's references and owners, and the check's, are checked", %{dir: dir} do
     step = %{"op" => "fact.assign", "fact" => "gate_rusted", "value" => true}
 
-    assert compile(dir, pick(["outcomes", "failure", "sequence"], fn _ -> [step] end)) ==
+    assert compile(dir, pick(["outcomes", "failure", "steps"], fn _ -> [step] end)) ==
              {:error,
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "actions/pick_lock.outcomes.failure.sequence[0].fact",
+                  "actions/pick_lock.outcomes.failure.steps[0].fact",
                   %{
                     "target" => "check_sampler@0.0.1:fact/gate_rusted"
                   }
@@ -107,14 +109,14 @@ defmodule Loka.ContentDuskTest do
     files =
       Map.merge(
         without("fact"),
-        pick(["outcomes", "failure", "sequence"], fn _ -> [emit, step] end)
+        pick(["outcomes", "failure", "steps"], fn _ -> [emit, step] end)
       )
 
     {:error, diags} = compile(dir, files)
 
     assert d(
              "UNDECLARED_CAPABILITY",
-             "actions/pick_lock.outcomes.failure.sequence[1].op",
+             "actions/pick_lock.outcomes.failure.steps[1].op",
              %{"capability" => "fact"},
              ["fact@1"]
            ) in diags
@@ -139,9 +141,9 @@ defmodule Loka.ContentDuskTest do
              {:error, [d("EMPTY_TIME_WINDOW", "actions/ring_bell.policy")]}
   end
 
-  # Review S2. Breaks: two recipes' checks with one key compile, so one check DefinitionRef names
+  # Review S2. Breaks: two scripted actions' checks with one key compile, so one check DefinitionRef names
   # two checks.
-  test "two recipes' checks with one key are DUPLICATE_DEFINITION", %{dir: dir} do
+  test "two scripted actions' checks with one key are DUPLICATE_DEFINITION", %{dir: dir} do
     ring = Map.put(src("actions/ring_bell.json"), "check", src("actions/pick_lock.json")["check"])
 
     ring =

@@ -17,7 +17,7 @@ walk('1-self-build', 'Self-build: chop, learn carpentry, saw, raise a timbered h
   await tap(/^Take/);
   const chop = async () => {
     await moves(screen, 'west');
-    await tap('oak, open'); // a recipe aimed at a detail is on its page (loka-x6t.120)
+    await tap('oak, open'); // a scripted action aimed at a detail is on its page (loka-x6t.120)
     await tap('Chop wood');
     await tap('Chop wood');
     await tap(LABEL.leave);

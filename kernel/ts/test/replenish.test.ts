@@ -139,19 +139,19 @@ test('loader: a container reserve loads', () => {
   );
 });
 
-// Homestead hs-1: the sampler with a `dig` recipe on the seam whose custom_event `dig` runs `apply`.
-const RUN = { op: 'replenish.run', key: ref('replenish', 'seam_regrowth') };
+// Homestead hs-1: the sampler with a `dig` scripted action on the seam whose custom_event `dig` runs `steps`.
+const RUN = { op: 'replenish.run', replenish: ref('replenish', 'seam_regrowth') };
 const digging =
-  (apply: object[] = [RUN]) =>
+  (steps: object[] = [RUN]) =>
   (c: any) => {
     c.manifest.requires.kernel_api.at_least = '1.101';
-    for (const k of ['action_recipe', 'reaction'])
+    for (const k of ['scripted_action', 'reaction'])
       c.manifest.requires.capabilities[k] = c.lock.capabilities[k] = 1;
     // The step emits no event: it needs no fact@1 (which owns fact_changed).
     delete c.manifest.requires.capabilities.fact;
     delete c.lock.capabilities.fact;
-    c.recipes = {
-      [`${S}recipe/dig`]: {
+    c.scripted_actions = {
+      [`${S}action/dig`]: {
         key: 'dig',
         name: 'action.mine',
         aliases: ['dig'],
@@ -160,14 +160,14 @@ const digging =
         policy: { op: 'all', items: [] },
         outcomes: {
           success: {
-            sequence: [{ op: 'event.emit', event: 'dig' }],
+            steps: [{ op: 'event.emit', event: 'dig' }],
             narration: { actor: 'narration.mine' },
           },
         },
       },
     };
     c.reactions = {
-      [`${S}reaction/dig`]: { key: 'dig', on: { event: 'custom_event', custom: 'dig' }, apply },
+      [`${S}reaction/dig`]: { key: 'dig', on: { event: 'custom_event', custom: 'dig' }, steps },
     };
   };
 const dig = (w: World) => {
@@ -210,7 +210,7 @@ test('a sweep rule on item_dropped moves the dropped ore on in the same command'
       cap: 5,
     };
     c.reactions[`${S}reaction/dig`].on = { event: 'item_dropped' };
-    c.reactions[`${S}reaction/dig`].apply = [{ ...RUN, key: ref('replenish', 'sweep') }];
+    c.reactions[`${S}reaction/dig`].steps = [{ ...RUN, replenish: ref('replenish', 'sweep') }];
   });
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const w = harvested(loaded.cartridge as Cartridge);

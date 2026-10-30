@@ -54,7 +54,7 @@ defmodule Loka.ContentParamsTest do
              s
              |> Map.put("params", ["line"])
              |> update_in(
-               ["reactions", "take", "apply"],
+               ["reactions", "take", "steps"],
                &(&1 ++ [narrate(%{"param" => "line"})])
              )
            end}
@@ -75,7 +75,7 @@ defmodule Loka.ContentParamsTest do
       "abstract" => true,
       "params" => ["on"],
       "on" => %{"param" => "on"},
-      "apply" => [narrate("narration.wheel_1.0")]
+      "steps" => [narrate("narration.wheel_1.0")]
     }
 
     child = %{
@@ -128,15 +128,15 @@ defmodule Loka.ContentParamsTest do
   } do
     colour = %{"param" => "colour"}
 
-    assert diags(s, [{@shows, &put_in(&1, ["apply"], [narrate(colour)])}]) == [
-             {"UNRESOLVED_REFERENCE", "reactions/wheel_shows.apply[0].text",
+    assert diags(s, [{@shows, &put_in(&1, ["steps"], [narrate(colour)])}]) == [
+             {"UNRESOLVED_REFERENCE", "reactions/wheel_shows.steps[0].text",
               %{"target" => "colour"}}
            ]
 
-    take = ["reactions", "take", "apply"]
+    take = ["reactions", "take", "steps"]
 
     assert diags(f, [{@spoils, &update_in(&1, take, fn a -> a ++ [narrate(colour)] end)}]) == [
-             {"UNRESOLVED_REFERENCE", "behaviours/spoils.reactions.take.apply[2].text",
+             {"UNRESOLVED_REFERENCE", "behaviours/spoils.reactions.take.steps[2].text",
               %{"target" => "colour"}}
            ]
   end
@@ -189,7 +189,7 @@ defmodule Loka.ContentParamsTest do
   # instead of left for the schema), or an attachment object with an extra member accepted.
   test "only a one-member param object is a marker, and an attachment has only behaviour and with",
        %{fishing: f} do
-    take = ["reactions", "take", "apply"]
+    take = ["reactions", "take", "steps"]
     loose = narrate(%{"param" => "colour", "x" => 1})
 
     codes =
@@ -221,7 +221,7 @@ defmodule Loka.ContentParamsTest do
   # not reaching the copy.
   test "a behaviour's with gives each holder its own prose line", %{fishing: f} do
     c = cartridge(f, [])
-    take = &c["reactions"]["fishing_sampler@0.0.1:reaction/take_" <> &1]["apply"]
+    take = &c["reactions"]["fishing_sampler@0.0.1:reaction/take_" <> &1]["steps"]
 
     for {fish, words} <- [
           {"trout_01", "The trout slaps the bank."},

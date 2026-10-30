@@ -72,8 +72,8 @@ export const UnavailableRow: Story = {
   },
 };
 
-// Two recipes on one page: each row names its verb. Breaks: rows show only the tool's name.
-export const RecipesMixed: Story = {
+// Two scripted actions on one page: each row names its verb. Breaks: rows show only the tool's name.
+export const ScriptedMixed: Story = {
   args: { buttons: [pair('quench', 'bucket'), pair('oil', 'oilcan')] },
   play: async ({ canvas, userEvent }) => {
     await open(canvas, userEvent);

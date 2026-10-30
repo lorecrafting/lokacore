@@ -7,7 +7,7 @@
     "fact": "plate_sprung",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "plate_sprung",

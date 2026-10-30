@@ -6,7 +6,7 @@
   "narration": "service.mend_hut.used",
   "price": 3,
   "benefit": {
-    "kind": "mend",
+    "op": "mend",
     "site": "lane",
     "direction": "north",
     "escrow": {

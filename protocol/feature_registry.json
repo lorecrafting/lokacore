@@ -1,7 +1,7 @@
 [
   {
-    "kind": "action_recipe",
-    "spec": "21 §7 ActionRecipe / ComposedAction; 05 §6",
+    "kind": "scripted_action",
+    "spec": "21 §7 ScriptedAction / ComposedAction; 05 §6",
     "freeze": "R5"
   },
   {

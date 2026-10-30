@@ -552,7 +552,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target. A use recipe (toolbox row G4) needs both target_id, the item used on, and item_id, the held tool.",
+          "description": "Perform a cartridge's ScriptedAction by its action key (06 §20; action.schema.json ScriptedAction). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the scripted action's target. A use scripted action (toolbox row G4) needs both target_id, the item used on, and item_id, the held tool.",
           "type": "object",
           "properties": {
             "type": {
@@ -640,7 +640,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it; target_id is the one entity an aimed spell is cast at (loka-x6t.109), refused invalid_target on an unaimed spell, missing on an aimed one or outside its scopes. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
+          "description": "Cast the spell whose word this is (scripted_action@1; toolbox row 29a): the word, case-folded, names a spell scripted action (action.schema.json ScriptedTarget spell), performed like a perform of it; target_id is the one entity an aimed spell is cast at (loka-x6t.109), refused invalid_target on an unaimed spell, missing on an aimed one or outside its scopes. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
           "type": "object",
           "properties": {
             "type": {

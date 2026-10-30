@@ -4,7 +4,7 @@
     "room": "yard",
     "npc": "crow"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "crow_fed",

@@ -4,7 +4,7 @@ defmodule Loka.ContentSpellEffectsTest do
   @dir "cartridges/spell_effects_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row 29b): the compiler accepts an effect step on a recipe that is not a spell,
+  # Breaks (toolbox row 29b): the compiler accepts an effect step on a scripted action that is not a spell,
   # a damage step naming no NPC of the cartridge, or light.ignite
   # without light@1.
   test "effect steps sit on spells, resolve and declare their owner" do
@@ -14,17 +14,17 @@ defmodule Loka.ContentSpellEffectsTest do
     detail = %{"kind" => "detail", "room" => "hall", "detail" => "stand"}
     misplaced = [{"actions/ward.json", &Map.put(&1, "target", detail)}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, misplaced)
-    assert pairs(diags) == [{"SCHEMA_VIOLATION", "actions/ward.outcomes.success.sequence[0].op"}]
+    assert pairs(diags) == [{"SCHEMA_VIOLATION", "actions/ward.outcomes.success.steps[0].op"}]
 
     ghoul = [
       {"actions/flamma.json",
-       &put_in(&1, ["outcomes", "success", "sequence", Access.at(0), "npc"], "ghoul")}
+       &put_in(&1, ["outcomes", "success", "steps", Access.at(0), "npc"], "ghoul")}
     ]
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, ghoul)
 
     assert pairs(diags) == [
-             {"UNRESOLVED_REFERENCE", "actions/flamma.outcomes.success.sequence[0].npc"}
+             {"UNRESOLVED_REFERENCE", "actions/flamma.outcomes.success.steps[0].npc"}
            ]
 
     unlit =
@@ -38,7 +38,7 @@ defmodule Loka.ContentSpellEffectsTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, unlit)
 
     assert pairs(diags) == [
-             {"UNDECLARED_CAPABILITY", "actions/lux.outcomes.success.sequence[0].op"}
+             {"UNDECLARED_CAPABILITY", "actions/lux.outcomes.success.steps[0].op"}
            ]
   end
 
@@ -49,7 +49,7 @@ defmodule Loka.ContentSpellEffectsTest do
     floor = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.119")}
 
     bare =
-      &update_in(&1, ["outcomes", "success", "sequence", Access.at(0)], fn s ->
+      &update_in(&1, ["outcomes", "success", "steps", Access.at(0)], fn s ->
         Map.delete(s, "npc")
       end)
 
@@ -63,7 +63,7 @@ defmodule Loka.ContentSpellEffectsTest do
 
     for {edits, want} <- [
           {[{"actions/flamma.json", bare}],
-           {"SCHEMA_VIOLATION", "actions/flamma.outcomes.success.sequence[0].npc"}},
+           {"SCHEMA_VIOLATION", "actions/flamma.outcomes.success.steps[0].npc"}},
           {[floor, {"actions/flamma.json", details}],
            {"SCHEMA_VIOLATION", "actions/flamma.target.aimed.scopes[0]"}},
           {[floor, {"actions/ward.json", &Map.put(&1, "target", use)}],
@@ -84,7 +84,7 @@ defmodule Loka.ContentSpellEffectsTest do
       fn r ->
         r
         |> put_in(["target", "aimed"], %{"scopes" => scopes})
-        |> update_in(["outcomes", "success", "sequence", Access.at(0)], &Map.delete(&1, field))
+        |> update_in(["outcomes", "success", "steps", Access.at(0)], &Map.delete(&1, field))
       end
     end
 

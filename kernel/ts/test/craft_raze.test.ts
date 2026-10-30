@@ -61,7 +61,7 @@ const carpentry = (w0: World) => {
 test('the self-built hut razes like a commissioned one', () => {
   const c = structuredClone(content) as any;
   const plain = c.services[`${P}service/raise_hut_plain`];
-  const benefit = { kind: 'raze', site: R('room', 'lane'), direction: 'north' };
+  const benefit = { op: 'raze', site: R('room', 'lane'), direction: 'north' };
   c.services[`${P}service/raze_hut`] = { ...plain, benefit };
   c.npcs[`${P}npc/carpenter`].services.push(R('service', 'raze_hut'));
   let w = ok(newWorld(c, ctx('6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f'), [1, 2, 3, 4]), {

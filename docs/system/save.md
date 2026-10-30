@@ -36,8 +36,8 @@ opens: a world whose first screen cannot be built
 (`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope
 that is not valid JSON or has a narration line without a key (`:71`). A stored Read command
 that is invalid JSON or has no valid target also follows this corruption path. A
-successful readable-recipe receipt also requires a valid committed Command bound to
-`receipt.command_id`, the pinned recipe's action, and exactly one root-caused
+successful readable-scripted action receipt also requires a valid committed Command bound to
+`receipt.command_id`, the pinned scripted action's action, and exactly one root-caused
 `action_completed` naming that action and its canonical detail subject. Missing or mismatched
 evidence follows the same corruption path. This structured receipt derives detail identity for
 replay and reopen, without a new row or transcript. Unrelated receipts retain ordinary routing.
@@ -485,7 +485,7 @@ unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchange
 
 The five [Green outcomes](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#a3-green-finale) extend the same
 receipt-backed return proof. A begun epilogue requires its own committed Begin
-receipt with the selected recipe, actor at Green and exact `market_cross` event
+receipt with the selected scripted action, actor at Green and exact `market_cross` event
 subject; an unrelated action cannot evidence its scene start. Load admits every
 lawful intermediate: terminal Q2/Q3,
 acknowledged bell, eligible Green, begun epilogue at each shown line, acknowledged
@@ -557,9 +557,9 @@ silent counter repair or save deletion is authorized.
 ### Village consequence recovery
 
 **Selected D9 contract.** The accepted bell receipt and causal
-event bind exact actor, room, time and one cue occurrence. A normal recipe
-invocation omits `target_id`: recover its exact detail from the pinned recipe,
-as ordinary action-recipe admission does. If an explicit target is present,
+event bind exact actor, room, time and one cue occurrence. A normal scripted action
+invocation omits `target_id`: recover its exact detail from the pinned scripted action,
+as ordinary action-scripted action admission does. If an explicit target is present,
 it must be that same detail; malformed or foreign explicit targets remain corrupt. Cold reopen can
 reproduce its retained past narration without emitting a new cue or reapplying
 consequences. Persist the hound suppression generation/deadline, resume job,
@@ -1161,4 +1161,4 @@ A [generic quest deadline](mechanics.md#quest-deadlines-toolbox-row-w24-engine-h
 
 ## Entity and pair fact recovery
 
-[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) persist in the existing `facts` section with the normal changed-row transaction before adoption and reply; a row's key is the canonical fact target text, which for a `per_subject` fact includes the subject's `subject_id`. Rows of older saves have no subject and load as before. Load checks every fact row (`mobile/authority/local-story/facts-save.ts`): its key must decode to a valid fact `MutationTarget` in canonical text, at this save's character (player) or world context (instance), of a declared fact at its scope, with a subject exactly when the fact is `per_subject` and that subject an NPC, item or detail of the world, and a value of the fact's type (invariant `facts_typed`). Any other row is typed `save_corrupt` (Start over), never a load that later reads a shared row or faults. Cold reopen re-decides the talk, choose, recipe and reaction receipts like any other (`mobile/authority/local-story/scoped_facts.test.ts`).
+[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) persist in the existing `facts` section with the normal changed-row transaction before adoption and reply; a row's key is the canonical fact target text, which for a `per_subject` fact includes the subject's `subject_id`. Rows of older saves have no subject and load as before. Load checks every fact row (`mobile/authority/local-story/facts-save.ts`): its key must decode to a valid fact `MutationTarget` in canonical text, at this save's character (player) or world context (instance), of a declared fact at its scope, with a subject exactly when the fact is `per_subject` and that subject an NPC, item or detail of the world, and a value of the fact's type (invariant `facts_typed`). Any other row is typed `save_corrupt` (Start over), never a load that later reads a shared row or faults. Cold reopen re-decides the talk, choose, scripted action and reaction receipts like any other (`mobile/authority/local-story/scoped_facts.test.ts`).

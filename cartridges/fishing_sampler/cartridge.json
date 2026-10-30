@@ -17,7 +17,7 @@
       "resource": 1,
       "policy": 1,
       "tags": 1,
-      "action_recipe": 1,
+      "scripted_action": 1,
       "check": 1,
       "reaction": 1,
       "status": 1,

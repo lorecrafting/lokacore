@@ -36,7 +36,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 | `quest@1` | proof | R7 | QUEST |
 | `dialogue@1` | proof | R7 | QUEST |
 | `scene@1` | proof | R7 | SCENE |
-| `action_recipe@1` | proof | R5 | RULES |
+| `scripted_action@1` | proof | R5 | RULES |
 | `reaction@1` | proof | R8 | WORLD |
 | `behavior@1` | proof | R8 | WORLD |
 | `schedule@1` | proof | R8 | WORLD |
@@ -69,7 +69,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 | `quest@1` | proof | R7 | QUEST |
 | `dialogue@1` | proof | R7 | QUEST |
 | `scene@1` | proof | R7 | SCENE |
-| `action_recipe@1` | proof | R5 | RULES |
+| `scripted_action@1` | proof | R5 | RULES |
 | `reaction@1` | proof | R8 | WORLD |
 | `behavior@1` | proof | R8 | WORLD |
 | `schedule@1` | proof | R8 | WORLD |

@@ -1,4 +1,4 @@
-// Riddle fragment: the frozen scene_sampler KAT (Bram, the lantern quest, the coil_rope recipe at
+// Riddle fragment: the frozen scene_sampler KAT (Bram, the lantern quest, the coil_rope scripted action at
 // Ferry Landing) plus an inline bounded riddle: a sphinx beside Bram asks a riddle of the lantern
 // quest that binds both of them, and coiling the rope starts a modal scene.
 import assert from 'node:assert/strict';
@@ -43,7 +43,7 @@ export function riddleSource(c: any) {
       answer: {
         label: 'dialogue.riddle.answer',
         narration: 'narration.riddle.answer',
-        sequence: [{ op: 'fact.assign', fact: ref('fact', 'riddle_solved'), value: true }],
+        steps: [{ op: 'fact.assign', fact: ref('fact', 'riddle_solved'), value: true }],
       },
     },
     riddle: {
@@ -66,7 +66,7 @@ export function riddleSource(c: any) {
     key: 'rope_coiled',
     control: 'modal',
     on: {
-      action: ref('recipe', 'coil_rope'),
+      action: ref('action', 'coil_rope'),
       room: ref('room', 'ferry_landing'),
       detail: 'mooring_post',
       outcome: 'success',

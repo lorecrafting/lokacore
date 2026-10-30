@@ -101,7 +101,7 @@ test('two NPCs remember the player separately; a stranger does not', () => {
 test('an apple given to the smith marks her fed (or the named miller), at the instance scope', () => {
   const named = structuredClone(content) as any;
   const ref = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
-  named.reactions[`${S}:reaction/fed`].apply[0].npc = { ...ref, key: 'miller' };
+  named.reactions[`${S}:reaction/fed`].steps[0].npc = { ...ref, key: 'miller' };
   for (const [c, fed, hungry] of [
     [content, 'smith', 'miller'],
     [named, 'miller', 'smith'],
@@ -181,7 +181,7 @@ test('row W2 needs a known subject, at fact sites only', () => {
 test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
   const smith = `${S}:dialogue/smith_talk`;
   const at = (k: string) =>
-    `.cartridge.dialogues[${JSON.stringify(smith)}].choices.${k}.sequence[0].fact`;
+    `.cartridge.dialogues[${JSON.stringify(smith)}].choices.${k}.steps[0].fact`;
   const variant = (change: (d: any, c: any) => void) => {
     const c = structuredClone(source);
     change(c.dialogues[smith], c);

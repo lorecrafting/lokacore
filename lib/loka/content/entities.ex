@@ -2,7 +2,7 @@ defmodule Loka.Content.Entities do
   @moduledoc """
   Items and NPCs (entity.schema.json; 21 §8; 03 §23): their definition kinds and room-line
   variants, their text keys, the variants' conditions, and where they start (containment:
-  no cycle, capacity). Ownership and location references are `Loka.Content.Checks.rooms/4`.
+  no cycle, capacity). Ownership and location references are `Loka.Content.Resolve.rooms/4`.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
 

@@ -55,7 +55,7 @@ defmodule Loka.Content.Lint do
        when p != @always and not is_map_key(r, "reason") and not is_map_key(r, "command"),
        do: ["#{rel}: policy refuses with no reason"]
 
-  defp file(["reactions", _], rel, %{"apply" => steps} = r) do
+  defp file(["reactions", _], rel, %{"steps" => steps} = r) do
     ops = Enum.map(steps, & &1["op"])
 
     if Enum.any?(ops, &(&1 in @writes)) and "narrate" not in ops and r["silent"] != true,
@@ -213,7 +213,7 @@ defmodule Loka.Content.Lint do
   defp wants(["actions", name], %{"target" => %{"tool" => %{"liquid" => l}}}),
     do: [{{:liquid, l}, Path.rootname(name)}]
 
-  defp wants(["services", _], %{"benefit" => %{"kind" => "drink", "liquid" => l, "vessel" => v}}),
+  defp wants(["services", _], %{"benefit" => %{"op" => "drink", "liquid" => l, "vessel" => v}}),
     do: [{{:liquid, l}, v}]
 
   defp wants(["items", name], %{"fuel" => %{"kind" => "source", "supply" => s}}),

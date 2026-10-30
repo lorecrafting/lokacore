@@ -24,7 +24,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "overheated"

@@ -8,7 +8,7 @@
     "fact": "lever_stage",
     "equals": 1
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "lever_stage",

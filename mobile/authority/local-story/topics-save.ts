@@ -19,7 +19,7 @@ export function topicsSave(world: World, db: Db, meta: Meta) {
   for (const t of Object.values(world.cartridge.topics ?? {})) facts.set(refString(t.fact), t.fact);
   for (const d of Object.values(world.cartridge.dialogues ?? {}))
     if (d.riddle?.wrong_limit !== undefined)
-      for (const s of d.choices[d.riddle.choice_id].sequence ?? [])
+      for (const s of d.choices[d.riddle.choice_id].steps ?? [])
         if (s.op === 'fact.assign') facts.set(refString(s.fact), s.fact);
   for (const n of Object.values(world.cartridge.npcs ?? {}))
     if (n.perception) facts.set(refString(n.perception.discovered), n.perception.discovered);
@@ -68,16 +68,18 @@ function seekProof(
   fact: DefinitionRef,
 ) {
   const p = command.payload as Extract<Command['payload'], { type: 'perform' }>;
-  const recipe = Object.values(world.cartridge.recipes ?? {}).find((r) => r.key === p.action);
-  const check = recipe?.check,
-    subject = recipe?.target.kind === 'detail' ? detailOf(world, recipe.target) : undefined;
+  const scripted = Object.values(world.cartridge.scripted_actions ?? {}).find(
+    (r) => r.key === p.action,
+  );
+  const check = scripted?.check,
+    subject = scripted?.target.kind === 'detail' ? detailOf(world, scripted.target) : undefined;
   if (
-    !recipe ||
+    !scripted ||
     check?.kind !== 'attribute_threshold' ||
     d.outcome !== 'success' ||
     world.attributes[key(check.attribute)] < check.difficulty ||
     (p.target_id !== undefined && p.target_id !== subject) ||
-    !(recipe.outcomes.success.sequence ?? []).some(
+    !(scripted.outcomes.success.steps ?? []).some(
       (s) => s.op === 'fact.assign' && same(s.fact, fact) && s.value === true,
     ) ||
     !d.events.some(
@@ -116,7 +118,7 @@ function grantSource(
       !row ||
       row.status !== 'resolved' ||
       !option ||
-      !(option.sequence ?? []).some((s) =>
+      !(option.steps ?? []).some((s) =>
         s.op === 'fact.assign'
           ? same(s.fact, fact) && s.value === true
           : s.op === 'topic.grant' &&

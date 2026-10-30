@@ -3,8 +3,8 @@ defmodule Loka.Content.LeafRefs do
   Each policy leaf's reference fields, each mapped to the definition kind a short ref expands
   to (mechanics.md policy leaf set). kernel/ts/test/tags.test.ts checks it against
   policy.schema.json. `steps/0`: the same for
-  each sequence step op (reactions, recipes, dialogue choices). No dependencies: the compiler's
-  checks read it at compile time.
+  each Step op (reactions, scripted actions, dialogue choices, service benefits). No dependencies:
+  the compiler's checks read it at compile time.
   """
   def all,
     do: %{
@@ -45,7 +45,7 @@ defmodule Loka.Content.LeafRefs do
       "item.move" => %{"room" => "room"},
       "npc.move" => %{"npc" => "npc", "room" => "room", "plan" => "population"},
       "population.spawn" => %{"plan" => "population"},
-      "replenish.run" => %{"key" => "replenish"},
+      "replenish.run" => %{"replenish" => "replenish"},
       "quest.activate" => %{"quest" => "quest"},
       "quest.resolve" => %{"quest" => "quest"},
       "quest.fail" => %{"quest" => "quest"},

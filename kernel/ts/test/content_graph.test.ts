@@ -50,7 +50,7 @@ const fixture = (keyIn = 'yard', hermit: Obj = {}) => ({
       policy: read('f_rw'),
       choices: {
         yes: {
-          sequence: [
+          steps: [
             { op: 'quest.accept', quest: R('quest', 'q1') },
             { op: 'fact.assign', fact: R('fact', 'f_rw'), value: true },
             { op: 'fact.assign', fact: R('fact', 'f_wo'), value: true },
@@ -62,7 +62,7 @@ const fixture = (keyIn = 'yard', hermit: Obj = {}) => ({
       npc: R('npc', 'hermit'),
       roles: {},
       policy: read('f_ro'),
-      choices: { yes: { sequence: [{ op: 'quest.accept', quest: R('quest', 'q2') }] } },
+      choices: { yes: { steps: [{ op: 'quest.accept', quest: R('quest', 'q2') }] } },
     },
   }),
   quests: defs('quest', { q1: {}, q2: {} }),
@@ -123,7 +123,7 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
       {
         from: 'f@1:dialogue/talk_guard',
         to: 'f@1:fact/f_wo',
-        path: '.choices.yes.sequence[2].fact',
+        path: '.choices.yes.steps[2].fact',
         op: 'fact.assign',
       },
     ],
@@ -154,7 +154,7 @@ test('engine write sites and engine-owned facts are not reported read_only', () 
     items: defs('item', {
       sword: { location: { in: 'template' }, weapon: { durability: { fact: R('fact', 'worn') } } },
     }),
-    services: defs('service', { mend: { benefit: { kind: 'repair', fact: R('fact', 'mended') } } }),
+    services: defs('service', { mend: { benefit: { op: 'repair', fact: R('fact', 'mended') } } }),
     facts: defs('fact', {
       slain: {},
       known: {},

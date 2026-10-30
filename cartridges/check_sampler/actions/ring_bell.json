@@ -17,7 +17,7 @@
   "duration": 60,
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "event.emit",
           "event": "bell_rung"

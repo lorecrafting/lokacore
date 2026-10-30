@@ -86,8 +86,8 @@ export type Assigned = {
 };
 
 /**
- * `r` with one authored fact.assign step of `actor` appended (a recipe outcome's or a dialogue
- * choice's sequence): a delta fact.assign at the fact's scope whose expected value is the fact as
+ * `r` with one authored fact.assign step of `actor` appended (a scripted action outcome's or a dialogue
+ * choice's steps): a delta fact.assign at the fact's scope whose expected value is the fact as
  * the steps before it left it; one that changes its fact leaves the next causal position free for
  * the fact_changed the host puts there (runtime/proposal.ts).
  */
@@ -109,12 +109,12 @@ export function assigned<R extends Assigned>(
   return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
 }
 
-/** Toolbox row W23: the engine-owned fact a recipe's tip sets once shown (compiler-added). */
-export const seenTip = (world: World, recipe: string): DefinitionRef => ({
+/** Toolbox row W23: the engine-owned fact a scripted action's tip sets once shown (compiler-added). */
+export const seenTip = (world: World, scripted: string): DefinitionRef => ({
   cartridge_id: world.cartridge.manifest.id,
   cartridge_version: world.cartridge.manifest.version,
   kind: 'fact',
-  key: `seen_tip_${recipe}` as DefinitionRef['key'],
+  key: `seen_tip_${scripted}` as DefinitionRef['key'],
 });
 
 type Owner = 'skills' | 'patrol' | 'service' | 'scene' | 'durability' | 'theft';
@@ -140,8 +140,8 @@ function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
     owner !== 'service' &&
     Object.values(world.cartridge.services ?? {}).some(
       ({ benefit: b }) =>
-        (b.kind === 'entitlement' && same(b.fact, ref)) ||
-        ((b.kind === 'deposit' || b.kind === 'withdraw') && same(b.account, ref)),
+        (b.op === 'entitlement' && same(b.fact, ref)) ||
+        ((b.op === 'deposit' || b.op === 'withdraw') && same(b.account, ref)),
     )
   )
     throw new KernelError('precondition_failed');
@@ -239,7 +239,7 @@ export type Base = Pick<
  * `events` with a fact_changed (old, new, the fact's scope) for each of `assigns` that changes
  * its fact (owner decision, R5 S4 Q2), each `base` with its id from the sequence's `mint` in op
  * order, at the next causal position `events` leaves free, then after them (04 §5.2 steps 4-5):
- * a rule whose sequence assigns before it emits leaves that position (mechanics/action_recipe/rule.ts).
+ * a rule whose sequence assigns before it emits leaves that position (mechanics/scripted_action/rule.ts).
  * `events` itself when none changes.
  */
 export function factChanged(

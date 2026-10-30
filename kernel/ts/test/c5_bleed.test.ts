@@ -323,13 +323,13 @@ test('held qualified bandage treats during combat without spending its round', (
   assert.equal(treated.world.state.bleeds![world.body]!.active, false);
 });
 
-// Breaks: broadening the combat command allowlist admits an authored perform recipe beside Bandage.
-test('an authored recipe remains excluded while the hound fight offers Bandage', () => {
+// Breaks: broadening the combat command allowlist admits an authored perform scripted action beside Bandage.
+test('an authored scripted action remains excluded while the hound fight offers Bandage', () => {
   const { world, target } = fixture();
   const first = command(world, 1, { type: 'attack', target_id: target }, 1);
   const fight = elapsed(first.world, 64950, 2).world;
   const { ready } = readyBandage(fight);
-  assert.ok(Object.values(ready.cartridge.recipes ?? {}).some((r) => r.key === 'search'));
+  assert.ok(Object.values(ready.cartridge.scripted_actions ?? {}).some((r) => r.key === 'search'));
   assert.equal(resolved(ready, ready.character).search, undefined);
   assert.ok(Object.values(resolved(ready, ready.character)).some((a) => a.command === 'bandage'));
 });

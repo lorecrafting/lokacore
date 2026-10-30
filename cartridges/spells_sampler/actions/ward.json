@@ -15,7 +15,7 @@
   "costs": [{ "resource": "mana", "amount": 1 }],
   "outcomes": {
     "success": {
-      "sequence": [{ "op": "event.emit", "event": "ward_cast" }],
+      "steps": [{ "op": "event.emit", "event": "ward_cast" }],
       "narration": { "actor": "narration.ward" }
     }
   }
