@@ -55,7 +55,7 @@ export function onlyFood(c: any) {
   delete c.alternates;
   delete c.speech;
   delete c.structures;
-  delete c.map_positions;
+  delete c.layout;
   c.facts = { [`${prefix}:fact/position`]: position };
   c.world = { carry: { max_grams: 12000 } };
   const inn = c.rooms[`${prefix}:room/crossroads_inn`];

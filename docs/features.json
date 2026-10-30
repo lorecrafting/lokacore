@@ -1004,7 +1004,7 @@
       "MutationTarget"
     ],
     "modules": [
-      "lib/loka/content/map_positions.ex",
+      "lib/loka/content/layout.ex",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
       "kernel/ts/src/foundation/compose_knowledge.ts",
       "lib/loka/core/compose_knowledge.ex",

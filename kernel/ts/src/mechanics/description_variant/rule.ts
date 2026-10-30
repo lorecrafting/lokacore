@@ -53,7 +53,7 @@ export const describe = (
     : (of.variants?.find((v) => holds(world, actor, v.when, { target, steps }))?.description ??
       of.description);
 
-/** An entity's `field` text as `actor` sees it: its `<field>_variants`, the entity the target (toolbox row W6). */
+/** An entity's `field` text as `actor` sees it: its variants (`name_variants` for `short`), the entity the target (toolbox row W6). */
 export const describeEntity = (
   world: World,
   actor: CharacterId,
@@ -62,7 +62,10 @@ export const describeEntity = (
   steps: Steps = { n: 0 },
 ): TextKey => {
   const e = world.entities[id];
-  const of = { description: e[field], variants: e[`${field}_variants`] };
+  const of = {
+    description: e[field],
+    variants: e[field === 'short' ? 'name_variants' : (`${field}_variants` as const)],
+  };
   return describe(world, actor, of, steps, id);
 };
 

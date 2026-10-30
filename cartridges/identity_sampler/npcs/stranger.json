@@ -3,7 +3,7 @@
     "stranger"
   ],
   "name": "npc.stranger.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "fact_compare",

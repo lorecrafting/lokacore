@@ -70,7 +70,7 @@ test('Map joins actor-owned visited rooms and only links with two visited endpoi
     ...fresh,
     cartridge: {
       ...fresh.cartridge,
-      map_positions: [
+      layout: [
         { room: ref('ferry_landing'), x: 0, y: 2, z: 0 },
         { room: ref('well_lane'), x: 0, y: 1, z: 0 },
         { room: ref('well_shaft'), x: 1, y: 1, z: -1 },

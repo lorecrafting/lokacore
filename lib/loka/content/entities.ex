@@ -63,7 +63,7 @@ defmodule Loka.Content.Entities do
 
   # An item's or NPC's text variant lists (TextVariants; toolbox row W6).
   defp variants(e) do
-    for f <- ~w(short_variants room_line_variants description_variants),
+    for f <- ~w(name_variants room_line_variants description_variants),
         {v, i} <- Enum.with_index(Map.get(e, f, [])),
         do: {[f, i], v}
   end

@@ -327,7 +327,7 @@ adjacent-sight projection, rule, content artifact or saved state
 
 EntityView, ContentView and the combat opponent (`combat` and each `active_opponents`
 member) carry `words` copied from the definition while the selected short is the base
-`short`; a holding `short_variants` entry omits them (loka-6qi).
+`short`; a holding `name_variants` entry omits them (loka-6qi).
 
 NoticeView and NoticeBoardView carry `key`, the authored detail Key, so a presenter can match
 a touch link ([cartridge.md](cartridge.md#compiler)) in the selected description to the

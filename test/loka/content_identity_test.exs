@@ -21,7 +21,7 @@ defmodule Loka.ContentIdentityTest do
     assert diags.([{"cartridge.json", drop_cap}]) == [
              {"UNDECLARED_CAPABILITY", "cartridge.world.identity.name_variants[0]"},
              {"UNDECLARED_CAPABILITY", "cartridge.world.identity.name_variants[1]"},
-             {"UNDECLARED_CAPABILITY", "npcs/stranger.short_variants[0]"}
+             {"UNDECLARED_CAPABILITY", "npcs/stranger.name_variants[0]"}
            ]
 
     hooded = ["name_variants", Access.at(0), "when", "status"]
