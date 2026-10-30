@@ -204,7 +204,7 @@ test('a forged built row refuses the load', () => {
 // axis or sign (north is -y), or linking only one way.
 test('the map places the hut one step north of the lane and links both ways', () => {
   const mapped = sampler((c) => {
-    c.map_positions = [
+    c.layout = [
       { room: ref('room', 'lane'), x: 2, y: 5, z: 0 },
       { room: ref('room', 'yard'), x: 9, y: 9, z: 0 },
     ];
@@ -568,7 +568,7 @@ test('raze is refused for a non-owner, and while a corpse lies in the hut', () =
 // linking the lane north to it.
 test('a razed hut leaves the map', () => {
   const mapped = sampler((c) => {
-    c.map_positions = [
+    c.layout = [
       { room: ref('room', 'lane'), x: 2, y: 5, z: 0 },
       { room: ref('room', 'yard'), x: 9, y: 9, z: 0 },
     ];

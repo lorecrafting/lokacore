@@ -99,7 +99,7 @@ test('compiled map-position arrays reject empty declarations with a minItems red
   const cartridge: any = (DEFS as any).CompiledCartridge.oneOf.find(
     (b: any) => b.properties.format.const === 'loka-cartridge-v2',
   );
-  const defs = { ...DEFS, D10Probe: cartridge.properties.map_positions } as Defs;
+  const defs = { ...DEFS, D10Probe: cartridge.properties.layout } as Defs;
   assert.notDeepEqual(validate('D10Probe', [], defs), []);
   const mutant = structuredClone(defs);
   delete (mutant.D10Probe as any).minItems;
@@ -122,11 +122,11 @@ const knock = (c: any) => {
 // Breaks: the loader refuses a valid Knock door or loads a non-numeric map coordinate.
 test('D10 loader loads Knock and refuses a malformed map coordinate', () => {
   assert.equal(load(knock).ok, true);
-  const loaded = load((c) => (knock(c), (c.map_positions[0].x = '0')));
+  const loaded = load((c) => (knock(c), (c.layout[0].x = '0')));
   assert.equal(loaded.ok, false);
   if (loaded.ok) return;
   assert.deepEqual(
     [loaded.diagnostic.code, loaded.diagnostic.path],
-    ['SCHEMA_VIOLATION', '.cartridge.map_positions[0].x'],
+    ['SCHEMA_VIOLATION', '.cartridge.layout[0].x'],
   );
 });

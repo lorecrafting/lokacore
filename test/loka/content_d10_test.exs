@@ -27,22 +27,22 @@ defmodule Loka.ContentD10Test do
     dir: dir
   } do
     assert {:ok, _, _warnings} = ContentSource.compile(dir, knock())
-    map = "map_positions.json"
+    map = "layout.json"
     knock = &put_in(&1, ["exits", "south", "knock", &2], &3)
 
     for {file, change, code, path} <- [
-          {map, &tl/1, "SCHEMA_VIOLATION", "map_positions"},
+          {map, &tl/1, "SCHEMA_VIOLATION", "layout"},
           {map, &List.update_at(&1, 1, fn r -> Map.merge(r, Map.take(hd(&1), ~w(x y z))) end),
-           "SCHEMA_VIOLATION", "map_positions"},
+           "SCHEMA_VIOLATION", "layout"},
           {map, &List.update_at(&1, 1, fn r -> Map.put(r, "room", hd(&1)["room"]) end),
-           "SCHEMA_VIOLATION", "map_positions"},
+           "SCHEMA_VIOLATION", "layout"},
           {map, &List.update_at(&1, 0, fn r -> Map.put(r, "room", "absent") end),
-           "UNRESOLVED_REFERENCE", "map_positions[0].room"},
+           "UNRESOLVED_REFERENCE", "layout[0].room"},
           {map, &List.update_at(&1, 0, fn r -> Map.put(r, "x", 0.5) end), "SCHEMA_VIOLATION",
-           "map_positions[0].x"},
+           "layout[0].x"},
           {"cartridge.json",
            &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "knowledge") end),
-           "UNDECLARED_CAPABILITY", "map_positions"},
+           "UNDECLARED_CAPABILITY", "layout"},
           {"rooms/smithy.json", &knock.(&1, "npc", "absent"), "UNRESOLVED_REFERENCE",
            "rooms/smithy.exits.south.knock.npc"},
           {"rooms/smithy.json", &knock.(&1, "room", "smithy"), "BARRIER_MISMATCH",

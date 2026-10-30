@@ -7,7 +7,7 @@
   "room_line": "npc.hob.room",
   "description": "npc.hob.description",
   "room": "crossroads_inn",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "time_window",

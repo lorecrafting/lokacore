@@ -13,9 +13,9 @@ defmodule Loka.ContentVariantsTest do
     dir = Loka.ContentSource.copy("cartridges/items_sampler")
 
     for change <- [
-          {"items/lantern.json", &Map.put(&1, "short_variants", @variant)},
+          {"items/lantern.json", &Map.put(&1, "name_variants", @variant)},
           {"items/lantern.json", &Map.put(&1, "description_variants", @variant)},
-          {"npcs/bram.json", &Map.put(&1, "short_variants", @variant)},
+          {"npcs/bram.json", &Map.put(&1, "name_variants", @variant)},
           {"npcs/bram.json", &Map.put(&1, "room_line_variants", @variant)},
           {"npcs/bram.json", &Map.put(&1, "description_variants", @variant)}
         ],
@@ -29,12 +29,12 @@ defmodule Loka.ContentVariantsTest do
     dir = Loka.ContentSource.copy("cartridges/variants_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     ghost = &put_in(&1, ["description_variants", Access.at(0), "when", "status"], "ghost")
-    no_text = &put_in(&1, ["short_variants", Access.at(0), "description"], "item.sword.gone")
+    no_text = &put_in(&1, ["name_variants", Access.at(0), "description"], "item.sword.gone")
 
     for {file, change, path, target} <- [
           {"npcs/maud.json", ghost, "npcs/maud.description_variants[0].when.status",
            "variants_sampler@0.0.1:status/ghost"},
-          {"items/sword.json", no_text, "items/sword.short_variants[0].description",
+          {"items/sword.json", no_text, "items/sword.name_variants[0].description",
            "item.sword.gone"}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [{file, change}])

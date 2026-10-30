@@ -82,7 +82,7 @@ yet." becomes:
 
 The hub pin's exit count rises to four. The build slice edits `text.json` `readable.sign_hub` and
 `room.crossroads_inn.description` (the "Three roads" wording) and adds the five new rooms to
-`map_positions.json`.
+`layout.json`.
 
 ## Rooms and map
 
@@ -125,7 +125,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   `immune: [bleeding, gored]` (`npc_status_sampler/npcs/golem.json`); `drops: [{tusk, 100},
   {purse, 50}]` with `tusk` and `purse` `location {in: npc, npc: boar}` (`loot_sampler/npcs/rat.json`);
   `cues: [{sense: sound, text: cue.boar, range: 1}]` (`senses_sampler/npcs/sentry.json`; a dead
-  NPC's cues are silent); `short_variants` none.
+  NPC's cues are silent); `name_variants` none.
 - **Gil** (the ally): `room: gate_yard`; hp 0..10 gain 0; `attack {chance 100, 1..1}`;
   `description_variants` on `fact_compare gil_warned true` ("Gil has his spear up; he heard you
   call."). Listed in `world.combat.allies`; never an Attack target; takes no combat damage

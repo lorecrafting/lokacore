@@ -4,7 +4,7 @@
     "iron"
   ],
   "name": "item.sword.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "fact_compare",

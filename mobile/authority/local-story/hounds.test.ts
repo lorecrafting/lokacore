@@ -27,7 +27,7 @@ function populationOnly() {
     c.rooms = keep(c.rooms, rooms);
     const yard = c.rooms[`${prefix}:room/drill_yard`];
     yard.exits = { south: yard.exits.south };
-    c.map_positions = c.map_positions.filter((p: any) => rooms.includes(p.room.key));
+    c.layout = c.layout.filter((p: any) => rooms.includes(p.room.key));
     c.items = keep(c.items, ['ear', 'npc_corpse', 'player_corpse']);
     for (const item of Object.values(c.items) as any[]) delete item.immune;
     c.npcs = keep(c.npcs, ['goblin']);

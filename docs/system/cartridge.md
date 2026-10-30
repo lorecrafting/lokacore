@@ -12,7 +12,7 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attribute1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
-| `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
+| `layout.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/layout.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `quests/`, `dialogues/`, `reactions/`, `scenes/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `replenish/`, `services/`, `transports/`, `bleeds/`, `statuses/`, `structures/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 | `actions/<key>.json` | a player action, one of two shapes chosen by one field: with `command`, an action that names a built-in command (ActionDefinition); without it, a scripted action whose `outcomes` the author writes (ScriptedAction, `scripted_action@1`, [mechanics](mechanics.md#scripted_action1-mechanicsscripted_actionrulets49)). The compiler routes the file by `command` before any other stage reads it; the artifact keeps its `actions` and `scripted_actions` maps and ref kinds ([Actions with outcomes](#source-shortcuts)) |
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
@@ -365,7 +365,7 @@ is never validated (an abstract NPC needs no `room`), and a reference to it is a
 `UNRESOLVED_REFERENCE`. Any other `abstract` value stays and is `UNKNOWN_FIELD`.
 
 Root files are not flattened: `extends` in `cartridge.json`, `facts.json`, `resources.json`,
-`attributes.json` or `map_positions.json` is `UNKNOWN_FIELD` (for example `cartridge.extends`);
+`attributes.json` or `layout.json` is `UNKNOWN_FIELD` (for example `cartridge.extends`);
 in `text.json` it is an ordinary TextKey. A child whose parent failed to decode, or whose parent
 chain reaches a cycle it is not in, is dropped without a diagnostic of its own; the parent's
 diagnostic fails the build. The refusals, with `<src>` the file's source path:
@@ -484,7 +484,7 @@ rules byte for byte.
 
 `schemas/source/` holds one JSON Schema (draft 2020-12) per source file kind, for editors and
 LLM authors: one per definition directory (`rooms.schema.json`, `behaviours.schema.json`, ...),
-one per root file (`cartridge`, `facts`, `text`, `resources`, `attributes`, `map_positions`)
+one per root file (`cartridge`, `facts`, `text`, `resources`, `attributes`, `layout`)
 and `areas.schema.json` for bundles, each a `$ref` into the shared `defs.schema.json`.
 `mix loka.source_schema` writes them from the contracts the compiler checks source with plus the
 shortcuts above (`lib/loka/content/source_schema.ex`); a test fails when the committed files
@@ -1136,7 +1136,7 @@ An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `action
 
 ## Entity variant declarations
 
-[Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC (`short_variants`, `room_line_variants`, `description_variants`) or an item (`short_variants`, `description_variants`; `room_line_variants` are older), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. Sampler: `cartridges/variants_sampler`.
+[Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC (`name_variants`, `room_line_variants`, `description_variants`) or an item (`name_variants`, `description_variants`; `room_line_variants` are older), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. Sampler: `cartridges/variants_sampler`.
 
 ## Name word declarations
 
@@ -1291,4 +1291,4 @@ Built rooms S2 adds a service benefit `{op: "build", structure, site, direction}
 
 ## Map position declarations
 
-`map_positions.json` (optional) is a non-empty array of `MapPosition` rows `{room, x, y, z}` (`protocol/cartridge.schema.json`). It needs knowledge@1 (UNDECLARED_CAPABILITY at the file). Every room of the cartridge appears exactly once, at a unique `(x, y, z)` (SCHEMA_VIOLATION at the file). Each `room` resolves (UNRESOLVED_REFERENCE at `[i].room`). Coordinates are drawing data only: the map draws links from real exits, and positions never change movement, sight or reachability. Compiler `lib/loka/content/map_positions.ex`.
+`layout.json` (optional) is a non-empty array of `MapPosition` rows `{room, x, y, z}` (`protocol/cartridge.schema.json`). It needs knowledge@1 (UNDECLARED_CAPABILITY at the file). Every room of the cartridge appears exactly once, at a unique `(x, y, z)` (SCHEMA_VIOLATION at the file). Each `room` resolves (UNRESOLVED_REFERENCE at `[i].room`). Coordinates are drawing data only: the map draws links from real exits, and positions never change movement, sight or reachability. Compiler `lib/loka/content/layout.ex`.
