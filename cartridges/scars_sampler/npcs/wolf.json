@@ -3,7 +3,7 @@
     "wolf"
   ],
   "name": "npc.wolf.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "status_active",

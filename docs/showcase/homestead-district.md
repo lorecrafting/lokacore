@@ -43,7 +43,7 @@ mechanics in it.
 
 One build slice per district, in owner order: 4 Homestead, 5 economy and law, 6 magic, 7 traps.
 **They run in sequence, never in parallel:** every slice edits `cartridge.json` (capabilities,
-`world`, `speech`), `resources.json`, `facts.json`, `text.json`, `map_positions.json`, the hub sign
+`world`, `speech`), `resources.json`, `facts.json`, `text.json`, `layout.json`, the hub sign
 text and `protocol/fixtures/toolbox_showcase_hash.json`; plans 5 and 6 both edit
 `rooms/crossroads_inn.json`. Each slice branches from `main` after the previous one merges. A
 slice's kernel test file is its own; the hub pin in `showcase_body.test.ts` (exit count) changes

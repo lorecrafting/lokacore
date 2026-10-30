@@ -3,7 +3,7 @@
     "sword"
   ],
   "name": "item.sword.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "status_active",

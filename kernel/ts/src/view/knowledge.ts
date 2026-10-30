@@ -24,7 +24,7 @@ const STEP: Record<string, [number, number, number]> = {
 };
 
 // Built rooms S2: a built room sits one unit from its site in its direction (north is -y).
-function positions(world: World, authored: NonNullable<Cartridge['map_positions']>) {
+function positions(world: World, authored: NonNullable<Cartridge['layout']>) {
   const at = new Map(authored.map((p) => [world.roomIds[refString(p.room)], p]));
   for (const [id, { origin }] of Object.entries(world.state.created ?? {})) {
     if (origin.kind !== 'built' || world.state.built?.[id]) continue; // a razed room leaves the map (S5)
@@ -43,13 +43,13 @@ export function knowledgeView(
 ): Pick<GameView, 'map' | 'known_npcs' | 'actor_name'> {
   const actor_name = displayedName(world, actor, steps);
   const name = actor_name && { actor_name };
-  if (!world.cartridge.map_positions) return { ...name };
+  if (!world.cartridge.layout) return { ...name };
   const visited = new Set(
     Object.values(world.state.visited_rooms ?? {})
       .filter((r) => r.actor_id === actor)
       .map((r) => r.room_id),
   );
-  const at = positions(world, world.cartridge.map_positions);
+  const at = positions(world, world.cartridge.layout);
   const rooms = [...at]
     .flatMap(([id, p]) =>
       visited.has(id) ? [{ id, title: world.rooms[id].name, x: p.x, y: p.y, z: p.z }] : [],

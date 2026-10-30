@@ -352,7 +352,7 @@
                 "$ref": "cartridge.schema.json#/$defs/StructureDefinition"
               }
             },
-            "map_positions": {
+            "layout": {
               "type": "array",
               "items": {
                 "$ref": "cartridge.schema.json#/$defs/MapPosition"
