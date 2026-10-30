@@ -205,9 +205,10 @@ rc=0; MUTATE_MINUTES=0 capped sh "$bin/mutate.sh" m.tsv "touch ran" > out 2>&1 |
 # Break: the timebox exit hides a failure (a malformed line plus a timebox exits 3, not 1).
 printf 'bad\na.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_MINUTES=0 capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 1 ] && [ "$(cut -f1 out | tr '\n' ,)" = 'FAIL,TIMEBOX,' ] || { bad "mutate timebox after failure: exit $rc, want 1 (a failure beats the timebox)"; cat out; }
-# Break: a non-integer MUTATE_MINUTES runs no mutant and exits 0 (a silent clean pass), or an empty one is refused.
-printf 'a.txt\tx=1\tx=2\n' > m.tsv
-for shell in sh bash; do for m in thirty 1.5 -1 ' 5' 08; do
+# Break: a bad MUTATE_MINUTES is not refused with exit 2 (thirty exited 0 with no rows, a silent clean
+# pass; 08 died as bad octal; one value per guard branch), or an empty one is refused instead of meaning 30.
+mt; printf 'a.txt\tx=1\tx=2\n' > m.tsv
+for shell in sh bash; do for m in thirty 08; do
   rc=0; MUTATE_MINUTES=$m capped $shell "$bin/mutate.sh" m.tsv "touch ran" > out 2>&1 || rc=$?
   [ "$rc" = 2 ] && [ ! -e ran ] && grep -q '^usage: MUTATE_MINUTES' out || { bad "mutate MUTATE_MINUTES='$m' under $shell: exit $rc, want 2, a usage line and no mutant run"; cat out; }
 done; done
