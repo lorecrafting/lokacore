@@ -175,7 +175,7 @@ export function Here(p: {
 
 // One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
 // words (loka-6qi): the bare name, its article written when it differs from the previous link's or
-// the name repeats (a name without one breaks the run), and same-name entities with a plural as one.
+// the name ends in the previous link's last word (a name without one breaks the run), and same-name entities with a plural as one.
 function Present(p: {
   group: GameView['entities'];
   text: (key: string) => string;
@@ -196,7 +196,9 @@ function Present(p: {
     <Text style={prose(c, t)}>
       {links.map((l, i) => {
         const prev = links[i - 1];
-        const article = (l.article !== prev?.article || l.name === prev?.name) && l.article;
+        const noun = (n?: string) => n?.split(' ').pop(); // 'cowering goblin' and 'goblin' end alike
+        const article =
+          (l.article !== prev?.article || noun(l.name) === noun(prev?.name)) && l.article;
         const first = (s: string) => (i === 0 ? cap(s) : s);
         return (
           <Fragment key={l.id}>

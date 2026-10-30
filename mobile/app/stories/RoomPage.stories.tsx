@@ -195,7 +195,11 @@ export const Mood: StoryObj = {
   ...room([afraid(0), ...crowd(npc, 'npc', [['goblin', 'a', true]])]),
   name: 'An afraid goblin and a calm one',
   play: async ({ canvas }) => {
-    await sentence(canvas, ['cowering goblin', 'goblin'], 'A cowering goblin and goblin are here.');
+    await sentence(
+      canvas,
+      ['cowering goblin', 'goblin'],
+      'A cowering goblin and a goblin are here.',
+    );
   },
 };
 export const MoodPair: StoryObj = {
