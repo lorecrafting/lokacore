@@ -4,16 +4,16 @@
   ],
   "name": "npc.sage.short",
   "room_line": "npc.sage.line",
-  "room_line_variants": [
+  "description": "npc.sage.description",
+  "description_variants": [
     {
       "when": {
         "op": "skill_compare",
         "skill": "lore",
         "at_least": 2
       },
-      "description": "npc.sage.line.scholar"
+      "description": "npc.sage.description_scholar"
     }
   ],
-  "description": "npc.sage.description",
   "room": "hall"
 }

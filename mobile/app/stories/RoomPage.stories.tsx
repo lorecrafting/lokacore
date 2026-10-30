@@ -126,7 +126,7 @@ const crowd = (e: typeof npc, kind: string, names: Word[]) =>
     contents: [],
     words: { bare: `${kind}.${n}.bare`, article, plural: many && `${kind}.${n}.plural` },
   }));
-const room = (entities: ReturnType<typeof crowd>) =>
+const room = (entities: object[]) =>
   pageStory({ ...RoomNpcsItemsView, view: { ...RoomNpcsItemsView.view, entities } });
 const sentence = async (
   canvas: Parameters<NonNullable<StoryObj['play']>>[0]['canvas'],
@@ -174,5 +174,28 @@ export const Plural: StoryObj = {
   name: 'Three goblins and a hen',
   play: async ({ canvas }) => {
     await sentence(canvas, ['Three goblins', 'hen'], 'Three goblins and a hen are here.');
+  },
+};
+
+// Breaks (owner 2026-10-30, W6 moods): an NPC's mood name, which has no name words, loses its own
+// link, gains a second article, goes uncapitalised, or merges with the calm goblin of its kind.
+export const Mood: StoryObj = {
+  ...room([
+    {
+      ...npc,
+      id: 'goblin-afraid',
+      name: 'npc.goblin.short_afraid',
+      contents: [],
+      words: undefined,
+    },
+    ...crowd(npc, 'npc', [['goblin', 'a', true]]),
+  ]),
+  name: 'An afraid goblin and a calm one',
+  play: async ({ canvas }) => {
+    await sentence(
+      canvas,
+      ['A cowering goblin', 'goblin'],
+      'A cowering goblin and a goblin are here.',
+    );
   },
 };

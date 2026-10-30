@@ -1136,7 +1136,7 @@ An action may declare `reason`, a catalog key (`UNRESOLVED_REFERENCE` at `action
 
 ## Entity variant declarations
 
-[Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC (`name_variants`, `room_line_variants`, `description_variants`) or an item (`name_variants`, `description_variants`; `room_line_variants` are older), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. Sampler: `cartridges/variants_sampler`.
+[Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC or an item (`name_variants`, `description_variants`; an item's `room_line_variants` are older; an NPC declaring `room_line_variants` is UNKNOWN_FIELD), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. Sampler: `cartridges/variants_sampler`.
 
 ## Name word declarations
 
@@ -1144,7 +1144,7 @@ Name words (loka-6qi): an NPC or item may declare `words {bare, article?, plural
 
 ## Voice declarations
 
-[Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skill@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.room_line_variants[0].when.skill`). The checks are in `lib/loka/content/entities.ex`. Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
+[Passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2) add one leaf, `skill_compare {skill, at_least}` (owner skill@1; UNDECLARED_CAPABILITY at the leaf's op). `skill` takes a short key through `Loka.Content.LeafRefs`; an unresolved one is UNRESOLVED_REFERENCE at it (`npcs/sage.description_variants[0].when.skill`). The checks are in `lib/loka/content/entities.ex`. Room, detail and NPC `asides` are retired (`loka-x6t.125`): UNKNOWN_FIELD. Sampler: `cartridges/voices_sampler`.
 
 A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.details.<key>.title`), the page title the Book shows for it. `mix loka.lint` requires it, and a prose link to it, on a detail some action targets (loka-x6t.120).
 

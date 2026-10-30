@@ -5,6 +5,16 @@
   "name": "npc.guard.short",
   "room_line": "npc.guard.room",
   "description": "npc.guard.description",
+  "description_variants": [
+    {
+      "when": {
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
+      },
+      "description": "npc.guard.description_wanted"
+    }
+  ],
   "room": "market_row",
   "hp": {
     "minimum": 0,
@@ -37,16 +47,6 @@
   "resistances": {
     "physical": 100
   },
-  "room_line_variants": [
-    {
-      "when": {
-        "op": "fact_compare",
-        "fact": "wanted",
-        "equals": true
-      },
-      "description": "npc.guard.room_wanted"
-    }
-  ],
   "words": {
     "bare": "npc.guard.bare",
     "article": "the"

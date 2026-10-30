@@ -134,7 +134,7 @@ export const pinned = (t: { key: string; participants?: Readonly<Record<string, 
     : '';
 
 /** The current room's title, description (none when `brief`), the room line of each NPC and item
- * in it (its room-line variants), and exits, each marked closed or locked while its barrier
+ * in it (an item's room-line variants; an NPC's mood is its name and description), and exits, each marked closed or locked while its barrier
  * bars the way, in the cartridge's text. */
 export function room(cartridge: Cartridge, world: World, brief = false): string {
   const view = gameView(world);
