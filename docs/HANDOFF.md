@@ -5,50 +5,44 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #492; written 2026-10-28 by Claude Code (Opus 5.5), PM
-session 97831846. Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of
-weekly limit ... this will be my last week before a break so yeah make it right!" Owner is away from Storybook
-until all work is done; the picks Monitor is off. Storybook serves polish/session-2026-10-23 on 6006 (updated
-from main today, before #481). Owner delegated every open decision (quoted): "whatever your best
-recommendation on all is, or whatever is open, you decide with your best recommendation"; rulings are in the
-notes of loka-ivjq.20, .3, .4, .29. Owner asked to be told when the "How Loka works" page is up (after C3).
+AS OF main after #495; written 2026-10-29 by Claude Code (Opus 5.5), PM
+session cff5016d (resumed after a terminal crash killed session 97831846's agents). Owner (2026-10-28, quoted):
+"you can use fable when you think it would help, we have a lot of weekly limit ... this will be my last week
+before a break so yeah make it right!" Owner is away from Storybook until all work is done; the picks Monitor
+is off. Owner delegated every open decision (quoted): "whatever your best recommendation on all is, or whatever
+is open, you decide with your best recommendation"; rulings are in the notes of loka-ivjq.20, .3, .4, .29.
+Owner asked to be told when the "How Loka works" page is up.
 
 ## Now
 
-Merged 2026-10-28/29: #485-#489, #491, #492 (B5 Beads sync: refuses instead of losing a row), #490 (batch C1: TS
-loader keeps integrity/install checks only; one kernel_api range check; gate_sampler `knock` -> `knock_door`;
-Fable final review APPROVE WITH NOTES, docs/reviews/2026-10-28-c1-final-review.md). Pushes to main run no CI
-(nightly only); prove CI changes on a scratch branch. In flight; read the agent result or PR comment first:
+Merged 2026-10-29: #493 (batch C2: policy wrapper gone, policy optional, policies/population_bundles/story_points
+kinds gone, one `name` field, structures; transport@1 kept; docs/reviews/2026-10-29-c2-final-review.md) and #495
+(batch C3: one Step and one Check for reactions, scripted actions, dialogue choices and service benefits; recipe
+is now scripted action; reaction `event.emit` (refused in delayed rules); docs/reviews/2026-10-29-c3-final-review.md).
+Rulings for both: loka-ivjq.3 and .4 notes. Nothing is in flight.
 
-- Batch C2 (F3 F5 F6 F7 F8 F11 F12): draft PR #493, integration branch `simplify/c2-kinds` (worktree
-  ~/dev/worktrees.noindex/simplify-c2-kinds). Merged in: A (signals out, diag guard, behavior@1 out), E
-  (structures), F (story_point on the choice), B1 (policy optional), C1 (policies/ out, bundles inlined,
-  hunter/prey/loot, :area), B2 (policy wrapper dropped). C2 travel cancelled: transport@1 stays. D (one
-  `name` field) merged; Z (docs sweep) on `simplify/c2-z-docs`; then Fable final review. Plan, rulings
-  and amendments: loka-ivjq.3 notes. pm_merge uses main's merge_resolve.py (loka-hhs6): when it refuses a
-  generated-only conflict, merge by hand in the batch worktree with the batch's own resolver, regen,
-  commit, push.
-- Then C3: "C3 PLAN" (Fable) in loka-ivjq.4 notes; owner ratified D1 (two maps; the old action name becomes
-  scripted action); naming #7 #12 folded in; C3 rebuilds the glossary. After C3: a Fable "How Loka works"
-  explainer page (Artifact), link to the owner. Then C4 naming batch (loka-ivjq.29), then polish (Next 3).
-- C1 lessons, applied in every brief: parallel slices clash in shared tests, so each slice merges the
-  latest integration branch before handback; bash_guard refuses local full suites, CI kernel/elixir jobs
-  are the full red-test list and must be green before review; handback carries its own check table;
-  load gate refuses spawns above load 8. Run bin/worktree_setup.sh from inside a new worktree (the
-  main checkout's copy sets up main). A developer past ~2 h on mutation triage: tell it to hand back;
-  the reviewer classifies the rest. A PR blocked only by a generated-file conflict with main: merge origin/main
-  with diff3, `python3 bin/merge_resolve.py`, commit, push, wait_ci, merge.
-- Follow-ups filed 2026-10-28/29: loka-83pq, qik8, 82h3, kl1u, r0o7, lizb, hzag, poxf, hofs, pe11, mh6p
-  (provenance before any downloadable content: D5 gate), qjj4, hpbk, zeyz, q84v, muss, hhs6.
+- Next: a Fable "How Loka works" explainer page (Artifact) from the C3 glossary and cartridge.md "Steps and
+  checks"; link it to the owner. Then C4 naming batch (loka-ivjq.29), then polish (Next 3).
+- Fix first after that: loka-tb31 (P1): regen does not re-pin transcript or value-fixture hashes; every
+  parallel C3 slice merge conflicted in 30-50 of them and cost 20-30 min of scripted re-pinning. Also the
+  unenforced reviewer mutation timebox (C3 final sweep ran ~90 of 45 min) and mutate_diff treating renamed
+  files as new.
+- Batch lessons, applied in every brief: each slice merges the latest integration branch before handback;
+  CI kernel/elixir jobs are the full red-test list; handback carries its own check table and its
+  /code-review result; load gate refuses spawns above 8; mutation work is timeboxed at 30 min per slice and
+  survivors in carried-over logic are filed, not fixed. A slice that only changes compiler source merges
+  cleanly; one that touches the corpus conflicts in hashes until loka-tb31 lands.
+- Follow-ups filed 2026-10-29: C2/C3 review test gaps (loka-3ywg, barrier opens_when, R/P survivors,
+  sequence.ts:99-101), items_sampler containment hash, cartridge_journal_hash.py stale keys, payment deletion
+  (D4), loka-zeyz behavior rows.
+- Owner to ratify on return (PM decided under delegation): C2 D2/D5/D8 and transport@1 kept; C3 rulings in
+  loka-ivjq.4 notes (delayed event.emit refused, slice X, V's missing_property at benefit.site).
 - Draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
 
-1. Finish batch A (above).
-2. Simplification batch, epic loka-ivjq (Fable audit 2026-10-28, report in its notes; owner rulings in its
-   description): F1 docs, F2 kernel_api floors, F3 policy wrapper, F4 one step/check vocabulary (L, Fable
-   brief), F5 single-use kinds, F6 display-name field, F7 signals out, F11 story points onto the
-   choice; F9/F10/F12 after .17.
+1. "How Loka works" page, then loka-tb31.
+2. Simplification epic loka-ivjq: C1-C3 done (F2-F8, F11, F12); C4 naming (loka-ivjq.29) next; F9/F10 after .17.
 3. Then polish: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is ready
    (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide: [polish tour](design/polish-tour.md)).
 4. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
