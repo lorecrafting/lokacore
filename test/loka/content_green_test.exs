@@ -79,7 +79,23 @@ defmodule Loka.ContentGreenTest do
       {rule(
          "ring",
          &put_in(&1, ["steps"], [%{"op" => "fact.assign", "fact" => "bell_up", "value" => 1}])
-       ), d("FACT_TYPE_MISMATCH", "reactions/ring.steps[0].value", %{})}
+       ), d("FACT_TYPE_MISMATCH", "reactions/ring.steps[0].value", %{})},
+      # C3 D7: event.emit's custom_event is scripted_action@1's, which green does not declare.
+      {rule(
+         "ring",
+         &update_in(&1, ["steps"], fn s -> s ++ [%{"op" => "event.emit", "event" => "rang"}] end)
+       ),
+       d(
+         "UNDECLARED_CAPABILITY",
+         "reactions/ring.steps[1].op",
+         %{"capability" => "scripted_action"},
+         ["scripted_action@1"]
+       )},
+      # C3 D6: damage runs only in a scripted action.
+      {rule(
+         "ring",
+         &put_in(&1, ["steps"], [%{"op" => "damage", "amount" => 1, "kind" => "fire"}])
+       ), d("SCHEMA_VIOLATION", "reactions/ring.steps[0].op", %{"error" => "invalid_value"})}
     ]
 
     for {files, diag} <- cases,
