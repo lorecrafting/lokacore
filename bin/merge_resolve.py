@@ -5,10 +5,12 @@
   ends inside a section, or a duplicate heading afterwards, refuses;
 - docs/MECHANICS-TOOLBOX.md: the same for table rows (a row id on both sides refuses);
 - kernel/ts/src/runtime/world.ts: one conflict whose sides are each one kernel_api line keeps the higher;
-- a generated file (GENERATED, COMPILED, GENERATED_GLOBS) or docs/reviews/README.md takes theirs, as does a review record whose sides differ
-  only in whitespace (another review record is left); then every generator reruns (a COMPILED or GENERATED_GLOBS
-  family needs `sh bin/regen.sh` after the merge).
-Exit 0: all resolved and staged, not committed. Exit 1: prints the files it left; abort the merge.
+- a generated file (GENERATED, COMPILED, GENERATED_GLOBS: `*.gen.*` among them) or docs/reviews/README.md takes theirs, as does a review
+  record whose sides differ only in whitespace (another review record is left) and a transcript whose sides differ only in
+  content_hash values (another transcript is left); a path missing ours or theirs (modify/delete) is left.
+Exit 0: all resolved and staged, not committed; every generator reruns (a COMPILED, GENERATED_GLOBS or transcript family
+needs `sh bin/regen.sh` after the merge, which bin/pm_merge.sh runs). Exit 1: every other file is still resolved and staged;
+prints the files it left; edit those by hand, then run `sh bin/regen.sh`.
 Needs merge.conflictStyle=diff3 (the base section proves an append).
   python3 bin/merge_resolve.py"""
 import fnmatch
@@ -19,21 +21,11 @@ import sys
 
 HUNK = re.compile(r"^<<<<<<< [^\n]*\n(.*?)^\|{7}[^\n]*\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]*\n", re.M | re.S)
 KERNEL_API = re.compile(r"\s*kernel_api: '(\d+)\.(\d+)',\n")
-GENERATED = {
-    "kernel/ts/src/contracts.gen.ts",
-    "kernel/ts/test/subset.gen.ts",
-    "docs/contracts.gen.md",
-    "docs/residency.gen.json",
-    "docs/system-graph.gen.json",
-    "docs/checks.gen.json",
-    "docs/toolbox.gen.json",
-    "docs/features.gen.md",
-    "test/loka/lint_baseline.txt",
-}
+GENERATED = {"test/loka/lint_baseline.txt"}  # beside every `*.gen.*`
 # The compiled hash fixtures bin/regen.sh rebuilds: every one but its FROZEN ones and the hand-kept capability lock.
 COMPILED = re.compile(r"protocol/fixtures/(?!(containers_(sampler_v|reward_storage)|sampler_v|cartridge_(items|locks|sampler)_hash|reward_storage|capability_lock))\w+_hash\.json")
 GENERATED_GLOBS = [  # bin/regen.sh rebuilds these; `*` crosses `/`
-    "cartridges/*/transcripts/*.jsonl",
+    "*.gen.*",
     "mobile/app/stories/live/*.sql",
     "schemas/source/*.json",
 ]
@@ -100,11 +92,25 @@ RULES = {
 }
 
 
-def same_but_whitespace(f):
+TRANSCRIPT = "cartridges/*/transcripts/*.jsonl"
+CONTENT_HASH = re.compile(r'"content_hash":"[^"]*"')
+
+
+def sides(f):
+    """Ours and theirs, or None when one is missing (modify/delete, rename/delete)."""
     try:
-        return len({"\n".join(" ".join(l.split()) for l in git("show", f":{n}:{f}").splitlines()) for n in (2, 3)}) == 1  # line breaks count
-    except subprocess.CalledProcessError:  # modify/delete: a side is missing
-        return False
+        return [git("show", f":{n}:{f}") for n in (2, 3)]
+    except subprocess.CalledProcessError:
+        return None
+
+
+def same(f, norm):
+    s = sides(f)
+    return s is not None and norm(s[0]) == norm(s[1])
+
+
+def squash(t):  # whitespace only; line breaks count
+    return "\n".join(" ".join(l.split()) for l in t.splitlines())
 
 
 def git(*args):
@@ -128,15 +134,21 @@ for f in conflicted:
         with open(f, "w") as fh:
             fh.write(merged)
         git("add", f)
-    elif f in GENERATED or COMPILED.fullmatch(f) or any(fnmatch.fnmatchcase(f, g) for g in GENERATED_GLOBS) or f == "docs/reviews/README.md" or (f.startswith("docs/reviews/") and same_but_whitespace(f)):
+    elif (
+        ((f in GENERATED or COMPILED.fullmatch(f) or any(fnmatch.fnmatchcase(f, g) for g in GENERATED_GLOBS) or f == "docs/reviews/README.md") and sides(f))
+        or (f.startswith("docs/reviews/") and same(f, squash))
+        or (fnmatch.fnmatchcase(f, TRANSCRIPT) and same(f, lambda t: CONTENT_HASH.sub("", t)))  # regen.sh re-pins content_hash
+    ):
         theirs.append(f)
     else:
         left.append(f)
-if left:
-    print("unresolved: " + " ".join(left))
-    sys.exit(1)
 if theirs:
     git("checkout", "--theirs", "--", *theirs)
+    git("add", "--", *theirs)
+if left:
+    print("unresolved: " + " ".join(left))
+    print("resolve those by hand, then run sh bin/regen.sh", file=sys.stderr)
+    sys.exit(1)
 for gen in GENERATORS:  # always: mechanics.md feeds contracts.exs, so a resolved source regenerates too
     subprocess.run(gen, check=True, stdout=subprocess.DEVNULL)
 git("add", "-u")
