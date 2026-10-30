@@ -8,7 +8,8 @@
 # command first and the full command only if the narrow one stays green. Lines starting # are skipped.
 # MUTATE_MINUTES (default 30) is the time budget: before each mutant, once the sweep has run that long,
 # the mutant and every one after it print `TIMEBOX<TAB><file><TAB>not run` and the exit status is 3
-# (results already in the table stand; the tree is restored as usual). Exit 3 is not a clean pass.
+# (results already in the table stand; the tree is restored as usual). Exit 3 is not a clean pass;
+# an exit 1 failure takes precedence over it. MUTATE_MINUTES must be an integer.
 # ponytail: checked between mutants only, so one slow mutant can overrun the budget; upgrade if that bites.
 # Results: red-narrow, red-full, SURVIVED (all green; exit stays 0, the table is the report).
 # MUTATE_REBUILD=<command> runs after each apply and again after each restore, for tests that read a
@@ -52,5 +53,5 @@ sys.exit(1) if s.count(o) != 1 else open(f, "w").write(s.replace(o, n))' "$file"
   cur=
   printf '%s\t%s\t%s -> %s\n' "$res" "$file" "$old" "$new"
 done < "$list"
-[ -z "$timeboxed" ] || exit 3
+[ "$rc" != 0 ] || [ -z "$timeboxed" ] || exit 3  # a failure (exit 1) wins over the timebox
 exit $rc
