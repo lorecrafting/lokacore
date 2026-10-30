@@ -199,6 +199,10 @@ defmodule Loka.ContentCraftTest do
     failed =
       &put_in(&1, ["outcomes", "failure", "steps"], &1["outcomes"]["success"]["steps"])
 
+    # Breaks: an unresolved structure also gets on_site's SCHEMA_VIOLATION (one problem, two diagnostics).
+    nope = [{raise, &step.(&1, "structure", "nope_hut")}]
+    assert builds.(nope) == [{"UNRESOLVED_REFERENCE", seq <> "[0].structure"}]
+
     at = "actions/raise_timbered_hut.outcomes.failure.steps[0].op"
     assert {"SCHEMA_VIOLATION", at} in builds.([{raise, failed}])
   end

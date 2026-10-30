@@ -62,9 +62,7 @@ defmodule Loka.ContentChoiceChecksTest do
       {step.(Map.put(assign, "item", "x")), at <> "steps[0].item"},
       {step.(%{"op" => "fact.adjust", "fact" => "gate_open", "amount" => 1, "npc" => "guard"}),
        at <> "steps[0].npc"},
-      {step.(%{"op" => "fact.stamp", "fact" => "gate_open"}), at <> "steps[0].op"},
-      {check.(fn _ -> %{"key" => "persuade_guard", "kind" => "luck", "chance" => 50} end),
-       at <> "check.kind"}
+      {step.(%{"op" => "fact.stamp", "fact" => "gate_open"}), at <> "steps[0].op"}
     ]
 
     for {change, path} <- cases do
@@ -73,6 +71,14 @@ defmodule Loka.ContentChoiceChecksTest do
       assert {"SCHEMA_VIOLATION", path} in Enum.map(diags, &{&1["code"], &1["path"]}),
              inspect({path, diags})
     end
+
+    # Breaks: a luck check is resolved as opposed (its absent attribute, rating and npc), adding diagnostics.
+    luck = check.(fn _ -> %{"key" => "persuade_guard", "kind" => "luck", "chance" => 50} end)
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{guard, luck}])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) == [
+             {"SCHEMA_VIOLATION", at <> "check.kind"}
+           ]
 
     # Breaks: failure_text reads a missing failure as a text reference, adding a second diagnostic.
     assert {:error, diags} =

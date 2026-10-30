@@ -22,11 +22,14 @@ defmodule Loka.Content.CheckKinds do
     at = steps ++ ["check"]
     side = if is_map_key(c, "skill"), do: "skill", else: "attribute"
 
+    # A kind the choice does not run has only context/4's diagnostic.
     owned(at(rel, at), "check_passed", ctx.events) ++
       context(rel, at, c, :choice) ++
-      reference(rel, at, side, c, ctx.m, ctx.defs) ++
       failure_text(rel, at, c["failure"], ctx.text) ++
-      rated(rel, at, c, ctx) ++
+      if(c["kind"] == "opposed",
+        do: reference(rel, at, side, c, ctx.m, ctx.defs) ++ rated(rel, at, c, ctx),
+        else: []
+      ) ++
       plain(rel, at, o, d) ++
       if(c["key"] in shared_checks(ctx.defs),
         do: [diag("DUPLICATE_DEFINITION", at(rel, at))],
