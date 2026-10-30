@@ -296,8 +296,8 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
 - Dialogue is novel prose (owner, 2026-10-30, Beads `loka-r9mr`): speaker, speech verb, the
   listener when there is one, a comma, then the spoken line in double quotes. To the player:
   `Nell says to you, "Well, stranger?"`; to the room: `Nell says, "Ale's a penny."`; the player:
-  `You say, "Ware."`, `You whisper to the jailer, "Ware."`, `You shout, "Ware!"`. The verbs in use
-  are say, whisper and shout (a question may read `asks` / `asks you`). The quoted line starts with a
+  `You say, "Ware."`, `You whisper to the jailer, "Ware."`, `You shout, "Ware!"`. The Book's own
+  echo uses say, whisper and shout; an authored line chooses its own verb. The quoted line starts with a
   capital and its closing stop sits inside the quotes; a line ending in `?` or `!` takes no added
   comma or period. Never the colon form (`Nell: ...`) and never a bare quotation with no speaker.
   An authored line that already attributes itself (`"Gate's shut," says the guard.`) is kept as
