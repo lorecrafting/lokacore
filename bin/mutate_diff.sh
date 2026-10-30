@@ -7,7 +7,8 @@
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
 # and the first failing test line of a killed mutant.
-# Exits 1 when a row is SURVIVED, else as bin/mutate.sh. A SURVIVED or NO-TESTS row clears with the
+# Exits 1 when a row is SURVIVED, else as bin/mutate.sh. MUTATE_MINUTES (default 30) passes through to
+# it: mutants past the budget print as TIMEBOX rows and the exit status is 3, never a clean pass. A SURVIVED or NO-TESTS row clears with the
 # same change as a hand-written bin/mutate.sh mutant shown red by a named test (developer.md step 2).
 #   bin/mutate_diff.sh <base>
 # Mutants: flip ` < `/` <= `, ` > `/` >= `, ` === `/` !== `, ` == `/` != `, ` && `/` || ` (and ` and `/
