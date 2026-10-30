@@ -57,23 +57,23 @@ left 'one heading with two bodies' $m
 pair mid 's/\n/\nmid one\n/' 's/\n/\nmid two\n/'
 left 'a conflict in the middle of mechanics.md' $m
 # Regenerated files beside hand-kept ones (loka-3pr5): every regenerated one is taken and staged even though some are left;
-# left: a transcript that differs beyond content_hash, a modify/delete of a generated file and a hand file.
-t1=cartridges/bleed_sampler/transcripts/bleed.jsonl t2=cartridges/cellar_sampler/transcripts/combat.jsonl
-sq=mobile/app/stories/live/green.sql th=protocol/fixtures/toolbox_showcase_hash.json ss=docs/state-sections.gen.json dg=docs/toolbox.gen.json
+# left: a transcript that differs beyond content_hash, a modify/delete of a generated file and of a transcript, and a hand file.
+t1=cartridges/bleed_sampler/transcripts/bleed.jsonl t2=cartridges/cellar_sampler/transcripts/combat.jsonl t3=cartridges/check_sampler/transcripts/schedule.jsonl
+sq=mobile/app/stories/live/green.sql th=protocol/fixtures/toolbox_showcase_hash.json ss=docs/state-sections.gen.json lb=test/loka/lint_baseline.txt dg=docs/toolbox.gen.json
 for i in 1 2; do
   g checkout -q -b "gen$i" "$base"
   perl -pi -e "s/(\"content_hash\":\")[0-9a-f]{64}/\$1 . ('$i' x 64)/ge" $t1 $t2 # a re-pin: content_hash alone
   echo "{\"side\": $i}" >> $t2
-  for p in $sq $th $ss; do echo "$i" > $p; done
+  for p in $sq $th $ss $lb; do echo "$i" > $p; done
   echo "// $i" > $f
-  if [ $i = 1 ]; then git rm -q $dg; else echo 2 > $dg; fi
+  if [ $i = 1 ]; then git rm -q $dg $t3; else echo 2 | tee $dg >> $t3; fi
   g commit -qam "gen$i"
 done
 g merge -q gen1 >/dev/null 2>&1 && fail 'the generated files did not conflict'
 out=$(python3 "$src/bin/merge_resolve.py" 2>/dev/null) && fail 'resolved a hand file'
-[ "$out" = "unresolved: $t2 $dg $f" ] || fail "not only the hand-kept files left: $out"
-[ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$t2 $dg $f " ] || fail "not left unmerged: $t2 $dg $f"
-git diff --quiet gen1 -- $t1 $sq $th $ss && git diff --cached --quiet gen1 -- $t1 $sq $th $ss || fail "$t1 $sq $th $ss not theirs and staged"
+[ "$out" = "unresolved: $t2 $t3 $dg $f" ] || fail "not only the hand-kept files left: $out"
+[ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$t2 $t3 $dg $f " ] || fail "not left unmerged: $t2 $t3 $dg $f"
+git diff --quiet gen1 -- $t1 $sq $th $ss $lb && git diff --cached --quiet gen1 -- $t1 $sq $th $ss $lb || fail "$t1 $sq $th $ss $lb not theirs and staged"
 g merge --abort
 r=docs/reviews/zz-record.md ws=docs/reviews/zz-spaces.md fold=docs/reviews/zz-fold.md
 for i in 1 2; do g checkout -q -b "rev$i" "$base"; echo "verdict $i" > $r; printf 'same%*s text\n' $i '' > $ws; if [ $i = 1 ]; then printf '# T\nbody\n' > $fold; else printf '# T body\n' > $fold; fi; git add $r $ws $fold; g commit -qm "rev$i"; done
