@@ -48,7 +48,7 @@ fi
 python3 - "$FROZEN" <<'PY'
 import fnmatch, glob, json, os, re, sys
 kats, compiled = set(), {}
-for p in sorted(glob.glob('protocol/fixtures/*_hash.json')):  # sorted: the same answer on every machine
+for p in glob.glob('protocol/fixtures/*_hash.json'):
     name, d = os.path.basename(p), json.load(open(p, encoding='utf-8'))
     m = json.loads(d['canonical']).get('manifest')
     if not m: continue
