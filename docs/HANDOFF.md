@@ -22,9 +22,7 @@ is now scripted action; reaction `event.emit` (refused in delayed rules); docs/r
 Rulings for both: loka-ivjq.3 and .4 notes. Nothing is in flight.
 
 - Done 2026-10-29: "How Loka works" explainer (Evennia-oriented, with architecture and Realm sections):
-  https://claude.ai/artifact/HYVKe5JiSfmBQB25cx5Zgb. Open: PR #496 (docs/rnd Realm live-ops proposal,
-  loka-cw9y); a reviewer was running at the clear; read its record (docs/reviews/2026-10-29-pr496-review.md
-  on the branch) and merge if approved.
+  https://claude.ai/artifact/HYVKe5JiSfmBQB25cx5Zgb. Merged #496 (docs/rnd Realm live-ops proposal, loka-cw9y kept open as the Realm live-ops epic).
 - OVERNIGHT PLAN, owner-approved 2026-10-29 (quoted: "okay lets do all those"), in order, done before polish:
   (1) loka-tb31 P1: regen re-pins transcript and value-fixture hashes; (2) C4 naming batch loka-ivjq.29:
   PM picks under the standing delegation, low-risk renames only, nothing that changes a save, each pick
