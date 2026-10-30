@@ -7,8 +7,11 @@
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
 # and the first failing test line of a killed mutant.
-# MUTATE_MINUTES (default 30) passes through to bin/mutate.sh: mutants past the budget print as TIMEBOX
-# rows (unrun, so the tests are not done) and the exit status is 3, never a clean pass.
+# MUTATE_MINUTES (default 30, an integer) budgets the whole run: the test lookup and baseline runs count,
+# a row reached past the budget is not set up, and bin/mutate.sh gets the whole minutes left (rounded
+# down). Rows past the budget print as TIMEBOX (unrun,
+# so the tests are not done) and the exit status is 3, never a clean pass.
+# Renamed files are followed (git diff -M): only the lines a rename changed are candidates.
 # Exits 1 when a row is SURVIVED, else as bin/mutate.sh. A SURVIVED or NO-TESTS row clears with the
 # same change as a hand-written bin/mutate.sh mutant shown red by a named test (developer.md step 2).
 #   bin/mutate_diff.sh <base>
@@ -19,12 +22,14 @@
 # a tab, Elixir lines inside a """ block (docs), and a line carrying `mutate-skip: <reason>` (non-logic).
 # ponytail: one hop only; a module tested two hops away reads as NO-TESTS or SURVIVED (cleared by hand as above).
 [ $# -eq 1 ] || { echo "usage: $0 <base>" >&2; exit 2; }
+case ${MUTATE_MINUTES:-30} in *[!0-9]*) echo "usage: MUTATE_MINUTES must be an integer" >&2; exit 2 ;; esac
 here=$(cd "$(dirname "$0")" && pwd)
 cd "$(git rev-parse --show-toplevel)" || exit 2
 exec python3 -I - "$1" "$here/mutate.sh" <<'PY'
-import os, re, shutil, subprocess, sys, tempfile
+import os, re, shutil, subprocess, sys, tempfile, time
 base, mutate = sys.argv[1], sys.argv[2]
-d = subprocess.run(['git', 'diff', '-U0', '--no-color', '--no-renames', '--diff-filter=AM', base + '...HEAD', '--',
+deadline = time.time() + 60 * int(os.environ.get('MUTATE_MINUTES') or 30)
+d = subprocess.run(['git', 'diff', '-U0', '--no-color', '-M', '--diff-filter=AMR', base + '...HEAD', '--',
                     '*.ts', '*.tsx', '*.mjs', '*.ex'], capture_output=True, text=True)
 if d.returncode:
     sys.exit('mutate_diff: ' + d.stderr.strip())
@@ -117,6 +122,9 @@ def narrow(mod, log):
 tmp = tempfile.mkdtemp()
 lst, plan, base_red = open(os.path.join(tmp, 'list'), 'w'), [], {}
 for i, (f, n, old, new, label) in enumerate(rows):
+    if time.time() >= deadline:  # setup (xref, baseline) counts inside the budget
+        plan.append(('TIMEBOX', f, n, label, None))
+        continue
     if open(f).read().count(old) != 1:
         plan.append(('NOT-UNIQUE', f, n, label, None))
         continue
@@ -130,7 +138,9 @@ for i, (f, n, old, new, label) in enumerate(rows):
         lst.write('\t'.join((f, old, new, cmd)) + '\n')
 lst.close()
 print('mutate_diff: %d mutants from %s...HEAD (%d run)' % (len(plan), base, sum(1 for p in plan if p[0] is None)), flush=True)
-r = subprocess.run(['sh', mutate, lst.name, 'true'], capture_output=True, text=True)
+left = max(0, int(deadline - time.time()) // 60)
+r = subprocess.run(['sh', mutate, lst.name, 'true'], capture_output=True, text=True,
+                   env=dict(os.environ, MUTATE_MINUTES=str(left)))
 res = [l.split('\t')[0] for l in r.stdout.splitlines()]
 def first_fail(log):
     s = open(log, errors='replace').read() if os.path.exists(log) else ''
@@ -150,5 +160,5 @@ sys.stderr.write(r.stderr)
 if 'SURVIVED' in count or 'NO-TESTS' in count:
     sys.stderr.write('mutate_diff: clear each SURVIVED/NO-TESTS row with a red hand-written bin/mutate.sh mutant against a named test\n')
 shutil.rmtree(tmp)
-sys.exit(1 if 'SURVIVED' in count else r.returncode)
+sys.exit(1 if 'SURVIVED' in count else r.returncode or (3 if 'TIMEBOX' in count else 0))
 PY
