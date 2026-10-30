@@ -59,3 +59,33 @@ Scope: commit `0c7938579` only. Verdict: **APPROVE**.
 - **Nit 2, fixed.** `content_emotes_test.exs:15-18` `refused/3` matches the code and the path together; :70 and :77 assert `emotes/cower.json` and `reactions/cower.steps[0].emote`. Focused run: 10/10. Red control, both path-only mutants together: `owned(rel, …)` -> `owned("x", …)` (`emotes.ex:12`) and `steps ++ [field]` -> `steps` (`refs.ex:55`). Exactly those two tests fail (8/10).
 - **Nit 3, fixed.** The PR body cites `emote.test.ts:70/:76/:84/:89`. At the head these are the cower, hall-silence, "Nell bows to you." and "Nell bows to the goblin." literals.
 - CI at `0c7938579` (`gh run list --commit`): graph-diff, ci and book-e2e completed success.
+
+## Second opinion (at `0c793857979758de24a6b967d2ec72b6a9d77978`)
+
+- Independent second reviewer; authored none of the work. Own findings written before reading the record above.
+- Verdict: **APPROVE WITH NOTES** (two should-fixes, no blocker).
+- Fix round 1 checked: `docs/system/book-ui.md:284` has the emote exception (finding 1); the path asserts are in (nit 2); the PR cites `emote.test.ts:70/:76/:84/:89` hold the literals (nit 3, rerun by `grep -n`).
+
+### Findings
+
+1. **Should-fix, `kernel/ts/src/content/cartridge.ts:83-107`.** `DEFINITION_MAPS` (the loader's key stage) lacks `emotes`. A hand-made artifact with a re-hashed `emotes["emote_sampler@0.0.1:emote/bow"].key = "cower"`, or the entry moved to `other@0.0.1:emote/bow`, loads (ACCEPT). The same edit on `npcs` is refused with ARTIFACT_DEFINITION_KEY_MISMATCH. Failure: the `bow` step words through the wrong entry, or through none and shows the raw key. Fix: add `'emotes'` and add one loader refusal test. (`populations` is missing too; that predates this PR.)
+2. **Should-fix (or a PM ruling), `kernel/ts/src/mechanics/emote/line.ts:31-44` with `mobile/packages/game-view/line_words.ts:84-88`.** PLAN v2 P1 says "the client picks the reader's form ... kept for the Realm's many readers." Here the kernel picks: it drops the `target` binding when the target is the reader. `emoteSentence` then reads "no binding" as `to.you`. `lineSentence` instead gets the reader's person from its caller. Failure: if one line is delivered to every reader in a room (the Realm), a bystander reads "Nell bows to you." Fix: always bind the target, and have the client compare `participants.target` with its own body. Otherwise the PM rules P1 deferred.
+
+Question: the step `to` enum widened to `["subject","actor"]` stays green. Both compilers refuse `to: "actor"` today (Elixir SCHEMA_VIOLATION at `reactions/greet.steps[0].to`, TS SCHEMA_VIOLATION). The schema is the contract, so a pin would only detect the change.
+
+### Evidence
+
+- Byte identity: all 106 existing cartridges have the same `content_hash` at merge-base `142f058d3` and at the head, and `emote_sampler` is the only new one. Every transcript was replayed at both trees and the full decision plus GameView compared after each command: 1487 lines, identical raw and with 64-hex values masked. No fixture, transcript or story view is in the diff.
+- No save rows, jobs, events or commands: the registry `emote@1` lists `events: []` and `commands: []`, and `told` writes nothing.
+- Loader against compiler, on hand-made artifacts:
+  - Both refuse a step `to: "actor"` and a `to` that has only one form.
+  - Only Elixir refuses an unknown emote, a step `to` on an emote without forms, an unknown `npc`, and `emotes` without `emote@1`. That matches the other kinds: the loader does no reference or capability-ownership checks.
+- `bin/mutate_diff.sh origin/main` at the head, exit 0: 42 mutants, 38 red-narrow, 4 NO-TESTS (`emotes.ex:11,17,20x2`). This matches the record above.
+- Hand mutants, all red-narrow:
+  - emoter defaults to the actor (`line.ts:23`);
+  - drop `!mine` (`line.ts:34`);
+  - `to.others` -> `to.you` (`line_words.ts:88`);
+  - drop the `others` text-key check (`emotes.ex:17`);
+  - drop the ownership check (`emotes.ex:12`).
+- Text player: `kernel/ts/play/spoken.ts` uses the same `emoteSentence`, so for a single player it reads the same as the Book.
+- CI at the head (`gh run list --commit 0c7938579...`): ci 41124887928, book-e2e 41124888041 and graph-diff 41124896223 all completed success.
