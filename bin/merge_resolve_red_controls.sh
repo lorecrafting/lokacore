@@ -63,7 +63,7 @@ sq=mobile/app/stories/live/green.sql th=protocol/fixtures/toolbox_showcase_hash.
 for i in 1 2; do
   g checkout -q -b "gen$i" "$base"
   perl -pi -e "s/(\"content_hash\":\")[0-9a-f]{64}/\$1 . ('$i' x 64)/ge" $t1 $t2 # a re-pin: content_hash alone
-  echo "{\"side\": $i}" >> $t2
+  perl -pi -e "s/\"seed\":\[1/\"seed\":[1$i/" $t2 # a difference on the content_hash line, after it
   for p in $sq $th $ss $lb; do echo "$i" > $p; done
   echo "// $i" > $f
   if [ $i = 1 ]; then git rm -q $dg $t3; else echo 2 | tee $dg >> $t3; fi
