@@ -91,7 +91,7 @@ export const message = (m: { key: string; bindings?: Record<string, unknown> }, 
   m.key === 'resource.short'
     ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
     : text(m.key);
-// A refusal's own sentence, not "The way north is …" or "You can't do that: …": keyed by the
+// A refusal's own sentence, not "The way north is …" or "You can't do that—…": keyed by the
 // GameError's cause (RefusalCause), then by its code.
 const SENTENCE: Record<string, string> = {
   insufficient_resource: 'You are too exhausted.',
@@ -228,7 +228,7 @@ function answer(
     return {
       kind: 'refused',
       reason: reasonOf(d.error),
-      text: refusedSentence(d.error) ?? `You can't do that: ${reasonOf(d.error)}.`,
+      text: refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`, // prose, no colon (Line placement)
     };
   }
   if (d.kind === 'fault') return '';
@@ -236,7 +236,10 @@ function answer(
     const location = d.location;
     // novel prose, no colon label (book-ui.md, Line placement)
     const name = nameOf(view, location.target_id, text);
-    const [who, is, was] = name ? [name, 'is', 'was'] : ['They', 'are', 'were'];
+    // an appositive name closes with a comma before its verb: "Bess, the alewife, is here."
+    const [who, is, was] = name
+      ? [name.includes(', ') ? `${name},` : name, 'is', 'was']
+      : ['They', 'are', 'were'];
     if (location.status === 'here') return `${who} ${is} here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);

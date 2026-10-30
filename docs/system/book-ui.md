@@ -295,7 +295,9 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
 - A page never draws the room log, so no line shows twice on one page.
 - Every log line reads as novel prose (owner, 2026-10-30, Beads `loka-r9mr`): no colon label
   (`Name: ...`) anywhere in the log. A found person reads `Nell is here.` or `Nell was last seen
-  at the Landing, 2m ago.` Dialogue: speaker, speech verb, the
+  at the Landing, 2m ago.`; an appositive name closes with a comma before its verb (`Bess, the
+  alewife, is here.`); a refusal with no sentence of its own reads `You can't do that—locked.`
+  Dialogue: speaker, speech verb, the
   listener when there is one, a comma, then the spoken line in double quotes. To the player:
   `Nell says to you, "Well, stranger?"`; to the room: `Nell says, "Ale's a penny."`; the player:
   `You say, "Ware."`, `You whisper to the jailer, "Ware."`, `You shout, "Ware!"`. The Book's own
