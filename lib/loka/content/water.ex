@@ -31,7 +31,7 @@ defmodule Loka.Content.Water do
     path = "cartridge.world.water"
 
     capabilities =
-      for c <- ~w(water skills resource schedule death containment movement position),
+      for c <- ~w(water skill resource schedule death containment movement position),
           m["requires"]["capabilities"][c] != 1,
           do: diag("UNDECLARED_CAPABILITY", path, %{"capability" => c})
 

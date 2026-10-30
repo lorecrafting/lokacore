@@ -29,7 +29,7 @@ defmodule Loka.Content.Bleed do
   defp gate(m) do
     path = at("cartridge.json", ["requires", "capabilities"])
 
-    for c <- ~w(bleed combat skills food),
+    for c <- ~w(bleed combat skill food),
         m["requires"]["capabilities"][c] != 1,
         do: diag("UNDECLARED_CAPABILITY", path, %{"capability" => c}, [c <> "@1"])
   end
