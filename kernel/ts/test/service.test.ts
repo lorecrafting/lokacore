@@ -153,7 +153,14 @@ test('a benefit op the service context does not run fails the precondition', () 
       value: true,
     };
   });
-  assert.throws(() => run(w, 'kitchen_meal'), { code: 'precondition_failed' });
+  const p = {
+    type: 'use_service',
+    actor_id: w.character,
+    provider_id: entity(w, 'npc', 'cook'),
+    service: ref('service', 'kitchen_meal'),
+    quoted_price: 2,
+  } as const;
+  assert.throws(() => transition(w, p), { code: 'precondition_failed' });
 });
 
 // Breaks: rental performs Rest/recovery, repeats charge, or immediate meal/drink lose conserved payment/stock.
