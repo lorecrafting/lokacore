@@ -24,7 +24,7 @@ their rules and red controls remain available for resumption.
   contracts, no display text in the authority, renderer imports, which allow Skia, Reanimated and Worklets
   for the page curl; `mobile-book-raw-values`: no raw hex colour or numeric `fontSize` in
   `mobile/app/book/*.tsx`, `mobile/app/SaveError.tsx` or `mobile/app/App*.tsx`, only [design tokens](BOOK-UI-COMPONENTS.md#design-tokens), a designer one-off
-  marked `ast-grep-ignore`) keep their cases; `bin/check_all.sh` scans the whole tree with every rule, pre-commit the staged files. Rule
+  marked `ast-grep-ignore`; `mobile-book-english`: no English literal in `mobile/app/book/*.tsx` or `mobile/app/SaveError.tsx` outside [`LABEL`](../mobile/app/book/labels.ts), the files still to migrate listed in its `ignores`) keep their cases; `bin/check_all.sh` scans the whole tree with every rule, pre-commit the staged files. Rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)

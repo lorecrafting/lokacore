@@ -10,7 +10,10 @@ import { size, space } from './tokens.ts';
 
 const WORD = /^[a-zA-Z]{1,32}$/; // the kernel's own check (kernel/ts/src/mechanics/speech/shared.ts)
 
-export type Send = { label: (typeof LABEL)[keyof typeof LABEL]; send: (word: string) => void };
+export type Send = {
+  label: Extract<(typeof LABEL)[keyof typeof LABEL], string>;
+  send: (word: string) => void;
+};
 
 // Laid over what sits behind the open say field: a tap there only closes it, unsent, and reaches
 // nothing beneath (book-ui.md, Word bar). Not focusable; the say icon and Escape stay the close.

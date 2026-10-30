@@ -1,7 +1,8 @@
 // The Book's own control and section words (Control's and Page's doc comments):
 // the same in every cartridge, so not text keys, and not kernel codes (words.ts). Components, e2e
 // tests, the walkthrough and story routes all name a control through this table; it imports
-// nothing, so the e2e runner can load it. lint/rules/mobile-book-labels.yml lists these words too.
+// nothing, so the e2e runner can load it. lint/rules/mobile-book-labels.yml lists these words too;
+// lint/rules/mobile-book-english.yml keeps a page's English here.
 export const LABEL = {
   leave: 'Leave',
   leaveConversation: 'Leave the conversation',
@@ -65,6 +66,37 @@ export const LABEL = {
   yourOrder: 'Your order',
   // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
   the: 'the',
+  // Page titles and the Contents lines (Menu.tsx, sections.tsx, journal.tsx; loka-x6t.61).
+  contents: 'Contents',
+  character: 'Character',
+  map: 'Map',
+  journal: 'Journal',
+  settings: 'Settings',
+  item: 'Item',
+  chooseAncestry: 'Choose your ancestry',
+  chooseOnce: 'Choose once before your story begins.',
+  continue: 'Continue',
+  // A page's empty states and notes (sections.tsx, journal.tsx).
+  nothingKnown: 'Nothing is known about you yet.',
+  saveNotConfirmed: 'save not confirmed',
+  carryingNothing: 'You are carrying nothing.',
+  empty: 'Empty',
+  noWayOut: 'No way out is known.',
+  nothingWritten: 'Nothing written yet.',
+  currentPlace: (place: string) => `Current place: ${place}`,
+  beyond: (direction: string) => `Beyond ${direction}: `,
+  // A quest's patrol and expedition lines on the Journal page.
+  patrolProgress: (credit: number, required: number, status: string) =>
+    `${credit} of ${required} checkpoints. ${status}.`,
+  patrolAt: (leader: string, room: string) => `${leader} is at ${room}.`,
+  patrolWalk: (direction: string) => `Walk ${direction} to join him.`,
+  patrolRejoin: (leader: string) => `Return to ${leader} and choose Rejoin.`,
+  patrolRestart: (leader: string) => `Return to ${leader} and choose Restart now.`,
+  patrolNext: (title: string) => `Next: ${title}.`,
+  expeditionProgress: (cursor: number, required: number) => `${cursor} of ${required} entries.`,
+  shelterUsed: 'Shelter used.',
+  hint: (hint: string) => `Hint: ${hint}`,
+  look: (title: string) => `${title}, look`,
 } as const;
 
 // A collapsed group's count in the room sentence, "two crows", from two; digits from 10 (loka-6qi).
