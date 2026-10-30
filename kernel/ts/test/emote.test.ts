@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
-import { type Cartridge, type World } from '../src/runtime/decision.ts';
+import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/view/view.ts';
@@ -88,18 +88,44 @@ test('entering the inn: Nell bows to the reader; the captive brought in is bowed
   ]);
 });
 
-// Breaks: the line binds a target the reader cannot see from the room, or an NPC bows to itself.
-test("Nell's bow names no target that is elsewhere or herself", () => {
+// Breaks: the line binds a target that is elsewhere or that the reader does not see, or an NPC bows to
+// itself.
+test("Nell's bow names no target that is elsewhere, unseen or herself", () => {
   const w = play(start(), { type: 'move', direction: 'north' }).w;
   const ref = (k: string) => Object.keys(w.entityIds).find((r) => r.endsWith(`:npc/${k}`))!;
   const [nell, captive] = [w.entityIds[ref('nell')], w.entityIds[ref('captive')]];
   const bow = Object.values(content.reactions!).find(
     (r) => r.steps[0]?.op === 'emote' && r.steps[0].npc,
   )!.steps[0];
-  const lines = (subject: typeof nell) =>
-    told(w, w.character, bow as never, { subject, steps: { n: 0 } });
-  for (const subject of [captive, nell])
-    assert.deepEqual(lines(subject), [
+  const lines = (subject: typeof nell, at = w) =>
+    told(at, w.character, bow as never, { subject, steps: { n: 0 } });
+  // The captive beside the reader but undiscovered (an NPC perception fact that is not true).
+  const hidden = { ...(bow as { emote: object }).emote, key: 'hidden' };
+  const unseen = {
+    ...w,
+    cartridge: {
+      ...w.cartridge,
+      facts: { ...w.cartridge.facts, [refString(hidden as never)]: { scopes: ['instance'] } },
+    },
+    entities: {
+      ...w.entities,
+      [captive]: { ...w.entities[captive], perception: { discovered: hidden } },
+    },
+    state: {
+      ...w.state,
+      containers: { ...w.state.containers, [captive]: w.state.containers[nell] },
+    },
+  } as never as World;
+  assert.equal(
+    lines(captive, { ...unseen, entities: w.entities })[0]?.bindings?.target,
+    'npc.captive.short',
+  );
+  for (const [subject, at] of [
+    [captive, w],
+    [nell, w],
+    [captive, unseen],
+  ] as const)
+    assert.deepEqual(lines(subject, at), [
       { key: 'emote.performed', participants: { actor: nell }, bindings: { emote: 'bow' } },
     ]);
 });
