@@ -37,7 +37,7 @@ export const engineWrittenRefs = (c: Obj): string[] => [
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
   ),
   ...Object.values((c.services ?? {}) as Obj).flatMap((s) =>
-    s.benefit.kind === 'entitlement'
+    s.benefit.op === 'entitlement'
       ? [refString(s.benefit.fact)]
       : s.benefit.account
         ? [refString(s.benefit.account)]

@@ -68,7 +68,7 @@ defmodule Loka.Content.Position do
   defp reserved_names(m, defs) do
     engine_names(m, defs) ++
       for {_, {_, _, s}} <- defs["service"],
-          s["benefit"]["kind"] in ~w(deposit withdraw),
+          s["benefit"]["op"] in ~w(deposit withdraw),
           do: s["benefit"]["account"]["key"]
   end
 
@@ -100,7 +100,7 @@ defmodule Loka.Content.Position do
       patrols,
       for(
         {_, {_, _, s}} <- defs["service"],
-        s["benefit"]["kind"] == "entitlement",
+        s["benefit"]["op"] == "entitlement",
         do: s["benefit"]["fact"]["key"]
       ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),

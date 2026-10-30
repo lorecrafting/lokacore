@@ -143,6 +143,19 @@ test('pre-choice service envelope agrees only with Step invalid_state before ide
     );
 });
 
+// Breaks: a benefit op outside the service context (steps.ex refuses it) reaches recovery and
+// grants MV instead of failing the precondition.
+test('a benefit op the service context does not run fails the precondition', () => {
+  const w = fresh((c) => {
+    c.services[`${prefix}:service/kitchen_meal`].benefit = {
+      op: 'fact.assign',
+      fact: ref('fact', 'bed_paid'),
+      value: true,
+    };
+  });
+  assert.throws(() => run(w, 'kitchen_meal'), { code: 'precondition_failed' });
+});
+
 // Breaks: rental performs Rest/recovery, repeats charge, or immediate meal/drink lose conserved payment/stock.
 test('literal room/meal/ale outcomes conserve exact money, stock and capped MV', () => {
   let w = fresh();

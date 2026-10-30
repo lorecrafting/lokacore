@@ -140,8 +140,8 @@ function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
     owner !== 'service' &&
     Object.values(world.cartridge.services ?? {}).some(
       ({ benefit: b }) =>
-        (b.kind === 'entitlement' && same(b.fact, ref)) ||
-        ((b.kind === 'deposit' || b.kind === 'withdraw') && same(b.account, ref)),
+        (b.op === 'entitlement' && same(b.fact, ref)) ||
+        ((b.op === 'deposit' || b.op === 'withdraw') && same(b.account, ref)),
     )
   )
     throw new KernelError('precondition_failed');

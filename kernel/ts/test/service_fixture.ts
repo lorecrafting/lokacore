@@ -54,7 +54,7 @@ function base(c: any) {
         benefit: {
           amount: 12,
           debit: 1,
-          kind: 'meal',
+          op: 'meal',
           recovery: ref('resource', 'mv'),
           stock: ref('resource', 'meal_stock'),
         },
@@ -67,7 +67,7 @@ function base(c: any) {
       {
         benefit: {
           amount: 4,
-          kind: 'drink',
+          op: 'drink',
           liquid: ref('liquid', 'draught'),
           recovery: ref('resource', 'mv'),
           vessel: ref('item', 'kitchen_cask'),
@@ -78,7 +78,7 @@ function base(c: any) {
     [
       'kitchen_room',
       'rent_kitchen_room',
-      { benefit: { fact: ref('fact', 'bed_paid'), kind: 'entitlement' }, price: 3 },
+      { benefit: { fact: ref('fact', 'bed_paid'), op: 'entitlement' }, price: 3 },
     ],
   ];
   for (const [name, action, rest] of services) {

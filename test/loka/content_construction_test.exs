@@ -89,7 +89,23 @@ defmodule Loka.ContentConstructionTest do
            [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.structure"}]},
           {[build.("site", "nowhere")],
            [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]},
-          {[{"services/cancel_hut.json", &put_in(&1, ["benefit", "kind"], "claim")}, claim_text],
+          # C3 D5: a build structure is one reference diagnostic (Steps), not two
+          {[build.("structure", "nowhere")],
+           [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.structure"}]},
+          # C3: main's ServiceBenefit refused these; Step admits both, the service context not
+          {[
+             {"services/raise_hut.json",
+              &update_in(&1, ["benefit"], fn b -> Map.delete(b, "site") end)}
+           ], [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.site"}]},
+          {[
+             {"services/raze_hut.json",
+              &Map.put(&1, "benefit", %{
+                "op" => "fact.assign",
+                "fact" => "hut_ordered",
+                "value" => true
+              })}
+           ], [{"SCHEMA_VIOLATION", "services/raze_hut.benefit.op"}]},
+          {[{"services/cancel_hut.json", &put_in(&1, ["benefit", "op"], "claim")}, claim_text],
            [{"SCHEMA_VIOLATION", "services/cancel_hut.benefit.service"}]},
           # row kgd.70: price 0 is for an entitlement barter only, never a build
           {free_build, [{"SCHEMA_VIOLATION", "services/raise_hut.price"}]},

@@ -6,7 +6,7 @@
   "narration": "service.raze_hut.used",
   "price": 2,
   "benefit": {
-    "kind": "raze",
+    "op": "raze",
     "site": "holding_lane",
     "direction": "north"
   }

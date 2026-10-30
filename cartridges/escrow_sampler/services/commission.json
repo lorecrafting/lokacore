@@ -6,7 +6,7 @@
   "narration": "service.commission.used",
   "price": 3,
   "benefit": {
-    "kind": "entitlement",
+    "op": "entitlement",
     "fact": "ordered",
     "escrow": {
       "items": [

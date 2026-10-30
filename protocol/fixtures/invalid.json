@@ -24864,9 +24864,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "repair",
+      "op": "repair",
       "amount": 2
     },
     "errors": [
@@ -24877,9 +24877,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "repair",
+      "op": "repair",
       "fact": {
         "cartridge_id": "training",
         "cartridge_version": "1.0.0",
@@ -24895,9 +24895,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "repair",
+      "op": "repair",
       "fact": {
         "cartridge_id": "training",
         "cartridge_version": "1.0.0",
@@ -24914,9 +24914,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "repair",
+      "op": "repair",
       "fact": {
         "cartridge_id": "training",
         "cartridge_version": "1.0.0",
@@ -24933,9 +24933,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "repair",
+      "op": "repair",
       "fact": {
         "cartridge_id": "training",
         "cartridge_version": "1.0.0",
@@ -26164,9 +26164,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26199,9 +26199,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26226,9 +26226,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26266,9 +26266,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26307,9 +26307,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26348,9 +26348,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26376,9 +26376,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26507,9 +26507,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26537,9 +26537,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26695,9 +26695,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26743,9 +26743,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26791,9 +26791,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "entitlement",
+      "op": "entitlement",
       "fact": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -26833,9 +26833,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "claim"
+      "op": "claim"
     },
     "errors": [
       {
@@ -26845,9 +26845,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "cancel"
+      "op": "cancel"
     },
     "errors": [
       {
@@ -26857,9 +26857,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "claim",
+      "op": "claim",
       "service": {
         "cartridge_id": "escrow_sampler",
         "cartridge_version": "0.0.1",
@@ -27479,9 +27479,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "deposit",
+      "op": "deposit",
       "vault": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27498,9 +27498,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "withdraw",
+      "op": "withdraw",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27517,9 +27517,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "deposit",
+      "op": "deposit",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27541,9 +27541,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "deposit",
+      "op": "deposit",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27566,9 +27566,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "withdraw",
+      "op": "withdraw",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27591,9 +27591,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "withdraw",
+      "op": "withdraw",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27622,9 +27622,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "withdraw",
+      "op": "withdraw",
       "vault": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27641,9 +27641,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "deposit",
+      "op": "deposit",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27660,9 +27660,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "withdraw",
+      "op": "withdraw",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27684,9 +27684,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "withdraw",
+      "op": "withdraw",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27709,9 +27709,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "deposit",
+      "op": "deposit",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27734,9 +27734,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "deposit",
+      "op": "deposit",
       "account": {
         "cartridge_id": "property_sampler",
         "cartridge_version": "0.0.1",
@@ -27765,9 +27765,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -27784,28 +27784,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
-      "structure": {
-        "cartridge_id": "build_sampler",
-        "cartridge_version": "0.0.1",
-        "kind": "structure",
-        "key": "hut"
-      },
-      "direction": "north"
-    },
-    "errors": [
-      {
-        "path": "/site",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
-    "contract": "ServiceBenefit",
-    "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -27827,9 +27808,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -27852,9 +27833,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -27878,9 +27859,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -27909,9 +27890,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -27952,9 +27933,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -28002,9 +27983,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -28052,9 +28033,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "build",
+      "op": "build",
       "structure": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29343,9 +29324,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "direction": "north"
     },
     "errors": [
@@ -29356,9 +29337,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29374,9 +29355,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29393,9 +29374,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29413,9 +29394,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29447,9 +29428,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29480,9 +29461,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -29616,9 +29597,9 @@
     ]
   },
   {
-    "contract": "ServiceBenefit",
+    "contract": "Step",
     "value": {
-      "kind": "mend",
+      "op": "mend",
       "site": {
         "cartridge_id": "build_sampler",
         "cartridge_version": "0.0.1",
@@ -30970,7 +30951,7 @@
           "key": "traded_knife",
           "kind": "fact"
         },
-        "kind": "entitlement"
+        "op": "entitlement"
       },
       "currency": {
         "cartridge_id": "gift_sampler",
@@ -31082,7 +31063,7 @@
           "key": "traded_knife",
           "kind": "fact"
         },
-        "kind": "entitlement"
+        "op": "entitlement"
       },
       "action": {
         "action_key": "barter",

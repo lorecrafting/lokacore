@@ -32,7 +32,7 @@ export function resources(world: World, body: EntityId | undefined): ResourceVie
     .filter(
       (s) =>
         !Object.values(world.cartridge.services ?? {}).some(
-          (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
+          (service) => service.benefit.op === 'meal' && service.benefit.stock.key === s.key,
         ),
     )
     .map(({ key: k }) => {

@@ -14,11 +14,11 @@ const view = {
     {
       id: 'clerk',
       services: [
-        offer('deposit', 1, { kind: 'deposit', account: {}, vault: {}, amount: 10 }),
-        offer('withdraw', 1, { kind: 'withdraw', account: {}, vault: {}, amount: 10 }),
-        offer('meal', 2, { kind: 'meal', amount: 4 }),
-        offer('repair', 3, { kind: 'repair', amount: 5 }),
-        offer('barter', 0, { kind: 'goods' }),
+        offer('deposit', 1, { op: 'deposit', account: {}, vault: {}, amount: 10 }),
+        offer('withdraw', 1, { op: 'withdraw', account: {}, vault: {}, amount: 10 }),
+        offer('meal', 2, { op: 'meal', amount: 4 }),
+        offer('repair', 3, { op: 'repair', amount: 5 }),
+        offer('barter', 0, { op: 'goods' }),
       ],
     },
   ],
@@ -53,7 +53,7 @@ test('an open order hides its commission and groups claim and cancel', () => {
   const ref = (key: string) => ({ kind: 'service', key });
   // reason: undefined is available; null is a refusal with no message key.
   const follow = (kind: string, of: string, reason?: string | null) => ({
-    ...offer(`${kind}_${of}`, 0, { kind, service: ref(of) }),
+    ...offer(`${kind}_${of}`, 0, { op: kind, service: ref(of) }),
     action:
       reason === undefined
         ? { available: true, action_key: kind }
@@ -67,10 +67,10 @@ test('an open order hides its commission and groups claim and cancel', () => {
     [o.plain, o.order].map((l) => l.map((s) => s.service.key));
   const offers = (claim?: string | null, cancel?: string | null) =>
     [
-      offer('boots', 4, { kind: 'commission' }),
+      offer('boots', 4, { op: 'commission' }),
       follow('claim', 'boots', claim),
       follow('cancel', 'boots', cancel),
-      offer('ale', 1, { kind: 'entitlement' }),
+      offer('ale', 1, { op: 'entitlement' }),
     ] as never;
   const open = [['ale'], ['claim_boots', 'cancel_boots']];
   const none = [['boots', 'ale'], []];

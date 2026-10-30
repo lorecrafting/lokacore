@@ -39,7 +39,7 @@ defmodule Loka.ContentDreamsTest do
       "name" => "service.room",
       "narration" => "service.room.used",
       "price" => 3,
-      "benefit" => %{"kind" => "entitlement", "fact" => "bed_paid"}
+      "benefit" => %{"op" => "entitlement", "fact" => "bed_paid"}
     },
     "dialogues/maud_talk.json" => %{
       "npc" => "maud",

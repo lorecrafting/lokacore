@@ -262,9 +262,9 @@ function bankPayments(world: World, command: Command, fee: Payment) {
   const p = command.payload;
   const benefit =
     p.type === 'use_service' && world.cartridge.services?.[refString(p.service)]?.benefit;
-  if (!benefit || (benefit.kind !== 'deposit' && benefit.kind !== 'withdraw')) return [fee];
+  if (!benefit || (benefit.op !== 'deposit' && benefit.op !== 'withdraw')) return [fee];
   const vault = world.entityIds[refString(benefit.vault)];
-  const deposit = benefit.kind === 'deposit';
+  const deposit = benefit.op === 'deposit';
   const [payer, recipient] = deposit ? [world.body, vault] : [vault, world.body];
   const bank = { payer, recipient, amount: benefit.amount };
   return deposit ? [fee, bank] : [bank, fee];

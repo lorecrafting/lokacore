@@ -88,9 +88,9 @@ export const Services: StoryObj = { ...pageStory(NpcServicesView), name: 'Servic
 // the knife still at the forge, so cancel is offered and claim refused not ready; the commission
 // hides and they sit under Your order.
 const smith = NpcServicesView.view.entities.find((e) => 'services' in e && e.services)!;
-const offered = smith.services!.filter((s) => s.benefit.kind !== 'entitlement');
+const offered = smith.services!.filter((s) => s.benefit.op !== 'entitlement');
 const open = offered.map((s) =>
-  s.benefit.kind === 'cancel'
+  s.benefit.op === 'cancel'
     ? { ...s.action, available: true, reason: undefined }
     : { ...s.action, reason: { code: 'invalid_state', message: { key: 'service.not_ready' } } },
 );

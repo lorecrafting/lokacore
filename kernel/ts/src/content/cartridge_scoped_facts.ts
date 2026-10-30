@@ -37,7 +37,7 @@ const targetless = (at: string) =>
   /^\.cartridge\.rooms\[[^\]]*\](\.exits\.[a-z_]+)?\.locks\.(enter|traverse)\b/.test(at);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 // Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
-const wielded = (o?: Obj) => o?.wear !== undefined || o?.kind === 'repair';
+const wielded = (o?: Obj) => o?.wear !== undefined || o?.op === 'repair';
 const fieldsOf = (o: Obj) =>
   SUBJECTS.filter((f) => (f !== 'subject' || o.op === 'fact_compare') && Object.hasOwn(o, f));
 

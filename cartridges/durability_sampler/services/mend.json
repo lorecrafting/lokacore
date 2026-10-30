@@ -6,7 +6,7 @@
   "narration": "service.mend.used",
   "price": 2,
   "benefit": {
-    "kind": "repair",
+    "op": "repair",
     "fact": "edge",
     "amount": 2
   }

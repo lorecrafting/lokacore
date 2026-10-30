@@ -6,7 +6,7 @@
   "narration": "service.buy_plot.used",
   "price": 10,
   "benefit": {
-    "kind": "entitlement",
+    "op": "entitlement",
     "fact": "owns_plot"
   }
 }

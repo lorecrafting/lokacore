@@ -261,7 +261,7 @@ defmodule Loka.ContentLintTest do
     want = %{
       "actions/oil_winch.json" => %{"target" => %{"tool" => %{"liquid" => "oil"}}},
       "services/s.json" => %{
-        "benefit" => %{"kind" => "drink", "liquid" => "oil", "vessel" => "cask"}
+        "benefit" => %{"op" => "drink", "liquid" => "oil", "vessel" => "cask"}
       }
     }
 

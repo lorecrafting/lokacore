@@ -21,7 +21,7 @@
         "narration": "service.room.used",
         "price": 3,
         "benefit": {
-          "kind": "entitlement",
+          "op": "entitlement",
           "fact": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -52,7 +52,7 @@
         "narration": "service.meal.used",
         "price": 2,
         "benefit": {
-          "kind": "meal",
+          "op": "meal",
           "stock": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -91,7 +91,7 @@
         "narration": "service.ale.used",
         "price": 1,
         "benefit": {
-          "kind": "drink",
+          "op": "drink",
           "vessel": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -145,7 +145,7 @@
         "label": "service.room",
         "price": 3,
         "benefit": {
-          "kind": "entitlement",
+          "op": "entitlement",
           "fact": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -294,7 +294,7 @@
             "label": "service.room",
             "price": 3,
             "benefit": {
-              "kind": "entitlement",
+              "op": "entitlement",
               "fact": {
                 "cartridge_id": "village_chapter",
                 "cartridge_version": "0.0.25",
@@ -1316,7 +1316,7 @@
           "narration": "service.room.used",
           "price": 3,
           "benefit": {
-            "kind": "entitlement",
+            "op": "entitlement",
             "fact": {
               "cartridge_id": "village_chapter",
               "cartridge_version": "0.0.25",

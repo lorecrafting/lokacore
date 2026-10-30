@@ -154,7 +154,7 @@ test('engine write sites and engine-owned facts are not reported read_only', () 
     items: defs('item', {
       sword: { location: { in: 'template' }, weapon: { durability: { fact: R('fact', 'worn') } } },
     }),
-    services: defs('service', { mend: { benefit: { kind: 'repair', fact: R('fact', 'mended') } } }),
+    services: defs('service', { mend: { benefit: { op: 'repair', fact: R('fact', 'mended') } } }),
     facts: defs('fact', {
       slain: {},
       known: {},
