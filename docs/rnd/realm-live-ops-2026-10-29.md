@@ -18,8 +18,8 @@ how would live testing and rollback work?
 | Mechanics (engine rules) | a new step op or policy leaf | a new `key@version` beside the old one; content opts in |
 
 Why this fits Loka: a decision is atomic (rules propose, nothing commits until adopt; [protocol](../system/protocol.md)),
-so the gap between two commands is a clean swap point; content is data, so it cannot crash the server
-([owner rules](../system/owner-rules.md)); decisions are deterministic, so recorded traffic can be replayed against a change.
+so the gap between two commands is a clean swap point; content is compiled data with no code of its own
+([artifact and loader](../system/cartridge.md#artifact-and-loader); a bad reference there is a runtime fault, not a crash); decisions are deterministic, so recorded traffic can be replayed against a change.
 A released `key@version` is immutable in meaning ([ADR-074](../archive/decisions/adr-074-ts-first-proposal.md)).
 
 ## Content: live artifact swap
@@ -32,12 +32,12 @@ Needed:
 1. **Content diff and migration contract.** The compiler compares the old and new artifact against live state.
    Additive changes (new rooms, text, reactions) ship automatically. Destructive ones (deleting an item
    definition with live instances, changing a fact's type) are refused unless the release carries an
-   authored migration, written as data in the step vocabulary. This replaces the Story rule "a save is pinned
-   to its hash; Start over" with a Realm release lineage; that policy is open today
-   ([cartridge identity](../system/cartridge.md#artifact-and-loader)).
+   authored migration, written as data in the step vocabulary. This would replace the Story rule "a save is pinned
+   to its release; [Start over](../system/save.md#opening-a-story)" with a Realm release lineage; Realm hosting
+   policy is open today ([owner rules](../system/owner-rules.md)).
 2. **Shadow replay.** Re-run the last hours of live commands, from receipts, against a copy of the world on
    the new artifact and diff the outcomes before any player sees them. Requires every receipt to record the
-   artifact hash it was decided under (true today).
+   artifact hash it was decided under (not true today: a Story save pins one hash for all its receipts).
 3. **Canary, then promote.** One zone or shard first; compare error, budget-fault and refusal rates with the
    baseline; then widen. Content opt-in per zone is the feature flag.
 
@@ -74,7 +74,7 @@ Two steps, kept apart:
 
 ## Rollback
 
-- **Content:** point the zone back at the previous artifact (immutable, retained). Seconds.
+- **Content:** point the zone back at the previous artifact (immutable, retained). Seconds (estimate).
 - **Engine:** usually nothing to undo; `@1` was never removed, so rolling content back stops `@2` use.
   Retire a version only when no content uses it.
 - **State written under the new version** (items, fact values made during the canary) is the hard part.
@@ -96,4 +96,5 @@ shadow replay, canary metrics, rollback. Engine changes keep the brief, review a
 
 ## Keep true now (cheap)
 
-Content stays data-only; decisions stay deterministic; every receipt records the artifact hash it was decided under.
+Content stays data-only; decisions stay deterministic; every receipt stays traceable to the artifact hash it was
+decided under (today through the save's pin).
