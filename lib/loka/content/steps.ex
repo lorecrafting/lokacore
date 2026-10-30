@@ -65,15 +65,17 @@ defmodule Loka.Content.Steps do
 
     case contexts[context] do
       nil -> [invalid(rel, path ++ ["op"])]
-      fields -> unrun(rel, path, s, fields) ++ refs(rel, path, s, event, ctx)
+      fields -> unrun(rel, path, s, fields) ++ refs(rel, path, s, fields, event, ctx)
     end
   end
 
-  # The step's owning event and references.
-  defp refs(rel, path, s, event, ctx) do
+  # The step's owning event and the references of the fields the context runs (a refused field
+  # has its own diagnostic).
+  defp refs(rel, path, s, fields, event, ctx) do
     if(event, do: owned(at(rel, path ++ ["op"]), event, ctx.events), else: []) ++
       for {f, kind} <- Map.get(Loka.Content.LeafRefs.steps(), s["op"], %{}),
           is_map_key(s, f),
+          fields == :any or f in fields,
           d <- reference(rel, path, {f, kind}, s, ctx.m, ctx.defs),
           do: d
   end

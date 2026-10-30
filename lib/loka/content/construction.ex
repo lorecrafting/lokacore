@@ -54,7 +54,7 @@ defmodule Loka.Content.Construction do
       true <- [misplaced?(steps, i, name, site, settings)],
       do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
     ) ++
-      refusal_texts(text, op) ++ on_site(site, s, rel, path)
+      refusal_texts(text, op) ++ on_site(site, s, rel, path, {m, defs})
   end
 
   # A second build in the steps, a build outside success, off a site or without world.construction.
@@ -76,11 +76,14 @@ defmodule Loka.Content.Construction do
          else: (_ -> nil)
   end
 
-  defp on_site(nil, _, _, _), do: []
+  defp on_site(nil, _, _, _, _), do: []
 
-  defp on_site(site, s, rel, path) do
+  # An unresolved structure is Steps' UNRESOLVED_REFERENCE, not a second diagnostic here.
+  defp on_site(site, s, rel, path, {m, defs}) do
     for {f, ok} <- [
-          {"structure", s["structure"] in site["structures"]},
+          {"structure",
+           s["structure"] in site["structures"] or
+             resolve(s["structure"], "structure", m, defs) == :unresolved},
           {"direction", s["direction"] in site["directions"]}
         ],
         not ok,
