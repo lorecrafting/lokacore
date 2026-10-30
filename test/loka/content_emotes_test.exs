@@ -71,4 +71,10 @@ defmodule Loka.ContentEmotesTest do
     update(dir, "reactions/cower.json", &put_in(&1, ["steps", Access.at(0), "to"], "subject"))
     refused(dir, "UNRESOLVED_REFERENCE", "reactions/cower.steps[0].to")
   end
+
+  # Breaks: an emote step's npc naming no NPC of the cartridge is admitted (the line would have no emoter).
+  test "a step's unknown npc is unresolved", %{tmp_dir: dir} do
+    update(dir, "reactions/greet.json", &put_in(&1, ["steps", Access.at(0), "npc"], "nobody"))
+    refused(dir, "UNRESOLVED_REFERENCE", "reactions/greet.steps[0].npc")
+  end
 end
