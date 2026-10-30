@@ -9,7 +9,8 @@
 # MUTATE_MINUTES (default 30) is the time budget: before each mutant, once the sweep has run that long,
 # the mutant and every one after it print `TIMEBOX<TAB><file><TAB>not run` and the exit status is 3
 # (results already in the table stand; the tree is restored as usual). Exit 3 is not a clean pass;
-# an exit 1 failure takes precedence over it. MUTATE_MINUTES must be an integer.
+# an exit 1 failure takes precedence over it. MUTATE_MINUTES must be digits without a leading zero
+# (sh reads 08 as bad octal); 0 is valid (every mutant TIMEBOX); unset or empty means 30; else exit 2.
 # ponytail: checked between mutants only, so one slow mutant can overrun the budget; upgrade if that bites.
 # Results: red-narrow, red-full, SURVIVED (all green; exit stays 0, the table is the report).
 # MUTATE_REBUILD=<command> runs after each apply and again after each restore, for tests that read a
@@ -18,6 +19,7 @@
 set -u
 [ $# -eq 2 ] && [ -f "$1" ] || { echo "usage: $0 <mutants-file> <full-test-command>" >&2; exit 2; }
 list=$1 full=$2 rebuild=${MUTATE_REBUILD-}
+case ${MUTATE_MINUTES:-30} in *[!0-9]*|0?*) echo "usage: MUTATE_MINUTES must be a whole number of minutes, got '$MUTATE_MINUTES'" >&2; exit 2 ;; esac
 tmp=$(mktemp -d)
 cur=
 trap '[ -z "$cur" ] || { cp "$tmp/orig" "$cur"; [ -z "$rebuild" ] || sh -c "$rebuild" > /dev/null 2>&1 < /dev/null; }; rm -rf "$tmp"' EXIT
