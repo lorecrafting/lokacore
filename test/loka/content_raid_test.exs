@@ -26,6 +26,7 @@ defmodule Loka.ContentRaidTest do
     since = %{"op" => "time_since", "fact" => "raided_at", "at_least" => 600}
     move = %{"op" => "item.move", "room" => "village"}
     npc_move = %{"op" => "npc.move"}
+    emit = %{"op" => "event.emit", "event" => "quake"}
     shake = %{"op" => "status.apply", "status" => "shaken", "co_present" => true}
 
     mv = %{
@@ -43,6 +44,9 @@ defmodule Loka.ContentRaidTest do
           {[
              {"reactions/aftershock.json", &update_in(&1, ["steps"], fn a -> a ++ [npc_move] end)}
            ], {"SCHEMA_VIOLATION", "reactions/aftershock.steps[1].op"}},
+          # C3: event.emit's custom_event takes its subject from the delivery.
+          {[{"reactions/aftershock.json", &update_in(&1, ["steps"], fn a -> a ++ [emit] end)}],
+           {"SCHEMA_VIOLATION", "reactions/aftershock.steps[1].op"}},
           {[{"reactions/raid.json", &put_in(&1, ["steps", Access.at(2), "fact"], "aftershocks")}],
            {"SCHEMA_VIOLATION", "reactions/raid.steps[2].fact"}},
           {[{"facts.json", &put_in(&1, ["facts", "raided_at", "value_type", "minimum"], 1)}],
