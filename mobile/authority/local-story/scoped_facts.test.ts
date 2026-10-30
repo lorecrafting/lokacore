@@ -18,6 +18,7 @@ import {
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
+import { assignmentEvidence } from './dialogue-consequences.ts';
 import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -252,4 +253,27 @@ test('a receipt writing at another subject than the speaker is save_corrupt', (t
       moved,
     );
   }
+});
+
+// Breaks (dialogue-consequences.ts assignmentOf): a step op outside the choice context (steps.ex)
+// is read as a fact.assign, so recovery accepts a receipt for a step the kernel would not run.
+test('a choice step outside the choice context gives no assignment evidence', (t) => {
+  const h = save(t, 'outside', variant);
+  const speaker = id('npc/stranger', variant);
+  h.run('stranger_talk', [speaker]);
+  const rows = Object.entries(h.story.world().state.choices ?? {}) as [string, any][];
+  const [continuation_id, row] = rows.find(([, r]) => r.status === 'pending')!;
+  h.run('choose', [], { choice_id: 'help', continuation_id, answer: 'ab' });
+  const { response } = h.p.sql
+    .prepare("SELECT response FROM receipt WHERE response LIKE '%fact_changed%'")
+    .get();
+  const { delta, events } = JSON.parse(String(response));
+  const world = h.story.world();
+  const option = world.cartridge.dialogues[`${S}:dialogue/stranger_talk`].choices.help;
+  // assignmentEvidence reads only the story's world.
+  const evidence = (steps: unknown[]) =>
+    assignmentEvidence({ world } as any, row, { ...option, steps }, delta.ops, events, speaker);
+  assert.equal(evidence(option.steps), true);
+  assert.equal(evidence([{ ...trust2, op: 'fact.stamp' }]), false);
+  h.p.sql.close();
 });
