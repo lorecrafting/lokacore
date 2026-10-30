@@ -2,6 +2,7 @@
 // hall (entry), the goblins' den east of it with an immune guard, the inn north with Nell (who bows to
 // whoever enters), a goblin captive in a cell north of the inn that "fetch" brings to the inn.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -12,6 +13,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import { bodyOf, refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { encode } from '../src/foundation/canonical.ts';
 import { gameView } from '../src/view/view.ts';
 import { spoken } from '../play/spoken.ts';
 import { told } from '../src/mechanics/emote/line.ts';
@@ -214,6 +216,29 @@ test('the emote contracts refuse an emote without a key, a bad emote map key and
     assert.notDeepEqual(check(emotes), [], JSON.stringify(emotes));
   const view = gameView(play(start(), { type: 'move', direction: 'north' }).w);
   assert.notDeepEqual(validate('GameView', { ...view, emotes: [] }), []);
+});
+
+// Breaks: the loader's key stage skips `emotes`, so an emote whose key differs from its map key loads.
+test('an emote map key that disagrees with its emote is ARTIFACT_DEFINITION_KEY_MISMATCH', () => {
+  const { cartridge } = JSON.parse(new TextDecoder().decode(artifact));
+  const [ref, emote] = Object.entries(cartridge.emotes)[0] as [string, { key: string }];
+  const declared = ref.split('/').pop();
+  emote.key = 'other';
+  const canonical = encode(cartridge);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  assert.ok(!r.ok);
+  assert.deepEqual(
+    [r.diagnostic.code, r.diagnostic.path, r.diagnostic.data],
+    [
+      'ARTIFACT_DEFINITION_KEY_MISMATCH',
+      `.cartridge.emotes["${ref}"]`,
+      { field: 'key', declared, expected: 'other' },
+    ],
+  );
 });
 
 // Breaks if the projection's size guard is off by one: an empty table projects `emotes: []` (a GameView

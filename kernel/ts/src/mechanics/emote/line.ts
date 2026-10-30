@@ -28,6 +28,7 @@ export function told(
     return [];
   // The target: the reader's own body (worded `to.you`, so it binds no name), or another NPC the reader
   // sees in the room (`to.others`, bound by its short); any other subject drops it (`others`).
+  // ponytail: one reader today, so the kernel picks its form; the Realm must render per reader (loka-u6wj).
   const target = step.to === 'subject' && subject !== emoter ? subject : undefined;
   const mine = target === body;
   const seen =
