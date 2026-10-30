@@ -108,9 +108,7 @@ defmodule Loka.Content.ScriptedActions do
         do: {s, ["outcomes", name, "steps", i]}
   end
 
-  defp owners(rel, r, %{m: m, registry: registry, events: events} = ctx) do
-    caps = m["requires"]["capabilities"]
-
+  defp owners(rel, r, %{registry: registry, events: {caps, _} = events} = ctx) do
     check =
       if is_map_key(r, "check"),
         do:
