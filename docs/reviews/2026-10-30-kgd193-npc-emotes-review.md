@@ -49,3 +49,13 @@ Question, not a finding: the reader's perspective comes from the kernel omitting
 - `/code-review medium` is reported in the PR body.
 - No Storybook screenshots were taken (ports out of bounds for this review). The `NpcEmotes` and `GoblinsCower` story sources show the three authored forms through `lineWords`.
 - CI at `0e1fdaf56` (`gh run list --commit`): ci, book-e2e and graph-diff completed success.
+
+## Re-check: fix round 1 at `0c793857979758de24a6b967d2ec72b6a9d77978`
+
+Scope: commit `0c7938579` only. Verdict: **APPROVE**.
+
+- **Finding 1, fixed.** `docs/system/book-ui.md:284` now carries the PR's proposed `emote.performed` exception (`others`; `to.you` for the reader as target; else `to.others`). That matches `line_words.ts:84-88`.
+- **Owner note.** The appended note in `owner-decision-moods-ambient-emotes-2026-10-30.md` quotes the owner text exactly as it stands in the `br show loka-kgd.193` note. It is dated and only appended.
+- **Nit 2, fixed.** `content_emotes_test.exs:15-18` `refused/3` matches the code and the path together; :70 and :77 assert `emotes/cower.json` and `reactions/cower.steps[0].emote`. Focused run: 10/10. Red control, both path-only mutants together: `owned(rel, …)` -> `owned("x", …)` (`emotes.ex:12`) and `steps ++ [field]` -> `steps` (`refs.ex:55`). Exactly those two tests fail (8/10).
+- **Nit 3, fixed.** The PR body cites `emote.test.ts:70/:76/:84/:89`. At the head these are the cower, hall-silence, "Nell bows to you." and "Nell bows to the goblin." literals.
+- CI at `0c7938579` (`gh run list --commit`): graph-diff, ci and book-e2e completed success.
