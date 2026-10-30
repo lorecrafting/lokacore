@@ -8,7 +8,7 @@
     "op": "sky",
     "weather": "rain"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "soaked"

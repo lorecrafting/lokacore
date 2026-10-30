@@ -18,7 +18,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "poison"

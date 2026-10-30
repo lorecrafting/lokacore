@@ -8,7 +8,7 @@
     "fact": "lever_stage",
     "equals": 2
   },
-  "apply": [
+  "steps": [
     {
       "op": "narrate",
       "text": "narration.lever_open"

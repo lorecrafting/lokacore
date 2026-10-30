@@ -65,9 +65,9 @@ defmodule Loka.ContentRestTest do
         do: %{
           "on" => on,
           "when" => %{"op" => "fact_compare", "fact" => "position", "equals" => "sitting"},
-          "apply" => [plan]
+          "steps" => [plan]
         },
-        else: %{"on" => on, "apply" => [@write]}
+        else: %{"on" => on, "steps" => [@write]}
 
     facts = put_in(src("facts.json"), ["facts", "position"], @own)
 
@@ -101,7 +101,7 @@ defmodule Loka.ContentRestTest do
              d("actions/coil_rope.outcomes.success.steps[0].fact"),
              d("dialogues/bram.choices.carry.steps[0].fact"),
              d("facts.facts.position"),
-             d("reactions/settle.apply[0].fact")
+             d("reactions/settle.steps[0].fact")
            ]
 
     assert {:ok, _, _} = compile(Path.join(dir, "reads"), true, writes(true))

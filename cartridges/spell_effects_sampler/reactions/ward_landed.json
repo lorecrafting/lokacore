@@ -3,7 +3,7 @@
     "event": "status_applied",
     "status": "warded"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "ward_landed",

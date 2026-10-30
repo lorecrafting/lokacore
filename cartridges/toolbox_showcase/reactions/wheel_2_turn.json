@@ -3,7 +3,7 @@
     "event": "action_completed",
     "action": "turn_wheel_2"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.adjust",
       "fact": "wheel_2",

@@ -18,7 +18,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "dreamt_of_hounds",

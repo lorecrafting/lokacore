@@ -3,7 +3,7 @@
     "event": "entity_entered_room",
     "room": "village_green"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "green_busy",

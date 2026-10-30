@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "smithy_torch"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "burning",

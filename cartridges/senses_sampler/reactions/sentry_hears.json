@@ -8,7 +8,7 @@
     "npc": "sentry",
     "sense": "sound"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "sentry_alerted",

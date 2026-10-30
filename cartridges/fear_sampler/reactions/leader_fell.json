@@ -3,7 +3,7 @@
     "event": "entity_died",
     "victim": "chief"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "afraid",

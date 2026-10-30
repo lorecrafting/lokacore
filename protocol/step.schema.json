@@ -340,13 +340,13 @@
             "op": {
               "const": "replenish.run"
             },
-            "key": {
+            "replenish": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
           "required": [
             "op",
-            "key"
+            "replenish"
           ],
           "additionalProperties": false
         },

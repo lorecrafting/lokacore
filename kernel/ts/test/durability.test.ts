@@ -171,7 +171,7 @@ test('only combat and the smith write the edge', () => {
       [`${S}:reaction/blunt`]: {
         key: 'blunt',
         on: { event: 'item_acquired' },
-        apply: [{ ...assign, item: ref('item', 'sword') }],
+        steps: [{ ...assign, item: ref('item', 'sword') }],
       },
     };
   });

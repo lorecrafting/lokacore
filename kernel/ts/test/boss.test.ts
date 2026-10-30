@@ -229,7 +229,7 @@ test('a reaction write and a later death credit of one fact compose in one wait 
     ];
     const at_least_percent = 70; // only the first hit (3 of 4) leaves the warlord this high
     c.reactions[R('mark')] = {
-      apply: [{ fact: ref('fact', 'marked'), op: 'fact.assign', value: false }],
+      steps: [{ fact: ref('fact', 'marked'), op: 'fact.assign', value: false }],
       key: 'mark',
       on: { event: 'attack_result', target: ref('npc', 'warlord') },
       when: {

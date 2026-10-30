@@ -153,7 +153,7 @@ test('a reaction on status_applied hears the first fed, and a refresh stays sile
     c.reactions[`${S}:reaction/fed_seen`] = {
       key: 'fed_seen',
       on: { event: 'status_applied', status: ref('status', 'fed') },
-      apply: [
+      steps: [
         { op: 'status.apply', status: ref('status', 'spoiling'), item: ref('item', 'fish_05') },
       ],
     };

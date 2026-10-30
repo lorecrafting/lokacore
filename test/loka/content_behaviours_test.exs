@@ -18,12 +18,12 @@ defmodule Loka.ContentBehavioursTest do
   # Breaks: a copy key other than <rule>_<holder>, a holder marker left unfilled, `behaviours`
   # left on an item, or a behaviour reaching the artifact. The literal is the artifact's sha256
   # on main at 9cf4619c4, before the four reactions/take_*.json became one behaviour, with
-  # scripted_actions/ moved to actions/ and policies unwrapped (F3), and display names renamed to `name` (F6), and action outcome `sequence` renamed `steps` (F4).
+  # scripted_actions/ moved to actions/ and policies unwrapped (F3), display names renamed to `name` (F6), action outcome `sequence` (F4) and reaction `apply` (C3) renamed `steps`.
   test "fishing_sampler compiles to the artifact of its hand-written take_* reactions" do
     {:ok, artifact, []} = Loka.Content.compile(@fishing)
 
     assert Base.encode16(:crypto.hash(:sha256, artifact), case: :lower) ==
-             "a7161c9d4a201fdbbd3c53109f8cb3d89564eea76d369574e969ce14dbcffe9b"
+             "a7f3dd412e686274d885e30c768a20712dbcada4bf8b6b41edcbb97b2489fb66"
   end
 
   # Breaks: a malformed list, an unknown name, a bad behaviour or a clashing copy passing
@@ -73,7 +73,7 @@ defmodule Loka.ContentBehavioursTest do
   test "a copy key equal to a reaction's or over 64 characters is refused" do
     dir = Loka.ContentSource.copy(@fishing)
     rule = JSON.decode!(File.read!(Path.join(dir, @spoils)))["reactions"]["take"]
-    authored = rule |> put_in(["on", "item"], "trout_01") |> put_in(["apply"], [])
+    authored = rule |> put_in(["on", "item"], "trout_01") |> put_in(["steps"], [])
 
     assert refused(dir, [{"reactions/take_trout_01.json", authored}]) == [
              {"DUPLICATE_DEFINITION", "behaviours/spoils.reactions.take", %{}},
@@ -95,8 +95,8 @@ defmodule Loka.ContentBehavioursTest do
     dir = Loka.ContentSource.copy(@fishing)
     take = ["reactions", "take"]
 
-    assert refused(dir, [{@spoils, &put_in(&1, take ++ ["apply"], [status("rotting")])}]) == [
-             {"UNRESOLVED_REFERENCE", "behaviours/spoils.reactions.take.apply[0].status",
+    assert refused(dir, [{@spoils, &put_in(&1, take ++ ["steps"], [status("rotting")])}]) == [
+             {"UNRESOLVED_REFERENCE", "behaviours/spoils.reactions.take.steps[0].status",
               %{"target" => "fishing_sampler@0.0.1:status/rotting"}}
            ]
 
@@ -143,7 +143,7 @@ defmodule Loka.ContentBehavioursTest do
       "reactions" => %{
         "hears" => %{
           "on" => %{"event" => "spoken", "npc" => %{"param" => "holder"}},
-          "apply" => [%{"op" => "fact.assign", "fact" => "elder_heard", "value" => true}]
+          "steps" => [%{"op" => "fact.assign", "fact" => "elder_heard", "value" => true}]
         }
       }
     }

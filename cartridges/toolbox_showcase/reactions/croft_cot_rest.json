@@ -7,7 +7,7 @@
     "op": "item_present",
     "tag": "bed"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "well_rested"

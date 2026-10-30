@@ -44,7 +44,7 @@ defmodule Loka.ContentStatusReadersTest do
   # the cartridge.
   test "a room step stands alone and names a room", %{dir: dir} do
     api = &{"cartridge.json", fn c -> put_in(c, ["requires", "kernel_api", "at_least"], &1) end}
-    step = &{"reactions/thunder.json", fn r -> put_in(r, ["apply"], [&1]) end}
+    step = &{"reactions/thunder.json", fn r -> put_in(r, ["steps"], [&1]) end}
     room = %{"op" => "status.apply", "status" => "stunned", "room" => "den"}
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.65"), step.(room)])
 
@@ -54,7 +54,7 @@ defmodule Loka.ContentStatusReadersTest do
           {%{"co_present" => true}, "SCHEMA_VIOLATION"},
           {%{"room" => "nowhere"}, "UNRESOLVED_REFERENCE"}
         ] do
-      assert {code, "reactions/thunder.apply[0].room"} in diags(dir, [
+      assert {code, "reactions/thunder.steps[0].room"} in diags(dir, [
                api.("1.65"),
                step.(Map.merge(room, edit))
              ])

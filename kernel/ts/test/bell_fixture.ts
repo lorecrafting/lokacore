@@ -45,7 +45,7 @@ export function bellSource(c: any) {
   c.reactions[`${prefix}:reaction/bell_suppress_goblins`] = {
     key: 'bell_suppress_goblins',
     on: { event: 'fact_changed', fact },
-    apply: [
+    steps: [
       { op: 'population.suppress', plan: ref('population', 'goblins'), duration: SUPPRESSION },
     ],
   };

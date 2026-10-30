@@ -8,7 +8,7 @@
     "fact": "wanted",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "narrate",
       "text": "trial.charge"

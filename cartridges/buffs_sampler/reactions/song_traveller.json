@@ -7,7 +7,7 @@
     "op": "npc_present",
     "npc": "traveller"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "inspired",

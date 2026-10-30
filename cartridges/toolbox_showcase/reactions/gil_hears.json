@@ -5,7 +5,7 @@
     "word": "ware",
     "loudness": "shout"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "gil_warned",

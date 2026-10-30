@@ -99,7 +99,7 @@ test('one wait across the spoil and the restock leaves the fish in the market', 
 test('a spoil rule that respoils the fish it moves composes in one wait', () => {
   const edit = (c: any) => {
     const spoil = c.reactions[`${S}reaction/spoil`];
-    spoil.apply = [spoil.apply[0], c.reactions[`${S}reaction/catch`].apply[0]];
+    spoil.steps = [spoil.steps[0], c.reactions[`${S}reaction/catch`].steps[0]];
   };
   let w = take(fresh(edit), 'fish');
   w = wait(w, w.state.clock + 90000);
@@ -134,7 +134,7 @@ test('a dropped rag is swept after an hour unless the player took it back', () =
 test('a subject that is not an item stays where it is', () => {
   const move = { op: 'item.move', room: ref('room', 'midden') };
   let w = take(
-    fresh((c) => (c.reactions[`${S}reaction/litter`].apply = [move])),
+    fresh((c) => (c.reactions[`${S}reaction/litter`].steps = [move])),
     'rag',
   );
   w = drop(w, 'rag');
@@ -149,7 +149,7 @@ test('a subject that is not an item stays where it is', () => {
 test('a second item.move in one rule starts where the first left the item', () => {
   const steps = ['midden', 'market'].map((k) => ({ op: 'item.move', room: ref('room', k) }));
   let w = take(
-    fresh((c) => (c.reactions[`${S}reaction/spoil`].apply = steps)),
+    fresh((c) => (c.reactions[`${S}reaction/spoil`].steps = steps)),
     'fish',
   );
   w = wait(w, w.state.clock + 86400);
@@ -219,7 +219,7 @@ test('a restock rule on the spoil event moves the spoiled fish to the market at 
     c.reactions[`${S}reaction/tidy`] = {
       key: 'tidy',
       on: { event: 'status_expired', status: ref('status', 'spoiling') },
-      apply: [{ op: 'replenish.run', key: ref('replenish', 'restock') }],
+      steps: [{ op: 'replenish.run', replenish: ref('replenish', 'restock') }],
     };
   };
   let w = take(fresh(edit), 'fish');
@@ -244,7 +244,7 @@ test('two runs on one event move the fish out and back in one wait', () => {
       c.reactions[`${S}reaction/${key}`] = {
         key,
         on,
-        apply: [{ op: 'replenish.run', key: ref('replenish', run!) }],
+        steps: [{ op: 'replenish.run', replenish: ref('replenish', run!) }],
       };
   };
   let w = drop(take(fresh(edit), 'rag'), 'rag');
@@ -269,7 +269,7 @@ for (const rule of ['a_toss', 'z_toss'])
       c.reactions[`${S}reaction/${rule}`] = {
         ...c.reactions[`${S}reaction/litter`],
         key: rule,
-        apply: [{ op: 'replenish.run', key: ref('replenish', 'toss') }],
+        steps: [{ op: 'replenish.run', replenish: ref('replenish', 'toss') }],
       };
     };
     const w = drop(take(fresh(edit), 'rag'), 'rag');

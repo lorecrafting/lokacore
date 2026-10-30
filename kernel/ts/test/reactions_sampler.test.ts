@@ -116,7 +116,7 @@ test('a reaction chain from a dropped pebble stops at the budget', () => {
     key,
     on,
     when: { op: 'fact_compare', fact, equals },
-    apply: [{ op: 'fact.assign', fact, value: !equals }],
+    steps: [{ op: 'fact.assign', fact, value: !equals }],
   });
   const pebble = { ...c.reactions[`${R}:reaction/bone_drop`].on.item, key: 'pebble' };
   c.reactions = {
@@ -148,7 +148,7 @@ test('a victim filter skips a death without a victim definition', () => {
     [`${R}:reaction/mourn`]: {
       key: 'mourn',
       on: { event: 'entity_died', victim: hound },
-      apply: [],
+      steps: [],
     },
   };
   const w = fresh(c);
@@ -170,7 +170,7 @@ test('an entity_died delivery runs for the victim player, else for the doer', ()
   const rule = {
     key: 'mourn',
     on: { event: 'entity_died' },
-    apply: [{ op: 'fact.assign', fact: { ...fact, key: 'crow_drawn' }, value: true }],
+    steps: [{ op: 'fact.assign', fact: { ...fact, key: 'crow_drawn' }, value: true }],
   } as never;
   const w = fresh(c);
   const actorFor = (victim_id: unknown) => {
@@ -200,7 +200,7 @@ test('quest.fail ends the trigger character instance only; a world trigger ends 
   const rule = {
     key: 'lose',
     on: { event: 'rested' },
-    apply: [{ op: 'quest.fail', quest, outcome: 'lost' }],
+    steps: [{ op: 'quest.fail', quest, outcome: 'lost' }],
   };
   const base = fresh();
   const row = (character_id: string) => ({

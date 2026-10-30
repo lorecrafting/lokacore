@@ -33,11 +33,11 @@ defmodule Loka.ContentWitnessTest do
   test "an npc.move step names a local room and placed NPC" do
     dir = Loka.ContentSource.copy("cartridges/reactions_sampler")
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
-    step = &{"reactions/crow_called.json", fn r -> put_in(r, ["apply", Access.at(0)], &1) end}
+    step = &{"reactions/crow_called.json", fn r -> put_in(r, ["steps", Access.at(0)], &1) end}
     attic = step.(%{"op" => "npc.move", "npc" => "crow", "room" => "attic"})
     template = {"npcs/crow.json", &Map.put(&1, "spawn_template", true)}
 
-    assert {"UNRESOLVED_REFERENCE", "reactions/crow_called.apply[0].room"} in codes(dir, [attic])
-    assert {"SCHEMA_VIOLATION", "reactions/crow_called.apply[0].npc"} in codes(dir, [template])
+    assert {"UNRESOLVED_REFERENCE", "reactions/crow_called.steps[0].room"} in codes(dir, [attic])
+    assert {"SCHEMA_VIOLATION", "reactions/crow_called.steps[0].npc"} in codes(dir, [template])
   end
 end

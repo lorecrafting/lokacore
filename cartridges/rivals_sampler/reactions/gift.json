@@ -7,7 +7,7 @@
     "op": "npc_present",
     "npc": "miller"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "gloats",

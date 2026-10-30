@@ -53,7 +53,7 @@ const plus = (name: string, extra: object) => {
   const r = content.reactions![k]!;
   return {
     ...content,
-    reactions: { ...content.reactions, [k]: { ...r, apply: [...r.apply, extra] } },
+    reactions: { ...content.reactions, [k]: { ...r, steps: [...r.steps, extra] } },
   } as Cartridge;
 };
 const stream = commands('cccccccc-4444-4333-8444');
@@ -135,7 +135,7 @@ test('a fatal tick kills the guard and ends its other status', () => {
     npcs: { ...content.npcs, [`${C}:npc/guard`]: { ...guard, hp: { ...guard.hp!, start: 2 } } },
     reactions: {
       ...content.reactions,
-      [`${C}:reaction/dart`]: { ...dart, apply: [...dart.apply, burning] },
+      [`${C}:reaction/dart`]: { ...dart, steps: [...dart.steps, burning] },
     },
   } as Cartridge;
   // Poison and burning each take 1 at +60: the second brings hp to 0, whichever runs first.

@@ -200,7 +200,7 @@ export function homestead(c: any) {
     'errand_reward',
   ]) {
     const x = c.reactions[ref('reaction', r)];
-    x.apply = x.apply.filter((op: any) => op.op !== 'narrate');
+    x.steps = x.steps.filter((op: any) => op.op !== 'narrate');
   }
   for (let w = 1; w <= 3; w++)
     for (let k = 0; k <= 9; k++) delete c.reactions[ref('reaction', `wheel_${w}_x_shows_${k}`)];

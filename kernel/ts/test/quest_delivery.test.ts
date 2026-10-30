@@ -67,7 +67,7 @@ function reacting(f: (c: any) => void = () => {}) {
       [`${E}:reaction/notice`]: {
         key: 'notice',
         on: { event: 'fact_changed', fact: ref('fact', 'flag') },
-        apply: [{ op: 'fact.assign', fact: ref('fact', 'seen'), value: true }],
+        steps: [{ op: 'fact.assign', fact: ref('fact', 'seen'), value: true }],
       },
     };
     f(c);
@@ -187,7 +187,7 @@ test('a quest delivery counts toward the deliveries budget', () => {
       c.reactions[`${E}:reaction/r${i}`] = {
         key: `r${i}`,
         on: { event: 'fact_changed', fact: ref('fact', 'flag') },
-        apply: [],
+        steps: [],
       };
   });
   const w = step(w0, cmd(w0, { type: 'accept_quest', quest: QUEST }), 1).world;

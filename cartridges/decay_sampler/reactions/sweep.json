@@ -10,7 +10,7 @@
       "item": "rag"
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "item.move",
       "room": "midden"

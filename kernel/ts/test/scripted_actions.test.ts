@@ -428,7 +428,7 @@ test('FD1: a delayed rule on a 60 s scripted action, after 30, is due at 61', ()
         key: 'echo',
         on: { event: 'action_completed', action: 'ring_bell' },
         after: 30,
-        apply: [{ op: 'fact.stamp', fact }],
+        steps: [{ op: 'fact.stamp', fact }],
       },
     };
   });

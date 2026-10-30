@@ -3,10 +3,10 @@
     "event": "status_ticked",
     "status": "hen_fed"
   },
-  "apply": [
+  "steps": [
     {
       "op": "replenish.run",
-      "key": "eggs"
+      "replenish": "eggs"
     }
   ]
 }

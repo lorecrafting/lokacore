@@ -14,7 +14,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -64,7 +64,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -87,7 +87,7 @@
         "event": "quest_resolved",
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -115,7 +115,7 @@
           "key": "first_lead"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -144,7 +144,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "quest": {
             "cartridge_id": "village_chapter",
@@ -172,7 +172,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate"
         }
@@ -195,7 +195,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -224,7 +224,7 @@
         },
         "outcome": ""
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -253,7 +253,7 @@
         },
         "outcome": "bad key"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -277,7 +277,7 @@
         "quest": "first_lead",
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -306,7 +306,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": "lost_lamb"
@@ -330,7 +330,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.start",
           "quest": {
@@ -360,7 +360,7 @@
         "outcome": "report",
         "extra": true
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {
@@ -389,7 +389,7 @@
         },
         "outcome": "report"
       },
-      "apply": [
+      "steps": [
         {
           "op": "quest.activate",
           "quest": {

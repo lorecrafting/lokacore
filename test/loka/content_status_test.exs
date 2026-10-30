@@ -13,7 +13,7 @@ defmodule Loka.ContentStatusTest do
         {"statuses/poison.json", &Map.put(&1, "tick_every", 300)},
         {"statuses/poison.json", &Map.put(&1, "per_tick", 0)},
         {"statuses/poison.json", &put_in(&1, ["narration", "tick"], "missing.text")},
-        {"reactions/dart.json", &put_in(&1, ["apply", Access.at(0), "status"], "missing")},
+        {"reactions/dart.json", &put_in(&1, ["steps", Access.at(0), "status"], "missing")},
         {"items/antidote.json", &put_in(&1, ["edible", "cures"], ["missing"])},
         {"cartridge.json",
          &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "status") end)},
@@ -23,7 +23,7 @@ defmodule Loka.ContentStatusTest do
         {"statuses/poison.json", &Map.put(&1, "duration", 0)},
         {"statuses/poison.json", &Map.put(&1, "extra", 1)},
         {"statuses/poison.json", &put_in(&1, ["narration", "cured"], "narration.poison.tick")},
-        {"reactions/dart.json", &put_in(&1, ["apply"], [%{"op" => "status.apply"}])},
+        {"reactions/dart.json", &put_in(&1, ["steps"], [%{"op" => "status.apply"}])},
         {"items/antidote.json", &put_in(&1, ["edible", "cures"], [])}
       ] ++
         for(
@@ -82,7 +82,7 @@ defmodule Loka.ContentStatusTest do
 
     entry = %{"event" => "entity_entered_room", "room" => "keep"}
 
-    assert {"OUTCOME_MISMATCH", "reactions/hide.apply[0].op"} in diags.([
+    assert {"OUTCOME_MISMATCH", "reactions/hide.steps[0].op"} in diags.([
              {"reactions/hide.json", &Map.put(&1, "on", entry)}
            ])
   end

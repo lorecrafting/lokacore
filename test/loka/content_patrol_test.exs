@@ -87,7 +87,7 @@ defmodule Loka.ContentPatrolTest do
   defp reaction(quest) do
     %{
       "on" => %{"event" => "entity_entered_room", "room" => "well_lane"},
-      "apply" => [%{"op" => "quest.activate", "quest" => quest}]
+      "steps" => [%{"op" => "quest.activate", "quest" => quest}]
     }
   end
 

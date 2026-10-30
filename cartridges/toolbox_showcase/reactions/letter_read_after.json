@@ -8,7 +8,7 @@
     "fact": "scene_letter_read",
     "equals": -1
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.adjust",
       "fact": "wardle_standing",

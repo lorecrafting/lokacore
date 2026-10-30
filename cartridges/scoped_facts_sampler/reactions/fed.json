@@ -3,7 +3,7 @@
     "event": "item_acquired",
     "item": "apple"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "fed",

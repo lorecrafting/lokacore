@@ -22,13 +22,13 @@ defmodule Loka.ContentShowcaseTest do
       Enum.map(ds, &{&1["code"], &1["path"]})
     end
 
-    defp spread(edit), do: {"reactions/fire_spreads.json", &update_in(&1, ["apply"], edit)}
+    defp spread(edit), do: {"reactions/fire_spreads.json", &update_in(&1, ["steps"], edit)}
 
     defp door(to, by),
       do: spread(&List.replace_at(&1, 1, Map.merge(%{"op" => "barrier.set", "to" => to}, by)))
 
     test "barrier.set to locked needs a key_item", %{dir: dir} do
-      lockout = {"BARRIER_UNREACHABLE_KEY", "reactions/fire_spreads.apply[1].to"}
+      lockout = {"BARRIER_UNREACHABLE_KEY", "reactions/fire_spreads.steps[1].to"}
       assert lockout in diags(dir, [door("locked", %{"tag" => "burnable"})])
       assert lockout in diags(dir, [door("locked", %{"barrier" => "store_door"})])
       keyed = {"barriers/store_door.json", &Map.put(&1, "key_item", "anvil")}
@@ -60,7 +60,7 @@ defmodule Loka.ContentShowcaseTest do
       assert {:ok, _, _} = Loka.ContentSource.compile(dir, [entering.("the_fold"), locked])
       assert lockout in diags(dir, [entering.("smithy"), locked])
 
-      assert {"UNRESOLVED_REFERENCE", "reactions/fire_spreads.apply[1].barrier"} in diags(dir, [
+      assert {"UNRESOLVED_REFERENCE", "reactions/fire_spreads.steps[1].barrier"} in diags(dir, [
                door("open", %{"barrier" => "gate"})
              ])
     end

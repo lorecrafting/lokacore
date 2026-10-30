@@ -43,7 +43,7 @@ const status = (key: string) => ({
 artifact.cartridge.reactions['kitchen_sampler@0.0.1:reaction/fed_seen'] = {
   key: 'fed_seen',
   on: { event: 'status_applied', status: status('fed') },
-  apply: [{ op: 'status.apply', status: status('spoiling') }],
+  steps: [{ op: 'status.apply', status: status('spoiling') }],
 };
 const canonical = encode(artifact.cartridge);
 const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };

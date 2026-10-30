@@ -3,7 +3,7 @@
     "event": "entity_entered_room",
     "room": "mill"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "knows_mill",

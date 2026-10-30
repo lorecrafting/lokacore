@@ -159,7 +159,7 @@ function light(edit: (c: any) => void, carry: string[] = []) {
   return play(x, { type: 'drop', item_id: id(x, 'item', 'smithy_torch') }).world;
 }
 const storeDoor = { ...C, kind: 'barrier', key: 'store_door' };
-const spreadOf = (c: any) => c.reactions[ref('reaction', 'fire_spreads')].apply;
+const spreadOf = (c: any) => c.reactions[ref('reaction', 'fire_spreads')].steps;
 
 // Breaks: a named barrier.set ignores its barrier, or moves a locked door to open in one illegal
 // transition (the composer refuses it) instead of locked, closed, open.
@@ -209,7 +209,7 @@ test('a later rule, or a later step, re-closes the door the spread opened', () =
     c.reactions[ref('reaction', 'zz_reclose')] = {
       key: 'zz_reclose',
       on: spread.on,
-      apply: [reclose],
+      steps: [reclose],
     };
   });
   assert.equal(door(wait(laterRule, laterRule.state.clock + 60).world), 'closed');

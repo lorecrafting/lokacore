@@ -3,7 +3,7 @@
     "event": "fact_changed",
     "fact": "blessed"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.cure",
       "status": "cursed"

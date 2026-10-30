@@ -146,7 +146,7 @@ test('a status refreshed on its tick inside one advance matches job-by-job play'
     r[rule('zz_reshock')] = {
       key: 'zz_reshock',
       on: { event: 'status_ticked', status: ref('status', 'shocked') },
-      apply: [{ op: 'status.apply', status: ref('status', 'shocked') }],
+      steps: [{ op: 'status.apply', status: ref('status', 'shocked') }],
     };
   });
   const start = drop(fresh({ ...refresh, statuses } as Cartridge), 'jar');
@@ -192,7 +192,7 @@ test('warmth landing dries the golem, so lightning no longer stuns', () => {
 test('subject reads the shocked golem and self the wet player', () => {
   const soaked = (subject: string) =>
     edited((r) => {
-      delete r[rule('drench')].apply[0].npc; // item_dropped's subject: the player's body
+      delete r[rule('drench')].steps[0].npc; // item_dropped's subject: the player's body
       r[rule('shock_on_wet')].when.subject = subject;
     });
   for (const [subject, stunned] of [
@@ -212,7 +212,7 @@ test('a rule re-applying the status that triggered it quiesces: a refresh does n
     r[rule('shock_on_wet')] = {
       key: 'shock_on_wet',
       on: r[rule('shock_on_wet')].on,
-      apply: [{ op: 'status.apply', status: ref('status', 'shocked') }],
+      steps: [{ op: 'status.apply', status: ref('status', 'shocked') }],
     };
   });
   const w = drop(fresh(again), 'jar');
@@ -227,7 +227,7 @@ test('in one rule the first of an apply and a cure on one holder and status wins
     r[rule('shock_on_wet')] = {
       key: 'shock_on_wet',
       on: r[rule('shock_on_wet')].on,
-      apply: [
+      steps: [
         { op: 'status.apply', status: ref('status', 'wet') },
         { op: 'status.cure', status: ref('status', 'wet') },
       ],
@@ -251,7 +251,7 @@ test('two rules that cure and re-apply each other fault budget_exceeded at react
   const flip = (from: string, to: string) => ({
     key: `${from}_to_${to}`,
     on: { event: 'status_applied', status: ref('status', from) },
-    apply: [
+    steps: [
       { op: 'status.cure', status: ref('status', from) },
       { op: 'status.apply', status: ref('status', to) },
     ],

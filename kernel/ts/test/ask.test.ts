@@ -206,7 +206,7 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   assert.equal(value(unanswered.w, unanswered.w.character, ref('fact', 'wanted')), false);
   // The asked reaction's subject is the asked NPC: trust (a pair fact) set toward the guard.
   const toward = reload(content, (c) =>
-    c.reactions[`${P}reaction/guard_smugglers`].apply.push({
+    c.reactions[`${P}reaction/guard_smugglers`].steps.push({
       op: 'fact.assign',
       fact: ref('fact', 'trust'),
       value: 1,

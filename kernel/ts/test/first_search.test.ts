@@ -179,7 +179,7 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
   const prior = resolved();
   const reaction = {
     ...prior.cartridge.reactions![`${prefix}:reaction/start_search`],
-    apply: [
+    steps: [
       { op: 'fact.assign', fact: ref('fact', 'tracks_found'), value: true },
       { op: 'quest.activate', quest: ref('quest', 'oar') },
       { op: 'quest.activate', quest: ref('quest', 'oar') },

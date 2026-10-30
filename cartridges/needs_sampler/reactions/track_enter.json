@@ -3,7 +3,7 @@
     "event": "entity_entered_room",
     "room": "track"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "hungry"

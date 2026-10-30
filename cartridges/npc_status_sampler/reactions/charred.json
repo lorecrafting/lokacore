@@ -3,7 +3,7 @@
     "event": "status_expired",
     "status": "burning"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "charred",
