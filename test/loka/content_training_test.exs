@@ -82,7 +82,7 @@ defmodule Loka.ContentTrainingTest do
              carving.(fn _ ->
                [%{"op" => "fact.assign", "fact" => "skill_carving", "value" => true}]
              end)
-           ], {"RESERVED_FACT", "dialogues/carpenter_lessons.choices.carving.sequence[0].fact"}},
+           ], {"RESERVED_FACT", "dialogues/carpenter_lessons.choices.carving.steps[0].fact"}},
           {[carving.(&(&1 ++ &1))],
            {"SCHEMA_VIOLATION", "dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
           {[{"npcs/carpenter.json", &Map.delete(&1, "resource_starts")}],

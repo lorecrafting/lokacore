@@ -99,7 +99,7 @@ defmodule Loka.ContentRestTest do
 
     assert Enum.sort_by(ds, & &1["path"]) == [
              d("actions/coil_rope.outcomes.success.sequence[0].fact"),
-             d("dialogues/bram.choices.carry.sequence[0].fact"),
+             d("dialogues/bram.choices.carry.steps[0].fact"),
              d("facts.facts.position"),
              d("reactions/settle.apply[0].fact")
            ]

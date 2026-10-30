@@ -183,7 +183,7 @@ defmodule Loka.ContentFerryTest do
         |> Map.merge(%{"npc" => full.("npc", "bram"), "quest" => full.("quest", "lantern")})
         |> put_in(~w(roles bram npc), full.("npc", "bram"))
         |> put_in(~w(roles lantern item), full.("item", "lantern"))
-        |> update_in(~w(choices carry sequence), fn [s] ->
+        |> update_in(~w(choices carry steps), fn [s] ->
           [%{s | "fact" => full.("fact", "search_plan")}]
         end)
       end)
@@ -224,11 +224,11 @@ defmodule Loka.ContentFerryTest do
       {dialogue(&put_in(&1, ~w(choices carry narration), "dialogue.none")),
        unresolved.(".choices.carry.narration", "dialogue.none")},
       {dialogue(
-         &update_in(&1, ~w(choices carry sequence), fn [s] -> [%{s | "fact" => "missing"}] end)
-       ), unresolved.(".choices.carry.sequence[0].fact", missing.("fact"))},
+         &update_in(&1, ~w(choices carry steps), fn [s] -> [%{s | "fact" => "missing"}] end)
+       ), unresolved.(".choices.carry.steps[0].fact", missing.("fact"))},
       {dialogue(
-         &update_in(&1, ~w(choices carry sequence), fn [s] -> [%{s | "value" => "lost"}] end)
-       ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.sequence[0].value", %{})},
+         &update_in(&1, ~w(choices carry steps), fn [s] -> [%{s | "value" => "lost"}] end)
+       ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.steps[0].value", %{})},
       {dialogue(&put_in(&1, ~w(roles actor), %{"role" => "npc", "npc" => "bram"})),
        d("DUPLICATE_DEFINITION", at <> ".roles.actor", %{})},
       {dialogue(&Map.put(&1, "choices", %{})),

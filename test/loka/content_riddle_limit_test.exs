@@ -80,7 +80,7 @@ defmodule Loka.ContentRiddleLimitTest do
   test "a reopening dialogue rejects a direct assignment of a bounded riddle answer fact", %{
     dir: dir
   } do
-    at = "dialogues/chat.choices.ask.sequence[0].op"
+    at = "dialogues/chat.choices.ask.steps[0].op"
 
     unbounded =
       @riddle |> Map.delete("quest") |> Map.update!("riddle", &Map.delete(&1, "wrong_limit"))

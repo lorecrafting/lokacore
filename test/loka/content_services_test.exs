@@ -167,7 +167,7 @@ defmodule Loka.ContentServicesTest do
       {"dialogues/aldous_lesson.json",
        &put_in(&1, ["choices", "learn", "steps"], [
          %{"op" => "fact.assign", "fact" => "bed_paid", "value" => true}
-       ]), "dialogues/aldous_lesson.choices.learn.sequence[0].fact"}
+       ]), "dialogues/aldous_lesson.choices.learn.steps[0].fact"}
     ]
 
     for {file, change, path} <- mutations do
