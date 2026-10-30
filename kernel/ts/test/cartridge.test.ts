@@ -10,7 +10,7 @@ const bytes = (text: string) => new TextEncoder().encode(text);
 const corpus = read('protocol/fixtures/cartridge_loader.json');
 // The hello and fact v2 fixtures' capabilities, each at version 1.
 const hello =
-  'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topics check schedule resource';
+  'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topic check schedule resource';
 const installed: Installed = {
   kernel_api: '1.0',
   capabilities: Object.fromEntries(hello.split(' ').map((k) => [k, [1]])),
