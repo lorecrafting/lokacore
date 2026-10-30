@@ -17,7 +17,7 @@
       "fact": 1,
       "policy": 1,
       "dialogue": 1,
-      "tags": 1,
+      "tag": 1,
       "description_variant": 1
     },
     "client_features": []

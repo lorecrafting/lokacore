@@ -20,7 +20,7 @@
       "status": 1,
       "schedule": 1,
       "calendar": 1,
-      "tags": 1,
+      "tag": 1,
       "description_variant": 1,
       "death": 1,
       "position": 1

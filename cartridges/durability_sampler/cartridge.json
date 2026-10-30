@@ -23,12 +23,12 @@
       "fact": 1,
       "equipment": 1,
       "policy": 1,
-      "attributes": 1,
-      "skills": 1,
+      "attribute": 1,
+      "skill": 1,
       "service": 1,
       "scripted_action": 1,
       "check": 1,
-      "tags": 1
+      "tag": 1
     },
     "client_features": []
   },

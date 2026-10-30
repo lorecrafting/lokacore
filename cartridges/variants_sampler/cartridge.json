@@ -24,7 +24,7 @@
       "target_resolution": 1,
       "scripted_action": 1,
       "check": 1,
-      "attributes": 1,
+      "attribute": 1,
       "fact": 1,
       "death": 1,
       "position": 1
