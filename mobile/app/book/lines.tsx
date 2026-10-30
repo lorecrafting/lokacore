@@ -6,7 +6,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain } from './model.ts';
 import { COUNT, LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
-import { lineText } from './words.ts';
+import { lineText, subject } from './words.ts';
 import { grouped, type RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
@@ -209,6 +209,7 @@ function Present(p: {
           </Fragment>
         );
       })}
+      {subject(links.at(-1)?.name ?? '').endsWith(',') && ','}
       {links.length > 1 || links[0]?.many ? ' are here.' : ' is here.'}
     </Text>
   );

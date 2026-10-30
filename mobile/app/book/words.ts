@@ -128,6 +128,8 @@ export const used = (label: string, target: string, tool: string) =>
 export const cast = (label: string, target: string) => `You cast ${lower(label)} on ${target}.`;
 export const reason = (code: string, cause?: string) =>
   (cause && CAUSE[cause]) ?? REASON[code] ?? code.replaceAll('_', ' ');
+// An appositive name closes with a comma before its verb: "Bess, the alewife, is here." (Line placement)
+export const subject = (name: string) => (name.includes(', ') ? `${name},` : name);
 export const reasonOf = (r: Refusal) => reason(r.code, r.cause);
 // An item page's refusal notes (book-ui.md, too heavy; pass-1 E8): a locked Take reads as ownership.
 export const NOTED: Record<string, string> = {
@@ -236,10 +238,7 @@ function answer(
     const location = d.location;
     // novel prose, no colon label (book-ui.md, Line placement)
     const name = nameOf(view, location.target_id, text);
-    // an appositive name closes with a comma before its verb: "Bess, the alewife, is here."
-    const [who, is, was] = name
-      ? [name.includes(', ') ? `${name},` : name, 'is', 'was']
-      : ['They', 'are', 'were'];
+    const [who, is, was] = name ? [subject(name), 'is', 'was'] : ['They', 'are', 'were'];
     if (location.status === 'here') return `${who} ${is} here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);

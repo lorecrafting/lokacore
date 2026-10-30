@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { bleedingLine, buttonsOf, group, intentOf } from './model.ts';
-import { lineText, replyLine } from './words.ts';
+import { lineText, replyLine, subject } from './words.ts';
 import type { GameView, Reply } from '../../packages/game-view/session.ts';
 const view = {
   actor_id: 'actor',
@@ -82,4 +82,10 @@ test('the bleeding line reads its time left and cadence like a condition', () =>
     bleedingLine(bleeding, 900, (s) => s),
     'bleeding · 6m remaining · 1 HP each 3m',
   );
+});
+
+// Breaks: a one-word name given the appositive comma ("Nell, is here."), or an appositive left open.
+test('subject: only an appositive name closes with a comma', () => {
+  assert.equal(`${subject('Nell')} is here.`, 'Nell is here.');
+  assert.equal(`${subject('Bess, the alewife')} is here.`, 'Bess, the alewife, is here.');
 });
