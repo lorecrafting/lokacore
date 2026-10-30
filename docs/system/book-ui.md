@@ -302,7 +302,7 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   comma or period. Never the colon form (`Nell: ...`) and never a bare quotation with no speaker.
   An authored line that already attributes itself (`"Gate's shut," says the guard.`) is kept as
   written; the Book never parses quotes to add a speaker. Authored dialogue that is a bare
-  quotation is a content fix (Beads `loka-r9mr` follow-up), not a Book rewrite.
+  quotation is a content fix (Beads `loka-548k`), not a Book rewrite.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
   same bindings and actor, the same pressed card target (the stock row or item), the same page
   visit, and no other line lies between. The merged line is the sentence once with " (N times)"
