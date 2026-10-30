@@ -33,7 +33,6 @@ export function told(
   const seen =
     !mine &&
     target !== undefined &&
-    world.entities[target] !== undefined &&
     world.state.containers[target] === here &&
     visible(world, actor, target, steps);
   return [

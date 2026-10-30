@@ -3,7 +3,7 @@ defmodule Loka.Content.Emotes do
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [owned: 3, owners: 2]
 
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  def check(_, _, nil, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
