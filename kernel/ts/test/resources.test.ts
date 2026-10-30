@@ -242,7 +242,7 @@ test('a resource.adjust step stops at the maximum; at full value it changes noth
   // Review N4: -10 at hp 3 stops at the minimum, 0.
   const harm = world((c) => {
     c.resources['resource_sampler@0.0.1:resource/hp'].start = 3;
-    c.scripted_actions[PRAY].outcomes.success.sequence[0].by = -10;
+    c.scripted_actions[PRAY].outcomes.success.steps[0].by = -10;
   });
   assert.deepEqual(ops(run(harm, move('east')), perform('pray'))[1], adjust('hp', 3, 0));
 });

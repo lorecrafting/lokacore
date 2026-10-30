@@ -114,12 +114,12 @@ test('the offered quench agrees with admission (gameview_agrees_with_admission)'
   assert.ok(check('gameview_agrees_with_admission', observation));
 });
 
-// Breaks: a second cure of the same status in one sequence proposes a second transition from the
+// Breaks: a second cure of the same status in one outcome proposes a second transition from the
 // already-ended row, so the decision faults instead of curing once.
-test('curing twice in one sequence ends the status once', () => {
+test('curing twice in one outcome ends the status once', () => {
   const twice = structuredClone(content) as Cartridge & { scripted_actions: Record<string, any> };
   const success = twice.scripted_actions['use_sampler@0.0.1:action/quench'].outcomes.success;
-  success.sequence = [success.sequence[0], success.sequence[0]];
+  success.steps = [success.steps[0], success.steps[0]];
   stream.n = 0;
   let w = newWorld(twice, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44'), [1, 2, 3, 4]);
   for (const k of ['bucket', 'torch']) w = ok(play(w, { type: 'take', item_id: e(w, k) }));

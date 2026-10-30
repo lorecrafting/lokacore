@@ -68,7 +68,7 @@ defmodule Loka.ContentScriptedActionsTest do
     r =
       src("actions/ring_bell.json")
       |> put_in(["target", "room"], full("room", "belfry"))
-      |> put_in(["outcomes", "success", "sequence"], seq)
+      |> put_in(["outcomes", "success", "steps"], seq)
 
     assert compile(dir, %{"actions/ring_bell.json" => r}) == {:ok, @expected, []}
   end
@@ -76,7 +76,7 @@ defmodule Loka.ContentScriptedActionsTest do
   # Breaks: a scripted action naming a room, detail or fact that does not exist compiles, or a wrongly
   # typed value compiles and only faults at play time (brief item 7).
   test "a scripted action's unknown room, detail or fact or mistyped value fails", %{tmp_dir: dir} do
-    seq = ["outcomes", "success", "sequence"]
+    seq = ["outcomes", "success", "steps"]
 
     cases = [
       {scripted(["target", "room"], "crypt"),
@@ -86,15 +86,53 @@ defmodule Loka.ContentScriptedActionsTest do
       {scripted(["target", "detail"], "gong"),
        d("UNRESOLVED_REFERENCE", "actions/ring_bell.target.detail", %{"target" => "gong"})},
       {scripted(seq, [%{"op" => "fact.assign", "fact" => "bell_tolled", "value" => true}]),
-       d("UNRESOLVED_REFERENCE", "actions/ring_bell.outcomes.success.sequence[0].fact", %{
+       d("UNRESOLVED_REFERENCE", "actions/ring_bell.outcomes.success.steps[0].fact", %{
          "target" => "recipe_sampler@0.0.1:fact/bell_tolled"
        })},
       {scripted(seq, [%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => "yes"}]),
-       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.sequence[0].value")}
+       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.steps[0].value")}
     ]
 
     for {r, diag} <- cases,
         do: assert(compile(dir, %{"actions/ring_bell.json" => r}) == {:error, [diag]})
+  end
+
+  # C3 D6 (loka-ivjq.4): Loka.Content.Steps' :action row. Breaks: a step op or field a scripted
+  # action does not run, or an opposed check's choice-only failure or rating, compiles (the
+  # kernel's scripted action rule would refuse or ignore it at play time).
+  test "a scripted action runs only the action steps and check fields", %{tmp_dir: dir} do
+    at = "actions/ring_bell.outcomes.success.steps[0]."
+    refused = &d("SCHEMA_VIOLATION", at <> &1, %{"error" => "invalid_value"})
+
+    cases = [
+      {%{"op" => "narrate", "text" => "narration.ring_bell.actor"}, [refused.("op")]},
+      {%{"op" => "skill.acquire", "skill" => "lockpicking"}, [refused.("op")]},
+      {%{"op" => "experience.grant", "amount" => 1}, [refused.("op")]},
+      {%{"op" => "fact.adjust", "fact" => "chapel_bell_rung", "amount" => 1}, [refused.("op")]},
+      {%{"op" => "drink", "vessel" => "cup", "liquid" => "ale", "recovery" => "r", "amount" => 1},
+       [refused.("op")]},
+      {%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => true, "npc" => "bram"},
+       [
+         refused.("npc"),
+         d("UNRESOLVED_REFERENCE", at <> "npc", %{"target" => "recipe_sampler@0.0.1:npc/bram"})
+       ]}
+    ]
+
+    for {step, diags} <- cases do
+      r = scripted(["outcomes", "success", "steps"], [step])
+      assert {:error, ^diags} = compile(dir, %{"actions/ring_bell.json" => r})
+    end
+
+    src = Loka.ContentSource.copy("cartridges/barrier_sampler")
+    path = "actions/pick_lock.json"
+
+    for {field, v} <- [{"failure", "narration.pick_lock.failure"}, {"rating", 3}] do
+      diag =
+        d("SCHEMA_VIOLATION", "actions/pick_lock.check." <> field, %{"error" => "invalid_value"})
+
+      check = &put_in(&1, ["check", field], v)
+      assert Loka.ContentSource.compile(src, [{path, check}]) == {:error, [diag]}
+    end
   end
 
   # Breaks: a label or narration key without catalog text compiles (the player sees a raw key).
@@ -133,7 +171,7 @@ defmodule Loka.ContentScriptedActionsTest do
              {:error,
               [
                 owner.("actions/ring_bell"),
-                owner.("actions/ring_bell.outcomes.success.sequence[1].op")
+                owner.("actions/ring_bell.outcomes.success.steps[1].op")
               ]}
 
     action = %{

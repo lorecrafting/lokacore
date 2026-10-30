@@ -38,7 +38,7 @@ export function bellSource(c: any) {
     outcomes: {
       success: {
         narration: { actor: 'narration.ring_bell' },
-        sequence: [{ op: 'fact.assign', fact, value: true }],
+        steps: [{ op: 'fact.assign', fact, value: true }],
       },
     },
   };

@@ -46,7 +46,7 @@ function variant(change: (c: Record<string, any>) => void) {
 }
 const aim = (c: Record<string, any>, k: string, scopes: string[], arg: string) => {
   c.scripted_actions[R(k)].target.aimed = { scopes };
-  delete c.scripted_actions[R(k)].outcomes.success.sequence[0][arg];
+  delete c.scripted_actions[R(k)].outcomes.success.steps[0][arg];
 };
 /** The sampler with flamma, ward and lux aimed (kernel_api 1.119) and the orb tagged silver. */
 function aimedChange(c: Record<string, any>) {
@@ -355,8 +355,8 @@ test('a dead wight is no aimed target: invalid_target, no mana paid, not listed'
 // caster.
 test('a ward naming an npc not in the world lands on no one', () => {
   const r = variant((c) => {
-    const npc = c.scripted_actions[R('flamma')].outcomes.success.sequence[0].npc;
-    c.scripted_actions[R('ward')].outcomes.success.sequence[0].npc = npc;
+    const npc = c.scripted_actions[R('flamma')].outcomes.success.steps[0].npc;
+    c.scripted_actions[R('ward')].outcomes.success.steps[0].npc = npc;
   }) as { cartridge: Cartridge };
   const w = hall(r.cartridge);
   delete (w.entityIds as Record<string, unknown>)[`${P}:npc/wight`];

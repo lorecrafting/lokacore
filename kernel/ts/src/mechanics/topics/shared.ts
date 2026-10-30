@@ -58,7 +58,7 @@ export function lore(world: World, actor: CharacterId) {
           ),
         ),
       ];
-      const grants = r.outcomes.success.sequence.find(
+      const grants = r.outcomes.success.steps.find(
         (s) => s.op === 'fact.assign' && s.value === true && topicOf(s.fact),
       );
       return from.length >= 2 &&

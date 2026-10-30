@@ -32,11 +32,11 @@ defmodule Loka.ContentSkillGrowthTest do
       {"actions/force_vault.json", &put_in(&1, ["check", "attribute"], "dex"),
        {"UNRESOLVED_REFERENCE", "actions/force_vault.check.attribute"}},
       {"actions/pick_gate.json",
-       &put_in(&1, ["outcomes", "success", "sequence", Access.at(0)], %{
+       &put_in(&1, ["outcomes", "success", "steps", Access.at(0)], %{
          "op" => "fact.assign",
          "fact" => "uses_pick",
          "value" => 5
-       }), {"RESERVED_FACT", "actions/pick_gate.outcomes.success.sequence[0].fact"}},
+       }), {"RESERVED_FACT", "actions/pick_gate.outcomes.success.steps[0].fact"}},
       {"facts.json", &put_in(&1, ["facts", "uses_pick"], uses),
        {"RESERVED_FACT", "facts.facts.uses_pick"}}
     ]

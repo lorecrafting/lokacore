@@ -9,7 +9,7 @@
   ],
   "outcomes": {
     "success": {
-      "sequence": [{ "op": "event.emit", "event": "light_cast" }],
+      "steps": [{ "op": "event.emit", "event": "light_cast" }],
       "narration": { "actor": "narration.lux" }
     }
   }

@@ -75,10 +75,10 @@ test('fault, rejection and failed attempt stay distinct; only the attempt change
     change(cartridge.scripted_actions['recipe_sampler@0.0.1:action/ring_bell']);
     return { ...ok, cartridge };
   };
-  const bad = bell((r) => (r.outcomes.success.sequence[0].value = 'yes'));
+  const bad = bell((r) => (r.outcomes.success.steps[0].value = 'yes'));
   const luck = bell((r) => {
     r.check = { key: 'ring_true', kind: 'luck', chance: 20 };
-    r.outcomes.failure = { sequence: [], narration: { actor: 'narration.ring_bell.actor' } };
+    r.outcomes.failure = { steps: [], narration: { actor: 'narration.ring_bell.actor' } };
   });
   const invoke = (w: World, action_key: string) =>
     attempt(

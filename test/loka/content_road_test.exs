@@ -66,7 +66,7 @@ defmodule Loka.ContentRoadTest do
     pray =
       put_in(
         src("actions/pray.json"),
-        ["outcomes", "success", "sequence", Access.at(0), "resource"],
+        ["outcomes", "success", "steps", Access.at(0), "resource"],
         ref("resource", "hp")
       )
 
@@ -144,14 +144,14 @@ defmodule Loka.ContentRoadTest do
            ) ==
              {:error, [d("UNRESOLVED_REFERENCE", "actions/shove_cart.check.resource", target)]}
 
-    step = ["outcomes", "success", "sequence", Access.at(0), "resource"]
+    step = ["outcomes", "success", "steps", Access.at(0), "resource"]
 
     assert compile(Path.join(dir, "c"), edit("actions/pray.json", step, "sp")) ==
              {:error,
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "actions/pray.outcomes.success.sequence[0].resource",
+                  "actions/pray.outcomes.success.steps[0].resource",
                   target
                 )
               ]}

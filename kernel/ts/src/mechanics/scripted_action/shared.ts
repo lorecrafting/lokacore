@@ -222,7 +222,7 @@ export const craftRefused = (
   actor: CharacterId,
   steps: Steps,
 ) => {
-  const s = scripted?.outcomes.success.sequence.find((x) => x.op === 'build');
+  const s = scripted?.outcomes.success.steps.find((x) => x.op === 'build');
   const b =
     s &&
     scripted!.target.kind === 'detail' &&

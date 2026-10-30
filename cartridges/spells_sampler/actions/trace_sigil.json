@@ -6,7 +6,7 @@
   "policy": { "op": "quest_state", "quest": "apprentice", "state": "active" },
   "outcomes": {
     "success": {
-      "sequence": [{ "op": "fact.assign", "fact": "sigil_traced", "value": true }],
+      "steps": [{ "op": "fact.assign", "fact": "sigil_traced", "value": true }],
       "narration": { "actor": "narration.trace_sigil" }
     }
   }

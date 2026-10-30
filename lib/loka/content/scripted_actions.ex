@@ -6,10 +6,7 @@ defmodule Loka.Content.ScriptedActions do
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
-  alias Loka.Content.{ActionTips, CheckKinds}
-
-  # A step uses its op through the event it produces, a check through check@1's events.
-  @step_event %{"fact.assign" => "fact_changed", "event.emit" => "custom_event"}
+  alias Loka.Content.{ActionTips, CheckKinds, Steps}
 
   @doc "Each schema-valid scripted action's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
@@ -20,12 +17,13 @@ defmodule Loka.Content.ScriptedActions do
 
   @doc """
   For a v2 source with a valid manifest (else none): each scripted action's owner (scripted_action), its
-  check's (check@1, by its events) and each step's of any outcome (by its event; a
-  resource.adjust has none, like a cost: resource@1 comes with the default pools) is required;
+  check's (check@1, by its events) is required; each outcome's steps are `Loka.Content.Steps`
+  :action steps (ops, fields, owning events and references) and its check runs neither failure
+  nor rating (`CheckKinds.context/4`);
   its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
-  of this cartridge and a detail of that room (a use target's tool liquid a liquid of it; row G4), each fact.assign a fact with a value of its type, each
-  status.cure a status and only on a use scripted action (SCHEMA_VIOLATION) (a spell's word and
+  of this cartridge and a detail of that room (a use target's tool liquid a liquid of it; row G4), each
+  status.cure only on a use scripted action (SCHEMA_VIOLATION) (a spell's word and
   row 29b effect steps: `Loka.Content.Spells`),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other scripted action's check's (DUPLICATE_DEFINITION),
@@ -40,11 +38,14 @@ defmodule Loka.Content.ScriptedActions do
   def check(m, defs, {_, text}, registry) do
     actions = for {_, {_, [], a}} <- defs["action"], into: MapSet.new(), do: a["key"]
 
+    caps = m["requires"]["capabilities"]
+
     ctx = %{
       m: m,
       defs: defs,
       text: text,
       registry: registry,
+      events: {caps, owners(registry, ["events"])},
       actions: actions,
       shared: CheckKinds.shared_checks(defs)
     }
@@ -103,40 +104,31 @@ defmodule Loka.Content.ScriptedActions do
   # Each step of each outcome, with its path.
   defp steps(r) do
     for {name, o} <- r["outcomes"],
-        {s, i} <- Enum.with_index(o["sequence"]),
-        do: {s, ["outcomes", name, "sequence", i]}
+        {s, i} <- Enum.with_index(o["steps"]),
+        do: {s, ["outcomes", name, "steps", i]}
   end
 
-  defp owners(rel, r, %{m: m, registry: registry}) do
+  defp owners(rel, r, %{m: m, registry: registry, events: events} = ctx) do
     caps = m["requires"]["capabilities"]
-    events = {caps, owners(registry, ["events"])}
 
     check =
-      if is_map_key(r, "check"), do: owned(at(rel, ["check"]), "check_passed", events), else: []
+      if is_map_key(r, "check"),
+        do:
+          owned(at(rel, ["check"]), "check_passed", events) ++
+            CheckKinds.context(rel, ["check"], r["check"], :action),
+        else: []
 
     owned(at(rel, []), "scripted_action", {caps, owners(registry, ["definitions"])}) ++
       check ++
-      for {s, steps} <- steps(r),
-          event = @step_event[s["op"]],
-          event != nil,
-          d <- owned(at(rel, steps ++ ["op"]), event, events),
+      for {name, o} <- r["outcomes"],
+          d <- Steps.check(rel, ["outcomes", name, "steps"], o["steps"], :action, ctx),
           do: d
   end
 
   defp refs(rel, r, %{m: m, defs: defs}) do
     target(rel, r["target"], m, defs) ++
-      named_steps(rel, r, m, defs) ++
       CheckKinds.attributes(rel, r, m, defs) ++
       resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
-  end
-
-  # Each step's fact, and (rows G4, 29b) status, npc and item, names one of this cartridge.
-  defp named_steps(rel, r, m, defs) do
-    for {s, steps} <- steps(r),
-        field <- ~w(fact status npc item),
-        is_map_key(s, field),
-        d <- reference(rel, steps, field, s, m, defs),
-        do: d
   end
 
   # Each narration participant but the actor names this cartridge's npc or item its role says.

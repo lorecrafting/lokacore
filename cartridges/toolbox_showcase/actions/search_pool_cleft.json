@@ -11,7 +11,7 @@
   "priority": 10,
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "stair_found",
