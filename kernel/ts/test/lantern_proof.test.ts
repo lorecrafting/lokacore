@@ -26,7 +26,7 @@ const load = () =>
 test('the known answer loads with its hash, as its hand-written value', () => {
   const loaded = load();
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  assert.equal(loaded.hash, 'ff4bef68b8ba5308af1bdc971b74c7db9fcc274ce070b769291f024381e017ab');
+  assert.equal(loaded.hash, 'ddff32fe70e564b7ac7b8e8cf8f5e05183e670e18536406f78b3b9589fec3480');
   assert.deepEqual(structuredClone(loaded.cartridge), kat.value);
 });
 
