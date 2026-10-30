@@ -51,7 +51,7 @@ const aim = (c: Record<string, any>, k: string, scopes: string[], arg: string) =
 /** The sampler with flamma, ward and lux aimed (kernel_api 1.119) and the orb tagged silver. */
 function aimedChange(c: Record<string, any>) {
   c.manifest.requires.kernel_api.at_least = '1.119';
-  for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.tags = 1;
+  for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.tag = 1;
   aim(c, 'flamma', ['room_occupants'], 'npc');
   aim(c, 'ward', ['room_occupants'], 'npc');
   aim(c, 'lux', ['inventory'], 'item');

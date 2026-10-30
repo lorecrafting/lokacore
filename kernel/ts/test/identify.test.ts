@@ -51,7 +51,7 @@ const identify = (w: World) => {
   return play(talked, { type: 'choose', continuation_id, choice_id: 'ask' });
 };
 
-// Breaks: the view sums every worn affect (a worn note before identification), attributes@1 drops
+// Breaks: the view sums every worn affect (a worn note before identification), attribute@1 drops
 // unidentified affects (PER 10 while worn), a missing fact row reads as identified, the variant
 // names the wrong text, or a removed identified ring still counts.
 test('a worn dull ring adds PER at once; the sage reveals its name and its worn note', () => {

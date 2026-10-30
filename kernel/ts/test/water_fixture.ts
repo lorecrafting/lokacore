@@ -43,7 +43,7 @@ function addItem(c: any, key: string, location: object, extra: object = {}) {
 const inRoom = (key: string) => ({ in: 'room', room: ref('room', key) });
 
 export function waterSource(c: any) {
-  for (const cap of ['water', 'skills', 'light']) {
+  for (const cap of ['water', 'skill', 'light']) {
     c.lock.capabilities[cap] = 1;
     c.manifest.requires.capabilities[cap] = 1;
   }
@@ -72,7 +72,7 @@ export function waterSource(c: any) {
     version: 1,
     value_type: { type: 'bool', default: false },
     scopes: ['player'],
-    meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
+    meaning: "Skill swim's acquisition (skill@1): only skill@1 writes it.",
   };
   c.world.water = {
     skill: ref('skill', 'swim'),

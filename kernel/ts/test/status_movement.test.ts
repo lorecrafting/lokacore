@@ -156,11 +156,11 @@ test('loader: movement and terrain tags load at API 1.62; movement stands in for
   };
   const tagged = (tag: string) => (c: any) => {
     c.rooms[DEN].tags = [tag];
-    c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
+    c.manifest.requires.capabilities.tag = c.lock.capabilities.tag = 1;
   };
   const item = (c: any) => {
     c.items[Object.keys(c.items)[0]].tags = ['water'];
-    c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
+    c.manifest.requires.capabilities.tag = c.lock.capabilities.tag = 1;
   };
   const barrier = (c: any) => {
     c.barriers = {
@@ -172,7 +172,7 @@ test('loader: movement and terrain tags load at API 1.62; movement stands in for
         tags: ['chasm'],
       },
     };
-    c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
+    c.manifest.requires.capabilities.tag = c.lock.capabilities.tag = 1;
     c.text['barrier.mist_gate.short'] = 'a mist gate';
     c.manifest.requires.capabilities.barrier = c.lock.capabilities.barrier = 1;
   };

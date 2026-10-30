@@ -121,7 +121,7 @@
       ]
     },
     {
-      "id": "attributes@1",
+      "id": "attribute@1",
       "first_required": "chapter_one",
       "phase": "R5",
       "gates": [
@@ -137,7 +137,7 @@
       ]
     },
     {
-      "id": "skills@1",
+      "id": "skill@1",
       "first_required": "chapter_one",
       "phase": "R7",
       "gates": [
@@ -298,7 +298,7 @@
       ]
     },
     {
-      "id": "topics@1",
+      "id": "topic@1",
       "first_required": "chapter_one",
       "phase": "R8",
       "gates": [

@@ -50,7 +50,7 @@ import { newWorld, NIL } from './fresh.ts';
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   knowledge: knowledge.decide,
-  attributes: attributes.decide,
+  attribute: attributes.decide,
   movement: movement.decide,
   combat: combat.decide,
   population: population.decide,
@@ -94,10 +94,10 @@ const RULELESS = [
   'reaction',
   'narration',
   'target_resolution',
-  'skills',
-  'topics',
-  'tags',
-  'variety',
+  'skill',
+  'topic',
+  'tag',
+  'alternates',
   'sense_cue',
   'construction',
 ];

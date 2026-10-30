@@ -48,7 +48,7 @@ defmodule Loka.ContentUseTest do
     checked = [
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn c ->
-         Map.merge(c, %{"attributes" => 1, "check" => 1})
+         Map.merge(c, %{"attribute" => 1, "check" => 1})
        end)},
       {"attributes.json", %{"attributes" => %{"str" => %{"start" => 8}}}},
       {"actions/quench.json",

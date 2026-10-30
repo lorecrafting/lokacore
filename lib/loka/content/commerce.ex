@@ -93,7 +93,7 @@ defmodule Loka.Content.Commerce do
 
   defp condition?(m, defs, _, d),
     do:
-      m["requires"]["capabilities"]["skills"] == 1 and
+      m["requires"]["capabilities"]["skill"] == 1 and
         match?({_, _, _}, Refs.resolve(d["skill"], "skill", m, defs))
 
   defp prices?(offers, minimum, numerator),

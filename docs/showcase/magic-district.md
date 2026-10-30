@@ -42,7 +42,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   `shocked` (120, tick 60, hp -1), `stunned` (120, tick 60, hp -3), `warm` (600, tick 300, mv,
   `modifies str +1`) (`elements_sampler/statuses`). `burning` and `spent` exist (the smithy).
 - Facts: `lux_known`, `flamma_known`, `ward_taught`, `gate_oiled` (player bool, per_subject: a pair fact on `gate_winch`);
-  `topic_flamma_known` for the grimoire (topics@1). Quest `errand` (`spells_sampler/quests`):
+  `topic_flamma_known` for the grimoire (topic@1). Quest `errand` (`spells_sampler/quests`):
   objective `fact_compare flamma_known true`, outcome `done`.
 - `world.levelling.kills`: `wight` 10, `attic_wight` 10; no entry for the golems (0).
 - Items: `lantern` (tag `metal`; `fuel {kind: source, capacity: 36000, initial: 36000, rate: 1}`,

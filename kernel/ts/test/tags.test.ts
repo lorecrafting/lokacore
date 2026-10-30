@@ -72,8 +72,8 @@ test('a burnable check passes only on the wooden door, stick and the wooden hall
   assert.equal(holds(away, world.character, wooden, { steps: { n: 0 } }), false);
 });
 
-// Breaks: the loader loads tags without tags@1.
-test('the loader refuses tags without tags@1', () => {
+// Breaks: the loader loads tags without tag@1.
+test('the loader refuses tags without tag@1', () => {
   const hall = 'tags_sampler@0.0.1:room/hall';
   const rows: [(c: Obj) => void, string, string][] = [];
   for (const [change, code, path] of rows) {

@@ -291,7 +291,7 @@ test('FD1: two delayed experience grants due in one advance both count', () => {
   const xp = (c: any) => {
     const level_up = 'item.player_corpse.short'; // any catalog key: no level is reached
     c.world.levelling = { thresholds: [30, 100], points_per_level: 1, level_up };
-    c.manifest.requires.capabilities.attributes = c.lock.capabilities.attributes = 1;
+    c.manifest.requires.capabilities.attribute = c.lock.capabilities.attribute = 1;
     c.reactions[AFTERSHOCK].steps = [{ op: 'experience.grant', amount: 5 }];
     c.reactions[AFTERSHOCK + '2'] = { ...c.reactions[AFTERSHOCK], key: 'aftershock2' };
   };

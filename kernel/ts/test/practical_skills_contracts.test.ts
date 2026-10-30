@@ -48,7 +48,7 @@ test('method is literal and optional declarations enforce every new field and nu
     // stock count, skill, narration and action refs: compiler rows in
     // test/loka/content_practical_skills_test.exs
     (c: any) => (patch(c).harvest.careful.extra = true),
-    (c: any) => delete c.manifest.requires.capabilities.skills,
+    (c: any) => delete c.manifest.requires.capabilities.skill,
     (c: any) => (shop(c).buy_discount.extra = true),
   ];
   for (const field of ['numerator', 'denominator', 'minimum'])

@@ -1,4 +1,4 @@
-// Toolbox row FD7 (speech@1 with topics@1; mechanics.md "Ask about a topic"): ask an NPC in the
+// Toolbox row FD7 (speech@1 with topic@1; mechanics.md "Ask about a topic"): ask an NPC in the
 // actor's room about a topic the actor knows; its first answer that holds, else its unknown line.
 import type {
   CharacterId,

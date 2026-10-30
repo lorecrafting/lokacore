@@ -1,5 +1,5 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
-import { vary } from '../mechanics/variety.ts';
+import { vary } from '../mechanics/alternates.ts';
 // size: allow 346, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';

@@ -134,7 +134,7 @@
               }
             },
             "attributes": {
-              "description": "The cartridge's attributes (AttributeSpec), keyed by DefinitionRefString of kind attribute; absent when it has none (C1 c1-attributes, an optional map: the tag stays). Its kind and the policy leaves stat_compare and resource_compare need attributes@1 in the lock.",
+              "description": "The cartridge's attributes (AttributeSpec), keyed by DefinitionRefString of kind attribute; absent when it has none (C1 c1-attributes, an optional map: the tag stays). Its kind and the policy leaves stat_compare and resource_compare need attribute@1 in the lock.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
@@ -144,7 +144,7 @@
               }
             },
             "ancestries": {
-              "description": "Authored once-only character choices (attributes@1), keyed by choice Key.",
+              "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -161,7 +161,7 @@
               "$ref": "text.schema.json#/$defs/TextCatalog"
             },
             "alternates": {
-              "description": "Narration variety (variety@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
+              "description": "Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^[a-z][a-z0-9_.]{0,127}$"
@@ -909,7 +909,7 @@
       "additionalProperties": false
     },
     "AttributeSpec": {
-      "description": "attributes@1 (00 §4.3 and 06 §21 amendments 2026-10-03): an attribute and its starting value, content and never an engine default. Every actor's value is start while nothing writes attributes (no state). In source, attributes.json's {\"attributes\": {key: {start}}}, the key taken from the map (an authored key is UNKNOWN_FIELD).",
+      "description": "attribute@1 (00 §4.3 and 06 §21 amendments 2026-10-03): an attribute and its starting value, content and never an engine default. Every actor's value is start while nothing writes attributes (no state). In source, attributes.json's {\"attributes\": {key: {start}}}, the key taken from the map (an authored key is UNKNOWN_FIELD).",
       "type": "object",
       "properties": {
         "key": {
@@ -1309,7 +1309,7 @@
           "additionalProperties": false
         },
         "derived": {
-          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
+          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attribute@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
           "type": "object",
           "properties": {
             "hit_chance": {
@@ -1328,7 +1328,7 @@
           "additionalProperties": false
         },
         "gear_budget": {
-          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attributes@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attribute@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
           "type": "object",
           "properties": {
             "per_slot": {
@@ -1356,7 +1356,7 @@
           "additionalProperties": false
         },
         "levelling": {
-          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attributes@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
+          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "type": "object",
           "properties": {
             "thresholds": {
@@ -1671,7 +1671,7 @@
       ]
     },
     "DerivedStat": {
-      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attributes@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "type": "object",
       "properties": {
         "terms": {
@@ -2750,7 +2750,7 @@
           "items": {
             "$ref": "entity.schema.json#/$defs/ItemAffect"
           },
-          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it."
+          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it."
         },
         "kind": {
           "enum": [
@@ -2856,7 +2856,7 @@
             "attribute"
           ],
           "additionalProperties": false,
-          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attributes@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it."
+          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it."
         }
       },
       "required": [

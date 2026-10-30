@@ -1,9 +1,9 @@
 import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
-// target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
-// variety@1's visited_count, population@1's population_count (row W12), equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
-// npc_present, skills@1's skill_compare (row FD2); 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// target_present, attribute@1's stat_compare and resource_compare, tag@1's has_tag, calendar@1's sky,
+// alternates@1's visited_count, population@1's population_count (row W12), equipment@1's wearing, attribute@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
+// npc_present, skill@1's skill_compare (row FD2); 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type { CharacterId, DomainEvent, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { LIMITS } from '../contracts.gen.ts';
@@ -129,7 +129,7 @@ function read(
   return value(world, actor, p.fact, subject, partner);
 }
 
-// attributes@1's leaves: the actor's saved value or definition start, or the current pool on the
+// attribute@1's leaves: the actor's saved value or definition start, or the current pool on the
 // actor's body or (row 39, subject) a reaction's event subject, against at_least or a percent of
 // its maximum (value * 100 >= percent * maximum: integer math, no rounding).
 function atLeast(
@@ -159,7 +159,7 @@ function atLeast(
   return mul(now, 100) >= mul(p.at_least_percent, resourceSpec(world, who!, p.resource)!.maximum);
 }
 
-// tags@1's subjects: a named definition (a constant), the target item's or the actor's room's.
+// tag@1's subjects: a named definition (a constant), the target item's or the actor's room's.
 // ponytail: an item's or barrier's repeated tag is not refused (only room tags carry uniqueItems,
 // since the terrain fare counts them); it reads the same as one.
 function tagsOf(

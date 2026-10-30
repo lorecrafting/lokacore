@@ -71,7 +71,7 @@ export function itemSheet(c: Obj) {
     .filter(([, i]) => i.slot)
     .map(([ref, i]) => {
       const affects: ItemAffect[] = i.affects ?? [];
-      // attributes@1 order: each attribute's modifiers summed and saturated, then added to the start
+      // attribute@1 order: each attribute's modifiers summed and saturated, then added to the start
       const sums: Values = {};
       for (const a of affects)
         sums[refString(a.attribute)] = (sums[refString(a.attribute)] ?? 0) + a.modifier;

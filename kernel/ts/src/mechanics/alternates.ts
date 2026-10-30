@@ -1,4 +1,4 @@
-// variety@1 (toolbox row W7; mechanics.md narration variety): a committed narration line whose key
+// alternates@1 (toolbox row W7; mechanics.md narration variety): a committed narration line whose key
 // has alternates shows one of the key and its alternates, chosen by SHA-256 of
 // "<command id>:<key>" (its first four bytes, big-endian, modulo the count), never the authority
 // RNG (toolbox trap 5), so replaying the same command ids replays the same lines.

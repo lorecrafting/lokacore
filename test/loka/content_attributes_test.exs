@@ -10,7 +10,7 @@ defmodule Loka.ContentAttributesTest do
   @pray "resource_sampler@0.0.1:action/pray"
   @stats %{"str" => 14, "dex" => 12, "con" => 13, "int" => 10, "spi" => 9, "per" => 11}
 
-  # resource_sampler with `attributes` (nil: no attributes.json), attributes@1 locked when `lock`,
+  # resource_sampler with `attributes` (nil: no attributes.json), attribute@1 locked when `lock`,
   # and pray's policy root `root`.
   defp compile(
          dir,
@@ -21,7 +21,7 @@ defmodule Loka.ContentAttributesTest do
     File.cp_r!(@src, dir)
     File.rm_rf!(Path.join(dir, "transcripts"))
     write = &File.write!(Path.join(dir, &1), JSON.encode!(&2))
-    caps = if lock, do: %{"attributes" => 1}, else: %{}
+    caps = if lock, do: %{"attribute" => 1}, else: %{}
 
     write.(
       "cartridge.json",
@@ -81,7 +81,7 @@ defmodule Loka.ContentAttributesTest do
            ]
   end
 
-  # Breaks: the attribute kind or a leaf accepted without its owner attributes@1, a leaf's
+  # Breaks: the attribute kind or a leaf accepted without its owner attribute@1, a leaf's
   # reference unchecked, or a schema bound of a leaf or of attributes.json lost, each compiling
   # what the loader rejects.
   test "unlocked, unresolved and malformed attributes and leaves", %{tmp_dir: dir} do
@@ -90,7 +90,7 @@ defmodule Loka.ContentAttributesTest do
     {s, u} = {"SCHEMA_VIOLATION", "UNKNOWN_FIELD"}
 
     undeclared =
-      &d("UNDECLARED_CAPABILITY", &1, %{"capability" => "attributes"}, ["attributes@1"])
+      &d("UNDECLARED_CAPABILITY", &1, %{"capability" => "attribute"}, ["attribute@1"])
 
     unresolved =
       &d("UNRESOLVED_REFERENCE", "#{root}.#{&1}", %{
@@ -135,7 +135,7 @@ defmodule Loka.ContentAttributesTest do
     hello = "cartridges/hello_sampler"
     File.cp_r!(hello, dir)
     m = JSON.decode!(File.read!(Path.join(hello, "cartridge.json")))
-    m = put_in(m, ["requires", "capabilities", "attributes"], 1)
+    m = put_in(m, ["requires", "capabilities", "attribute"], 1)
     File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
     talk = Path.join(dir, "actions/talk.json")
     action = put_in(JSON.decode!(File.read!(talk)), ["policy"], pool("hp", 1))

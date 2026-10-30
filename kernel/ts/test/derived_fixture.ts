@@ -86,7 +86,7 @@ const ancestryNamed = (kind: string, name: string) => `derived_sampler@0.0.1:${k
 /** The sampler with strong inheriting skill swim and standing -2, and hardy seeing in the dark. */
 export function ancestrySource() {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  for (const cap of ['skills', 'light'])
+  for (const cap of ['skill', 'light'])
     // light@1 gates dark_sight
     c.manifest.requires.capabilities[cap] = c.lock.capabilities[cap] = 1;
   c.skills = {
@@ -106,7 +106,7 @@ export function ancestrySource() {
     version: 1,
     value_type: { type: 'bool', default: false },
     scopes: ['player'],
-    meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
+    meaning: "Skill swim's acquisition (skill@1): only skill@1 writes it.",
   };
   c.facts[ancestryNamed('fact', 'standing')] = {
     key: 'standing',

@@ -39,7 +39,7 @@ const edit = (file: string, change: (j: Record<string, any>) => void) => {
 };
 const KILLS = [{ npc: 'al', experience: 1 }]; // the schema wants one; Al is never asserted
 edit('cartridge.json', (c) => {
-  Object.assign(c.requires.capabilities, { attributes: 1, fact: 1, policy: 1 });
+  Object.assign(c.requires.capabilities, { attribute: 1, fact: 1, policy: 1 });
   c.world.levelling = { thresholds: [10], points_per_level: 1, kills: KILLS, level_up: 'level_up' };
   c.world.derived = { damage: { terms: [{ attribute: 'might', per_point: 1, pivot: 0 }] } };
   c.world.combat.allies = ['al'];
