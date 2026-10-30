@@ -63,3 +63,38 @@ Scope: commit `c04f53cba` only, plus the callers of `named` (`view/combat.ts:40`
   - `{ target: id, steps }` -> `{ steps }`.
   The two-variants-one-key case still has no test; that was a nit.
 - CI at `c04f53cba` (`gh run list --commit`): graph-diff, ci and book-e2e completed success.
+
+## Second opinion
+
+- Commit reviewed: `c04f53cba847064cff62619674c2049ac7205746` (head after fix round 1), diff `origin/main...c04f53cba`. The second reviewer wrote the list and findings below before reading the record above.
+- Verdict: **APPROVE**. No blockers, should-fixes or nits. Fix round 1 closes first-review findings 1, 2 and 4. Finding 3 is fixed in the PR body (line 53 now names only the Elixir compiler).
+
+### Must be true
+
+1. Both kernels refuse an NPC `room_line_variants`, even `[]`, and an invalid row covers it.
+2. Every `NameVariants`/`NameWords` rule fails a row when removed.
+3. `gameview.schema.json` changes only in description text, with no structural change (the brief's STOP rule).
+4. Hash and transcript re-pins appear only where content changed; no save or receipt behaviour changes.
+5. Item `room_line_variants` still draw.
+6. A name variant shows its own words, or none; dropping a mood `when` fails a test.
+
+All hold.
+
+### Evidence
+
+- **(1, 2) Cross-kernel accept/refuse.** Hand-made variants_sampler NPC files were run through `mix loka.compile` and artifacts with recomputed hashes through `loadCartridge`. Both kernels agree on all ten shapes:
+  - Accepted: words with `the`; item `room_line_variants`; a name variant without `when`.
+  - UNKNOWN_FIELD: NPC `room_line_variants` (`[]` and non-empty); an extra key in words; an extra key in a name variant.
+  - Refused by schema: article `An` (not_in_enum); words `{}` (missing bare).
+  - Elixir only: a plural text key missing from the catalog (UNRESOLVED_REFERENCE). This is by design: TS has no text-key check.
+- **(2) Schema mutants**, regenerated with `elixir bin/contracts.exs`, run against `validate.test.ts`:
+  - Re-adding the NPC field: red.
+  - Deleting `minItems`, `maxItems` or `required`: red.
+  - Removing `additionalProperties:false`: the generator refuses it (`schema.ex:67`).
+- **(3)** The diff touches only the four `words` descriptions.
+- **(4) Re-pins.** All 37 changed transcripts and live `.sql` files equal `origin/main` once every 64-hex value is masked. One pair changes everywhere (content hash `76c00879…` -> `c29e4e12…`, 1406 hits). `delta_digest` values are unchanged, and the save rows differ only in that hash.
+- **(5)** Hand mutant `rule.ts:73` (items' room-line variants -> `undefined`): red in `play_items.test.ts`.
+- **(6)** Hand mutants on `combat.ts:31` (base words kept) and `:30` (`target` dropped): both red in `showcase_traps.test.ts`, traps 8 and the sandbox twins.
+- **PR claims rerun:** "Re-adding the schema field turns the TS invalid fixtures red" and "deleting each NameVariants rule turns validate.test red": both confirmed.
+- **Open, not a finding:** the mixed-mood sentence ("A cowering goblin and goblin are here.") waits on the owner question already logged at polish (handback 2).
+- **CI** at `c04f53cba` (`gh run list --commit`): graph-diff, ci and book-e2e completed success.
