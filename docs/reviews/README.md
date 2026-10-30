@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: C3 slice V, the service benefit is one Step (F4, loka-ivjq.4)](2026-10-29-c3-v-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice R, recipe -> scripted action (F4, loka-ivjq.4)](2026-10-29-c3-r-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice P, one Step and one Check (F4, loka-ivjq.4)](2026-10-29-c3-p-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice C, dialogue choices on `steps` (F4, loka-ivjq.4)](2026-10-29-c3-c-review.md): **APPROVE WITH NOTES**
