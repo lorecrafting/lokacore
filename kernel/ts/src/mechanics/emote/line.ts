@@ -26,18 +26,23 @@ export function told(
   if (!emoter || world.entities[emoter]?.kind !== 'npc' || !living(world, emoter)) return [];
   if (!here || world.state.containers[emoter] !== here || !visible(world, actor, emoter, steps))
     return [];
-  const target = step.to === 'subject' ? subject : undefined;
+  // The target: the reader's own body (worded `to.you`, so it binds no name), or another NPC the reader
+  // sees in the room (`to.others`, bound by its short); any other subject drops it (`others`).
+  const target = step.to === 'subject' && subject !== emoter ? subject : undefined;
+  const mine = target === body;
+  const seen =
+    !mine &&
+    target !== undefined &&
+    world.entities[target] !== undefined &&
+    world.state.containers[target] === here &&
+    visible(world, actor, target, steps);
   return [
     engineLine(
       'emote.performed',
-      { actor: emoter, ...(target && { target }) },
+      { actor: emoter, ...((mine || seen) && { target }) },
       {
         emote: step.emote.key,
-        // A body has no short: the reader's own reads the `to.you` form, which names no target.
-        ...(target &&
-          world.entities[target] && {
-            target: describeEntity(world, actor, target, 'short', steps),
-          }),
+        ...(seen && { target: describeEntity(world, actor, target, 'short', steps) }),
       },
     ),
   ];

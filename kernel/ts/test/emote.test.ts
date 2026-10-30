@@ -14,6 +14,7 @@ import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/view/view.ts';
 import { spoken } from '../play/spoken.ts';
+import { told } from '../src/mechanics/emote/line.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-emote-sampler-'));
@@ -85,4 +86,20 @@ test('entering the inn: Nell bows to the reader; the captive brought in is bowed
   assert.deepEqual(play(inn.w, { type: 'say', word: 'fetch' }).emoted, [
     'Nell bows to the goblin.',
   ]);
+});
+
+// Breaks: the line binds a target the reader cannot see from the room, or an NPC bows to itself.
+test("Nell's bow names no target that is elsewhere or herself", () => {
+  const w = play(start(), { type: 'move', direction: 'north' }).w;
+  const ref = (k: string) => Object.keys(w.entityIds).find((r) => r.endsWith(`:npc/${k}`))!;
+  const [nell, captive] = [w.entityIds[ref('nell')], w.entityIds[ref('captive')]];
+  const bow = Object.values(content.reactions!).find(
+    (r) => r.steps[0]?.op === 'emote' && r.steps[0].npc,
+  )!.steps[0];
+  const lines = (subject: typeof nell) =>
+    told(w, w.character, bow as never, { subject, steps: { n: 0 } });
+  for (const subject of [captive, nell])
+    assert.deepEqual(lines(subject), [
+      { key: 'emote.performed', participants: { actor: nell }, bindings: { emote: 'bow' } },
+    ]);
 });

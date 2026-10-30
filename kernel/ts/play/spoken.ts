@@ -1,8 +1,7 @@
 // The terminal client's words for one narration line: an NPC's emote (G9) from the view's emote table,
-// to.you when its target is the reader's body; an engine key from the shared table
+// (line_words.ts emoteSentence); an engine key from the shared table
 // (mobile/packages/game-view/line_words.ts); else cartridge text.
 import { gameView, type Cartridge, type World } from '../src/index.ts';
-import { bodyOf } from '../src/runtime/decision.ts';
 import { emoteSentence, lineSentence } from '../../../mobile/packages/game-view/line_words.ts';
 import { say } from './text.ts';
 
@@ -23,6 +22,5 @@ export function spoken(cartridge: Cartridge, t: Line, world: World): string {
 function emoted(t: Line, world: World, word: (v: unknown) => string) {
   const view = gameView(world);
   const name = view.entities.find((e) => e.id === t.participants?.actor)?.name;
-  const you = t.participants?.target === bodyOf(world, world.character);
-  return name && emoteSentence(t, view.emotes, word, word(name), you);
+  return name && emoteSentence(t, view.emotes, word, word(name));
 }

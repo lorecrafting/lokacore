@@ -3016,7 +3016,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row FD1:writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+          "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
           "properties": {
             "fact": { "$ref": "#/$defs/DefinitionRef" },
             "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -5466,7 +5466,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row FD1:writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+          "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
           "properties": {
             "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
             "item": { "$ref": "#/$defs/partial.DefinitionRef" },

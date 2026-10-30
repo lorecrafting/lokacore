@@ -393,7 +393,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row FD1:writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+          "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
           "type": "object",
           "properties": {
             "op": {

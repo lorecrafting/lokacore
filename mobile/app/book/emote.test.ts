@@ -17,15 +17,15 @@ const bow = {
   to: { others: 'emote.bow.to.others', you: 'emote.bow.to.you' },
 };
 
-// Breaks: the reader test swapped (the reader's own body read as a named third person, or a named
-// NPC read as "you"), or a targeted line read with the untargeted form (G9; book-ui.md, Line placement).
+// Breaks: the reader test swapped (the reader's own body, which the kernel binds no name, read as a third
+// person, or a named NPC read as "you"), or a targeted line read with the untargeted form (G9).
 test('an NPC emote reads to.you for the reader, to.others for a named target, others with none', () => {
   const v = view({ emotes: [bow] } as never);
   const line = (target?: string) =>
     lineWords(
       {
         key: 'emote.performed',
-        bindings: { emote: 'bow', ...(target && { target: 'npc.rat' }) },
+        bindings: { emote: 'bow', ...(target === 'rat' && { target: 'npc.rat' }) },
         participants: { actor: 'rat', ...(target && { target }) },
       },
       say,
