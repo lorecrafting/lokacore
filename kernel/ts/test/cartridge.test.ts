@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { loadCartridge, type Installed } from '../src/content/cartridge.ts';
+import { DEFINITION_MAPS, loadCartridge, type Installed } from '../src/content/cartridge.ts';
 import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
@@ -97,4 +97,20 @@ test('artifact bytes that are not strict UTF-8 are INVALID_JSON', () => {
       { ok: false, diagnostic: diagnostic('INVALID_JSON', '', {}) },
       b.map((x) => x.toString(16)).join(' '),
     );
+});
+
+// Breaks: a new definition map in the schema (keyed id@version:kind/key) is left out of the loader's
+// key stage, so its map key and definition key may disagree (emotes in #509, populations before it).
+test('every definition map of the cartridge schema is in the key stage', () => {
+  const branches = read('protocol/cartridge.schema.json').$defs.CompiledCartridge.oneOf;
+  const maps = branches.flatMap((b: any) =>
+    Object.entries(b.properties)
+      .filter(([, v]: [string, any]) => /@.*:[a-z_]+\/\[/.test(v.propertyNames?.pattern ?? ''))
+      .map(([k]) => k),
+  );
+  assert.ok(maps.includes('facts'), 'the schema walk found no map');
+  assert.deepEqual(
+    maps.filter((m: string) => !DEFINITION_MAPS.includes(m)),
+    [],
+  );
 });

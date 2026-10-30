@@ -149,6 +149,8 @@ PM, developer, reviewer and designer alike; the role files link here instead of 
   serving the owner's [live preview](web-preview.md) (loka-4xl).
 - Check and push output goes to a scratchpad file with a name unique to the slice (a shared
   `pr-body.md` once put one PR's description on another); read only the exit status, the failing lines and the tail.
+- Scratch files go in a scratchpad subfolder named after your issue id, and throwaway and mutant worktrees
+  take it as their name prefix (`worktrees.noindex/<issue-id>-mut`); never write to another agent's subfolder or worktree (parallel developers sharing one scratchpad overwrote each other's files, loka-yqde).
 - No subagents or forks unless the brief allows them (a triage analyst forked four and spent 500k of a 150k budget, loka-u8ey). Returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative. Past the [handoff threshold](#token-hygiene), commit and hand back a short state note.
 
