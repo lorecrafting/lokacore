@@ -13,7 +13,7 @@ import { test } from 'node:test';
 import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { value } from '../src/mechanics/attributes/shared.ts';
+import { value } from '../src/mechanics/attribute/shared.ts';
 import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { level as skillLevel, practice } from '../src/mechanics/skill_level.ts';

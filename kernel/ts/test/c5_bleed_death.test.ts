@@ -36,7 +36,7 @@ function water(c: any) {
     version: 1,
     value_type: { type: 'bool', default: false },
     scopes: ['player'],
-    meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
+    meaning: "Skill swim's acquisition (skill@1): only skill@1 writes it.",
   };
   c.world.carry = { max_grams: 20000 };
   c.world.water = {

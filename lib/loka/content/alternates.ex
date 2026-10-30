@@ -1,6 +1,6 @@
-defmodule Loka.Content.Variety do
+defmodule Loka.Content.Alternates do
   @moduledoc """
-  variety@1 (toolbox row W7): cartridge.json alternates is owned by variety@1, names only text
+  alternates@1 (toolbox row W7): cartridge.json alternates is owned by alternates@1, names only text
   catalog keys. A visited_count leaf without knowledge@1 always
   fails (nothing records visits): VISITS_UNRECORDED, a compiler-only warning. It also runs the
   world.identity checks (Loka.Content.Identity, rows W15 and FD9).

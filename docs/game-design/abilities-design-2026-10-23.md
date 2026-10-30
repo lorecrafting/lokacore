@@ -232,7 +232,7 @@ rating-7 vault. That is UO's bottomfeeding ([Koster](../rnd/koster-design-lesson
 | Option | Engine | Verdict |
 |---|---|---|
 | A. Keep: every attempt counts | none | Breaks the rule |
-| **B. A use counts only inside a window: rating from level minus `below` to level plus `above`** | skills@1 rule, new floor | **Recommended**; both cartridge-owned, default 0 and 1 |
+| **B. A use counts only inside a window: rating from level minus `below` to level plus `above`** | skill@1 rule, new floor | **Recommended**; both cartridge-owned, default 0 and 1 |
 | C. A gain chance that falls with the gap (RNG) | RNG draw per use | Players macro for rolls; replay noise |
 
 The window shuts both ends: a rating-1 chest stops teaching a level-3 picker, and failing a
@@ -351,7 +351,7 @@ rituals cannot be long casts.
 | Costs | pools (mv), held items (`craft.consume`) | pools (mana, stillness, reagents) | `ActionCost`; paid before the check, kept on failure |
 | Cooldown | scripted action `cooldown` | scripted action `cooldown` | combat abilities: cooldown at least one `combat.interval` (content rule) |
 | Learning | box from a teacher, fee | grimoire, teacher, box | gate is a fact; the box is the usual one |
-| Growth | box use count, inside the growth window | the school box, inside the window (§3.3) | one rule in skills@1 |
+| Growth | box use count, inside the growth window | the school box, inside the window (§3.3) | one rule in skill@1 |
 | Effects | fact, resource, event; + status, damage when aimed (§2.6) | + status, damage, light | one effect vocabulary |
 | Refusal | `invalid_state` + `reason` text; `resource.short` | same; an unknown or unlearned word is a plain `invalid_state` | the GameView and the command read one admission |
 | Combat | aimed skills on foe lines | casts between rounds, no `duration` | see pacing |

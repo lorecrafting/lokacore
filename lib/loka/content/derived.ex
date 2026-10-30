@@ -43,7 +43,7 @@ defmodule Loka.Content.Derived do
 
   defp tables(_, _, _), do: []
 
-  # Balance 6b: a gear budget needs attributes@1 and budgets at least one slot (too_few_items: the
+  # Balance 6b: a gear budget needs attribute@1 and budgets at least one slot (too_few_items: the
   # subset has no minProperties).
   defp gear_budget(m, %{"gear_budget" => %{"per_slot" => slots}}) when slots == %{},
     do:
@@ -72,7 +72,7 @@ defmodule Loka.Content.Derived do
 
   defp intended(_), do: []
 
-  # Toolbox row 3: an item's affects need its slot, attributes@1 and real attributes.
+  # Toolbox row 3: an item's affects need its slot, attribute@1 and real attributes.
   defp affects({rel, %{"affects" => list} = item}, m, defs) do
     slot = if item["slot"], do: [], else: [diag("SCHEMA_VIOLATION", at(rel, ["affects"]))]
 
@@ -104,7 +104,7 @@ defmodule Loka.Content.Derived do
   defp identified(_, _, _), do: []
 
   # Row G3: an NPC's attributes each name a distinct real attribute (an attributes section already
-  # needs attributes@1).
+  # needs attribute@1).
   defp npcs(m, defs) do
     for {_, {rel, _, %{"attributes" => list}}} <- defs["npc"] || %{},
         {a, i} <- Enum.with_index(list),
@@ -127,10 +127,10 @@ defmodule Loka.Content.Derived do
   end
 
   defp owner(m, path) do
-    if m["requires"]["capabilities"]["attributes"] == 1,
+    if m["requires"]["capabilities"]["attribute"] == 1,
       do: [],
       else: [
-        diag("UNDECLARED_CAPABILITY", path, %{"capability" => "attributes"}, ["attributes@1"])
+        diag("UNDECLARED_CAPABILITY", path, %{"capability" => "attribute"}, ["attribute@1"])
       ]
   end
 

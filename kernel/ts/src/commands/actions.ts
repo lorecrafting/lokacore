@@ -29,7 +29,7 @@ import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
-import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
+import { choice as characterChoice } from '../mechanics/attribute/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 import { castAdmission, craftRefused, useAdmission } from '../mechanics/scripted_action/shared.ts';
 import { spellOf } from '../mechanics/scripted_action/shared.ts';

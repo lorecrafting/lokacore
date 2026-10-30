@@ -4,7 +4,7 @@
 import type { CharacterId, EntityId, StateDelta } from '../../contracts.gen.ts';
 import type { Event, Mint, Steps, World } from '../../runtime/decision.ts';
 import { accepted, event } from '../../runtime/decision.ts';
-import { npcValue } from '../attributes/shared.ts';
+import { npcValue } from '../attribute/shared.ts';
 import { living } from '../death/shared.ts';
 import { assigned } from '../fact.ts';
 import { chainRefused, lockRefused } from '../locks.ts';

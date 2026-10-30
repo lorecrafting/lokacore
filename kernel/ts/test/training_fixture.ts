@@ -18,7 +18,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
   const named = (kind: string, name: string) =>
     `${c.manifest.id}@${c.manifest.version}:${kind}/${name}`;
   c.manifest.requires.kernel_api.at_least = '1.18';
-  for (const cap of ['skills', 'attributes', 'commerce'])
+  for (const cap of ['skill', 'attribute', 'commerce'])
     c.manifest.requires.capabilities[cap] = c.lock.capabilities[cap] = 1;
   c.text[text] = 'Controlled training.';
   c.attributes = Object.fromEntries(
@@ -45,7 +45,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
       version: 1,
       value_type: { type: 'bool', default: false },
       scopes: ['player'],
-      meaning: `Skill ${k}'s acquisition (skills@1): only skills@1 writes it.`,
+      meaning: `Skill ${k}'s acquisition (skill@1): only skill@1 writes it.`,
     };
   c.resources[named('resource', 'pennies')] = {
     key: 'pennies',

@@ -464,7 +464,7 @@ test('before the ancestry choice a nil-id liquid command agrees only with invali
   // Any declared ancestry table gates the unchosen character (needsAncestry); attributes owns
   // the choose_ancestry verb the view then offers.
   const c = fresh.cartridge;
-  const lock = { ...c.lock, capabilities: { ...c.lock.capabilities, attributes: 1 } };
+  const lock = { ...c.lock, capabilities: { ...c.lock.capabilities, attribute: 1 } };
   const w = { ...owned(4, 0), cartridge: { ...c, lock, ancestries: {} } } as World;
   const command = {
     id: '00000000-0000-0000-0000-000000000000',

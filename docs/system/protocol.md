@@ -302,7 +302,7 @@ and independently validates both targets.
 
 `holds` (in `kernel/ts/src/mechanics/policy.ts`) evaluates `all`, `any`, `not` and the leaves of
 `protocol/policy.schema.json` (`Policy`: the one list; each leaf's meaning is in its mechanics row, e.g.
-[attributes@1](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60) for `stat_compare`).
+[attribute@1](mechanics.md#attribute1-kerneltssrcmechanicspolicyts60) for `stat_compare`).
 An op outside that list throws: the loader closes the set (its schema stage, `schemaStage` in `content/cartridge.ts`).
 
 ## Target resolution
@@ -1239,7 +1239,7 @@ eligible item detail; closed ancestors hide unreachable contents and leave no ra
 ID bypass. Use current Item/ContentView and offered-action shapes where sufficient;
 add only consumed readable metadata, never a generic document hierarchy.
 The item-readable extension requires API1.24 and `readable@1`; its optional
-`topic` requires `topics@1`. Item Read offers retain the resolved command while
+`topic` requires `topic@1`. Item Read offers retain the resolved command while
 preserving the authored action key.
 
 Topic grants lower to the B6 Boolean owner; no new portable delta, event writer,

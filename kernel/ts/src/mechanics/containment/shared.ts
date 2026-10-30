@@ -9,7 +9,7 @@ import type { Steps, World } from '../../runtime/decision.ts';
 import { actorOf, has, refString, values } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { movable } from '../../runtime/created.ts';
-import { derived } from '../attributes/shared.ts';
+import { derived } from '../attribute/shared.ts';
 
 type Failure =
   'too_heavy' | 'over_load' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';

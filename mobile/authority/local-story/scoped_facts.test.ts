@@ -171,7 +171,7 @@ const trust2 = { op: 'fact.assign', fact: 'trust', value: 2 };
 const all = { op: 'all', items: [] };
 const variant = build((dir) => {
   json(dir, 'cartridge.json', (c) => {
-    Object.assign(c.requires.capabilities, { skills: 1, quest: 1 });
+    Object.assign(c.requires.capabilities, { skill: 1, quest: 1 });
     return c;
   });
   json(dir, 'dialogues/stranger_talk.json', (d) => {

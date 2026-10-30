@@ -183,7 +183,7 @@
       ],
       "oneOf": [
         {
-          "description": "Select one authored ancestry for this character before ordinary play (attributes@1).",
+          "description": "Select one authored ancestry for this character before ordinary play (attribute@1).",
           "type": "object",
           "properties": {
             "type": {
@@ -204,7 +204,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Spend one unspent attribute point on an authored attribute (attributes@1; toolbox row 4).",
+          "description": "Spend one unspent attribute point on an authored attribute (attribute@1; toolbox row 4).",
           "type": "object",
           "properties": {
             "type": {

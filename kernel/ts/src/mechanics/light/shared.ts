@@ -9,7 +9,7 @@ import {
 } from '../../contracts.gen.ts';
 import { fuelAt, validFuel } from '../../foundation/fuel.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
-import { darkSight } from '../attributes/shared.ts';
+import { darkSight } from '../attribute/shared.ts';
 import { weather } from '../calendar.ts';
 import { concealed, perceives } from '../status/shared.ts';
 

@@ -1,5 +1,5 @@
 {
-  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value (the attribute*, stat_compare_* and resource_compare_* cases from cartridge_road_hash.json value with attributes, the attributes@1 lock or pray's policy root changed; the band_* and move_cost_* cases from cartridge_rooms_hash.json value with condition band tables, band.<key> text and a world move cost added); each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. The slot_* cases derive from cartridge_wear_hash.json value with equipment@1 left out of requires and the lock, or the lantern's slot made finger. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
+  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value (the attribute*, stat_compare_* and resource_compare_* cases from cartridge_road_hash.json value with attributes, the attribute@1 lock or pray's policy root changed; the band_* and move_cost_* cases from cartridge_rooms_hash.json value with condition band tables, band.<key> text and a world move cost added); each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. The slot_* cases derive from cartridge_wear_hash.json value with equipment@1 left out of requires and the lock, or the lantern's slot made finger. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
   "cases": [
     {
       "name": "not_decodable",
@@ -50,7 +50,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -70,7 +70,7 @@
     {
       "name": "duplicate_key",
       "break": "the decoder keeps one of two equal keys",
-      "artifact": "{\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"content_hash\":\"8b16e7768b38b5464787c558de5290e64a3dd980b3b589e9d8e76d1d1ba29528\",\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}}}",
+      "artifact": "{\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"content_hash\":\"8b16e7768b38b5464787c558de5290e64a3dd980b3b589e9d8e76d1d1ba29528\",\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}}}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -116,7 +116,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -136,7 +136,7 @@
     {
       "name": "unknown_format",
       "break": "the format tag is not checked",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v3\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"3ed65cdad24ee1968949124596104f140d37a6f1d35117c2593935f392bd534a\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v3\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"3ed65cdad24ee1968949124596104f140d37a6f1d35117c2593935f392bd534a\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -182,7 +182,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -248,7 +248,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -268,7 +268,7 @@
     {
       "name": "unknown_field",
       "break": "unknown_property maps to SCHEMA_VIOLATION or loses its path",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"extra\":1,\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"d73bd680e2feff69747dee22b49532a1e7f68fe8548f1931b9b8c640b2831681\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"extra\":1,\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"de90a4d1926600e24aa094a620f0de3da06924a38f559ab119cc429b365aab87\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -314,7 +314,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -334,7 +334,7 @@
     {
       "name": "schema_violation",
       "break": "a member path with non-name characters is not bracket-quoted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":\"high\",\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"21471b403e35a96c06ce51a3ad14c2989ebd30e350a231185d546dc9d56ccd96\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":\"high\",\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"23631d89b0cdc23b5948a8c6a12e7a68c40e4910eb1b22ea9ce441aee86de1d9\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -380,7 +380,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -402,7 +402,7 @@
     {
       "name": "schema_violation_index",
       "break": "an array index is written as a member step",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_privat\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"0368ad4de8886d6e124ff831cb6114401d585bcbe628bc7488356fb950fa907e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_privat\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"a43617773598d7210e213bd104b1b738128a4b1970daec75b1734acfe59e625c\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -448,7 +448,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -470,7 +470,7 @@
     {
       "name": "kind_mismatch",
       "break": "a fact keyed as an action is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:action/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"57ba261699ed81e9c34c72b72a750ed48a3601cb60b819b3027bfbbb03fbbca7\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:action/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"01e48893e67f12904798396f030220cf1033f1cb8f7466d79eb2943457d8b199\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -516,7 +516,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -538,7 +538,7 @@
     {
       "name": "hash_mismatch",
       "break": "content_hash is not recomputed, or is computed over other bytes",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -584,7 +584,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -599,7 +599,7 @@
         "message_key": "diagnostics.content_hash_mismatch",
         "data": {
           "declared": "0000000000000000000000000000000000000000000000000000000000000000",
-          "computed": "858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e"
+          "computed": "6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7"
         },
         "suggested_capabilities": []
       }
@@ -607,7 +607,7 @@
     {
       "name": "key_cartridge_id",
       "break": "a map key naming another cartridge is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"other@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"2946c9516d538f7321f839946afb27de9c1c73e05a159597eb7c8d814e86e2ce\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"other@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"050c6e0befa602f22db202ce7bf96ba25b1be413668ec988239bc256433afba8\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -653,7 +653,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -677,7 +677,7 @@
     {
       "name": "key_cartridge_version",
       "break": "a map key naming another release is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.2:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"fc5a1a505823b991743f8eec75e415a1ce9391a8e0013fd9be51dbcad71ad911\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.2:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"7134e3a59d4e155536e50c531eac0354a75fe5b0f7cb642a1e99b6e033d6d645\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -723,7 +723,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -747,7 +747,7 @@
     {
       "name": "key_key",
       "break": "a map key differing from the definition key is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/speak\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"a4843e255203a8b5c77a09550d31fcfb3e42c6d96a3512f75399a46355d36206\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/speak\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"5152cf581bc38b8827a8779bba42067492ffb725abddaaf67d5335ab9756fa76\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -793,7 +793,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -817,7 +817,7 @@
     {
       "name": "lock_missing_required",
       "break": "Astra R4-02: a capability required but absent from the lock loads",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"d3b79b24bb25876c66026dc12ec8caa5bdc69a18333d08f2fcaef268958910c2\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"63481d8cbc5fc254b1085c61298ff14129ac0980aceab8552a4fccaa739966f9\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -863,7 +863,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -886,7 +886,7 @@
     {
       "name": "lock_extra",
       "break": "a lock entry the manifest does not require is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"tide\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"603265e5e9fb64588c78092622004fef1aefb1bbd4e8351f6b12fa58ff31d8de\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"tide\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"7949356759f67532150c6bcf27669712a97eaee0214f51e2b8b47c82b64913cf\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -932,7 +932,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -955,7 +955,7 @@
     {
       "name": "stage_list_order",
       "break": "a stage reports its first-found diagnostic (the locked topics key) instead of the first in list order (the unlocked dialogue key)",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":2},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"06d8963177c89f21aa195c98ca8d825fb0ff5e8d0a9a06df10cca17fd8c4f4c6\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":2},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"2e24f258497528e0a646c6cb3bea356ea862fcda36e1800eee2b05251dd86070\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1001,7 +1001,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1024,7 +1024,7 @@
     {
       "name": "capability_not_installed",
       "break": "a locked capability the kernel lacks is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1067,7 +1067,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1089,7 +1089,7 @@
     {
       "name": "capability_version_not_installed",
       "break": "only the key is checked, not the version",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1135,7 +1135,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1157,7 +1157,7 @@
     {
       "name": "kernel_api_at_below",
       "break": "below is treated as inclusive",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "2.0",
         "capabilities": {
@@ -1203,7 +1203,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1225,7 +1225,7 @@
     {
       "name": "kernel_api_under",
       "break": "at_least is not checked",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "0.9",
         "capabilities": {
@@ -1271,7 +1271,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1293,7 +1293,7 @@
     {
       "name": "kernel_api_numeric",
       "break": "versions compare as text (10.0 before 2.0)",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "10.0",
         "capabilities": {
@@ -1339,7 +1339,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1361,7 +1361,7 @@
     {
       "name": "rule_ir_unsupported",
       "break": "the rule_ir pin is not re-checked",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1407,7 +1407,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1431,7 +1431,7 @@
     {
       "name": "content_schema_unsupported",
       "break": "the content_schema pin is not re-checked",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"858092e2d3cb020c37239b3e42b1e3b79d1f1c74b30b7ea0270126a1447a082e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"6ca4562f1062f654b024a884f74aa7a1fc1618c7ce7ecc8cd41821818fa7d0a7\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1477,7 +1477,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1501,7 +1501,7 @@
     {
       "name": "client_feature_missing",
       "break": "a required client feature the app lacks is accepted",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[\"zeta_v1\",\"compass_six_v1\"],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"7a046e8a453202d6e4f172e9143aacd66f524ed50721ad3711eefe4692809354\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[\"zeta_v1\",\"compass_six_v1\"],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"b76743e8aed4b717f353213c03f9f55057a7ed94ac27fa9ea42ca375580fc620\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1547,7 +1547,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1571,7 +1571,7 @@
     {
       "name": "two_faults_schema_hash",
       "break": "the hash stage runs before the schema stage",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"extra\":1,\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"3adfd232f6baa615f2a18690db38693832fae7ac9180258f119862e582ab429e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"extra\":1,\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"3adfd232f6baa615f2a18690db38693832fae7ac9180258f119862e582ab429e\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1617,7 +1617,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1637,7 +1637,7 @@
     {
       "name": "two_faults_hash_keys",
       "break": "the definition-key stage runs before the hash stage",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"other@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"3adfd232f6baa615f2a18690db38693832fae7ac9180258f119862e582ab429e\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"other@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"3adfd232f6baa615f2a18690db38693832fae7ac9180258f119862e582ab429e\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
@@ -1683,7 +1683,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1698,7 +1698,7 @@
         "message_key": "diagnostics.content_hash_mismatch",
         "data": {
           "declared": "3adfd232f6baa615f2a18690db38693832fae7ac9180258f119862e582ab429e",
-          "computed": "2946c9516d538f7321f839946afb27de9c1c73e05a159597eb7c8d814e86e2ce"
+          "computed": "050c6e0befa602f22db202ce7bf96ba25b1be413668ec988239bc256433afba8"
         },
         "suggested_capabilities": []
       }
@@ -1706,7 +1706,7 @@
     {
       "name": "two_faults_lock_installed",
       "break": "the installed stage runs before the lock stage",
-      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"target_resolution\":1,\"topics\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topics\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"d3b79b24bb25876c66026dc12ec8caa5bdc69a18333d08f2fcaef268958910c2\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{\"hello_sampler@0.0.1:action/talk\":{\"accessibility\":\"actions.talk.a11y\",\"command\":\"talk\",\"input\":[],\"key\":\"talk\",\"name\":\"actions.talk\",\"policy\":{\"op\":\"target_present\"},\"priority\":100,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"facts\":{\"hello_sampler@0.0.1:fact/village_arrived\":{\"key\":\"village_arrived\",\"meaning\":\"The lantern was fetched for Bram; the village green reads differently.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v1\",\"lock\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"target_resolution\":1,\"topic\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"hello_sampler\",\"requires\":{\"capabilities\":{\"behavior\":1,\"check\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"narration\":1,\"policy\":1,\"quest\":1,\"schedule\":1,\"target_resolution\":1,\"topic\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Hello Sampler\",\"version\":\"0.0.1\"}},\"content_hash\":\"63481d8cbc5fc254b1085c61298ff14129ac0980aceab8552a4fccaa739966f9\"}",
       "installed": {
         "kernel_api": "2.0",
         "capabilities": {
@@ -1752,7 +1752,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ]
         },
@@ -1915,14 +1915,14 @@
     {
       "name": "attribute_key_mismatch",
       "break": "an attribute's map key and its key may differ (stat_compare would read another attribute)",
-      "artifact": "{\"cartridge\":{\"actions\":{},\"attributes\":{\"resource_sampler@0.0.1:attribute/str\":{\"key\":\"dex\",\"start\":14}},\"entry\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"},\"facts\":{\"resource_sampler@0.0.1:fact/cart_moved\":{\"key\":\"cart_moved\",\"meaning\":\"The mired cart was shoved free of the ruts.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"scripted_action\":1,\"attributes\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"resource_sampler\",\"requires\":{\"capabilities\":{\"scripted_action\":1,\"attributes\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Resource Sampler\",\"version\":\"0.0.1\"},\"scripted_actions\":{\"resource_sampler@0.0.1:action/pray\":{\"aliases\":[\"pray\"],\"cooldown\":3600,\"costs\":[{\"amount\":10,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}],\"key\":\"pray\",\"name\":\"actions.pray\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.pray.actor\"},\"steps\":[{\"by\":5,\"op\":\"resource.adjust\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}]}},\"policy\":{\"items\":[],\"op\":\"all\"},\"priority\":5,\"target\":{\"detail\":\"shrine\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"resource_sampler@0.0.1:action/shove_cart\":{\"aliases\":[\"shove\"],\"check\":{\"difficulty\":15,\"key\":\"shove_cart\",\"kind\":\"threshold\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}},\"costs\":[{\"amount\":1,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}],\"key\":\"shove_cart\",\"name\":\"actions.shove_cart\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.shove_cart.failure\"},\"steps\":[]},\"success\":{\"narration\":{\"actor\":\"narration.shove_cart.success\"},\"steps\":[{\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"},\"priority\":5,\"target\":{\"detail\":\"cart\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}}},\"resources\":{\"resource_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":25,\"minimum\":0,\"start\":10},\"resource_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"resource_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":3,\"minimum\":0,\"start\":3}},\"rooms\":{\"resource_sampler@0.0.1:room/mill_yard\":{\"description\":\"room.mill_yard.description\",\"details\":{\"cart\":{\"aliases\":[\"cart\",\"handcart\"],\"description\":\"detail.cart\",\"variants\":[{\"description\":\"detail.cart.moved\",\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}]}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"key\":\"mill_yard\",\"name\":\"room.mill_yard.title\"},\"resource_sampler@0.0.1:room/wayside\":{\"description\":\"room.wayside.description\",\"details\":{\"shrine\":{\"aliases\":[\"shrine\",\"wayside_shrine\"],\"description\":\"detail.shrine\"}},\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}},\"key\":\"wayside\",\"name\":\"room.wayside.title\"}},\"text\":{\"actions.pray\":\"Pray at the shrine\",\"actions.shove_cart\":\"Shove the cart\",\"detail.cart\":\"A handcart sunk deep in the mud. It would take a hale body to shift it.\",\"detail.cart.moved\":\"The handcart stands free of the ruts now, its wheels caked in mud.\",\"detail.shrine\":\"A little stone shrine, its niche worn smooth by hands.\",\"narration.pray.actor\":\"You bow your head at the shrine. Warmth steadies your limbs.\",\"narration.shove_cart.failure\":\"You heave at the cart, but you are too weak to shift it.\",\"narration.shove_cart.success\":\"You set your shoulder to the cart and heave. It lurches free of the ruts.\",\"room.mill_yard.description\":\"Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.\",\"room.mill_yard.title\":\"Mill Yard\",\"room.wayside.description\":\"The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.\",\"room.wayside.title\":\"Wayside\"}},\"content_hash\":\"122e4720351a210bfaa0d263d3933910a2b2cd5b2e1296fe33a81bd22c9294fe\"}",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"attributes\":{\"resource_sampler@0.0.1:attribute/str\":{\"key\":\"dex\",\"start\":14}},\"entry\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"},\"facts\":{\"resource_sampler@0.0.1:fact/cart_moved\":{\"key\":\"cart_moved\",\"meaning\":\"The mired cart was shoved free of the ruts.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"scripted_action\":1,\"attribute\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"resource_sampler\",\"requires\":{\"capabilities\":{\"scripted_action\":1,\"attribute\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Resource Sampler\",\"version\":\"0.0.1\"},\"scripted_actions\":{\"resource_sampler@0.0.1:action/pray\":{\"aliases\":[\"pray\"],\"cooldown\":3600,\"costs\":[{\"amount\":10,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}],\"key\":\"pray\",\"name\":\"actions.pray\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.pray.actor\"},\"steps\":[{\"by\":5,\"op\":\"resource.adjust\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}]}},\"policy\":{\"items\":[],\"op\":\"all\"},\"priority\":5,\"target\":{\"detail\":\"shrine\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"resource_sampler@0.0.1:action/shove_cart\":{\"aliases\":[\"shove\"],\"check\":{\"difficulty\":15,\"key\":\"shove_cart\",\"kind\":\"threshold\",\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}},\"costs\":[{\"amount\":1,\"resource\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}],\"key\":\"shove_cart\",\"name\":\"actions.shove_cart\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.shove_cart.failure\"},\"steps\":[]},\"success\":{\"narration\":{\"actor\":\"narration.shove_cart.success\"},\"steps\":[{\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"},\"priority\":5,\"target\":{\"detail\":\"cart\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}}},\"resources\":{\"resource_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":25,\"minimum\":0,\"start\":10},\"resource_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"resource_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":3,\"minimum\":0,\"start\":3}},\"rooms\":{\"resource_sampler@0.0.1:room/mill_yard\":{\"description\":\"room.mill_yard.description\",\"details\":{\"cart\":{\"aliases\":[\"cart\",\"handcart\"],\"description\":\"detail.cart\",\"variants\":[{\"description\":\"detail.cart.moved\",\"when\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}]}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"key\":\"mill_yard\",\"name\":\"room.mill_yard.title\"},\"resource_sampler@0.0.1:room/wayside\":{\"description\":\"room.wayside.description\",\"details\":{\"shrine\":{\"aliases\":[\"shrine\",\"wayside_shrine\"],\"description\":\"detail.shrine\"}},\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"resource_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}},\"key\":\"wayside\",\"name\":\"room.wayside.title\"}},\"text\":{\"actions.pray\":\"Pray at the shrine\",\"actions.shove_cart\":\"Shove the cart\",\"detail.cart\":\"A handcart sunk deep in the mud. It would take a hale body to shift it.\",\"detail.cart.moved\":\"The handcart stands free of the ruts now, its wheels caked in mud.\",\"detail.shrine\":\"A little stone shrine, its niche worn smooth by hands.\",\"narration.pray.actor\":\"You bow your head at the shrine. Warmth steadies your limbs.\",\"narration.shove_cart.failure\":\"You heave at the cart, but you are too weak to shift it.\",\"narration.shove_cart.success\":\"You set your shoulder to the cart and heave. It lurches free of the ruts.\",\"room.mill_yard.description\":\"Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.\",\"room.mill_yard.title\":\"Mill Yard\",\"room.wayside.description\":\"The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.\",\"room.wayside.title\":\"Wayside\"}},\"content_hash\":\"ba1a73ceb53bd62684343414b397047fde1b58e328ab98f525aa6ea80a6d1bdd\"}",
       "installed": {
         "kernel_api": "1.0",
         "capabilities": {
           "scripted_action": [
             1
           ],
-          "attributes": [
+          "attribute": [
             1
           ],
           "check": [
@@ -2060,7 +2060,7 @@
           "target_resolution": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ],
           "scripted_action": [
@@ -2125,13 +2125,13 @@
           "resource": [
             1
           ],
-          "attributes": [
+          "attribute": [
             1
           ],
           "position": [
             1
           ],
-          "skills": [
+          "skill": [
             1
           ],
           "status": [
@@ -2191,7 +2191,7 @@
           "readable": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ],
           "relationship": [
@@ -2259,13 +2259,13 @@
           "resource": [
             1
           ],
-          "attributes": [
+          "attribute": [
             1
           ],
           "position": [
             1
           ],
-          "skills": [
+          "skill": [
             1
           ],
           "status": [
@@ -2325,7 +2325,7 @@
           "readable": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ],
           "relationship": [
@@ -2393,13 +2393,13 @@
           "resource": [
             1
           ],
-          "attributes": [
+          "attribute": [
             1
           ],
           "position": [
             1
           ],
-          "skills": [
+          "skill": [
             1
           ],
           "status": [
@@ -2459,7 +2459,7 @@
           "readable": [
             1
           ],
-          "topics": [
+          "topic": [
             1
           ],
           "relationship": [

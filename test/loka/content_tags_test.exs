@@ -2,7 +2,7 @@ defmodule Loka.ContentTagsTest do
   use ExUnit.Case, async: true
 
   # Breaks: the compiler drops a definition's tags, leaves a has_tag short reference unexpanded,
-  # or compiles a has_tag naming no item, barrier or room, or tags or has_tag without tags@1
+  # or compiles a has_tag naming no item, barrier or room, or tags or has_tag without tag@1
   # (toolbox row G1).
   test "tags reach the artifact and has_tag keeps its reference and owner" do
     dir = Loka.ContentSource.copy("cartridges/tags_sampler")
@@ -28,7 +28,7 @@ defmodule Loka.ContentTagsTest do
 
     leaf = &put_in(&1, root, Map.merge(%{"op" => "has_tag", "tag" => "metal"}, &2))
     variant = "rooms/hall.details.iron_door.variants[0].when"
-    drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "tags") end)
+    drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "tag") end)
 
     cases = [
       {"rooms/hall.json", &leaf.(&1, %{"barrier" => "oak_door"}),

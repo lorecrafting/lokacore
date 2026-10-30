@@ -134,7 +134,7 @@
       ]
     },
     "ItemAffect": {
-      "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attributes@1 reads. The number is the cartridge's.",
+      "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attribute@1 reads. The number is the cartridge's.",
       "type": "object",
       "properties": {
         "attribute": {
@@ -279,7 +279,7 @@
           "$ref": "entity.schema.json#/$defs/ItemBandage"
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1).",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -380,7 +380,7 @@
       ]
     },
     "Tag": {
-      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent. Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target.",
+      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tag@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent. Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target.",
       "enum": [
         "air",
         "bed",
@@ -617,7 +617,7 @@
           "additionalProperties": false
         },
         "ask": {
-          "description": "Toolbox row FD7 (speech@1 with topics@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
+          "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
           "type": "object",
           "properties": {
             "unknown": {
@@ -739,7 +739,7 @@
           }
         },
         "attributes": {
-          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "description": "Toolbox row G3: this NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,

@@ -13,9 +13,9 @@ import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts
 // The crow always hits back and every hit opens an inline C5 bleed; the player always misses.
 function bleeding(c: any) {
   const effect = shoo.ref('bleed', 'bleeding');
-  // C5 bleed compiles only beside skills@1 and food@1 (lib/loka/content/bleed.ex).
+  // C5 bleed compiles only beside skill@1 and food@1 (lib/loka/content/bleed.ex).
   for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities])
-    for (const k of ['bleed', 'skills', 'food']) caps[k] = 1;
+    for (const k of ['bleed', 'skill', 'food']) caps[k] = 1;
   c.npcs[ref('npc', 'crow')].hp = { gain: 0, maximum: 10, minimum: 0, start: 10 };
   c.npcs[ref('npc', 'willow_deer')].hp = { gain: 0, maximum: 2, minimum: 0, start: 2 };
   c.resources[ref('resource', 'hp')].gain = 0; // no regen at 68400, so HP counts only hits and ticks

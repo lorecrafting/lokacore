@@ -35,12 +35,12 @@ export function record(
   return ops;
 }
 
-// A first entry records the room; with variety@1 each later one counts it (VisitedRoom.count).
+// A first entry records the room; with alternates@1 each later one counts it (VisitedRoom.count).
 function visit(world: World, actor_id: CharacterId, room_id: EntityId): DeltaOp[] {
   const from = visitRow(world, actor_id, room_id);
   const op = { op: 'visit.record', writer_group: 0, actor_id, room_id } as const;
   if (!from) return [{ ...op, value: { actor_id, room_id } }];
-  if (!world.cartridge.lock.capabilities.variety) return [];
+  if (!world.cartridge.lock.capabilities.alternates) return [];
   return [{ ...op, from, value: { actor_id, room_id, count: (from.count ?? 1) + 1 } }];
 }
 

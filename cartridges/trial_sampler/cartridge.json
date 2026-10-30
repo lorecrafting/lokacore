@@ -22,10 +22,10 @@
       "reaction": 1,
       "resource": 1,
       "inspectable_detail": 1,
-      "tags": 1,
+      "tag": 1,
       "scripted_action": 1,
       "check": 1,
-      "attributes": 1
+      "attribute": 1
     },
     "client_features": []
   },

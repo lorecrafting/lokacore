@@ -59,9 +59,9 @@ This is planning applicability, not a release certificate or a frozen engine reg
 | `policy@1` | proof | R5 | RULES |
 | `fact@1` | proof | R5 | RULES |
 | `resource@1` | chapter_one | R5 | TRANSACTION |
-| `attributes@1` | chapter_one | R5 | RULES |
+| `attribute@1` | chapter_one | R5 | RULES |
 | `position@1` | chapter_one | R5 | RULES |
-| `skills@1` | chapter_one | R7 | RULES |
+| `skill@1` | chapter_one | R7 | RULES |
 | `status@1` | chapter_one | R7 | RULES |
 | `check@1` | proof | R5 | RULES |
 | `combat@1` | chapter_one | R7 | RULES |
@@ -80,7 +80,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 | `light@1` | chapter_one | R8 | WORLD |
 | `liquid@1` | chapter_one | R8 | TRANSACTION |
 | `readable@1` | chapter_one | R8 | RULES |
-| `topics@1` | chapter_one | R8 | QUEST |
+| `topic@1` | chapter_one | R8 | QUEST |
 | `relationship@1` | chapter_one | R8 | QUEST |
 | `faction@1` | chapter_one | R8 | QUEST |
 | `narration@1` | proof | R7 | SCENE |

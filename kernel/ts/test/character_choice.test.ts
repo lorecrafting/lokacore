@@ -1,4 +1,4 @@
-// Ancestry choice (attributes@1 character creation) on the derived sampler, with the optional
+// Ancestry choice (attribute@1 character creation) on the derived sampler, with the optional
 // ancestry fields (skill, faction, dark_sight) added inline. Expected values are hand-computed
 // from the sampler's starts (str 5, dex 10, con 10) and modifiers (strong +10, nimble +5, hardy +6).
 import assert from 'node:assert/strict';

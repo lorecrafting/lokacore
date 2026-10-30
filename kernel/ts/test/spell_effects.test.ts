@@ -267,7 +267,7 @@ test('a bolt with a duration starts the fight an interval after the cast ends', 
 // (deathCredit only credits a round's attack_result).
 test('a spell kill grants its experience and death credit', () => {
   const credited = cartridge((c) => {
-    for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.attributes = 1;
+    for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.attribute = 1;
     c.world.levelling = {
       thresholds: [30],
       points_per_level: 1,

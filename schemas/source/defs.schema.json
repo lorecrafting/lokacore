@@ -862,7 +862,7 @@
     },
     "DerivedStat": {
       "additionalProperties": false,
-      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attributes@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "properties": {
         "divisor": {
           "maximum": 2147483647,
@@ -1383,7 +1383,7 @@
     },
     "ItemAffect": {
       "additionalProperties": false,
-      "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attributes@1 reads. The number is the cartridge's.",
+      "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attribute@1 reads. The number is the cartridge's.",
       "properties": {
         "attribute": { "$ref": "#/$defs/DefinitionRef" },
         "modifier": { "$ref": "#/$defs/ResourceInt" }
@@ -1870,7 +1870,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.",
+          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attribute@1.",
           "properties": {
             "at_least": { "$ref": "#/$defs/ResourceInt" },
             "attribute": { "$ref": "#/$defs/DefinitionRef" },
@@ -1885,7 +1885,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attribute@1.",
           "properties": {
             "at_least": {
               "maximum": 2147483647,
@@ -1918,7 +1918,7 @@
               ]
             }
           ],
-          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attribute@1.",
           "properties": {
             "at_least": { "$ref": "#/$defs/ResourceInt" },
             "at_least_percent": {
@@ -1993,7 +1993,7 @@
               ]
             }
           ],
-          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).",
+          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tag@1 (toolbox row G1).",
           "properties": {
             "barrier": { "$ref": "#/$defs/DefinitionRef" },
             "item": { "$ref": "#/$defs/DefinitionRef" },
@@ -2081,7 +2081,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Owned by variety@1.",
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while alternates@1 is locked (VisitedRoom.count). Owned by alternates@1.",
           "properties": {
             "at_least": {
               "minimum": 1,
@@ -2099,7 +2099,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skills@1.",
+          "description": "The actor's level in the named skill (skill@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skill@1.",
           "properties": {
             "at_least": {
               "minimum": 1,
@@ -2224,7 +2224,7 @@
           "type": "object"
         }
       ],
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attribute@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
     },
     "QuestJournal": {
       "additionalProperties": false,
@@ -3411,7 +3411,7 @@
       "description": "One registered operation of a step list, discriminated by op. Scripted action outcome's explicit steps (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost)."
     },
     "Tag": {
-      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent. Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target.",
+      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tag@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent. Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target.",
       "enum": [
         "air",
         "bed",
@@ -3762,7 +3762,7 @@
         },
         "derived": {
           "additionalProperties": false,
-          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
+          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attribute@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
           "properties": {
             "carry_grams": { "$ref": "#/$defs/DerivedStat" },
             "damage": { "$ref": "#/$defs/DerivedStat" },
@@ -3773,7 +3773,7 @@
         },
         "gear_budget": {
           "additionalProperties": false,
-          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attributes@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attribute@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
           "properties": {
             "per_level": {
               "maximum": 2147483647,
@@ -3844,7 +3844,7 @@
         },
         "levelling": {
           "additionalProperties": false,
-          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attributes@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
+          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "properties": {
             "kills": {
               "items": {
@@ -4819,7 +4819,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.",
+          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attribute@1.",
           "properties": {
             "at_least": { "$ref": "#/$defs/ResourceInt" },
             "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
@@ -4829,7 +4829,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attribute@1.",
           "properties": {
             "at_least": {
               "maximum": 2147483647,
@@ -4842,7 +4842,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attribute@1.",
           "properties": {
             "at_least": { "$ref": "#/$defs/ResourceInt" },
             "at_least_percent": {
@@ -4879,7 +4879,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).",
+          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tag@1 (toolbox row G1).",
           "properties": {
             "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
             "item": { "$ref": "#/$defs/partial.DefinitionRef" },
@@ -4930,7 +4930,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Owned by variety@1.",
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while alternates@1 is locked (VisitedRoom.count). Owned by alternates@1.",
           "properties": {
             "at_least": {
               "minimum": 1,
@@ -4943,7 +4943,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skills@1.",
+          "description": "The actor's level in the named skill (skill@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skill@1.",
           "properties": {
             "at_least": {
               "minimum": 1,
@@ -5035,7 +5035,7 @@
           "type": "object"
         }
       ],
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attribute@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all."
     },
     "partial.QuestJournal": {
       "additionalProperties": false,
@@ -5882,7 +5882,7 @@
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1).",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -6094,7 +6094,7 @@
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "slot": { "$ref": "#/$defs/SlotKey" },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1).",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -6140,7 +6140,7 @@
       "properties": {
         "ask": {
           "additionalProperties": false,
-          "description": "Toolbox row FD7 (speech@1 with topics@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
+          "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
           "properties": {
             "answers": {
               "items": {
@@ -6167,7 +6167,7 @@
         },
         "attack": { "$ref": "#/$defs/partial.AttackProfile" },
         "attributes": {
-          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "description": "Toolbox row G3: this NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
           "items": {
             "additionalProperties": false,
             "properties": {
@@ -7152,7 +7152,7 @@
           "type": "object"
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -7467,7 +7467,7 @@
           ]
         },
         "modifies": {
-          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it.",
+          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it.",
           "items": { "$ref": "#/$defs/ItemAffect" },
           "maxItems": 16,
           "minItems": 1,
@@ -7544,7 +7544,7 @@
         },
         "pierced_by": {
           "additionalProperties": false,
-          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attributes@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
+          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
             "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
             "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
@@ -7692,7 +7692,7 @@
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1).",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -7933,7 +7933,7 @@
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "slot": { "$ref": "#/$defs/SlotKey" },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1).",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -7989,7 +7989,7 @@
       "properties": {
         "ask": {
           "additionalProperties": false,
-          "description": "Toolbox row FD7 (speech@1 with topics@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
+          "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
           "properties": {
             "answers": {
               "items": {
@@ -8020,7 +8020,7 @@
         },
         "attack": { "$ref": "#/$defs/AttackProfile" },
         "attributes": {
-          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "description": "Toolbox row G3: this NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
           "items": {
             "additionalProperties": false,
             "properties": {
@@ -9260,7 +9260,7 @@
           "type": "object"
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -9654,7 +9654,7 @@
           ]
         },
         "modifies": {
-          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it.",
+          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it.",
           "items": { "$ref": "#/$defs/ItemAffect" },
           "maxItems": 16,
           "minItems": 1,
@@ -9736,7 +9736,7 @@
         },
         "pierced_by": {
           "additionalProperties": false,
-          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attributes@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
+          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
             "attribute": { "$ref": "#/$defs/DefinitionRef" },
             "skill": { "$ref": "#/$defs/DefinitionRef" }
@@ -10101,13 +10101,13 @@
             "minItems": 1,
             "type": "array"
           },
-          "description": "Narration variety (variety@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
+          "description": "Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
           "propertyNames": { "pattern": "^[a-z][a-z0-9_.]{0,127}$" },
           "type": "object"
         },
         "ancestries": {
           "additionalProperties": { "$ref": "#/$defs/AncestrySpec" },
-          "description": "Authored once-only character choices (attributes@1), keyed by choice Key.",
+          "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         },

@@ -2,7 +2,7 @@ defmodule Loka.ContentLevellingTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/levelling_sampler")}
 
-  # Breaks: world.levelling or an experience.grant step without attributes@1,
+  # Breaks: world.levelling or an experience.grant step without attribute@1,
   # with thresholds not strictly rising (equal catches < for <=), an unknown kill NPC or level_up
   # text, or a grant without world.levelling compiles (toolbox row 4).
   test "levelling keeps its owner, rising thresholds and references", %{dir: dir} do
@@ -13,7 +13,7 @@ defmodule Loka.ContentLevellingTest do
     cases = [
       {"cartridge.json", unlevelled, {"SCHEMA_VIOLATION", "reactions/cull_reward.steps[0].op"}},
       {"cartridge.json",
-       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end),
+       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attribute") end),
        {"UNDECLARED_CAPABILITY", "cartridge.world.levelling"}},
       {"cartridge.json", &put_in(&1, l ++ ["thresholds"], [30, 30]),
        {"SCHEMA_VIOLATION", "cartridge.world.levelling.thresholds[1]"}},

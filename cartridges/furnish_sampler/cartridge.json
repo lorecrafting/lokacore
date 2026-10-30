@@ -22,9 +22,9 @@
       "description_variant": 1,
       "scripted_action": 1,
       "check": 1,
-      "skills": 1,
+      "skill": 1,
       "death": 1,
-      "tags": 1,
+      "tag": 1,
       "schedule": 1
     },
     "client_features": []

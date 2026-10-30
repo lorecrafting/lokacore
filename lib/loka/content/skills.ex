@@ -9,7 +9,7 @@ defmodule Loka.Content.Skills do
       "version" => 1,
       "value_type" => %{"type" => "bool", "default" => false},
       "scopes" => ["player"],
-      "meaning" => "Skill #{key}'s acquisition (skills@1): only skills@1 writes it."
+      "meaning" => "Skill #{key}'s acquisition (skill@1): only skill@1 writes it."
     }
 
   @doc "Toolbox row 5: the reserved use count of a skill with growth (mechanics.md skill growth)."
@@ -24,7 +24,7 @@ defmodule Loka.Content.Skills do
         "maximum" => List.last(growth)
       },
       "scopes" => ["player"],
-      "meaning" => "Skill #{key}'s use count (skills@1): only skills@1 writes it."
+      "meaning" => "Skill #{key}'s use count (skill@1): only skill@1 writes it."
     }
 
   # Scripted action tips' seen_tip_<key> facts (ActionTips.tip_facts) are reserved the same way, here.
@@ -167,9 +167,9 @@ defmodule Loka.Content.Skills do
 
   defp capability(rel, caps),
     do:
-      if(caps["skills"] == 1 and caps["fact"] == 1 and caps["policy"] == 1,
+      if(caps["skill"] == 1 and caps["fact"] == 1 and caps["policy"] == 1,
         do: [],
-        else: [diag("UNDECLARED_CAPABILITY", at(rel, []), %{"capability" => "skills"})]
+        else: [diag("UNDECLARED_CAPABILITY", at(rel, []), %{"capability" => "skill"})]
       )
 
   defp equipment(m, defs) do

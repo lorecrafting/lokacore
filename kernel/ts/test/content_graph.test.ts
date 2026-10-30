@@ -131,7 +131,7 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
 });
 
 // A cartridge without rooms or an entry (hello_sampler). Each fact is read by a quest's policy; the
-// engine writes it at a site with no op, or owns it (skill_blade under skills@1, a patrol's
+// engine writes it at a site with no op, or owns it (skill_blade under skill@1, a patrol's
 // trust); a hit wears a weapon's durability fact and a repair service restores it (row 21); the
 // topic's fact is also read by the codex. None is read_only or write_only.
 test('engine write sites and engine-owned facts are not reported read_only', () => {

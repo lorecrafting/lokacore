@@ -5,7 +5,7 @@ defmodule Loka.Content.Resources do
   pool's key (hp, ma, mv) overrides any of its fields, another key declares a whole
   ResourceSpec without `key`. Every loka-cartridge-v2 cartridge gets the three pools and
   resource@1 and schedule@1 (`requires/1`), with or without the file. `attributes.json`, the
-  cartridge's attributes (attributes@1), loads here too (`attributes/1`), the same way.
+  cartridge's attributes (attribute@1), loads here too (`attributes/1`), the same way.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, schema: 4]
   alias Loka.Content.Refs
@@ -87,7 +87,7 @@ defmodule Loka.Content.Resources do
   and cartridge.json's `world.bands`) and of `world.movement.cost`, given a manifest and a v2
   source: cuts not strictly descending to a last 0, or a repeated key, is RESOURCE_SPEC_INVALID at
   the table; a band key without `band.<key>` in the catalog (unless it was rejected) or a cost
-  naming no resource of this cartridge is UNRESOLVED_REFERENCE; an attribute without attributes@1
+  naming no resource of this cartridge is UNRESOLVED_REFERENCE; an attribute without attribute@1
   in `m`'s requires is UNDECLARED_CAPABILITY.
   """
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) ::

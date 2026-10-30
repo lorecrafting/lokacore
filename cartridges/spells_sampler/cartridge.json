@@ -17,10 +17,10 @@
       "resource": 1,
       "policy": 1,
       "fact": 1,
-      "attributes": 1,
+      "attribute": 1,
       "scripted_action": 1,
       "readable": 1,
-      "topics": 1,
+      "topic": 1,
       "quest": 1,
       "reaction": 1
     },

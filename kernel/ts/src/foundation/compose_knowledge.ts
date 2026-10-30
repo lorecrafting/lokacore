@@ -22,7 +22,7 @@ export function recordKnowledge(
   return valid ? { value: value as unknown as Json } : { code: 'precondition_failed' as const };
 }
 
-// A first visit has no `from` and no count; a later one (variety@1) names the current row in
+// A first visit has no `from` and no count; a later one (alternates@1) names the current row in
 // `from` and counts it plus one, so a replayed, stale or skipped count is refused.
 function counted(op: Extract<DeltaOp, { op: 'visit.record' }>, row: Json | undefined) {
   if (row === undefined) return op.from === undefined && op.value.count === undefined;

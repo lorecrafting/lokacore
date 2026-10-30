@@ -15,7 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { dark, illuminated, unlit, visible } from '../src/mechanics/light/shared.ts';
-import { darkSight } from '../src/mechanics/attributes/shared.ts';
+import { darkSight } from '../src/mechanics/attribute/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { ctx } from './harness.ts';
 

@@ -66,7 +66,7 @@ defmodule Loka.Content.RoomParts do
       for {steps, _} <- variants(r), do: {steps, "variant"}
   end
 
-  # A harvest tool gate (toolbox row 19) reads item tags, owned by tags@1.
+  # A harvest tool gate (toolbox row 19) reads item tags, owned by tag@1.
   defp tools(r),
     do:
       for(
@@ -74,7 +74,7 @@ defmodule Loka.Content.RoomParts do
         do: {["details", k, "harvest", "tool"], "tags"}
       )
 
-  # A room's darkness (light@1: dark, dark_description) and tags (tags@1), each owned by its
+  # A room's darkness (light@1: dark, dark_description) and tags (tag@1), each owned by its
   # capability, and its tool gates.
   defp optional(r),
     do:

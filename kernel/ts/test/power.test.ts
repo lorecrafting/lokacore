@@ -127,7 +127,7 @@ const extremes = (carry?: object) => ({
 // Breaks: hit not capped at 100 (2147483647), damage not floored at 0 ([-1, 1]), hp
 // not clamped at its minimum (0), the carry bonus subtracted (0), a table kept without its
 // authored base (carry_grams NaN), and affects saturated one by one instead of summed first as
-// attributes@1 does (STR max + 1 - 1 reads max - 1: carry delta -1, not 0).
+// attribute@1 does (STR max + 1 - 1 reads max - 1: carry delta -1, not 0).
 test('powerCurve and itemSheet: clamps, carry, a baseless table and summed affects', () => {
   const at = <T>(v: T) => ({ none: v, focused: v }); // level 1 has no point to spend
   assert.deepEqual(powerCurve(extremes({ max_grams: 1000 })), [

@@ -2,7 +2,7 @@ defmodule Loka.ContentDerivedTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/derived_sampler")}
 
-  # Breaks: a derived table naming no attribute, lacking attributes@1, or modifying a stat whose combat or carry settings are absent compiles
+  # Breaks: a derived table naming no attribute, lacking attribute@1, or modifying a stat whose combat or carry settings are absent compiles
   # (hit_chance and damage need world.combat, carry_grams world.carry).
   test "derived tables keep their references, owner and settings", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -17,7 +17,7 @@ defmodule Loka.ContentDerivedTest do
        {"SCHEMA_VIOLATION", "cartridge.world.derived.hit_chance"}},
       {&update_in(&1, ["world"], fn w -> Map.delete(w, "combat") end),
        {"SCHEMA_VIOLATION", "cartridge.world.derived.damage"}},
-      {&update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end),
+      {&update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attribute") end),
        {"UNDECLARED_CAPABILITY", "cartridge.world.derived"}}
     ]
 
@@ -27,7 +27,7 @@ defmodule Loka.ContentDerivedTest do
     end
   end
 
-  # Breaks: an item affect on an unworn item, naming no attribute, or lacking attributes@1
+  # Breaks: an item affect on an unworn item, naming no attribute, or lacking attribute@1
   # compiles (toolbox row 3).
   test "item affects keep their slot, references and owner" do
     dir = Loka.ContentSource.copy("cartridges/affects_sampler")
@@ -38,7 +38,7 @@ defmodule Loka.ContentDerivedTest do
       {"items/belt.json", drop.("slot"), {"SCHEMA_VIOLATION", "items/belt.affects"}},
       {"items/belt.json", &put_in(&1, ["affects", Access.at(1), "attribute"], "luck"),
        {"UNRESOLVED_REFERENCE", "items/belt.affects[1].attribute"}},
-      {"cartridge.json", &update_in(&1, ["requires", "capabilities"], drop.("attributes")),
+      {"cartridge.json", &update_in(&1, ["requires", "capabilities"], drop.("attribute")),
        {"UNDECLARED_CAPABILITY", "items/belt.affects"}}
     ]
 
@@ -72,7 +72,7 @@ defmodule Loka.ContentDerivedTest do
     end
   end
 
-  # Breaks: a gear budget without attributes@1 or with an empty per_slot, an intended level without
+  # Breaks: a gear budget without attribute@1 or with an empty per_slot, an intended level without
   # affects compiles, or a sound budget is refused or dropped from
   # the artifact (balance 6b).
   test "gear budget and intended level keep their owner and affects" do
@@ -87,7 +87,7 @@ defmodule Loka.ContentDerivedTest do
       {"cartridge.json",
        &(&1
          |> put_in(["world", "gear_budget"], budget)
-         |> update_in(["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end))}
+         |> update_in(["requires", "capabilities"], fn c -> Map.delete(c, "attribute") end))}
 
     cases = [
       {[drop_owner], {"UNDECLARED_CAPABILITY", "cartridge.world.gear_budget"}},

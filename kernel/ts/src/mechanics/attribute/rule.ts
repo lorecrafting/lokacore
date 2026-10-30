@@ -7,7 +7,7 @@ import { levelling, write } from '../levelling/shared.ts';
 import { refString } from '../../runtime/decision.ts';
 import { settleMaxima } from '../resource.ts';
 
-export const decide: Rule<'attributes'> = (world, command) => {
+export const decide: Rule<'attribute'> = (world, command) => {
   if (command.payload.type === 'raise_attribute') {
     // Toolbox row 4: one unspent point on one authored attribute.
     const { actor_id, attribute } = command.payload;
