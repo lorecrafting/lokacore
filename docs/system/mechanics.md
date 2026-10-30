@@ -408,7 +408,7 @@ unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
 `quest_resolved`. A typed reaction may instead fail an active or
 objectives_complete instance (whose: Attribution below) with a declared outcome. Failure never reopens a terminal
-instance and emits no event. Policy leaf `quest_state`; the GameView journal lists the player's instances.
+instance and emits no event. Policy leaf `quest_state` (false while the actor has no instance); the GameView journal lists the player's instances.
 A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
 `abandoned`, and optional `outcomes` keyed by outcome. The view selects one TextKey without
 persisting it: `active` shows `objectives_met` while `holdsNow` holds, else `active`;

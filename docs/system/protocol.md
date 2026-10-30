@@ -242,7 +242,7 @@ capabilities the lock holds (`VERBS` in `kernel/ts/src/commands/verbs.ts`, each 
 cartridge's actions, scripted actions, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
-intersect; `:59`), then the answers to a pending choice (`choose`, `close_choice`), which no
+intersect; `apply` in `kernel/ts/src/commands/actions.ts`), then the answers to a pending choice (`choose`, `close_choice`), which no
 ordinary contribution removes; the combat restriction below takes precedence. A scripted action's
 admission adds `cooldown` and `insufficient_resource`
 ([scripted_action@1](mechanics.md#scripted_action1-mechanicsscripted_actionrulets49)).
@@ -308,11 +308,11 @@ An op outside that list throws: the loader closes the set (its schema stage, `sc
 ## Target resolution
 
 Before any Command exists, the host resolves the player's words (`resolve` in `kernel/ts/src/commands/target.ts`):
-lowercase, split, a leading `at` and article dropped (`:20`), joined by `_`, matched exactly
+lowercase, split, a leading `at` and article dropped (`normalize`), joined by `_`, matched exactly
 against the aliases of the room's details and the keywords of items and NPCs in the room or
 held by the body; none, unique, or ambiguous with candidate ids in ascending code-point order
-(invariant `target_candidates_ordered`); over 1024 candidates it throws (`:50`). A barrier is
-named by its keywords through `doors` (`:72`). A Command carries only ids, never words.
+(invariant `target_candidates_ordered`); over 1024 candidates `resolve` throws. A barrier is
+named by its keywords through `doors`. A Command carries only ids, never words.
 
 ## GameView
 
