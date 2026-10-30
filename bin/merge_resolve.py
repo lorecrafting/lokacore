@@ -29,7 +29,7 @@ GENERATED = {
     "docs/toolbox.gen.json",
     "docs/features.gen.md",
     "test/loka/lint_baseline.txt",
-    "protocol/fixtures/toolbox_showcase_hash.json",  # the one hash fixture bin/regen.sh rebuilds; the others are kept by hand
+    "protocol/fixtures/toolbox_showcase_hash.json",  # bin/regen.sh rebuilds it and the other compiled (not frozen) fixtures
 }
 GENERATED_GLOBS = [  # bin/regen.sh rebuilds these; `*` crosses `/`
     "cartridges/*/transcripts/*.jsonl",

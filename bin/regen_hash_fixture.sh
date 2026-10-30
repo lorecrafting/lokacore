@@ -1,8 +1,8 @@
 #!/bin/sh
-# Rebuild a compiled known-answer fixture ({description, canonical, sha256}) from its cartridge source
-# (loka-kjky): mix loka.compile, then the artifact's canonical bytes and content hash go into the
-# fixture; the description is kept. Refuses a fixture of any other shape (sampler fixtures also
-# carry `value`) and an artifact whose hash is not the sha256 of its canonical bytes.
+# Rebuild a compiled known-answer fixture ({description, [value,] canonical, sha256}) from its cartridge
+# source (loka-kjky): mix loka.compile, then the artifact's canonical bytes and content hash go into the
+# fixture, and `value`, when present, becomes the decoded canonical; the description and the key order
+# (in `value` too, so a rebuild changes only changed values) are kept. Refuses a fixture of any other shape and an artifact whose hash is not the sha256 of its canonical bytes.
 #   bin/regen_hash_fixture.sh <cartridge dir> <fixture>   (from the repo root, where mix.exs is)
 # LOKA_COMPILED=<artifact> skips the compile (tests).
 set -eu
@@ -21,7 +21,17 @@ if not m: sys.exit('regen_hash_fixture: artifact is not {"cartridge":...,"conten
 canon, sha = m[1], m[2].decode()
 if hashlib.sha256(canon).hexdigest() != sha: sys.exit('regen_hash_fixture: content_hash is not the sha256 of the canonical bytes')
 fix = json.load(open(sys.argv[2], encoding='utf-8'))
-if list(fix) != ['description', 'canonical', 'sha256']: sys.exit('regen_hash_fixture: fixture keys are not description, canonical, sha256')
+if list(fix) not in (['description', 'canonical', 'sha256'], ['description', 'value', 'canonical', 'sha256']):
+    sys.exit('regen_hash_fixture: fixture keys are not description, [value,] canonical, sha256')
+def keep(o, n):  # n's content in o's key order; new keys last
+    if isinstance(o, dict) and isinstance(n, dict):
+        return {k: keep(o[k], n[k]) if k in o else n[k] for k in [*(k for k in o if k in n), *(k for k in n if k not in o)]}
+    if isinstance(o, list) and isinstance(n, list):
+        return [keep(a, b) for a, b in zip(o, n)] + n[len(o):]
+    return n
 fix.update(canonical=canon.decode('utf-8'), sha256=sha)
+if 'value' in fix:
+    fix['value'] = keep(fix['value'], json.loads(canon))
+    assert fix['value'] == json.loads(canon)
 open(sys.argv[2], 'w', encoding='utf-8').write(json.dumps(fix, indent=2, ensure_ascii=False) + '\n')
 PY
