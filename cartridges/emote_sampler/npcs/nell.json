@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "nell"
+  ],
+  "name": "npc.nell.short",
+  "room_line": "npc.nell.room",
+  "description": "npc.nell.description",
+  "room": "inn",
+  "immune": [
+    "afraid"
+  ]
+}

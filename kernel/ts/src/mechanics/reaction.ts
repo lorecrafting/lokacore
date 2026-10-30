@@ -13,7 +13,7 @@ import type {
   FactValue,
   JobId,
   ReactionRule,
-  TextKey,
+  Text,
 } from '../contracts.gen.ts';
 import { key, same } from '../foundation/compose.ts';
 import {
@@ -44,6 +44,7 @@ import { replenishStep } from './containment/job.ts';
 import { witnesses } from './senses.ts';
 import { visible } from './light/shared.ts';
 import { spawn } from './population/react.ts';
+import { isTold, told } from './emote/line.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
@@ -152,7 +153,7 @@ export function sequence(
   if (rule.when && !holds(then, actor, rule.when, about)) return undefined;
   if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint, ran);
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), seen: new Set() };
-  const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
+  const [ops, events, narration]: [DeltaOp[], DomainEvent[], Text[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload, actor_id = actor) =>
@@ -184,7 +185,7 @@ export function sequence(
       if (typeof refill === 'string') return { kind: 'fault', code: refill };
       ops.push(...refill);
     } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
-    else if (step.op === 'narrate') narration.push({ key: step.text });
+    else if (isTold(step)) narration.push(...told(then, actor, step, about));
     else if (step.op !== 'event.emit') {
       const assigned = assignment(world, actor, step, group, own, cause);
       if (assigned) ops.push(assigned);

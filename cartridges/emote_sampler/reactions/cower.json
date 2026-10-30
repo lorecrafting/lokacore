@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "status_applied",
+    "status": "afraid"
+  },
+  "steps": [
+    {
+      "op": "emote",
+      "emote": "cower"
+    }
+  ]
+}

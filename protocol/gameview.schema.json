@@ -1276,6 +1276,14 @@
             "$ref": "action.schema.json#/$defs/Word"
           }
         },
+        "emotes": {
+          "description": "NPC emotes (G9): the cartridge's emote table, unchanged, so the client words an emote.performed line; absent without emote@1.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "cartridge.schema.json#/$defs/EmoteDefinition"
+          }
+        },
         "combat": {
           "$ref": "gameview.schema.json#/$defs/CombatView"
         },

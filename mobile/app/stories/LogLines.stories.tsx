@@ -40,3 +40,9 @@ export const ThirtyLines: Story = {
 };
 
 export const Empty: Story = { args: { lines: [] } };
+
+// G9 (loka-kgd.193): an NPC's emote as the reader sees it, untargeted, to the reader and to another.
+export const NpcEmotes: Story = {
+  name: 'NPC emotes',
+  args: { lines: ['A goblin cowers in fear.', 'Nell bows to you.', 'Nell bows to the goblin.'] },
+};

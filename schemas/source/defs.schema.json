@@ -3015,6 +3015,25 @@
         },
         {
           "additionalProperties": false,
+          "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.",
+          "properties": {
+            "emote": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "op": { "const": "emote" },
+            "to": {
+              "enum": [
+                "subject"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "emote"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
           "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
           "properties": {
             "fact": { "$ref": "#/$defs/DefinitionRef" },
@@ -5450,6 +5469,21 @@
         },
         {
           "additionalProperties": false,
+          "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.",
+          "properties": {
+            "emote": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "emote" },
+            "to": {
+              "enum": [
+                "subject"
+              ]
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
           "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
           "properties": {
             "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
@@ -5994,6 +6028,24 @@
         "roles": {
           "additionalProperties": { "$ref": "#/$defs/partial.DialogueRole" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+          "type": "object"
+        },
+        "with": { "type": "object" }
+      },
+      "type": "object"
+    },
+    "partial.source.EmoteDefinition": {
+      "additionalProperties": false,
+      "description": "NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.",
+      "properties": {
+        "extends": { "$ref": "#/$defs/Key" },
+        "others": { "$ref": "#/$defs/partial.TextKey" },
+        "to": {
+          "additionalProperties": false,
+          "properties": {
+            "others": { "$ref": "#/$defs/partial.TextKey" },
+            "you": { "$ref": "#/$defs/partial.TextKey" }
+          },
           "type": "object"
         },
         "with": { "type": "object" }
@@ -7830,6 +7882,29 @@
         "prompt",
         "roles",
         "choices"
+      ],
+      "type": "object"
+    },
+    "source.EmoteDefinition": {
+      "additionalProperties": false,
+      "description": "NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.",
+      "properties": {
+        "others": { "$ref": "#/$defs/TextKey" },
+        "to": {
+          "additionalProperties": false,
+          "properties": {
+            "others": { "$ref": "#/$defs/TextKey" },
+            "you": { "$ref": "#/$defs/TextKey" }
+          },
+          "required": [
+            "others",
+            "you"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "others"
       ],
       "type": "object"
     },
@@ -9944,6 +10019,11 @@
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         },
+        "emotes": {
+          "additionalProperties": { "$ref": "#/$defs/source.emotes" },
+          "propertyNames": { "$ref": "#/$defs/Key" },
+          "type": "object"
+        },
         "items": {
           "additionalProperties": { "$ref": "#/$defs/source.items" },
           "propertyNames": { "$ref": "#/$defs/Key" },
@@ -10183,6 +10263,30 @@
           "type": "object"
         },
         "then": { "$ref": "#/$defs/partial.source.DialogueDefinition" }
+      },
+      "if": {
+        "required": [
+          "abstract"
+        ],
+        "type": "object"
+      },
+      "then": {
+        "properties": {
+          "abstract": { "const": true }
+        },
+        "type": "object"
+      }
+    },
+    "source.emotes": {
+      "else": {
+        "else": { "$ref": "#/$defs/source.EmoteDefinition" },
+        "if": {
+          "required": [
+            "extends"
+          ],
+          "type": "object"
+        },
+        "then": { "$ref": "#/$defs/partial.source.EmoteDefinition" }
       },
       "if": {
         "required": [

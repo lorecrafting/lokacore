@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "goblin"
+  ],
+  "name": "npc.captive.short",
+  "room_line": "npc.captive.room",
+  "description": "npc.captive.description",
+  "room": "cell"
+}

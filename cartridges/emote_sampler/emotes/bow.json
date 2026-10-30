@@ -1,0 +1,7 @@
+{
+  "others": "emote.bow.others",
+  "to": {
+    "others": "emote.bow.to_others",
+    "you": "emote.bow.you"
+  }
+}

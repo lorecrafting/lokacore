@@ -148,7 +148,8 @@ defmodule Loka.Content.Source do
     "bleeds" => :bleed,
     "statuses" => :status,
     "structures" => :structure,
-    "behaviours" => :behaviour
+    "behaviours" => :behaviour,
+    "emotes" => :emote
   }
 
   defp classify(rel) do

@@ -1,7 +1,8 @@
 // Word bar S2: the GameView's spell_words, one per spell the viewer has learned (its learned fact
 // reads true for the viewer; an unlearned spell is never projected), in scripted action key order, absent when
 // none; its availability is cast's own admission: step's refusal, then the scripted action's cooldown and
-// costs. And the cartridge's static speech.phrases (say's word chips), absent without them.
+// costs. And the cartridge's static speech.phrases (say's word chips), absent without them, and its emote table
+// (G9: the client words an emote.performed line from it), absent when empty.
 import type { CharacterId, Key, SpellWord, Word } from '../contracts.gen.ts';
 import { admission, refusalReason, resolved } from '../commands/actions.ts';
 import { value as factValue } from '../mechanics/fact.ts';
@@ -10,9 +11,11 @@ import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 
 export function wordViews(world: World, actor: CharacterId, steps: Steps) {
   const words = spellWords(world, actor, steps);
+  const emotes = Object.values(world.cartridge.emotes ?? {});
   return {
     ...(words.length > 0 && { spell_words: words }),
     ...(world.cartridge.speech && { phrases: world.cartridge.speech.phrases }),
+    ...(emotes.length > 0 && { emotes }),
   };
 }
 

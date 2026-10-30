@@ -10,7 +10,7 @@ import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts'
 import { commandId } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { gameView } from '../src/view/view.ts';
-import { lineSentence } from '../../../mobile/packages/game-view/line_words.ts';
+import { spoken } from './spoken.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { sha256Hex } from '../src/foundation/sha256.ts';
 import { doors, normalize } from '../src/commands/target.ts';
@@ -138,9 +138,6 @@ function turn(r: Run, cmd: Command, measured = true): string {
 }
 
 type Turn = ReturnType<typeof decide>;
-// A line's words: an engine key from the shared table (game-view/line_words.ts), else cartridge text.
-const spoken = (t: { key: string; bindings?: Readonly<Record<string, unknown>> }) =>
-  lineSentence(t, (v) => say(cartridge, String(v))) ?? say(cartridge, t.key);
 // size: allow 45, terminal outcome projection retains ordinary command and located output
 function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
   const { trace, latency, decision } = result;
@@ -168,7 +165,7 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     decision.kind !== 'accepted'
       ? `${reason(decision, lockless ? 'lockless' : p.type)}\n`
       : narrated
-        ? narrated.map((t) => `${spoken(t)}\n${pinned(t)}`).join('') +
+        ? narrated.map((t) => `${spoken(cartridge, t, r.world)}\n${pinned(t)}`).join('') +
           (decision.outcome === 'moved'
             ? arrived(r)
             : decision.outcome === 'choice_opened'

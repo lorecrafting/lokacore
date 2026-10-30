@@ -368,6 +368,31 @@
           "additionalProperties": false
         },
         {
+          "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "emote"
+            },
+            "emote": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "to": {
+              "enum": [
+                "subject"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "emote"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
           "type": "object",
           "properties": {
