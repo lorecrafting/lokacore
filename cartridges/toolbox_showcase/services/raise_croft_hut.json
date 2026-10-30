@@ -6,7 +6,7 @@
   "narration": "service.raise_croft_hut.used",
   "price": 5,
   "benefit": {
-    "kind": "build",
+    "op": "build",
     "structure": "hut_plain",
     "site": "holding_croft",
     "direction": "north"

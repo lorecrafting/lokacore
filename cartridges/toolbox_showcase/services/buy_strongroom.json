@@ -6,7 +6,7 @@
   "narration": "service.buy_strongroom.used",
   "price": 5,
   "benefit": {
-    "kind": "entitlement",
+    "op": "entitlement",
     "fact": "owns_strongroom"
   }
 }

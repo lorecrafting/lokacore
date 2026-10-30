@@ -47,15 +47,21 @@ defmodule Loka.Content.Steps do
     "mend" => {nil, @s},
     "raze" => {nil, @s}
   }
+  # Fields a context requires besides op: a service build raises at its site (P review finding 3).
+  @required %{{"build", :service} => ~w(site)}
 
   @doc "The registered ops (step.schema.json Step's branches)."
   def ops, do: Map.keys(@ops)
 
   @doc """
-  `steps` at `path` of `rel` in `context` (:reaction, :action, :choice or :service):
-  SCHEMA_VIOLATION invalid_value at an op or field the context does not run, the owning event
-  an op needs (`ctx.events`), and each step's references (`ctx.m`, `ctx.defs`).
+  `steps` (a list, or one step such as a service's benefit) at `path` of `rel` in `context`
+  (:reaction, :action, :choice or :service): SCHEMA_VIOLATION invalid_value at an op or field
+  the context does not run, missing_property at a field it requires, the owning event
+  an op needs (`ctx.events`), and the references of the fields it runs (`ctx.m`, `ctx.defs`).
   """
+  def check(rel, path, step, context, ctx) when is_map(step),
+    do: step(rel, path, step, context, ctx)
+
   def check(rel, path, steps, context, ctx) do
     for {s, i} <- Enum.with_index(steps), d <- step(rel, path ++ [i], s, context, ctx), do: d
   end
@@ -64,18 +70,30 @@ defmodule Loka.Content.Steps do
     {event, contexts} = Map.get(@ops, s["op"], {nil, %{}})
 
     case contexts[context] do
-      nil -> [invalid(rel, path ++ ["op"])]
-      fields -> unrun(rel, path, s, fields) ++ refs(rel, path, s, event, ctx)
+      nil ->
+        [invalid(rel, path ++ ["op"])]
+
+      fields ->
+        missing(rel, path, s, context) ++
+          unrun(rel, path, s, fields) ++ refs(rel, path, s, fields, event, ctx)
     end
   end
 
-  # The step's owning event and references.
-  defp refs(rel, path, s, event, ctx) do
+  # The step's owning event and the references of the fields the context runs (a refused field
+  # has its own diagnostic).
+  defp refs(rel, path, s, fields, event, ctx) do
     if(event, do: owned(at(rel, path ++ ["op"]), event, ctx.events), else: []) ++
       for {f, kind} <- Map.get(Loka.Content.LeafRefs.steps(), s["op"], %{}),
           is_map_key(s, f),
+          fields == :any or f in fields,
           d <- reference(rel, path, {f, kind}, s, ctx.m, ctx.defs),
           do: d
+  end
+
+  defp missing(rel, path, s, context) do
+    for f <- Map.get(@required, {s["op"], context}, []),
+        not is_map_key(s, f),
+        do: diag("SCHEMA_VIOLATION", at(rel, path ++ [f]), %{"error" => "missing_property"})
   end
 
   defp unrun(_, _, _, :any), do: []

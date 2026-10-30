@@ -6,7 +6,7 @@
   "narration": "service.deposit_b.used",
   "price": 1,
   "benefit": {
-    "kind": "deposit",
+    "op": "deposit",
     "account": "savings",
     "vault": "vault",
     "amount": 5

@@ -245,7 +245,9 @@ one Step. One `Check` (same file) serves scripted actions and dialogue choices; 
 is unique across both (`lib/loka/content/check_kinds.ex`). The schema admits every op in every context; the
 compiler (`lib/loka/content/steps.ex` `@ops`) refuses an op a context does not run, or a field it
 does not run there, with SCHEMA_VIOLATION `invalid_value` at that `op` or field, and an op whose
-owning event's capability is not declared with UNDECLARED_CAPABILITY at its `op`. "all" means every
+owning event's capability is not declared with UNDECLARED_CAPABILITY at its `op`. A service `build` needs
+`site` (SCHEMA_VIOLATION `missing_property`). References are checked only in the fields a context runs, and
+each bad `build.structure` gives one diagnostic. "all" means every
 field of the op; a list names the only fields run besides `op`.
 
 | `op` | Owning event | Reaction | Action outcome | Dialogue choice | Service benefit |

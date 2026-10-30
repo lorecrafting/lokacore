@@ -78,7 +78,7 @@ defmodule Loka.Content.Theft do
 
   # No pickpocketing the shared pool: a bank vault NPC needs a get lock.
   defp vaults(m, defs) do
-    for {_, {rel, steps, %{"benefit" => %{"kind" => k, "vault" => v}}}} <- defs["service"] || %{},
+    for {_, {rel, steps, %{"benefit" => %{"op" => k, "vault" => v}}}} <- defs["service"] || %{},
         k in ~w(deposit withdraw),
         not match?({_, _, %{"locks" => %{"get" => _}}}, resolve(v, "npc", m, defs)),
         do:

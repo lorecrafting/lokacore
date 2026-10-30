@@ -6,7 +6,7 @@
   "narration": "service.claim.used",
   "price": 1,
   "benefit": {
-    "kind": "claim",
+    "op": "claim",
     "service": "commission"
   }
 }

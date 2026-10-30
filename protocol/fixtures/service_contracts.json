@@ -21,7 +21,7 @@
         "narration": "service.room.used",
         "price": 3,
         "benefit": {
-          "kind": "entitlement",
+          "op": "entitlement",
           "fact": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -52,7 +52,7 @@
         "narration": "service.meal.used",
         "price": 2,
         "benefit": {
-          "kind": "meal",
+          "op": "meal",
           "stock": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -91,7 +91,7 @@
         "narration": "service.ale.used",
         "price": 1,
         "benefit": {
-          "kind": "drink",
+          "op": "drink",
           "vessel": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -145,7 +145,7 @@
         "label": "service.room",
         "price": 3,
         "benefit": {
-          "kind": "entitlement",
+          "op": "entitlement",
           "fact": {
             "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
@@ -294,7 +294,7 @@
             "label": "service.room",
             "price": 3,
             "benefit": {
-              "kind": "entitlement",
+              "op": "entitlement",
               "fact": {
                 "cartridge_id": "village_chapter",
                 "cartridge_version": "0.0.25",
@@ -737,9 +737,9 @@
       "base": "room",
       "path": [
         "benefit",
-        "kind"
+        "op"
       ],
-      "name": "room missing benefit kind",
+      "name": "room missing benefit op",
       "valid": false,
       "omit": true
     },
@@ -767,9 +767,9 @@
       "base": "room",
       "path": [
         "benefit",
-        "kind"
+        "op"
       ],
-      "name": "room wrong benefit kind",
+      "name": "room wrong benefit op",
       "valid": false,
       "value": "unknown"
     },
@@ -804,9 +804,9 @@
       "base": "meal",
       "path": [
         "benefit",
-        "kind"
+        "op"
       ],
-      "name": "meal missing benefit kind",
+      "name": "meal missing benefit op",
       "valid": false,
       "omit": true
     },
@@ -864,9 +864,9 @@
       "base": "meal",
       "path": [
         "benefit",
-        "kind"
+        "op"
       ],
-      "name": "meal wrong benefit kind",
+      "name": "meal wrong benefit op",
       "valid": false,
       "value": "unknown"
     },
@@ -961,9 +961,9 @@
       "base": "drink",
       "path": [
         "benefit",
-        "kind"
+        "op"
       ],
-      "name": "drink missing benefit kind",
+      "name": "drink missing benefit op",
       "valid": false,
       "omit": true
     },
@@ -1021,9 +1021,9 @@
       "base": "drink",
       "path": [
         "benefit",
-        "kind"
+        "op"
       ],
-      "name": "drink wrong benefit kind",
+      "name": "drink wrong benefit op",
       "valid": false,
       "value": "unknown"
     },
@@ -1316,7 +1316,7 @@
           "narration": "service.room.used",
           "price": 3,
           "benefit": {
-            "kind": "entitlement",
+            "op": "entitlement",
             "fact": {
               "cartridge_id": "village_chapter",
               "cartridge_version": "0.0.25",

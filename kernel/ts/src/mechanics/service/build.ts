@@ -25,7 +25,7 @@ import { movable } from '../../runtime/created.ts';
 import { living } from '../death/shared.ts';
 
 type Build = Pick<
-  Extract<ServiceDefinition['benefit'], { kind: 'build' }>,
+  Extract<ServiceDefinition['benefit'], { op: 'build' }>,
   'structure' | 'site' | 'direction'
 >; // a build service's or (S6) a scripted action build step's
 const refused = (key: string) => ({
@@ -54,7 +54,8 @@ export function unbuildable(world: World, b: Build, owner: CharacterId) {
 // after hydrate, so the status is applied on a world that already knows it (compose admits a
 // holder created earlier in the same delta).
 export function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaOp[] {
-  const origin = { kind: 'built', site: b.site, direction: b.direction, owner } as const;
+  // steps.ex requires a service build's site; the action build passes its detail's room.
+  const origin = { kind: 'built', site: b.site!, direction: b.direction, owner } as const;
   const identity = { id: mint() as EntityId, definition: b.structure, origin };
   const weathering = world.cartridge.structures?.[refString(b.structure)]?.weathering;
   const known = { ...world.knownEntities, [identity.id]: { kind: 'room' as const } };
@@ -66,8 +67,8 @@ export function created(world: World, b: Build, owner: CharacterId, mint: Mint):
   ];
 }
 
-type Mend = Extract<ServiceDefinition['benefit'], { kind: 'mend' }>;
-type Raze = Extract<ServiceDefinition['benefit'], { kind: 'raze' }>;
+type Mend = Extract<ServiceDefinition['benefit'], { op: 'mend' }>;
+type Raze = Extract<ServiceDefinition['benefit'], { op: 'raze' }>;
 
 /** The unrazed room built at a site direction (at most one, builtValid), else []. */
 const live = (world: World, b: Mend | Raze) =>
@@ -149,9 +150,9 @@ export function raised(
   s: ServiceDefinition,
   mint: Mint,
 ): DeltaOp[] {
-  if (s.benefit.kind === 'mend') return mended(world, s.benefit, mint);
-  if (s.benefit.kind === 'raze') return razed(world, s.benefit);
-  return s.benefit.kind === 'build' && !s.benefit.escrow
+  if (s.benefit.op === 'mend') return mended(world, s.benefit, mint);
+  if (s.benefit.op === 'raze') return razed(world, s.benefit);
+  return s.benefit.op === 'build' && !s.benefit.escrow
     ? created(world, s.benefit, p.actor_id, mint)
     : [];
 }
@@ -169,7 +170,7 @@ export function built(
 ): readonly DeltaOp[] | 'budget_exceeded' | 'precondition_failed' {
   const b = world.cartridge.services?.[refString({ ...row.job, kind: 'service' })]?.benefit;
   const owner = row.actor_id;
-  if (b?.kind !== 'build' || !b.fact || !b.escrow || !owner) return [];
+  if (b?.op !== 'build' || !b.fact || !b.escrow || !owner) return [];
   if (value(world, owner, b.fact) !== true) return [];
   const later = Object.entries(world.state.jobs ?? {}).some(
     ([id, r]) =>

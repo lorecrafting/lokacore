@@ -6,7 +6,7 @@
   "narration": "service.forge_cancel.used",
   "price": 1,
   "benefit": {
-    "kind": "cancel",
+    "op": "cancel",
     "service": "forge_commission"
   }
 }

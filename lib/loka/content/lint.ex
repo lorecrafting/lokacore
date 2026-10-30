@@ -213,7 +213,7 @@ defmodule Loka.Content.Lint do
   defp wants(["actions", name], %{"target" => %{"tool" => %{"liquid" => l}}}),
     do: [{{:liquid, l}, Path.rootname(name)}]
 
-  defp wants(["services", _], %{"benefit" => %{"kind" => "drink", "liquid" => l, "vessel" => v}}),
+  defp wants(["services", _], %{"benefit" => %{"op" => "drink", "liquid" => l, "vessel" => v}}),
     do: [{{:liquid, l}, v}]
 
   defp wants(["items", name], %{"fuel" => %{"kind" => "source", "supply" => s}}),
