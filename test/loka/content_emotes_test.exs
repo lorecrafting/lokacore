@@ -72,9 +72,9 @@ defmodule Loka.ContentEmotesTest do
     refused(dir, "UNRESOLVED_REFERENCE", "reactions/cower.steps[0].to")
   end
 
-  # Breaks: an emote step's npc naming no NPC of the cartridge is admitted (the line would have no emoter).
-  test "a step's unknown npc is unresolved", %{tmp_dir: dir} do
-    update(dir, "reactions/greet.json", &put_in(&1, ["steps", Access.at(0), "npc"], "nobody"))
-    refused(dir, "UNRESOLVED_REFERENCE", "reactions/greet.steps[0].npc")
+  # Breaks: an emote step's npc naming a spawn template is admitted (no single emoter to resolve at play).
+  test "a step's npc that is a spawn template is refused", %{tmp_dir: dir} do
+    update(dir, "reactions/greet.json", &put_in(&1, ["steps", Access.at(0), "npc"], "goblin"))
+    refused(dir, "SCHEMA_VIOLATION", "reactions/greet.steps[0].npc")
   end
 end
