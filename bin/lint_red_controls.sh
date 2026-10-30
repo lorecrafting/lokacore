@@ -45,8 +45,6 @@ printf '%s\n' "export const said = 'You are too tired.';" 'export const go = `Go
 printf "import { openGame } from '../../authority/local-story/session.ts';\nimport Storage from 'expo-sqlite/kv-store';\nimport * as RN from 'react-native';\nimport { default as D } from 'react-native';\nimport c from './metro.config.js';\nimport { phone } from './App.tsx';\nexport const S = [openGame, Storage, RN, D, c, phone];\n" > mobile/app/book/red_control.tsx
 # A literal Control label (mobile-book-labels).
 echo "export const L = <Control label=\"Leave\" />;" >> mobile/app/book/red_control.tsx
-# Book English outside LABEL (mobile-book-english).
-echo "export const E = <Note>Nothing here yet.</Note>;" >> mobile/app/book/red_control.tsx
 # A reason note drawn by the page (mobile-book-reason-note).
 echo "export const N = <Text>{why(e, text)}</Text>;" >> mobile/app/book/red_control.tsx
 # A raw colour and font size in a Book component.

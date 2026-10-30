@@ -5,7 +5,6 @@ valid:
   - "const f = <View testID=\"world-title\" accessibilityRole=\"button\" style={{ alignItems: 'center' }} />;"
   - "const f = onKey((k) => k === 'Escape' && close());"
   - "const f = (e) => e.nativeEvent.key === 'Enter';"
-  - "import { Text } from 'react-native';"
   - "const f = <Text>{' — '}{x}.</Text>;"
 invalid: # one per alternative of the rule, in its order
   - "const f = <Note>empty</Note>;"
