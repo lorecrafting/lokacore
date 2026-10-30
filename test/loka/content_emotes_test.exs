@@ -8,6 +8,10 @@ defmodule Loka.ContentEmotesTest do
     File.write!(path, JSON.encode!(fun.(JSON.decode!(File.read!(path)))))
   end
 
+  defp drop(m, [k]), do: Map.delete(m, k)
+  defp drop(l, [i | p]) when is_list(l), do: List.update_at(l, i, &drop(&1, p))
+  defp drop(m, [k | p]), do: Map.update!(m, k, &drop(&1, p))
+
   defp refused(dir, code, path) do
     assert {:error, ds} = Loka.Content.compile(dir)
     assert Enum.any?(ds, &(&1["code"] == code and &1["path"] == path)), inspect(ds)
@@ -34,11 +38,18 @@ defmodule Loka.ContentEmotesTest do
            } = step
   end
 
-  # Breaks: a `to` with only one of its two forms is admitted.
-  test "a to with one form is a schema violation", %{tmp_dir: dir} do
-    update(dir, "emotes/bow.json", &Map.update!(&1, "to", fn t -> Map.delete(t, "you") end))
-    assert {:error, ds} = Loka.Content.compile(dir)
-    assert Enum.any?(ds, &(&1["code"] == "SCHEMA_VIOLATION")), inspect(ds)
+  # Breaks: the schema drops a required emote field: a `to` form, the untargeted line, or a step's emote.
+  for {name, rel, drop} <- [
+        {"a to without you", "emotes/bow.json", ["to", "you"]},
+        {"a to without others", "emotes/bow.json", ["to", "others"]},
+        {"an emote without others", "emotes/cower.json", ["others"]},
+        {"an emote step without its emote", "reactions/cower.json", ["steps", 0, "emote"]}
+      ] do
+    test "#{name} is a schema violation", %{tmp_dir: dir} do
+      update(dir, unquote(rel), &drop(&1, unquote(drop)))
+      assert {:error, ds} = Loka.Content.compile(dir)
+      assert Enum.any?(ds, &(&1["code"] == "SCHEMA_VIOLATION")), inspect(ds)
+    end
   end
 
   # Breaks: an emote's text key missing from the catalog is admitted.

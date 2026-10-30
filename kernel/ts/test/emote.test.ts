@@ -190,3 +190,20 @@ test('told: only a living NPC the reader sees emotes; no `to`, no target', () =>
     { key: 'emote.performed', participants: { actor: nell }, bindings: { emote: 'bow' } },
   ]);
 });
+
+// Breaks: the artifact or GameView schema drops an emote bound (a key, the emote map's key names, a
+// non-empty emotes list).
+test('the emote contracts refuse an emote without a key, a bad emote map key and an empty list', () => {
+  const { cartridge } = JSON.parse(new TextDecoder().decode(artifact));
+  const [ref, bow] = Object.entries(cartridge.emotes).find(([, e]) => (e as { to?: object }).to)!;
+  const check = (emotes: object) => validate('CompiledCartridge', { ...cartridge, emotes });
+  assert.deepEqual(check(cartridge.emotes), []);
+  const { key: _, ...keyless } = bow as object & { key: string };
+  for (const emotes of [
+    { ...cartridge.emotes, [ref]: keyless },
+    { ...cartridge.emotes, nope: bow },
+  ])
+    assert.notDeepEqual(check(emotes), [], JSON.stringify(emotes));
+  const view = gameView(play(start(), { type: 'move', direction: 'north' }).w);
+  assert.notDeepEqual(validate('GameView', { ...view, emotes: [] }), []);
+});
