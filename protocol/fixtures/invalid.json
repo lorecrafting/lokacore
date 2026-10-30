@@ -29037,6 +29037,39 @@
     ]
   },
   {
+    "name": "npc_name_variant_words_without_bare",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "name": "npc.hal.short",
+      "name_variants": [
+        {
+          "description": "npc.hal.short_tired",
+          "words": {
+            "plural": "npc.hal.plural_tired"
+          }
+        }
+      ],
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      }
+    },
+    "errors": [
+      {
+        "path": "/name_variants/0/words/bare",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "name": "entity_view_asides_retired",
     "contract": "EntityView",
     "value": {

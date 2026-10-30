@@ -10,7 +10,12 @@
         "subject": "target",
         "status": "afraid"
       },
-      "description": "npc.goblin.short_afraid"
+      "description": "npc.goblin.short_afraid",
+      "words": {
+        "bare": "npc.goblin.bare_afraid",
+        "article": "a",
+        "plural": "npc.goblin.plural_afraid"
+      }
     }
   ],
   "room_line": "npc.goblin.room",

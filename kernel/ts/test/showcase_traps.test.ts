@@ -355,12 +355,12 @@ let stair: World;
 const mood = (w: World, id: string) =>
   gameView(w).entities.flatMap((e) => (e.id === id ? [e.name, e.words?.bare, e.description] : []));
 const CALM = ['npc.goblin.short', 'npc.den_goblin.bare', 'npc.goblin.description'];
-const AFRAID = ['npc.goblin.short_afraid', undefined, 'npc.goblin.description_afraid'];
+const AFRAID = ['short_afraid', 'bare_afraid', 'description_afraid'].map((k) => `npc.goblin.${k}`);
 
 // Breaks: the den or its pack is missing, a said begone frightens (loudness dropped), the shout misses
 // the pack (the word), lands on the chief (immune dropped) or the player, the afraid span or its mood
-// differs (a mood variant without its `when`, so a calm goblin cowers; or its words kept, so the Book
-// draws "a goblin"), or the afraid goblins stand and fight (fear dropped, or the flight is off fear).
+// differs (no `when`, so a calm goblin cowers; or the base words kept, so the Book draws "a goblin"),
+// or the afraid goblins stand and fight (fear dropped, or the flight is off fear).
 test('traps 8: in the den the shout frightens both goblins, not the chief; they flee south', () => {
   stair = go(go(w, 'west').world, 'west').world;
   w = go(go(stair, 'north').world, 'north').world;

@@ -24,11 +24,13 @@ export function combatOffered(
   );
 }
 
-// An entity's view name, with its name words while the base short holds (loka-6qi).
+// An entity's view name, with the name words of the base short or of the name variant shown (loka-6qi, W6).
 export const named = (world: World, actor: CharacterId, id: EntityId, steps: Steps) => {
   const name = describeEntity(world, actor, id, 'short', steps);
-  const { short, words } = world.entities[id];
-  return { name, ...(words && name === short && { words }) };
+  const e = world.entities[id];
+  const words =
+    name === e.short ? e.words : e.name_variants?.find((v) => v.description === name)?.words;
+  return { name, ...(words && { words }) };
 };
 
 type Fight = NonNullable<ReturnType<typeof engaged>>;

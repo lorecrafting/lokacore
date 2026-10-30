@@ -177,25 +177,31 @@ export const Plural: StoryObj = {
   },
 };
 
-// Breaks (owner 2026-10-30, W6 moods): an NPC's mood name, which has no name words, loses its own
-// link, gains a second article, goes uncapitalised, or merges with the calm goblin of its kind.
+// Breaks (owner 2026-10-30, W6 moods; PR #507): an NPC's mood name loses its own words (so two
+// afraid goblins split into two links) or merges with the calm goblin of its kind. The calm goblin
+// shares the run's article (Crowded's rule), so it reads "and goblin" (PM question on PR #507).
+const afraid = (i: number) => ({
+  ...npc,
+  id: `goblin-afraid-${i}`,
+  name: 'npc.goblin.short_afraid',
+  contents: [],
+  words: {
+    bare: 'npc.goblin.bare_afraid',
+    article: 'a' as const,
+    plural: 'npc.goblin.plural_afraid',
+  },
+});
 export const Mood: StoryObj = {
-  ...room([
-    {
-      ...npc,
-      id: 'goblin-afraid',
-      name: 'npc.goblin.short_afraid',
-      contents: [],
-      words: undefined,
-    },
-    ...crowd(npc, 'npc', [['goblin', 'a', true]]),
-  ]),
+  ...room([afraid(0), ...crowd(npc, 'npc', [['goblin', 'a', true]])]),
   name: 'An afraid goblin and a calm one',
   play: async ({ canvas }) => {
-    await sentence(
-      canvas,
-      ['A cowering goblin', 'goblin'],
-      'A cowering goblin and a goblin are here.',
-    );
+    await sentence(canvas, ['cowering goblin', 'goblin'], 'A cowering goblin and goblin are here.');
+  },
+};
+export const MoodPair: StoryObj = {
+  ...room([afraid(0), afraid(1)]),
+  name: 'Two afraid goblins',
+  play: async ({ canvas }) => {
+    await sentence(canvas, ['Two cowering goblins'], 'Two cowering goblins are here.');
   },
 };
