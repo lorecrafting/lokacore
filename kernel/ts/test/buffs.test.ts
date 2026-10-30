@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { npcValue, value } from '../src/mechanics/attributes/shared.ts';
+import { npcValue, value } from '../src/mechanics/attribute/shared.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-buffs-'));

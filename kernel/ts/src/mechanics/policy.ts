@@ -17,7 +17,7 @@ import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 import { hourOf, skyPhase } from './calendar.ts';
 import { visits } from './knowledge/shared.ts';
-import { value as attributeValue, wearing } from './attributes/shared.ts';
+import { value as attributeValue, wearing } from './attribute/shared.ts';
 import { currentStatus } from './status/shared.ts';
 import { living } from './death/shared.ts';
 import { perceived } from './senses.ts';

@@ -8,7 +8,7 @@ import type { DerivedStat, ItemAffect } from '../src/contracts.gen.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { saturate } from '../src/foundation/int.ts';
-import { derived } from '../src/mechanics/attributes/shared.ts';
+import { derived } from '../src/mechanics/attribute/shared.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 type Values = Record<string, number>; // attribute DefinitionRefString -> value

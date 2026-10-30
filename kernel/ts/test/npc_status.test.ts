@@ -17,7 +17,7 @@ import { apply } from '../src/runtime/apply.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { runStatus } from '../src/mechanics/status/job.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { npcValue } from '../src/mechanics/attributes/shared.ts';
+import { npcValue } from '../src/mechanics/attribute/shared.ts';
 import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-status-'));

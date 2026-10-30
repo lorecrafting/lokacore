@@ -563,7 +563,7 @@ Balance tool 6 ([study](../rnd/balance-diagnostics-2026-10-11.md) §2 C1, §1 I1
 `node kernel/ts/play/power.ts <artifact>` loads and refuses as `reach.ts` does and prints one
 canonical JSON document `{levels, items}` (`{levels, items, budget}` with a gear budget). Every bonus is the engine's
 [derived stat](mechanics.md#stats-derived-from-attributes-toolbox-row-2) formula (`derived` in
-`mechanics/attributes/shared.ts`) read with the attribute values below in place of a character's.
+`mechanics/attribute/shared.ts`) read with the attribute values below in place of a character's.
 
 - **Tables.** The authored `world.derived` tables whose base exists: `hit_chance` and `damage`
   with `world.combat.player_attack`, `carry_grams` with `world.carry`, `hp_max` with the `hp` pool.

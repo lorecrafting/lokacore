@@ -1,5 +1,5 @@
 import { dark, illuminated, unlit } from '../light/shared.ts';
-import { darkSight } from '../attributes/shared.ts';
+import { darkSight } from '../attribute/shared.ts';
 import { living } from '../death/shared.ts';
 import { concealed, perceives } from '../status/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).

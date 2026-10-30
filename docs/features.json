@@ -442,7 +442,7 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
-      "kernel/ts/src/mechanics/attributes/shared.ts"
+      "kernel/ts/src/mechanics/attribute/shared.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_loader.json",

@@ -21,7 +21,7 @@ import { invariants as factInvariants } from '../mechanics/fact_typed.ts';
 import { needsAncestry, refusal } from '../commands/actions.ts';
 import * as scripted_action from '../mechanics/scripted_action/rule.ts';
 import * as knowledge from '../mechanics/knowledge/rule.ts';
-import * as attributes from '../mechanics/attributes/rule.ts';
+import * as attributes from '../mechanics/attribute/rule.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
 import * as food from '../mechanics/food/rule.ts';
 import * as bleed from '../mechanics/bleed/rule.ts';

@@ -13,9 +13,9 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
-import { derived } from '../src/mechanics/attributes/shared.ts';
+import { derived } from '../src/mechanics/attribute/shared.ts';
 import { oneWrite } from '../src/mechanics/levelling/shared.ts';
-import { decide } from '../src/mechanics/attributes/rule.ts';
+import { decide } from '../src/mechanics/attribute/rule.ts';
 import { gameView } from '../src/view/view.ts';
 import { ctx } from './harness.ts';
 
