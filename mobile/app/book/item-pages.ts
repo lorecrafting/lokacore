@@ -32,7 +32,12 @@ export function restoredItemPages(
   while (at && 'container_id' in at) {
     const parent: string = at.container_id;
     at = items.find((e) => e.id === parent);
-    if (at) parents.unshift({ kind: 'thing', id: at.id }, { kind: 'inside', id: at.id });
+    // a person's Held list stays on their page (Npc.tsx); a container's goes through its Inside page
+    if (at)
+      parents.unshift(
+        { kind: 'thing', id: at.id },
+        ...(at.kind === 'npc' ? [] : [{ kind: 'inside', id: at.id } as const]),
+      );
   }
   return [{ kind: 'carrying' }, ...parents, { kind: 'thing', id: book.id }];
 }

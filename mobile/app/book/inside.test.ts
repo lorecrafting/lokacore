@@ -5,7 +5,10 @@ import { book, bundle } from './__tests__/polish-book.test.ts';
 import { routes } from '../stories/routes.ts';
 import { LABEL } from './labels.ts';
 import { pagesAfter } from './model.ts';
+import { restoredItemPages } from './item-pages.ts';
 
+// after the harness registers its .tsx loader
+const { resultPages } = await import('./updates.ts');
 const showcase = bundle('toolbox_showcase_hash');
 // The Farm Yard's seed sack, opened: one turnip seed inside.
 const openSack = () => {
@@ -20,6 +23,8 @@ const openSack = () => {
 test('Look inside opens the contents page; Leave returns to it, Close to the item page', () => {
   const h = openSack();
   const sack = h.stack.at(-1)!;
+  const opened = h.p.screen().detail((sack as { id: string }).id)[0]!;
+  assert.ok(h.text().includes(opened));
   assert.ok(!h.text().includes(LABEL.inside), 'the item page draws no Inside list');
   h.tap(LABEL.lookInside);
   assert.deepEqual(h.stack.at(-1), { kind: 'inside', id: (sack as { id: string }).id });
@@ -30,6 +35,9 @@ test('Look inside opens the contents page; Leave returns to it, Close to the ite
   assert.equal(h.stack.at(-1)!.kind, 'inside');
   h.tap(LABEL.close);
   assert.deepEqual(h.stack.at(-1), sack);
+  assert.ok(h.text().includes(opened), 'the item page visit outlives its Inside page');
+  h.tap(LABEL.leave);
+  assert.deepEqual(h.stack, []);
   h.unmount();
   h.sql.close();
 });
@@ -64,4 +72,44 @@ test('a closed lid or a room change clears the contents page', () => {
   assert.deepEqual(pagesAfter(stack, view, moved), []);
   h.unmount();
   h.sql.close();
+});
+
+// Breaks: a corpse Take that leaves items behind drops the Inside page the player took from.
+test('a corpse Take with items left returns to its Inside page', () => {
+  const corpse = { id: 'c', name: 'corpse', contents: [] };
+  const view = {
+    place: { id: 'p' },
+    entities: [corpse, { id: 'tooth', name: 'tooth', container_id: 'c' }],
+    inventory: [{ id: 'ear', name: 'ear' }],
+  };
+  const stack = [
+    { kind: 'thing', id: 'c' },
+    { kind: 'inside', id: 'c' },
+    { kind: 'thing', id: 'ear' },
+  ] as const;
+  const screen = { returnWorld: false, returnDetail: 'c', view } as never;
+  assert.deepEqual(resultPages([...stack], screen), stack.slice(0, 2));
+});
+
+// Breaks: a cold reopen of a Read routes a person's held book through an Inside page they never draw.
+test('a restored Read goes through a container Inside page, never a person', () => {
+  const read = [{ action_key: 'read' }];
+  const view = (kind: string) => ({
+    entities: [
+      { id: 'h', kind, contents: [] },
+      { id: 'b', container_id: 'h', actions: read },
+    ],
+    inventory: [],
+  });
+  const pages = (kind: string) =>
+    restoredItemPages(view(kind) as never, (id) => (id === 'b' ? ['text'] : []));
+  assert.deepEqual(pages('npc'), [
+    { kind: 'carrying' },
+    { kind: 'thing', id: 'h' },
+    { kind: 'thing', id: 'b' },
+  ]);
+  assert.deepEqual(pages('item').slice(1, 3), [
+    { kind: 'thing', id: 'h' },
+    { kind: 'inside', id: 'h' },
+  ]);
 });
