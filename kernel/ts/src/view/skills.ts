@@ -83,7 +83,7 @@ export function freeLessons(world: World, npc: string, actor: CharacterId, steps
       Object.values(d.choices).flatMap((o) =>
         o.lesson_payment
           ? []
-          : (o.sequence ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
+          : (o.steps ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
       ),
     )
     .filter((r) => !concealed(world, actor, r, steps));

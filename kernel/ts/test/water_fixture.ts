@@ -149,7 +149,7 @@ export function waterSource(c: any) {
       learn: {
         label: 'sedge.swim.choice',
         narration: 'sedge.swim.learned',
-        sequence: [{ op: 'skill.acquire', skill: ref('skill', 'swim') }],
+        steps: [{ op: 'skill.acquire', skill: ref('skill', 'swim') }],
       },
     },
   };

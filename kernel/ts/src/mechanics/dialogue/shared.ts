@@ -116,7 +116,7 @@ export function blocked(
   if (watched) return watched;
   const escort = escortRefused(world, row, option);
   if (escort) return escort;
-  for (const step of option.sequence ?? [])
+  for (const step of option.steps ?? [])
     if (step.op === 'skill.acquire' && !learnable(world, row.actor_id, step.skill, steps))
       return 'invalid_state' as const;
   if (

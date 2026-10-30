@@ -62,7 +62,7 @@ v['resources'][key('resource', 'mv')].update(
            dict(at_percent=0, key='exhausted', tone='danger')])
 v['quests'] = {key('quest', 'lantern'): definition('lantern', title='quest.lantern.title', objective=dict(evidence='current_state', policy=dict(op='has_item', item=ref('item', 'lantern'))), journal=dict(active='quest.lantern.find', objectives_met='quest.lantern.return', resolved='quest.lantern.done', failed='quest.lantern.failed', abandoned='quest.lantern.abandoned', outcomes=dict(take_it='quest.lantern.carried')))}
 roles = dict(bram=dict(role='npc', npc=ref('npc', 'bram')))
-choices = {name: dict(label=f'dialogue.bram.{outcome}', narration=f'narration.bram.{outcome}', sequence=[dict(op='fact.assign', fact=ref('fact', 'search_plan'), value=value)]) for name, outcome, value in [('take_it', 'carry', 'player_led'), ('leave_it', 'leave', 'party_led')]}
+choices = {name: dict(label=f'dialogue.bram.{outcome}', narration=f'narration.bram.{outcome}', steps=[dict(op='fact.assign', fact=ref('fact', 'search_plan'), value=value)]) for name, outcome, value in [('take_it', 'carry', 'player_led'), ('leave_it', 'leave', 'party_led')]}
 choices['leave_it']['hand_over'] = dict(item='lantern', to='bram')
 v['dialogues'] = {
     key('dialogue', 'bram'): definition('bram', npc=ref('npc', 'bram'), policy=quest_state('active'), prompt='dialogue.bram.prompt', roles=dict(**roles, lantern=dict(role='item', item=ref('item', 'lantern'))), quest=ref('quest', 'lantern'), choices=choices),
@@ -102,7 +102,7 @@ v['quests'][key('quest', 'mauds_cellar')] = definition('mauds_cellar', title='qu
 maud_state = lambda state: dict(op='quest_state', quest=ref('quest', 'mauds_cellar'), state=state)
 maud_roles = dict(maud=dict(role='npc', npc=ref('npc', 'maud')))
 v['dialogues'][key('dialogue', 'maud_offer')] = definition('maud_offer', npc=ref('npc', 'maud'), policy=dict(op='not', item=dict(op='any', items=[maud_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']])), prompt='dialogue.maud_offer.prompt', roles=maud_roles, choices=dict(accept=dict(label='quest.mauds_cellar.accept', narration='narration.maud.accept', accept=ref('quest', 'mauds_cellar'))))
-v['dialogues'][key('dialogue', 'maud_turn_in')] = definition('maud_turn_in', npc=ref('npc', 'maud'), quest=ref('quest', 'mauds_cellar'), policy=maud_state('active'), prompt='dialogue.maud_turn_in.prompt', roles=dict(**maud_roles, key=dict(role='item', item=ref('item', 'cellar_key'))), choices=dict(done=dict(label='dialogue.maud_turn_in.done', narration='narration.maud.done', receive=dict(item='key', **{'from': 'maud'}), sequence=[dict(op='fact.adjust', fact=ref('fact', 'maud_trust'), amount=5), dict(op='fact.assign', fact=ref('fact', 'inn_cellar_cleared'), value=True)])))
+v['dialogues'][key('dialogue', 'maud_turn_in')] = definition('maud_turn_in', npc=ref('npc', 'maud'), quest=ref('quest', 'mauds_cellar'), policy=maud_state('active'), prompt='dialogue.maud_turn_in.prompt', roles=dict(**maud_roles, key=dict(role='item', item=ref('item', 'cellar_key'))), choices=dict(done=dict(label='dialogue.maud_turn_in.done', narration='narration.maud.done', receive=dict(item='key', **{'from': 'maud'}), steps=[dict(op='fact.adjust', fact=ref('fact', 'maud_trust'), amount=5), dict(op='fact.assign', fact=ref('fact', 'inn_cellar_cleared'), value=True)])))
 v['text'] = json.loads(Path('cartridges/cellar_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()

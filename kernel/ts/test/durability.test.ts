@@ -155,7 +155,7 @@ test('mend refuses a wielded weapon whose durability is another fact', () => {
 test('only combat and the smith write the edge', () => {
   const assign = { op: 'fact.assign', fact: ref('fact', 'edge'), value: 0 };
   const scripted = sampler((c) =>
-    c.scripted_actions[`${S}:action/forge`].outcomes.success.sequence.push(assign),
+    c.scripted_actions[`${S}:action/forge`].outcomes.success.steps.push(assign),
   );
   const w = forging(scripted);
   const forged = send(w, {

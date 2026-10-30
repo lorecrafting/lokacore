@@ -138,7 +138,7 @@ defmodule Loka.Content.Position do
 
   # Each author's write list: {steps, list}.
   defp lists("scripted_action", r),
-    do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "sequence"], o["sequence"]})
+    do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "steps"], o["steps"]})
 
   defp lists("reaction", r), do: [{["steps"], r["steps"]}]
 
@@ -155,5 +155,5 @@ defmodule Loka.Content.Position do
     ]
 
   defp lists("dialogue", d),
-    do: for({id, o} <- d["choices"], do: {["choices", id, "sequence"], o["sequence"] || []})
+    do: for({id, o} <- d["choices"], do: {["choices", id, "steps"], o["steps"] || []})
 end

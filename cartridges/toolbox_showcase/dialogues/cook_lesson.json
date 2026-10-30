@@ -19,7 +19,7 @@
     "cooking": {
       "label": "dialogue.cook_lesson.cooking",
       "narration": "narration.cook_lesson.cooking",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "cooking"

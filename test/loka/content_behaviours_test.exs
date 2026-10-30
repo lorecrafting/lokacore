@@ -18,12 +18,12 @@ defmodule Loka.ContentBehavioursTest do
   # Breaks: a copy key other than <rule>_<holder>, a holder marker left unfilled, `behaviours`
   # left on an item, or a behaviour reaching the artifact. The literal is the artifact's sha256
   # on main at 9cf4619c4, before the four reactions/take_*.json became one behaviour, with
-  # scripted_actions/ moved to actions/ and policies unwrapped (F3), display names renamed to `name` (F6) and reaction `apply` renamed `steps` (C3).
+  # scripted_actions/ moved to actions/ and policies unwrapped (F3), display names renamed to `name` (F6), action outcome `sequence` (F4) and reaction `apply` (C3) renamed `steps`.
   test "fishing_sampler compiles to the artifact of its hand-written take_* reactions" do
     {:ok, artifact, []} = Loka.Content.compile(@fishing)
 
     assert Base.encode16(:crypto.hash(:sha256, artifact), case: :lower) ==
-             "ffff00d13bab6cc3d628ec3b6df59e19004e028b01ed90b82bcb1f49979f22e0"
+             "a7f3dd412e686274d885e30c768a20712dbcada4bf8b6b41edcbb97b2489fb66"
   end
 
   # Breaks: a malformed list, an unknown name, a bad behaviour or a clashing copy passing

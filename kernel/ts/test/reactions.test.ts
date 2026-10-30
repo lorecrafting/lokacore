@@ -444,6 +444,31 @@ test('a reaction event.emit emits custom_event in step order, which triggers its
   ]);
 });
 
+// Breaks (C3 A review 1, reaction.ts event.emit): a delivery with no subject (its doer, another
+// character, has no body here) still emits its custom_event, so the rang rule pulls the rope.
+test('a reaction event.emit on a delivery with no subject emits nothing', () => {
+  const w = only({
+    ring: [{ event: 'custom_event', custom: 'ping' }, [EMIT]],
+    pull: [RANG, [SET('rope_taut')]],
+  });
+  const OTHER = { id: CMD, payload: { actor_id: 'c0ffee00-0000-4000-8000-000000000001' } } as never;
+  const ping = {
+    cartridge_id: 'green_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'event',
+    key: 'ping',
+  };
+  const root = accepted(w, 'x', [], [
+    { position: 1, payload: { type: 'custom_event', event: ping } },
+  ] as never);
+  const r = adopt(w, admit('scripted_action', root as never), OTHER, allocator(w, OTHER), 0);
+  assert.ok(r.decision.kind === 'accepted', JSON.stringify(r.decision));
+  assert.deepEqual(
+    r.decision.events.map((e) => e.payload.type),
+    ['custom_event'],
+  );
+});
+
 // Breaks: custom_event deliveries outside the reaction_depth budget (a rule re-emitting its own
 // event runs on to the deliveries limit, or forever).
 test('a reaction re-emitting its own custom_event exceeds reaction_depth', () => {

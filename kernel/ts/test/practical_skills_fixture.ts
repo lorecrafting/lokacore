@@ -109,7 +109,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
         learn: {
           label: 'teacher.choice',
           narration: 'teacher.learned',
-          sequence: [{ op: 'skill.acquire', skill: ref('skill', skill) }],
+          steps: [{ op: 'skill.acquire', skill: ref('skill', skill) }],
           lesson_payment: { to: 'teacher', resource: ref('resource', 'pennies'), amount: 2 },
         },
       },

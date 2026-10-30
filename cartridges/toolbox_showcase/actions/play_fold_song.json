@@ -24,7 +24,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "event.emit",
           "event": "song"

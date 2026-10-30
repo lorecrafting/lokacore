@@ -11,7 +11,7 @@
     "join": {
       "label": "dialogue.talk.join",
       "narration": "narration.talk.join",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "in_group",
@@ -22,7 +22,7 @@
     "leave": {
       "label": "dialogue.talk.leave",
       "narration": "narration.talk.leave",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "in_group",

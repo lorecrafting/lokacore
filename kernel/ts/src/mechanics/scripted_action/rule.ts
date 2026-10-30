@@ -10,7 +10,7 @@
 // and emits check_passed or check_failed at position 1; its result selects the outcome, success
 // or failure (the decision's outcome; performed for a scripted action without a check), and a failure
 // commits its costs, draw, cooldown, time and steps exactly like success (04 §5.0). Then that
-// outcome's sequence in order: each fact.assign a delta op whose expected value is the fact as the
+// outcome's steps in order: each fact.assign a delta op whose expected value is the fact as the
 // steps before it left it, each resource.adjust one from the resource's value as the costs and
 // steps before it left it, adding by and stopping at the bounds (none when that changes nothing), each event.emit a custom_event at its causal position; a fact.assign
 // that changes its fact leaves the next position free for the fact_changed the host puts there
@@ -85,14 +85,14 @@ export const decide: Rule<'scripted_action'> = (world, command, mint, steps = { 
   if ('code' in craft) return rejected(craft.code);
   const { check, duration } = scripted;
   const rolled = check && resolve(world, command, mint, check, subject_id, body);
-  const { sequence, narration } = scripted.outcomes[rolled?.outcome ?? 'success']!;
+  const { steps: outcome, narration } = scripted.outcomes[rolled?.outcome ?? 'success']!;
   const ops = [...paid.ops, ...craft.consumed];
   const start: Run = { ...START, ...paid, ops, rng: rolled?.rng ?? world.state.rng }; // row 29b: a kill's drops
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
   const practice = practised(world, actor_id, checked, check); // after the check reads the level
   const kept = rolled?.outcome === 'failure' ? [] : craft.made;
   const begun = made(world, command, mint, practice, kept);
-  const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
+  const ran = outcome.reduce(step(world, command, mint, subject_id, body), begun);
   const end = duration ? add(from, duration) : from; // a fight's first round never inside the cast
   const run = tip(world, actor_id, scripted, fightBack(world, actor_id, body, ran, mint, end));
   const said = { key: narration.actor, ...pinned(world, narration.participants, body) };
@@ -223,7 +223,7 @@ type CheckEvent = Extract<EventPayload, { type: 'check_passed' | 'check_failed' 
 const START = { ops: [], events: [], position: 0, facts: {}, levels: {}, lines: [] };
 
 // Homestead hs-10: unless the outcome is failure, the craft's yield moves to the body, each with
-// an item_acquired after the practice's fact_changed and before the sequence.
+// an item_acquired after the practice's fact_changed and before the steps.
 const made = (world: World, command: Command, mint: Mint, run: Run, moves: readonly Transfer[]) =>
   moves.reduce((r, o): Run => {
     const payload = {
@@ -235,7 +235,7 @@ const made = (world: World, command: Command, mint: Mint, run: Run, moves: reado
     return { ...r, ops: [...r.ops, o], position: r.position + 1, events: [...r.events, e] };
   }, run);
 
-// One step of the sequence over the run so far.
+// One step of the outcome over the run so far.
 const step =
   (world: World, command: Command, mint: Mint, subject_id: EntityId, body: EntityId) =>
   (r: Run, s: Step): Run => {

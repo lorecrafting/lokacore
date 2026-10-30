@@ -16,7 +16,7 @@
         "resource": "coins",
         "amount": 3
       },
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "hired",
@@ -27,7 +27,7 @@
     "dismiss": {
       "label": "dialogue.hal.dismiss",
       "narration": "narration.hal.dismiss",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "hired",
@@ -48,7 +48,7 @@
     "stay": {
       "label": "dialogue.hal.stay",
       "narration": "narration.hal.stay",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "staying",
@@ -59,7 +59,7 @@
     "follow": {
       "label": "dialogue.hal.follow",
       "narration": "narration.hal.follow",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "staying",
@@ -70,7 +70,7 @@
     "attack": {
       "label": "dialogue.hal.attack",
       "narration": "narration.hal.attack",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "fighting",
@@ -81,7 +81,7 @@
     "hold": {
       "label": "dialogue.hal.hold",
       "narration": "narration.hal.hold",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "fighting",
@@ -92,7 +92,7 @@
     "guard": {
       "label": "dialogue.hal.guard",
       "narration": "narration.hal.guard",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "staying",

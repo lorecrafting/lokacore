@@ -29,7 +29,7 @@
     "learn_carpentry": {
       "label": "old_carver.carpentry.choice",
       "narration": "old_carver.carpentry.learned",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "carpentry"

@@ -43,8 +43,8 @@ defmodule Loka.ContentTracksTest do
            {"RESERVED_FACT", "facts.facts.trail_hounds_exit"}},
           {[
              {"actions/track_clearing.json",
-              &update_in(&1, ["outcomes", "success", "sequence"], fn s -> s ++ [write] end)}
-           ], {"RESERVED_FACT", "actions/track_clearing.outcomes.success.sequence[1].fact"}},
+              &update_in(&1, ["outcomes", "success", "steps"], fn s -> s ++ [write] end)}
+           ], {"RESERVED_FACT", "actions/track_clearing.outcomes.success.steps[1].fact"}},
           {[{"cartridge.json", &(pop_in(&1, ["world", "trails", "leads", "north"]) |> elem(1))}],
            {"UNRESOLVED_REFERENCE", "cartridge.world.trails.leads"}},
           {[{"cartridge.json", &put_in(&1, ["world", "trails", "leads", "north"], "trail.nope")}],

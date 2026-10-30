@@ -462,7 +462,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -479,7 +479,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -523,7 +523,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -540,7 +540,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -584,7 +584,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -601,7 +601,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -640,7 +640,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -657,7 +657,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -701,7 +701,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -718,7 +718,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -763,7 +763,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -780,7 +780,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -825,7 +825,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -842,7 +842,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -887,7 +887,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -904,7 +904,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -950,7 +950,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -967,7 +967,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.seek_failed"
           }
@@ -1190,7 +1190,7 @@
         "answer": {
           "label": "dialogue.wisp.answer",
           "narration": "narration.wisp.correct",
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -1290,7 +1290,7 @@
         "answer": {
           "label": "dialogue.wisp.answer",
           "narration": "narration.wisp.correct",
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -1390,7 +1390,7 @@
         "answer": {
           "label": "dialogue.wisp.answer",
           "narration": "narration.wisp.correct",
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -1434,7 +1434,7 @@
     "value": {
       "label": "dialogue.answer",
       "narration": "narration.answer",
-      "sequence": [
+      "steps": [
         {
           "op": "topic.grant",
           "topic": {
@@ -1449,12 +1449,12 @@
     "valid": true
   },
   {
-    "name": "topic grant missing sequence.0.op",
+    "name": "topic grant missing steps.0.op",
     "contract": "DialogueChoice",
     "value": {
       "label": "dialogue.answer",
       "narration": "narration.answer",
-      "sequence": [
+      "steps": [
         {
           "topic": {
             "cartridge_id": "village_chapter",
@@ -1468,12 +1468,12 @@
     "valid": false
   },
   {
-    "name": "topic grant missing sequence.0.topic",
+    "name": "topic grant missing steps.0.topic",
     "contract": "DialogueChoice",
     "value": {
       "label": "dialogue.answer",
       "narration": "narration.answer",
-      "sequence": [
+      "steps": [
         {
           "op": "topic.grant"
         }
@@ -1482,12 +1482,12 @@
     "valid": false
   },
   {
-    "name": "topic grant invalid sequence.0.op topic.bad",
+    "name": "topic grant invalid steps.0.op topic.bad",
     "contract": "DialogueChoice",
     "value": {
       "label": "dialogue.answer",
       "narration": "narration.answer",
-      "sequence": [
+      "steps": [
         {
           "op": "topic.bad",
           "topic": {
@@ -1502,12 +1502,12 @@
     "valid": false
   },
   {
-    "name": "topic grant invalid sequence.0.extra True",
+    "name": "topic grant invalid steps.0.extra True",
     "contract": "DialogueChoice",
     "value": {
       "label": "dialogue.answer",
       "narration": "narration.answer",
-      "sequence": [
+      "steps": [
         {
           "op": "topic.grant",
           "topic": {

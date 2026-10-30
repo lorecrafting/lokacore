@@ -10,7 +10,7 @@ const ref = (key: string) => ({
   kind: 'skill',
   key,
 });
-const teach = (key: string) => ({ sequence: [{ op: 'skill.acquire', skill: ref(key) }] });
+const teach = (key: string) => ({ steps: [{ op: 'skill.acquire', skill: ref(key) }] });
 const world = (carving: object) =>
   ({
     cartridge: {

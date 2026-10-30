@@ -35,7 +35,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "build",
           "structure": "hut_timbered",
@@ -47,7 +47,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.raise_timbered_hut.failure"
       }

@@ -11,7 +11,7 @@
     "ask_name": {
       "label": "dialogue.stranger.ask_name",
       "narration": "narration.stranger.ask_name",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "knows_name",

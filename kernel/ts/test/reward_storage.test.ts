@@ -46,7 +46,7 @@ test('reward adds and clamps trust; every independent death credit is required',
         maximum: 9,
         default: before,
       };
-      c.dialogues[`${prefix}:dialogue/maud_turn_in`].choices.done.sequence[0].amount = amount;
+      c.dialogues[`${prefix}:dialogue/maud_turn_in`].choices.done.steps[0].amount = amount;
     });
     const w = ready(alternative);
     assert.equal(value(ok(w, choose(w)), w.character, ref('fact', 'maud_trust')), expected);
@@ -154,7 +154,7 @@ test('adjustment uses sequence overlay and faults on corrupt/unsafe values befor
   const chained = ready(
     world((c) => {
       const o = c.dialogues[`${prefix}:dialogue/maud_turn_in`].choices.done;
-      o.sequence.unshift({ op: 'fact.assign', fact: ref('fact', 'maud_trust'), value: 3 });
+      o.steps.unshift({ op: 'fact.assign', fact: ref('fact', 'maud_trust'), value: 3 });
     }),
   );
   assert.equal(
@@ -169,7 +169,7 @@ test('adjustment uses sequence overlay and faults on corrupt/unsafe values befor
   }
   const reserved = ready();
   const cartridge = structuredClone(reserved.cartridge) as any;
-  cartridge.dialogues[`${prefix}:dialogue/maud_turn_in`].choices.done.sequence = [
+  cartridge.dialogues[`${prefix}:dialogue/maud_turn_in`].choices.done.steps = [
     { op: 'fact.adjust', fact: ref('fact', 'scene_lantern_kept'), amount: 1 },
   ];
   const engineWrite = { ...reserved, cartridge };

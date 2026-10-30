@@ -11,7 +11,7 @@
     "praise": {
       "label": "dialogue.bess_talk.praise",
       "narration": "narration.bess_talk.praise",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "wardle_standing",
@@ -22,7 +22,7 @@
     "insult": {
       "label": "dialogue.bess_talk.insult",
       "narration": "narration.bess_talk.insult",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "wardle_standing",
@@ -33,7 +33,7 @@
     "boast": {
       "label": "dialogue.bess_talk.boast",
       "narration": "narration.bess_talk.boast",
-      "sequence": [],
+      "steps": [],
       "check": {
         "key": "boast_bess",
         "kind": "opposed",
@@ -45,7 +45,7 @@
     "lean": {
       "label": "dialogue.bess_talk.lean",
       "narration": "narration.bess_talk.lean",
-      "sequence": [],
+      "steps": [],
       "check": {
         "key": "lean_bess",
         "kind": "opposed",

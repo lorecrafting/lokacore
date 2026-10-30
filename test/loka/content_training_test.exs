@@ -42,7 +42,7 @@ defmodule Loka.ContentTrainingTest do
              ref.("skill", "blade")
 
     choice = c["dialogues"][prefix <> ":dialogue/carpenter_lessons"]["choices"]["carving"]
-    assert choice["sequence"] == [%{"op" => "skill.acquire", "skill" => ref.("skill", "carving")}]
+    assert choice["steps"] == [%{"op" => "skill.acquire", "skill" => ref.("skill", "carving")}]
     assert choice["lesson_payment"]["resource"] == ref.("resource", "pennies")
     assert c["world"]["combat"]["dodge"]["skill"] == ref.("skill", "blade")
   end
@@ -54,7 +54,7 @@ defmodule Loka.ContentTrainingTest do
   } do
     carving =
       &{"dialogues/carpenter_lessons.json",
-       fn d -> update_in(d, ["choices", "carving", "sequence"], &1) end}
+       fn d -> update_in(d, ["choices", "carving", "steps"], &1) end}
 
     # The scene's on_end claims a letter_fate outcome so its write is otherwise valid.
     on_end = fn fact ->
@@ -82,7 +82,7 @@ defmodule Loka.ContentTrainingTest do
              carving.(fn _ ->
                [%{"op" => "fact.assign", "fact" => "skill_carving", "value" => true}]
              end)
-           ], {"RESERVED_FACT", "dialogues/carpenter_lessons.choices.carving.sequence[0].fact"}},
+           ], {"RESERVED_FACT", "dialogues/carpenter_lessons.choices.carving.steps[0].fact"}},
           {[carving.(&(&1 ++ &1))],
            {"SCHEMA_VIOLATION", "dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
           {[{"npcs/carpenter.json", &Map.delete(&1, "resource_starts")}],

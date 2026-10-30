@@ -21,7 +21,7 @@
     "carry": {
       "label": "dialogue.bram.carry",
       "narration": "proof.carry",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "search_plan",
@@ -33,7 +33,7 @@
     "leave": {
       "label": "dialogue.bram.leave",
       "narration": "proof.leave",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "search_plan",

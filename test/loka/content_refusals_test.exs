@@ -251,6 +251,37 @@ defmodule Loka.ContentRefusalsTest do
              dir,
              quest.(&put_in(&1, ["exchange", "contribution"], "missing"))
            )
+
+    # Breaks: an exchange turn-in choice compiles with its own steps, which the kernel's exchange
+    # contribution would overwrite (exchanges.ex valid_choice?).
+    turn_in = fn choice ->
+      [
+        {"cartridge.json", &put_in(&1, ["requires", "capabilities", "dialogue"], 1)},
+        {"dialogues/healer_turn_in.json",
+         %{
+           "npc" => "healer",
+           "quest" => "herbs",
+           "prompt" => "quest.herbs.journal",
+           "policy" => %{"op" => "all", "items" => []},
+           "roles" => %{"healer" => %{"role" => "npc", "npc" => "healer"}},
+           "choices" => %{"turn_in" => choice}
+         }}
+      ]
+    end
+
+    plain = %{
+      "label" => "quest.herbs.journal",
+      "narration" => "quest.herbs.journal",
+      "exchange" => true
+    }
+
+    step = %{"op" => "fact.assign", "fact" => "axis", "value" => 1}
+    assert_ok(dir, exchange ++ turn_in.(plain))
+
+    assert {"OUTCOME_MISMATCH", "dialogues/healer_turn_in.choices.turn_in.exchange"} in codes(
+             dir,
+             exchange ++ turn_in.(Map.put(plain, "steps", [step]))
+           )
   end
 
   # Breaks: a hound-style area whose rooms are not joined both ways compiles and later strands

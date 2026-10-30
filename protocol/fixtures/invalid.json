@@ -375,7 +375,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -441,7 +441,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -589,7 +589,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -655,7 +655,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -731,7 +731,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -10145,7 +10145,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/outcomes/success/sequence",
+        "path": "/outcomes/success/steps",
         "code": "missing_property"
       }
     ]
@@ -10175,7 +10175,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [],
+          "steps": [],
           "narration": {}
         }
       }
@@ -10186,7 +10186,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/outcomes/success/sequence",
+        "path": "/outcomes/success/steps",
         "code": "too_few_items"
       }
     ]
@@ -10234,7 +10234,7 @@
         "y": 1,
         "success": {
           "z": 1,
-          "sequence": [
+          "steps": [
             {
               "op": "event.emit",
               "event": "e"
@@ -10322,7 +10322,7 @@
         "code": "unknown_property"
       },
       {
-        "path": "/outcomes/success/sequence",
+        "path": "/outcomes/success/steps",
         "code": "too_many_items"
       },
       {
@@ -10729,7 +10729,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -10751,7 +10751,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pry_lid.failure"
           }
@@ -10805,7 +10805,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -10827,7 +10827,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pry_lid.failure"
           }
@@ -10882,7 +10882,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -10904,7 +10904,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pry_lid.failure"
           }
@@ -10959,7 +10959,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -10995,7 +10995,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/outcomes/failure/sequence",
+        "path": "/outcomes/failure/steps",
         "code": "missing_property"
       }
     ]
@@ -11035,7 +11035,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -11057,7 +11057,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {},
           "z": 1
         }
@@ -11115,7 +11115,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -11137,7 +11137,7 @@
           }
         },
         "failure": {
-          "sequence": [
+          "steps": [
             {
               "op": "event.emit",
               "event": "e"
@@ -11226,7 +11226,7 @@
         "code": "unknown_property"
       },
       {
-        "path": "/outcomes/failure/sequence",
+        "path": "/outcomes/failure/steps",
         "code": "too_many_items"
       }
     ]
@@ -13280,7 +13280,7 @@
         "d": {
           "label": "a",
           "narration": "b",
-          "sequence": [
+          "steps": [
             {
               "op": "event.emit",
               "fact": {
@@ -13353,27 +13353,27 @@
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/0/event",
+        "path": "/choices/d/steps/0/event",
         "code": "missing_property"
       },
       {
-        "path": "/choices/d/sequence/0/fact",
+        "path": "/choices/d/steps/0/fact",
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/0/value",
+        "path": "/choices/d/steps/0/value",
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/1/fact",
+        "path": "/choices/d/steps/1/fact",
         "code": "missing_property"
       },
       {
-        "path": "/choices/d/sequence/1/value",
+        "path": "/choices/d/steps/1/value",
         "code": "missing_property"
       },
       {
-        "path": "/choices/d/sequence/2/op",
+        "path": "/choices/d/steps/2/op",
         "code": "missing_property"
       },
       {
@@ -16529,7 +16529,7 @@
           "duration": 3600,
           "outcomes": {
             "success": {
-              "sequence": [
+              "steps": [
                 {
                   "op": "event.emit",
                   "event": "rope_coiled"
@@ -16710,7 +16710,7 @@
             "carry": {
               "label": "dialogue.bram.carry",
               "narration": "narration.bram.carry",
-              "sequence": [
+              "steps": [
                 {
                   "op": "fact.assign",
                   "fact": {
@@ -16726,7 +16726,7 @@
             "leave": {
               "label": "dialogue.bram.leave",
               "narration": "narration.bram.leave",
-              "sequence": [
+              "steps": [
                 {
                   "op": "fact.assign",
                   "fact": {
@@ -17427,7 +17427,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "event.emit",
               "event": "done"
@@ -17479,7 +17479,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "event.emit",
               "event": "done"
@@ -19433,7 +19433,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -19450,7 +19450,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -19506,7 +19506,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -19523,7 +19523,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -19573,7 +19573,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -19590,7 +19590,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -20813,7 +20813,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -20830,7 +20830,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -28329,7 +28329,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -28346,7 +28346,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -28394,7 +28394,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -28411,7 +28411,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -28455,7 +28455,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -28472,7 +28472,7 @@
           }
         },
         "failure": {
-          "sequence": [],
+          "steps": [],
           "narration": {
             "actor": "narration.pick.failure"
           }
@@ -29943,7 +29943,7 @@
       },
       "outcomes": {
         "success": {
-          "sequence": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {

@@ -160,7 +160,7 @@ const digging =
         policy: { op: 'all', items: [] },
         outcomes: {
           success: {
-            sequence: [{ op: 'event.emit', event: 'dig' }],
+            steps: [{ op: 'event.emit', event: 'dig' }],
             narration: { actor: 'narration.mine' },
           },
         },

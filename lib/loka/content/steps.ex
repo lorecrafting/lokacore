@@ -2,7 +2,7 @@ defmodule Loka.Content.Steps do
   @moduledoc """
   The one step vocabulary's context table (C3 D6, loka-ivjq.4). step.schema.json Step admits
   every registered op; which ops each context runs (a reaction's apply, a scripted action's
-  sequence, a dialogue choice's sequence, a service's benefits), which of their fields, and the
+  steps, a dialogue choice's sequence, a service's benefits), which of their fields, and the
   event an op needs registered are this table. `check/5` refuses the rest.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]

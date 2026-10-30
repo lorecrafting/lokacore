@@ -17,7 +17,7 @@ defmodule Loka.ContentRiddleLimitTest do
       "answer" => %{
         "label" => "dialogue.riddle.answer",
         "narration" => "narration.riddle.answer",
-        "sequence" => [%{"op" => "fact.assign", "fact" => "riddle_solved", "value" => true}]
+        "steps" => [%{"op" => "fact.assign", "fact" => "riddle_solved", "value" => true}]
       }
     },
     "riddle" => %{
@@ -80,7 +80,7 @@ defmodule Loka.ContentRiddleLimitTest do
   test "a reopening dialogue rejects a direct assignment of a bounded riddle answer fact", %{
     dir: dir
   } do
-    at = "dialogues/chat.choices.ask.sequence[0].op"
+    at = "dialogues/chat.choices.ask.steps[0].op"
 
     unbounded =
       @riddle |> Map.delete("quest") |> Map.update!("riddle", &Map.delete(&1, "wrong_limit"))
@@ -100,7 +100,7 @@ defmodule Loka.ContentRiddleLimitTest do
           "ask" => %{
             "label" => "dialogue.bram.carry",
             "narration" => "narration.bram.carry",
-            "sequence" => [%{"op" => "fact.assign", "fact" => fact, "value" => true}]
+            "steps" => [%{"op" => "fact.assign", "fact" => fact, "value" => true}]
           },
           "bye" => %{"label" => "dialogue.bram.leave", "narration" => "narration.bram.leave"}
         }

@@ -28,7 +28,7 @@ function cartridge() {
     edit('cartridge.json', (j) => (j.requires.kernel_api.at_least = '1.119'));
     edit('actions/flamma.json', (j) => {
       j.target.aimed = { scopes: ['room_occupants'] };
-      delete j.outcomes.success.sequence[0].npc;
+      delete j.outcomes.success.steps[0].npc;
     });
     return compiled(dir);
   } finally {

@@ -146,7 +146,7 @@ test('an assign that keeps its value takes no position and emits no fact_changed
   const w = world((c) => {
     const r = c.scripted_actions[SCRIPTED];
     r.policy = { op: 'all', items: [] };
-    r.outcomes.success.sequence.splice(1, 0, r.outcomes.success.sequence[0]);
+    r.outcomes.success.steps.splice(1, 0, r.outcomes.success.steps[0]);
   });
   const { decision } = step(w, ring(), 0);
   assert.ok(decision.kind === 'accepted');
@@ -185,7 +185,7 @@ test('perform is rejected for another target, key or room, and once its policy f
 test('a scripted action assigning a wrongly typed value faults with nothing committed', () => {
   const ok = world();
   const cartridge = structuredClone(ok.cartridge) as any;
-  cartridge.scripted_actions[SCRIPTED].outcomes.success.sequence[0].value = 'yes';
+  cartridge.scripted_actions[SCRIPTED].outcomes.success.steps[0].value = 'yes';
   const w = { ...ok, cartridge };
   const r = step(w, ring(), 0);
   assert.deepEqual(plain(r.decision), {
@@ -193,6 +193,19 @@ test('a scripted action assigning a wrongly typed value faults with nothing comm
     code: 'precondition_failed',
     target: { kind: 'fact', fact: ref('fact', 'chapel_bell_rung'), scope: instance },
   });
+  assert.equal(r.world, w);
+});
+
+// Breaks (C3 D6, loka-ivjq.4): an op the compiler's scripted action context refuses (steps.ex),
+// reaching the kernel in a malformed definition, is skipped or run instead of faulting (rule.ts
+// throws precondition_failed; deciding turns a KernelError into evaluator_error).
+test('a scripted action step outside the action context faults with nothing committed', () => {
+  const ok = world();
+  const cartridge = structuredClone(ok.cartridge) as any;
+  cartridge.scripted_actions[SCRIPTED].outcomes.success.steps[1] = { op: 'narrate', text: 'x' };
+  const w = { ...ok, cartridge };
+  const r = step(w, ring(), 0);
+  assert.deepEqual(plain(r.decision), { kind: 'fault', code: 'evaluator_error' }); // world.ts:147
   assert.equal(r.world, w);
 });
 

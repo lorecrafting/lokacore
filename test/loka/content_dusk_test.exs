@@ -40,14 +40,14 @@ defmodule Loka.ContentDuskTest do
     step = %{"op" => "fact.assign", "fact" => "crypt_gate_open", "value" => false}
 
     {:ok, artifact, []} =
-      compile(dir, pick(["outcomes", "failure", "sequence"], fn _ -> [step] end))
+      compile(dir, pick(["outcomes", "failure", "steps"], fn _ -> [step] end))
 
     [failure] =
       JSON.decode!(artifact)["cartridge"]["scripted_actions"][
         "check_sampler@0.0.1:action/pick_lock"
       ][
         "outcomes"
-      ]["failure"]["sequence"]
+      ]["failure"]["steps"]
 
     assert failure["fact"]["kind"] == "fact"
   end
@@ -68,12 +68,12 @@ defmodule Loka.ContentDuskTest do
   test "a failure outcome's references and owners, and the check's, are checked", %{dir: dir} do
     step = %{"op" => "fact.assign", "fact" => "gate_rusted", "value" => true}
 
-    assert compile(dir, pick(["outcomes", "failure", "sequence"], fn _ -> [step] end)) ==
+    assert compile(dir, pick(["outcomes", "failure", "steps"], fn _ -> [step] end)) ==
              {:error,
               [
                 d(
                   "UNRESOLVED_REFERENCE",
-                  "actions/pick_lock.outcomes.failure.sequence[0].fact",
+                  "actions/pick_lock.outcomes.failure.steps[0].fact",
                   %{
                     "target" => "check_sampler@0.0.1:fact/gate_rusted"
                   }
@@ -109,14 +109,14 @@ defmodule Loka.ContentDuskTest do
     files =
       Map.merge(
         without("fact"),
-        pick(["outcomes", "failure", "sequence"], fn _ -> [emit, step] end)
+        pick(["outcomes", "failure", "steps"], fn _ -> [emit, step] end)
       )
 
     {:error, diags} = compile(dir, files)
 
     assert d(
              "UNDECLARED_CAPABILITY",
-             "actions/pick_lock.outcomes.failure.sequence[1].op",
+             "actions/pick_lock.outcomes.failure.steps[1].op",
              %{"capability" => "fact"},
              ["fact@1"]
            ) in diags
