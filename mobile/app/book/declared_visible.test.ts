@@ -84,8 +84,12 @@ const spellPoolBesideMa = (w: World) => {
 
 for (const [name, bytes] of artifacts()) {
   const w = open(bytes);
-  // hello_sampler is a text-only greeting with no entry room.
-  if (!w) continue;
+  // hello_sampler is a text-only greeting with no entry room; any other cartridge must open.
+  if (!w) {
+    test(`${name} has no entry room only if it is hello_sampler`, () =>
+      assert.equal(name, 'hello_sampler'));
+    continue;
+  }
   const c = w.cartridge;
   test(`${name}: declared pools and statuses are in the GameView and on the Character page`, () => {
     // No stock cartridge has a meal service, whose stock pool the view leaves out (resources.ts).
