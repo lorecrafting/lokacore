@@ -10,7 +10,8 @@
 # file with one edited line plans other than that line's two mutants, or a pure rename plans any; a
 # 0-minute budget still runs setup (a BASELINE-RED row, not TIMEBOX) or exits other than 3; a 1-minute
 # budget lets bin/mutate.sh run mutants after setup used part of it; or a
-# non-integer or leading-zero MUTATE_MINUTES is not a usage error.
+# non-integer or leading-zero MUTATE_MINUTES is not a usage error; or a SURVIVED row next to a TIMEBOX
+# row (bin/mutate.sh exit 3) does not exit 1.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -127,5 +128,8 @@ for m in 1.5 08; do
   rc=0; MUTATE_MINUTES=$m sh bin/mutate_diff.sh HEAD~1 > outx 2>&1 || rc=$?
   [ "$rc" = 2 ] && grep -q 'MUTATE_MINUTES must be an integer' outx || bad "MUTATE_MINUTES=$m: exit $rc, not a usage error"
 done
+printf '%s\n' '#!/bin/sh' 'printf "SURVIVED\tsrc/gate.ts\tx\nTIMEBOX\tsrc/gate.ts\tnot run\n"; exit 3' > bin/mutate.sh
+rc=0; PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out3 2>&1 || rc=$?
+[ "$rc" = 1 ] && grep -q '^SURVIVED	' out3 && grep -q '^TIMEBOX	' out3 || bad "SURVIVED beside TIMEBOX: exit $rc, want 1"
 [ "$fail" = 0 ] && echo "mutate_diff red controls: all pass" || cat out
 exit "$fail"
