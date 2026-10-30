@@ -19,7 +19,7 @@
     "reason": {
       "label": "dialogue.warden_talk.reason",
       "narration": "narration.warden_talk.reason",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "warden_lets_pass",
@@ -37,7 +37,7 @@
     "lean": {
       "label": "dialogue.warden_talk.lean",
       "narration": "narration.warden_talk.lean",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "warden_lets_pass",

@@ -151,7 +151,7 @@ defmodule Loka.Content.Skills do
   defp teaches?(d, hidden?),
     do:
       Enum.any?(Map.values(d["choices"]), fn o ->
-        Enum.any?(o["sequence"] || [], &hidden?.(&1["skill"]))
+        Enum.any?(o["steps"] || [], &hidden?.(&1["skill"]))
       end)
 
   defp hidden(m, defs),
@@ -243,9 +243,9 @@ defmodule Loka.Content.Skills do
 
   def choice(rel, steps, o, d, ctx) do
     refs =
-      for {s, i} <- Enum.with_index(o["sequence"] || []),
+      for {s, i} <- Enum.with_index(o["steps"] || []),
           s["op"] == "skill.acquire",
-          e <- reference(rel, steps ++ ["sequence", i], {"skill", "skill"}, s, ctx.m, ctx.defs),
+          e <- reference(rel, steps ++ ["steps", i], {"skill", "skill"}, s, ctx.m, ctx.defs),
           do: e
 
     refs ++ lesson(rel, steps, o, d, ctx)
@@ -269,7 +269,7 @@ defmodule Loka.Content.Skills do
       else: []
   end
 
-  defp grants(o), do: Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire"))
+  defp grants(o), do: Enum.count(o["steps"] || [], &(&1["op"] == "skill.acquire"))
 
   defp funded?(%{"role" => "npc", "npc" => ref}, resource, ctx) do
     case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do

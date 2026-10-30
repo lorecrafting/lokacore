@@ -42,8 +42,8 @@ defmodule Loka.Content.Topics do
   defp grants(m, defs) do
     for {_, {rel, _, d}} <- defs["dialogue"],
         {id, o} <- d["choices"],
-        {%{"op" => "topic.grant"} = s, i} <- Enum.with_index(Map.get(o, "sequence", [])),
-        error <- reference(rel, ["choices", id, "sequence", i], "topic", s, m, defs),
+        {%{"op" => "topic.grant"} = s, i} <- Enum.with_index(Map.get(o, "steps", [])),
+        error <- reference(rel, ["choices", id, "steps", i], "topic", s, m, defs),
         do: error
   end
 

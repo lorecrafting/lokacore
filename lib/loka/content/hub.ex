@@ -23,7 +23,7 @@ defmodule Loka.Content.Hub do
     answers =
       for {_, {_, [], %{"riddle" => %{"wrong_limit" => _, "choice_id" => id}} = d}} <-
             Map.get(defs, "dialogue", %{}),
-          %{"op" => "fact.assign", "fact" => f} <- get_in(d, ["choices", id, "sequence"]) || [],
+          %{"op" => "fact.assign", "fact" => f} <- get_in(d, ["choices", id, "steps"]) || [],
           do: f
 
     (topics ++ seen ++ answers) |> MapSet.new(&key/1) |> MapSet.delete(nil)
@@ -43,9 +43,9 @@ defmodule Loka.Content.Hub do
     escort = if match?(%{"escort" => %{"transition" => "start"}}, o), do: [["escort"]], else: []
 
     steps =
-      for {s, i} <- Enum.with_index(Map.get(o, "sequence", [])),
+      for {s, i} <- Enum.with_index(Map.get(o, "steps", [])),
           once?(s, proven),
-          do: ["sequence", i, "op"]
+          do: ["steps", i, "op"]
 
     receive ++ escort ++ steps
   end

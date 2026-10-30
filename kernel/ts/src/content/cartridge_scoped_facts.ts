@@ -86,9 +86,9 @@ export function scopeSites(c: Obj): Diagnostic[] {
         BOUND.some((f) => Object.hasOwn(o, f)) ||
         (d.riddle?.choice_id === key && d.riddle.wrong_limit !== undefined)
       )
-        (o.sequence ?? []).forEach((x: Obj, i: number) => {
+        (o.steps ?? []).forEach((x: Obj, i: number) => {
           if (x.fact && subjective(x.fact))
-            out.push(`.cartridge.dialogues${step(ref)}.choices${step(key)}.sequence[${i}].fact`);
+            out.push(`.cartridge.dialogues${step(ref)}.choices${step(key)}.steps[${i}].fact`);
         });
   }
   return out.map((at) => diag('FACT_SCOPE_UNSUPPORTED', at));

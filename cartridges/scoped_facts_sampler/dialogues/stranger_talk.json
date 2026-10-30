@@ -11,7 +11,7 @@
     "greet": {
       "label": "dialogue.talk.greet",
       "narration": "narration.talk.greet",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "times_met",
@@ -22,7 +22,7 @@
     "help": {
       "label": "dialogue.talk.help",
       "narration": "narration.talk.help",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "trust",

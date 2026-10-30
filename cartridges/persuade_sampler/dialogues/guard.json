@@ -11,7 +11,7 @@
     "persuade": {
       "label": "dialogue.guard.persuade",
       "narration": "narration.guard.persuade",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "gate_open",
@@ -29,7 +29,7 @@
     "intimidate": {
       "label": "dialogue.guard.intimidate",
       "narration": "narration.guard.intimidate",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "gate_open",

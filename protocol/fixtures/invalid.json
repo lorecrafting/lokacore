@@ -13280,7 +13280,7 @@
         "d": {
           "label": "a",
           "narration": "b",
-          "sequence": [
+          "steps": [
             {
               "op": "event.emit",
               "fact": {
@@ -13353,27 +13353,27 @@
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/0/event",
+        "path": "/choices/d/steps/0/event",
         "code": "missing_property"
       },
       {
-        "path": "/choices/d/sequence/0/fact",
+        "path": "/choices/d/steps/0/fact",
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/0/value",
+        "path": "/choices/d/steps/0/value",
         "code": "unknown_property"
       },
       {
-        "path": "/choices/d/sequence/1/fact",
+        "path": "/choices/d/steps/1/fact",
         "code": "missing_property"
       },
       {
-        "path": "/choices/d/sequence/1/value",
+        "path": "/choices/d/steps/1/value",
         "code": "missing_property"
       },
       {
-        "path": "/choices/d/sequence/2/op",
+        "path": "/choices/d/steps/2/op",
         "code": "missing_property"
       },
       {
@@ -16710,7 +16710,7 @@
             "carry": {
               "label": "dialogue.bram.carry",
               "narration": "narration.bram.carry",
-              "sequence": [
+              "steps": [
                 {
                   "op": "fact.assign",
                   "fact": {
@@ -16726,7 +16726,7 @@
             "leave": {
               "label": "dialogue.bram.leave",
               "narration": "narration.bram.leave",
-              "sequence": [
+              "steps": [
                 {
                   "op": "fact.assign",
                   "fact": {

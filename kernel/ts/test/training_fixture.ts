@@ -93,7 +93,7 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
     const option: any = {
       label: text,
       narration: text,
-      sequence: [{ op: 'skill.acquire', skill: ref('skill', skill) }],
+      steps: [{ op: 'skill.acquire', skill: ref('skill', skill) }],
       lesson_payment: { to: 'teacher', resource: ref('resource', 'pennies'), amount: 4 },
     };
     if (skill === 'swords') {

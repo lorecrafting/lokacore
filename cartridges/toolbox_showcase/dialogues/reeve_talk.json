@@ -16,7 +16,7 @@
     "help": {
       "label": "dialogue.reeve_talk.help",
       "narration": "narration.reeve_talk.help",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "wardle_standing",
@@ -27,7 +27,7 @@
     "wrong": {
       "label": "dialogue.reeve_talk.wrong",
       "narration": "narration.reeve_talk.wrong",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": "wardle_standing",

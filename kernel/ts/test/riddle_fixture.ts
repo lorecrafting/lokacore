@@ -43,7 +43,7 @@ export function riddleSource(c: any) {
       answer: {
         label: 'dialogue.riddle.answer',
         narration: 'narration.riddle.answer',
-        sequence: [{ op: 'fact.assign', fact: ref('fact', 'riddle_solved'), value: true }],
+        steps: [{ op: 'fact.assign', fact: ref('fact', 'riddle_solved'), value: true }],
       },
     },
     riddle: {

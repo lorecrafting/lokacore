@@ -9,13 +9,13 @@ defmodule Loka.Content.CheckKinds do
   check@1 (its check_passed); its key is no scripted action's or other choice's check's
   (DUPLICATE_DEFINITION); its skill, attribute and failure text resolve; it names exactly one of
   rating and npc (SCHEMA_VIOLATION invalid_value), its npc as a scripted action check's (row G3); and it
-  carries only label, narration, sequence, availability and check, in a dialogue with no quest and
+  carries only label, narration, steps, availability and check, in a dialogue with no quest and
   no riddle, with no skill.acquire step (OUTCOME_MISMATCH at the check).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [owned: 3, reference: 6, resolve: 4]
 
-  @plain ~w(label narration sequence availability check)
+  @plain ~w(label narration steps availability check)
 
   @doc "The diagnostics of choice `o` (at `steps` of dialogue `d` in `rel`)."
   def choice(rel, steps, %{"check" => c} = o, d, ctx) do
@@ -23,6 +23,7 @@ defmodule Loka.Content.CheckKinds do
     side = if is_map_key(c, "skill"), do: "skill", else: "attribute"
 
     owned(at(rel, at), "check_passed", ctx.events) ++
+      context(rel, at, c, :choice) ++
       reference(rel, at, side, c, ctx.m, ctx.defs) ++
       failure_text(rel, at, c["failure"], ctx.text) ++
       rated(rel, at, c, ctx) ++
@@ -127,6 +128,8 @@ defmodule Loka.Content.CheckKinds do
   def attributes(_, _, _, _), do: []
 
   defp failure_text(_, _, _, :unknown), do: []
+  # A missing failure is context/4's diagnostic.
+  defp failure_text(_, _, nil, _), do: []
 
   defp failure_text(rel, at, key, text) do
     if is_map_key(text, key),
@@ -145,7 +148,7 @@ defmodule Loka.Content.CheckKinds do
   defp plain(rel, at, o, d) do
     sound =
       d["quest"] == nil and d["riddle"] == nil and Enum.all?(Map.keys(o), &(&1 in @plain)) and
-        not Enum.any?(Map.get(o, "sequence", []), &(&1["op"] == "skill.acquire"))
+        not Enum.any?(Map.get(o, "steps", []), &(&1["op"] == "skill.acquire"))
 
     if sound, do: [], else: [diag("OUTCOME_MISMATCH", at(rel, at))]
   end

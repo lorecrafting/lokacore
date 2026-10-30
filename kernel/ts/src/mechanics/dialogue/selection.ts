@@ -42,7 +42,7 @@ export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(
 
 /** Whether choice `id` of `d` teaches a skill for which `p` holds (Homestead hs-14). */
 const teaches = (d: DialogueDefinition, id: Key, p: (skill: DefinitionRef) => boolean) =>
-  !!d.choices[id]!.sequence?.some((s) => s.op === 'skill.acquire' && p(s.skill));
+  !!d.choices[id]!.steps?.some((s) => s.op === 'skill.acquire' && p(s.skill));
 
 /** `d`'s choice ids less those that teach a skill concealed from `actor` (Homestead hs-14). */
 export const offered = (world: World, actor: CharacterId, d: DialogueDefinition, steps: Steps) =>

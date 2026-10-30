@@ -56,7 +56,7 @@ defmodule Loka.ContentRestTest do
         &[@write | &1]
       )
 
-    dialogue = put_in(src("dialogues/bram.json"), ["choices", "carry", "sequence"], [@write])
+    dialogue = put_in(src("dialogues/bram.json"), ["choices", "carry", "steps"], [@write])
     plan = %{"op" => "fact.assign", "fact" => "search_plan", "value" => "party_led"}
     on = %{"event" => "fact_changed", "fact" => "search_plan"}
 
@@ -99,7 +99,7 @@ defmodule Loka.ContentRestTest do
 
     assert Enum.sort_by(ds, & &1["path"]) == [
              d("actions/coil_rope.outcomes.success.steps[0].fact"),
-             d("dialogues/bram.choices.carry.sequence[0].fact"),
+             d("dialogues/bram.choices.carry.steps[0].fact"),
              d("facts.facts.position"),
              d("reactions/settle.apply[0].fact")
            ]

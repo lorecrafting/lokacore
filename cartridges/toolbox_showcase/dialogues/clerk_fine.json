@@ -16,7 +16,7 @@
     "pay": {
       "label": "dialogue.clerk_fine.pay",
       "narration": "narration.clerk_fine.pay",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",
