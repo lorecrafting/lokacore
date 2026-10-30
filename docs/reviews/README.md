@@ -15,6 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: C3 slice V, the service benefit is one Step (F4, loka-ivjq.4)](2026-10-29-c3-v-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice R, recipe -> scripted action (F4, loka-ivjq.4)](2026-10-29-c3-r-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice P, one Step and one Check (F4, loka-ivjq.4)](2026-10-29-c3-p-review.md): **APPROVE WITH NOTES**
+- [Review: batch C3 final head (loka-ivjq.4 F4 one step and one check vocabulary)](2026-10-29-c3-final-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice C, dialogue choices on `steps` (F4, loka-ivjq.4)](2026-10-29-c3-c-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice B, scripted action steps (F4, loka-ivjq.4)](2026-10-29-c3-b-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice A, reactions on the step vocabulary (loka-ivjq.4)](2026-10-29-c3-a-review.md): **APPROVE WITH NOTES**
