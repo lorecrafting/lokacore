@@ -52,7 +52,7 @@ defmodule Loka.ContentRestTest do
     scripted =
       update_in(
         src("actions/coil_rope.json"),
-        ["outcomes", "success", "sequence"],
+        ["outcomes", "success", "steps"],
         &[@write | &1]
       )
 
@@ -98,7 +98,7 @@ defmodule Loka.ContentRestTest do
     assert {:error, ds} = compile(Path.join(dir, "writes"), true, writes())
 
     assert Enum.sort_by(ds, & &1["path"]) == [
-             d("actions/coil_rope.outcomes.success.sequence[0].fact"),
+             d("actions/coil_rope.outcomes.success.steps[0].fact"),
              d("dialogues/bram.choices.carry.sequence[0].fact"),
              d("facts.facts.position"),
              d("reactions/settle.apply[0].fact")

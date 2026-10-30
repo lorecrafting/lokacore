@@ -161,7 +161,7 @@ defmodule Loka.ContentErrandTest do
         "policy" => action["policy"],
         "outcomes" => %{
           "success" => %{
-            "sequence" => [%{"op" => "event.emit", "event" => "rang"}],
+            "steps" => [%{"op" => "event.emit", "event" => "rang"}],
             "narration" => %{"actor" => "quest.lantern.title"}
           }
         }

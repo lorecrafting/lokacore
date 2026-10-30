@@ -30,7 +30,7 @@
   "cooldown": 600,
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "event.emit",
           "event": "bite_croft"
@@ -41,7 +41,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.fish.miss"
       }

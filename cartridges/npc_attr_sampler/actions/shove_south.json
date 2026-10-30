@@ -22,7 +22,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "south_open",
@@ -34,7 +34,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.shove_south.failure"
       }

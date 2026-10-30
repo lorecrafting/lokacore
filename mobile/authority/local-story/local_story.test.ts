@@ -225,7 +225,7 @@ test('a fault changes nothing and gets no receipt', () => {
   const cartridge = structuredClone(ok.fresh.cartridge) as any;
   cartridge.scripted_actions[
     'recipe_sampler@0.0.1:action/ring_bell'
-  ].outcomes.success.sequence[0].value = 'yes';
+  ].outcomes.success.steps[0].value = 'yes';
   const p = processOn(save(), { ...ok, fresh: { ...ok.fresh, cartridge } });
   const before = p.story.world();
   const ring = invocation(4, 'ring_bell', []);

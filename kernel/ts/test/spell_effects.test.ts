@@ -142,7 +142,7 @@ test('without combat settings a fatal bolt kills and writes only the spell line'
 test('flamma on a warded wight sums its status resistance with its own', () => {
   const c = cartridge((c) => {
     c.statuses[`${P}:status/warded`].resistances = { fire: 25 }; // 50 + 25: 8 fire deals 2
-    success(c, 'ward').sequence[0].npc = success(c, 'flamma').sequence[0].npc; // ward the wight
+    success(c, 'ward').steps[0].npc = success(c, 'flamma').steps[0].npc; // ward the wight
   });
   assert.equal(wightHp(ok(cast(ok(cast(crypt(true, c), 'ward')), 'flamma'))), 6);
 });
@@ -163,9 +163,9 @@ test('ward lands warded on the caster: status_applied fires the reaction once', 
 // the dead wight), or damage on an NPC with no hp pool faults instead of writing nothing.
 test('a spell writes nothing more to an NPC it killed, nor damage to an NPC without hp', () => {
   const lethal = cartridge((c) => {
-    const [bolt] = success(c, 'flamma').sequence;
-    const ward = { ...success(c, 'ward').sequence[0], npc: bolt.npc };
-    success(c, 'flamma').sequence = [{ ...bolt, amount: 16 }, bolt, ward];
+    const [bolt] = success(c, 'flamma').steps;
+    const ward = { ...success(c, 'ward').steps[0], npc: bolt.npc };
+    success(c, 'flamma').steps = [{ ...bolt, amount: 16 }, bolt, ward];
   });
   const w = ok(cast(crypt(true, lethal), 'lux'));
   const killed = cast(w, 'flamma');
@@ -188,8 +188,8 @@ test('a spell writes nothing more to an NPC it killed, nor damage to an NPC with
 // committed fuel row (a fault) instead of writing nothing.
 test('two light.ignite steps on one orb light it once', () => {
   const twice = cartridge((c) => {
-    const [ignite] = success(c, 'lux').sequence;
-    success(c, 'lux').sequence = [ignite, ignite];
+    const [ignite] = success(c, 'lux').steps;
+    success(c, 'lux').steps = [ignite, ignite];
   });
   const w = crypt(true, twice);
   assert.equal(dark(ok(cast(w, 'lux')), w.character), false);
@@ -226,8 +226,8 @@ test('a bolt starts the fight as Attack does; a bolt that hurts then kills opens
   const hit = ok(cast(w, 'flamma'));
   assert.deepEqual([wightHp(hit), round(hit)], [4, w.state.clock + 150]);
   const twice = cartridge((c) => {
-    const [bolt] = success(c, 'flamma').sequence;
-    success(c, 'flamma').sequence = [bolt, bolt];
+    const [bolt] = success(c, 'flamma').steps;
+    success(c, 'flamma').steps = [bolt, bolt];
   });
   const killed = ok(cast(ok(cast(crypt(true, twice), 'lux')), 'flamma'));
   assert.deepEqual([wightHp(killed), engaged(killed, killed.entityIds[W]!)], [0, undefined]);
@@ -277,7 +277,7 @@ test('a spell kill grants its experience and death credit', () => {
     const room = { ...RA, kind: 'room', key: 'crypt' };
     const fact = { ...RA, kind: 'fact', key: 'ward_landed' };
     c.world.death_credit = [{ npc: npc('wight'), room, fact }];
-    success(c, 'flamma').sequence[0].amount = 16;
+    success(c, 'flamma').steps[0].amount = 16;
   });
   const w = ok(cast(ok(cast(crypt(true, credited), 'lux')), 'flamma'));
   assert.equal(wightHp(w), 0);

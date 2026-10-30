@@ -182,7 +182,7 @@ test('a scripted action aimed at a transport detail keeps its card beside the ri
         outcomes: {
           success: {
             narration: { actor: 'narration.polish_post' },
-            sequence: [{ op: 'resource.adjust', resource: ref('resource', 'coins'), by: 1 }],
+            steps: [{ op: 'resource.adjust', resource: ref('resource', 'coins'), by: 1 }],
           },
         },
       },

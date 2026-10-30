@@ -31,7 +31,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "cart_moved",
@@ -43,7 +43,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.shove_cart.failure"
       }

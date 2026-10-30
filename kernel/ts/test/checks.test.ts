@@ -62,7 +62,7 @@ const checked = (chance: number) =>
     r.check = { key: 'ring_true', kind: 'luck', chance };
     r.duration = 90;
     r.outcomes.failure = {
-      sequence: [{ op: 'event.emit', event: 'bell_muffled' }],
+      steps: [{ op: 'event.emit', event: 'bell_muffled' }],
       narration: { actor: 'narration.ring_bell.observers' },
     };
   });

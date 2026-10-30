@@ -16,7 +16,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "store_unbarred",

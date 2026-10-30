@@ -5,7 +5,7 @@
   "priority": 5,
   "outcomes": {
     "success": {
-      "sequence": [{ "op": "resource.adjust", "resource": "ash", "by": 1 }],
+      "steps": [{ "op": "resource.adjust", "resource": "ash", "by": 1 }],
       "narration": { "actor": "narration.gather_ash" }
     }
   }

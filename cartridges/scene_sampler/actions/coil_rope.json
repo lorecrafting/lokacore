@@ -12,7 +12,7 @@
   "duration": 3600,
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "event.emit",
           "event": "rope_coiled"

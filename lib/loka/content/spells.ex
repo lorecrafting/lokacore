@@ -76,9 +76,9 @@ defmodule Loka.Content.Spells do
   defp effects(defs) do
     for {_, {rel, [], r}} <- defs["scripted_action"] || %{},
         {name, o} <- r["outcomes"],
-        {%{"op" => op} = s, i} <- Enum.with_index(o["sequence"]),
+        {%{"op" => op} = s, i} <- Enum.with_index(o["steps"]),
         op in @effects,
-        do: {rel, r, ["outcomes", name, "sequence", i, "op"], op, s}
+        do: {rel, r, ["outcomes", name, "steps", i, "op"], op, s}
   end
 
   defp placed(effects) do

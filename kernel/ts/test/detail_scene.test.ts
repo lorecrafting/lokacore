@@ -32,7 +32,7 @@ const begin = (c: any) => {
     policy: { op: 'all', items: [] },
     outcomes: {
       success: {
-        sequence: [{ op: 'event.emit', event: 'begun' }],
+        steps: [{ op: 'event.emit', event: 'begun' }],
         narration: { actor: 'narration.coil_rope.actor' },
       },
     },

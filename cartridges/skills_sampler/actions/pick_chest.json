@@ -21,7 +21,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "chest_open",
@@ -33,7 +33,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.pick_chest.failure"
       }

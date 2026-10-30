@@ -19,7 +19,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "chapel_bell_rung",

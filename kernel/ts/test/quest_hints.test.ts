@@ -134,7 +134,7 @@ test('a failed checked perform still shows the tip once and assigns seen_tip_', 
   const checked = structuredClone(content);
   const scripted = checked.scripted_actions!['quest_sampler@0.0.1:action/search_floor']! as Obj;
   scripted.check = { key: 'search_floor', kind: 'luck', chance: 1 };
-  scripted.outcomes.failure = { sequence: [], narration: { actor: 'narration.search_floor' } };
+  scripted.outcomes.failure = { steps: [], narration: { actor: 'narration.search_floor' } };
   const w = newWorld(checked, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23'), [4, 3, 2, 1]);
   const r = run(w, { type: 'perform', action: 'search_floor' });
   assert.ok(r.decision.kind === 'accepted' && r.decision.outcome === 'failure');

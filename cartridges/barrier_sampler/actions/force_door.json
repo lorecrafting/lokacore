@@ -36,7 +36,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "door_forced",
@@ -48,7 +48,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.force_door.failure"
       }

@@ -40,7 +40,7 @@ defmodule Loka.ContentUseTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, on_detail)
 
     assert pairs(diags) == [
-             {"SCHEMA_VIOLATION", "actions/quench.outcomes.success.sequence[0].op"}
+             {"SCHEMA_VIOLATION", "actions/quench.outcomes.success.steps[0].op"}
            ]
 
     opposed = %{"key" => "q", "kind" => "opposed", "attribute" => "str"}
