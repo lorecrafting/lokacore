@@ -57,7 +57,6 @@ balance tools (loka-kgd.107), worldbuilding (loka-ikch), Chapters 1-3.
 
 ## Waiting on the owner
 
-- Chronicle milestone: is the size step enough, or add a hairline? Decide by eye during polish (PM rec: keep the size step).
 - Worldbuilding first decisions (after polish): premise and pillars, cosmology shape, magic hardness and
   cost, Story vs Realm canon.
 
