@@ -19,6 +19,10 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - Give `/code-review` the exact branch target; developers ran it in the main checkout (`loka-aa75`, `loka-7p2w`).
 - Blocks deps between batch slices stop `br update --status in_progress` (`loka-gfgr`).
 - Parallel slices append to the same fixture and doc spots: hand-merge hand-kept files; for regenerated families, take theirs and run `sh bin/regen.sh`; it rebuilds the compiled hash fixtures (`value` ones included) and re-pins the transcripts, while a frozen or hand-kept hash fixture stays a hand-merge ([CHECKS](../CHECKS.md)).
+- Hand work that every parallel slice merge repeats is a tool gap: file and fix it before the next batch, not after. In C3 each merge of C, A and V into the moving batch head cost 20-30 min re-pinning 30-50 hashes by script because `bin/regen.sh` skipped 48 of 49 hash fixtures (`711ac2123`, `18c66e328`, `e1cfcaa4c`; fixed after the batch by `loka-tb31`).
+- A timebox stated only in a brief is not kept (C2 final review 1h53; C3 final sweep about 90 of 45 min, and #495 merged 4 h 54 min after its final head `684787658`): put the limit in the tool (`bin/mutate.sh` `MUTATE_MINUTES`, `loka-tafk`).
+- Cutting the next batch from the previous batch's head during its final review saves the wait: C3 slice R started on `simplify/c2-kinds` during #493's Fable review and needed one `main` merge (`a8d42475c`), no rework. Do it when the next batch does not depend on that review's fixes.
+- Batch merge order: a rename that touches every later file first and alone (C3 R), then the parallel slices, then one slice for cross-slice fixes (X) before the docs sweep (Z). A slice that loosens checks for later slices to tighten (C3 P) blocks the batch PR until they land: name that gate in the plan, not at handback (C3 final review merge gate 1, `6aa921c70`).
 - An item loop table in every content brief found the hidden faucets batch A missed (`loka-vro5`).
 - A fix round that answers a developer's own open question can add a blocker: rule on such questions as follow-ups unless the owner already decided.
 
