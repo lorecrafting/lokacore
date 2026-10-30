@@ -199,7 +199,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
     'resolved',
   );
   assert.equal(cold.stack().at(-1).kind, 'notice');
-  assert.ok(cold.text().includes('Dream acknowledged.'));
+  assert.ok(!cold.text().includes('Dream acknowledged.'));
   assert.ok(cold.text().includes('Rest: not now'));
   assert.ok(!cold.labels().includes('Resume dream'));
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM report').get()!.n, 0);

@@ -310,8 +310,10 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
 - A vessel's liquid amount reads in words, never a count or unit label (owner, 2026-10-30, Beads
   `loka-ikat`), from quantity against capacity: `Empty.`; a third or less `Nearly empty, a little
   water left.`; between `Half full of water.`; two thirds or more `Nearly full of water.`; exact
-  capacity `Full of water.` Only exact 0 reads empty and only exact capacity reads full. One helper
-  words it (`liquidWords`, `mobile/app/book/pick.ts`) for the item page and a twin row's note. A
+  capacity `Full of water.` Only exact 0 reads empty and only exact capacity reads full. A light's
+  fuel takes the same bands with the noun `fuel` and its state after a comma: `Nearly full of fuel,
+  lit.`, `Empty, unlit.` (owner, 2026-10-30, Beads `loka-nkcr`). One helper words both
+  (`amountWords`, `mobile/app/book/pick.ts`) on the item page; a liquid also on a twin row's note. A
   Fill, Pour or Drink log line is its sentence alone; the open page's redraw shows the new amount.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
   same bindings and actor, the same pressed card target (the stock row or item), the same page
@@ -543,8 +545,9 @@ and answers "You take it up." and "You put it away."; any other slot reads Wear 
 put it on." and "You take it off.". A cure's authored `edible.label` names its verb the same way
 (**Apply** a poultice); an authored narration line always wins over these defaults.
 
-**Fuel and light.** An item with fuel shows `Fuel <remaining> of <capacity>, lit/unlit` from the
-confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside Remove when worn.
+**Fuel and light.** An item with fuel words its amount and lit state from the confirmed view
+([line placement](#line-placement)); Ignite, Douse and Refuel sit in its ordinary action list,
+beside Remove when worn.
 A two-item action names both items on its button (`Refuel <source> from <supply>`); the item that
 owns the control keeps the history, and the bound participant's page does not repeat it. The
 presenter owns no fuel arithmetic or clock. A dark room keeps exits, inventory and recovery

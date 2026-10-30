@@ -129,7 +129,7 @@ const history = (screen: Screen, id: string, description: string) =>
  * A notice or board detail in the detail-page order (book-ui.md, Notice board details).
  * - Use: a notice route.
  * - Rules: a read whose text is the description adds nothing; equal read lines all show.
- * - States: notice with Read; dream available; dream acknowledged.
+ * - States: notice with Read; dream available; dream finished.
  * - Story: NoticePage.stories.tsx
  */
 export function NoticePage(

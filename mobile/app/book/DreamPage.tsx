@@ -5,7 +5,7 @@ import { Text } from './Text.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { LogLines, Note } from './lines.tsx';
+import { LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import { prose, usePalette, useType } from './palette.ts';
 import { LABEL } from './labels.ts';
@@ -52,9 +52,9 @@ export function DreamPage(p: {
 }
 
 /**
- * The bed notice's Resume dream Control, or the Note "Dream acknowledged.".
+ * The bed notice's Resume dream Control; a finished dream's bed shows nothing extra (owner, 2026-10-30).
  * - Use: a bed notice's detail.
- * - States: dream available; dream acknowledged.
+ * - States: dream available; dream finished (nothing).
  * - Story: NoticePage.stories.tsx
  */
 export function DreamResume(p: {
@@ -64,7 +64,5 @@ export function DreamResume(p: {
   const d = p.detail.dream;
   return d?.available ? (
     <Control label={LABEL.resumeDream} onPress={() => p.open({ kind: 'dream', id: p.detail.id })} />
-  ) : d?.index === -1 ? (
-    <Note>Dream acknowledged.</Note>
   ) : null;
 }

@@ -388,12 +388,12 @@ test('Book interaction teaches swords then dodge in the teacher detail and recov
 test('shared item detail draws confirmed fuel for lit and exhausted items', () => {
   assert.deepEqual(
     words(ItemDetails({ thing: { fuel: { remaining: 7, capacity: 10, lit: true } } as any, text })),
-    ['Fuel 7 of 10, lit'],
+    ['Nearly full of fuel, lit.'],
   );
   assert.deepEqual(
     words(
       ItemDetails({ thing: { fuel: { remaining: 0, capacity: 10, lit: false } } as any, text }),
     ),
-    ['Fuel 0 of 10, unlit'],
+    ['Empty, unlit.'],
   );
 });
