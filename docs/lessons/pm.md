@@ -42,7 +42,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 
 ## Tools
 
-- Regenerated families (`*.gen.*` and the `{description, canonical, sha256}` hash fixtures, toolbox_showcase_hash.json among them) after a merge: take theirs, then `sh bin/regen.sh`; it rebuilds those that carry `value` too, but not the frozen or hand-kept ones, which `bin/merge_resolve.py` leaves unmerged ([CHECKS](../CHECKS.md); `loka-tb31`). It takes a transcript only when the sides differ in `content_hash` alone, and stages every file it takes even when others are left: its exit-1 list (and `bin/pm_merge.sh`'s CONFLICT line) names only the hand-kept files; edit those, then `sh bin/regen.sh` (`loka-3pr5`).
+- Regenerated families (`*.gen.*` and the `{description, canonical, sha256}` hash fixtures, toolbox_showcase_hash.json among them) after a merge: take theirs, then `sh bin/regen.sh`; it rebuilds those that carry `value` too, but not the frozen or hand-kept ones, which `bin/merge_resolve.py` leaves unmerged ([CHECKS](../CHECKS.md); `loka-tb31`). It takes a transcript only when the sides differ in `content_hash` alone, and stages every file it takes even when others are left: its exit-1 list (and `bin/pm_merge.sh`'s CONFLICT line) names only the hand-kept files (pm_merge then resets; merge by hand, run the resolver, edit those, then `sh bin/regen.sh`; `loka-3pr5`).
 - `br` "WAL index recovery already failed ... database is busy": run `br doctor migrate-schema recover`, then retry.
 - `git cherry-pick -q` printed a usage error and picked nothing: use plain `git cherry-pick <sha>`.
 - Agents share one scratchpad and delete files: keep PM working files under a `pm_` prefix (`loka-xmvu`).
