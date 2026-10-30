@@ -291,7 +291,7 @@ author still writes the key alone. The refusals:
 | `command` beside `outcomes` or any other scripted-action-only field (`aliases`, `check`, `costs`, `cooldown`, `duration`, `craft`, `tip`, `reason`) | `UNKNOWN_FIELD` | `actions/<key>.<field>`, one per field | `{}` |
 | the same file then also misses ActionDefinition's own required fields (`accessibility`, `input`) or uses a scripted action target (`{kind: "detail"}`) | `SCHEMA_VIOLATION` | `actions/<key>.<field>`, `actions/<key>.target.kind` | `{"error": "missing_property"}`, `{"error": "unknown_variant"}` |
 | neither `command` nor `outcomes` | `SCHEMA_VIOLATION` | `actions/<key>.outcomes` | `{"error": "missing_property"}` |
-| a `scripted_actions/` directory (the retired source kind) | `UNKNOWN_FIELD` | `scripted_actions/<key>` | `{}` |
+| a `actions/` directory (the retired source kind) | `UNKNOWN_FIELD` | `actions/<key>` | `{}` |
 
 A built-in action and a scripted action cannot share a key: two files cannot, and a bundled
 definition beside a file is `DUPLICATE_DEFINITION` at both sites (`actions/<key>`,

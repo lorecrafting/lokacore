@@ -30,7 +30,7 @@ These rules hold across every kind:
 - A story point is `story_point: "<key>/<outcome>"` on the dialogue choice that reaches it (a
   scene's `on_end` may also claim one); there is no story point file.
 - One `steps` list serves reactions, scripted action outcomes and dialogue choices; a service's `benefit`
-  is one Step, one of the service ops ([steps and checks](system/cartridge.md#steps-and-checks)).
+  is one Step whose `op` the service context runs ([steps and checks](system/cartridge.md#steps-and-checks)).
 - A dialogue choice's terms (`accept`, `hand_over`, `payment`, `patrol`) are fields; its effects are `steps`.
 - One `Check` serves scripted actions and dialogue choices; a choice runs only `opposed`.
 - Custom events are the one message between rules: an `event.emit` step in a reaction or scripted action emits a `custom_event`,

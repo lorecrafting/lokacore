@@ -696,7 +696,7 @@ original provider/service for confirmed narration routing and save validation.
 
 `ServiceDefinition` binds its original
 provider, exact authored action key, currency, price, label/narration and one
-`benefit` [Step](cartridge.md#steps-and-checks) (`protocol/step.schema.json`), its `op` one of the service ops: entitlement fact, meal stock/debit/MV, or provider-held
+`benefit` [Step](cartridge.md#steps-and-checks) (`protocol/step.schema.json`), its `op` one the service context runs: entitlement fact, meal stock/debit/MV, or provider-held
 vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
 projects the captured provider target, service reference/quote, declared benefit
 and keyed admission. `ServiceDefinition` and `ServiceOffer` each declare a literal
