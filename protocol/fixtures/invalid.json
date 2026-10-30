@@ -12360,15 +12360,15 @@
     },
     "errors": [
       {
-        "path": "/steps",
-        "code": "missing_property"
-      },
-      {
         "path": "/key",
         "code": "missing_property"
       },
       {
         "path": "/on",
+        "code": "missing_property"
+      },
+      {
+        "path": "/steps",
         "code": "missing_property"
       },
       {
