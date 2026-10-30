@@ -7,14 +7,14 @@ defmodule Loka.ContentStatusMovementTest do
   defp tagged(tag) do
     [
       {"rooms/den.json", &Map.put(&1, "tags", [tag])},
-      {"cartridge.json", &put_in(&1, ["requires", "capabilities", "tags"], 1)}
+      {"cartridge.json", &put_in(&1, ["requires", "capabilities", "tag"], 1)}
     ]
   end
 
   defp item,
     do: [
       {"items/npc_corpse.json", &Map.put(&1, "tags", ["water"])},
-      {"cartridge.json", &put_in(&1, ["requires", "capabilities", "tags"], 1)}
+      {"cartridge.json", &put_in(&1, ["requires", "capabilities", "tag"], 1)}
     ]
 
   defp barrier,
@@ -30,7 +30,7 @@ defmodule Loka.ContentStatusMovementTest do
       {"cartridge.json",
        &(&1
          |> put_in(["requires", "capabilities", "barrier"], 1)
-         |> put_in(["requires", "capabilities", "tags"], 1))}
+         |> put_in(["requires", "capabilities", "tag"], 1))}
     ]
 
   defp moving,

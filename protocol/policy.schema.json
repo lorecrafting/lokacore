@@ -17,7 +17,7 @@
       ]
     },
     "Policy": {
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all.",
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes its owning capability's next version. fact_compare compares FactValue. stat_compare and resource_compare (attribute@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all.",
       "oneOf": [
         {
           "description": "Every item holds; an empty list is the policy with no condition.",
@@ -209,7 +209,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.",
+          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attribute@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -230,7 +230,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "description": "Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attribute@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -249,7 +249,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attribute@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -316,7 +316,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).",
+          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tag@1 (toolbox row G1).",
           "type": "object",
           "properties": {
             "op": {
@@ -406,7 +406,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Owned by variety@1.",
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while alternates@1 is locked (VisitedRoom.count). Owned by alternates@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -428,7 +428,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skills@1.",
+          "description": "The actor's level in the named skill (skill@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skill@1.",
           "type": "object",
           "properties": {
             "op": {

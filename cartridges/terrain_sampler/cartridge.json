@@ -14,7 +14,7 @@
       "movement": 1,
       "containment": 1,
       "resource": 1,
-      "tags": 1
+      "tag": 1
     },
     "client_features": []
   },

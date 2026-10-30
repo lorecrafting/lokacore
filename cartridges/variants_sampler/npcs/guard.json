@@ -3,7 +3,7 @@
     "guard"
   ],
   "name": "npc.guard.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "time_window",

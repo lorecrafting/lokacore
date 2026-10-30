@@ -433,7 +433,7 @@
     ],
     "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report; C1 c1-chapters derived chapter markers"
   },
-  "attributes": {
+  "attribute": {
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
     "contracts": [
       "AttributeSpec",
@@ -442,7 +442,7 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
-      "kernel/ts/src/mechanics/attributes/shared.ts"
+      "kernel/ts/src/mechanics/attribute/shared.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_loader.json",
@@ -664,7 +664,7 @@
     "invariants": [],
     "implemented_in": "B4 useful light"
   },
-  "skills": {
+  "skill": {
     "spec": "docs/system/mechanics.md C1 training and armed defense; docs/system/protocol.md Training and defense composition",
     "contracts": [
       "SkillDefinition",
@@ -744,7 +744,7 @@
     ],
     "implemented_in": "C3 Living hounds: TypeScript story semantics and portable Elixir/TypeScript composition"
   },
-  "topics": {
+  "topic": {
     "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md Bounded sitting and topic composition",
     "contracts": [
       "TopicDefinition",
@@ -1004,7 +1004,7 @@
       "MutationTarget"
     ],
     "modules": [
-      "lib/loka/content/map_positions.ex",
+      "lib/loka/content/layout.ex",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
       "kernel/ts/src/foundation/compose_knowledge.ts",
       "lib/loka/core/compose_knowledge.ex",
@@ -1021,7 +1021,7 @@
     ],
     "implemented_in": "D10 candidate v042/API1.37: committed actor-owned visits and visible NPC observations, truthful Map/Where; independent source review pending"
   },
-  "tags": {
+  "tag": {
     "spec": "docs/system/mechanics.md property tags and the policy leaf set (toolbox row G1)",
     "contracts": [
       "Tag",
@@ -1044,7 +1044,7 @@
     ],
     "implemented_in": "toolbox row G1 (loka-kgd.17): tags on item, barrier and room definitions; has_tag"
   },
-  "variety": {
+  "alternates": {
     "spec": "docs/system/mechanics.md narration variety and visit tiers (toolbox row W7)",
     "contracts": [
       "CompiledCartridge",
@@ -1053,10 +1053,10 @@
       "DeltaOp"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/variety.ts",
+      "kernel/ts/src/mechanics/alternates.ts",
       "kernel/ts/src/mechanics/policy.ts",
       "kernel/ts/src/mechanics/knowledge/shared.ts",
-      "lib/loka/content/variety.ex",
+      "lib/loka/content/alternates.ex",
       "lib/loka/core/compose_knowledge.ex"
     ],
     "fixtures": [

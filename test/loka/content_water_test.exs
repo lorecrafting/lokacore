@@ -17,7 +17,7 @@ defmodule Loka.ContentWaterTest do
     |> put_in(["requires", "kernel_api", "at_least"], "1.37")
     |> update_in(
       ["requires", "capabilities"],
-      &Map.merge(&1, %{"water" => 1, "skills" => 1, "resource" => 1})
+      &Map.merge(&1, %{"water" => 1, "skill" => 1, "resource" => 1})
     )
     |> put_in(["world", "water"], water)
   end

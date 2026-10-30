@@ -16,7 +16,7 @@
       "equipment": 1,
       "resource": 1,
       "policy": 1,
-      "tags": 1,
+      "tag": 1,
       "scripted_action": 1,
       "check": 1,
       "reaction": 1,

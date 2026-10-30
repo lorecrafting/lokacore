@@ -2,7 +2,7 @@ defmodule Loka.ContentAsksTest do
   use ExUnit.Case, async: true
 
   # Breaks (row FD7): an answer naming no
-  # topic or grant, a bad ask text or answer condition, an ask without speech@1 or topics@1, or an asked trigger naming no topic
+  # topic or grant, a bad ask text or answer condition, an ask without speech@1 or topic@1, or an asked trigger naming no topic
   # compiles.
   test "ask declarations keep their boundaries" do
     dir = Loka.ContentSource.copy("cartridges/ask_sampler")
@@ -30,10 +30,9 @@ defmodule Loka.ContentAsksTest do
                diags.([{"npcs/smith.json", &nope.(&1, path)}])
     end
 
-    # The compiler emits topic definitions without topics@1 (loka-3wwm): only the asks refuse.
+    # The compiler emits topic definitions without topic@1 (loka-3wwm): only the asks refuse.
     assert diags.([
-             {"cartridge.json",
-              &(&1 |> pop_in(["requires", "capabilities", "topics"]) |> elem(1))}
+             {"cartridge.json", &(&1 |> pop_in(["requires", "capabilities", "topic"]) |> elem(1))}
            ]) == [
              {"UNDECLARED_CAPABILITY", "npcs/guard.ask"},
              {"UNDECLARED_CAPABILITY", "npcs/smith.ask"}

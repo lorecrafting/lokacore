@@ -18,7 +18,7 @@ import { actorOf, admitted, type World } from '../runtime/decision.ts';
 import { add, saturate } from '../foundation/int.ts';
 import { fact, positionOf } from './position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
-import { derived } from './attributes/shared.ts';
+import { derived } from './attribute/shared.ts';
 
 type Adjust = Extract<DeltaOp, { op: 'resource.adjust' }>;
 /** A decision's resource values so far, by canonical resource target text. */

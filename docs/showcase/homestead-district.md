@@ -43,7 +43,7 @@ mechanics in it.
 
 One build slice per district, in owner order: 4 Homestead, 5 economy and law, 6 magic, 7 traps.
 **They run in sequence, never in parallel:** every slice edits `cartridge.json` (capabilities,
-`world`, `speech`), `resources.json`, `facts.json`, `text.json`, `map_positions.json`, the hub sign
+`world`, `speech`), `resources.json`, `facts.json`, `text.json`, `layout.json`, the hub sign
 text and `protocol/fixtures/toolbox_showcase_hash.json`; plans 5 and 6 both edit
 `rooms/crossroads_inn.json`. Each slice branches from `main` after the previous one merges. A
 slice's kernel test file is its own; the hub pin in `showcase_body.test.ts` (exit count) changes
@@ -67,7 +67,7 @@ in plans 5 and 6 only.
   - "Forestry": `woodcutting` (growth `[1, 2]`), `carpentry` (prerequisite `skill_compare
     woodcutting at_least 2`, growth `[2]`).
   - "Kitchen": `cooking` (growth `[2, 4]`; `kitchen_sampler/skills/cooking.json`).
-  Levels are whatever skills@1 derives from `growth` and the use count; the thresholds above are
+  Levels are whatever skill@1 derives from `growth` and the use count; the thresholds above are
   the samplers', so their pins (carving teachable after the first carve, since whittling is taught at level 1,
   `cook_feast` at two uses) carry over unchanged. If a freshly taught skill reads below the level `chop` wants, the
   build gates `chop` on the learned fact instead and notes it (finding 2).

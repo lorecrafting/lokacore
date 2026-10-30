@@ -68,7 +68,7 @@ One room, `crossroads_inn`, the entry and the death shrine. Exits: north `fell_g
 `shore_steps` (world); slice B adds south `village_green` (social) when that room exists, so
 slice A builds alone; west is reserved for the combat district (no exit yet; the sign says so).
 
-- **Hob**, the innkeeper, stays in the inn (no schedule). `short_variants`: "Hob, asleep over the
+- **Hob**, the innkeeper, stays in the inn (no schedule). `name_variants`: "Hob, asleep over the
   bar" while `time_window {from: 0, to: 6}` ([row W6](../system/mechanics.md#entity-description-variants-toolbox-row-w6);
   `variants_sampler/npcs/guard.json`).
 - **sign_hub**, a readable room detail read in place (as the retired chapter's `reed_path` room
@@ -204,7 +204,7 @@ their description why the door is shut (a `sky` variant).
 
 ### NPCs, items, scripted actions
 
-- **Idony** (the watcher): stays on `cliff_path`; `short_variants` "a dozing watcher" while
+- **Idony** (the watcher): stays on `cliff_path`; `name_variants` "a dozing watcher" while
   `time_window {from: 0, to: 6}`, `description_variants` on `sky {season: winter}`
   (`variants_sampler`).
 - `shore_steps`: `description_variants` in this order, since the first matching variant wins

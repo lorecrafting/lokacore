@@ -3,7 +3,7 @@ import { level } from '../mechanics/skill_level.ts';
 import { holds } from '../mechanics/policy.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import type { CharacterId, DefinitionRef, Key, SkillDefinition } from '../contracts.gen.ts';
-import { choice, value, worn } from '../mechanics/attributes/shared.ts';
+import { choice, value, worn } from '../mechanics/attribute/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 
 export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {

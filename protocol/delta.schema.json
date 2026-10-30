@@ -1610,7 +1610,7 @@
               "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "from": {
-              "description": "The row this entry counts on (variety@1, toolbox row W7): absent for the first entry, else exactly the current row, and value.count is its count (1 when absent) plus one.",
+              "description": "The row this entry counts on (alternates@1, toolbox row W7): absent for the first entry, else exactly the current row, and value.count is its count (1 when absent) plus one.",
               "$ref": "delta.schema.json#/$defs/VisitedRoom"
             },
             "value": {
@@ -2644,7 +2644,7 @@
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
         "count": {
-          "description": "How many accepted body entries the actor has made into the room, from the second on (absent means 1); written only while variety@1 is locked (toolbox row W7).",
+          "description": "How many accepted body entries the actor has made into the room, from the second on (absent means 1); written only while alternates@1 is locked (toolbox row W7).",
           "type": "integer",
           "minimum": 2
         }
@@ -2660,7 +2660,7 @@
           "room_id": "aaaaaaaa-0000-4000-8000-000000000001"
         }
       ],
-      "description": "One actor’s committed room visit; keyed by actor and room. Its count (variety@1) is the number of entries, absent while it is 1."
+      "description": "One actor’s committed room visit; keyed by actor and room. Its count (alternates@1) is the number of entries, absent while it is 1."
     },
     "ObservedNpc": {
       "type": "object",

@@ -2,7 +2,7 @@ defmodule Loka.Content.Identity do
   @moduledoc """
   Toolbox rows W15 and FD9: world.identity's name and each name variant's description name text
   catalog keys; description_variant@1 owns each name variant, whose condition names declared
-  definitions through ops the cartridge's capabilities own. Called from Variety. The name
+  definitions through ops the cartridge's capabilities own. Called from Alternates. The name
   variants' condition roots also get
   Delayed's time_since checks and the target-subject FACT_SCOPE_UNSUPPORTED walk (Resolve.trees/1
   holds definition roots only).

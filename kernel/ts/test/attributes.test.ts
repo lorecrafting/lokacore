@@ -1,6 +1,6 @@
-// attributes@1 (06 §21 and 00 §4.3 amendments 2026-10-03): attributes are content, read by
+// attribute@1 (06 §21 and 00 §4.3 amendments 2026-10-03): attributes are content, read by
 // stat_compare; resource_compare reads the current value of the actor's pool. Worlds are the road
-// known answer (protocol/fixtures/cartridge_road_hash.json) with attributes@1 locked, str 14,
+// known answer (protocol/fixtures/cartridge_road_hash.json) with attribute@1 locked, str 14,
 // dex 12, con 13, int 10, spi 9, per 11, hp 0..20 start 20, mv 0..82 gain 18 and a pool grit
 // -100..100 start 0, re-hashed with node:crypto over sorted-key JSON.stringify. Ids as in
 // resources.test.ts; every expected value is hand-derived from those numbers.
@@ -45,8 +45,8 @@ const pool = (key: string, at_least: number) =>
 // The road known answer with the attributes above, `f` applied, loaded and fresh.
 const world = (f: (c: any) => void = () => {}): World => {
   const c = structuredClone(read('protocol/fixtures/cartridge_road_hash.json').value);
-  c.manifest.requires.capabilities.attributes = 1;
-  c.lock.capabilities.attributes = 1;
+  c.manifest.requires.capabilities.attribute = 1;
+  c.lock.capabilities.attribute = 1;
   c.attributes = Object.fromEntries(
     Object.entries(STATS).map(([key, start]) => [`${AT}attribute/${key}`, { key, start }]),
   );

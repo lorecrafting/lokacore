@@ -7,7 +7,7 @@
   "room_line": "npc.idony.room",
   "description": "npc.idony.description",
   "room": "cliff_path",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "time_window",

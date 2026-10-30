@@ -17,7 +17,7 @@ defmodule Loka.Content.Source do
           | :text
           | :resources
           | :attributes
-          | :map_positions
+          | :layout
           | {:action
              | :room
              | :item
@@ -126,7 +126,7 @@ defmodule Loka.Content.Source do
   defp classify("text.json"), do: :text
   defp classify("resources.json"), do: :resources
   defp classify("attributes.json"), do: :attributes
-  defp classify("map_positions.json"), do: :map_positions
+  defp classify("layout.json"), do: :layout
 
   @dirs %{
     "actions" => :action,

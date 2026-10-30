@@ -28,7 +28,7 @@ defmodule Loka.Content.SourceSchema do
     "text" => "TextCatalog",
     "resources" => "source.resources",
     "attributes" => "source.attributes",
-    "map_positions" => "source.map_positions",
+    "layout" => "source.layout",
     "areas" => "source.areas"
   }
 
@@ -214,7 +214,7 @@ defmodule Loka.Content.SourceSchema do
   defp partial(k, v, ch) when k in ~w(additionalProperties oneOf anyOf), do: partial(v, ch)
   defp partial(_, v, _), do: v
 
-  # cartridge.json, facts.json, resources.json, attributes.json and map_positions.json, as the
+  # cartridge.json, facts.json, resources.json, attributes.json and layout.json, as the
   # compiler checks them; root files take no shortcut (an area bundle opens into definitions).
   defp roots(defs) do
     fact = defs["FactSpec"] |> drop("key")
@@ -236,7 +236,7 @@ defmodule Loka.Content.SourceSchema do
       "source.facts" => put(Compiler.facts_file(), "facts", facts),
       "source.resources" => Resources.file_schema("resources"),
       "source.attributes" => Resources.file_schema("attributes"),
-      "source.map_positions" => %{
+      "source.layout" => %{
         "type" => "array",
         "items" => %{"$ref" => "MapPosition"},
         "minItems" => 1

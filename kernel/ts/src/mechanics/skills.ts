@@ -3,7 +3,7 @@ import { KernelError } from '../foundation/error.ts';
 import { refString, type Steps, type World } from '../runtime/decision.ts';
 import { assigned, value, type Assigned } from './fact.ts';
 import { holds } from './policy.ts';
-import { npcValue, value as attributeValue } from './attributes/shared.ts';
+import { npcValue, value as attributeValue } from './attribute/shared.ts';
 import { acquisition, level, membership, practice } from './skill_level.ts';
 
 export { acquisition, level, membership, practice };
@@ -42,7 +42,7 @@ export function concealed(world: World, actor: CharacterId, skill: DefinitionRef
 }
 
 /** Not yet learned, and (Homestead hs-11) its prerequisite, when declared, holds; dialogue
- * admission only: an ancestry grant at birth (attributes/rule.ts) is not learning. */
+ * admission only: an ancestry grant at birth (attribute/rule.ts) is not learning. */
 export function learnable(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
   const p = world.cartridge.skills?.[refString(skill)]?.prerequisite;
   return membership(world, actor, skill) === false && (!p || holds(world, actor, p, { steps }));

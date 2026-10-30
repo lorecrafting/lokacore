@@ -127,12 +127,12 @@ test('Continue is refused while the leader is rooted', () => {
 });
 
 // Breaks (W15 review): the journal's patrol leader_name reads the base short, not the actor's
-// short_variants (the one displayed-name read every other view uses).
-test('journal leader name follows the leader short_variants', () => {
+// name_variants (the one displayed-name read every other view uses).
+test('journal leader name follows the leader name_variants', () => {
   const id = npc(fresh);
   const e = {
     ...fresh.entities[id],
-    short_variants: [{ when: { op: 'all', items: [] }, description: 'npc.leader.named' }],
+    name_variants: [{ when: { op: 'all', items: [] }, description: 'npc.leader.named' }],
   };
   const a = journey({ ...fresh, entities: { ...fresh.entities, [id]: e } } as never);
   a.start();

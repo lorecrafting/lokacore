@@ -525,7 +525,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
         },
         "shop": {
           "type": "array",
@@ -679,7 +679,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
         },
         "container_id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
@@ -2146,7 +2146,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
         },
         "band": {
           "$ref": "action.schema.json#/$defs/Key",
@@ -2167,7 +2167,7 @@
               },
               "words": {
                 "$ref": "entity.schema.json#/$defs/NameWords",
-                "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a short_variants entry holds or the definition declares none."
+                "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
               },
               "band": {
                 "$ref": "action.schema.json#/$defs/Key",

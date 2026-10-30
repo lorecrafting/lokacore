@@ -15,7 +15,7 @@ import {
   newWorld,
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
-import { value } from '../../../kernel/ts/src/mechanics/attributes/shared.ts';
+import { value } from '../../../kernel/ts/src/mechanics/attribute/shared.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
 import { coldReopen, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';

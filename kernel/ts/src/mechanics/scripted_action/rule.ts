@@ -59,7 +59,7 @@ import {
 import { assigned, seenTip, value } from '../fact.ts';
 import { add } from '../../foundation/int.ts';
 import { adjust, level } from '../resource.ts';
-import { value as attributeValue } from '../attributes/shared.ts';
+import { value as attributeValue } from '../attribute/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';

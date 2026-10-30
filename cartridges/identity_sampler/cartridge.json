@@ -27,7 +27,7 @@
       "scripted_action": 1,
       "dialogue": 1,
       "inspectable_detail": 1,
-      "topics": 1,
+      "topic": 1,
       "knowledge": 1
     },
     "client_features": []

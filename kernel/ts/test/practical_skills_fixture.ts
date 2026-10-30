@@ -9,7 +9,7 @@ import { fragment } from './fragment.ts';
 export const sampler = fragment('protocol/fixtures/harvest_sampler_hash.json');
 export const { ref, prefix } = sampler;
 const named = (kind: string, k: string) => `${prefix}:${kind}/${k}`;
-const caps = ['attributes', 'resource', 'commerce', 'dialogue'];
+const caps = ['attribute', 'resource', 'commerce', 'dialogue'];
 /** The fragment change: `stat` is INT and DEX, `pennies` and `mv` the player's starts. */
 export const practical = (stat: number, pennies: number, mv: number) => (c: any) => {
   for (const cap of caps) c.manifest.requires.capabilities[cap] = c.lock.capabilities[cap] = 1;
@@ -95,7 +95,7 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
       version: 1,
       scopes: ['player'],
       value_type: { type: 'bool', default: false },
-      meaning: `Skill ${skill}'s acquisition (skills@1): only skills@1 writes it.`,
+      meaning: `Skill ${skill}'s acquisition (skill@1): only skill@1 writes it.`,
     };
     const teacherRef = ref('npc', teacher);
     c.dialogues[named('dialogue', `${teacher}_${skill}`)] = {

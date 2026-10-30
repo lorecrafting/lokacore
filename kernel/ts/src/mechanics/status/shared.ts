@@ -20,8 +20,8 @@ import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
 // pierces lives here, its one caller: in skills.ts it closed skills -> policy -> status/shared
-// (status/shared and attributes/shared already shared a cycle before row 16).
-import { npcValue, value as attributeValue } from '../attributes/shared.ts';
+// (status/shared and attribute/shared already shared a cycle before row 16).
+import { npcValue, value as attributeValue } from '../attribute/shared.ts';
 import { level } from '../skill_level.ts';
 import { settleMaxima } from '../resource.ts';
 

@@ -31,7 +31,7 @@ defmodule Loka.Content.Exchanges do
 
   defp careful(m, defs, %{"careful" => c, "items" => items}, path) do
     valid =
-      m["requires"]["capabilities"]["skills"] == 1 and
+      m["requires"]["capabilities"]["skill"] == 1 and
         match?({_, _, _}, Refs.resolve(c["skill"], "skill", m, defs)) and
         c["count"] <= length(Enum.uniq(items))
 

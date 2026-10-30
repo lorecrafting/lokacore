@@ -24,7 +24,7 @@ defmodule Loka.Core.ComposeKnowledge do
     end
   end
 
-  # A first visit has no from and no count; a later one (variety@1) names the current row in from
+  # A first visit has no from and no count; a later one (alternates@1) names the current row in from
   # and counts it plus one.
   defp valid?(%{"op" => "visit.record"} = op, before, _),
     do: op["value"]["room_id"] == op["room_id"] and counted?(op, before)

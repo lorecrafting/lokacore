@@ -144,7 +144,7 @@
     ]
   },
   {
-    "key": "attributes",
+    "key": "attribute",
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability",
@@ -177,7 +177,7 @@
     ]
   },
   {
-    "key": "skills",
+    "key": "skill",
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability",
@@ -448,7 +448,7 @@
     ]
   },
   {
-    "key": "topics",
+    "key": "topic",
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability",
@@ -595,7 +595,7 @@
     "events": []
   },
   {
-    "key": "tags",
+    "key": "tag",
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability",
@@ -609,7 +609,7 @@
     ]
   },
   {
-    "key": "variety",
+    "key": "alternates",
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability",

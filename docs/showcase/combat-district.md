@@ -50,7 +50,7 @@ harder with the sword and changes nothing unarmed (chance 0 never deals the unar
 
 - `requires.kernel_api.at_least` 1.102; capabilities add `population` (the pit's pack),
   `sense_cue` (the boar's cue) and `speech` (say and shout). Levelling needs no capability
-  (attributes@1 is declared).
+  (attribute@1 is declared).
 - `world.combat` adds `target_choice: true`, `allies: ["gil"]` and the narration keys `ally_hit`
   and `ally_miss` (`targets_sampler/cartridge.json`); `player_attack` is unchanged.
 - `world.levelling`: `thresholds [30, 100]`, `points_per_level 1`, `kills` raider 10, boar 30, tilt boar 30,
@@ -82,7 +82,7 @@ yet." becomes:
 
 The hub pin's exit count rises to four. The build slice edits `text.json` `readable.sign_hub` and
 `room.crossroads_inn.description` (the "Three roads" wording) and adds the five new rooms to
-`map_positions.json`.
+`layout.json`.
 
 ## Rooms and map
 
@@ -125,7 +125,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   `immune: [bleeding, gored]` (`npc_status_sampler/npcs/golem.json`); `drops: [{tusk, 100},
   {purse, 50}]` with `tusk` and `purse` `location {in: npc, npc: boar}` (`loot_sampler/npcs/rat.json`);
   `cues: [{sense: sound, text: cue.boar, range: 1}]` (`senses_sampler/npcs/sentry.json`; a dead
-  NPC's cues are silent); `short_variants` none.
+  NPC's cues are silent); `name_variants` none.
 - **Gil** (the ally): `room: gate_yard`; hp 0..10 gain 0; `attack {chance 100, 1..1}`;
   `description_variants` on `fact_compare gil_warned true` ("Gil has his spear up; he heard you
   call."). Listed in `world.combat.allies`; never an Attack target; takes no combat damage

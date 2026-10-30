@@ -35,15 +35,15 @@ defmodule Loka.Content.Levelling do
   @path ["world", "levelling"]
 
   defp owner(m) do
-    if m["requires"]["capabilities"]["attributes"] == 1,
+    if m["requires"]["capabilities"]["attribute"] == 1,
       do: [],
       else: [
         diag(
           "UNDECLARED_CAPABILITY",
           at("cartridge.json", @path),
-          %{"capability" => "attributes"},
+          %{"capability" => "attribute"},
           [
-            "attributes@1"
+            "attribute@1"
           ]
         )
       ]

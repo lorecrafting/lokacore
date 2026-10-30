@@ -3,7 +3,7 @@
     "ring"
   ],
   "name": "item.ring.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "fact_compare",

@@ -3,7 +3,7 @@ defmodule Loka.ContentVoicesTest do
 
   # Breaks (toolbox row FD2; twin of voices.test.ts): the compiler stops walking the
   # skill_compare leaf, so an undeclared skill compiles and fails in play, the leaf loses its
-  # skills@1 owner, or a retired `asides` field compiles.
+  # skill@1 owner, or a retired `asides` field compiles.
   test "skill_compare: reference and owner; asides refused" do
     dir = Loka.ContentSource.copy("cartridges/voices_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -11,7 +11,7 @@ defmodule Loka.ContentVoicesTest do
 
     unowned =
       {"cartridge.json",
-       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "skills") end)}
+       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "skill") end)}
 
     for {changes, path, data} <- [
           {[
@@ -20,7 +20,7 @@ defmodule Loka.ContentVoicesTest do
            ], "npcs/sage.room_line_variants[0].when.skill",
            %{"target" => "voices_sampler@0.0.1:skill/ghost"}},
           {[unowned, no_scripted], "npcs/sage.room_line_variants[0].when.op",
-           %{"capability" => "skills"}}
+           %{"capability" => "skill"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
       assert %{"data" => ^data} = Enum.find(diags, &(&1["path"] == path)), inspect(diags)

@@ -134,7 +134,7 @@ defmodule Loka.CartridgeCrossKernelTest do
     dir
   end
 
-  # resource_sampler with six attributes, attributes@1 and pray gated on both leaves, short refs
+  # resource_sampler with six attributes, attribute@1 and pray gated on both leaves, short refs
   # (c1-attributes; cartridge.schema.json AttributeSpec, policy.schema.json Policy).
   defp attributed(dir) do
     road = "cartridges/resource_sampler"
@@ -153,7 +153,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
     files = %{
       "cartridge.json" =>
-        put_in(src.("cartridge.json"), ["requires", "capabilities", "attributes"], 1),
+        put_in(src.("cartridge.json"), ["requires", "capabilities", "attribute"], 1),
       "attributes.json" => %{
         "attributes" => Map.new(stats, fn {k, v} -> {k, %{"start" => v}} end)
       },

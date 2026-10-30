@@ -1,6 +1,7 @@
 2 kernel/ts/test/access_locks.test.ts
 4 kernel/ts/test/affects.test.ts
 9 kernel/ts/test/aimed_spells.test.ts
+4 kernel/ts/test/alternates.test.ts
 4 kernel/ts/test/ask.test.ts
 1 kernel/ts/test/barrier_sampler.test.ts
 8 kernel/ts/test/boss.test.ts
@@ -104,7 +105,6 @@
 10 kernel/ts/test/reactions.test.ts
 7 kernel/ts/test/reactions_sampler.test.ts
 4 kernel/ts/test/readable.test.ts
-6 kernel/ts/test/scripted_actions.test.ts
 1 kernel/ts/test/reward_storage.test.ts
 1 kernel/ts/test/riddle_fixture.ts
 2 kernel/ts/test/rumour.test.ts
@@ -113,6 +113,7 @@
 5 kernel/ts/test/schedule.test.ts
 2 kernel/ts/test/schedule_cases.test.ts
 1 kernel/ts/test/scoped_facts.test.ts
+6 kernel/ts/test/scripted_actions.test.ts
 1 kernel/ts/test/senses.test.ts
 4 kernel/ts/test/service.test.ts
 24 kernel/ts/test/settle.test.ts
@@ -153,7 +154,6 @@
 4 kernel/ts/test/traps_sampler.test.ts
 4 kernel/ts/test/use.test.ts
 6 kernel/ts/test/variants.test.ts
-4 kernel/ts/test/variety.test.ts
 2 kernel/ts/test/voices.test.ts
 8 kernel/ts/test/water.test.ts
 4 kernel/ts/test/witness.test.ts

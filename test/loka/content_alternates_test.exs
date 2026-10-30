@@ -1,9 +1,9 @@
-defmodule Loka.ContentVarietyTest do
+defmodule Loka.ContentAlternatesTest do
   use ExUnit.Case, async: true
 
   # Breaks (toolbox row W7): the compiler drops cartridge.json alternates, accepts an alternate or
   # key the text catalog lacks, skips alternates' or visited_count's owner check.
-  test "alternates reach the artifact, name catalog keys and need variety@1" do
+  test "alternates reach the artifact, name catalog keys and need alternates@1" do
     dir = Loka.ContentSource.copy("cartridges/variety_sampler")
     assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
 
@@ -13,7 +13,7 @@ defmodule Loka.ContentVarietyTest do
 
     alternate = &put_in(&1, ["alternates", "narration.walk"], ["narration.walk_b", "nope"])
     key = &put_in(&1, ["alternates"], %{"narration.gone" => ["narration.walk_b"]})
-    drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "variety") end)
+    drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "alternates") end)
 
     cases = [
       {[{"cartridge.json", alternate}],

@@ -3,7 +3,7 @@
     "feast"
   ],
   "name": "item.feast.short",
-  "short_variants": [
+  "name_variants": [
     {
       "when": {
         "op": "status_active",

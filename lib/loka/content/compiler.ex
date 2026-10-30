@@ -51,8 +51,8 @@ defmodule Loka.Content.Compiler do
 
   defp world_content(files, manifest, defs, located) do
     {text, d3} = text(of(files, :text))
-    {positions, d4} = Loka.Content.MapPositions.source(of(files, :map_positions), manifest, defs)
-    located = Loka.Content.MapPositions.settings(located, positions)
+    {positions, d4} = Loka.Content.Layout.source(of(files, :layout), manifest, defs)
+    located = Loka.Content.Layout.settings(located, positions)
     v2 = v2(defs, located, text, files)
 
     {located, v2, d3 ++ d4}
@@ -75,7 +75,7 @@ defmodule Loka.Content.Compiler do
   defp checks(manifest, defs, v2, located, registry) do
     Enum.concat([
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),
-      Loka.Content.Variety.check(manifest, defs, located, {v2, registry}),
+      Loka.Content.Alternates.check(manifest, defs, located, {v2, registry}),
       Resources.check(manifest, defs, v2, located, registry),
       Entities.carry(manifest, defs, located),
       Loka.Content.Fuel.check(manifest, defs),

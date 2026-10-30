@@ -1,4 +1,4 @@
-defmodule Loka.Content.MapPositions do
+defmodule Loka.Content.Layout do
   @moduledoc "Static drawing metadata; real room exits remain the only graph."
   import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3, schema: 4]
   alias Loka.Core.Contracts
@@ -12,9 +12,9 @@ defmodule Loka.Content.MapPositions do
 
     validation =
       Contracts.validate(
-        "MapPositionsFile",
+        "LayoutFile",
         rows,
-        Map.put(Loka.Content.Source.contracts(), "MapPositionsFile", shape)
+        Map.put(Loka.Content.Source.contracts(), "LayoutFile", shape)
       )
 
     if validation != :ok do
@@ -26,7 +26,7 @@ defmodule Loka.Content.MapPositions do
   end
 
   def settings(located, nil), do: located
-  def settings({entry, settings}, rows), do: {entry, Map.put(settings, "map_positions", rows)}
+  def settings({entry, settings}, rows), do: {entry, Map.put(settings, "layout", rows)}
 
   defp check(rel, rows, m, defs) do
     rows = Enum.map(rows, &Map.update!(&1, "room", fn r -> ref(r, "room", m) end))

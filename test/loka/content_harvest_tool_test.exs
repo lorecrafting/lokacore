@@ -3,15 +3,15 @@ defmodule Loka.ContentHarvestToolTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/harvest_sampler")}
 
   # Break (toolbox row 19): a
-  # harvest tool gate compiles without tags@1.
-  test "a harvest tool needs tags@1", %{dir: dir} do
+  # harvest tool gate compiles without tag@1.
+  test "a harvest tool needs tag@1", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
     untagged = &Map.delete(&1, "tags")
 
     assert {:error, diags} =
              Loka.ContentSource.compile(dir, [
-               {"cartridge.json", &(pop_in(&1, ["requires", "capabilities", "tags"]) |> elem(1))},
+               {"cartridge.json", &(pop_in(&1, ["requires", "capabilities", "tag"]) |> elem(1))},
                {"items/pickaxe.json", untagged},
                {"items/stick.json", untagged}
              ])

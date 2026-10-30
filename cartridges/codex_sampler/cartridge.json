@@ -17,11 +17,11 @@
       "policy": 1,
       "fact": 1,
       "readable": 1,
-      "topics": 1,
+      "topic": 1,
       "reaction": 1,
       "scripted_action": 1,
       "knowledge": 1,
-      "variety": 1
+      "alternates": 1
     },
     "client_features": []
   },

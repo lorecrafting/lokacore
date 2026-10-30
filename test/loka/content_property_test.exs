@@ -61,7 +61,7 @@ defmodule Loka.ContentPropertyTest do
           {[{"services/deposit_a.json", &put_in(&1, ["benefit", "amount"], 101)}],
            {"SCHEMA_VIOLATION", "#{at}.amount"}},
           {[
-             {"cartridge.json", &put_in(&1, ["requires", "capabilities", "skills"], 1)},
+             {"cartridge.json", &put_in(&1, ["requires", "capabilities", "skill"], 1)},
              {"skills/pick.json", pick},
              {"services/deposit_a.json", &put_in(&1, ["benefit", "account"], "uses_pick")}
            ], {"SCHEMA_VIOLATION", "#{at}.account"}},

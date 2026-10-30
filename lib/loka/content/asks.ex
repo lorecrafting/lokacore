@@ -1,6 +1,6 @@
 defmodule Loka.Content.Asks do
   @moduledoc """
-  Toolbox row FD7: an NPC's ask names topics of this cartridge, needs speech@1 and topics@1
+  Toolbox row FD7: an NPC's ask names topics of this cartridge, needs speech@1 and topic@1
   (UNDECLARED_CAPABILITY at the ask). The answers' conditions and texts are checked with
   every entity's (Loka.Content.Entities).
   """
@@ -18,7 +18,7 @@ defmodule Loka.Content.Asks do
 
   defp npc({rel, a}, m, defs) do
     owners =
-      for c <- ~w(speech topics),
+      for c <- ~w(speech topic),
           m["requires"]["capabilities"][c] != 1,
           do: diag("UNDECLARED_CAPABILITY", at(rel, ["ask"]), %{"capability" => c}, ["#{c}@1"])
 

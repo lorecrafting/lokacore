@@ -23,7 +23,7 @@ defmodule Loka.Content.Ancestries do
         do: [diag("SCHEMA_VIOLATION", at("cartridge.json", ["ancestries"]))],
         else: []
 
-    # attributes@1 owns these cartridge.json settings: ancestries, derived-stat tables, levelling.
+    # attribute@1 owns these cartridge.json settings: ancestries, derived-stat tables, levelling.
     empty ++
       Loka.Content.Derived.check(manifest, defs, located) ++
       Loka.Content.Levelling.check(manifest, defs, located, text) ++
@@ -70,8 +70,8 @@ defmodule Loka.Content.Ancestries do
   defp capability(manifest, path, choice) do
     caps = manifest["requires"]["capabilities"]
 
-    if caps["attributes"] == 1 and caps["fact"] == 1 and
-         (is_nil(choice["skill"]) or caps["skills"] == 1) and
+    if caps["attribute"] == 1 and caps["fact"] == 1 and
+         (is_nil(choice["skill"]) or caps["skill"] == 1) and
          (is_nil(choice["dark_sight"]) or caps["light"] == 1),
        do: [],
        else: [diag("UNDECLARED_CAPABILITY", at("cartridge.json", path))]

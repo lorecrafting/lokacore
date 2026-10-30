@@ -101,11 +101,11 @@ test('the garden shows its long description until the tenth visit, then one line
   assert.deepEqual(garden, [...Array(9).fill('room.garden.description'), 'room.garden.familiar']);
 });
 
-// Breaks: the variety@1 lock check dropped from the knowledge recorder, so a knowledge@1-only
+// Breaks: the alternates@1 lock check dropped from the knowledge recorder, so a knowledge@1-only
 // world (Chapter 1) writes from and count on every re-entry and saves differently than before.
-test('without variety@1 a re-entry records nothing and the row has no count', () => {
+test('without alternates@1 a re-entry records nothing and the row has no count', () => {
   const lock = { ...content.lock, capabilities: { ...content.lock.capabilities } };
-  delete (lock.capabilities as Obj).variety;
+  delete (lock.capabilities as Obj).alternates;
   let w = fresh({ ...content, lock } as Cartridge);
   const garden = w.roomIds['variety_sampler@0.0.1:room/garden']!;
   const ops: string[][] = [];
