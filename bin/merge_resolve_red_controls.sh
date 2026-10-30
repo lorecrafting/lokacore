@@ -1,6 +1,8 @@
 #!/bin/sh
 # bin/merge_resolve.py (bin/pm_merge.sh) resolves a mechanics.md tail (a section both sides appended
-# kept once), a kernel_api line and a generated-file conflict (a hash fixture included), and leaves unresolved: a tail that
+# kept once), a kernel_api line and a generated-file conflict (a hash fixture included), takes every regenerated file (a
+# content_hash-only transcript, a live save, a compiled hash fixture, a *.gen.* file) even when others are left, and leaves
+# unresolved: a transcript that differs beyond content_hash, a modify/delete of a generated file, a tail that
 # repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of mechanics.md, a review record that differs
 # beyond whitespace, an edit of the last mechanics.md line, a conflict in a TypeScript source and one in a hand-kept hash fixture.
 set -eu
@@ -54,10 +56,29 @@ pair body 's/\z/\n## Same\n\nd\n/' 's/\z/\n## Same\n\ne\n/'
 left 'one heading with two bodies' $m
 pair mid 's/\n/\nmid one\n/' 's/\n/\nmid two\n/'
 left 'a conflict in the middle of mechanics.md' $m
+# Regenerated files beside hand-kept ones (loka-3pr5): every regenerated one is taken and staged even though some are left;
+# left: a transcript that differs beyond content_hash, a modify/delete of a generated file and of a transcript, and a hand file.
+t1=cartridges/bleed_sampler/transcripts/bleed.jsonl t2=cartridges/cellar_sampler/transcripts/combat.jsonl t3=cartridges/check_sampler/transcripts/schedule.jsonl
+sq=mobile/app/stories/live/green.sql th=protocol/fixtures/toolbox_showcase_hash.json ss=docs/state-sections.gen.json lb=test/loka/lint_baseline.txt dg=docs/toolbox.gen.json
+for i in 1 2; do
+  g checkout -q -b "gen$i" "$base"
+  perl -pi -e "s/(\"content_hash\":\")[0-9a-f]{64}/\$1 . ('$i' x 64)/ge" $t1 $t2 # a re-pin: content_hash alone
+  perl -pi -e "s/\"seed\":\[1/\"seed\":[1$i/" $t2 # a difference on the content_hash line, after it
+  for p in $sq $th $ss $lb; do echo "$i" > $p; done
+  echo "// $i" > $f
+  if [ $i = 1 ]; then git rm -q $dg $t3; else echo 2 | tee $dg >> $t3; fi
+  g commit -qam "gen$i"
+done
+g merge -q gen1 >/dev/null 2>&1 && fail 'the generated files did not conflict'
+out=$(python3 "$src/bin/merge_resolve.py" 2>/dev/null) && fail 'resolved a hand file'
+[ "$out" = "unresolved: $t2 $t3 $dg $f" ] || fail "not only the hand-kept files left: $out"
+[ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$t2 $t3 $dg $f " ] || fail "not left unmerged: $t2 $t3 $dg $f"
+git diff --quiet gen1 -- $t1 $sq $th $ss $lb && git diff --cached --quiet gen1 -- $t1 $sq $th $ss $lb || fail "$t1 $sq $th $ss $lb not theirs and staged"
+g merge --abort
 r=docs/reviews/zz-record.md ws=docs/reviews/zz-spaces.md fold=docs/reviews/zz-fold.md
 for i in 1 2; do g checkout -q -b "rev$i" "$base"; echo "verdict $i" > $r; printf 'same%*s text\n' $i '' > $ws; if [ $i = 1 ]; then printf '# T\nbody\n' > $fold; else printf '# T body\n' > $fold; fi; git add $r $ws $fold; g commit -qm "rev$i"; done
 g merge -q rev1 >/dev/null 2>&1 && fail 'the review records did not conflict'
-left 'a review record' "$fold $r $ws"
+left 'a review record' "$fold $r"
 [ "$out" = "unresolved: $fold $r" ] || fail "$ws (whitespace only) not taken: $out"
 edit() { g checkout -q -b "$1" "$base" && echo "// $1" > $f && perl -0pi -e "s/[^\n]*\n\z/$1\n/" $m && g commit -qam "$1"; }
 edit c
@@ -66,7 +87,7 @@ g merge -q c >/dev/null 2>&1 && fail 'the sides did not conflict'
 python3 "$src/bin/merge_resolve.py" >/dev/null && fail "an edit of $m or a conflict in $f was resolved"
 [ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$m $f " ] || fail "$m and $f are not left unmerged"
 g merge --abort
-for k in capability_lock sampler_v010; do # kept by hand, frozen: theirs would silently drop ours; one merge each, as one left file keeps the other
+for k in capability_lock sampler_v010; do # kept by hand, frozen: theirs would silently drop ours; one merge each, so each refusal is its own
   hk=protocol/fixtures/${k}_hash.json
   for i in 1 2; do g checkout -q -b "$k$i" "$base"; echo "{\"side\": $i}" > $hk; g commit -qam "$k$i"; done
   g merge -q ${k}1 >/dev/null 2>&1 && fail "$hk did not conflict"

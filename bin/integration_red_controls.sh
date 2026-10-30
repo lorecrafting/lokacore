@@ -205,6 +205,15 @@ rc=0; MUTATE_MINUTES=0 capped sh "$bin/mutate.sh" m.tsv "touch ran" > out 2>&1 |
 # Break: the timebox exit hides a failure (a malformed line plus a timebox exits 3, not 1).
 printf 'bad\na.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_MINUTES=0 capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 1 ] && [ "$(cut -f1 out | tr '\n' ,)" = 'FAIL,TIMEBOX,' ] || { bad "mutate timebox after failure: exit $rc, want 1 (a failure beats the timebox)"; cat out; }
+# Break: a bad MUTATE_MINUTES is not refused with exit 2 (thirty exited 0 with no rows, a silent clean
+# pass; 1.5 catches a first-character-only check; 08 died as bad octal), or an empty one is refused instead of meaning 30.
+mt; printf 'a.txt\tx=1\tx=2\n' > m.tsv
+for shell in sh bash; do for m in thirty 1.5 08; do
+  rc=0; MUTATE_MINUTES=$m capped $shell "$bin/mutate.sh" m.tsv "touch ran" > out 2>&1 || rc=$?
+  [ "$rc" = 2 ] && [ ! -e ran ] && grep -q '^usage: MUTATE_MINUTES' out || { bad "mutate MUTATE_MINUTES='$m' under $shell: exit $rc, want 2, a usage line and no mutant run"; cat out; }
+done; done
+rc=0; MUTATE_MINUTES= capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && grep -q '^SURVIVED' out || { bad "mutate empty MUTATE_MINUTES: exit $rc, want 0 and the default budget"; cat out; }
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
@@ -310,7 +319,7 @@ CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.
 CI=$ok E2E=$ok SLICE_FILE=s REC_FILE=r REC_IN_BASE= RESOLVE=1 pm batch-resolver 0 '^PUSHED batch'
 [ "$(cat "$R.rg" 2>/dev/null)" = run ] && [ "$(git -C "$R" show origin/batch:a)" = regenerated ] || bad 'pm_merge batch-resolver: regen.sh did not run once into the pushed merge'
 # Break: a failed regen.sh merges anyway, or leaves its edits in the worktree (merge --abort keeps them).
-CI=$ok E2E=$ok SLICE_FILE=s REC_FILE=r REC_IN_BASE= RESOLVE=1 REGEN_RC=1 pm regen-fails 1 '^CONFLICT'; unset RESOLVE REGEN_RC # bash's sh keeps a function's prefix assignments, dash does not
+CI=$ok E2E=$ok SLICE_FILE=s REC_FILE=r REC_IN_BASE= RESOLVE=1 REGEN_RC=1 pm regen-fails 1 '^REGEN_FAIL'; unset RESOLVE REGEN_RC # bash's sh keeps a function's prefix assignments, dash does not
 # --- prepush.sh ----------------------------------------------------------------------------
 # A repo whose stub mise logs each check and fails them when STUB_RC=1; origin/main is the base commit.
 # Break: two runs share log files, so one reports the other's output (the first log must still read "run-a" after

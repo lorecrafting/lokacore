@@ -109,7 +109,10 @@ their rules and red controls remain available for resumption.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
   sides' whole `## `/`### ` sections at one spot of `docs/system/mechanics.md`, both sides' table rows at one spot of
   `docs/MECHANICS-TOOLBOX.md`, the higher
-  `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`; and leaves unresolved a section
+  `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`; takes and stages every regenerated file (a
+  `content_hash`-only transcript, a live save, a compiled hash fixture, `docs/state-sections.gen.json`) beside a hand file it
+  leaves, naming only the left ones; and leaves unresolved a transcript that differs beyond `content_hash`, a modify/delete of a
+  generated file, a section
   that repeats a `## ` heading, a `###` beside a `##` section, a non-table line, two sections inside another section, one row id on both sides, a review
   record that differs
   beyond whitespace and a TypeScript source conflict.
