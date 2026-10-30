@@ -1,0 +1,38 @@
+id: mobile-book-english
+language: tsx
+severity: error
+message: 'Book English comes from LABEL in mobile/app/book/labels.ts, never a literal in a page or component, so a wording change is one edit there (loka-x6t.61).'
+# Page and component files only: the presenter's .ts tables (words.ts, model.ts) are their own layer.
+files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx]
+# Allowlist by file, still to migrate (loka-x6t.61): drop a file from here once it has no hit.
+ignores:
+  - mobile/app/SaveError.tsx
+  - mobile/app/book/Body.tsx
+  - mobile/app/book/Book.tsx
+  - mobile/app/book/Combat.tsx
+  - mobile/app/book/DiscoveredMap.tsx
+  - mobile/app/book/DreamPage.tsx
+  - mobile/app/book/Footer.tsx
+  - mobile/app/book/lines.tsx
+  - mobile/app/book/notices.tsx
+  - mobile/app/book/Npc.tsx
+  - mobile/app/book/Riddle.tsx
+  - mobile/app/book/skills.tsx
+  - mobile/app/book/Status.tsx
+  - mobile/app/book/StatusIcon.tsx
+# Prose is JSX text with a letter, or a string or template piece with two words, a letter before an
+# end stop, a word at a piece's edge, or a capitalised word. Keys, test ids, styles and roles are one
+# lowercase or camel token, so they never match; a key name compared to a key (`k === 'Escape'`) and
+# module specifiers are not prose either.
+rule:
+  any:
+    - kind: jsx_text
+      regex: '[A-Za-z]'
+    - kind: string_fragment
+      regex: '[A-Za-z]+ [A-Za-z]+|[A-Za-z][.:!?…] *$|[A-Za-z] $|^ [A-Za-z]|^[A-Z][a-z]+\b'
+      not:
+        any:
+          - inside: { kind: import_statement, stopBy: end }
+          - inside:
+              kind: string
+              inside: { kind: binary_expression, has: { regex: '(^|\.)(k|key)$' } }
