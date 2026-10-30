@@ -517,7 +517,7 @@
         "key": "traded_knife",
         "kind": "fact"
        },
-       "kind": "entitlement"
+       "op": "entitlement"
       },
       "action": {
        "action_key": "barter",
@@ -561,7 +561,7 @@
         "key": "owns_plot",
         "kind": "fact"
        },
-       "kind": "entitlement"
+       "op": "entitlement"
       },
       "action": {
        "action_key": "buy_plot",
@@ -599,7 +599,7 @@
         "key": "owns_pen",
         "kind": "fact"
        },
-       "kind": "entitlement"
+       "op": "entitlement"
       },
       "action": {
        "action_key": "buy_pen",
