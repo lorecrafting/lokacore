@@ -88,15 +88,8 @@ for (const [name, bytes] of artifacts()) {
   if (!w) continue;
   const c = w.cartridge;
   test(`${name}: declared pools and statuses are in the GameView and on the Character page`, () => {
-    // A meal service's stock is the provider's pool, not the player's (mechanics.md:1552).
-    const stock = new Set(
-      Object.values(c.services ?? {}).flatMap((s: any) =>
-        s.benefit.op === 'meal' ? [s.benefit.stock.key] : [],
-      ),
-    );
-    const pools = Object.values(c.resources)
-      .map((r) => r.key)
-      .filter((k) => !stock.has(k));
+    // No stock cartridge has a meal service, whose stock pool the view leaves out (resources.ts).
+    const pools = Object.values(c.resources).map((r) => r.key);
     const statuses = Object.values(c.statuses ?? {}).map((s) => s.name);
     const view = viewOf(withStatuses(w));
     assert.deepEqual(view.resources.map((r) => r.resource.key).sort(), [...pools].sort());
