@@ -5,7 +5,7 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #507 (142f058d3); written 2026-10-30 by Claude Code (Opus 5.5), PM session e74a58c9.
+AS OF main after #509 (0b795d299); written 2026-10-30 by Claude Code (Opus 5.5), PM session e74a58c9.
 Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of weekly limit ...
 this will be my last week before a break so yeah make it right!" Owner delegated every open decision (quoted):
 "whatever your best recommendation on all is, or whatever is open, you decide with your best recommendation";
@@ -13,46 +13,50 @@ rulings are in the notes of loka-ivjq.20, .3, .4, .29.
 
 ## Now
 
-Polish-foundation session (owner 2026-10-30, quoted: "Ok the five items oyu suggested, please work on them").
-In flight: #509 loka-kgd.193 slice A (NPC emotes: emote@1 table with `others`/`to` lines, reaction `emote` step,
-renderer in `mobile/packages/game-view/line_words.ts`, `cartridges/emote_sampler`, stories) at 0e1fdaf56: fresh
-Opus review running (record `docs/reviews/2026-10-30-kgd193-npc-emotes-review.md`, branch `review-509`), then a
-second opinion on the post-fix head (protocol change). Then slice B (showcase goblins cower), then loka-8ghm ambient.
-Storybook on 6006 is current with #507 (Pages/Room Mood, MoodPair; Pages/NPC Mood).
+Polish-foundation session done (owner 2026-10-30, quoted: "Ok the five items oyu suggested, please work on them").
+IN FLIGHT: retro housekeeping PR (loka-yqde scratch subfolders, loka-wam0 lint cancellations measured first,
+loka-e69q DEFINITION_MAPS check), branch `housekeeping/retro-2026-10-30`, worktree `retro-2026-10-30`; brief in
+the Beads notes of all three (owner approved 2026-10-30, quoted: "ok lets go with your recommendation"); a developer
+was spawned at 11:29 by PM session e74a58c9. Next: check `gh pr list --head housekeeping/retro-2026-10-30`; if no PR,
+inspect the worktree and spawn a fresh developer from the brief (keep its commits); then one Opus reviewer (PR
+comments, no record), merge with `bin/merge_pr.sh <PR> loka-yqde,loka-wam0,loka-e69q`. POLISH IS READY: `bin/polish_session.sh update` brought main (#509) into the session worktree;
+Storybook http://localhost:6006 shows the new stories: Book/LogLines "NPC emotes", Pages/Room "Goblins cower",
+"An afraid goblin and a calm one", "Two afraid goblins", Pages/NPC "Mood (afraid goblin)".
 
 Merged 2026-10-30, each with a fresh review and green ci/book-e2e on the exact head:
 - #503 loka-3pr5: `bin/merge_resolve.py` resolves and stages what it can when hand files are left, `*.gen.*` glob,
   transcripts only on content_hash-only conflicts; `pm_merge` names only leftovers (REGEN_FAIL/COMMIT_FAIL). Cause of
-  the C4 A refusal: all-or-nothing exit plus a CONFLICT line that listed every file (follow-up loka-b3ii).
+  the C4 A refusal: all-or-nothing exit plus a CONFLICT line that listed every file (follow-up loka-b3ii). Proven
+  live: it resolved #508's checks.gen.json conflict with no hand edit.
 - #502 loka-o6r3: `bin/mutate_diff.sh` follows renames (`-M`, AMR) and counts setup inside `MUTATE_MINUTES`.
 - #504 loka-xppq: `bin/mutate.sh` refuses a non-integer or leading-zero `MUTATE_MINUTES` (exit 2).
 - #505 loka-9t2m: one malformed POST to Storybook `/mcp` killed Storybook (ECONNREFUSED for every agent after):
-  npm override `@tmcp/transport-http` 0.9.1 (follow-up loka-e9ey: drop it when addon-mcp moves). Never probe `/mcp` by curl.
-- #506 loka-kgd.174: `mobile/app/book/declared_visible.test.ts`, every declared pool, NPC Held list (theft) and
-  status visible in GameView and the Book (follow-ups loka-h12t mana beside ma, loka-hp4d shop stock under Held).
+  npm override `@tmcp/transport-http` 0.9.1 (follow-up loka-e9ey). Never probe `/mcp` by curl.
+- #506 loka-kgd.174: `mobile/app/book/declared_visible.test.ts` (follow-ups loka-h12t mana beside ma, loka-hp4d
+  shop stock under Held).
 - #508 loka-x6t.61: `lint/rules/mobile-book-english.yml`, Book English only in LABEL; 14 files allowlisted
-  (part 2 loka-s7af, with the rule's false positives and a Book.tsx:262 test gap).
+  (part 2 loka-s7af).
 - #507 loka-x6t.71 moods: NPC mood = name_variants (may carry their own `words`) + description_variants; NPC
-  room_line_variants retired; record `docs/reviews/2026-10-30-x6t71-moods-review.md` (item moods loka-n39c).
-- Closed, no code: loka-y6yg.52 (web clock pauses in a hidden tab by design, `App.tsx:136,144`).
+  room_line_variants retired (item moods loka-n39c); record `docs/reviews/2026-10-30-x6t71-moods-review.md`.
+- #510 loka-2ve2: the article is written again when adjacent names end in the same word ("A cowering goblin and a
+  goblin are here."; owner 2026-10-30 accepted the PM rec).
+- #509 loka-kgd.193 NPC emotes: `emote@1` table (`others`, optional `to`), reaction `emote` step, renderer in
+  `mobile/packages/game-view/line_words.ts`, `cartridges/emote_sampler`; record
+  `docs/reviews/2026-10-30-kgd193-npc-emotes-review.md` (Realm per-reader lines loka-u6wj; emoted trigger loka-s0fy).
+- Closed, no code: loka-y6yg.52 (web clock pauses in a hidden tab by design, `App.tsx:136,144`; the owner's
+  browser-use skill now calls `Page.bringToFront` after `new_tab`).
 
-Owner decisions 2026-10-30 (record `docs/decisions/owner-decision-moods-ambient-emotes-2026-10-30.md`; Beads
-loka-kgd.193 notes): three builder tools, moods / ambient emotes (NPCs, rooms, every item; interval + optional
-chance; loka-8ghm) / canned emotes. Then (quoted): "Actually, dont emotes only make sense in multiplayer? if so
-table it for now", and chose "Keep NPC emotes (Recommended)": player emotes (command, Emote... pick list) are tabled
-to the Realm; NPC emotes stay. Every feature ships a Storybook story.
-
-Owner questions open: (1) mixed mood line "A cowering goblin and goblin are here." (shared-article rule,
-book-ui.md:81-86) vs repeating the article for a shared noun (PM recommends repeat); (2) add
-`cdp("Page.bringToFront")` after `new_tab()` in the owner's browser-use skill (outside the repo); (3) check that
-~/dev is still in Spotlight Search Privacy (mdworker indexed the session worktree after npm ci; load 14).
+Owner decisions 2026-10-30 (record `docs/decisions/owner-decision-moods-ambient-emotes-2026-10-30.md`): three
+builder tools, moods / ambient emotes (NPCs, rooms, every item; loka-8ghm) / canned emotes; player emotes tabled to
+the Realm (quoted: "Actually, dont emotes only make sense in multiplayer? if so table it for now"), NPC emotes kept.
+Every feature ships a Storybook story. Owner re-added ~/dev to Spotlight privacy (mdfind hits 0).
 - Draft #454 ON HOLD (P3 hold below).
 
 ## Next, in order (owner-approved)
 
-1. Finish loka-kgd.193 (review #509, slice B), then loka-8ghm ambient emotes.
-2. Polish: owner at Storybook; first item loka-r9mr (owner 2026-10-30: room-log dialogue in novel prose, `Nell says to you, "..."` / `Nell says, "..."`, never a colon; designer writes the rule into book-ui.md) (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide:
+1. Polish: owner at Storybook; first item loka-r9mr (owner 2026-10-30: room-log dialogue in novel prose, `Nell says to you, "..."` / `Nell says, "..."`, never a colon; designer writes the rule into book-ui.md) (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide:
    [polish tour](design/polish-tour.md)).
+2. After the owner's polish pass (PM rec): loka-698n showcase goblins cower, then loka-8ghm ambient emotes.
 3. Simplification epic loka-ivjq: C1-C4 done; F9/F10 after .17.
 4. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
    loka-tjhk flee line on a second fight's page; loka-nw03 formal methods plan; audit leftovers loka-u9x8,
