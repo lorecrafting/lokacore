@@ -6,7 +6,12 @@
 # mutant are not BASELINE-RED, or a mutate-skip line or a number in a string is mutated; a module
 # tested one import hop away (TS), through a directory import, or through an xref caller (Elixir, stub
 # mise) is NO-TESTS; an `} else if` guard is not negated; a co-located .test. file or Elixir """ prose
-# is mutated; two equal operators on a line share a label; or SURVIVED rows do not exit 1.
+# is mutated; two equal operators on a line share a label; or SURVIVED rows do not exit 1; a renamed
+# file with one edited line plans other than that line's two mutants, or a pure rename plans any; a
+# 0-minute budget still runs setup (a BASELINE-RED row, not TIMEBOX) or exits other than 3; a 1-minute
+# budget lets bin/mutate.sh run mutants after setup used part of it; or a
+# non-integer or leading-zero MUTATE_MINUTES is not a usage error; or a SURVIVED row next to a TIMEBOX
+# row (bin/mutate.sh exit 3) does not exit 1.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -15,8 +20,14 @@ R=$(mktemp -d)
 trap 'rm -rf "$R"' EXIT
 fail=0
 bad() { echo "FAIL: $*"; fail=1; }
-cd "$R"; git init -q -b main; mkdir bin src src/pkg test lib stub; cp "$bin/mutate.sh" "$bin/mutate_diff.sh" bin/
-echo '{"type":"module"}' > package.json; echo 'export const x = 1;' > src/gate.ts; git add . && git commit -qm base
+cd "$R"; git init -q -b main; git config diff.renames false  # -M must not depend on user config
+mkdir bin src src/pkg test lib stub; cp "$bin/mutate.sh" "$bin/mutate_diff.sh" bin/
+echo '{"type":"module"}' > package.json; echo 'export const x = 1;' > src/gate.ts
+printf '%s\n' 'export const a = (n: number) => n > 1;' 'export const b = (n: number) => n < 2;' \
+  'export const c = (n: number) => n === 3;' 'export const d = (n: number) => n >= 4;' > src/old.ts
+cp src/old.ts src/still.ts; git add . && git commit -qm base
+git mv src/old.ts src/moved.ts; git mv src/still.ts src/still2.ts
+sed -i.bak 's/n < 2/n <= 5/' src/moved.ts && rm src/moved.ts.bak
 cat > src/gate.ts <<'TS'
 export const x = 1;
 export function gate(n: number): string {
@@ -84,7 +95,7 @@ chmod +x stub/mise
 git add . && git commit -qm change
 rc=0; PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out 2>&1 || rc=$?
 [ "$rc" = 1 ] || bad "exit $rc with SURVIVED rows, want 1"
-row() { grep -F "$1" out | grep -F "$2" | grep -q "^$3	"; }
+row() { grep -F "$1" "${4:-out}" | grep -F "$2" | grep -q "^$3	"; }
 row 'src/gate.ts:3' '< -> <=' red-narrow && grep -F 'src/gate.ts:3	< -> <=	' out | grep -q 'not ok .* - zero passes' \
   || bad 'tested guard: not killed with its failing test line'
 row 'src/gate.ts:3' 'drop if (n < 0)' red-narrow || bad 'tested guard drop: not killed'
@@ -105,5 +116,20 @@ row 'lib/gate.ex:6' 'and -> or' red-narrow && grep -F 'lib/gate.ex:6	and -> or' 
 row 'lib/gate.ex:6' 'negate n < 0 and n > -99' red-narrow || bad 'Elixir block guard: negation not killed'
 ! grep -q 'lib/gate.ex:3' out || bad 'Elixir """ prose was mutated'
 head -1 out | grep -q '^mutate_diff: [0-9]* mutants' || bad 'count not printed first'
+# src/moved.ts:2 `n <= 5`: `<= -> <` and `5 -> 6`, the only changed line of the rename
+[ "$(grep -c 'src/moved.ts:' out)" = 2 ] && row 'src/moved.ts:2' '<= -> <' NO-TESTS && row 'src/moved.ts:2' '5 -> 6' NO-TESTS \
+  || bad 'renamed file with one edited line: not exactly that line'"'"'s 2 mutants'
+! grep -q 'src/still2\?.ts' out || bad 'a pure rename planned mutants'
+rc=0; MUTATE_MINUTES=0 PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out0 2>&1 || rc=$?
+[ "$rc" = 3 ] && grep -F 'src/broken.ts:1' out0 | grep -q '^TIMEBOX	' && row 'src/lonely.ts:3' '< -> <=' NOT-UNIQUE out0 || { bad "0-minute budget: exit $rc, setup ran past it"; cat out0; }
+rc=0; MUTATE_MINUTES=1 PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out1 2>&1 || rc=$?
+[ "$rc" = 3 ] && grep -F 'lib/gate.ex:6' out1 | grep -q '^TIMEBOX	' || { bad "1-minute budget: exit $rc, bin/mutate.sh got the whole minute after setup"; cat out1; }
+for m in 1.5 08; do
+  rc=0; MUTATE_MINUTES=$m sh bin/mutate_diff.sh HEAD~1 > outx 2>&1 || rc=$?
+  [ "$rc" = 2 ] && grep -q 'MUTATE_MINUTES must be an integer' outx || bad "MUTATE_MINUTES=$m: exit $rc, not a usage error"
+done
+printf '%s\n' '#!/bin/sh' 'printf "SURVIVED\tsrc/gate.ts\tx\nTIMEBOX\tsrc/gate.ts\tnot run\n"; exit 3' > bin/mutate.sh
+rc=0; PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out3 2>&1 || rc=$?
+[ "$rc" = 1 ] && grep -q '^SURVIVED	' out3 && grep -q '^TIMEBOX	' out3 || bad "SURVIVED beside TIMEBOX: exit $rc, want 1"
 [ "$fail" = 0 ] && echo "mutate_diff red controls: all pass" || cat out
 exit "$fail"

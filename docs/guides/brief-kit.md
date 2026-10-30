@@ -19,7 +19,7 @@ handoff); [building mechanics by composition](../system/architecture.md#building
   `mobile/app/stories/SystemDataModel.stories.tsx` Impact story.
 - Exact boundary: test every threshold at the boundary value and one past it.
 - Content: hand back an item loop table (item: source -> sink or cap); no hidden faucet.
-- Mutants: `bin/mutate_diff.sh origin/main` (in a throwaway worktree) mutates the added lines; the check table is its
+- Mutants: `bin/mutate_diff.sh origin/main` (in a throwaway worktree) mutates the added lines (of a renamed file, only the changed ones); the check table is its
   output plus the hand-written `bin/mutate.sh` mutants the developer agent prescribes (`.claude/agents/developer.md`,
   Before handing off, step 2); a non-logic line takes `mutate-skip: <reason>`.
 - Self-review: `/code-review medium <branch-name>` (the slice branch, e.g. `feat/x`); never with no
