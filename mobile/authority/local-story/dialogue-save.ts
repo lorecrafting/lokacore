@@ -131,10 +131,10 @@ type Expected = Map<
 function expect(
   world: World,
   expected: Expected,
-  sequence: NonNullable<DialogueChoice['steps']>,
+  steps: NonNullable<DialogueChoice['steps']>,
   selected: boolean,
 ) {
-  for (const step of sequence) {
+  for (const step of steps) {
     if (step.op !== 'fact.assign') continue;
     const key = refString(step.fact);
     const prior = expected.get(key);

@@ -159,7 +159,7 @@ defmodule Loka.Content.Exchanges do
     case Refs.resolve(d["quest"], "quest", m, defs) do
       {_, _, %{"exchange" => x}} ->
         d["npc"] == x["npc"] and
-          not Enum.any?(~w(accept receive hand_over payment sequence escort), &is_map_key(o, &1))
+          not Enum.any?(~w(accept receive hand_over payment steps escort), &is_map_key(o, &1))
 
       _ ->
         false
