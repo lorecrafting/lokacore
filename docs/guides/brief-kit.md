@@ -31,6 +31,7 @@ handoff); [building mechanics by composition](../system/architecture.md#building
 - Screenshot: when the player sees the change, a 390 px screenshot of the web Book
   ([web preview](../web-preview.md)); its path goes in the handback.
 - Never print home or worktree absolute paths in commits, Beads text or PR text.
+- Scratch and throwaway worktrees: in a subfolder named after your issue id ([Every agent](../WORKFLOW.md#every-agent)).
 
 ## Handback
 
