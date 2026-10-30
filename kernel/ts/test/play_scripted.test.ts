@@ -75,7 +75,7 @@ function gongs(): string[] {
   gong.target = { kind: 'detail', room: ref('room', 'bell_tower'), detail: 'gong' };
   const success = {
     ...bell.outcomes.success,
-    sequence: [{ op: 'event.emit', event: 'gong_rung' }],
+    steps: [{ op: 'event.emit', event: 'gong_rung' }],
   };
   gong.outcomes = { success }; // leaves the bell unrung
   c.scripted_actions['recipe_sampler@0.0.1:action/ring_gong'] = gong;

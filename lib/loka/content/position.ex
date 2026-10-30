@@ -138,7 +138,7 @@ defmodule Loka.Content.Position do
 
   # Each author's write list: {steps, list}.
   defp lists("scripted_action", r),
-    do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "sequence"], o["sequence"]})
+    do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "steps"], o["steps"]})
 
   defp lists("reaction", r), do: [{["apply"], r["apply"]}]
 

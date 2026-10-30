@@ -21,7 +21,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "event.emit",
           "event": "shoved"
@@ -32,7 +32,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.shove_drover.failure"
       }

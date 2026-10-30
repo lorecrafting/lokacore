@@ -6,7 +6,7 @@
   "costs": [{ "resource": "mana", "amount": 1 }],
   "outcomes": {
     "success": {
-      "sequence": [{ "op": "event.emit", "event": "noctis_cast" }],
+      "steps": [{ "op": "event.emit", "event": "noctis_cast" }],
       "narration": { "actor": "narration.noctis" }
     }
   }

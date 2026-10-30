@@ -33,34 +33,34 @@ defmodule Loka.Content.Construction do
   end
 
   # Built rooms S6: a scripted action build step sits in the success outcome of a detail target whose room is a site listing its
-  # structure and direction, at most one per sequence, with world.construction, the build refusal
+  # structure and direction, at most one per outcome, with world.construction, the build refusal
   # texts. The listed structure
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
     for {_, {rel, [], r}} <- defs["scripted_action"] || %{},
         {name, o} <- r["outcomes"],
-        {s, i} <- Enum.with_index(o["sequence"]),
+        {s, i} <- Enum.with_index(o["steps"]),
         s["op"] == "build",
-        d <- build(m, defs, text, settings, {rel, name, r, s, o["sequence"], i}),
+        d <- build(m, defs, text, settings, {rel, name, r, s, o["steps"], i}),
         do: d
   end
 
-  defp build(m, defs, text, settings, {rel, name, r, s, sequence, i}) do
-    path = ["outcomes", name, "sequence", i]
+  defp build(m, defs, text, settings, {rel, name, r, s, steps, i}) do
+    path = ["outcomes", name, "steps", i]
     site = build_site(r["target"], m, defs)
     op = at(rel, path ++ ["op"])
 
     for(
-      true <- [misplaced?(sequence, i, name, site, settings)],
+      true <- [misplaced?(steps, i, name, site, settings)],
       do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
     ) ++
       refusal_texts(text, op) ++ on_site(site, s, rel, path)
   end
 
-  # A second build in the sequence, a build outside success, off a site or without world.construction.
-  defp misplaced?(sequence, i, name, site, settings),
+  # A second build in the steps, a build outside success, off a site or without world.construction.
+  defp misplaced?(steps, i, name, site, settings),
     do:
-      Enum.any?(Enum.take(sequence, i), &(&1["op"] == "build")) or name != "success" or
+      Enum.any?(Enum.take(steps, i), &(&1["op"] == "build")) or name != "success" or
         site == nil or get_in(settings, ["world", "construction"]) == nil
 
   defp refusal_texts(text, op) do

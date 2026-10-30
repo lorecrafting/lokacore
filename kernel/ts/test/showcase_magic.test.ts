@@ -470,7 +470,7 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
     const c = structuredClone(v.cartridge) as any;
     const ward = c.scripted_actions[ref('action', 'ward')];
     ward.costs = []; // the earlier casts spent the ma
-    ward.outcomes.success.sequence = [
+    ward.outcomes.success.steps = [
       { op: 'status.apply', status: status('wet'), npc: { ...C, kind: 'npc', key: 'golem' } },
     ];
     const r = act({ ...v, cartridge: c }, { type: 'cast', word: 'ward' });

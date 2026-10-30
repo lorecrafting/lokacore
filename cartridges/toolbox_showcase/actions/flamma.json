@@ -27,7 +27,7 @@
   ],
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "damage",
           "kind": "fire",

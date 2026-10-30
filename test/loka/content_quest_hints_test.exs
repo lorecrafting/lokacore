@@ -41,8 +41,8 @@ defmodule Loka.ContentQuestHintsTest do
        {"UNRESOLVED_REFERENCE", "actions/search_floor.tip"}},
       {[{"facts.json", &put_in(&1, ["facts", "seen_tip_search_floor"], spec)}],
        {"RESERVED_FACT", "facts.facts.seen_tip_search_floor"}},
-      {[{scripted, &put_in(&1, ["outcomes", "success", "sequence"], [seen])}],
-       {"RESERVED_FACT", "actions/search_floor.outcomes.success.sequence[0].fact"}},
+      {[{scripted, &put_in(&1, ["outcomes", "success", "steps"], [seen])}],
+       {"RESERVED_FACT", "actions/search_floor.outcomes.success.steps[0].fact"}},
       {[{"cartridge.json", &(pop_in(&1, ["requires", "capabilities", "fact"]) |> elem(1))}],
        {"UNDECLARED_CAPABILITY", "actions/search_floor.tip"}},
       {[

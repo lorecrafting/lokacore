@@ -79,7 +79,7 @@ function seekProof(
     d.outcome !== 'success' ||
     world.attributes[key(check.attribute)] < check.difficulty ||
     (p.target_id !== undefined && p.target_id !== subject) ||
-    !(scripted.outcomes.success.sequence ?? []).some(
+    !(scripted.outcomes.success.steps ?? []).some(
       (s) => s.op === 'fact.assign' && same(s.fact, fact) && s.value === true,
     ) ||
     !d.events.some(

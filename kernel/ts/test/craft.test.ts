@@ -564,7 +564,7 @@ test('chop needs woodcutting 1; a raise counts max_per_owner 1 and max_total 2',
         free.key = `raise_${direction}`;
         free.aliases = [free.key];
         free.check.key = free.key;
-        free.outcomes.success.sequence[0].direction = direction;
+        free.outcomes.success.steps[0].direction = direction;
         c.scripted_actions[`${P}action/raise_${direction}`] = free;
       }
       if (!owner_cap) delete c.structures[`${P}structure/hut_timbered`].max_per_owner;

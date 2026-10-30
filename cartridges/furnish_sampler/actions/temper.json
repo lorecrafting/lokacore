@@ -20,7 +20,7 @@
   },
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "resource.adjust",
           "resource": "mv",
@@ -32,7 +32,7 @@
       }
     },
     "failure": {
-      "sequence": [],
+      "steps": [],
       "narration": {
         "actor": "narration.temper.failure"
       }

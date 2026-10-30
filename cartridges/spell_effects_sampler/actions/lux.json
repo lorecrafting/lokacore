@@ -11,7 +11,7 @@
   "priority": 0,
   "outcomes": {
     "success": {
-      "sequence": [
+      "steps": [
         {
           "op": "light.ignite",
           "item": "orb"

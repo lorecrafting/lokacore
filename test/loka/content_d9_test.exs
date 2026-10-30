@@ -25,7 +25,7 @@ defmodule Loka.ContentD9Test do
          "policy" => %{"op" => "all", "items" => []},
          "outcomes" => %{
            "success" => %{
-             "sequence" => [%{"op" => "fact.assign", "fact" => "bell_rung", "value" => true}],
+             "steps" => [%{"op" => "fact.assign", "fact" => "bell_rung", "value" => true}],
              "narration" => %{"actor" => "narration.ring_bell"}
            }
          }

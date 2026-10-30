@@ -144,6 +144,27 @@ test('a failed check reads its failure line, closes the talk, counts a use; a ne
   assert.equal(g.fact('uses_intimidate'), 2);
 });
 
+// Breaks: a choice's topic.grant step writes nothing (the switch case returns the run unchanged),
+// so the topic's knowledge fact stays unknown after the choice.
+test("a choice's topic.grant step makes the topic known", () => {
+  const c = structuredClone(source);
+  const persuade = c.dialogues[`${P}:dialogue/guard`].choices.persuade;
+  const topic = {
+    cartridge_id: 'persuade_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'topic',
+    key: 'gate',
+  };
+  c.topics = {
+    [`${P}:topic/gate`]: { key: 'gate', name: persuade.label, fact: persuade.steps[0].fact },
+  };
+  persuade.steps = [{ op: 'topic.grant', topic }];
+  const g = play(c);
+  assert.equal(g.fact('gate_open'), undefined);
+  assert.equal(g.choose(g.talk(), 'persuade').outcome, 'persuade');
+  assert.equal(g.fact('gate_open'), true);
+});
+
 // Breaks: a choice step or check outside the choice context (steps.ex, check_kinds.ex) runs instead
 // of faulting: the step switch falls through, or the check guard accepts a non-opposed kind or a
 // missing failure line. The loader admits each shape; only the compiler refuses it.

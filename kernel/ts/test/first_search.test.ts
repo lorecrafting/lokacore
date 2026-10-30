@@ -328,7 +328,7 @@ test('board-child readable scripted actions project exclusively on the child Not
       policy: { op: 'all', items: [] },
       outcomes: {
         success: {
-          sequence: [{ op: 'fact.assign', fact: ref('fact', 'tracks_found'), value: true }],
+          steps: [{ op: 'fact.assign', fact: ref('fact', 'tracks_found'), value: true }],
           narration: { actor: 'narration.study_tracks' },
         },
       },
