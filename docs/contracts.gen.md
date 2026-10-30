@@ -776,7 +776,7 @@ B8 typed finite paid entitlement, meal and provider-owned serving.
 
 ## Step and check contracts (`protocol/step.schema.json`)
 
-One step vocabulary and one check vocabulary (C3 D2, loka-ivjq.4): a reaction's apply, a scripted action outcome's steps and a dialogue choice's sequence list Steps; a scripted action's and a dialogue choice's check is a Check. Each context runs a declared subset, enforced by the compiler (lib/loka/content/steps.ex, lib/loka/content/check_kinds.ex).
+One step vocabulary and one check vocabulary (C3 D2, loka-ivjq.4): a reaction's steps, a scripted action outcome's steps and a dialogue choice's steps list Steps, and a service's benefit is one Step; a scripted action's and a dialogue choice's check is a Check. Each context runs a declared subset, enforced by the compiler (lib/loka/content/steps.ex, lib/loka/content/check_kinds.ex).
 
 - **Check**: A check (check@1), discriminated by kind.
   - `luck`: A luck check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two checks, of scripted actions or dialogue choices, may not share one (DUPLICATE_DEFINITION).
