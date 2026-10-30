@@ -27,9 +27,8 @@ Merged overnight, each with a fresh review and green ci/book-e2e on the exact he
 - #501 batch C4 loka-ivjq.29: variety@1 -> alternates@1; capability keys attribute/skill/topic/tag (singular);
   map_positions.json -> layout.json; short_variants -> name_variants; records docs/reviews/2026-10-30-c4-{a,b,final}-review.md.
 
-- Owner to ratify on return (PM decided under delegation): C4 picks and the pin ruling (loka-ivjq.29 notes: OUT
-  #2b crow, #5 water, #9 one format, #11 citations; capability-lock change in a save's pin is not save shape;
-  SAVE_FORMAT unchanged); C2 D2/D5/D8 and transport@1 kept; C3 rulings in loka-ivjq.4 notes.
+- Owner ratified 2026-10-30 (quoted: "yes to all except the room log line dialogue"): C2, C3 and C4 PM rulings;
+  C4 OUT items #9/#11 filed as cleanups loka-9x5y, loka-kkt5; #2b crow and #5 water deferred to the real game.
 - Fix next (P2 housekeeping): loka-3pr5 merge_resolve.py should take either side for transcripts, live saves and gen
   files (pm_merge refused C4 A after B); loka-o6r3 mutate_diff follows renames; loka-xppq MUTATE_MINUTES guard.
 - Batch lessons, applied in every brief: each slice merges the latest integration branch before handback;
@@ -38,7 +37,7 @@ Merged overnight, each with a fresh review and green ci/book-e2e on the exact he
 
 ## Next, in order (owner-approved)
 
-1. Polish: owner at Storybook (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide:
+1. Polish: owner at Storybook; first item loka-r9mr (owner 2026-10-30: room-log dialogue in novel prose, `Nell says to you, "..."` / `Nell says, "..."`, never a colon; designer writes the rule into book-ui.md) (loop: [PM, Live polish session](PM.md#live-polish-session); owner guide:
    [polish tour](design/polish-tour.md)).
 2. Simplification epic loka-ivjq: C1-C4 done; F9/F10 after .17.
 3. Later: loka-x6t.130 verbose/brief setting; loka-h1gl narration follow-ups; loka-1dax compaction story;
@@ -58,12 +57,7 @@ balance tools (loka-kgd.107), worldbuilding (loka-ikch), Chapters 1-3.
 
 ## Waiting on the owner
 
-- loka-r9mr: a talk prompt in the room log has no speaker ("Well, stranger?"). PM recommendation: "Nell: …".
-- NPC/item detail page redesign: the designer's 2026-10-23 proposal (one card list, Leave at the bottom, no
-  status line on detail pages, "Buy or sell" shop page, explicit service cards, Whisper hidden) has 7 open
-  questions.
-- Whether to file canned emotes.
-- Polish: is the one-size step enough to mark a Chronicle milestone, or add a hairline?
+- Chronicle milestone: is the size step enough, or add a hairline? Decide by eye during polish (PM rec: keep the size step).
 - Worldbuilding first decisions (after polish): premise and pillars, cosmology shape, magic hardness and
   cost, Story vs Realm canon.
 
