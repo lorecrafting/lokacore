@@ -100,22 +100,24 @@ for (const [name, bytes] of artifacts()) {
         page.some((l) => l.startsWith(`${k}  `)),
         `pool ${k}`,
       );
-    for (const s of statuses)
-      assert.ok(
-        page.some((l) => l.includes(s.toLowerCase())),
-        `status ${s}`,
-      );
+    // A condition line starts with its label (model.ts conditionLine); compared as a multiset, so a
+    // status declared twice, or one whose name prefixes another, needs its own line.
+    const names = new Set(statuses.map((s) => s.toLowerCase()));
+    const drawn = page.map((l) => l.split(' · ')[0]).filter((l) => names.has(l));
+    assert.deepEqual(drawn.sort(), statuses.map((s) => s.toLowerCase()).sort(), 'statuses drawn');
     assert.equal(spellPoolBesideMa(w), SPELL_POOL_BESIDE_MA.has(name), 'spell pool beside ma');
   });
 
   // Held is scoped to world.theft (book-ui.md:476): elsewhere an NPC's holdings stay private.
   if (!c.world?.theft) continue;
   test(`${name}: each NPC's held items are in the GameView and under Held`, () => {
+    let checked = 0;
     for (const [ref, item] of Object.entries(c.items ?? {}) as [string, any][]) {
       if (item.location?.in !== 'npc') continue;
       const n = item.location.npc;
       const holder = `${n.cartridge_id}@${n.cartridge_version}:npc/${n.key}`;
       const npc = (c.npcs as any)[holder];
+      assert.ok(npc, `${ref} holder ${holder} is declared`);
       // Shop stock is the shop page's, not Held (Npc.tsx held); an NPC's get lock keeps its
       // holdings private (mechanics.md:2960, the theft vault).
       if (npc.locks?.get) continue;
@@ -151,6 +153,9 @@ for (const [name, bytes] of artifacts()) {
         at >= 0 && page.slice(at).includes(String(item.name).toLowerCase()),
         `${ref} under Held`,
       );
+      checked++;
     }
+    // A theft cartridge whose every held item is skipped would pass while checking nothing.
+    assert.ok(checked > 0, 'some held item checked');
   });
 }

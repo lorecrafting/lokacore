@@ -14,6 +14,7 @@ import {
   newWorld,
   step,
 } from '../../../../kernel/ts/src/index.ts';
+import type { DefinitionRef } from '../../../../kernel/ts/src/contracts.gen.ts';
 import type { Cartridge, World } from '../../../../kernel/ts/src/runtime/decision.ts';
 import { statusKey } from '../../../../kernel/ts/src/mechanics/status/shared.ts';
 
@@ -64,15 +65,19 @@ export const withStatuses = (w: World): World => ({
   state: {
     ...w.state,
     statuses: Object.fromEntries(
-      Object.values(w.cartridge.statuses ?? {}).map((s) => [
-        statusKey(w.body, {
-          cartridge_id: w.cartridge.manifest.id,
-          cartridge_version: w.cartridge.manifest.version,
-          kind: 'status',
-          key: s.key,
-        }),
-        { active: true, generation: 1 },
-      ]),
+      // The ref comes from the map key, so a bundled or extended status keeps its own cartridge id.
+      Object.keys(w.cartridge.statuses ?? {}).map((ref) => {
+        const [, cartridge_id, cartridge_version, key] = /^(.+)@(.+):status\/(.+)$/.exec(ref)!;
+        return [
+          statusKey(w.body, {
+            cartridge_id,
+            cartridge_version,
+            kind: 'status',
+            key,
+          } as DefinitionRef),
+          { active: true, generation: 1 },
+        ];
+      }),
     ),
   },
 });
