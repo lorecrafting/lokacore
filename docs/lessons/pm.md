@@ -18,7 +18,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - Fable plans can contradict docs/system; the developer's STOP point catches it.
 - Give `/code-review` the exact branch target; developers ran it in the main checkout (`loka-aa75`, `loka-7p2w`).
 - Blocks deps between batch slices stop `br update --status in_progress` (`loka-gfgr`).
-- Parallel slices append to the same fixture and doc spots: hand-merge hand-kept files; for regenerated families, take theirs and run `sh bin/regen.sh`; a sampler hash fixture that carries `value` is not regenerated: hand-merge it (`loka-0fhi`).
+- Parallel slices append to the same fixture and doc spots: hand-merge hand-kept files; for regenerated families, take theirs and run `sh bin/regen.sh`; it rebuilds the compiled hash fixtures (`value` ones included) and re-pins the transcripts, while a frozen or hand-kept hash fixture stays a hand-merge ([CHECKS](../CHECKS.md)).
 - An item loop table in every content brief found the hidden faucets batch A missed (`loka-vro5`).
 - A fix round that answers a developer's own open question can add a blocker: rule on such questions as follow-ups unless the owner already decided.
 
@@ -38,7 +38,7 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 
 ## Tools
 
-- Regenerated families (`*.gen.*` and the `{description, canonical, sha256}` hash fixtures, toolbox_showcase_hash.json among them) after a merge: take theirs, then `sh bin/regen.sh`; it skips fixtures that also carry `value` (`loka-kjky`, `loka-gsgj`).
+- Regenerated families (`*.gen.*` and the `{description, canonical, sha256}` hash fixtures, toolbox_showcase_hash.json among them) after a merge: take theirs, then `sh bin/regen.sh`; it rebuilds those that carry `value` too, but not the frozen or hand-kept ones, which `bin/merge_resolve.py` leaves unmerged ([CHECKS](../CHECKS.md); `loka-tb31`).
 - `br` "WAL index recovery already failed ... database is busy": run `br doctor migrate-schema recover`, then retry.
 - `git cherry-pick -q` printed a usage error and picked nothing: use plain `git cherry-pick <sha>`.
 - Agents share one scratchpad and delete files: keep PM working files under a `pm_` prefix (`loka-xmvu`).

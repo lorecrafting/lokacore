@@ -39,7 +39,9 @@
         },
         "rule_ir": 1
       },
-      "supported_profiles": ["offline_private"],
+      "supported_profiles": [
+        "offline_private"
+      ],
       "title": "Terrain Sampler",
       "version": "0.0.1"
     },
@@ -80,7 +82,9 @@
           }
         },
         "key": "fen",
-        "tags": ["marsh"],
+        "tags": [
+          "marsh"
+        ],
         "name": "room.fen.title"
       },
       "terrain_sampler@0.0.1:room/ford": {
@@ -104,7 +108,10 @@
           }
         },
         "key": "ford",
-        "tags": ["road", "marsh"],
+        "tags": [
+          "road",
+          "marsh"
+        ],
         "name": "room.ford.title"
       },
       "terrain_sampler@0.0.1:room/road": {
@@ -128,7 +135,9 @@
           }
         },
         "key": "road",
-        "tags": ["road"],
+        "tags": [
+          "road"
+        ],
         "name": "room.road.title"
       },
       "terrain_sampler@0.0.1:room/yard": {

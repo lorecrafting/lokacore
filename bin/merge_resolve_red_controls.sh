@@ -13,7 +13,7 @@ git clone -q --shared "$src" "$t/r"
 cd "$t/r"
 g() { git -c user.name=t -c user.email=t@t -c merge.conflictStyle=diff3 "$@"; }
 fail() { echo "merge_resolve control failed: $*" >&2; exit 1; }
-m=docs/system/mechanics.md w=kernel/ts/src/runtime/world.ts s=docs/system-graph.gen.json hf=protocol/fixtures/toolbox_showcase_hash.json f=kernel/ts/src/runtime/fresh.ts
+m=docs/system/mechanics.md w=kernel/ts/src/runtime/world.ts s=docs/system-graph.gen.json hf=protocol/fixtures/cartridge_gate_hash.json f=kernel/ts/src/runtime/fresh.ts
 base=$(git rev-parse HEAD)
 side() { # <branch> <section> <kernel_api>
   g checkout -q -b "$1" "$base"
@@ -66,10 +66,12 @@ g merge -q c >/dev/null 2>&1 && fail 'the sides did not conflict'
 python3 "$src/bin/merge_resolve.py" >/dev/null && fail "an edit of $m or a conflict in $f was resolved"
 [ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$m $f " ] || fail "$m and $f are not left unmerged"
 g merge --abort
-hk=protocol/fixtures/capability_lock_hash.json # kept by hand: theirs would silently drop ours
-for i in 1 2; do g checkout -q -b "hk$i" "$base"; echo "{\"side\": $i}" > $hk; g commit -qam "hk$i"; done
-g merge -q hk1 >/dev/null 2>&1 && fail 'the hash fixtures did not conflict'
-left 'a hand-kept hash fixture' $hk
+for k in capability_lock sampler_v010; do # kept by hand, frozen: theirs would silently drop ours; one merge each, as one left file keeps the other
+  hk=protocol/fixtures/${k}_hash.json
+  for i in 1 2; do g checkout -q -b "$k$i" "$base"; echo "{\"side\": $i}" > $hk; g commit -qam "$k$i"; done
+  g merge -q ${k}1 >/dev/null 2>&1 && fail "$hk did not conflict"
+  left "a hand-kept or frozen hash fixture" $hk
+done
 # Both sides add at one spot (a section, a table row): ours then theirs, the result valid.
 ap() { # <name> <file> <perl edit of the file for side 1> <for side 2>: merges two branches from base, expecting a conflict
   for i in 1 2; do eval "e=\$$((i + 2))"; g checkout -q -b "$1$i" "$base"; perl -0pi -e "$e" "$2"; g commit -qam "$1$i"; done

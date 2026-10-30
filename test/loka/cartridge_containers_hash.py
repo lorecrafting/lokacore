@@ -15,6 +15,14 @@ HOLDERS = {
     "cartridge_sampler_hash": ["player_corpse", "rat_corpse", "storage_chest", "trunk"],
     "reward_storage_hash": ["player_corpse", "rat_corpse", "reward_chest", "trunk"],
 }
+
+def keep(o, n):  # n's content in o's key order (new keys last), so a rerun rewrites nothing
+    if isinstance(o, dict) and isinstance(n, dict):
+        return {k: keep(o[k], n[k]) if k in o else n[k] for k in [*(k for k in o if k in n), *(k for k in n if k not in o)]}
+    if isinstance(o, list) and isinstance(n, list):
+        return [keep(a, b) for a, b in zip(o, n)] + n[len(o):]
+    return n
+
 for name, holders in HOLDERS.items():
     path = Path("protocol/fixtures") / (name + ".json")
     fixture = json.loads(path.read_text())
@@ -24,4 +32,7 @@ for name, holders in HOLDERS.items():
         item["container"] = True
     canonical = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     fixture.update(description="Current controlled receptacle derivative of " + name + "; literal holder list in test/loka/cartridge_containers_hash.py; historical input remains frozen.", value=value, canonical=canonical, sha256=hashlib.sha256(canonical.encode()).hexdigest())
-    path.with_name("containers_" + path.name).write_text(json.dumps(fixture, indent=2, ensure_ascii=False) + "\n")
+    out = path.with_name("containers_" + path.name)
+    if out.exists():
+        fixture["value"] = keep(json.loads(out.read_text())["value"], value)
+    out.write_text(json.dumps(fixture, indent=2, ensure_ascii=False) + "\n")

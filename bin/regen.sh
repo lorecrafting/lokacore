@@ -5,11 +5,14 @@
 # mobile/ or a review record, and
 # commit what it rewrites. The slow generators run only when their inputs differ from origin/main
 # (committed or not; every generator when that diff cannot be read):
-#   - a changed cartridge (or lib/): its {description, canonical, sha256} fixture under protocol/fixtures/
-#     (bin/regen_hash_fixture.sh), and the old content hash in its transcripts becomes the new one;
-#     fixtures that also carry `value` are rebuilt by hand;
+#   - a changed cartridge (or lib/, protocol/capability_registry.json): its compiled known-answer fixtures under protocol/fixtures/
+#     (bin/regen_hash_fixture.sh; frozen ones excepted, see FROZEN); a changed
+#     test/loka/cartridge_containers_hash.py or input of it: the containers_* fixtures it derives, first;
 #   - mobile/, kernel/ts/src/, protocol/: the stories' views and saves (npm run stories:views);
 #   - cartridges/toolbox_showcase/, lib/: test/loka/lint_baseline.txt (mix loka.lint; fixed findings drop out, a new one fails).
+# Always: a transcript content_hash that is no known answer of its cartridge becomes the cartridge's
+# compiled fixture hash. Merge recipe: a conflict only in compiled (not FROZEN) hash fixtures or transcript pins takes either
+# side, then `sh bin/regen.sh`.
 #   bin/regen.sh
 set -eu
 cd "$(git rev-parse --show-toplevel)"
@@ -22,21 +25,45 @@ touched() {
 }
 
 m mix do compile + loka.source_schema >/dev/null # one VM: schemas/source/ from the source contracts (loka-tp02)
-sha() { sed -n 's/^  "sha256": "\(.*\)",*$/\1/p' "$1"; }
-# Each fixture regen_hash_fixture.sh accepts, with its cartridge (the manifest id).
+# containers_* derive from the frozen inputs; the three of current cartridges (containers_cartridge_*) must
+# also equal a live compile (test/loka/content_{items,locks,sampler}_test.exs), so the compile below runs after.
+if touched '^(test/loka/cartridge_containers_hash\.py|protocol/fixtures/(cartridge_(items|locks|sampler)_|sampler_v|reward_storage_))'; then
+  python3 test/loka/cartridge_containers_hash.py
+fi
+# Not rebuilt from a compile: the historical containers_*, the historical frozen inputs (sampler_v*,
+# cartridge_{items,locks,sampler}_hash, reward_storage_hash) and the capability lock (hand-written; no
+# generator, no manifest). Every other fixture is a compile of cartridges/<its manifest id>.
+FROZEN='^(containers_(sampler_v|reward_storage)|sampler_v|cartridge_(items|locks|sampler)_hash|reward_storage)'
 python3 -c '
-import json, sys
-for p in sys.argv[1:]:
-    d = json.load(open(p, encoding="utf-8"))
-    if list(d) == ["description", "canonical", "sha256"]:
-        print(p, json.loads(d["canonical"])["manifest"]["id"])
-' protocol/fixtures/*_hash.json | while read -r fix id; do
-  touched "^(cartridges/$id/|lib/)" || continue
-  old=$(sha "$fix")
+import json, os, re, sys
+for p in sys.argv[2:]:
+    m = json.loads(json.load(open(p, encoding="utf-8"))["canonical"]).get("manifest")
+    if m and not re.match(sys.argv[1], os.path.basename(p)):
+        print(p, m["id"])
+' "$FROZEN" protocol/fixtures/*_hash.json | while read -r fix id; do
+  touched "^(cartridges/$id/|lib/|protocol/capability_registry\.json|$fix\$)" || continue # $fix: a merge took either side of it
   sh bin/regen_hash_fixture.sh "cartridges/$id" "$fix"
-  new=$(sha "$fix")
-  [ "$old" = "$new" ] || find "cartridges/$id" -path '*/transcripts/*.jsonl' -exec perl -pi -e "s/$old/$new/g" {} +
 done
+# A transcript pin that is no known answer of its cartridge (matched as kernel/ts/test/transcripts.test.ts
+# matches: its fixture globs, manifest id and sha256) is stale after a cartridge change or a merge: it
+# becomes the hash of the cartridge's compiled fixture. A cartridge without one keeps its pins.
+python3 - "$FROZEN" <<'PY'
+import fnmatch, glob, json, os, re, sys
+kats, compiled = set(), {}
+for p in sorted(glob.glob('protocol/fixtures/*_hash.json')):  # sorted: one answer whatever the directory order
+    name, d = os.path.basename(p), json.load(open(p, encoding='utf-8'))
+    m = json.loads(d['canonical']).get('manifest')
+    if not m: continue
+    if any(fnmatch.fnmatch(name, g) for g in ('cartridge_*hash.json', 'containers_*hash.json', 'toolbox_showcase_hash.json', '*_sampler_hash.json')):
+        kats.add((m['id'], d['sha256']))
+    if not re.match(sys.argv[1], name): compiled[m['id']] = d['sha256']
+for t in glob.glob('cartridges/*/transcripts/*.jsonl'):
+    cid, text = t.split('/')[1], open(t, encoding='utf-8', newline='').read()
+    if cid not in compiled: continue
+    for pin in {json.loads(line)['ids']['content_hash'] for line in text.splitlines() if line}:  # every line: a merge can mix them
+        if (cid, pin) not in kats: text = text.replace(pin, compiled[cid])
+    open(t, 'w', encoding='utf-8', newline='').write(text)
+PY
 
 m elixir bin/contracts.exs
 (cd kernel/ts && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot test/state_sections.test.ts >/dev/null)
