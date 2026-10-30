@@ -505,6 +505,17 @@
     ]
   },
   {
+    "key": "emote",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [],
+    "definitions": [
+      "emote"
+    ],
+    "events": []
+  },
+  {
     "key": "escort",
     "version": 1,
     "portability": "portable",

@@ -49,6 +49,7 @@ defmodule Loka.Content.LeafRefs do
       "quest.activate" => %{"quest" => "quest"},
       "quest.resolve" => %{"quest" => "quest"},
       "quest.fail" => %{"quest" => "quest"},
-      "build" => %{"structure" => "structure"}
+      "build" => %{"structure" => "structure"},
+      "emote" => %{"emote" => "emote", "npc" => "npc"}
     }
 end

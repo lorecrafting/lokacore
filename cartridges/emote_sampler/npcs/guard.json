@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "name": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "den",
+  "immune": [
+    "afraid"
+  ]
+}

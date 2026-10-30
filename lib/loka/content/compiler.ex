@@ -93,6 +93,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Theft.check(manifest, defs, located, v2),
       Loka.Content.Mounts.check(manifest, defs, located),
       Loka.Content.Asks.check(manifest, defs),
+      Loka.Content.Emotes.check(manifest, defs, v2, registry),
       Resolve.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
       Resolve.rooms(manifest, defs, v2, registry),
       ScriptedActions.check(manifest, defs, v2, registry),
@@ -224,7 +225,8 @@ defmodule Loka.Content.Compiler do
     {"transport", :transport, "TransportDefinition"},
     {"bleed", :bleed, "BleedDefinition"},
     {"status", :status, "StatusDefinition"},
-    {"structure", :structure, "StructureDefinition"}
+    {"structure", :structure, "StructureDefinition"},
+    {"emote", :emote, "EmoteDefinition"}
   ]
 
   @doc false

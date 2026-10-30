@@ -100,6 +100,7 @@ const RULELESS = [
   'alternates',
   'sense_cue',
   'construction',
+  'emote',
 ];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */

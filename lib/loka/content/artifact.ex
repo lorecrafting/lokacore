@@ -44,6 +44,7 @@ defmodule Loka.Content.Artifact do
     status
     replenish
     structure
+    emote
   )
 
   # items, npcs, scripted actions, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The

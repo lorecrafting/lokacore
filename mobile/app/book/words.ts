@@ -10,7 +10,7 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
-import { lineSentence } from '../../packages/game-view/line_words.ts';
+import { emoteSentence, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
@@ -172,7 +172,8 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // One narration line's words: an engine key from the shared table (packages/game-view/line_words.ts), in the
 // third person when its actor is a person the view, or the view before the step (one who left),
 // names. A skipped combat turn (loka-x6t.30)
-// names its status from the engine line combat.skipped; it has no actor when the player skipped.
+// names its status from the engine line combat.skipped; it has no actor when the player skipped. An NPC's
+// emote (G9) words from the view's emote table, to.you when the target is the reader (one the view does not name).
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -184,7 +185,11 @@ export const lineWords = (
   const id = t.participants?.actor;
   const actor =
     id === undefined ? undefined : nameOf(view, id, text) || (was && nameOf(was, id, text));
-  const told = lineSentence(t, (v) => text(String(v)), actor, wield ? WIELD[t.key] : undefined);
+  const word = (v: unknown) => text(String(v));
+  const told =
+    (actor &&
+      emoteSentence(t, view.emotes, word, actor, !nameOf(view, t.participants?.target, text))) ||
+    lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
   if (told) return told;
   if (t.key !== 'combat.skipped') return text(t.key);
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';

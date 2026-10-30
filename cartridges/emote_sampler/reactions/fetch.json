@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "spoken",
+    "word": "fetch"
+  },
+  "steps": [
+    {
+      "op": "npc.move",
+      "npc": "captive",
+      "room": "inn"
+    }
+  ]
+}

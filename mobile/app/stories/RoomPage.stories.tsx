@@ -11,6 +11,8 @@ import RoomLongLogView from './views/room-long-log.json';
 import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
+import emoteText from '../../../cartridges/emote_sampler/text.json';
+import { lineWords } from '../book/words.ts';
 
 const meta: Meta = {
   tags: ['!autodocs'],
@@ -174,5 +176,33 @@ export const Plural: StoryObj = {
   name: 'Three goblins and a hen',
   play: async ({ canvas }) => {
     await sentence(canvas, ['Three goblins', 'hen'], 'Three goblins and a hen are here.');
+  },
+};
+
+// Breaks (G9, loka-kgd.193): an NPC emote line is shown as its raw key, or one goblin's cower hides the other's.
+const goblins = crowd(npc, 'npc', [
+  ['goblin', 'a', true],
+  ['goblin', 'a', true],
+]);
+const cowering = {
+  ...RoomNpcsItemsView.view,
+  entities: goblins,
+  emotes: [{ key: 'cower', others: 'emote.cower.others' }],
+};
+export const GoblinsCower: StoryObj = {
+  ...pageStory({
+    ...RoomNpcsItemsView,
+    view: cowering,
+    log: goblins.map((g) =>
+      lineWords(
+        { key: 'emote.performed', bindings: { emote: 'cower' }, participants: { actor: g.id } },
+        (k) => (emoteText as Record<string, string>)[k] ?? k,
+        cowering as never,
+      ),
+    ),
+  }),
+  name: 'Goblins cower',
+  play: async ({ canvas }) => {
+    await expect(await canvas.findAllByText('A goblin cowers in fear.')).toHaveLength(2);
   },
 };

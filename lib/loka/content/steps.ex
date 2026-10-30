@@ -25,6 +25,7 @@ defmodule Loka.Content.Steps do
     "population.suppress" => {nil, @r},
     "experience.grant" => {nil, @r},
     "narrate" => {nil, @r},
+    "emote" => {nil, @r},
     "item.move" => {nil, @r},
     "population.spawn" => {nil, @r},
     "replenish.run" => {nil, @r},

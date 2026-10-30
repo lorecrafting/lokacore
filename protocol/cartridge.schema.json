@@ -337,6 +337,16 @@
                 "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
               }
             },
+            "emotes": {
+              "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): the cartridge's emote table, keyed by DefinitionRefString of kind emote; a reaction's emote step plays one.",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):emote/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "cartridge.schema.json#/$defs/EmoteDefinition"
+              }
+            },
             "statuses": {
               "type": "object",
               "additionalProperties": {
@@ -2656,6 +2666,49 @@
           "description": "structure.hut.description"
         }
       ]
+    },
+    "EmoteDefinition": {
+      "description": "NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.",
+      "examples": [
+        {
+          "key": "bow",
+          "others": "emote.bow.others",
+          "to": {
+            "others": "emote.bow.to_others",
+            "you": "emote.bow.to_you"
+          }
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "others": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "to": {
+          "type": "object",
+          "properties": {
+            "others": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "you": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "others",
+            "you"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "key",
+        "others"
+      ],
+      "additionalProperties": false
     },
     "StatusDefinition": {
       "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active; a status with modifies may omit per_tick, and then never ticks (its one job is the expiry).",

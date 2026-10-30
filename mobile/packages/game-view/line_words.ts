@@ -62,3 +62,34 @@ export const lineSentence = (
         : word(t.bindings![k]),
   );
 };
+
+/** An emote.performed line's sentence (G9, docs/system/mechanics.md#npc-emotes-g9) from the view's emote
+ * table: the emote's to.you form when the reader is the target, else to.others, and others when the line
+ * has no target; {actor} is the emoter's name, {target} the target's binding worded. Undefined for
+ * another key or an emote the table lacks. `word` words a text key. */
+export const emoteSentence = (
+  t: {
+    key: string;
+    bindings?: Readonly<Record<string, unknown>>;
+    participants?: Readonly<Record<string, unknown>>;
+  },
+  emotes: readonly { key: string; others: string; to?: { others: string; you: string } }[] = [],
+  word: (value: unknown) => string,
+  actor: string,
+  readerIsTarget: boolean,
+): string | undefined => {
+  const emote = t.key === 'emote.performed' && emotes.find((e) => e.key === t.bindings?.emote);
+  const target = t.bindings?.target;
+  const form =
+    emote &&
+    (t.participants?.target === undefined
+      ? emote.others
+      : readerIsTarget
+        ? emote.to?.you
+        : emote.to?.others);
+  return form
+    ? word(form)
+        .replace(/\{(actor|target)\}/g, (_, k: string) => (k === 'actor' ? actor : word(target)))
+        .replace(/^./, (a) => a.toUpperCase())
+    : undefined;
+};

@@ -149,6 +149,20 @@ defmodule Loka.Content.Reactions do
       plan_move(rel, s, i)
   end
 
+  # NPC emotes (G9): the emoter is no spawn template; to subject needs the emote's to forms.
+  defp consequence(rel, {%{"op" => "emote"} = s, i}, _, ctx) do
+    if(s["npc"], do: instance(at(rel, ["steps", i, "npc"]), s["npc"], ctx), else: []) ++
+      case {s["to"], resolve(s["emote"], "emote", ctx.m, ctx.defs)} do
+        {"subject", {_, _, %{} = e}} when not is_map_key(e, "to") ->
+          r = s["emote"]
+          target = "#{r["cartridge_id"]}@#{r["cartridge_version"]}:emote/#{r["key"]}"
+          [diag("UNRESOLVED_REFERENCE", at(rel, ["steps", i, "to"]), %{"target" => target})]
+
+        _ ->
+          []
+      end
+  end
+
   defp consequence(_, _, _, _), do: []
 
   defp plan_move(rel, %{"plan" => _} = s, i) do

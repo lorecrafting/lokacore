@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "inn"
+  },
+  "steps": [
+    {
+      "op": "emote",
+      "emote": "bow",
+      "npc": "nell",
+      "to": "subject"
+    }
+  ]
+}

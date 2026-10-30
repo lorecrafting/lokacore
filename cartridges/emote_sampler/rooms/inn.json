@@ -1,0 +1,12 @@
+{
+  "name": "room.inn.title",
+  "description": "room.inn.description",
+  "exits": {
+    "south": {
+      "to": "hall"
+    },
+    "north": {
+      "to": "cell"
+    }
+  }
+}
