@@ -10,10 +10,17 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import type { Command, DefinitionRef, DomainEvent } from '../src/contracts.gen.ts';
+import type {
+  CharacterId,
+  Command,
+  CommandId,
+  DefinitionRef,
+  DomainEvent,
+  EntityId,
+} from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { accepted, allocator } from '../src/runtime/decision.ts';
+import { accepted, allocator, type Event } from '../src/runtime/decision.ts';
 import { admit, adopt, newWorld, step } from '../src/runtime/world.ts';
 import { FILTERS } from '../src/mechanics/reaction.ts';
 import { read } from './read.ts';
@@ -451,19 +458,17 @@ test('a reaction event.emit on a delivery with no subject emits nothing', () => 
     ring: [{ event: 'custom_event', custom: 'ping' }, [EMIT]],
     pull: [RANG, [SET('rope_taut')]],
   });
-  const OTHER = cmd(w, { actor_id: 'c0ffee00-0000-4000-8000-000000000001' });
-  const ping: DefinitionRef = {
-    cartridge_id: 'green_sampler',
-    cartridge_version: '0.0.1',
-    kind: 'event',
-    key: 'ping',
+  // custom_event's subject is its doer, so the payload's subject_id gives the delivery none.
+  const OTHER = {
+    id: CMD as CommandId,
+    payload: { actor_id: 'c0ffee00-0000-4000-8000-000000000001' as CharacterId },
   };
-  const root = accepted(
-    w,
-    'x',
-    [],
-    [{ position: 1, payload: { type: 'custom_event', event: ping } }],
-  );
+  const event = {
+    type: 'custom_event',
+    event: ref('event', 'ping'),
+    subject_id: BODY as EntityId,
+  } as const;
+  const root = accepted(w, 'x', [], [{ position: 1, payload: event } as Event<'custom_event'>]);
   const r = adopt(w, admit('scripted_action', root), OTHER, allocator(w, OTHER), 0);
   assert.ok(r.decision.kind === 'accepted', JSON.stringify(r.decision));
   assert.deepEqual(
