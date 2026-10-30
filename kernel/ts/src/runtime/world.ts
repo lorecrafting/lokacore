@@ -21,7 +21,7 @@ import { invariants as factInvariants } from '../mechanics/fact_typed.ts';
 import { needsAncestry, refusal } from '../commands/actions.ts';
 import * as scripted_action from '../mechanics/scripted_action/rule.ts';
 import * as knowledge from '../mechanics/knowledge/rule.ts';
-import * as attributes from '../mechanics/attribute/rule.ts';
+import * as attribute from '../mechanics/attribute/rule.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
 import * as food from '../mechanics/food/rule.ts';
 import * as bleed from '../mechanics/bleed/rule.ts';
@@ -50,7 +50,7 @@ import { newWorld, NIL } from './fresh.ts';
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   knowledge: knowledge.decide,
-  attribute: attributes.decide,
+  attribute: attribute.decide,
   movement: movement.decide,
   combat: combat.decide,
   population: population.decide,

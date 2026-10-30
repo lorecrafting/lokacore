@@ -401,7 +401,7 @@
                 "narration": 1,
                 "quest": 1,
                 "dialogue": 1,
-                "topics": 1,
+                "topic": 1,
                 "check": 1,
                 "schedule": 1
               },
@@ -425,7 +425,7 @@
               "narration": 1,
               "quest": 1,
               "dialogue": 1,
-              "topics": 1,
+              "topic": 1,
               "check": 1,
               "schedule": 1
             }
@@ -614,7 +614,7 @@
                   "narration": 1,
                   "quest": 1,
                   "dialogue": 1,
-                  "topics": 1,
+                  "topic": 1,
                   "check": 1,
                   "schedule": 1
                 },
@@ -638,7 +638,7 @@
                 "narration": 1,
                 "quest": 1,
                 "dialogue": 1,
-                "topics": 1,
+                "topic": 1,
                 "check": 1,
                 "schedule": 1
               }
