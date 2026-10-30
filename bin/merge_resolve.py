@@ -5,8 +5,8 @@
   ends inside a section, or a duplicate heading afterwards, refuses;
 - docs/MECHANICS-TOOLBOX.md: the same for table rows (a row id on both sides refuses);
 - kernel/ts/src/runtime/world.ts: one conflict whose sides are each one kernel_api line keeps the higher;
-- a generated file (GENERATED, GENERATED_GLOBS) or docs/reviews/README.md takes theirs, as does a review record whose sides differ
-  only in whitespace (another review record is left); then every generator reruns (a GENERATED_GLOBS
+- a generated file (GENERATED, COMPILED, GENERATED_GLOBS) or docs/reviews/README.md takes theirs, as does a review record whose sides differ
+  only in whitespace (another review record is left); then every generator reruns (a COMPILED or GENERATED_GLOBS
   family needs `sh bin/regen.sh` after the merge).
 Exit 0: all resolved and staged, not committed. Exit 1: prints the files it left; abort the merge.
 Needs merge.conflictStyle=diff3 (the base section proves an append).
@@ -29,8 +29,9 @@ GENERATED = {
     "docs/toolbox.gen.json",
     "docs/features.gen.md",
     "test/loka/lint_baseline.txt",
-    "protocol/fixtures/toolbox_showcase_hash.json",  # bin/regen.sh rebuilds it and the other compiled (not frozen) fixtures
 }
+# The compiled hash fixtures bin/regen.sh rebuilds: every one but its FROZEN ones and the hand-kept capability lock.
+COMPILED = re.compile(r"protocol/fixtures/(?!(containers_(sampler_v|reward_storage)|sampler_v|cartridge_(items|locks|sampler)_hash|reward_storage|capability_lock))\w+_hash\.json")
 GENERATED_GLOBS = [  # bin/regen.sh rebuilds these; `*` crosses `/`
     "cartridges/*/transcripts/*.jsonl",
     "mobile/app/stories/live/*.sql",
@@ -127,7 +128,7 @@ for f in conflicted:
         with open(f, "w") as fh:
             fh.write(merged)
         git("add", f)
-    elif f in GENERATED or any(fnmatch.fnmatchcase(f, g) for g in GENERATED_GLOBS) or f == "docs/reviews/README.md" or (f.startswith("docs/reviews/") and same_but_whitespace(f)):
+    elif f in GENERATED or COMPILED.fullmatch(f) or any(fnmatch.fnmatchcase(f, g) for g in GENERATED_GLOBS) or f == "docs/reviews/README.md" or (f.startswith("docs/reviews/") and same_but_whitespace(f)):
         theirs.append(f)
     else:
         left.append(f)

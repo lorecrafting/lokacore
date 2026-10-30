@@ -394,9 +394,9 @@ git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_wal
 # --- regen.sh -------------------------------------------------------------------------------
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
 # into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them
-# (the story views read the fixture this run rewrites; a lib/ change rebuilds every fixture; the containers generator
+# (the story views read the fixture this run rewrites; a lib/ or capability registry change rebuilds every fixture; the containers generator
 # runs for its own or its frozen inputs' diff only); a fixture of another cartridge, or a frozen one, is rebuilt, or a `value` one, or one a
-# merge took a side of, is not; a transcript pin that is no known answer keeps its stale hash (on any line), or one pinned
+# merge took a side of, is not; a transcript pin that is no known answer keeps its stale hash (on any line, each line its own stale pin), or one pinned
 # to another known answer of its cartridge is rewritten, or one of a cartridge with no compiled fixture stops regen; a fixed lint finding stays in the baseline; a new finding is pinned instead of failing regen.
 mkdir "$tmp/rg"; cat > "$tmp/rg/mise" <<'SH'
 #!/bin/sh
@@ -409,22 +409,24 @@ cp "$bin/regen.sh" bin/; : > bin/review_index.sh; echo 'print("containers", file
 printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
 for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
 printf '{\n  "description": "x",\n  "value": 1,\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b\\"}}",\n  "sha256": "old"\n}\n' > protocol/fixtures/v_hash.json
-printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"a\\"}}",\n  "sha256": "kept"\n}\n' > protocol/fixtures/containers_a_hash.json; sed s/kept/frozen/ protocol/fixtures/containers_a_hash.json > protocol/fixtures/sampler_v1_hash.json
-printf '{"ids":{"content_hash":"stale"}}\n{"ids":{"content_hash":"stale"}}\n' > cartridges/a/transcripts/t.jsonl; echo '{"ids":{"content_hash":"kept"}}' > cartridges/a/transcripts/k.jsonl; echo '{"ids":{"content_hash":"stale"}}' > cartridges/c/transcripts/u.jsonl; echo x > cartridges/b/x; printf '# header\ntoolbox_showcase lint: finding\ntoolbox_showcase lint: fixed\n' > test/loka/lint_baseline.txt
+printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"a\\"}}",\n  "sha256": "kept"\n}\n' > protocol/fixtures/containers_sampler_v1_hash.json; sed s/kept/frozen/ protocol/fixtures/containers_sampler_v1_hash.json > protocol/fixtures/sampler_v1_hash.json; sed s/kept/old/ protocol/fixtures/containers_sampler_v1_hash.json > protocol/fixtures/containers_cartridge_a_hash.json
+printf '{"ids":{"content_hash":"stale"}}\n{"ids":{"content_hash":"older"}}\n' > cartridges/a/transcripts/t.jsonl; echo '{"ids":{"content_hash":"kept"}}' > cartridges/a/transcripts/k.jsonl; echo '{"ids":{"content_hash":"stale"}}' > cartridges/c/transcripts/u.jsonl; echo x > cartridges/b/x; printf '# header\ntoolbox_showcase lint: finding\ntoolbox_showcase lint: fixed\n' > test/loka/lint_baseline.txt
 git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 rg() { RG_LOG=$R.$1 PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2>&1 || bad "regen.sh exited non-zero ($1)"; }
 echo y > cartridges/a/y; rg a
-grep -qx 'protocol/fixtures/a_hash.json' "$R.a" && ! grep -qE 'protocol/fixtures/([bv]|containers)_|^containers' "$R.a" && grep -q stories:views "$R.a" && ! grep -q loka.lint "$R.a" \
+grep -qx 'protocol/fixtures/a_hash.json' "$R.a" && grep -qx 'protocol/fixtures/containers_cartridge_a_hash.json' "$R.a" && ! grep -qE 'protocol/fixtures/([bv]|containers_sampler)|^containers' "$R.a" && grep -q stories:views "$R.a" && ! grep -q loka.lint "$R.a" \
   || bad "regen: wrong generators for a cartridges/a change: $(tr '\n' ' ' < "$R.a")"
 [ "$(grep -c '"new"' cartridges/a/transcripts/t.jsonl)" = 2 ] || bad "regen: a stale transcript pin was kept: $(cat cartridges/a/transcripts/t.jsonl)"
 grep -q '"kept"' cartridges/a/transcripts/k.jsonl || bad 'regen: a transcript pinned to a known answer was rewritten'
 git add . && git commit -qm a; git update-ref refs/remotes/origin/main HEAD; mkdir lib; echo x > lib/x; rg l
 grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b_hash.json' "$R.l" || bad "regen: a lib/ change did not rebuild every fixture: $(tr '\n' ' ' < "$R.l")"
-git add . && git commit -qm l; git update-ref refs/remotes/origin/main HEAD; perl -pi -e s/new/old/ protocol/fixtures/v_hash.json; perl -pi -e s/frozen/thawed/ protocol/fixtures/sampler_v1_hash.json; rg f
+git add . && git commit -qm l; git update-ref refs/remotes/origin/main HEAD; echo x > protocol/capability_registry.json; rg r
+grep -qx 'protocol/fixtures/a_hash.json' "$R.r" && grep -qx 'protocol/fixtures/b_hash.json' "$R.r" || bad "regen: a capability registry change did not rebuild every fixture: $(tr '\n' ' ' < "$R.r")"
+git add . && git commit -qm r; git update-ref refs/remotes/origin/main HEAD; perl -pi -e s/new/old/ protocol/fixtures/v_hash.json; perl -pi -e s/frozen/thawed/ protocol/fixtures/sampler_v1_hash.json; rg f
 [ "$(grep fixtures "$R.f")" = protocol/fixtures/v_hash.json ] && grep -qx containers "$R.f" || bad "regen: a fixture a merge took a side of was not rebuilt alone, or a frozen input did not re-derive containers: $(tr '\n' ' ' < "$R.f")"
 git update-ref -d refs/remotes/origin/main; rg b
-grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && grep -qx 'protocol/fixtures/v_hash.json' "$R.b" && grep -qx containers "$R.b" && ! grep -qE 'containers_a|sampler_v1' "$R.b" \
-  || bad "regen: no diff did not rebuild every compiled fixture and the containers ones, or rebuilt a frozen one: $(tr '\n' ' ' < "$R.b")"
+grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && grep -qx 'protocol/fixtures/v_hash.json' "$R.b" && grep -qx containers "$R.b" && ! grep -qE 'sampler_v1' "$R.b" && [ "$(grep -nE '^containers$|containers_cartridge_a' "$R.b" | cut -d: -f2 | tr '\n' ' ')" = 'containers protocol/fixtures/containers_cartridge_a_hash.json ' ] \
+  || bad "regen: no diff did not rebuild every compiled fixture and the containers ones, or rebuilt a frozen one, or compiled containers_cartridge_* before the generator: $(tr '\n' ' ' < "$R.b")"
 [ "$(cat test/loka/lint_baseline.txt)" = "$(printf '# header\ntoolbox_showcase lint: finding')" ] || bad "regen: lint baseline is: $(cat test/loka/lint_baseline.txt)"
 if RG_LINT=new RG_LOG=$R.n PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2> "$R.n.err" || ! grep -qx 'toolbox_showcase lint: new' "$R.n.err" \
   || grep -q new test/loka/lint_baseline.txt; then bad "regen: a new lint finding was pinned or not named: $(cat "$R.n.err")"; fi
