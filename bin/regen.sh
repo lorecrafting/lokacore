@@ -11,7 +11,7 @@
 #   - mobile/, kernel/ts/src/, protocol/: the stories' views and saves (npm run stories:views);
 #   - cartridges/toolbox_showcase/, lib/: test/loka/lint_baseline.txt (mix loka.lint; fixed findings drop out, a new one fails).
 # Always: a transcript content_hash that is no known answer of its cartridge becomes the cartridge's
-# compiled fixture hash. Merge recipe: a conflict only in hash fixtures or transcript pins takes either
+# compiled fixture hash. Merge recipe: a conflict only in compiled (not FROZEN) hash fixtures or transcript pins takes either
 # side, then `sh bin/regen.sh`.
 #   bin/regen.sh
 set -eu
@@ -39,7 +39,7 @@ for p in sys.argv[2:]:
   touched "^(cartridges/$id/|lib/|$fix\$)" || continue # $fix: a merge took either side of it
   sh bin/regen_hash_fixture.sh "cartridges/$id" "$fix"
 done
-if touched '^(test/loka/cartridge_containers_hash\.py|protocol/fixtures/(cartridge_(items|locks|sampler)|sampler_v|reward_storage)_)'; then
+if touched '^(test/loka/cartridge_containers_hash\.py|protocol/fixtures/(cartridge_(items|locks|sampler)_|sampler_v|reward_storage_))'; then
   python3 test/loka/cartridge_containers_hash.py
 fi
 # A transcript pin that is no known answer of its cartridge (matched as kernel/ts/test/transcripts.test.ts

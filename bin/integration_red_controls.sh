@@ -387,7 +387,7 @@ git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_wal
 # Stub mise logs each generator (mix loka.lint reports one finding); stub regen_hash_fixture.sh turns sha256 old
 # into new. Break: a slow generator runs for a diff that misses its inputs or is skipped for one that touches them
 # (the story views read the fixture this run rewrites; a lib/ change rebuilds every fixture; the containers generator
-# runs for its own diff only); a fixture of another cartridge, or a frozen one, is rebuilt, or a `value` one, or one a
+# runs for its own or its frozen inputs' diff only); a fixture of another cartridge, or a frozen one, is rebuilt, or a `value` one, or one a
 # merge took a side of, is not; a transcript pin that is no known answer keeps its stale hash (on any line), or one pinned
 # to another known answer of its cartridge is rewritten, or one of a cartridge with no compiled fixture stops regen; a fixed lint finding stays in the baseline; a new finding is pinned instead of failing regen.
 mkdir "$tmp/rg"; cat > "$tmp/rg/mise" <<'SH'
@@ -412,8 +412,8 @@ grep -qx 'protocol/fixtures/a_hash.json' "$R.a" && ! grep -qE 'protocol/fixtures
 grep -q '"kept"' cartridges/a/transcripts/k.jsonl || bad 'regen: a transcript pinned to a known answer was rewritten'
 git add . && git commit -qm a; git update-ref refs/remotes/origin/main HEAD; mkdir lib; echo x > lib/x; rg l
 grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b_hash.json' "$R.l" || bad "regen: a lib/ change did not rebuild every fixture: $(tr '\n' ' ' < "$R.l")"
-git add . && git commit -qm l; git update-ref refs/remotes/origin/main HEAD; perl -pi -e s/new/old/ protocol/fixtures/v_hash.json; rg f
-[ "$(grep fixtures "$R.f")" = protocol/fixtures/v_hash.json ] || bad "regen: a fixture a merge took a side of was not rebuilt alone: $(tr '\n' ' ' < "$R.f")"
+git add . && git commit -qm l; git update-ref refs/remotes/origin/main HEAD; perl -pi -e s/new/old/ protocol/fixtures/v_hash.json; perl -pi -e s/frozen/thawed/ protocol/fixtures/sampler_v1_hash.json; rg f
+[ "$(grep fixtures "$R.f")" = protocol/fixtures/v_hash.json ] && grep -qx containers "$R.f" || bad "regen: a fixture a merge took a side of was not rebuilt alone, or a frozen input did not re-derive containers: $(tr '\n' ' ' < "$R.f")"
 git update-ref -d refs/remotes/origin/main; rg b
 grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && grep -qx 'protocol/fixtures/v_hash.json' "$R.b" && grep -qx containers "$R.b" && ! grep -qE 'containers_a|sampler_v1' "$R.b" \
   || bad "regen: no diff did not rebuild every compiled fixture and the containers ones, or rebuilt a frozen one: $(tr '\n' ' ' < "$R.b")"
