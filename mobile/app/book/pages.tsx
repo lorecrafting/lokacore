@@ -86,7 +86,7 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
  * - Story: Control.stories.tsx
  */
 export function Control(p: {
-  label: (typeof LABEL)[keyof typeof LABEL];
+  label: Extract<(typeof LABEL)[keyof typeof LABEL], string>;
   onPress: () => void;
   disabled?: boolean;
   onInk?: true;

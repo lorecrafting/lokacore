@@ -15,11 +15,11 @@ type Say = (key: string) => string;
 
 export type Section = 'character' | 'carrying' | 'map' | 'journal' | 'settings';
 const SECTIONS: [Section, string][] = [
-  ['character', 'Character'],
+  ['character', LABEL.character],
   ['carrying', LABEL.inventory],
-  ['map', 'Map'],
-  ['journal', 'Journal'],
-  ['settings', 'Settings'],
+  ['map', LABEL.map],
+  ['journal', LABEL.journal],
+  ['settings', LABEL.settings],
 ];
 /**
  * The Contents: one Entity line per section.
@@ -28,7 +28,7 @@ const SECTIONS: [Section, string][] = [
  */
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
-    <Page title="Contents" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
+    <Page title={LABEL.contents} foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
       <View>
         {SECTIONS.map(([kind, label]) => (
           <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
@@ -112,7 +112,7 @@ export function ThingPage(p: {
   const refusals = notes(p.thing, p.label, p.holder);
   return (
     <Page
-      title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
+      title={p.thing ? cap(p.text(p.thing.name)) : LABEL.item}
       foot={<Control label={LABEL.leave} onPress={p.leave} />}
     >
       <ItemDetails thing={p.thing} text={p.text} />
