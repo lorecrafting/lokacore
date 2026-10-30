@@ -3,7 +3,7 @@ import type { Offered } from '../commands/actions.ts';
 import type { Steps, World } from '../runtime/decision.ts';
 import { ally, engaged } from '../mechanics/combat/shared.ts';
 import { shooRefused } from '../mechanics/crow/behavior.ts';
-import { describeEntity } from '../mechanics/description_variant/rule.ts';
+import { holds } from '../mechanics/policy.ts';
 import { living } from '../mechanics/death/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { bandOf } from './resources.ts';
@@ -24,12 +24,11 @@ export function combatOffered(
   );
 }
 
-// An entity's view name, with the name words of the base short or of the name variant shown (loka-6qi, W6).
+// An entity's view name with its words: the first name variant that holds, else the base (loka-6qi, W6).
 export const named = (world: World, actor: CharacterId, id: EntityId, steps: Steps) => {
-  const name = describeEntity(world, actor, id, 'short', steps);
   const e = world.entities[id];
-  const words =
-    name === e.short ? e.words : e.name_variants?.find((v) => v.description === name)?.words;
+  const v = e.name_variants?.find((v) => holds(world, actor, v.when, { target: id, steps }));
+  const [name, words] = v ? [v.description, v.words] : [e.short, e.words];
   return { name, ...(words && { words }) };
 };
 

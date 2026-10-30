@@ -21239,6 +21239,167 @@
     ]
   },
   {
+    "name": "name_variants_empty",
+    "contract": "NameVariants",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "name_variants_seventeen",
+    "contract": "NameVariants",
+    "value": [
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "name_variant_without_description",
+    "contract": "NameVariants",
+    "value": [
+      {
+        "when": {
+          "op": "target_present"
+        }
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/description",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "name_variant_unknown_field",
+    "contract": "NameVariants",
+    "value": [
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k",
+        "room_line": "t.k"
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/room_line",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "might",
