@@ -189,7 +189,7 @@ defmodule Loka.Content.Entities do
 
   @doc """
   Every text of each entity as `{rel, entity key, steps, text key}`: name, room_line and
-  description, then each text variant's description.
+  description, then each text variant's description and each name variant's words.
   """
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]
   def text_keys(defs) do
