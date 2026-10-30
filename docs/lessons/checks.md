@@ -33,3 +33,4 @@ Hard-won lessons for CI, hooks, skip rules and test reliability. Current gates: 
   walk, and only 30 needed a reader. Sign promises are the largest family (13 rows); a walk
   tests 11 of them. Build the cheap checks before the next playtest, not after ([pass 1 analysis](../playtests/2026-10-21-pass1/analysis.md)).
 - A retire or rename sweep greps every identifier form, not only the name: Ashmere's chapter-coded `book-ui.md` section ids (C1, D11, B4) survived the name sweep of #426 until #429. List the forms (names, ids, headings, fixture and file names) before the sweep and grep each.
+- A merge conflict only in hash fixtures (`protocol/fixtures/*_hash.json`) or transcript `content_hash` pins: take either side, then run `sh bin/regen.sh`; it rebuilds the compiled fixtures and re-pins every stale transcript (loka-tb31).
