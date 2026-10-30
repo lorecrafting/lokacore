@@ -23,3 +23,7 @@ have ambient emotes; 2. yes; 3. yes, and each of these features must be shown in
    its entries; custom emotes stay with the Realm (Beads `loka-kgd.193`).
 4. Order: moods first (`loka-x6t.71`), then canned emotes, then ambient emotes. Each feature ships a
    Storybook story that shows it.
+
+## Note, 2026-10-30: player emotes tabled
+
+The owner said, verbatim: "For now, no need to emote to an NPC. Actually, dont emotes only make sense in multiplayer? if so table it for now". The owner then chose "Keep NPC emotes (Recommended)". Player emotes (the command and the Emote... pick list) are tabled to the Realm; NPC emotes and ambient emotes stay.

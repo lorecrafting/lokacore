@@ -66,15 +66,13 @@ defmodule Loka.ContentEmotesTest do
       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "emote") end)
     )
 
-    assert {:error, ds} = Loka.Content.compile(dir)
-    assert Enum.any?(ds, &(&1["code"] == "UNDECLARED_CAPABILITY")), inspect(ds)
+    refused(dir, "UNDECLARED_CAPABILITY", "emotes/cower.json")
   end
 
   # Breaks: a step naming an emote the table lacks is admitted.
   test "a step's unknown emote is unresolved", %{tmp_dir: dir} do
     update(dir, "reactions/cower.json", &put_in(&1, ["steps", Access.at(0), "emote"], "sneer"))
-    assert {:error, ds} = Loka.Content.compile(dir)
-    assert Enum.any?(ds, &(&1["code"] == "UNRESOLVED_REFERENCE")), inspect(ds)
+    refused(dir, "UNRESOLVED_REFERENCE", "reactions/cower.steps[0].emote")
   end
 
   # Breaks: a step's `to` on an emote without `to` forms is admitted (no line could word it).
