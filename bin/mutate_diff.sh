@@ -7,7 +7,7 @@
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
 # and the first failing test line of a killed mutant.
-# MUTATE_MINUTES (default 30, an integer) budgets the whole run: the test lookup and baseline runs count,
+# MUTATE_MINUTES (default 30; digits, no leading zero, refused before any setup) budgets the whole run: the test lookup and baseline runs count,
 # a row reached past the budget is not set up, and bin/mutate.sh gets the whole minutes left (rounded
 # down). Rows past the budget print as TIMEBOX (unrun, so the tests are not done) and the exit status
 # is 3, never a clean pass. ponytail: checked between rows, so one slow xref or baseline run overruns.
@@ -28,8 +28,8 @@ exec python3 -I - "$1" "$here/mutate.sh" <<'PY'
 import os, re, shutil, subprocess, sys, tempfile, time
 base, mutate = sys.argv[1], sys.argv[2]
 minutes = os.environ.get('MUTATE_MINUTES') or '30'
-if not re.fullmatch('[0-9]+', minutes):
-    sys.stderr.write('usage: MUTATE_MINUTES must be an integer\n')
+if not re.fullmatch('0|[1-9][0-9]*', minutes):  # as bin/mutate.sh: no leading zero (octal there)
+    sys.stderr.write('usage: MUTATE_MINUTES must be an integer without a leading zero\n')
     sys.exit(2)
 deadline = time.time() + 60 * int(minutes)
 d = subprocess.run(['git', 'diff', '-U0', '--no-color', '-M', '--diff-filter=AMR', base + '...HEAD', '--',

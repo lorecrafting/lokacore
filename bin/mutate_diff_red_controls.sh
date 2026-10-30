@@ -10,7 +10,7 @@
 # file with one edited line plans other than that line's two mutants, or a pure rename plans any; a
 # 0-minute budget still runs setup (a BASELINE-RED row, not TIMEBOX) or exits other than 3; a 1-minute
 # budget lets bin/mutate.sh run mutants after setup used part of it; or a
-# non-integer MUTATE_MINUTES is not a usage error.
+# non-integer or leading-zero MUTATE_MINUTES is not a usage error.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -123,7 +123,9 @@ rc=0; MUTATE_MINUTES=0 PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out0 
 [ "$rc" = 3 ] && grep -F 'src/broken.ts:1' out0 | grep -q '^TIMEBOX	' && row 'src/lonely.ts:3' '< -> <=' NOT-UNIQUE out0 || { bad "0-minute budget: exit $rc, setup ran past it"; cat out0; }
 rc=0; MUTATE_MINUTES=1 PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out1 2>&1 || rc=$?
 [ "$rc" = 3 ] && grep -F 'lib/gate.ex:6' out1 | grep -q '^TIMEBOX	' || { bad "1-minute budget: exit $rc, bin/mutate.sh got the whole minute after setup"; cat out1; }
-rc=0; MUTATE_MINUTES=1.5 sh bin/mutate_diff.sh HEAD~1 > outx 2>&1 || rc=$?
-[ "$rc" = 2 ] && grep -q 'MUTATE_MINUTES must be an integer' outx || bad "non-integer MUTATE_MINUTES: exit $rc, not a usage error"
+for m in 1.5 08; do
+  rc=0; MUTATE_MINUTES=$m sh bin/mutate_diff.sh HEAD~1 > outx 2>&1 || rc=$?
+  [ "$rc" = 2 ] && grep -q 'MUTATE_MINUTES must be an integer' outx || bad "MUTATE_MINUTES=$m: exit $rc, not a usage error"
+done
 [ "$fail" = 0 ] && echo "mutate_diff red controls: all pass" || cat out
 exit "$fail"
