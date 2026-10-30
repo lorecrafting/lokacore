@@ -32,7 +32,7 @@
         },
         "benefit": {
           "$ref": "step.schema.json#/$defs/Step",
-          "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S4, a build or mend of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op)."
+          "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S5, a build, mend or raze of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op)."
         }
       },
       "required": [

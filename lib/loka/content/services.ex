@@ -100,12 +100,14 @@ defmodule Loka.Content.Services do
         do: bad(at(rel, ["services"]))
   end
 
-  # C3 D5: the benefit is one Step the service context runs; a refused one is checked no further.
+  # C3 D5: the benefit is one Step the service context runs; a schema-refused one is checked no
+  # further, while an unresolved reference still lets the rest of the service report.
   defp service(rel, s, m, defs, text) do
-    case Steps.check(rel, ["benefit"], s["benefit"], :service, %{m: m, defs: defs, events: nil}) do
-      [] -> admitted(rel, s, m, defs, text)
-      refused -> refused
-    end
+    ds = Steps.check(rel, ["benefit"], s["benefit"], :service, %{m: m, defs: defs, events: nil})
+
+    if Enum.any?(ds, &(&1["code"] == "SCHEMA_VIOLATION")),
+      do: ds,
+      else: ds ++ admitted(rel, s, m, defs, text)
   end
 
   defp admitted(rel, s, m, defs, text) do

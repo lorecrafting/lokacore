@@ -89,9 +89,13 @@ defmodule Loka.ContentConstructionTest do
            [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.structure"}]},
           {[build.("site", "nowhere")],
            [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]},
-          # C3 D5: a build structure is one reference diagnostic (Steps), not two
-          {[build.("structure", "nowhere")],
-           [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.structure"}]},
+          # C3 D5: a build structure is one reference diagnostic (Steps), not two, and the
+          # service's own checks still report beside it
+          {[build.("structure", "nowhere"), build.("direction", "east")],
+           [
+             {"SCHEMA_VIOLATION", "services/raise_hut.benefit.direction"},
+             {"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.structure"}
+           ]},
           # C3: main's ServiceBenefit refused these; Step admits both, the service context not
           {[
              {"services/raise_hut.json",
