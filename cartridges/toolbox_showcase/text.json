@@ -1262,7 +1262,7 @@
   "npc.gil.short": "Gil",
   "npc.goblin.bare": "goblin",
   "npc.goblin.description": "A small, wiry goblin with a notched blade.",
-  "npc.goblin.description_afraid": "The goblin shrinks against the wall, eyes on the way out.",
+  "npc.goblin.description_afraid": "The goblin shrinks against the wall, its notched blade low, eyes on the way out.",
   "npc.goblin.plural": "goblins",
   "npc.goblin.room": "A [goblin] crouches here.",
   "npc.goblin.short": "a goblin",

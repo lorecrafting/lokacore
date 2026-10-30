@@ -126,7 +126,7 @@ const crowd = (e: typeof npc, kind: string, names: Word[]) =>
     contents: [],
     words: { bare: `${kind}.${n}.bare`, article, plural: many && `${kind}.${n}.plural` },
   }));
-const room = (entities: object[]) =>
+const room = (entities: Partial<ReturnType<typeof crowd>[number]>[]) =>
   pageStory({ ...RoomNpcsItemsView, view: { ...RoomNpcsItemsView.view, entities } });
 const sentence = async (
   canvas: Parameters<NonNullable<StoryObj['play']>>[0]['canvas'],

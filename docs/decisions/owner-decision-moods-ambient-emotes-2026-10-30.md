@@ -1,19 +1,16 @@
 # Owner decision: moods, ambient emotes and canned emotes are three builder tools — 2026-10-30
 
-Written 2026-10-30 in Claude Code (developer), from the Beads notes of `loka-x6t.71`. The owner's
-words are quoted verbatim.
+Written 2026-10-30 in Claude Code (developer), from the Beads notes of `loka-x6t.71`.
 
-Owner, 2026-10-30, quoted: "Ok i think we are conflating two 'mechanics' or two things for one thing.
-Lets discuss this so we can make things more immersive and give more clearly defined tools to the
-builder. I like your idea of showing it inside the goblins description, in LegendMUD or muds i believe
-thats called 'moods' ... But there's also room events, or npc loglines ... where periodically if you
-are in the room, they will emote something. And yes there's also teh concept of emotes, we can do
-canned emotes, or custom ... but lets do canned for now. "You cower in fear" and othe rpoeple say "A
-goblin cowers in fear""
+Owner, 2026-10-30 (paraphrased): two things have been treated as one mechanic; separating them makes
+play more immersive and gives builders clearer tools. Showing the state inside the goblin's
+description is what LegendMUD and other MUDs call a mood. Separately, rooms have events (NPC
+loglines): while the player is in the room, something emotes now and then. Emotes are a third
+concept, canned or custom; canned only for now, so the actor reads "You cower in fear" and others
+read "A goblin cowers in fear".
 
-Answers to the PM's three questions, quoted: "1. yes sounds good, and yes rooms should definitely have
-ambient emotes, any type of 'item' in teh game. 2. Yes 3. yes sounds good. And make sure those features
-are shown in storybook".
+Answers to the PM's three questions (paraphrased): 1. yes, and rooms and every kind of item should
+have ambient emotes; 2. yes; 3. yes, and each of these features must be shown in Storybook.
 
 ## Effect
 
