@@ -197,6 +197,14 @@ printf 'a.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_REBUILD=false capped sh "$bin/m
 # Break: a sweep stopped mid-mutant restores the source but leaves b.txt built from the mutant.
 printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 130 ] && grep -q '^x=1$' b.txt || { bad "mutate interrupted: exit $rc, want 130 and b.txt rebuilt from the restored a.txt"; cat out; }
+# Break: no time budget (a sweep runs past MUTATE_MINUTES), or a timeboxed sweep exits 0/1 as a clean pass.
+mt
+printf 'a.txt\tx=1\tx=2\na.txt\ty=1\ty=2\n' > m.tsv
+rc=0; MUTATE_MINUTES=0 capped sh "$bin/mutate.sh" m.tsv "touch ran" > out 2>&1 || rc=$?
+[ "$rc" = 3 ] && [ "$(cut -f1 out | tr '\n' ,)" = 'TIMEBOX,TIMEBOX,' ] && [ ! -e ran ] && cmp -s a.txt a.orig || { bad "mutate timebox: exit $rc, want 3, two TIMEBOX rows, no test run, file untouched"; cat out; }
+# Break: the timebox exit hides a failure (a malformed line plus a timebox exits 3, not 1).
+printf 'bad\na.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_MINUTES=0 capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
+[ "$rc" = 1 ] && [ "$(cut -f1 out | tr '\n' ,)" = 'FAIL,TIMEBOX,' ] || { bad "mutate timebox after failure: exit $rc, want 1 (a failure beats the timebox)"; cat out; }
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping

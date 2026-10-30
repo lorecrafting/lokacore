@@ -6,6 +6,11 @@
 # Mutants file, one per line, TAB-separated: file, exact old text (must occur once), new text,
 # optional narrow test command (the tests that import the mutated module). A mutant runs its narrow
 # command first and the full command only if the narrow one stays green. Lines starting # are skipped.
+# MUTATE_MINUTES (default 30) is the time budget: before each mutant, once the sweep has run that long,
+# the mutant and every one after it print `TIMEBOX<TAB><file><TAB>not run` and the exit status is 3
+# (results already in the table stand; the tree is restored as usual). Exit 3 is not a clean pass;
+# an exit 1 failure takes precedence over it. MUTATE_MINUTES must be an integer.
+# ponytail: checked between mutants only, so one slow mutant can overrun the budget; upgrade if that bites.
 # Results: red-narrow, red-full, SURVIVED (all green; exit stays 0, the table is the report).
 # MUTATE_REBUILD=<command> runs after each apply and again after each restore, for tests that read a
 # derived file (loka-958g; e.g. bin/regen_hash_fixture.sh for a compiled fixture). A failed rebuild
@@ -17,7 +22,8 @@ tmp=$(mktemp -d)
 cur=
 trap '[ -z "$cur" ] || { cp "$tmp/orig" "$cur"; [ -z "$rebuild" ] || sh -c "$rebuild" > /dev/null 2>&1 < /dev/null; }; rm -rf "$tmp"' EXIT
 trap 'exit 130' INT TERM
-rc=0
+rc=0 timeboxed=
+t0=$(date +%s) budget=$((${MUTATE_MINUTES:-30} * 60))
 tab=$(printf '\t')
 # Outside a git work tree both snapshots are empty, so only the per-file cmp checks the restore.
 start=$(git diff HEAD 2>/dev/null | cksum)
@@ -26,6 +32,7 @@ while IFS= read -r line; do
   # cut keeps empty fields (a deletion mutant has an empty new text); read with IFS=tab would merge them.
   file=$(printf '%s\n' "$line" | cut -f1) old=$(printf '%s\n' "$line" | cut -f2)
   new=$(printf '%s\n' "$line" | cut -f3) narrow=$(printf '%s\n' "$line" | cut -f4)
+  if [ $(($(date +%s) - t0)) -ge "$budget" ]; then printf 'TIMEBOX\t%s\tnot run\n' "$file"; timeboxed=y; continue; fi
   cp "$file" "$tmp/orig" || { echo "FAIL	$file	not readable"; rc=1; continue; }
   cur=$file
   if ! python3 -I -c 'import sys
@@ -46,4 +53,5 @@ sys.exit(1) if s.count(o) != 1 else open(f, "w").write(s.replace(o, n))' "$file"
   cur=
   printf '%s\t%s\t%s -> %s\n' "$res" "$file" "$old" "$new"
 done < "$list"
+[ "$rc" != 0 ] || [ -z "$timeboxed" ] || exit 3  # a failure (exit 1) wins over the timebox
 exit $rc

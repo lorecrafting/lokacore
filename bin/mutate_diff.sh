@@ -7,6 +7,8 @@
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
 # and the first failing test line of a killed mutant.
+# MUTATE_MINUTES (default 30) passes through to bin/mutate.sh: mutants past the budget print as TIMEBOX
+# rows (unrun, so the tests are not done) and the exit status is 3, never a clean pass.
 # Exits 1 when a row is SURVIVED, else as bin/mutate.sh. A SURVIVED or NO-TESTS row clears with the
 # same change as a hand-written bin/mutate.sh mutant shown red by a named test (developer.md step 2).
 #   bin/mutate_diff.sh <base>
@@ -148,5 +150,5 @@ sys.stderr.write(r.stderr)
 if 'SURVIVED' in count or 'NO-TESTS' in count:
     sys.stderr.write('mutate_diff: clear each SURVIVED/NO-TESTS row with a red hand-written bin/mutate.sh mutant against a named test\n')
 shutil.rmtree(tmp)
-sys.exit(r.returncode or (1 if 'SURVIVED' in count else 0))
+sys.exit(1 if 'SURVIVED' in count else r.returncode)
 PY
