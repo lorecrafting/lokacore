@@ -244,6 +244,27 @@ test('FD1: a raid at 1000 adds its aftershock at 1600, not before, once', () => 
   assert.deepEqual([fact(w, 'aftershocks'), statuses(w)], [1, [[1600, 'completed']]]);
 });
 
+// Breaks (C3 D7): a delayed rule's event.emit faults unowned_event at its job (schedule does not
+// compose scripted_action) or its custom_event reaches no rule.
+test('FD1: a delayed event.emit runs its custom_event rule at the due time', () => {
+  const w = world((c) => {
+    c.manifest.requires.capabilities.scripted_action = c.lock.capabilities.scripted_action = 1;
+    const rule = c.reactions[AFTERSHOCK];
+    c.reactions[AFTERSHOCK.replace('aftershock', 'quake')] = {
+      key: 'quake',
+      on: { event: 'custom_event', custom: 'quake' },
+      steps: rule.steps,
+    };
+    rule.steps = [{ op: 'event.emit', event: 'quake' }];
+  });
+  const at = elapsed(world(), 1600);
+  const emitted = elapsed(w, 1600);
+  assert.deepEqual(
+    [fact(emitted, 'aftershocks'), statuses(emitted)],
+    [fact(at, 'aftershocks'), [[1600, 'completed']]],
+  );
+});
+
 // Breaks: two delayed jobs writing one fact in one advance take separate writer groups
 // (conflicting_write, both stay pending and wedge later waits), or the result depends on chunking.
 test('FD1: two delayed rules on one fact both apply, in hourly waits or one wait', () => {

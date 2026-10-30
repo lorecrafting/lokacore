@@ -394,3 +394,69 @@ test('FILTERS names exactly the trigger filters reaction.schema.json admits', ()
   fields.delete('event');
   assert.deepEqual(Object.keys(FILTERS).sort(), [...fields].sort());
 });
+
+// A world whose reactions are only `rules` (key -> trigger and steps), entering the belfry the
+// root; scripted_action@1 locked for its custom_event (C3 D7).
+const only = (rules: Record<string, [object, object[]]>) =>
+  world((c) => {
+    c.manifest.requires.capabilities.scripted_action = c.lock.capabilities.scripted_action = 1;
+    c.reactions = {};
+    for (const [key, [on, steps]] of Object.entries(rules))
+      c.reactions[`${G}:reaction/${key}`] = { key, on, steps };
+  });
+const BELFRY = { event: 'entity_entered_room', room: ref('room', 'belfry') };
+const RANG = { event: 'custom_event', custom: 'rang' };
+const EMIT = { op: 'event.emit', event: 'rang' };
+const SET = (fact: string) => ({ op: 'fact.assign', fact: ref('fact', fact), value: true });
+// The move into the belfry's events after the root's: type (fact key), position, cause's position.
+const reacted = (w: World) => {
+  const s = move(move(w, 'north').world, 'east');
+  assert.ok(s.decision.kind === 'accepted', JSON.stringify(s.decision));
+  const events = s.decision.events;
+  const from = events.findIndex((e) => e.payload.type === 'entity_entered_room');
+  return events
+    .slice(from + 1)
+    .map((e) => [
+      e.payload.type === 'fact_changed' ? e.payload.fact.key : e.payload.type,
+      e.position,
+      events.find((c) => (c.id as string) === e.causation_id)?.position,
+    ]);
+};
+
+// Breaks (C3 D7): event.emit dropped or refused in a reaction, its custom_event not at its step's
+// position (first or second, around a fact.assign), or not delivered to a custom_event rule in
+// the same command.
+test('a reaction event.emit emits custom_event in step order, which triggers its own rule', () => {
+  const root = (steps: object[]) =>
+    reacted(only({ ring: [BELFRY, steps], pull: [RANG, [SET('rope_taut')]] }));
+  const entered = move(move(only({}), 'north').world, 'east').decision;
+  assert.ok(entered.kind === 'accepted');
+  const e = entered.events.find((x) => x.payload.type === 'entity_entered_room')!.position;
+  assert.deepEqual(root([EMIT, SET('bell_up')]), [
+    ['custom_event', e + 1, e],
+    ['bell_up', e + 2, e],
+    ['rope_taut', e + 3, e + 1],
+  ]);
+  assert.deepEqual(root([SET('bell_up'), EMIT]), [
+    ['bell_up', e + 1, e],
+    ['custom_event', e + 2, e],
+    ['rope_taut', e + 3, e + 2],
+  ]);
+});
+
+// Breaks: custom_event deliveries outside the reaction_depth budget (a rule re-emitting its own
+// event runs on to the deliveries limit, or forever).
+test('a reaction re-emitting its own custom_event exceeds reaction_depth', () => {
+  const w = move(only({ ring: [BELFRY, [EMIT]], again: [RANG, [EMIT]] }), 'north').world;
+  const s = move(w, 'east');
+  assert.deepEqual([s.decision, s.limit], [FAULT, 'reaction_depth']);
+  assert.equal(s.world, w);
+});
+
+// Breaks (P review, reaction.ts assignment()): a step op the reaction context does not run
+// (steps.ex) reaching the engine lowered as a fact write or skipped, not refused.
+test('a reaction step outside the reaction context faults as evaluator_error', () => {
+  const damage = { op: 'damage', amount: 1, kind: 'fire' };
+  const w = move(only({ ring: [BELFRY, [damage]] }), 'north').world;
+  assert.deepEqual(move(w, 'east').decision, { kind: 'fault', code: 'evaluator_error' });
+});
