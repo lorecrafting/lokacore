@@ -11,7 +11,7 @@
     "join": {
       "label": "dialogue.ada.join",
       "narration": "narration.ada.join",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "in_group",
@@ -22,7 +22,7 @@
     "leave": {
       "label": "dialogue.ada.leave",
       "narration": "narration.ada.leave",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "in_group",

@@ -30,7 +30,7 @@
     "press": {
       "label": "dialogue.nell_ash.press",
       "narration": "narration.nell_ash.press",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "topic_surety_known",

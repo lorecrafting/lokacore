@@ -168,7 +168,7 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(one) == []
     # a Leave label that does something (a hand-over sequence) is a real choice
-    assert Lint.findings(talk.(%{"label" => "s", "sequence" => []})) == []
+    assert Lint.findings(talk.(%{"label" => "s", "steps" => []})) == []
   end
 
   # Samplers break lint rules on purpose, but not label wording (loka-p2ey, loka-z2j2).

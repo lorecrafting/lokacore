@@ -17,7 +17,7 @@
     "chat": {
       "label": "dialogue.farmer.chat",
       "narration": "narration.farmer.cold",
-      "sequence": []
+      "steps": []
     }
   }
 }

@@ -38,7 +38,7 @@
     "chat": {
       "label": "dialogue.maud.chat",
       "narration": "narration.maud.chat",
-      "sequence": []
+      "steps": []
     }
   }
 }

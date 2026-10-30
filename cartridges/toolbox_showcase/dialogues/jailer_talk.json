@@ -21,7 +21,7 @@
         "resource": "pennies",
         "amount": 3
       },
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",

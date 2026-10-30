@@ -38,7 +38,7 @@ edit('dialogues/old_carver_carving.json', (d) => {
   d.choices.whittle = {
     label: 'old_carver.carving.prompt',
     narration: 'old_carver.carving.learned',
-    sequence: [{ op: 'skill.acquire', skill: 'carpentry' }],
+    steps: [{ op: 'skill.acquire', skill: 'carpentry' }],
   };
 });
 const craft = compiled(src);

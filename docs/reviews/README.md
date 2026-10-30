@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: C3 slice R, recipe -> scripted action (F4, loka-ivjq.4)](2026-10-29-c3-r-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice P, one Step and one Check (F4, loka-ivjq.4)](2026-10-29-c3-p-review.md): **APPROVE WITH NOTES**
+- [Review: C3 slice C, dialogue choices on `steps` (F4, loka-ivjq.4)](2026-10-29-c3-c-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice B, scripted action steps (F4, loka-ivjq.4)](2026-10-29-c3-b-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice Z, docs sweep (loka-ivjq.3)](2026-10-29-c2-z-review.md): **APPROVE WITH NOTES**
 - [Review: batch C2 final head (loka-ivjq.3 F3 F5 F6, .7 .8 .11 .12)](2026-10-29-c2-final-review.md): **APPROVE WITH NOTES**

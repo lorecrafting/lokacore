@@ -67,7 +67,7 @@ defmodule Loka.ContentPatrolTest do
       {"dialogues/maud_turn_in.json", "OUTCOME_MISMATCH", &Map.put(&1, "quest", "watch_rounds")},
       {"dialogues/tobin_watch.json", "RESERVED_FACT",
        fn d ->
-         put_in(d, ["choices", "start", "sequence"], [
+         put_in(d, ["choices", "start", "steps"], [
            %{"op" => "fact.assign", "fact" => "watch_gate_trusts_player", "value" => true}
          ])
        end}

@@ -19,7 +19,7 @@
     "learn": {
       "label": "old_carver.carving.choice",
       "narration": "old_carver.carving.learned",
-      "sequence": [
+      "steps": [
         {
           "op": "skill.acquire",
           "skill": "carving"

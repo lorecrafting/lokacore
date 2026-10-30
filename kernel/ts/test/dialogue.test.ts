@@ -347,7 +347,7 @@ test('carry keeps the lantern, sets player_led and resolves with outcome carry',
 // declared key, or emitted before choice_resolved when no fact change re-sorts the events.
 test('a story point reports its declared outcome key, after choice_resolved', () => {
   const w = world((c) => {
-    delete bram(c).choices.carry.sequence;
+    delete bram(c).choices.carry.steps;
     const { outcomes } = point(c);
     outcomes.kept = outcomes.carry;
     delete outcomes.carry;
@@ -421,7 +421,7 @@ test('an answer returns to the hub: a fresh pending row re-offers the same choic
     [3, 'choice_opened'],
   ]);
   // With no fact_changed (sorted by position) the array order shows: an answer that sets no fact.
-  const bare = ok(open(hub((d) => delete d.choices.carry.sequence)), choose('carry'), 4).decision;
+  const bare = ok(open(hub((d) => delete d.choices.carry.steps)), choose('carry'), 4).decision;
   assert.deepEqual(events(bare), [
     [1, 'choice_resolved'],
     [2, 'choice_opened'],

@@ -22,7 +22,7 @@ defmodule Loka.ContentPropertyTest do
         "gift" => %{
           "label" => "service.deposit",
           "narration" => "service.deposit.used",
-          "sequence" => [%{"op" => "fact.assign", "fact" => "savings", "value" => 50}]
+          "steps" => [%{"op" => "fact.assign", "fact" => "savings", "value" => 50}]
         }
       }
     }

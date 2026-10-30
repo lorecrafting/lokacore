@@ -181,7 +181,7 @@ test('row W2 needs a known subject, at fact sites only', () => {
 test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
   const smith = `${S}:dialogue/smith_talk`;
   const at = (k: string) =>
-    `.cartridge.dialogues[${JSON.stringify(smith)}].choices.${k}.sequence[0].fact`;
+    `.cartridge.dialogues[${JSON.stringify(smith)}].choices.${k}.steps[0].fact`;
   const variant = (change: (d: any, c: any) => void) => {
     const c = structuredClone(source);
     change(c.dialogues[smith], c);

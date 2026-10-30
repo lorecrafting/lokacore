@@ -277,15 +277,12 @@ defmodule Loka.Content.Dialogues do
   end
 
   defp sequence(rel, steps, o, ctx) do
-    Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
-      if(s["op"] in ["skill.acquire", "topic.grant"],
-        do: [],
-        else:
-          owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
-            reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
-            adjusted(rel, steps ++ ["sequence", i], s, ctx)
-      )
-    end)
+    path = steps ++ ["steps"]
+
+    Loka.Content.Steps.check(rel, path, o["steps"] || [], :choice, ctx) ++
+      Enum.flat_map(Enum.with_index(o["steps"] || []), fn {s, i} ->
+        adjusted(rel, path ++ [i], s, ctx)
+      end)
   end
 
   # A choice's accept: a quest of this cartridge, in a dialogue that resolves none (accepting

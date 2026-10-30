@@ -272,7 +272,7 @@ function resolved(
   if (!within(terminalReceipt, terminal.choices[outcome!]!.availability)) invalid();
   committedDialogue(world, db, scope, complete[0]);
   const selected = terminal.choices[outcome!]!;
-  const axis = selected.sequence?.filter((s) => s.op === 'fact.adjust') ?? [];
+  const axis = selected.steps?.filter((s) => s.op === 'fact.adjust') ?? [];
   if (axis.length !== 1 || !terminalAxis(world, terminalReceipt, axis[0], exchanges)) invalid();
   if (paid && !d.commerce) {
     const transfers = terminalReceipt.delta.ops.filter((o) => o.op === 'resource.adjust');

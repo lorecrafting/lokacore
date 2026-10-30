@@ -252,10 +252,10 @@ defmodule Loka.ContentDreamsTest do
        {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end.assign[0]"}},
       {[
          {"dialogues/maud_talk.json",
-          &put_in(&1, ["choices", "chat", "sequence"], [
+          &put_in(&1, ["choices", "chat", "steps"], [
             %{"op" => "fact.assign", "fact" => "dream_seen", "value" => true}
           ])}
-       ], {"RESERVED_FACT", "dialogues/maud_talk.choices.chat.sequence[0].fact"}},
+       ], {"RESERVED_FACT", "dialogues/maud_talk.choices.chat.steps[0].fact"}},
       {[{"dialogues/maud_talk.json", &put_in(&1, ["choices", "chat", "accept"], "a_room")}],
        {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}}
     ]

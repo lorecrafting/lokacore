@@ -11,7 +11,7 @@
     "confess": {
       "label": "dialogue.crier.confess",
       "narration": "narration.crier.confess",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",
@@ -22,7 +22,7 @@
     "pardon": {
       "label": "dialogue.crier.pardon",
       "narration": "narration.crier.pardon",
-      "sequence": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "wanted",
