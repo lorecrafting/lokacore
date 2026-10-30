@@ -77,6 +77,7 @@
           }
         },
         "mass_grams": 100,
+        "name": "item.carters_note.short",
         "readable": {
           "label": "actions.read_book",
           "text": "readable.carters_note",
@@ -87,8 +88,7 @@
             "kind": "topic"
           }
         },
-        "room_line": "item.carters_note.room",
-        "name": "item.carters_note.short"
+        "room_line": "item.carters_note.room"
       },
       "codex_sampler@0.0.1:item/mill_ledger": {
         "description": "item.mill_ledger.description",
@@ -107,6 +107,7 @@
           }
         },
         "mass_grams": 100,
+        "name": "item.mill_ledger.short",
         "readable": {
           "label": "actions.read_book",
           "text": "readable.mill_ledger",
@@ -117,13 +118,11 @@
             "kind": "topic"
           }
         },
-        "room_line": "item.mill_ledger.room",
-        "name": "item.mill_ledger.short"
+        "room_line": "item.mill_ledger.room"
       }
     },
     "lock": {
       "capabilities": {
-        "scripted_action": 1,
         "containment": 1,
         "fact": 1,
         "inspectable_detail": 1,
@@ -134,6 +133,7 @@
         "readable": 1,
         "resource": 1,
         "schedule": 1,
+        "scripted_action": 1,
         "topics": 1,
         "variety": 1
       },
@@ -144,7 +144,6 @@
       "id": "codex_sampler",
       "requires": {
         "capabilities": {
-          "scripted_action": 1,
           "containment": 1,
           "fact": 1,
           "inspectable_detail": 1,
@@ -155,6 +154,7 @@
           "readable": 1,
           "resource": 1,
           "schedule": 1,
+          "scripted_action": 1,
           "topics": 1,
           "variety": 1
         },
@@ -174,7 +174,17 @@
     },
     "reactions": {
       "codex_sampler@0.0.1:reaction/wanderer_hall": {
-        "apply": [
+        "key": "wanderer_hall",
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "codex_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "hall",
+            "kind": "room"
+          }
+        },
+        "steps": [
           {
             "fact": {
               "cartridge_id": "codex_sampler",
@@ -186,16 +196,6 @@
             "value": true
           }
         ],
-        "key": "wanderer_hall",
-        "on": {
-          "event": "entity_entered_room",
-          "room": {
-            "cartridge_id": "codex_sampler",
-            "cartridge_version": "0.0.1",
-            "key": "hall",
-            "kind": "room"
-          }
-        },
         "when": {
           "items": [
             {
@@ -266,7 +266,17 @@
         }
       },
       "codex_sampler@0.0.1:reaction/wanderer_mill": {
-        "apply": [
+        "key": "wanderer_mill",
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "codex_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "mill",
+            "kind": "room"
+          }
+        },
+        "steps": [
           {
             "fact": {
               "cartridge_id": "codex_sampler",
@@ -278,16 +288,6 @@
             "value": true
           }
         ],
-        "key": "wanderer_mill",
-        "on": {
-          "event": "entity_entered_room",
-          "room": {
-            "cartridge_id": "codex_sampler",
-            "cartridge_version": "0.0.1",
-            "key": "mill",
-            "kind": "room"
-          }
-        },
         "when": {
           "items": [
             {
@@ -358,7 +358,17 @@
         }
       },
       "codex_sampler@0.0.1:reaction/wanderer_road": {
-        "apply": [
+        "key": "wanderer_road",
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "codex_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "road",
+            "kind": "room"
+          }
+        },
+        "steps": [
           {
             "fact": {
               "cartridge_id": "codex_sampler",
@@ -370,16 +380,6 @@
             "value": true
           }
         ],
-        "key": "wanderer_road",
-        "on": {
-          "event": "entity_entered_room",
-          "room": {
-            "cartridge_id": "codex_sampler",
-            "cartridge_version": "0.0.1",
-            "key": "road",
-            "kind": "room"
-          }
-        },
         "when": {
           "items": [
             {
@@ -450,7 +450,17 @@
         }
       },
       "codex_sampler@0.0.1:reaction/wanderer_study": {
-        "apply": [
+        "key": "wanderer_study",
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "codex_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "study",
+            "kind": "room"
+          }
+        },
+        "steps": [
           {
             "fact": {
               "cartridge_id": "codex_sampler",
@@ -462,16 +472,6 @@
             "value": true
           }
         ],
-        "key": "wanderer_study",
-        "on": {
-          "event": "entity_entered_room",
-          "room": {
-            "cartridge_id": "codex_sampler",
-            "cartridge_version": "0.0.1",
-            "key": "study",
-            "kind": "room"
-          }
-        },
         "when": {
           "items": [
             {
@@ -542,7 +542,17 @@
         }
       },
       "codex_sampler@0.0.1:reaction/wanderer_yard": {
-        "apply": [
+        "key": "wanderer_yard",
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "codex_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "yard",
+            "kind": "room"
+          }
+        },
+        "steps": [
           {
             "fact": {
               "cartridge_id": "codex_sampler",
@@ -554,16 +564,6 @@
             "value": true
           }
         ],
-        "key": "wanderer_yard",
-        "on": {
-          "event": "entity_entered_room",
-          "room": {
-            "cartridge_id": "codex_sampler",
-            "cartridge_version": "0.0.1",
-            "key": "yard",
-            "kind": "room"
-          }
-        },
         "when": {
           "items": [
             {
@@ -632,6 +632,138 @@
           ],
           "op": "all"
         }
+      }
+    },
+    "resources": {
+      "codex_sampler@0.0.1:resource/hp": {
+        "gain": 5,
+        "key": "hp",
+        "maximum": 20,
+        "minimum": 0,
+        "start": 20
+      },
+      "codex_sampler@0.0.1:resource/ma": {
+        "gain": 4,
+        "key": "ma",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 100
+      },
+      "codex_sampler@0.0.1:resource/mv": {
+        "gain": 18,
+        "key": "mv",
+        "maximum": 82,
+        "minimum": 0,
+        "start": 82
+      }
+    },
+    "rooms": {
+      "codex_sampler@0.0.1:room/hall": {
+        "description": "room.hall.description",
+        "exits": {
+          "east": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "yard",
+              "kind": "room"
+            }
+          },
+          "north": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "mill",
+              "kind": "room"
+            }
+          },
+          "south": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "road",
+              "kind": "room"
+            }
+          },
+          "west": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "study",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "hall",
+        "name": "room.hall.title"
+      },
+      "codex_sampler@0.0.1:room/mill": {
+        "description": "room.mill.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "hall",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "mill",
+        "name": "room.mill.title"
+      },
+      "codex_sampler@0.0.1:room/road": {
+        "description": "room.road.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "hall",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "road",
+        "name": "room.road.title"
+      },
+      "codex_sampler@0.0.1:room/study": {
+        "description": "room.study.description",
+        "details": {
+          "desk": {
+            "aliases": [
+              "desk"
+            ],
+            "description": "detail.desk"
+          }
+        },
+        "exits": {
+          "east": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "hall",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "study",
+        "name": "room.study.title"
+      },
+      "codex_sampler@0.0.1:room/yard": {
+        "description": "room.yard.description",
+        "exits": {
+          "west": {
+            "to": {
+              "cartridge_id": "codex_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "hall",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "yard",
+        "name": "room.yard.title"
       }
     },
     "scripted_actions": {
@@ -776,138 +908,6 @@
         }
       }
     },
-    "resources": {
-      "codex_sampler@0.0.1:resource/hp": {
-        "gain": 5,
-        "key": "hp",
-        "maximum": 20,
-        "minimum": 0,
-        "start": 20
-      },
-      "codex_sampler@0.0.1:resource/ma": {
-        "gain": 4,
-        "key": "ma",
-        "maximum": 100,
-        "minimum": 0,
-        "start": 100
-      },
-      "codex_sampler@0.0.1:resource/mv": {
-        "gain": 18,
-        "key": "mv",
-        "maximum": 82,
-        "minimum": 0,
-        "start": 82
-      }
-    },
-    "rooms": {
-      "codex_sampler@0.0.1:room/hall": {
-        "description": "room.hall.description",
-        "exits": {
-          "east": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "yard",
-              "kind": "room"
-            }
-          },
-          "north": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "mill",
-              "kind": "room"
-            }
-          },
-          "south": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "road",
-              "kind": "room"
-            }
-          },
-          "west": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "study",
-              "kind": "room"
-            }
-          }
-        },
-        "key": "hall",
-        "name": "room.hall.title"
-      },
-      "codex_sampler@0.0.1:room/mill": {
-        "description": "room.mill.description",
-        "exits": {
-          "south": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "hall",
-              "kind": "room"
-            }
-          }
-        },
-        "key": "mill",
-        "name": "room.mill.title"
-      },
-      "codex_sampler@0.0.1:room/road": {
-        "description": "room.road.description",
-        "exits": {
-          "north": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "hall",
-              "kind": "room"
-            }
-          }
-        },
-        "key": "road",
-        "name": "room.road.title"
-      },
-      "codex_sampler@0.0.1:room/study": {
-        "description": "room.study.description",
-        "details": {
-          "desk": {
-            "aliases": [
-              "desk"
-            ],
-            "description": "detail.desk"
-          }
-        },
-        "exits": {
-          "east": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "hall",
-              "kind": "room"
-            }
-          }
-        },
-        "key": "study",
-        "name": "room.study.title"
-      },
-      "codex_sampler@0.0.1:room/yard": {
-        "description": "room.yard.description",
-        "exits": {
-          "west": {
-            "to": {
-              "cartridge_id": "codex_sampler",
-              "cartridge_version": "0.0.1",
-              "key": "hall",
-              "kind": "room"
-            }
-          }
-        },
-        "key": "yard",
-        "name": "room.yard.title"
-      }
-    },
     "text": {
       "actions.deduce_smugglers": "Think it through",
       "actions.follow_tracks": "Follow the cart tracks",
@@ -981,6 +981,6 @@
       }
     }
   },
-  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"},\"facts\":{\"codex_sampler@0.0.1:fact/topic_mill_known\":{\"key\":\"topic_mill_known\",\"meaning\":\"The player knows about the mill.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"codex_sampler@0.0.1:fact/topic_missing_cart_known\":{\"key\":\"topic_missing_cart_known\",\"meaning\":\"The player knows a cart went missing.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"codex_sampler@0.0.1:fact/topic_smugglers_known\":{\"key\":\"topic_smugglers_known\",\"meaning\":\"The player has worked out the smugglers.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"codex_sampler@0.0.1:fact/topic_wanderer_known\":{\"key\":\"topic_wanderer_known\",\"meaning\":\"Badge: the player has visited all five rooms.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"codex_sampler@0.0.1:item/carters_note\":{\"description\":\"item.carters_note.description\",\"key\":\"carters_note\",\"keywords\":[\"carters_note\",\"book\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"mass_grams\":100,\"name\":\"item.carters_note.short\",\"readable\":{\"label\":\"actions.read_book\",\"text\":\"readable.carters_note\",\"topic\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"missing_cart\",\"kind\":\"topic\"}},\"room_line\":\"item.carters_note.room\"},\"codex_sampler@0.0.1:item/mill_ledger\":{\"description\":\"item.mill_ledger.description\",\"key\":\"mill_ledger\",\"keywords\":[\"mill_ledger\",\"book\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},\"mass_grams\":100,\"name\":\"item.mill_ledger.short\",\"readable\":{\"label\":\"actions.read_book\",\"text\":\"readable.mill_ledger\",\"topic\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"topic\"}},\"room_line\":\"item.mill_ledger.room\"}},\"lock\":{\"capabilities\":{\"containment\":1,\"fact\":1,\"inspectable_detail\":1,\"knowledge\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"readable\":1,\"resource\":1,\"schedule\":1,\"scripted_action\":1,\"topics\":1,\"variety\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"codex_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"fact\":1,\"inspectable_detail\":1,\"knowledge\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"readable\":1,\"resource\":1,\"schedule\":1,\"scripted_action\":1,\"topics\":1,\"variety\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.47\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Lore Codex Sampler\",\"version\":\"0.0.1\"},\"reactions\":{\"codex_sampler@0.0.1:reaction/wanderer_hall\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"wanderer_hall\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_mill\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"wanderer_mill\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_road\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"wanderer_road\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_study\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"wanderer_study\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_yard\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"wanderer_yard\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}}},\"resources\":{\"codex_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"codex_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"codex_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"codex_sampler@0.0.1:room/hall\":{\"description\":\"room.hall.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},\"north\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}}},\"key\":\"hall\",\"name\":\"room.hall.title\"},\"codex_sampler@0.0.1:room/mill\":{\"description\":\"room.mill.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"mill\",\"name\":\"room.mill.title\"},\"codex_sampler@0.0.1:room/road\":{\"description\":\"room.road.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"road\",\"name\":\"room.road.title\"},\"codex_sampler@0.0.1:room/study\":{\"description\":\"room.study.description\",\"details\":{\"desk\":{\"aliases\":[\"desk\"],\"description\":\"detail.desk\"}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"study\",\"name\":\"room.study.title\"},\"codex_sampler@0.0.1:room/yard\":{\"description\":\"room.yard.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"yard\",\"name\":\"room.yard.title\"}},\"scripted_actions\":{\"codex_sampler@0.0.1:action/deduce_smugglers\":{\"aliases\":[\"think\"],\"key\":\"deduce_smugglers\",\"name\":\"actions.deduce_smugglers\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.deduce_smugglers\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_smugglers_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"items\":[{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_missing_cart_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_smugglers_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"},\"priority\":5,\"target\":{\"detail\":\"desk\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}}},\"codex_sampler@0.0.1:action/follow_tracks\":{\"aliases\":[\"follow\"],\"key\":\"follow_tracks\",\"name\":\"actions.follow_tracks\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.follow_tracks\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"items\":[{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_missing_cart_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"},\"priority\":5,\"target\":{\"detail\":\"desk\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}}}},\"text\":{\"actions.deduce_smugglers\":\"Think it through\",\"actions.follow_tracks\":\"Follow the cart tracks\",\"actions.read_book\":\"Read\",\"detail.desk\":\"A desk with room to spread out notes.\",\"item.carters_note.description\":\"A note in a carter's hand.\",\"item.carters_note.room\":\"A [carter's note](carters_note) lies here.\",\"item.carters_note.short\":\"a carter's note\",\"item.mill_ledger.description\":\"A ledger of sacks ground at the mill.\",\"item.mill_ledger.room\":\"A [mill ledger](mill_ledger) lies here.\",\"item.mill_ledger.short\":\"a mill ledger\",\"narration.deduce_smugglers\":\"Night grinding and a cart that never arrived: someone is smuggling through the mill.\",\"narration.follow_tracks\":\"The ruts lead back to the mill.\",\"readable.carters_note\":\"A cart left the mill at night and never reached the town.\",\"readable.mill_ledger\":\"The mill ground more sacks at night than by day.\",\"room.hall.description\":\"A bare hall. Doors lead north to the mill, east to the yard, south to the road and west to the study.\",\"room.hall.title\":\"Hall\",\"room.mill.description\":\"A quiet mill. The hall is south.\",\"room.mill.title\":\"Mill\",\"room.road.description\":\"A rutted road. The hall is north.\",\"room.road.title\":\"Road\",\"room.study.description\":\"A small study with a [desk](desk). The hall is east.\",\"room.study.title\":\"Study\",\"room.yard.description\":\"An empty yard. The hall is west.\",\"room.yard.title\":\"Yard\",\"topic.mill\":\"The mill\",\"topic.missing_cart\":\"The missing cart\",\"topic.smugglers\":\"The smugglers\",\"topic.wanderer\":\"Wanderer: you have visited all five rooms\"},\"topics\":{\"codex_sampler@0.0.1:topic/mill\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"key\":\"mill\",\"name\":\"topic.mill\"},\"codex_sampler@0.0.1:topic/missing_cart\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_missing_cart_known\",\"kind\":\"fact\"},\"key\":\"missing_cart\",\"name\":\"topic.missing_cart\"},\"codex_sampler@0.0.1:topic/smugglers\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_smugglers_known\",\"kind\":\"fact\"},\"key\":\"smugglers\",\"name\":\"topic.smugglers\"},\"codex_sampler@0.0.1:topic/wanderer\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"key\":\"wanderer\",\"name\":\"topic.wanderer\"}}}",
-  "sha256": "3252ddfbdda1aa81b0fb3efdfb417247a26c7ac9166ad6b4034cdad818d328ed"
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"},\"facts\":{\"codex_sampler@0.0.1:fact/topic_mill_known\":{\"key\":\"topic_mill_known\",\"meaning\":\"The player knows about the mill.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"codex_sampler@0.0.1:fact/topic_missing_cart_known\":{\"key\":\"topic_missing_cart_known\",\"meaning\":\"The player knows a cart went missing.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"codex_sampler@0.0.1:fact/topic_smugglers_known\":{\"key\":\"topic_smugglers_known\",\"meaning\":\"The player has worked out the smugglers.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"codex_sampler@0.0.1:fact/topic_wanderer_known\":{\"key\":\"topic_wanderer_known\",\"meaning\":\"Badge: the player has visited all five rooms.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"codex_sampler@0.0.1:item/carters_note\":{\"description\":\"item.carters_note.description\",\"key\":\"carters_note\",\"keywords\":[\"carters_note\",\"book\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"mass_grams\":100,\"name\":\"item.carters_note.short\",\"readable\":{\"label\":\"actions.read_book\",\"text\":\"readable.carters_note\",\"topic\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"missing_cart\",\"kind\":\"topic\"}},\"room_line\":\"item.carters_note.room\"},\"codex_sampler@0.0.1:item/mill_ledger\":{\"description\":\"item.mill_ledger.description\",\"key\":\"mill_ledger\",\"keywords\":[\"mill_ledger\",\"book\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},\"mass_grams\":100,\"name\":\"item.mill_ledger.short\",\"readable\":{\"label\":\"actions.read_book\",\"text\":\"readable.mill_ledger\",\"topic\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"topic\"}},\"room_line\":\"item.mill_ledger.room\"}},\"lock\":{\"capabilities\":{\"containment\":1,\"fact\":1,\"inspectable_detail\":1,\"knowledge\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"readable\":1,\"resource\":1,\"schedule\":1,\"scripted_action\":1,\"topics\":1,\"variety\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"codex_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"fact\":1,\"inspectable_detail\":1,\"knowledge\":1,\"movement\":1,\"policy\":1,\"reaction\":1,\"readable\":1,\"resource\":1,\"schedule\":1,\"scripted_action\":1,\"topics\":1,\"variety\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.47\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Lore Codex Sampler\",\"version\":\"0.0.1\"},\"reactions\":{\"codex_sampler@0.0.1:reaction/wanderer_hall\":{\"key\":\"wanderer_hall\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},\"steps\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_mill\":{\"key\":\"wanderer_mill\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},\"steps\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_road\":{\"key\":\"wanderer_road\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"steps\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_study\":{\"key\":\"wanderer_study\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},\"steps\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}},\"codex_sampler@0.0.1:reaction/wanderer_yard\":{\"key\":\"wanderer_yard\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},\"steps\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"when\":{\"items\":[{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},{\"at_least\":1,\"op\":\"visited_count\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"}}},\"resources\":{\"codex_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"codex_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"codex_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"codex_sampler@0.0.1:room/hall\":{\"description\":\"room.hall.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}},\"north\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}}},\"key\":\"hall\",\"name\":\"room.hall.title\"},\"codex_sampler@0.0.1:room/mill\":{\"description\":\"room.mill.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"mill\",\"name\":\"room.mill.title\"},\"codex_sampler@0.0.1:room/road\":{\"description\":\"room.road.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"road\",\"name\":\"room.road.title\"},\"codex_sampler@0.0.1:room/study\":{\"description\":\"room.study.description\",\"details\":{\"desk\":{\"aliases\":[\"desk\"],\"description\":\"detail.desk\"}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"study\",\"name\":\"room.study.title\"},\"codex_sampler@0.0.1:room/yard\":{\"description\":\"room.yard.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hall\",\"kind\":\"room\"}}},\"key\":\"yard\",\"name\":\"room.yard.title\"}},\"scripted_actions\":{\"codex_sampler@0.0.1:action/deduce_smugglers\":{\"aliases\":[\"think\"],\"key\":\"deduce_smugglers\",\"name\":\"actions.deduce_smugglers\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.deduce_smugglers\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_smugglers_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"items\":[{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_missing_cart_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_smugglers_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"},\"priority\":5,\"target\":{\"detail\":\"desk\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}}},\"codex_sampler@0.0.1:action/follow_tracks\":{\"aliases\":[\"follow\"],\"key\":\"follow_tracks\",\"name\":\"actions.follow_tracks\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.follow_tracks\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"items\":[{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_missing_cart_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}],\"op\":\"all\"},\"priority\":5,\"target\":{\"detail\":\"desk\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"study\",\"kind\":\"room\"}}}},\"text\":{\"actions.deduce_smugglers\":\"Think it through\",\"actions.follow_tracks\":\"Follow the cart tracks\",\"actions.read_book\":\"Read\",\"detail.desk\":\"A desk with room to spread out notes.\",\"item.carters_note.description\":\"A note in a carter's hand.\",\"item.carters_note.room\":\"A [carter's note](carters_note) lies here.\",\"item.carters_note.short\":\"a carter's note\",\"item.mill_ledger.description\":\"A ledger of sacks ground at the mill.\",\"item.mill_ledger.room\":\"A [mill ledger](mill_ledger) lies here.\",\"item.mill_ledger.short\":\"a mill ledger\",\"narration.deduce_smugglers\":\"Night grinding and a cart that never arrived: someone is smuggling through the mill.\",\"narration.follow_tracks\":\"The ruts lead back to the mill.\",\"readable.carters_note\":\"A cart left the mill at night and never reached the town.\",\"readable.mill_ledger\":\"The mill ground more sacks at night than by day.\",\"room.hall.description\":\"A bare hall. Doors lead north to the mill, east to the yard, south to the road and west to the study.\",\"room.hall.title\":\"Hall\",\"room.mill.description\":\"A quiet mill. The hall is south.\",\"room.mill.title\":\"Mill\",\"room.road.description\":\"A rutted road. The hall is north.\",\"room.road.title\":\"Road\",\"room.study.description\":\"A small study with a [desk](desk). The hall is east.\",\"room.study.title\":\"Study\",\"room.yard.description\":\"An empty yard. The hall is west.\",\"room.yard.title\":\"Yard\",\"topic.mill\":\"The mill\",\"topic.missing_cart\":\"The missing cart\",\"topic.smugglers\":\"The smugglers\",\"topic.wanderer\":\"Wanderer: you have visited all five rooms\"},\"topics\":{\"codex_sampler@0.0.1:topic/mill\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_mill_known\",\"kind\":\"fact\"},\"key\":\"mill\",\"name\":\"topic.mill\"},\"codex_sampler@0.0.1:topic/missing_cart\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_missing_cart_known\",\"kind\":\"fact\"},\"key\":\"missing_cart\",\"name\":\"topic.missing_cart\"},\"codex_sampler@0.0.1:topic/smugglers\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_smugglers_known\",\"kind\":\"fact\"},\"key\":\"smugglers\",\"name\":\"topic.smugglers\"},\"codex_sampler@0.0.1:topic/wanderer\":{\"fact\":{\"cartridge_id\":\"codex_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"topic_wanderer_known\",\"kind\":\"fact\"},\"key\":\"wanderer\",\"name\":\"topic.wanderer\"}}}",
+  "sha256": "604726b5e1e214f22f2f264dd91095c89831a4eef6bdcc32fc308a0846e31c8f"
 }

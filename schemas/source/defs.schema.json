@@ -3292,12 +3292,12 @@
           "additionalProperties": false,
           "description": "Homestead hs-1: one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
           "properties": {
-            "key": { "$ref": "#/$defs/DefinitionRef" },
-            "op": { "const": "replenish.run" }
+            "op": { "const": "replenish.run" },
+            "replenish": { "$ref": "#/$defs/DefinitionRef" }
           },
           "required": [
             "op",
-            "key"
+            "replenish"
           ],
           "type": "object"
         },
@@ -6803,17 +6803,13 @@
     },
     "partial.source.ReactionRule": {
       "additionalProperties": false,
-      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Apply may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
       "properties": {
         "after": {
           "description": "Toolbox row FD1: the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
-        },
-        "apply": {
-          "items": { "$ref": "#/$defs/Step" },
-          "type": "array"
         },
         "extends": { "$ref": "#/$defs/Key" },
         "on": {
@@ -7114,6 +7110,10 @@
         "silent": {
           "const": true,
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
+        },
+        "steps": {
+          "items": { "$ref": "#/$defs/Step" },
+          "type": "array"
         },
         "when": { "$ref": "#/$defs/partial.Policy" },
         "with": { "type": "object" },
@@ -8771,7 +8771,7 @@
     },
     "source.ReactionRule": {
       "additionalProperties": false,
-      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Apply may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
       "else": {
         "properties": {
           "on": {
@@ -8806,10 +8806,6 @@
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
-        },
-        "apply": {
-          "items": { "$ref": "#/$defs/Step" },
-          "type": "array"
         },
         "on": {
           "anyOf": [
@@ -9200,12 +9196,16 @@
           "const": true,
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
+        "steps": {
+          "items": { "$ref": "#/$defs/Step" },
+          "type": "array"
+        },
         "when": { "$ref": "#/$defs/Policy" },
         "zone": { "$ref": "#/$defs/Key" }
       },
       "required": [
         "on",
-        "apply"
+        "steps"
       ],
       "then": {
         "properties": {
