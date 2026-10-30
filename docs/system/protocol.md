@@ -176,9 +176,9 @@ never writes one keeps its state hash.
 ## Budgets
 
 The eleven composition-profile limits and their values are `LIMITS`
-(`kernel/ts/src/contracts.gen.ts:366`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
-that order names the fault (`foundation/compose.ts:119`, `:130`), returned beside the decision and
-observed as `evaluation.budget_exceeded`, never in the result (`runtime/proposal.ts:26`). Every policy
+(`kernel/ts/src/contracts.gen.ts`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
+that order names the fault (`over` and `LIMIT_ORDER` in `foundation/compose.ts`), returned beside the decision and
+observed as `evaluation.budget_exceeded`, never in the result (`limit` in `runtime/proposal.ts`). Every policy
 leaf evaluated adds one query step (`holds` in `mechanics/policy.ts`).
 
 Carrying admission shares the decision's existing query counter
@@ -237,7 +237,7 @@ bell-first case, a typed Q2 failure transition without a new event.
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/commands/actions.ts:154`) are, in order: the engine verbs of the
+An actor's actions (`composed` in `kernel/ts/src/commands/actions.ts`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS` in `kernel/ts/src/commands/verbs.ts`, each with its target kind and input; policy always true), then the
 cartridge's actions, scripted actions, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
@@ -303,11 +303,11 @@ and independently validates both targets.
 `holds` (in `kernel/ts/src/mechanics/policy.ts`) evaluates `all`, `any`, `not` and the leaves of
 `protocol/policy.schema.json` (`Policy`: the one list; each leaf's meaning is in its mechanics row, e.g.
 [attributes@1](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60) for `stat_compare`).
-An op outside that list throws: the loader closes the set (its schema stage, `content/cartridge.ts:78`).
+An op outside that list throws: the loader closes the set (its schema stage, `schemaStage` in `content/cartridge.ts`).
 
 ## Target resolution
 
-Before any Command exists, the host resolves the player's words (`kernel/ts/src/commands/target.ts:37`):
+Before any Command exists, the host resolves the player's words (`resolve` in `kernel/ts/src/commands/target.ts`):
 lowercase, split, a leading `at` and article dropped (`:20`), joined by `_`, matched exactly
 against the aliases of the room's details and the keywords of items and NPCs in the room or
 held by the body; none, unique, or ambiguous with candidate ids in ascending code-point order

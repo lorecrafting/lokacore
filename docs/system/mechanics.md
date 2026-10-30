@@ -243,7 +243,7 @@ The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records
 ## target_resolution@1, policy@1, fact@1
 
 Ruleless. `target_present` is true when the action's target is in reach (the `target_present` case in `mechanics/policy.ts`,
-`commands/target.ts:59`). `policy@1` is `all`, `any`, `not` (`holds` in `mechanics/policy.ts`). A fact is read and set at
+`present` in `commands/target.ts`). `policy@1` is `all`, `any`, `not` (`holds` in `mechanics/policy.ts`). A fact is read and set at
 its one declared scope: the actor's for `player`, the world's for `instance`
 (`mechanics/fact.ts`); a `per_subject` fact also at its subject ([row W2](#entity-and-pair-facts-toolbox-row-w2)); unset means its default; `fact_compare` compares equality. The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
