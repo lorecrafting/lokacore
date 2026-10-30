@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "spark_jar"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "shocked",

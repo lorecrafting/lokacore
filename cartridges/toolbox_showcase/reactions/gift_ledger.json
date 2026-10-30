@@ -3,7 +3,7 @@
     "event": "item_acquired",
     "item": "mill_ledger"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.adjust",
       "fact": "trust",

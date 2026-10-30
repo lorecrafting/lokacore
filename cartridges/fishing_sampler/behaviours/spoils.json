@@ -7,7 +7,7 @@
           "param": "holder"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.apply",
           "status": "spoiling",

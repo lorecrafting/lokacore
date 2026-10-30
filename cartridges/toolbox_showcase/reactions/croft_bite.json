@@ -3,10 +3,10 @@
     "event": "custom_event",
     "custom": "bite_croft"
   },
-  "apply": [
+  "steps": [
     {
       "op": "replenish.run",
-      "key": "croft_fish"
+      "replenish": "croft_fish"
     }
   ]
 }

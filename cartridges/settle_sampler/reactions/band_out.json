@@ -8,7 +8,7 @@
     "fact": "band_out",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "npc.move",
       "plan": "raiders",

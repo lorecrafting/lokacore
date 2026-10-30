@@ -12,7 +12,7 @@ import { slotRows } from './shared.ts';
 
 export function spawn(
   world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'population.spawn' }>,
+  step: Extract<ReactionRule['steps'][number], { op: 'population.spawn' }>,
   group: number,
   earlier: readonly DeltaOp[],
   mint: Mint,

@@ -10,7 +10,7 @@
     "npc": "tam",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "knows_ash",

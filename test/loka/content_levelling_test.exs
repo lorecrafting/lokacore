@@ -11,7 +11,7 @@ defmodule Loka.ContentLevellingTest do
     unlevelled = &update_in(&1, ["world"], fn w -> Map.delete(w, "levelling") end)
 
     cases = [
-      {"cartridge.json", unlevelled, {"SCHEMA_VIOLATION", "reactions/cull_reward.apply[0].op"}},
+      {"cartridge.json", unlevelled, {"SCHEMA_VIOLATION", "reactions/cull_reward.steps[0].op"}},
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end),
        {"UNDECLARED_CAPABILITY", "cartridge.world.levelling"}},

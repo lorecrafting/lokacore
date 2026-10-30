@@ -3,7 +3,7 @@
     "event": "custom_event",
     "custom": "theft_seen"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "wanted",

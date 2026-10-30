@@ -22,7 +22,7 @@ export function searchSource(c: any) {
     [`${prefix}:reaction/start_search`]: {
       key: 'start_search',
       on: { event: 'quest_resolved', quest: ref('quest', 'lantern'), outcome: 'carry' },
-      apply: [{ op: 'quest.activate', quest: ref('quest', 'oar') }],
+      steps: [{ op: 'quest.activate', quest: ref('quest', 'oar') }],
     },
   };
   const read = (name: string, title?: string) => ({

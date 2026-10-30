@@ -4,7 +4,7 @@
     "quest": "find_key",
     "outcome": "late"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "keeper_trust",

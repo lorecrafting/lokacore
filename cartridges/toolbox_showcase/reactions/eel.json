@@ -11,10 +11,10 @@
       "to": 18
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "replenish.run",
-      "key": "eel"
+      "replenish": "eel"
     }
   ]
 }

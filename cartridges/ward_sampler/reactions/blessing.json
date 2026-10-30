@@ -3,7 +3,7 @@
     "event": "entity_entered_room",
     "room": "shrine"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "warded"

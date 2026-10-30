@@ -3,7 +3,7 @@
     "event": "action_completed",
     "action": "play_song"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "inspired"

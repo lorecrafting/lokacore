@@ -4,7 +4,7 @@
     "item": "apple",
     "witness": "baker"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "gratitude",

@@ -217,7 +217,7 @@ test('talk opens the plain dialogue; an unnamed reaction step lands on each hear
     };
     const hears = c.reactions['speech_sampler@0.0.1:reaction/elder_hears'];
     hears.on = { event: 'spoken' };
-    hears.apply = [{ op: 'fact.assign', fact: ref('fact', 'heard'), value: true }];
+    hears.steps = [{ op: 'fact.assign', fact: ref('fact', 'heard'), value: true }];
   });
   assert.ok(r.ok, JSON.stringify(r));
   const w = fresh(r.cartridge as Cartridge);

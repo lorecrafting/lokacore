@@ -8,7 +8,7 @@
     "op": "sky",
     "weather": "frost"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "chilled"

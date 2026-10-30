@@ -1,4 +1,4 @@
-// size: allow 324, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17)
+// size: allow 325, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7)
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -213,7 +213,7 @@ export type Mint = () => string;
  * (status@1's); reactions activate quest-owned instances and land statuses; a choice resolves its
  * dialogue's quest (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give);
  * a spell (row 29b) lands a status (status_applied) and kills (entity_died), a craft (hs-10) hands its
- * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event;
+ * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event, as a reaction's event.emit does (C3 D7);
  * a meal (row hs-5) lands its `applies`. */
 export const COMPOSES = {
   expedition: ['quest'],
@@ -228,7 +228,8 @@ export const COMPOSES = {
   commerce: ['containment'],
   containment: ['scripted_action'],
   scene: ['dialogue', 'quest'],
-  reaction: ['quest', 'status', 'barrier', 'movement'], // W22 barrier_changed; FD5 npc.move's entity_entered_room
+  // W22 barrier_changed; FD5 npc.move's entity_entered_room; C3 D7 event.emit's custom_event
+  reaction: ['quest', 'status', 'barrier', 'movement', 'scripted_action'],
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)
   position: ['movement'], // a sleeper's arrest moves its body (entity_entered_room, row 35)
 } as const;

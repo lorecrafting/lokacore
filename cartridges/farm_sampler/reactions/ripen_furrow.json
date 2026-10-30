@@ -12,10 +12,10 @@
       "at_least": 43200
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "replenish.run",
-      "key": "crop_furrow"
+      "replenish": "crop_furrow"
     }
   ]
 }

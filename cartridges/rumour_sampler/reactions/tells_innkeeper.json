@@ -10,7 +10,7 @@
     "npc": "ada",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "knows_mill",

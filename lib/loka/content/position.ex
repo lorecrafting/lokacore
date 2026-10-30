@@ -140,7 +140,7 @@ defmodule Loka.Content.Position do
   defp lists("scripted_action", r),
     do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "steps"], o["steps"]})
 
-  defp lists("reaction", r), do: [{["apply"], r["apply"]}]
+  defp lists("reaction", r), do: [{["steps"], r["steps"]}]
 
   defp lists("scene", s),
     do: [

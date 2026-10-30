@@ -91,7 +91,6 @@
 12 kernel/ts/test/portable_abi.test.ts
 8 kernel/ts/test/position.test.ts
 6 kernel/ts/test/practical_skills.test.ts
-1 kernel/ts/test/prices.test.ts
 3 kernel/ts/test/priory_contracts.test.ts
 1 kernel/ts/test/property.test.ts
 2 kernel/ts/test/put.test.ts
@@ -106,7 +105,6 @@
 7 kernel/ts/test/reactions_sampler.test.ts
 4 kernel/ts/test/readable.test.ts
 6 kernel/ts/test/scripted_actions.test.ts
-1 kernel/ts/test/replenish.test.ts
 1 kernel/ts/test/reward_storage.test.ts
 1 kernel/ts/test/riddle_fixture.ts
 2 kernel/ts/test/rumour.test.ts

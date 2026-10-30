@@ -12,7 +12,7 @@
       "at_least_percent": 26
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "withdrawn",

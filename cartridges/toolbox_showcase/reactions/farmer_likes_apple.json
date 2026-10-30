@@ -9,7 +9,7 @@
     "equals": false,
     "npc": "farmer"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.adjust",
       "fact": "regard",

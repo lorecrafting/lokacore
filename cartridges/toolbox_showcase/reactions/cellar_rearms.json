@@ -7,7 +7,7 @@
     "fact": "cellar_sprung",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "cellar_sprung",

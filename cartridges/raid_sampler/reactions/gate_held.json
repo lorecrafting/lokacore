@@ -8,7 +8,7 @@
     "fact": "raided",
     "equals": false
   },
-  "apply": [
+  "steps": [
     {
       "op": "quest.resolve",
       "quest": "hold_the_gate",

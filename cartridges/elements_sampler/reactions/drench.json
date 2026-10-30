@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "bucket"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "wet",

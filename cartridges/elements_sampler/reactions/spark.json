@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "jar"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "shocked",

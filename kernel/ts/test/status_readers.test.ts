@@ -164,7 +164,7 @@ test("a player stunned mid-fight takes no blow; the troll's still lands", () => 
   const dazing = {
     key: 'dazing',
     on: { event: 'status_expired', status: status('hushed') },
-    apply: [{ op: 'status.apply', status: status('stunned') }],
+    steps: [{ op: 'status.apply', status: status('stunned') }],
   };
   const c = {
     ...content,

@@ -3,7 +3,7 @@
     "event": "entity_entered_room",
     "room": "road"
   },
-  "apply": [
+  "steps": [
     {
       "op": "narrate",
       "text": "settle.arrival_line"

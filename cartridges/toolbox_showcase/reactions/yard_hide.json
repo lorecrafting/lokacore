@@ -3,7 +3,7 @@
     "event": "check_passed",
     "check": "yard_hide"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "hidden"

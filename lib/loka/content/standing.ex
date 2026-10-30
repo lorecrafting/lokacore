@@ -36,7 +36,7 @@ defmodule Loka.Content.Standing do
   end
 
   defp adjusts(r) do
-    for {%{"op" => "fact.adjust"} = s, i} <- Enum.with_index(r["apply"] || []), do: {s, i}
+    for {%{"op" => "fact.adjust"} = s, i} <- Enum.with_index(r["steps"] || []), do: {s, i}
   end
 
   defp shapes(npcs) do
@@ -61,6 +61,6 @@ defmodule Loka.Content.Standing do
     for {rel, {s, i}} <- adjusts,
         {_, _, %{"value_type" => t}} <- [Refs.resolve(s["fact"], "fact", m, defs)],
         not match?(%{"type" => "int", "minimum" => _, "maximum" => _}, t),
-        do: diag("FACT_TYPE_MISMATCH", at(rel, ["apply", i, "fact"]), %{})
+        do: diag("FACT_TYPE_MISMATCH", at(rel, ["steps", i, "fact"]), %{})
   end
 end

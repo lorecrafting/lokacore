@@ -131,11 +131,11 @@ test('an oversized scaled fare is refused, not thrown', () => {
       ...base.reactions,
       [`ward_sampler@0.0.1:reaction/blessing`]: {
         ...blessing,
-        apply: [
-          ...blessing.apply,
+        steps: [
+          ...blessing.steps,
           ...clones.map((s) => ({
             op: 'status.apply',
-            status: { ...(blessing.apply[0] as any).status, key: s.key },
+            status: { ...(blessing.steps[0] as any).status, key: s.key },
           })),
         ],
       },

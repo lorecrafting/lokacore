@@ -3,7 +3,7 @@
     "event": "spoken",
     "word": "thunder"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "stunned",

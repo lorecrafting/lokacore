@@ -3,7 +3,7 @@
     "event": "status_ticked",
     "status": "poison"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "groaned",

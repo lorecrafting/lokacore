@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "bone"
   },
-  "apply": [
+  "steps": [
     {
       "op": "npc.move",
       "npc": "crow"

@@ -60,7 +60,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   const held = (ref: string, i: number) => {
     const { key, on, when } = rules[ref]!;
     const leaf = leaves(when!)[i]!;
-    const probed = { key, on, when: leaf, apply: [{ op: 'narrate', text: probe }] };
+    const probed = { key, on, when: leaf, steps: [{ op: 'narrate', text: probe }] };
     const reactions = { ...rules, [ref]: probed };
     return said(decide({ ...cartridge, reactions } as Cartridge), (k) => k === probe);
   };

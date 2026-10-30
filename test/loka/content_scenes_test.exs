@@ -171,7 +171,7 @@ defmodule Loka.ContentScenesTest do
     for {rel, path, diagnostic} <- [
           {"actions/coil_rope.json", ["outcomes", "success", "steps"],
            "actions/coil_rope.outcomes.success.steps[0].fact"},
-          {"reactions/bell_after.json", ["apply"], "reactions/bell_after.apply[0].fact"},
+          {"reactions/bell_after.json", ["steps"], "reactions/bell_after.steps[0].fact"},
           {"dialogues/bram.json", ["choices", "carry", "steps"],
            "dialogues/bram.choices.carry.steps[0].fact"}
         ] do

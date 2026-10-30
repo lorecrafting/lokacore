@@ -175,7 +175,7 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
       c.reactions[`${P}:reaction/mourn`] = {
         key: 'mourn',
         on: { event: 'entity_died' },
-        apply: Array(64).fill(mourn),
+        steps: Array(64).fill(mourn),
       };
     }),
   );
@@ -215,7 +215,7 @@ test('a reaction grant in the death step builds on the loss in one write, untold
       c.reactions[`${P}:reaction/died_reward`] = {
         key: 'died_reward',
         on: { event: 'entity_died' },
-        apply: [{ op: 'experience.grant', amount: 20 }],
+        steps: [{ op: 'experience.grant', amount: 20 }],
       };
     }),
   );

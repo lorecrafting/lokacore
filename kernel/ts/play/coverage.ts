@@ -28,7 +28,7 @@ export function marked(c: Cartridge) {
   const reactions = Object.fromEntries(
     refs.map((ref, i) => {
       const r = c.reactions![ref]!;
-      return [ref, { ...r, apply: [...r.apply, { op: 'narrate', text: `coverage.m${i}` }] }];
+      return [ref, { ...r, steps: [...r.steps, { op: 'narrate', text: `coverage.m${i}` }] }];
     }),
   );
   const ruleOf = (key: string) => refs[Number(MARK.exec(key)?.[1] ?? NaN)];

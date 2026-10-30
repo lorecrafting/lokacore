@@ -197,7 +197,7 @@ test('co_present with no room frightens no one', () => {
   const { [npc(placed, 'chief')]: _, ...containers } = placed.state.containers;
   const w = { ...placed, state: { ...placed.state, containers } } as World;
   const rule = { ...Object.values(content.reactions!).find((r) => r.key === 'leader_fell')! };
-  const status = (rule.apply[0] as unknown as { status: never }).status;
+  const status = (rule.steps[0] as unknown as { status: never }).status;
   const on = { event: 'status_expired' } as const;
   const payload = {
     type: 'status_expired',

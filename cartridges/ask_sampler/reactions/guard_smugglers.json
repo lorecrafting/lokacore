@@ -4,7 +4,7 @@
     "npc": "guard",
     "topic": "smugglers"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "wanted",

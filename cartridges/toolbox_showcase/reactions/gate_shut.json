@@ -33,7 +33,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "barrier.set",
       "barrier": "toll_gate",

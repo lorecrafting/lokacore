@@ -3,7 +3,7 @@
     "event": "entity_entered_room",
     "room": "reading_room"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "hushed"

@@ -54,8 +54,8 @@ test('every $ref in the source schemas resolves', () => {
 
 const room = { name: 'hall.title', description: 'hall.description', exits: {} };
 const step = { op: 'fact.assign', fact: 'known', value: true };
-const entered = { on: { event: 'entity_entered_room', room: 'hall' }, apply: [step] };
-const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, apply: [step] };
+const entered = { on: { event: 'entity_entered_room', room: 'hall' }, steps: [step] };
+const zoned = { zone: 'priory', on: { event: 'entity_entered_room' }, steps: [step] };
 const defs = 'defs.schema.json#/$defs/';
 const discount = { numerator: 1, denominator: 2, minimum: 1, skill: 'haggle' };
 const consume = { items: ['log'], quantity: 1, to: { in: 'room', room: 'yard' } };

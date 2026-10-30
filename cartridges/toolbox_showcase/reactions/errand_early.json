@@ -18,7 +18,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "quest.resolve",
       "quest": "errand",

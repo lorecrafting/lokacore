@@ -8,7 +8,7 @@
     "fact": "wheel_1",
     "equals": 10
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "wheel_1",

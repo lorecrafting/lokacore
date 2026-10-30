@@ -106,7 +106,7 @@
         "event": "spoken",
         "npc": "elder"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "elder_heard",
@@ -119,7 +119,7 @@
         "event": "spoken",
         "npc": "miller"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "miller_heard",
@@ -134,7 +134,7 @@
         "word": "help",
         "loudness": "shout"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": "watchman_alerted",

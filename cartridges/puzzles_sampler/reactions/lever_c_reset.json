@@ -11,7 +11,7 @@
       "equals": 2
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "lever_stage",
