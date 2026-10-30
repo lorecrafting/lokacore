@@ -293,7 +293,9 @@ otherwise; an authored line keeps its own text, except an `emote.performed` line
 in place; every other line is log. The page's own redraw (purse, list, contents) is the
   feedback. Another person's action is never quiet.
 - A page never draws the room log, so no line shows twice on one page.
-- Dialogue is novel prose (owner, 2026-10-30, Beads `loka-r9mr`): speaker, speech verb, the
+- Every log line reads as novel prose (owner, 2026-10-30, Beads `loka-r9mr`): no colon label
+  (`Name: ...`) anywhere in the log. A found person reads `Nell is here.` or `Nell was last seen
+  at the Landing, 2m ago.` Dialogue: speaker, speech verb, the
   listener when there is one, a comma, then the spoken line in double quotes. To the player:
   `Nell says to you, "Well, stranger?"`; to the room: `Nell says, "Ale's a penny."`; the player:
   `You say, "Ware."`, `You whisper to the jailer, "Ware."`, `You shout, "Ware!"`. The Book's own

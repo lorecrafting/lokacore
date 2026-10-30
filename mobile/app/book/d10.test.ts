@@ -41,13 +41,13 @@ test('Where touch sends exact identity and labels here, saved last seen and unkn
   assert.deepEqual(group([button]).on('ash'), [button]);
   assert.deepEqual(
     replyLine(reply({ target_id: 'ash', status: 'here', room_id: 'landing' }), (s) => s, view),
-    ['Ash: here.'],
+    ['Ash is here.'],
   );
   // loka-ozu: time since, not the raw clock; view.time is 900.
   for (const [at, line] of [
-    [100, 'Ash: last seen at Landing, 13m ago.'],
-    [780, 'Ash: last seen at Landing, 2m ago.'],
-    [781, 'Ash: last seen at Landing, just now.'],
+    [100, 'Ash was last seen at Landing, 13m ago.'],
+    [780, 'Ash was last seen at Landing, 2m ago.'],
+    [781, 'Ash was last seen at Landing, just now.'],
   ] as const)
     assert.deepEqual(
       replyLine(

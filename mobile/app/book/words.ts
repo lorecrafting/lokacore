@@ -234,12 +234,14 @@ function answer(
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {
     const location = d.location;
-    const who = nameOf(view, location.target_id, text) || 'They';
-    if (location.status === 'here') return `${who}: here.`;
+    // novel prose, no colon label (book-ui.md, Line placement)
+    const name = nameOf(view, location.target_id, text);
+    const [who, is, was] = name ? [name, 'is', 'was'] : ['They', 'are', 'were'];
+    if (location.status === 'here') return `${who} ${is} here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);
     const ago = view.time - location.at; // a clock behind the sighting still reads just now
-    return `${who}: last seen at ${room ? text(room.title) : 'a previously observed place'}, ${ago < 120 ? 'just now' : `${dur(ago)} ago`}.`;
+    return `${who} ${was} last seen at ${room ? text(room.title) : 'a previously observed place'}, ${ago < 120 ? 'just now' : `${dur(ago)} ago`}.`;
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
