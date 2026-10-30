@@ -33,7 +33,7 @@ python3 -c '
 import json, os, re, sys
 for p in sys.argv[2:]:
     m = json.loads(json.load(open(p, encoding="utf-8"))["canonical"]).get("manifest")
-    if m and not re.match(sys.argv[1], os.path.basename(p)) and os.path.isdir("cartridges/" + m["id"]):
+    if m and not re.match(sys.argv[1], os.path.basename(p)):
         print(p, m["id"])
 ' "$FROZEN" protocol/fixtures/*_hash.json | while read -r fix id; do
   touched "^(cartridges/$id/|lib/|$fix\$)" || continue # $fix: a merge took either side of it
@@ -48,7 +48,7 @@ fi
 python3 - "$FROZEN" <<'PY'
 import fnmatch, glob, json, os, re, sys
 kats, compiled = set(), {}
-for p in glob.glob('protocol/fixtures/*_hash.json'):
+for p in sorted(glob.glob('protocol/fixtures/*_hash.json')):  # sorted: the same answer on every machine
     name, d = os.path.basename(p), json.load(open(p, encoding='utf-8'))
     m = json.loads(d['canonical']).get('manifest')
     if not m: continue

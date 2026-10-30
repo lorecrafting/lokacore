@@ -409,7 +409,7 @@ cp "$bin/regen.sh" bin/; : > bin/review_index.sh; echo 'print("containers", file
 printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
 for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
 printf '{\n  "description": "x",\n  "value": 1,\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b\\"}}",\n  "sha256": "old"\n}\n' > protocol/fixtures/v_hash.json
-printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"a\\"}}",\n  "sha256": "kept"\n}\n' > protocol/fixtures/containers_a_hash.json
+printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"a\\"}}",\n  "sha256": "kept"\n}\n' > protocol/fixtures/containers_a_hash.json; sed s/kept/frozen/ protocol/fixtures/containers_a_hash.json > protocol/fixtures/sampler_v1_hash.json
 printf '{"ids":{"content_hash":"stale"}}\n{"ids":{"content_hash":"stale"}}\n' > cartridges/a/transcripts/t.jsonl; echo '{"ids":{"content_hash":"kept"}}' > cartridges/a/transcripts/k.jsonl; echo '{"ids":{"content_hash":"stale"}}' > cartridges/c/transcripts/u.jsonl; echo x > cartridges/b/x; printf '# header\ntoolbox_showcase lint: finding\ntoolbox_showcase lint: fixed\n' > test/loka/lint_baseline.txt
 git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
 rg() { RG_LOG=$R.$1 PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2>&1 || bad "regen.sh exited non-zero ($1)"; }
@@ -423,7 +423,7 @@ grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b
 git add . && git commit -qm l; git update-ref refs/remotes/origin/main HEAD; perl -pi -e s/new/old/ protocol/fixtures/v_hash.json; rg f
 [ "$(grep fixtures "$R.f")" = protocol/fixtures/v_hash.json ] || bad "regen: a fixture a merge took a side of was not rebuilt alone: $(tr '\n' ' ' < "$R.f")"
 git update-ref -d refs/remotes/origin/main; rg b
-grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && grep -qx 'protocol/fixtures/v_hash.json' "$R.b" && grep -qx containers "$R.b" && ! grep -q containers_a "$R.b" \
+grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && grep -qx 'protocol/fixtures/v_hash.json' "$R.b" && grep -qx containers "$R.b" && ! grep -qE 'containers_a|sampler_v1' "$R.b" \
   || bad "regen: no diff did not rebuild every compiled fixture and the containers ones, or rebuilt a frozen one: $(tr '\n' ' ' < "$R.b")"
 [ "$(cat test/loka/lint_baseline.txt)" = "$(printf '# header\ntoolbox_showcase lint: finding')" ] || bad "regen: lint baseline is: $(cat test/loka/lint_baseline.txt)"
 if RG_LINT=new RG_LOG=$R.n PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2> "$R.n.err" || ! grep -qx 'toolbox_showcase lint: new' "$R.n.err" \
@@ -701,7 +701,7 @@ kill "$decoy" 2> /dev/null || bad 'a stop by name killed the decoy on $dp'
 fi
 
 # --- regen_hash_fixture.sh -------------------------------------------------------------------------
-# A stub artifact whose canonical holds a float written 1.50, non-ASCII text and a list that grew. Break: the canonical is
+# A stub artifact whose canonical holds a float written 1.50, non-ASCII text and a list that grew and a new key. Break: the canonical is
 # re-encoded instead of copied as bytes (1.50 becomes 1.5), the description is dropped, a sampler's `value` is
 # refused, kept stale, moved or re-sorted, a hash that is not the canonical's sha256 or a fixture with other keys is written over.
 mkdir "$tmp/rh"; cd "$tmp/rh"; canon='{"a":[{"x":1,"y":2},3],"n":1.50,"s":"Grüße"}'
@@ -716,7 +716,7 @@ printf '{\n  "description": "d",\n  "canonical": "old",\n  "sha256": "0"\n}\n' >
 [ "$(cat fix)" = "$(printf '{\n  "description": "d",\n  "canonical": "%s",\n  "sha256": "%s"\n}' "$(printf %s "$canon" | sed 's/"/\\"/g')" "$sha")" ] \
   || { bad 'regen_hash_fixture ok: fixture not description + canonical bytes + sha256'; cat fix; }
 rh wrong-hash 1 "$(printf %s "$sha" | tr 0-9a-f 1-9a-f0)"
-printf '{\n  "description": "d",\n  "value": {"s": 0, "a": [{"y": 0, "x": 0}], "n": 0},\n  "canonical": "old",\n  "sha256": "0"\n}\n' > fix; rh value 0 "$sha"
+printf '{\n  "description": "d",\n  "value": {"s": 0, "a": [{"y": 0, "x": 0}]},\n  "canonical": "old",\n  "sha256": "0"\n}\n' > fix; rh value 0 "$sha"
 [ "$(cat fix)" = "$(printf '{\n  "description": "d",\n  "value": {\n    "s": "Grüße",\n    "a": [\n      {\n        "y": 2,\n        "x": 1\n      },\n      3\n    ],\n    "n": 1.5\n  },\n  "canonical": "%s",\n  "sha256": "%s"\n}' "$(printf %s "$canon" | sed 's/"/\\"/g')" "$sha")" ] \
   || { bad 'regen_hash_fixture value: fixture not description + decoded value + canonical bytes + sha256'; cat fix; }
 printf '{\n  "description": "d",\n  "canonical": "old",\n  "sha256": "0",\n  "x": 1\n}\n' > fix; rh other-key 1 "$sha"
