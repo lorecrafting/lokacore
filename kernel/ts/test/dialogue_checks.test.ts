@@ -112,7 +112,7 @@ test('a check naming another NPC makes that NPC its subject', () => {
   assert.equal(d.events[0].payload.subject_id, g.entity(captain));
 });
 
-// Breaks: a failure applies the choice's sequence, resolves the choice (choice_resolved), keeps
+// Breaks: a failure applies the choice's steps, resolves the choice (choice_resolved), keeps
 // the conversation open so the same sitting retries, skips the use, names the actor (not the
 // speaker) as the check's subject, or GameView still offers a
 // choice the choose would refuse; or a use is not counted, so the second talk fails again.
@@ -142,4 +142,22 @@ test('a failed check reads its failure line, closes the talk, counts a use; a ne
   assert.equal(again.events[0].payload.type, 'check_passed');
   assert.equal(g.fact('gate_open'), true);
   assert.equal(g.fact('uses_intimidate'), 2);
+});
+
+// Breaks: a choice step or check outside the choice context (steps.ex, check_kinds.ex) runs instead
+// of faulting: the step switch falls through, or the check guard accepts a non-opposed kind or a
+// missing failure line. The loader admits each shape; only the compiler refuses it.
+test('a malformed choice step or check faults evaluator_error (KernelError while deciding, world.ts)', () => {
+  const guard = (c: any) => c.dialogues[`${P}:dialogue/guard`].choices.persuade;
+  const cases: ((c: any) => void)[] = [
+    (c) => (guard(c).steps = [{ op: 'fact.stamp', fact: guard(c).steps[0].fact }]),
+    (c) => (guard(c).check = { key: 'persuade_guard', kind: 'luck', chance: 50 }),
+    (c) => delete guard(c).check.failure,
+  ];
+  for (const change of cases) {
+    const c = structuredClone(source);
+    change(c);
+    const g = play(c);
+    assert.deepEqual(g.choose(g.talk(), 'persuade'), { kind: 'fault', code: 'evaluator_error' });
+  }
 });

@@ -96,6 +96,7 @@ export function checked(
   const { actor_id, continuation_id, choice_id } = command.payload;
   const check = d.choices[choice_id]!.check!;
   // check_kinds.ex: a choice's check is opposed and has a failure.
+  // mutate-skip: the kind test only narrows the union; only opposed carries failure, so the failure test refuses the rest.
   if (check.kind !== 'opposed' || check.failure === undefined)
     throw new KernelError('precondition_failed');
   const subject_id = check.npc
