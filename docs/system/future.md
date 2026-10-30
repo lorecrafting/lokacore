@@ -45,3 +45,4 @@ Worldbuilding subproject (Beads loka-ikch): the [stub tree](../worldbuilding/REA
   [current owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md)); the effect outbox
   ([03 §16](../archive/spec/03-domain-state-persistence.md)); a networked `loka play` (R14), puppeting
   and player-written descriptions ([ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
+- Live operations: shipping content and mechanics to a running Realm without a restart, proposed in the [live-ops sketch](../rnd/realm-live-ops-2026-10-29.md) (not decided).
