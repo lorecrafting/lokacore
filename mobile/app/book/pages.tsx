@@ -86,7 +86,7 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
  * - Story: Control.stories.tsx
  */
 export function Control(p: {
-  label: (typeof LABEL)[keyof typeof LABEL];
+  label: Extract<(typeof LABEL)[keyof typeof LABEL], string>;
   onPress: () => void;
   disabled?: boolean;
   onInk?: true;
@@ -181,7 +181,7 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
     </Text>
   );
   return p.onPress ? (
-    <Tap label={`${p.title}, look`} onPress={p.onPress}>
+    <Tap label={LABEL.look(p.title)} onPress={p.onPress}>
       {heading}
     </Tap>
   ) : (

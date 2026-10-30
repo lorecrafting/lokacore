@@ -60,8 +60,8 @@ export function CharacterPage(p: Character) {
   const name = p.view?.actor_name;
   const known = resources.length || p.view?.attributes?.length || p.view?.skills?.some(knownSkill);
   return (
-    <Page title="Character" foot={home(p.world)}>
-      {!known && !name && <Note>Nothing is known about you yet.</Note>}
+    <Page title={LABEL.character} foot={home(p.world)}>
+      {!known && !name && <Note>{LABEL.nothingKnown}</Note>}
       {name && <Text style={prose(c, t)}>{p.text(name)}</Text>}
       {position && <Text style={prose(c, t)}>{cap(position)}</Text>}
       {p.view?.ancestry && (
@@ -104,8 +104,8 @@ export function AncestryPage(p: {
   const c = usePalette();
   const t = useType();
   return (
-    <Page title="Choose your ancestry">
-      <Text style={prose(c, t)}>Choose once before your story begins.</Text>
+    <Page title={LABEL.chooseAncestry}>
+      <Text style={prose(c, t)}>{LABEL.chooseOnce}</Text>
       {p.view.ancestry_choices?.map((choice) => {
         const button = p.buttons.find(
           (b) =>
@@ -119,7 +119,7 @@ export function AncestryPage(p: {
           </View>
         );
       })}
-      {p.pending && <Note>save not confirmed</Note>}
+      {p.pending && <Note>{LABEL.saveNotConfirmed}</Note>}
     </Page>
   );
 }
@@ -142,7 +142,7 @@ export function CarryingPage(p: {
   return (
     <Page title={LABEL.inventory} foot={home(p.world)}>
       <SectionTitle>{LABEL.held}</SectionTitle>
-      {p.items.length === 0 && <Note>You are carrying nothing.</Note>}
+      {p.items.length === 0 && <Note>{LABEL.carryingNothing}</Note>}
       {p.items.length > 0 && (
         <View>
           {p.items.map((e) => (
@@ -160,7 +160,7 @@ export function CarryingPage(p: {
                 {item ? (
                   <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
                 ) : (
-                  <Note>Empty</Note>
+                  <Note>{LABEL.empty}</Note>
                 )}
               </View>
             ))}
@@ -195,7 +195,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
         ))}
         {e.sight && (
           <Text style={note(c, t)}>
-            {`Beyond ${e.direction}: ${p.text(e.sight.title)}${
+            {`${LABEL.beyond(e.direction)}${p.text(e.sight.title)}${
               e.sight.entities.length
                 ? ` — ${e.sight.entities.map((x) => p.text(x.name)).join(', ')}`
                 : ''
@@ -227,7 +227,7 @@ export function MapPage(p: {
   const chosen = p.view.map?.rooms.some((r) => r.id === selected);
   return (
     <Page
-      title="Map"
+      title={LABEL.map}
       foot={
         <>
           {chosen && <Control label={LABEL.backToMap} onPress={() => select(null)} />}
@@ -238,8 +238,8 @@ export function MapPage(p: {
       {p.view.map && (
         <DiscoveredMap view={p.view} text={p.text} selected={selected} select={select} />
       )}
-      <Text style={prose(c, t)}>Current place: {p.text(p.view.place.title.key)}</Text>
-      {p.view.exits.length === 0 && <Note>No way out is known.</Note>}
+      <Text style={prose(c, t)}>{LABEL.currentPlace(p.text(p.view.place.title.key))}</Text>
+      {p.view.exits.length === 0 && <Note>{LABEL.noWayOut}</Note>}
       <Ways
         {...p}
         view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}
@@ -277,7 +277,7 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
  */
 export function SettingsPage(p: { startOver: () => void; world: () => void; reading?: Reading }) {
   return (
-    <Page title="Settings" foot={home(p.world)}>
+    <Page title={LABEL.settings} foot={home(p.world)}>
       {p.reading && <ReadingSize {...p.reading} />}
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
@@ -318,7 +318,7 @@ export function ChapterPage(p: { label: string; title: string; done: () => void 
         />
       </View>
       <View style={{ alignItems: 'center' }}>
-        <ContinueButton label="Continue" onPress={p.done} />
+        <ContinueButton label={LABEL.continue} onPress={p.done} />
       </View>
     </Page>
   );

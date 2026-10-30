@@ -131,7 +131,7 @@ export function StatusLine(p: StatusProps) {
       {open && shield(() => setOpen(false))}
       {p.say && open && <SayField {...p.say} pending={p.say.busy} close={() => setOpen(false)} />}
       <View style={{ alignItems: 'center' }}>
-        {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
+        {p.pending && <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>}
       </View>
     </View>
   );

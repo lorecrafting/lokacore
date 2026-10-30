@@ -33,9 +33,9 @@ export function JournalPage(p: JournalProps) {
   const t = useType();
   const [days] = useState(p.chronicle); // read once as the Journal opens, never live
   return (
-    <Page title="Journal" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
+    <Page title={LABEL.journal} foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
       {!view.journal.length && !view.topics?.length && !days.length && (
-        <Note>Nothing written yet.</Note>
+        <Note>{LABEL.nothingWritten}</Note>
       )}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
@@ -43,19 +43,19 @@ export function JournalPage(p: JournalProps) {
           <Text style={note(c, t)}>{String(q.state).replaceAll('_', ' ')}</Text>
           {q.patrol && (
             <Text style={prose(c, t)}>
-              {q.patrol.credit} of {q.patrol.required} checkpoints. {q.patrol.status}.{' '}
-              {text(q.patrol.leader_name)} is at {text(q.patrol.room_title)}.{' '}
+              {LABEL.patrolProgress(q.patrol.credit, q.patrol.required, q.patrol.status)}{' '}
+              {LABEL.patrolAt(text(q.patrol.leader_name), text(q.patrol.room_title))}{' '}
               {patrolNext(q.patrol, text)}
             </Text>
           )}
           {q.expedition && (
             <Text style={note(c, t)}>
-              {q.expedition.cursor} of {q.expedition.required} entries.{' '}
-              {expeditionLine(q.expedition, text)} {q.expedition.sheltered ? 'Shelter used.' : ''}
+              {LABEL.expeditionProgress(q.expedition.cursor, q.expedition.required)}{' '}
+              {expeditionLine(q.expedition, text)} {q.expedition.sheltered ? LABEL.shelterUsed : ''}
             </Text>
           )}
           {q.journal && <Text style={prose(c, t)}>{plain(text(q.journal))}</Text>}
-          {q.hint && <Text style={note(c, t)}>Hint: {plain(text(q.hint))}</Text>}
+          {q.hint && <Text style={note(c, t)}>{LABEL.hint(plain(text(q.hint)))}</Text>}
           {q.remaining !== undefined && <Text style={note(c, t)}>{timeLeft(q.remaining)}</Text>}
         </View>
       ))}
@@ -109,13 +109,13 @@ function LoreDetails(p: {
 type Patrol = NonNullable<GameView['journal'][number]['patrol']>;
 const patrolNext = (p: Patrol, text: (t: Patrol['leader_name']) => string) =>
   p.status === 'awaiting'
-    ? `Walk ${p.direction} to join him.`
+    ? LABEL.patrolWalk(p.direction)
     : p.status === 'paused'
-      ? `Return to ${text(p.leader_name)} and choose Rejoin.`
+      ? LABEL.patrolRejoin(text(p.leader_name))
       : p.status === 'failed'
-        ? `Return to ${text(p.leader_name)} and choose Restart now.`
+        ? LABEL.patrolRestart(text(p.leader_name))
         : p.status === 'together'
-          ? `Next: ${text(p.next_title)}.`
+          ? LABEL.patrolNext(text(p.next_title))
           : '';
 
 /** The Chronicle (book-ui.md, Chronicle details). */

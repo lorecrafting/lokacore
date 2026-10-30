@@ -1,0 +1,17 @@
+id: mobile-book-english
+valid:
+  - "const f = <Page title={LABEL.map} />;"
+  - "const f = <Note>{LABEL.empty}</Note>;"
+  - "const f = <View testID=\"world-title\" accessibilityRole=\"button\" style={{ alignItems: 'center' }} />;"
+  - "const f = onKey((k) => k === 'Escape' && close());"
+  - "const f = (e) => e.nativeEvent.key === 'Enter';"
+  - "const f = <Text>{' — '}{x}.</Text>;"
+invalid: # one per alternative of the rule, in its order
+  - "const f = <Note>empty</Note>;"
+  - "const f = x === 'not here';"
+  - "const f = 'done.';"
+  - "const f = `more ${n}`;"
+  - "const f = `${n} more`;"
+  - "const f = <Page title=\"Map\" />;"
+  - "const f = `${t}, look`;"
+  - "const f = r.key + ' points left';"
