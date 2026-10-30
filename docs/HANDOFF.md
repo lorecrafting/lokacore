@@ -21,8 +21,17 @@ kinds gone, one `name` field, structures; transport@1 kept; docs/reviews/2026-10
 is now scripted action; reaction `event.emit` (refused in delayed rules); docs/reviews/2026-10-29-c3-final-review.md).
 Rulings for both: loka-ivjq.3 and .4 notes. Nothing is in flight.
 
-- Next: a Fable "How Loka works" explainer page (Artifact) from the C3 glossary and cartridge.md "Steps and
-  checks"; link it to the owner. Then C4 naming batch (loka-ivjq.29), then polish (Next 3).
+- Done 2026-10-29: "How Loka works" explainer (Evennia-oriented, with architecture and Realm sections):
+  https://claude.ai/artifact/HYVKe5JiSfmBQB25cx5Zgb. Open: PR #496 (docs/rnd Realm live-ops proposal,
+  loka-cw9y); a reviewer was running at the clear; read its record (docs/reviews/2026-10-29-pr496-review.md
+  on the branch) and merge if approved.
+- OVERNIGHT PLAN, owner-approved 2026-10-29 (quoted: "okay lets do all those"), in order, done before polish:
+  (1) loka-tb31 P1: regen re-pins transcript and value-fixture hashes; (2) C4 naming batch loka-ivjq.29:
+  PM picks under the standing delegation, low-risk renames only, nothing that changes a save, each pick
+  recorded for owner ratification; (3) loka-t37i docs drift (eight stale doc facts); (4) retro for C2/C3
+  (lessons: hash re-pin cost, unenforced reviewer mutation timebox loka-tafk, early-start slices, merge-order
+  conflicts). Morning: `bin/polish_session.sh update`, re-arm the picks Monitor, tell the owner Storybook is
+  ready, then polish (Next 3).
 - Fix first after that: loka-tb31 (P1): regen does not re-pin transcript or value-fixture hashes; every
   parallel C3 slice merge conflicted in 30-50 of them and cost 20-30 min of scripted re-pinning. Also the
   unenforced reviewer mutation timebox (C3 final sweep ran ~90 of 45 min) and mutate_diff treating renamed
