@@ -15,7 +15,7 @@ defmodule Loka.ContentNpcStatusTest do
       {"npcs/golem.json", &Map.put(&1, "immune", ["missing"])},
       {"items/torch.json", &Map.put(&1, "immune", ["missing"])},
       {"npcs/golem.json", &Map.put(&1, "immune", [])},
-      {"reactions/kindle.json", &put_in(&1, ["apply", Access.at(0), "item"], "missing")},
+      {"reactions/kindle.json", &put_in(&1, ["steps", Access.at(0), "item"], "missing")},
       {"reactions/groan.json", &put_in(&1, ["on", "status"], "missing")}
     ]
 

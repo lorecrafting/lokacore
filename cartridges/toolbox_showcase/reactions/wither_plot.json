@@ -9,7 +9,7 @@
     "item": "plot",
     "at_least": 43200
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "withered",

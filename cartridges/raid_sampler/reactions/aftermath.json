@@ -8,7 +8,7 @@
     "fact": "raided",
     "equals": false
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.adjust",
       "fact": "aftermaths",

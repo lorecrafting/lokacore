@@ -3,7 +3,7 @@
     "event": "fact_changed",
     "fact": "word_left"
   },
-  "apply": [
+  "steps": [
     {
       "op": "quest.resolve",
       "quest": "find_key",

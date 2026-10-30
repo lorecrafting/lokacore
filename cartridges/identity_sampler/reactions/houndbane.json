@@ -11,7 +11,7 @@
       "equals": true
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "topic_houndbane_known",

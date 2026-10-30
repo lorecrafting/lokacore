@@ -11,9 +11,9 @@ defmodule Loka.ContentElementsTest do
   test "a reaction cure names a declared status", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     cure = %{"op" => "status.cure", "status" => "wet"}
-    ash = &update_in(&1, ["apply"], fn a -> a ++ [%{cure | "status" => "ash"}] end)
+    ash = &update_in(&1, ["steps"], fn a -> a ++ [%{cure | "status" => "ash"}] end)
 
-    assert {"UNRESOLVED_REFERENCE", "reactions/spark.apply[1].status"} in diags(dir, [
+    assert {"UNRESOLVED_REFERENCE", "reactions/spark.steps[1].status"} in diags(dir, [
              {"reactions/spark.json", ash}
            ])
   end

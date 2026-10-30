@@ -3,7 +3,7 @@
     "event": "spoken",
     "word": "drench"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "soaked"

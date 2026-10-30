@@ -33,7 +33,7 @@ defmodule Loka.ContentD9Test do
       {"reactions/bell_suppress_goblins.json",
        %{
          "on" => %{"event" => "fact_changed", "fact" => "bell_rung"},
-         "apply" => [%{"op" => "population.suppress", "plan" => "goblins", "duration" => 172_800}]
+         "steps" => [%{"op" => "population.suppress", "plan" => "goblins", "duration" => 172_800}]
        }},
       {"cartridge.json",
        &put_in(&1, ["world", "bell_cue"], %{
@@ -67,13 +67,13 @@ defmodule Loka.ContentD9Test do
            "UNRESOLVED_REFERENCE", "cartridge.world.bell_cue.fact"},
           {"cartridge.json", &put_in(&1, ["world", "bell_cue", "text"], "narration.absent"),
            "UNRESOLVED_REFERENCE", "cartridge.world.bell_cue.text"},
-          {"#{reaction}.json", &put_in(&1, ["apply", Access.at(0), "plan"], "hens"),
-           "SCHEMA_VIOLATION", "#{reaction}.apply[0].plan"},
+          {"#{reaction}.json", &put_in(&1, ["steps", Access.at(0), "plan"], "hens"),
+           "SCHEMA_VIOLATION", "#{reaction}.steps[0].plan"},
           {"#{reaction}.json", &put_in(&1, ["on", "fact"], "lever_stage"), "FACT_TYPE_MISMATCH",
            "#{reaction}.on.value"},
           {"#{reaction}.json",
            &put_in(&1, ["on"], %{"event" => "entity_entered_room", "room" => "drill_yard"}),
-           "OUTCOME_MISMATCH", "#{reaction}.apply[0].op"}
+           "OUTCOME_MISMATCH", "#{reaction}.steps[0].op"}
         ] do
       assert {:error, diags} = ContentSource.compile(dir, bell() ++ [{file, change}])
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect({path, diags})

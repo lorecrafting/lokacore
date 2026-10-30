@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "attic_bucket"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "wet",

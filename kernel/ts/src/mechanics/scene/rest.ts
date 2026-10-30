@@ -41,7 +41,7 @@ function reaction(world: World, s: Dream): ReactionRule {
         { op: 'fact_compare', fact: fact(world, s), equals: 0 },
       ],
     },
-    apply: [
+    steps: [
       { op: 'fact.assign', fact: s.on.rest.credit, value: true },
       { op: 'quest.activate', quest: s.on.rest.quest },
       { op: 'fact.assign', fact: fact(world, s), value: 1 },

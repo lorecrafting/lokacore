@@ -672,7 +672,7 @@ QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation p
 
 ReactionRule (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), owned by reaction@1.
 
-- **ReactionRule**: Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Apply may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.
+- **ReactionRule**: Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.
 
 ## Relation and provenance contracts (`protocol/relation.schema.json`)
 

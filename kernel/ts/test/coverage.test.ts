@@ -127,10 +127,10 @@ test('E: coverage of a stale transcript (the byte guard missing)', () => {
   const base = load('protocol/fixtures/cartridge_scene_hash.json');
   const bell = base.reactions![`${S}reaction/bell_after`]!;
   const narrate = { op: 'narrate', text: 'scene.bell' } as any;
-  const apply = [...bell.apply, ...Array(64).fill(narrate)];
+  const apply = [...bell.steps, ...Array(64).fill(narrate)];
   const loud = {
     ...base,
-    reactions: { ...base.reactions, [`${S}reaction/bell_after`]: { ...bell, apply } },
+    reactions: { ...base.reactions, [`${S}reaction/bell_after`]: { ...bell, steps: apply } },
   };
   assert.throws(() => coverage(loud, [trace(SCENE)]), /narration cap reached at ordinal 7/);
   // The header is compared too: a head whose ids differ from its recorded line 0.

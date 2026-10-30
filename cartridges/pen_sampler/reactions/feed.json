@@ -10,7 +10,7 @@
       "item": "grain_01"
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "fed",
@@ -18,7 +18,7 @@
     },
     {
       "op": "replenish.run",
-      "key": "spent_grain"
+      "replenish": "spent_grain"
     }
   ]
 }

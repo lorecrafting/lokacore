@@ -11,7 +11,7 @@
       "status": "spent"
     }
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "burning",

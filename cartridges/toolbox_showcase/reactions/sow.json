@@ -22,7 +22,7 @@
       }
     ]
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.cure",
       "status": "withered"
@@ -41,11 +41,11 @@
     },
     {
       "op": "replenish.run",
-      "key": "spent_plot"
+      "replenish": "spent_plot"
     },
     {
       "op": "replenish.run",
-      "key": "spent_croft"
+      "replenish": "spent_croft"
     }
   ]
 }

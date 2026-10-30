@@ -3,7 +3,7 @@
     "event": "status_applied",
     "status": "warm"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.cure",
       "status": "wet"

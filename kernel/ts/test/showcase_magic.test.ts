@@ -194,7 +194,7 @@ test('magic 4b: ward needs level 2 at the exact threshold', () => {
   const at = (grant: number) => {
     const c = structuredClone(content) as any;
     c.attributes[ref('attribute', 'cha')].start = 7;
-    c.reactions[ref('reaction', 'errand_reward')].apply.find(
+    c.reactions[ref('reaction', 'errand_reward')].steps.find(
       (s: any) => s.op === 'experience.grant',
     ).amount = grant;
     const v = read(taught(c));

@@ -7,8 +7,8 @@ defmodule Loka.ContentBuffsTest do
   test "row 42 status.apply npc keeps its boundaries", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     rule = "reactions/song_listener.json"
-    at = "reactions/song_listener.apply[0].npc"
-    step = fn f -> &update_in(&1, ["apply", Access.at(0)], f) end
+    at = "reactions/song_listener.steps[0].npc"
+    step = fn f -> &update_in(&1, ["steps", Access.at(0)], f) end
 
     cases = [
       {[{rule, step.(&Map.put(&1, "npc", "ghost"))}], {"UNRESOLVED_REFERENCE", at}},

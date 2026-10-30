@@ -133,7 +133,7 @@ test('a slain raider slot waits out its delay; the next full moon fills slot 1',
 // Break: a second step of one delivery does not skip the slot the first took (both birth slot 2).
 test('a rule with two spawn steps births two raiders, slots 2 then 1', () => {
   const twice = (c: any) => {
-    const apply = c.reactions['raid_sampler@0.0.1:reaction/raid'].apply;
+    const apply = c.reactions['raid_sampler@0.0.1:reaction/raid'].steps;
     apply.unshift(apply[0]);
   };
   const w = elapsed(world(twice), 1000);
@@ -271,7 +271,7 @@ test('FD1: two delayed rules on one fact both apply, in hourly waits or one wait
 test('FD1: a reaction to a delayed write adds to the same fact in one advance', () => {
   const echo = (c: any) => {
     const { after: _, ...rule } = c.reactions[AFTERSHOCK];
-    const fact = rule.apply[0].fact; // aftershocks
+    const fact = rule.steps[0].fact; // aftershocks
     c.reactions['raid_sampler@0.0.1:reaction/echo'] = {
       ...rule,
       key: 'echo',
@@ -292,7 +292,7 @@ test('FD1: two delayed experience grants due in one advance both count', () => {
     const level_up = 'item.player_corpse.short'; // any catalog key: no level is reached
     c.world.levelling = { thresholds: [30, 100], points_per_level: 1, level_up };
     c.manifest.requires.capabilities.attributes = c.lock.capabilities.attributes = 1;
-    c.reactions[AFTERSHOCK].apply = [{ op: 'experience.grant', amount: 5 }];
+    c.reactions[AFTERSHOCK].steps = [{ op: 'experience.grant', amount: 5 }];
     c.reactions[AFTERSHOCK + '2'] = { ...c.reactions[AFTERSHOCK], key: 'aftershock2' };
   };
   const at1000 = elapsed(world(xp), 1000);
@@ -339,7 +339,7 @@ test('FD1: a delayed status.apply at 1600 and status.cure at 1601 both run, in h
         ...rule,
         key,
         after,
-        apply: [{ op, status: R('status', 'shaken') }],
+        steps: [{ op, status: R('status', 'shaken') }],
       };
   };
   const at1000 = elapsed(world(pair), 1000);
@@ -362,13 +362,13 @@ test('FD1: a delayed status.apply at 1600 and status.cure at 1601 both run, in h
 test('FD1: a cause at 1600 inside a wait to 1800 runs at 1700, in one wait as in hourly waits', () => {
   const echo = (c: any) => {
     const shock = c.reactions[AFTERSHOCK];
-    const fact = { ...shock.apply[0].fact, key: 'raided_at' };
+    const fact = { ...shock.steps[0].fact, key: 'raided_at' };
     c.reactions[AFTERSHOCK + '_echo'] = {
       ...shock,
       key: 'aftershock_echo',
-      on: { event: 'fact_changed', fact: shock.apply[0].fact },
+      on: { event: 'fact_changed', fact: shock.steps[0].fact },
       after: 100,
-      apply: [{ op: 'fact.stamp', fact }],
+      steps: [{ op: 'fact.stamp', fact }],
     };
   };
   const at1000 = elapsed(world(echo), 1000);
@@ -408,7 +408,7 @@ test('FD1: a delayed chain past the step budget in one wait faults budget_exceed
       on: { event: 'fact_changed', fact: shocks },
       after: 1,
       when: { op: 'all', items },
-      apply: [{ op: 'fact.adjust', fact: shocks, amount: 1 }],
+      steps: [{ op: 'fact.adjust', fact: shocks, amount: 1 }],
     };
   };
   const over = wait1700(elapsed(world(link(500)), 1000));
@@ -424,9 +424,9 @@ test('FD1: an advance that ends on a delayed fire past the delivery cap faults b
   const crowd = (n: number) => (c: any) => {
     const on = { event: 'fact_changed', fact: R('fact', 'aftershocks') };
     for (let i = 0; i < n; i++)
-      c.reactions[`raid_sampler@0.0.1:reaction/e${i}`] = { key: `e${i}`, on, apply: [] };
+      c.reactions[`raid_sampler@0.0.1:reaction/e${i}`] = { key: `e${i}`, on, steps: [] };
     const apply = [{ op: 'fact.adjust', fact: R('fact', 'aftermaths'), amount: 1 }];
-    c.reactions['raid_sampler@0.0.1:reaction/late'] = { key: 'late', on, after: 1, apply };
+    c.reactions['raid_sampler@0.0.1:reaction/late'] = { key: 'late', on, after: 1, steps: apply };
   };
   const over = wait1700(elapsed(world(crowd(8188)), 1000));
   assert.deepEqual([over.decision, over.limit], [BUDGET, 'deliveries']);
@@ -456,7 +456,7 @@ test('FD1: a false `when` at the due time, or a removed rule, only completes the
   };
   const fails = {
     ...w.cartridge.reactions![AFTERSHOCK]!,
-    apply: [{ op: 'quest.fail', quest, outcome: 'x' }],
+    steps: [{ op: 'quest.fail', quest, outcome: 'x' }],
   };
   const faulting = { ...w.cartridge.reactions, [AFTERSHOCK]: fails } as never;
   const stuck = elapsed({ ...w, cartridge: { ...w.cartridge, reactions: faulting } }, 1700);
@@ -467,7 +467,7 @@ test('FD1: a false `when` at the due time, or a removed rule, only completes the
 // pending, so the next advance and every later one faults (elapsed asserts each is accepted).
 test('FD1: a delayed step that throws completes its job and writes nothing', () => {
   const w = elapsed(world(), 1000);
-  const fact_ = w.cartridge.reactions![AFTERSHOCK]!.apply[0] as { fact: unknown };
+  const fact_ = w.cartridge.reactions![AFTERSHOCK]!.steps[0] as { fact: unknown };
   const blade = { weapon: { durability: { fact: fact_.fact } } };
   const items = { ...w.cartridge.items, 'raid_sampler@0.0.1:item/blade': blade } as never;
   const worn = elapsed({ ...w, cartridge: { ...w.cartridge, items } }, 1700);

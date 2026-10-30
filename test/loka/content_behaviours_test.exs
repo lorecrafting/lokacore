@@ -73,7 +73,7 @@ defmodule Loka.ContentBehavioursTest do
   test "a copy key equal to a reaction's or over 64 characters is refused" do
     dir = Loka.ContentSource.copy(@fishing)
     rule = JSON.decode!(File.read!(Path.join(dir, @spoils)))["reactions"]["take"]
-    authored = rule |> put_in(["on", "item"], "trout_01") |> put_in(["apply"], [])
+    authored = rule |> put_in(["on", "item"], "trout_01") |> put_in(["steps"], [])
 
     assert refused(dir, [{"reactions/take_trout_01.json", authored}]) == [
              {"DUPLICATE_DEFINITION", "behaviours/spoils.reactions.take", %{}},
@@ -95,8 +95,8 @@ defmodule Loka.ContentBehavioursTest do
     dir = Loka.ContentSource.copy(@fishing)
     take = ["reactions", "take"]
 
-    assert refused(dir, [{@spoils, &put_in(&1, take ++ ["apply"], [status("rotting")])}]) == [
-             {"UNRESOLVED_REFERENCE", "behaviours/spoils.reactions.take.apply[0].status",
+    assert refused(dir, [{@spoils, &put_in(&1, take ++ ["steps"], [status("rotting")])}]) == [
+             {"UNRESOLVED_REFERENCE", "behaviours/spoils.reactions.take.steps[0].status",
               %{"target" => "fishing_sampler@0.0.1:status/rotting"}}
            ]
 
@@ -143,7 +143,7 @@ defmodule Loka.ContentBehavioursTest do
       "reactions" => %{
         "hears" => %{
           "on" => %{"event" => "spoken", "npc" => %{"param" => "holder"}},
-          "apply" => [%{"op" => "fact.assign", "fact" => "elder_heard", "value" => true}]
+          "steps" => [%{"op" => "fact.assign", "fact" => "elder_heard", "value" => true}]
         }
       }
     }

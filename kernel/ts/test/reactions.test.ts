@@ -178,7 +178,7 @@ const chain = (n: number, room = 'belfry') =>
           i === 0
             ? { event: 'entity_entered_room', room: ref('room', room) }
             : { event: 'fact_changed', fact: ref('fact', `c${i - 1}`) },
-        apply: [{ op: 'fact.assign', fact: ref('fact', `c${i}`), value: true }],
+        steps: [{ op: 'fact.assign', fact: ref('fact', `c${i}`), value: true }],
       };
     }
   });
@@ -207,7 +207,7 @@ const belfry = (n: number, rest: object = {}, more = (_: any) => {}) =>
       c.reactions[`${G}:reaction/r${i}`] = {
         key: `r${i}`,
         on: { event: 'entity_entered_room', room: ref('room', 'belfry') },
-        apply: [],
+        steps: [],
         ...rest,
       };
     more(c);

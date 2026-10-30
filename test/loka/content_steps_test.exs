@@ -21,8 +21,8 @@ defmodule Loka.ContentStepsTest do
 
   # Breaks: a reaction runs an op only a scripted action runs (damage added to the reaction set).
   test "a reaction refuses an action-only op" do
-    assert Steps.check("reactions/bell.json", ["apply"], [%{"op" => "damage"}], :reaction, @ctx) ==
-             refused("reactions/bell.apply[0].op")
+    assert Steps.check("reactions/bell.json", ["steps"], [%{"op" => "damage"}], :reaction, @ctx) ==
+             refused("reactions/bell.steps[0].op")
   end
 
   # Breaks: a scripted action's fact.assign runs a field only a reaction's runs (field rule dropped).

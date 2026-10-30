@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "rag"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "rot",

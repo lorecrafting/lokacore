@@ -8,7 +8,7 @@
     "fact": "warden_lets_pass",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "barrier.set",
       "barrier": "toll_gate",

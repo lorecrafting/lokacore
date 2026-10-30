@@ -8,7 +8,7 @@
     "op": "npc_present",
     "npc": "tilt_boar"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "bleeding"

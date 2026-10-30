@@ -181,8 +181,11 @@ test('W7: a prefix that no longer replays throws', () => {
 test('W10: a step at the narration cap throws', () => {
   const base = load(); // set after the loader, as marked() does: a reaction narrate needs a newer kernel_api
   const bell = base.reactions![BELL]!;
-  const apply = [...bell.apply, ...Array(64).fill({ op: 'narrate', text: 'scene.bell' })];
-  const c = { ...base, reactions: { ...base.reactions, [BELL]: { ...bell, apply } } } as Cartridge;
+  const apply = [...bell.steps, ...Array(64).fill({ op: 'narrate', text: 'scene.bell' })];
+  const c = {
+    ...base,
+    reactions: { ...base.reactions, [BELL]: { ...bell, steps: apply } },
+  } as Cartridge;
   assert.throws(() => why(c, trace, 7), /^Error: narration cap reached at ordinal 7$/);
 });
 

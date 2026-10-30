@@ -142,9 +142,9 @@ defmodule Loka.Content.Patrol do
 
     reactions =
       for {_, {rrel, _, r}} <- ctx.defs["reaction"],
-          {s, i} <- Enum.with_index(r["apply"]),
+          {s, i} <- Enum.with_index(r["steps"]),
           s["quest"] && s["quest"]["key"] == q["key"],
-          do: diag("OUTCOME_MISMATCH", at(rrel, ["apply", i]))
+          do: diag("OUTCOME_MISMATCH", at(rrel, ["steps", i]))
 
     other ++ escorts ++ accepts ++ dialogue ++ reactions
   end

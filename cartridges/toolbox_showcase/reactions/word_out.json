@@ -3,7 +3,7 @@
     "event": "status_expired",
     "status": "word_travels"
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "warden_knows",

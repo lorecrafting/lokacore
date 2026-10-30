@@ -71,15 +71,15 @@ defmodule Loka.ContentGreenTest do
        })},
       {rule(
          "ring",
-         &put_in(&1, ["apply"], [%{"op" => "fact.assign", "fact" => "bell", "value" => true}])
+         &put_in(&1, ["steps"], [%{"op" => "fact.assign", "fact" => "bell", "value" => true}])
        ),
-       d("UNRESOLVED_REFERENCE", "reactions/ring.apply[0].fact", %{
+       d("UNRESOLVED_REFERENCE", "reactions/ring.steps[0].fact", %{
          "target" => "green_sampler@0.0.1:fact/bell"
        })},
       {rule(
          "ring",
-         &put_in(&1, ["apply"], [%{"op" => "fact.assign", "fact" => "bell_up", "value" => 1}])
-       ), d("FACT_TYPE_MISMATCH", "reactions/ring.apply[0].value", %{})}
+         &put_in(&1, ["steps"], [%{"op" => "fact.assign", "fact" => "bell_up", "value" => 1}])
+       ), d("FACT_TYPE_MISMATCH", "reactions/ring.steps[0].value", %{})}
     ]
 
     for {files, diag} <- cases,
@@ -122,7 +122,7 @@ defmodule Loka.ContentGreenTest do
              dir,
              others.("gossip")
              |> Map.merge(without.("fact"))
-             |> Map.merge(rule("gossip", &Map.merge(Map.delete(&1, "when"), %{"apply" => []})))
+             |> Map.merge(rule("gossip", &Map.merge(Map.delete(&1, "when"), %{"steps" => []})))
            ) ==
              {:error,
               [
@@ -139,7 +139,7 @@ defmodule Loka.ContentGreenTest do
               [
                 d(
                   "UNDECLARED_CAPABILITY",
-                  "reactions/ring.apply[0].op",
+                  "reactions/ring.steps[0].op",
                   %{"capability" => "fact"},
                   fact
                 )

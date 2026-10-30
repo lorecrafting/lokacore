@@ -3,7 +3,7 @@
     "event": "entity_died",
     "victim": "defender"
   },
-  "apply": [
+  "steps": [
     {
       "op": "quest.fail",
       "quest": "hold_the_gate",

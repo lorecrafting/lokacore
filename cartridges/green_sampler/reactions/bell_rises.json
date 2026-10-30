@@ -8,7 +8,7 @@
     "fact": "rope_taut",
     "equals": false
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.assign",
       "fact": "bell_up",

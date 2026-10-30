@@ -12360,7 +12360,7 @@
     },
     "errors": [
       {
-        "path": "/apply",
+        "path": "/steps",
         "code": "missing_property"
       },
       {
@@ -12390,7 +12390,7 @@
           "key": "r"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -12427,7 +12427,7 @@
           "key": "f"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -12464,7 +12464,7 @@
           "key": "f"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign",
           "fact": {
@@ -12494,7 +12494,7 @@
         "item": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12518,7 +12518,7 @@
         "room": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12546,7 +12546,7 @@
         "room": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12573,7 +12573,7 @@
         "quest": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12595,7 +12595,7 @@
         "event": "choice_opened",
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12614,7 +12614,7 @@
         "choice": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12638,7 +12638,7 @@
         "story_point": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12665,7 +12665,7 @@
         "custom": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12688,7 +12688,7 @@
         "action": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12711,7 +12711,7 @@
         "check": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12734,7 +12734,7 @@
         "check": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12758,7 +12758,7 @@
         "to": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12785,7 +12785,7 @@
         "scene": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12809,7 +12809,7 @@
         "victim": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12838,7 +12838,7 @@
         "target": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12869,7 +12869,7 @@
         "kind": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12892,7 +12892,7 @@
         "kind": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12915,7 +12915,7 @@
         "kind": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -12941,7 +12941,7 @@
           "key": "f"
         }
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.assign"
         },
@@ -12960,27 +12960,27 @@
     },
     "errors": [
       {
-        "path": "/apply/0/fact",
+        "path": "/steps/0/fact",
         "code": "missing_property"
       },
       {
-        "path": "/apply/0/value",
+        "path": "/steps/0/value",
         "code": "missing_property"
       },
       {
-        "path": "/apply/1/event",
+        "path": "/steps/1/event",
         "code": "missing_property"
       },
       {
-        "path": "/apply/1/fact",
+        "path": "/steps/1/fact",
         "code": "unknown_property"
       },
       {
-        "path": "/apply/1/value",
+        "path": "/steps/1/value",
         "code": "unknown_property"
       },
       {
-        "path": "/apply/1/x",
+        "path": "/steps/1/x",
         "code": "unknown_property"
       }
     ]
@@ -12998,7 +12998,7 @@
           "key": "f"
         }
       },
-      "apply": [
+      "steps": [
         {
           "fact": {
             "cartridge_id": "c",
@@ -13012,7 +13012,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/op",
+        "path": "/steps/0/op",
         "code": "missing_property"
       }
     ]
@@ -16829,7 +16829,7 @@
             },
             "equals": -1
           },
-          "apply": [
+          "steps": [
             {
               "op": "fact.assign",
               "fact": {
@@ -18282,7 +18282,7 @@
         },
         "outcome": "done"
       },
-      "apply": [
+      "steps": [
         {
           "op": "experience.grant",
           "amount": 0
@@ -18291,7 +18291,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/amount",
+        "path": "/steps/0/amount",
         "code": "below_minimum"
       }
     ]
@@ -18310,7 +18310,7 @@
         },
         "outcome": "done"
       },
-      "apply": [
+      "steps": [
         {
           "op": "experience.grant"
         }
@@ -18318,7 +18318,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/amount",
+        "path": "/steps/0/amount",
         "code": "missing_property"
       }
     ]
@@ -18438,7 +18438,7 @@
         },
         "outcome": "done"
       },
-      "apply": [
+      "steps": [
         {
           "op": "experience.grant",
           "amount": 2147483648
@@ -18447,7 +18447,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/amount",
+        "path": "/steps/0/amount",
         "code": "above_maximum"
       }
     ]
@@ -18466,7 +18466,7 @@
         },
         "outcome": "done"
       },
-      "apply": [
+      "steps": [
         {
           "op": "experience.grant",
           "amount": 1,
@@ -18476,7 +18476,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/extra",
+        "path": "/steps/0/extra",
         "code": "unknown_property"
       }
     ]
@@ -20391,7 +20391,7 @@
         "status": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -20414,7 +20414,7 @@
         "status": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -20435,7 +20435,7 @@
       "on": {
         "event": "status_expired"
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.apply",
           "status": {
@@ -20450,7 +20450,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/item",
+        "path": "/steps/0/item",
         "code": "invalid_type"
       }
     ]
@@ -20463,7 +20463,7 @@
       "on": {
         "event": "status_expired"
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.apply",
           "status": {
@@ -20478,7 +20478,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/npc",
+        "path": "/steps/0/npc",
         "code": "invalid_type"
       }
     ]
@@ -20930,7 +20930,7 @@
           "key": "fell"
         }
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -22460,7 +22460,7 @@
       "on": {
         "event": "item_acquired"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.adjust",
           "fact": {
@@ -22489,15 +22489,15 @@
     },
     "errors": [
       {
-        "path": "/apply/0/amount",
+        "path": "/steps/0/amount",
         "code": "missing_property"
       },
       {
-        "path": "/apply/1/fact",
+        "path": "/steps/1/fact",
         "code": "missing_property"
       },
       {
-        "path": "/apply/2/value",
+        "path": "/steps/2/value",
         "code": "unknown_property"
       }
     ]
@@ -22753,7 +22753,7 @@
         "event": "spoken",
         "word": "HELP"
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -23866,7 +23866,7 @@
       "on": {
         "event": "entity_died"
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.apply",
           "status": {
@@ -23881,7 +23881,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/co_present",
+        "path": "/steps/0/co_present",
         "code": "not_in_enum"
       }
     ]
@@ -24029,7 +24029,7 @@
         "status": 1,
         "x": 1
       },
-      "apply": []
+      "steps": []
     },
     "errors": [
       {
@@ -24050,7 +24050,7 @@
       "on": {
         "event": "status_applied"
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.cure"
         }
@@ -24058,7 +24058,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/status",
+        "path": "/steps/0/status",
         "code": "missing_property"
       }
     ]
@@ -24071,7 +24071,7 @@
       "on": {
         "event": "status_applied"
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.cure",
           "status": {
@@ -24091,7 +24091,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/npc",
+        "path": "/steps/0/npc",
         "code": "unknown_property"
       }
     ]
@@ -24104,7 +24104,7 @@
       "on": {
         "event": "status_ticked"
       },
-      "apply": [
+      "steps": [
         {
           "op": "status.apply",
           "status": {
@@ -24119,7 +24119,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/co_present",
+        "path": "/steps/0/co_present",
         "code": "missing_property"
       }
     ]
@@ -24132,7 +24132,7 @@
       "on": {
         "event": "status_ticked"
       },
-      "apply": [
+      "steps": [
         {
           "op": "barrier.set",
           "to": "open",
@@ -24148,7 +24148,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0",
+        "path": "/steps/0",
         "code": "exclusive_properties"
       }
     ]
@@ -24161,7 +24161,7 @@
       "on": {
         "event": "status_ticked"
       },
-      "apply": [
+      "steps": [
         {
           "op": "barrier.set",
           "to": "broken"
@@ -24170,11 +24170,11 @@
     },
     "errors": [
       {
-        "path": "/apply/0",
+        "path": "/steps/0",
         "code": "exclusive_properties"
       },
       {
-        "path": "/apply/0/to",
+        "path": "/steps/0/to",
         "code": "not_in_enum"
       }
     ]
@@ -24187,7 +24187,7 @@
       "on": {
         "event": "status_expired"
       },
-      "apply": [
+      "steps": [
         {
           "op": "item.move"
         }
@@ -24195,7 +24195,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/room",
+        "path": "/steps/0/room",
         "code": "missing_property"
       }
     ]
@@ -24208,7 +24208,7 @@
       "on": {
         "event": "status_expired"
       },
-      "apply": [
+      "steps": [
         {
           "op": "item.move",
           "room": {
@@ -24223,7 +24223,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/to",
+        "path": "/steps/0/to",
         "code": "unknown_property"
       }
     ]
@@ -24236,7 +24236,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "population.spawn"
         }
@@ -24244,7 +24244,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/plan",
+        "path": "/steps/0/plan",
         "code": "missing_property"
       }
     ]
@@ -24257,7 +24257,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "population.spawn",
           "plan": {
@@ -24272,20 +24272,20 @@
     },
     "errors": [
       {
-        "path": "/apply/0/room",
+        "path": "/steps/0/room",
         "code": "unknown_property"
       }
     ]
   },
   {
-    "name": "reaction_replenish_run_no_key",
+    "name": "reaction_replenish_run_no_replenish",
     "contract": "ReactionRule",
     "value": {
       "key": "k",
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "replenish.run"
         }
@@ -24293,7 +24293,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/key",
+        "path": "/steps/0/replenish",
         "code": "missing_property"
       }
     ]
@@ -24306,10 +24306,10 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "replenish.run",
-          "key": {
+          "replenish": {
             "cartridge_id": "c",
             "cartridge_version": "1.0.0",
             "kind": "replenish",
@@ -24321,7 +24321,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/count",
+        "path": "/steps/0/count",
         "code": "unknown_property"
       }
     ]
@@ -24334,7 +24334,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "narrate"
         }
@@ -24342,7 +24342,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/text",
+        "path": "/steps/0/text",
         "code": "missing_property"
       }
     ]
@@ -24355,7 +24355,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "narrate",
           "text": "settle.line",
@@ -24365,7 +24365,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/to",
+        "path": "/steps/0/to",
         "code": "unknown_property"
       }
     ]
@@ -24378,7 +24378,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "narrate",
           "text": 7
@@ -24387,7 +24387,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/text",
+        "path": "/steps/0/text",
         "code": "invalid_type"
       }
     ]
@@ -28692,7 +28692,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.stamp",
           "fact": {
@@ -28720,7 +28720,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.stamp",
           "fact": {
@@ -28748,7 +28748,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.stamp"
         }
@@ -28756,7 +28756,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/fact",
+        "path": "/steps/0/fact",
         "code": "missing_property"
       }
     ]
@@ -28769,7 +28769,7 @@
       "on": {
         "event": "clock_hour"
       },
-      "apply": [
+      "steps": [
         {
           "op": "fact.stamp",
           "fact": {
@@ -28784,7 +28784,7 @@
     },
     "errors": [
       {
-        "path": "/apply/0/value",
+        "path": "/steps/0/value",
         "code": "unknown_property"
       }
     ]

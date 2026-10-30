@@ -7,10 +7,10 @@
     "op": "sky",
     "weather": "rain"
   },
-  "apply": [
+  "steps": [
     {
       "op": "replenish.run",
-      "key": "salmon"
+      "replenish": "salmon"
     }
   ]
 }

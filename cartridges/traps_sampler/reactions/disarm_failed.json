@@ -8,7 +8,7 @@
     "fact": "plate_sprung",
     "equals": false
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "poison"

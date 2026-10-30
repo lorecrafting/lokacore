@@ -27,23 +27,23 @@ defmodule Loka.ContentLintTest do
   test "check 3: a reaction that writes state narrates or says it is silent (T4, plate_springs)" do
     apply = [%{"op" => "status.apply"}, %{"op" => "fact.assign"}]
 
-    assert lint(%{"reactions/plate_springs.json" => %{"apply" => apply}}) ==
+    assert lint(%{"reactions/plate_springs.json" => %{"steps" => apply}}) ==
              [
                ~s(reactions/plate_springs.json: writes state with no narrate step and no "silent": true)
              ]
 
-    assert lint(%{"reactions/a.json" => %{"apply" => [%{"op" => "fact.adjust"}]}}) ==
+    assert lint(%{"reactions/a.json" => %{"steps" => [%{"op" => "fact.adjust"}]}}) ==
              [~s(reactions/a.json: writes state with no narrate step and no "silent": true)]
 
     # status.cure says nothing by spec, and fact.stamp is a fact write (warmth_dries, water_croft).
     for op <- ~w(status.cure fact.stamp) do
-      assert lint(%{"reactions/w.json" => %{"apply" => [%{"op" => op}]}}) ==
+      assert lint(%{"reactions/w.json" => %{"steps" => [%{"op" => op}]}}) ==
                [~s(reactions/w.json: writes state with no narrate step and no "silent": true)]
     end
 
-    assert lint(%{"reactions/p.json" => %{"apply" => apply ++ [%{"op" => "narrate"}]}}) == []
-    assert lint(%{"reactions/p.json" => %{"apply" => apply, "silent" => true}}) == []
-    assert lint(%{"reactions/q.json" => %{"apply" => [%{"op" => "quest.fail"}]}}) == []
+    assert lint(%{"reactions/p.json" => %{"steps" => apply ++ [%{"op" => "narrate"}]}}) == []
+    assert lint(%{"reactions/p.json" => %{"steps" => apply, "silent" => true}}) == []
+    assert lint(%{"reactions/q.json" => %{"steps" => [%{"op" => "quest.fail"}]}}) == []
   end
 
   test "check 5: a readable has a title; a dialogue with no label needs action.talk (T5, UH)" do
@@ -405,7 +405,7 @@ defmodule Loka.ContentLintTest do
     File.cp_r!("cartridges/build_sampler", dir)
     before = Loka.Content.lint(dir)
     write = %{"op" => "fact.assign", "fact" => "x", "value" => true}
-    base = %{"abstract" => true, "on" => %{"event" => "x"}, "apply" => [write]}
+    base = %{"abstract" => true, "on" => %{"event" => "x"}, "steps" => [write]}
     File.write!(Path.join(dir, "reactions/base.json"), Jason.encode!(base))
     File.write!(Path.join(dir, "reactions/child.json"), Jason.encode!(%{"extends" => "base"}))
 

@@ -9,7 +9,7 @@
     "fact": "raided",
     "equals": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "fact.adjust",
       "fact": "aftershocks",

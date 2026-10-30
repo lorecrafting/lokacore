@@ -1,6 +1,6 @@
 {
   "on": { "event": "quest_resolved", "quest": "apprentice", "outcome": "done" },
-  "apply": [
+  "steps": [
     { "op": "fact.assign", "fact": "ward_taught", "value": true },
     { "op": "experience.grant", "amount": 20 }
   ]

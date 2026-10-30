@@ -52,7 +52,7 @@ defmodule Loka.Content.Status do
   defp trigger?({_, {_, _, %{} = r}}),
     do:
       String.starts_with?(r["on"]["event"], "status_") or
-        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and (&1["item"] || &1["npc"])))
+        Enum.any?(r["steps"], &(&1["op"] == "status.apply" and (&1["item"] || &1["npc"])))
 
   defp trigger?(_), do: false
 

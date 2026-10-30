@@ -58,11 +58,11 @@ defmodule Loka.ContentProseTest do
   # of being reported by the schema at its own site.
   test "a marker in a list is lowered; any other prose shape is the schema's to report" do
     narrate = [%{"op" => "narrate", "text" => %{"prose" => "She hears."}}]
-    apply = &update_in(&1, ["reactions", "elder_hears", "apply"], fn a -> a ++ narrate end)
+    apply = &update_in(&1, ["reactions", "elder_hears", "steps"], fn a -> a ++ narrate end)
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.103")}
     assert {:ok, bytes, []} = speech([{@bundle, apply}, api])
 
-    assert JSON.decode!(bytes)["cartridge"]["text"]["reaction.elder_hears.apply.1.text"] ==
+    assert JSON.decode!(bytes)["cartridge"]["text"]["reaction.elder_hears.steps.1.text"] ==
              "She hears."
 
     for shape <- [%{"prose" => ""}, %{"prose" => 1}, %{"prose" => "x", "y" => 1}] do

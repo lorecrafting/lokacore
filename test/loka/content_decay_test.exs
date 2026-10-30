@@ -6,11 +6,11 @@ defmodule Loka.ContentDecayTest do
   test "item.move keeps a resolved room and triggers resolve their filters" do
     dir = Loka.ContentSource.copy("cartridges/decay_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
-    room = &put_in(&1, ["apply", Access.at(0), "room"], "nowhere")
+    room = &put_in(&1, ["steps", Access.at(0), "room"], "nowhere")
 
     for {edit, expected} <- [
           {{"reactions/spoil.json", room},
-           {"UNRESOLVED_REFERENCE", "reactions/spoil.apply[0].room"}},
+           {"UNRESOLVED_REFERENCE", "reactions/spoil.steps[0].room"}},
           {{"reactions/spoil.json", &put_in(&1, ["on", "status"], "rotting")},
            {"UNRESOLVED_REFERENCE", "reactions/spoil.on.status"}},
           {{"reactions/catch.json", &put_in(&1, ["on", "item"], "eel")},

@@ -3,7 +3,7 @@
     "event": "attack_result",
     "hit": true
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "scar"

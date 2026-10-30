@@ -25,7 +25,7 @@ defmodule Loka.Content.Delayed do
 
   # Each fact.stamp step and time_since leaf, with its path.
   defp timed(steps, trees) do
-    stamps = for {rel, _, %{"op" => "fact.stamp"} = s, i} <- steps, do: {rel, ["apply", i], s}
+    stamps = for {rel, _, %{"op" => "fact.stamp"} = s, i} <- steps, do: {rel, ["steps", i], s}
     leaves = Enum.flat_map(trees, fn {rel, path, root} -> nodes(rel, path, root) end)
     stamps ++ for({_, _, %{"op" => "time_since"}} = n <- leaves, do: n)
   end
@@ -43,14 +43,14 @@ defmodule Loka.Content.Delayed do
     do:
       for(
         {_, {rel, [], r}} <- defs["reaction"],
-        {s, i} <- Enum.with_index(r["apply"]),
+        {s, i} <- Enum.with_index(r["steps"]),
         do: {rel, r, s, i}
       )
 
   defp refused({rel, %{"after" => _}, s, i}) do
     if s["op"] in @event_bound or
          (s["op"] == "status.apply" and (Map.has_key?(s, "co_present") or Map.has_key?(s, "tag"))),
-       do: [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "op"]), %{"error" => "invalid_value"})],
+       do: [diag("SCHEMA_VIOLATION", at(rel, ["steps", i, "op"]), %{"error" => "invalid_value"})],
        else: []
   end
 

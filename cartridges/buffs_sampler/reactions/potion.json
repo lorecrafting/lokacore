@@ -3,7 +3,7 @@
     "event": "drank",
     "kind": "potion"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "might"

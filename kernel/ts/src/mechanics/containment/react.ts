@@ -22,7 +22,7 @@ import { moves } from '../status/bars.ts';
 
 export function moveItem(
   world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'item.move' }>,
+  step: Extract<ReactionRule['steps'][number], { op: 'item.move' }>,
   subject: EntityId | undefined,
   group: number,
   ops: readonly DeltaOp[],
@@ -47,7 +47,7 @@ export function moveItem(
   ];
 }
 
-type Move = Extract<ReactionRule['apply'][number], { op: 'item.move' | 'npc.move' }>;
+type Move = Extract<ReactionRule['steps'][number], { op: 'item.move' | 'npc.move' }>;
 // A reaction's item.move (row 41) or npc.move (row FD5) step.
 export const moved = (
   world: World,

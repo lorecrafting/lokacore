@@ -3,7 +3,7 @@
     "event": "item_dropped",
     "item": "torch"
   },
-  "apply": [
+  "steps": [
     {
       "op": "status.apply",
       "status": "warm",
