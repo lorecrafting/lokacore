@@ -7,6 +7,12 @@ export const things = (v: GameView): Thing[] =>
     ...v.inventory,
     ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].flatMap((e) => [e, ...(e.contents ?? [])]);
+// The things directly inside a container (or held by a person).
+export const within = (v: GameView, id: string) =>
+  things(v).filter((e) => 'container_id' in e && e.container_id === id);
+// Its contents are reachable: an open lid, or contents the GameView lists (book-ui.md, Item details).
+export const opens = (v: GameView, thing: Thing) =>
+  thing.state === 'open' || within(v, thing.id).length > 0;
 
 export function restoredItemPages(
   view: GameView,
@@ -26,7 +32,7 @@ export function restoredItemPages(
   while (at && 'container_id' in at) {
     const parent: string = at.container_id;
     at = items.find((e) => e.id === parent);
-    if (at) parents.unshift({ kind: 'thing', id: at.id });
+    if (at) parents.unshift({ kind: 'thing', id: at.id }, { kind: 'inside', id: at.id });
   }
   return [{ kind: 'carrying' }, ...parents, { kind: 'thing', id: book.id }];
 }

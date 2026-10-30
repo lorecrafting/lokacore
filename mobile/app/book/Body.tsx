@@ -5,7 +5,7 @@ import { JournalPage } from './journal.tsx';
 // Page dispatch for the current Book view and local detail stack, and the room page it renders.
 import { group, LINK, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
-import { ContentsPage, Item, type Section } from './Menu.tsx';
+import { ContentsPage, InsidePage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
 import { ShelfPage } from './Shelf.tsx';
 import { NoticePage, proseLinks } from './notices.tsx';
@@ -102,6 +102,7 @@ function PageBody(p: BodyProps & Talk) {
   if (page.kind === 'shelf' || page.kind === 'sale')
     return <ShelfPage {...p} id={page.id} sale={page.kind === 'sale'} />;
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
+  if (page.kind === 'inside') return <InsidePage {...p} close={p.back} id={page.id} />;
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   return sectionPage(p, page);

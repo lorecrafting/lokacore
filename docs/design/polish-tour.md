@@ -38,7 +38,7 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.70 (NPC conditions), x6t.14 (wording M4/M5).
 
 ## 6. Item page
-- pages-item--plain, --container-with-inside, --fuel, --too-heavy
+- pages-item--plain, --open-container, --inside, --inside-empty, --fuel, --too-heavy
 - Look at: action order, fuel line, the too-heavy refusal.
 - Known: x6t.57 (Contents row summaries).
 

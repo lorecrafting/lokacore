@@ -274,7 +274,7 @@ no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pen
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
 fault show there as on every page. Combat, Character, Contents, the map and World keep the
 [status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
-foot. A control that opens a child (Resume dream) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
+foot. A control that opens a child (Resume dream, Look inside) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
 
 ## Line placement
 
@@ -289,7 +289,7 @@ otherwise; an authored line keeps its own text, except an `emote.performed` line
   **in place** (the open page's history and the room log), **log** (the room log only) or
   **quiet** (the room log only, compacted; no text on the open page). Quiet so far: the player's
   own buy and sale on the buy and sell pages, and the player's own take and put on an open
-  container's page (a corpse included). Any other line whose receipt routes to the open page is
+  container's item or Inside page (a corpse included). Any other line whose receipt routes to the open page is
 in place; every other line is log. The page's own redraw (purse, list, contents) is the
   feedback. Another person's action is never quiet.
 - A page never draws the room log, so no line shows twice on one page.
@@ -483,8 +483,7 @@ A shop reason from the cartridge is a lowercase fragment with no period.
 ## Item details and Take/Drop
 
 Inventory separates Held from Worn slots, including empty slots. Held/worn item
-taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
-reachable contents and current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
+taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World with the engine's take line ([line placement](#line-placement)),
 the item named as the player saw it. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
 returns to World with the engine's drop line. Held items
@@ -492,12 +491,13 @@ open their same item detail from Inventory, with existing offered Drop/other act
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 Authored narration takes precedence and meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
 Retry retains original action/target context and appends each confirmed Take/Drop event only once.
+**Inside.** A container whose contents are reachable (an open lid, or a corpse or lidless container with contents) never lists them on its item page: a **Look inside** Control follows its options and opens its **Inside** page, an anchored detail of the item page as the dream page is of its bed (owner, 2026-10-30, loka-mo0p). That page draws the container's name as title, the section title **Inside** and one Entity line per directly held item, each opening that item's own page; an empty one draws one Note, **There is nothing inside.** It draws no actions (Open, Close, Take from and Put into stay on the item page) and its foot is a local **Close** that returns to the item page and sends nothing. A contained item's Leave returns to the Inside page. The page goes when its container goes, when the lid closes, when the contents stop being reachable (an emptied corpse), and on a room change, death or Map as every detail does; a cold reopen of a contained Read restores item page, Inside page and item page.
 When Take removes an item from a corpse's Contents, the confirmed result returns to
-that corpse detail, where the take line is quiet ([line placement](#line-placement)), and keeps
+that corpse's Inside page (its item page once the corpse is empty), where the take line is quiet ([line placement](#line-placement)), and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps **Inside** and Take.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps its **Inside** page and Take.
 
-A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Inside: Open is one of its own cards (first group), an accepted Open keeps the page, logs **Opened.** and the next GameView adds the Inside list; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
+A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Look inside: Open is one of its own cards (first group), an accepted Open keeps the page, logs **Opened.** and the next GameView adds Look inside; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**; one refused because the load is full reads
@@ -565,7 +565,7 @@ detail, Pour and Drink to their source vessel. The Book owns no liquid math.
 **Held readables.** Opening a held book sends no Read; Read is an explicit option. Its confirmed
 text joins that item's history and the page stays. A child of an open held container pushes its
 own detail; its foot is Leave alone, which pops locally without a command to the page the item
-was opened from (the container, the person holding it, or inventory), and Back to World clears
+was opened from (the container's Inside page, the person holding it, or inventory), and Back to World clears
 the stack. There is no Back to container: it went to the same page (loka-x6t.94). Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
 Read to its original history, opening a route only when custody still reaches it.
 

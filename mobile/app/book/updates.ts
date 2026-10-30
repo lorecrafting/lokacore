@@ -28,7 +28,7 @@ export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']
   if (screen.returnWorld && !screen.view.combat) return [];
   if (!screen.returnDetail) return next;
   const index = next.findIndex((p) => p.kind === 'thing' && p.id === screen.returnDetail);
-  if (index >= 0) return next.slice(0, index + 1);
+  if (index >= 0) return next.slice(0, index + (next[index + 1]?.kind === 'inside' ? 2 : 1)); // its Inside page stays
   const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
   return pagesAfter(corpse, screen.view, screen.view);
 }

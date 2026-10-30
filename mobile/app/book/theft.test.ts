@@ -13,6 +13,7 @@ import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
+import { LABEL } from './labels.ts';
 
 const ts = createRequire(import.meta.url)('typescript');
 registerHooks({
@@ -122,13 +123,14 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
   const item = nodes(Item({ id: purse.id, screen, g, press: book.press, open() {}, world() {} }));
   const words = item.filter((n) => n.type === 'Text').map((n) => n.props.children);
   assert.deepEqual(words.slice(-3), ['A merchant is holding it.', 'Lift', 'Leave']); // pass-1 E14
-  // A container (any non-NPC entry) keeps Inside.
+  // A container (any non-NPC entry) offers Look inside, its contents on their own page (loka-mo0p).
   const box = { id: 'box', kind: 'item', name: 'box', actions: [] };
   const coin = { ...box, id: 'coin', name: 'coin' };
+  const view = { entities: [box, { ...coin, container_id: 'box' }], inventory: [] };
   const shelf = nodes(
-    ThingPage({ thing: box, text: (k: string) => k, actions: [], log: [], contents: [coin] }),
-  );
-  assert.ok(shelf.some((n) => n.props.children === 'Inside'));
+    ThingPage({ thing: box, text: (k: string) => k, actions: [], log: [], view } as any),
+  ).map((n) => n.props.children);
+  assert.ok(shelf.includes(LABEL.lookInside) && !shelf.includes(LABEL.inside));
   // Held lists only this NPC's things, and steps aside while a conversation runs.
   const m = { id: 'm', kind: 'npc', name: 'm', actions: [] };
   const held = (talking: boolean) =>

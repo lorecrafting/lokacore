@@ -36,10 +36,11 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   const ear = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
   const h = book(chapter, a);
   h.tap(h.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
+  h.tap('Look inside');
   h.tap(h.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
-    [corpse.id, ear.id],
+    [corpse.id, corpse.id, ear.id],
   );
   // Leave already returns to the container, so it is the one return (loka-x6t.94).
   assert.deepEqual(
@@ -48,8 +49,8 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   );
   h.tap('Leave');
   assert.deepEqual(
-    h.stack.map((p: any) => p.id),
-    [corpse.id],
+    h.stack.map((p: any) => p.kind),
+    ['thing', 'inside'],
   );
   h.tap(h.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   assert.ok(
@@ -62,7 +63,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   assert.equal(h.game.pending(), true);
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
-    [corpse.id, ear.id],
+    [corpse.id, corpse.id, ear.id],
   );
   assert.equal(h.p.screen().detail(corpse.id).length, 0);
   a.fault.reads = false;
@@ -142,6 +143,7 @@ test('remounted pending ear Take settles on its exact corpse detail', () => {
   const ear = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
   const first = book(chapter, a);
   first.tap(first.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
+  first.tap('Look inside');
   first.tap(first.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   a.fault.kind = 'lost';
   a.fault.armed = true;

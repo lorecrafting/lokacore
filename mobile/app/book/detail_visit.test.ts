@@ -76,6 +76,7 @@ test('a restored pickup stays in the room log after reopen, never on the corpse 
     ((a.clock.wall += 3000), (a.clock.mono += 3000), a.game.pulse());
   const b = book(cart, a);
   b.tap('corpse, open');
+  b.tap('Look inside');
   b.tap('A goblin ear, open');
   b.tap('Take a goblin ear');
   b.unmount();

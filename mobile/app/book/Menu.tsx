@@ -1,6 +1,7 @@
 // The thing and Contents views use the existing book controls (the NPC page: Npc.tsx).
 import { View } from 'react-native';
 import { cap, things, type group, type Page as Route } from './model.ts';
+import { opens, within } from './item-pages.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
@@ -91,8 +92,10 @@ export const inside = (p: {
  * An item's detail in the detail-page order: projected state as Notes and Entity lines, options
  * as Action cards (book-ui.md, Item details and take/drop).
  * - Use: Item only.
- * - Rules: a refused action reads the same word as an offered one.
- * - States: plain; container with Inside; fuel; too heavy; held by a person.
+ * - Rules: a refused action reads the same word as an offered one; a container whose contents are
+ *   reachable (an open lid, or listed contents) draws a Look inside Control after its options, never
+ *   its contents (InsidePage).
+ * - States: plain; open container (Look inside); fuel; too heavy; held by a person.
  * - Story: ItemPage.stories.tsx
  */
 export function ThingPage(p: {
@@ -105,8 +108,7 @@ export function ThingPage(p: {
   pending?: boolean;
   log: DetailLine[];
   press: (b: Button) => void;
-  contents: Thing[];
-  open: (id: string) => void;
+  lookInside: () => void;
   leave: () => void;
 }) {
   const refusals = notes(p.thing, p.label, p.holder);
@@ -129,7 +131,41 @@ export function ThingPage(p: {
       {p.thing && p.actions.some((b) => b.pick) && (
         <PickLists {...p} page={p.thing.id} buttons={p.actions} />
       )}
-      {inside(p)}
+      {p.thing && opens(p.view, p.thing) && (
+        <Control label={LABEL.lookInside} onPress={p.lookInside} />
+      )}
+    </Page>
+  );
+}
+
+/**
+ * An open container's contents as an anchored detail page of its item page (book-ui.md, Item
+ * details and Take/Drop), as the dream page is of its bed.
+ * - Use: the inside route, from the item page's Look inside.
+ * - Rules: the container's name, then Inside and one Entity line per item, each opening its item
+ *   page; no actions; Close returns to the item page and sends nothing.
+ * - States: several items; empty (one Note).
+ * - Story: ItemPage.stories.tsx
+ */
+export function InsidePage(p: {
+  screen: Screen;
+  id: string;
+  open: (p: Route) => void;
+  close: () => void;
+}) {
+  const { view, text } = p.screen;
+  const thing = things(view).find((e) => e.id === p.id);
+  return (
+    <Page
+      title={thing ? cap(text(thing.name)) : LABEL.item}
+      foot={<Control label={LABEL.close} onPress={p.close} />}
+    >
+      {inside({
+        thing,
+        contents: within(view, p.id),
+        text,
+        open: (id) => p.open({ kind: 'thing', id }),
+      }) || <Note>{LABEL.nothingInside}</Note>}
     </Page>
   );
 }
@@ -165,8 +201,7 @@ export function Item(p: {
       pending={p.screen.pending}
       log={p.screen.detail(p.id)}
       press={(b) => p.press(b, p.id)}
-      contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
-      open={(id) => p.open({ kind: 'thing', id })}
+      lookInside={() => p.open({ kind: 'inside', id: p.id })}
       leave={p.back ?? p.world} // the page it was opened from (loka-x6t.23), so no Back to container (loka-x6t.94)
     />
   );

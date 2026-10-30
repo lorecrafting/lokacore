@@ -57,7 +57,7 @@ const source = () =>
   });
 const ids = idsOf(source().value);
 const LEDGER = 'The mill ground more sacks at night than by day.';
-const { Item } = await import('./Menu.tsx');
+const { InsidePage, Item } = await import('./Menu.tsx');
 const { default: Book, BookView } = await import('./Book.tsx');
 function nodes(e: any): any[] {
   if (Array.isArray(e)) return e.flatMap(nodes);
@@ -99,6 +99,11 @@ test('actual nested book Item opens locally and Read stays between description a
     );
   const before = a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
   draw(chest)
+    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Look inside')!
+    .props.onPress();
+  assert.deepEqual(stack.at(-1), { kind: 'inside', id: chest });
+  const inside = { screen: p.screen(), id: chest, open: (page: any) => stack.push(page) };
+  nodes(InsidePage({ ...inside, close: () => stack.pop() }))
     .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'A mill ledger, open')!
     .props.onPress();
   assert.deepEqual(stack.at(-1), { kind: 'thing', id: ward });
@@ -123,11 +128,12 @@ test('actual nested book Item opens locally and Read stays between description a
   draw(ward)
     .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave')!
     .props.onPress();
-  assert.deepEqual(stack.at(-1), { kind: 'thing', id: chest });
+  assert.deepEqual(stack.at(-1), { kind: 'inside', id: chest });
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, latest);
   assert.deepEqual(restoredItemPages(p.screen().view, p.screen().detail), [
     { kind: 'carrying' },
     { kind: 'thing', id: chest },
+    { kind: 'inside', id: chest },
     { kind: 'thing', id: ward },
   ]);
   const was = p.screen().view;
@@ -137,7 +143,7 @@ test('actual nested book Item opens locally and Read stays between description a
   p.press(close, chest);
   assert.deepEqual(
     pagesAfter([...stack, { kind: 'thing', id: ward }], was, p.screen().view),
-    stack,
+    stack.slice(0, -1), // the Inside page goes with the lid
   );
 });
 
@@ -229,6 +235,7 @@ for (const settlement of ['pulse', 'title press'])
       assert.deepEqual(draw().props.stack, [
         { kind: 'carrying' },
         { kind: 'thing', id: chest },
+        { kind: 'inside', id: chest },
         { kind: 'thing', id: book },
       ]);
       draw().props.go([], -1);

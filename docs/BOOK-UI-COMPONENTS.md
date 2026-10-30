@@ -52,7 +52,7 @@ words remain in the cartridge; Book owns layout and navigation.
 |---|---|---|
 | Talk, quest choice or service | NPC detail and offered action list | Exact speaker, available/refused choice, detail-local result, Leave and reopen. |
 | Trade | The NPC's Trade card, its buy page and the buy page's Sell page ([rule](system/book-ui.md#npc-dialogue-and-action-details)) | Exact row and price, refused reason, the page stays after a trade, Leave back to the person. |
-| Inspect, take, equip or use an item/container | Item detail and nested `Page` route | Exact item/custody, contents parent return, current actions and load refusal. |
+| Inspect, take, equip or use an item/container | Item detail; an open container's `InsidePage` ([`Menu.tsx`](../mobile/app/book/Menu.tsx)), ordinary item → inside detail route ([rule](system/book-ui.md#item-details-and-takedrop)) | Exact item/custody, Look inside, local Close to the item page, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
 | Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
