@@ -138,7 +138,9 @@ export const Mood: StoryObj = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('A cowering goblin')).toBeVisible();
     await expect(
-      await canvas.findByText('The goblin shrinks against the wall, eyes on the way out.'),
+      await canvas.findByText(
+        'The goblin shrinks against the wall, its notched blade low, eyes on the way out.',
+      ),
     ).toBeVisible();
   },
 };

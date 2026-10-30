@@ -1,5 +1,5 @@
 // Toolbox row FD4 on the compiled rivals sampler: an npc_pair fact written by a reaction at the
-// event's subject toward its named `with` NPC, read by fact_compare and a W6 room line variant;
+// event's subject toward its named `with` NPC, read by fact_compare and a W6 description variant;
 // facts_typed on pair rows; the loader's 1.89 floor and site checks. Expected values hand-written.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
