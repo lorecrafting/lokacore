@@ -5,6 +5,16 @@
   "name": "npc.watchman.short",
   "room_line": "npc.watchman.room",
   "description": "npc.watchman.description",
+  "description_variants": [
+    {
+      "when": {
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
+      },
+      "description": "npc.watchman.description_wanted"
+    }
+  ],
   "room": "vault_yard",
   "hp": {
     "minimum": 0,
@@ -34,16 +44,6 @@
   "resistances": {
     "physical": 100
   },
-  "room_line_variants": [
-    {
-      "when": {
-        "op": "fact_compare",
-        "fact": "wanted",
-        "equals": true
-      },
-      "description": "npc.watchman.room_wanted"
-    }
-  ],
   "words": {
     "bare": "npc.watchman.bare",
     "article": "the"

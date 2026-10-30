@@ -1,5 +1,5 @@
 // Toolbox row FD4 on the compiled rivals sampler: an npc_pair fact written by a reaction at the
-// event's subject toward its named `with` NPC, read by fact_compare and a W6 room line variant;
+// event's subject toward its named `with` NPC, read by fact_compare and a W6 description variant;
 // facts_typed on pair rows; the loader's 1.89 floor and site checks. Expected values hand-written.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -16,7 +16,7 @@ import type { EntityId, Policy } from '../src/contracts.gen.ts';
 import { decode, encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { holds } from '../src/mechanics/policy.ts';
-import { room } from '../play/text.ts';
+import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-pair-facts-'));
@@ -82,14 +82,15 @@ const gift = () => {
 };
 
 // Breaks: the step drops `with` (one row per subject) or swaps the two NPCs, the reaction writes
-// at the body, fact_compare ignores `with`, or the room line variant does not read the pair.
+// at the body, fact_compare ignores `with`, or the description variant does not read the pair.
 test('the smith given the apple before the miller gloats over him, one ordered row', () => {
   const before = newWorld(content, ctx(CONTEXT), [1, 2, 3, 4]);
-  assert.doesNotMatch(room(content, before), /polishes her apple/);
+  const mood = (w: World) => describeEntity(w, w.character, id(w, 'npc/smith'), 'description');
+  assert.equal(mood(before), 'npc.smith.description');
   const w = gift();
   assert.equal(gloats(w, 'smith', 'miller'), true);
   assert.equal(gloats(w, 'miller', 'smith'), false);
-  assert.match(room(content, w), /The smith polishes her apple where the miller can see\./);
+  assert.equal(mood(w), 'npc.smith.description_gloating');
   const rows = Object.keys(w.state.facts ?? {}).map((k) => JSON.parse(JSON.stringify(decode(k))));
   assert.deepEqual(
     rows.map((r) => [r.fact.key, r.scope, r.subject_id, r.with_id]),
@@ -147,8 +148,8 @@ test('facts_typed refuses a pair row without two distinct NPCs', () => {
 // `with` a spawn template or the site's own npc. The 1.89 floor is the compiler's.
 test('row FD4 needs instance scope and a with NPC at each pair site', () => {
   const smith = `${S}:npc/smith`;
-  const rootAt = `.cartridge.npcs[${JSON.stringify(smith)}].room_line_variants[0].when`;
-  const root = (c: any) => c.npcs[smith].room_line_variants[0].when;
+  const rootAt = `.cartridge.npcs[${JSON.stringify(smith)}].description_variants[0].when`;
+  const root = (c: any) => c.npcs[smith].description_variants[0].when;
   const rows: [(c: any) => void, string, string][] = [
     [
       (c) => (c.facts[`${S}:fact/gloats`].scopes = ['player']),

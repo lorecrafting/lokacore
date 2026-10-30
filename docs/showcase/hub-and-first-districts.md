@@ -117,7 +117,7 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
 ### NPCs, items, reactions
 
 - **Wat** (shepherd): hp 10 gain 0, `attributes {str: 12}`; `daily_schedule` 8 `fell_top`, 9
-  `shepherd_hut`; `room_line_variants` and `description_variants` on
+  `shepherd_hut`; `description_variants` on
   `status_active {subject: target, status: chilled}` ("Wat, blue-lipped and shivering, ...").
   Reaction `wat_frost`: `on {event: entity_entered_room, room: fell_top, npc: wat}`, `when sky
   {weather: frost}`, `apply status.apply chilled` (lands on the entrant; the `npc` entrant filter
@@ -157,7 +157,7 @@ Day 1 is a frost day in the test's world; the day 2 branch is rain.
 | 4 | South to `fell_gate` at 09:00; wait to 11:30. | No refresh under the roof: the 09:00 refresh set the end to 11:30 (32400 + 9000); the 11:00 tick puts hp at 8; at 11:30 the expired line, with no cure. The developer pins these two times from row 1's refresh rule in the test. | |
 | 5 | Wear `cloak`, north to `fell_top`. | Nothing applies (the `not wearing warm` leaf fails); the frost variant still shows. | sky x exposure x equipment |
 | 6 | Same step on a rain day wearing only the cloak, then wearing the oilskin. | `soaked` applies with the cloak; nothing with the oilskin. | sky x exposure x equipment |
-| 7 | Stand on `fell_top` across 08:00 on the frost day. | Wat arrives at 08:00; the `wat_frost` rule chills him (no player line, [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3)); his room line reads the shivering variant; at 09:00 he leaves for the hut; at 10:00 his tick puts him at hp 9; at 10:30 the variant stops. | NPC status x variants x schedule |
+| 7 | Stand on `fell_top` across 08:00 on the frost day. | Wat arrives at 08:00; the `wat_frost` rule chills him (no player line, [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3)); his description reads the shivering variant; at 09:00 he leaves for the hut; at 10:00 his tick puts him at hp 9; at 10:30 the variant stops. | NPC status x variants x schedule |
 | 8 | East to `shepherd_hut`; eat `hut_loaf`; drink from `trough_skin`. | Eat ends `hungry` (mv rises by up to 5, never past 100; the hunger pool is unchanged); Drink ends `thirsty`; both conditions leave the Character page. | statuses x reactions |
 | 9 | West to `still_room`; take `quern`. | Refused: 7000 g over the 5000 g carry. | potion x derived carry |
 | 10 | Drink from `cask`; take `quern`. | `might` applied; Character page str 13; carry 8000 g; the take succeeds. A second dose at once moves the end, never stacks (str stays 13). | potion x derived carry |
@@ -172,7 +172,7 @@ which condition lands by the day's weather; drink, play, shove the Drover (passe
 ### Later (not in this slice)
 
 W8 permanent scars: the first `status_ticked` of Wat's `chilled` applies a `duration: permanent`
-`chilblained` status with a room-line variant; the batch that lands W8 adds it here.
+`chilblained` status with a description variant; the batch that lands W8 adds it here.
 
 ## World district: Tidewater Steps (slice A)
 

@@ -287,7 +287,7 @@ walk('4-traps', "Traps: the shout in the chief's den; the goblins flee", async (
   await moves('west', 'down', 'north', 'north'); // the passage plate bites on the way
   // Afraid lasts 600 game s (~12 s of wall time at rate 50): nothing slow between shout and Attack.
   await speak('begone', LABEL.shout);
-  await tap(/^(?:an? |two )?goblins?, open$/i);
+  await tap(/^two cowering goblins, open$/i); // both afraid: one link, their mood words (W6)
   await tap(/Attack/);
   // A round is 150 game s, 3 s of wall time at rate 50.
   await expect(screen.getByText(/A goblin flees south/).first()).toBeVisible({ timeout: 10_000 });

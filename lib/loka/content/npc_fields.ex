@@ -37,7 +37,7 @@ defmodule Loka.Content.NpcFields do
     for {f, v} <-
           Map.take(
             npc,
-            ~w(name_variants room_line_variants description_variants disposition locks)
+            ~w(name_variants description_variants disposition locks)
           ),
         into: %{},
         do: {f, expand.(v, m)}

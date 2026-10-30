@@ -179,11 +179,17 @@ defmodule Loka.Content.Entities do
   defp ask_texts(_), do: []
 
   defp variant_texts(e),
-    do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
+    do:
+      for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]}) ++
+        for(
+          {["name_variants", _] = s, v} <- variants(e),
+          {w, k} <- words_texts(v),
+          do: {s ++ w, k}
+        )
 
   @doc """
   Every text of each entity as `{rel, entity key, steps, text key}`: name, room_line and
-  description, then each text variant's description.
+  description, then each text variant's description and each name variant's words.
   """
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]
   def text_keys(defs) do

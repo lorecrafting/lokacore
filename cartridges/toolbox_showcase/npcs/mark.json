@@ -12,17 +12,6 @@
       "value": 0
     }
   ],
-  "room_line_variants": [
-    {
-      "when": {
-        "op": "fact_compare",
-        "fact": "stolen",
-        "item": "yard_purse",
-        "equals": true
-      },
-      "description": "npc.mark.room_robbed"
-    }
-  ],
   "description_variants": [
     {
       "when": {
