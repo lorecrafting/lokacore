@@ -8,7 +8,6 @@
   "room.bunkroom.description": "Rows of narrow bunks.",
   "npc.maud.short": "Maud",
   "npc.maud.room": "[Maud](maud) wipes the counter.",
-  "npc.maud.room_bruised": "[Maud](maud), bruised, wipes the counter.",
   "npc.maud.description": "Maud wipes the counter.",
   "npc.maud.description_bruised": "Maud, bruised, wipes the counter.",
   "npc.guard.short": "a guard",

@@ -43,10 +43,7 @@ const statuses = (w: World) =>
     .filter(([k, r]) => r.active && k.status.key === 'word_travels')
     .map(([k, r]) => [k.body_id, r.active && r.ends_at]);
 const offered = (w: World, action: string) => noticeAction(gameView(w), action)?.available;
-const looks = (w: World, who: string) =>
-  (['room_line', 'description'] as const).map((f) =>
-    describeEntity(w, w.character, npc(w, who), f),
-  );
+const looks = (w: World, who: string) => describeEntity(w, w.character, npc(w, who), 'description');
 const entered = (r: ReturnType<typeof wait>, who: string) =>
   r.events.some((e) => e.type === 'entity_entered_room' && e.entity_id === npc(r.world, who));
 /** 08:00 day 1 in the tollhouse: standing 1 after help, the toll gate leaned open. */
@@ -71,7 +68,7 @@ test('social 15: forced at 08:00 the box opens and carries word_travels to 08:00
     [fact(x, 'strongbox_forced'), offered(x, 'pick_strongbox'), labels(x), fact(x, 'warden_knows')],
     [true, false, [], undefined],
   );
-  assert.deepEqual(looks(x, 'warden'), ['npc.warden.room', 'npc.warden.description']);
+  assert.equal(looks(x, 'warden'), 'npc.warden.description');
   x = take(play(x, { type: 'open', target_id: id(x, 'item', 'strongbox') }).world, 'mill_ledger');
   x = play(perform(x, 'force_tollhouse_door').world, { type: 'open', direction: 'north' }).world;
   box = go(go(x, 'north').world, 'down').world;
@@ -85,8 +82,8 @@ test('social 16: picked, the box carries nothing; at 14:30 day 2 the Warden is a
   assert.deepEqual([statuses(x), offered(x, 'force_strongbox')], [[], false]);
   x = wait(go(go(x, 'west').world, 'west').world, DAY + 14 * HOUR + 1800).world;
   assert.deepEqual(
-    [fact(x, 'warden_knows'), where(x, npc(x, 'warden')), looks(x, 'warden')[0]],
-    [undefined, room(x, 'warden_gate'), 'npc.warden.room'],
+    [fact(x, 'warden_knows'), where(x, npc(x, 'warden')), looks(x, 'warden')],
+    [undefined, room(x, 'warden_gate'), 'npc.warden.description'],
   );
 });
 
@@ -114,11 +111,7 @@ test('social 17: at 08:00 day 2 the Warden knows; 13:00 he walks the green; 14:3
   assert.ok(entered(walk, 'warden'), JSON.stringify(walk.events));
   assert.deepEqual(
     [where(noon, npc(noon, 'warden')), engaged(noon, noon.body), looks(noon, 'warden')],
-    [
-      room(noon, 'village_green'),
-      undefined,
-      ['npc.warden.room_watchful', 'npc.warden.description_watchful'],
-    ],
+    [room(noon, 'village_green'), undefined, 'npc.warden.description_watchful'],
   );
   x = wait(noon, DAY + 14 * HOUR).world;
   assert.equal(where(x, npc(x, 'warden')), room(x, 'warden_gate'));
@@ -147,8 +140,8 @@ test('social 18: from 13:00 day 2: the empty gate, the ledger mend, and the gree
   assert.deepEqual([fact(b, 'trust', npc(b, 'warden')), mood(b, 'warden')], [1, 'wary']);
   b = go(wait(b, DAY + 14 * HOUR + 1800).world, 'east').world;
   assert.deepEqual(
-    [engaged(b, b.body), looks(b, 'warden')[0]],
-    [undefined, 'npc.warden.room_watchful'],
+    [engaged(b, b.body), looks(b, 'warden')],
+    [undefined, 'npc.warden.description_watchful'],
   );
   const c = go(wait(go(dawn, 'north').world, DAY + 13 * HOUR + 1800).world, 'south');
   assert.equal(engaged(c.world, c.world.body)?.row.npc_id, npc(c.world, 'warden'));
@@ -223,7 +216,7 @@ test('social 19: burnt at 09:00: Wat at the gate, Tam, Nell; press grants "The s
   let x = fate(hut(), 'burn');
   assert.deepEqual(
     [fact(x, 'wardle_standing'), fact(x, 'letter_burnt'), looks(x, 'wat'), knows(x)],
-    [-1, true, ['npc.wat.room_ash', 'npc.wat.description_ash'], [u, u, u]],
+    [-1, true, 'npc.wat.description_ash', [u, u, u]],
   );
   const steps = [
     [14 * HOUR, [u, u, u], [true, u, u]],

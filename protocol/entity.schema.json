@@ -183,7 +183,7 @@
           "$ref": "#/$defs/NameWords"
         },
         "name_variants": {
-          "$ref": "#/$defs/TextVariants"
+          "$ref": "#/$defs/NameVariants"
         },
         "room_line": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -530,7 +530,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "type": "object",
       "properties": {
         "key": {
@@ -551,13 +551,10 @@
           "$ref": "#/$defs/NameWords"
         },
         "name_variants": {
-          "$ref": "#/$defs/TextVariants"
+          "$ref": "#/$defs/NameVariants"
         },
         "room_line": {
           "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "room_line_variants": {
-          "$ref": "#/$defs/TextVariants"
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -825,6 +822,52 @@
           },
           "capacity": 1
         }
+      ]
+    },
+    "NameVariants": {
+      "description": "Toolbox row W6: variants of an item's or NPC's short name (TextVariants), each optionally with its own name words (NameWords), which a presenter uses while that variant names the entity; a variant without words has none, so a presenter shows its description alone.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "when": {
+            "$ref": "policy.schema.json#/$defs/Policy"
+          },
+          "description": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          },
+          "words": {
+            "$ref": "#/$defs/NameWords"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 16,
+      "examples": [
+        [
+          {
+            "when": {
+              "op": "status_active",
+              "subject": "target",
+              "status": {
+                "cartridge_id": "toolbox_showcase",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "afraid"
+              }
+            },
+            "description": "npc.goblin.short_afraid",
+            "words": {
+              "bare": "npc.goblin.bare_afraid",
+              "article": "a",
+              "plural": "npc.goblin.plural_afraid"
+            }
+          }
+        ]
       ]
     },
     "TextVariants": {

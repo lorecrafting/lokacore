@@ -4,7 +4,8 @@
   ],
   "name": "npc.smith.short",
   "room_line": "npc.smith.room",
-  "room_line_variants": [
+  "description": "npc.smith.description",
+  "description_variants": [
     {
       "when": {
         "op": "fact_compare",
@@ -13,9 +14,8 @@
         "with": "miller",
         "equals": true
       },
-      "description": "npc.smith.room_gloating"
+      "description": "npc.smith.description_gloating"
     }
   ],
-  "description": "npc.smith.description",
   "room": "square"
 }

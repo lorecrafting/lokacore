@@ -525,7 +525,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
+          "description": "Name words of the selected short (loka-6qi, W6): the definition's while the base short holds, the holding name_variants entry's while one does; absent when that source declares none."
         },
         "shop": {
           "type": "array",
@@ -679,7 +679,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
+          "description": "Name words of the selected short (loka-6qi, W6): the definition's while the base short holds, the holding name_variants entry's while one does; absent when that source declares none."
         },
         "container_id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
@@ -2154,7 +2154,7 @@
         },
         "words": {
           "$ref": "entity.schema.json#/$defs/NameWords",
-          "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
+          "description": "Name words of the selected short (loka-6qi, W6): the definition's while the base short holds, the holding name_variants entry's while one does; absent when that source declares none."
         },
         "band": {
           "$ref": "action.schema.json#/$defs/Key",
@@ -2175,7 +2175,7 @@
               },
               "words": {
                 "$ref": "entity.schema.json#/$defs/NameWords",
-                "description": "Name words copied from the definition (loka-6qi) while the selected short is the base short; absent while a name_variants entry holds or the definition declares none."
+                "description": "Name words of the selected short (loka-6qi, W6): the definition's while the base short holds, the holding name_variants entry's while one does; absent when that source declares none."
               },
               "band": {
                 "$ref": "action.schema.json#/$defs/Key",

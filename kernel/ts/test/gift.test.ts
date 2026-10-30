@@ -93,12 +93,12 @@ const retake = (w: World, item: string) => ({
     containers: { ...w.state.containers, [id(w, 'item', item)]: w.roomIds[`${S}:room/yard`]! },
   },
 });
-/** The farmer's dialogue and room line, as the player meets them. */
+/** The farmer's dialogue and description (his mood), as the player meets them. */
 const tier = (w: World) => [
   spokenBy(w, w.character, farmer(w))?.key,
-  describeEntity(w, w.character, farmer(w), 'room_line'),
+  describeEntity(w, w.character, farmer(w), 'description'),
 ];
-const PLAIN = ['farmer_plain', 'npc.farmer.room'];
+const PLAIN = ['farmer_plain', 'npc.farmer.description'];
 
 // Breaks: a like or dislike rule missing or of the wrong sign, the stone counted, the once-only
 // flag missing (trust is capped at 1, so the repeat apple is checked after the rat, at 0), a tier
@@ -109,7 +109,7 @@ test('an apple warms the farmer once, a stone does nothing, a dead rat cools him
   w = give(w, 'stone');
   assert.deepEqual([trust(w), ...tier(w)], [0, ...PLAIN]);
   w = give(w, 'apple');
-  assert.deepEqual([trust(w), ...tier(w)], [1, 'farmer_warm', 'npc.farmer.room_warm']);
+  assert.deepEqual([trust(w), ...tier(w)], [1, 'farmer_warm', 'npc.farmer.description_warm']);
   w = give(retake(w, 'apple'), 'apple');
   assert.equal(trust(w), 1);
   w = give(w, 'rat');
@@ -122,7 +122,7 @@ test('an apple warms the farmer once, a stone does nothing, a dead rat cools him
 
 test('a dead rat first opens the cold tier', () => {
   const w = give(fresh(), 'rat');
-  assert.deepEqual([trust(w), ...tier(w)], [-1, 'farmer_cold', 'npc.farmer.room_cold']);
+  assert.deepEqual([trust(w), ...tier(w)], [-1, 'farmer_cold', 'npc.farmer.description_cold']);
 });
 
 const trader = (w: World) => id(w, 'npc', 'trader');

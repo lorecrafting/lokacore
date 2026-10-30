@@ -4,16 +4,6 @@
   ],
   "name": "npc.maud.short",
   "room_line": "npc.maud.room",
-  "room_line_variants": [
-    {
-      "when": {
-        "op": "status_active",
-        "subject": "target",
-        "status": "bruised"
-      },
-      "description": "npc.maud.room_bruised"
-    }
-  ],
   "description": "npc.maud.description",
   "description_variants": [
     {

@@ -1640,6 +1640,24 @@
       ],
       "type": "object"
     },
+    "NameVariants": {
+      "description": "Toolbox row W6: variants of an item's or NPC's short name (TextVariants), each optionally with its own name words (NameWords), which a presenter uses while that variant names the entity; a variant without words has none, so a presenter shows its description alone.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": { "$ref": "#/$defs/TextKey" },
+          "when": { "$ref": "#/$defs/Policy" },
+          "words": { "$ref": "#/$defs/NameWords" }
+        },
+        "required": [
+          "description"
+        ],
+        "type": "object"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "type": "array"
+    },
     "NameWords": {
       "additionalProperties": false,
       "description": "Name words (loka-6qi): bare, the text key of the name with no article (\"lantern\"); optionally article, the article a presenter puts before bare (a, an or the); optionally plural, the text key of the plural (\"lanterns\"). short stays the phrase narration binds; words exist for presenters that compose a sentence from several names. Each key is in the text catalog.",
@@ -6140,7 +6158,7 @@
           "type": "integer"
         },
         "name": { "$ref": "#/$defs/partial.TextKey" },
-        "name_variants": { "$ref": "#/$defs/TextVariants" },
+        "name_variants": { "$ref": "#/$defs/NameVariants" },
         "readable": { "$ref": "#/$defs/partial.ItemReadable" },
         "room_line": { "$ref": "#/$defs/partial.TextKey" },
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
@@ -6188,7 +6206,7 @@
     },
     "partial.source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -6417,7 +6435,7 @@
           "type": "object"
         },
         "name": { "$ref": "#/$defs/partial.TextKey" },
-        "name_variants": { "$ref": "#/$defs/TextVariants" },
+        "name_variants": { "$ref": "#/$defs/NameVariants" },
         "perception": {
           "additionalProperties": false,
           "properties": {
@@ -6433,7 +6451,6 @@
         },
         "room": { "$ref": "#/$defs/partial.DefinitionRef" },
         "room_line": { "$ref": "#/$defs/partial.TextKey" },
-        "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "services": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 8,
@@ -8002,7 +8019,7 @@
           "type": "integer"
         },
         "name": { "$ref": "#/$defs/TextKey" },
-        "name_variants": { "$ref": "#/$defs/TextVariants" },
+        "name_variants": { "$ref": "#/$defs/NameVariants" },
         "readable": { "$ref": "#/$defs/ItemReadable" },
         "room_line": { "$ref": "#/$defs/TextKey" },
         "room_line_variants": { "$ref": "#/$defs/TextVariants" },
@@ -8060,7 +8077,7 @@
     },
     "source.NpcDefinition": {
       "additionalProperties": false,
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
         "ask": {
           "additionalProperties": false,
@@ -8309,7 +8326,7 @@
           "type": "object"
         },
         "name": { "$ref": "#/$defs/TextKey" },
-        "name_variants": { "$ref": "#/$defs/TextVariants" },
+        "name_variants": { "$ref": "#/$defs/NameVariants" },
         "perception": {
           "additionalProperties": false,
           "properties": {
@@ -8328,7 +8345,6 @@
         },
         "room": { "$ref": "#/$defs/DefinitionRef" },
         "room_line": { "$ref": "#/$defs/TextKey" },
-        "room_line_variants": { "$ref": "#/$defs/TextVariants" },
         "services": {
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 8,

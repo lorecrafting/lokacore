@@ -21239,6 +21239,167 @@
     ]
   },
   {
+    "name": "name_variants_empty",
+    "contract": "NameVariants",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "name_variants_seventeen",
+    "contract": "NameVariants",
+    "value": [
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k"
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "name_variant_without_description",
+    "contract": "NameVariants",
+    "value": [
+      {
+        "when": {
+          "op": "target_present"
+        }
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/description",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "name_variant_unknown_field",
+    "contract": "NameVariants",
+    "value": [
+      {
+        "when": {
+          "op": "target_present"
+        },
+        "description": "t.k",
+        "room_line": "t.k"
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/room_line",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "might",
@@ -29007,6 +29168,65 @@
       {
         "path": "/asides",
         "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_room_line_variants_retired",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "name": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "room_line_variants": []
+    },
+    "errors": [
+      {
+        "path": "/room_line_variants",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_name_variant_words_without_bare",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "name": "npc.hal.short",
+      "name_variants": [
+        {
+          "description": "npc.hal.short_tired",
+          "words": {
+            "plural": "npc.hal.plural_tired"
+          }
+        }
+      ],
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      }
+    },
+    "errors": [
+      {
+        "path": "/name_variants/0/words/bare",
+        "code": "missing_property"
       }
     ]
   },

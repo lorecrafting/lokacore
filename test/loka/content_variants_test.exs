@@ -16,14 +16,13 @@ defmodule Loka.ContentVariantsTest do
           {"items/lantern.json", &Map.put(&1, "name_variants", @variant)},
           {"items/lantern.json", &Map.put(&1, "description_variants", @variant)},
           {"npcs/bram.json", &Map.put(&1, "name_variants", @variant)},
-          {"npcs/bram.json", &Map.put(&1, "room_line_variants", @variant)},
           {"npcs/bram.json", &Map.put(&1, "description_variants", @variant)}
         ],
         do: assert({:ok, _, _} = Loka.ContentSource.compile(dir, [change]))
   end
 
   # Breaks: the compiler stops walking an NPC's or item's new variant lists, so a variant naming
-  # an undeclared status or text key compiles and fails at load or in play, or it refuses the
+  # an undeclared status or text key (a name variant's words too) compiles and fails at load or in play, or it refuses the
   # sound sampler (its status_active and npc_present leaves at 1.46).
   test "a new variant list's references and text keys are checked" do
     dir = Loka.ContentSource.copy("cartridges/variants_sampler")
@@ -31,10 +30,15 @@ defmodule Loka.ContentVariantsTest do
     ghost = &put_in(&1, ["description_variants", Access.at(0), "when", "status"], "ghost")
     no_text = &put_in(&1, ["name_variants", Access.at(0), "description"], "item.sword.gone")
 
+    no_words =
+      &put_in(&1, ["name_variants", Access.at(0), "words"], %{"bare" => "item.sword.gone"})
+
     for {file, change, path, target} <- [
           {"npcs/maud.json", ghost, "npcs/maud.description_variants[0].when.status",
            "variants_sampler@0.0.1:status/ghost"},
           {"items/sword.json", no_text, "items/sword.name_variants[0].description",
+           "item.sword.gone"},
+          {"items/sword.json", no_words, "items/sword.name_variants[0].words.bare",
            "item.sword.gone"}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [{file, change}])

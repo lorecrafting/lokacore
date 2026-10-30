@@ -52,27 +52,27 @@ const study = (w: World) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 };
-// What the player sees: the sage's line and whether decipher is offered on the door.
+// What the player sees: the sage's description and whether decipher is offered on the door.
 const seen = (w: World) => {
   const door = gameView(w).notices?.find((x) => w.details[x.id]?.key === 'carved_door');
   return {
-    sage: describeEntity(w, w.character, w.entityIds[`${C}:npc/sage`] as EntityId, 'room_line'),
+    sage: describeEntity(w, w.character, w.entityIds[`${C}:npc/sage`] as EntityId, 'description'),
     decipher: door?.actions?.find((a) => a.action_key === 'read_glyphs')?.available === true,
   };
 };
 const fresh = () => newWorld(content, ctx('6f1c2b3a-4d5e-4f60-8a7b-9c0d1e2f3a4b'), [5, 6, 7, 8]);
 
 // Breaks: skill_compare reading the attribute, membership alone or a strict comparison; the
-// leaf not gating room_line_variants or a scripted action policy.
-test('lore 0, 1 and 2: the scholar line and the decipher action wait for lore 2', () => {
+// leaf not gating description_variants or a scripted action policy.
+test('lore 0, 1 and 2: the scholar description and the decipher action wait for lore 2', () => {
   let w = fresh();
-  const before = { sage: 'npc.sage.line', decipher: false };
+  const before = { sage: 'npc.sage.description', decipher: false };
   assert.deepEqual(seen(w), before);
   assert.equal(perform(w, 'read_glyphs').decision.kind, 'rejected');
   w = study(w); // lore 1
   assert.deepEqual(seen(w), before);
   w = study(w); // lore 2: the last growth threshold
-  assert.deepEqual(seen(w), { sage: 'npc.sage.line.scholar', decipher: true });
+  assert.deepEqual(seen(w), { sage: 'npc.sage.description_scholar', decipher: true });
   assert.equal(perform(w, 'read_glyphs').decision.kind, 'accepted');
   assert.deepEqual(validate('GameView', gameView(w)), []);
 });

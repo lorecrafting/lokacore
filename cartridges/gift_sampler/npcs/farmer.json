@@ -4,7 +4,8 @@
   ],
   "name": "npc.farmer.short",
   "room_line": "npc.farmer.room",
-  "room_line_variants": [
+  "description": "npc.farmer.description",
+  "description_variants": [
     {
       "when": {
         "op": "fact_compare",
@@ -12,7 +13,7 @@
         "equals": 1,
         "subject": "target"
       },
-      "description": "npc.farmer.room_warm"
+      "description": "npc.farmer.description_warm"
     },
     {
       "when": {
@@ -21,9 +22,8 @@
         "equals": -1,
         "subject": "target"
       },
-      "description": "npc.farmer.room_cold"
+      "description": "npc.farmer.description_cold"
     }
   ],
-  "description": "npc.farmer.description",
   "room": "yard"
 }
