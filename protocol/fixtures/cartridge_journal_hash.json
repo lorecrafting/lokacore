@@ -1,5 +1,5 @@
 {
-  "description": "Independent Python known answer for journal_sampler: frozen ferry artifact renamed, recipe removed, hand-written Lantern stage/outcome journal plus event-earned oar quest and landing item. Catalog copied verbatim from source. c1-journal; mechanics.md quest@1; quest.schema.json QuestJournal. No kernel supplies expected values.",
+  "description": "Independent Python known answer for journal_sampler: frozen ferry artifact renamed, scripted action removed, hand-written Lantern stage/outcome journal plus event-earned oar quest and landing item. Catalog copied verbatim from source. c1-journal; mechanics.md quest@1; quest.schema.json QuestJournal. No kernel supplies expected values.",
   "value": {
     "format": "loka-cartridge-v2",
     "manifest": {

@@ -395,7 +395,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A performed ScriptedAction completed (06 \u00a720; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (scripted_action@1): the rule emits it after the outcome's sequence on every accepted perform whose outcome is performed (no check) or success; a failed attempt emits its check_failed and no action_completed (R5 S6a), and no content step can emit it, so a quest objective on it never depends on a scripted action's own steps.",
+          "description": "A performed ScriptedAction completed (06 \u00a720; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (scripted_action@1): the rule emits it after the outcome's steps on every accepted perform whose outcome is performed (no check) or success; a failed attempt emits its check_failed and no action_completed (R5 S6a), and no content step can emit it, so a quest objective on it never depends on a scripted action's own steps.",
           "type": "object",
           "properties": {
             "type": {

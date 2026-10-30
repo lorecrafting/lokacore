@@ -87,7 +87,7 @@ export type Assigned = {
 
 /**
  * `r` with one authored fact.assign step of `actor` appended (a scripted action outcome's or a dialogue
- * choice's sequence): a delta fact.assign at the fact's scope whose expected value is the fact as
+ * choice's steps): a delta fact.assign at the fact's scope whose expected value is the fact as
  * the steps before it left it; one that changes its fact leaves the next causal position free for
  * the fact_changed the host puts there (runtime/proposal.ts).
  */

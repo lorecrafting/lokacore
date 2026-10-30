@@ -696,10 +696,10 @@ original provider/service for confirmed narration routing and save validation.
 
 `ServiceDefinition` binds its original
 provider, exact authored action key, currency, price, label/narration and one
-closed `ServiceBenefit`: entitlement fact, meal stock/debit/MV, or provider-held
+`benefit` [Step](cartridge.md#steps-and-checks) (`protocol/step.schema.json`), its `op` one the service context runs: entitlement fact, meal stock/debit/MV, or provider-held
 vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
 projects the captured provider target, service reference/quote, declared benefit
-and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
+and keyed admission. `ServiceDefinition` and `ServiceOffer` each declare a literal
 valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
 paid, full MV, sold out and unavailable exact payment without changing error codes.
 `GameError` and `UnavailableReason` may also carry `cause`, a closed `RefusalCause`
@@ -729,7 +729,7 @@ choice resolution, events and narration share writer group0. No acquisition tabl
 practice field, custom money ledger or portable foundation op is added. Ordinary
 fact writers refuse the reserved acquisition target. Content and generated contracts
 must describe this actual typed hook and reserved ownership, not a narrative Boolean
-assignment that happens to use a skill name. `DialogueChoice.sequence` carries
+assignment that happens to use a skill name. `DialogueChoice.steps` carries
 `{op: skill.acquire, skill}` and `lesson_payment` carries `{to, resource, amount}`,
 where `to` is the bound original speaker role. `ItemDefinition.weapon` carries
 `{skill, attack}`; `block_chance` is the shield's authored chance. The optional
