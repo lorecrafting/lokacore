@@ -451,17 +451,20 @@ test('a reaction event.emit on a delivery with no subject emits nothing', () => 
     ring: [{ event: 'custom_event', custom: 'ping' }, [EMIT]],
     pull: [RANG, [SET('rope_taut')]],
   });
-  const OTHER = { id: CMD, payload: { actor_id: 'c0ffee00-0000-4000-8000-000000000001' } } as never;
-  const ping = {
+  const OTHER = cmd(w, { actor_id: 'c0ffee00-0000-4000-8000-000000000001' });
+  const ping: DefinitionRef = {
     cartridge_id: 'green_sampler',
     cartridge_version: '0.0.1',
     kind: 'event',
     key: 'ping',
   };
-  const root = accepted(w, 'x', [], [
-    { position: 1, payload: { type: 'custom_event', event: ping } },
-  ] as never);
-  const r = adopt(w, admit('scripted_action', root as never), OTHER, allocator(w, OTHER), 0);
+  const root = accepted(
+    w,
+    'x',
+    [],
+    [{ position: 1, payload: { type: 'custom_event', event: ping } }],
+  );
+  const r = adopt(w, admit('scripted_action', root), OTHER, allocator(w, OTHER), 0);
   assert.ok(r.decision.kind === 'accepted', JSON.stringify(r.decision));
   assert.deepEqual(
     r.decision.events.map((e) => e.payload.type),
