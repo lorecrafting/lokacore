@@ -453,6 +453,23 @@
     ],
     "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare; toolbox row 2 derived hit, damage and carry (loka-kgd.3) and hp maximum (loka-kgd.8)"
   },
+  "emote": {
+    "spec": "docs/system/mechanics.md NPC emotes (G9); docs/system/cartridge.md Emote declarations",
+    "contracts": [
+      "EmoteDefinition",
+      "ReactionRule",
+      "GameView"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/emote/line.ts",
+      "lib/loka/content/emotes.ex"
+    ],
+    "fixtures": [
+      "cartridges/emote_sampler/cartridge.json"
+    ],
+    "invariants": [],
+    "implemented_in": "Toolbox row G9 NPC half (loka-kgd.193 slice A): the emote table and the reaction emote step; NPCs cower and bow in emote_sampler"
+  },
   "equipment": {
     "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",
     "contracts": [

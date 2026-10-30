@@ -15,7 +15,10 @@ import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/view/view.ts';
 import { spoken } from '../play/spoken.ts';
 import { told } from '../src/mechanics/emote/line.ts';
-import { ctx } from './harness.ts';
+import { cmd, ctx, eid } from './harness.ts';
+import type { CommandId, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
+
+type Told = Parameters<typeof told>[2];
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-emote-sampler-'));
 let artifact: Uint8Array;
@@ -34,16 +37,16 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 
 let n = 0;
-const id = () => `eeeeeeee-2121-4121-8121-${String(++n).padStart(12, '0')}` as never;
+const id = () => `eeeeeeee-2121-4121-8121-${String(++n).padStart(12, '0')}` as CommandId;
 /** One accepted command and the English of its emote lines, as the terminal client words them. */
 function play(w: World, payload: object) {
   const r = step(
     w,
-    {
+    cmd({
       id: id(),
       world_context_id: w.context,
       payload: { actor_id: w.character, ...payload },
-    } as never,
+    }),
     n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
@@ -55,7 +58,9 @@ function play(w: World, payload: object) {
 }
 const start = () => newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
 const goblins = (w: World) =>
-  Object.keys(w.state.created ?? {}).filter((e) => w.state.created![e].definition.kind === 'npc');
+  Object.keys(w.state.created ?? {})
+    .filter((e) => w.state.created![e].definition.kind === 'npc')
+    .map(eid);
 
 // Breaks: the emoter defaults to the actor (the player), the line drops its sight/room check, or an immune
 // NPC (no status_applied) still cowers.
@@ -70,10 +75,7 @@ test('a shout from the next room frightens the goblins and tells no cower line',
   const r = play(start(), { type: 'shout', word: 'begone' });
   assert.deepEqual(r.emoted, []);
   const [a, b] = goblins(r.w);
-  assert.ok(
-    a && b && [a, b].every((g) => activeStatuses(r.w, g as never).length > 0),
-    'both afraid',
-  );
+  assert.ok(a && b && [a, b].every((g) => activeStatuses(r.w, g).length > 0), 'both afraid');
 });
 
 // Breaks: `to` resolves to the emoter, or the reader test (to.you) is swapped.
@@ -98,14 +100,17 @@ test("Nell's bow names no target that is elsewhere, unseen or herself", () => {
     (r) => r.steps[0]?.op === 'emote' && r.steps[0].npc,
   )!.steps[0];
   const lines = (subject: typeof nell, at = w) =>
-    told(at, w.character, bow as never, { subject, steps: { n: 0 } });
+    told(at, w.character, bow as Told, { subject, steps: { n: 0 } });
   // The captive beside the reader but undiscovered (an NPC perception fact that is not true).
   const hidden = { ...(bow as { emote: object }).emote, key: 'hidden' };
   const unseen = {
     ...w,
     cartridge: {
       ...w.cartridge,
-      facts: { ...w.cartridge.facts, [refString(hidden as never)]: { scopes: ['instance'] } },
+      facts: {
+        ...w.cartridge.facts,
+        [refString(hidden as DefinitionRef)]: { scopes: ['instance'] },
+      },
     },
     entities: {
       ...w.entities,
@@ -115,7 +120,7 @@ test("Nell's bow names no target that is elsewhere, unseen or herself", () => {
       ...w.state,
       containers: { ...w.state.containers, [captive]: w.state.containers[nell] },
     },
-  } as never as World;
+  } as World;
   assert.equal(
     lines(captive, { ...unseen, entities: w.entities })[0]?.bindings?.target,
     'npc.captive.short',
@@ -134,17 +139,17 @@ test("Nell's bow names no target that is elsewhere, unseen or herself", () => {
 // loses its text, or a step without `to` still names its subject.
 test('told: only a living NPC the reader sees emotes; no `to`, no target', () => {
   const den = play(start(), { type: 'move', direction: 'east' }).w;
-  const g = goblins(den)[0]! as never;
+  const g = goblins(den)[0]!;
   const steps = Object.values(content.reactions!).flatMap((r) => r.steps);
   const cower = steps.find((s) => s.op === 'emote' && !s.npc)!;
-  const lines = (at: World, subject: unknown, s = cower) =>
-    told(at, at.character, s as never, { subject: subject as never, steps: { n: 0 } });
+  const lines = (at: World, subject: EntityId | undefined, s = cower) =>
+    told(at, at.character, s as Told, { subject, steps: { n: 0 } });
   const one = [
     { key: 'emote.performed', participants: { actor: g }, bindings: { emote: 'cower' } },
   ];
   assert.deepEqual(lines(den, g), one);
   assert.deepEqual(
-    told(den, den.character, { op: 'narrate', text: 'x.y' } as never, { steps: { n: 0 } }),
+    told(den, den.character, { op: 'narrate', text: 'x.y' } as Told, { steps: { n: 0 } }),
     [{ key: 'x.y' }],
   );
   const [row] = Object.entries(den.state.resources!).filter(([k]) => k.includes(g));
@@ -165,10 +170,13 @@ test('told: only a living NPC the reader sees emotes; no `to`, no target', () =>
     ...den,
     cartridge: {
       ...den.cartridge,
-      facts: { ...den.cartridge.facts, [refString(hidden as never)]: { scopes: ['instance'] } },
+      facts: {
+        ...den.cartridge.facts,
+        [refString(hidden as DefinitionRef)]: { scopes: ['instance'] },
+      },
     },
     entities: { ...den.entities, [g]: { ...den.entities[g], perception: { discovered: hidden } } },
-  } as never as World;
+  } as World;
   for (const [at, subject] of [
     [den, undefined],
     [den, bodyOf(den, den.character)],
@@ -186,7 +194,7 @@ test('told: only a living NPC the reader sees emotes; no `to`, no target', () =>
   const captive =
     inn.entityIds[Object.keys(inn.entityIds).find((r) => r.endsWith(':npc/captive'))!];
   assert.equal(lines(inn, captive, bow)[0]?.bindings?.target, 'npc.captive.short');
-  assert.deepEqual(lines(inn, captive, { ...bow, to: undefined } as never), [
+  assert.deepEqual(lines(inn, captive, { ...bow, to: undefined } as Told), [
     { key: 'emote.performed', participants: { actor: nell }, bindings: { emote: 'bow' } },
   ]);
 });
