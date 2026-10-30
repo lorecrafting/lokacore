@@ -38,7 +38,7 @@ export const rendered = (
   withoutHeading(
     (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
     view,
-  ).map((line) => liquidLine(line, text, view, was));
+  ).map((line) => fullLine(line, text, view, was));
 
 // A refused line (a barred exit) leads with its reason tag (LogLines's doc comment); a quiet line
 // keeps its structured identity and count, `text` with " (N times)" once merged (logLines); an away
@@ -184,7 +184,7 @@ export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | 
   (['engaged', 'fled'].includes(d.outcome) ||
     d.events.some((e) => e.payload.type === 'attack_result'));
 
-function liquidLine(
+function fullLine(
   line: NarrationRecord['lines'][number],
   text: Say,
   view: GameView,
@@ -193,13 +193,7 @@ function liquidLine(
   const sentence = lineWords(line, text, view, was);
   if (line.key === 'item.recovered' && typeof line.bindings?.item === 'string')
     return `${sentence} ${text(line.bindings.item)}.`;
-  if (!['liquid.filled', 'liquid.poured', 'liquid.drank'].includes(line.key)) return sentence;
-  const { kind, unit_label, quantity } = line.bindings ?? {};
-  return typeof kind === 'string' &&
-    typeof unit_label === 'string' &&
-    Number.isSafeInteger(quantity)
-    ? `${sentence}\n${text(kind)} · ${quantity} ${text(unit_label)}`
-    : sentence;
+  return sentence;
 }
 
 export function detailLines(s: Logs, id: string) {

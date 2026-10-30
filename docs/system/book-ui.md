@@ -307,6 +307,12 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   An authored line that already attributes itself (`"Gate's shut," says the guard.`) is kept as
   written; the Book never parses quotes to add a speaker. Authored dialogue that is a bare
   quotation is a content fix (Beads `loka-548k`), not a Book rewrite.
+- A vessel's liquid amount reads in words, never a count or unit label (owner, 2026-10-30, Beads
+  `loka-ikat`), from quantity against capacity: `Empty.`; a third or less `Nearly empty, a little
+  water left.`; between `Half full of water.`; two thirds or more `Nearly full of water.`; exact
+  capacity `Full of water.` Only exact 0 reads empty and only exact capacity reads full. One helper
+  words it (`liquidWords`, `mobile/app/book/pick.ts`) for the item page and a twin row's note. A
+  Fill, Pour or Drink log line is its sentence alone; the open page's redraw shows the new amount.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
   same bindings and actor, the same pressed card target (the stock row or item), the same page
   visit, and no other line lies between. The merged line is the sentence once with " (N times)"

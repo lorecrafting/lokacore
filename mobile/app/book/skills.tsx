@@ -1,6 +1,7 @@
 import { cap, plain, why } from './model.ts';
 import { View } from 'react-native';
 import { LABEL } from './labels.ts';
+import { liquidWords } from './pick.ts';
 import { castWords, commandOf } from './buttons.ts';
 import { Fragment } from 'react';
 import { Text } from './Text.tsx';
@@ -108,7 +109,8 @@ export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void 
 }
 
 /**
- * An item's projected stats on its detail page.
+ * An item's projected stats on its detail page. A vessel's liquid reads in words, never a count
+ * (book-ui.md Line placement).
  * - Use: ThingPage only.
  * - Story: ItemPage.stories.tsx
  */
@@ -119,12 +121,7 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
   return (
     <>
       {item?.description && <Text style={prose(c, t)}>{plain(p.text(item.description))}</Text>}
-      {item?.liquid && (
-        <Text style={note(c, t)}>
-          {p.text(item.liquid.label)}: {item.liquid.quantity}/{item.liquid.capacity}{' '}
-          {p.text(item.liquid.unit_label)}
-        </Text>
-      )}
+      {item?.liquid && <Text style={note(c, t)}>{liquidWords(item.liquid, p.text)}</Text>}
       {item?.fuel && (
         <Text style={note(c, t)}>
           Fuel {item.fuel.remaining} of {item.fuel.capacity}

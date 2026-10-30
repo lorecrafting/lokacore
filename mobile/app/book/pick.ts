@@ -23,12 +23,23 @@ export const phrase = (b: Button, name: (id: string) => string) =>
       ? `give ${name(b.target_ids[0]!)} to ${name(b.target_ids[1]!)}`
       : `${lower(b.label)} ${name(b.target_ids[0]!)}`;
 
+// A vessel's liquid as prose, never a count (book-ui.md Line placement): exact 0 and exact capacity
+// only ever read empty and full; a third or less nearly empty, two thirds or more nearly full.
+export const liquidWords = (
+  l: { label: string; quantity: number; capacity: number },
+  text: (key: string) => string,
+) => {
+  const kind = lower(text(l.label));
+  if (l.quantity <= 0) return 'Empty.';
+  if (l.quantity >= l.capacity) return `Full of ${kind}.`;
+  if (3 * l.quantity >= 2 * l.capacity) return `Nearly full of ${kind}.`;
+  if (3 * l.quantity <= l.capacity) return `Nearly empty, a little ${kind} left.`;
+  return `Half full of ${kind}.`;
+};
+
 // A twin row's quiet note: the item's projected state, as its detail page shows it (skills.tsx).
 const state = (e: Thing | undefined, text: (key: string) => string) =>
-  e?.state
-    ? cap(e.state)
-    : e?.liquid &&
-      `${text(e.liquid.label)}: ${e.liquid.quantity}/${e.liquid.capacity} ${text(e.liquid.unit_label)}`;
+  e?.state ? cap(e.state) : e?.liquid && liquidWords(e.liquid, text);
 
 // The option a pair is listed under on page `id`. A spell: one list of spells on its target's page,
 // elsewhere (Character) one list per spell.
