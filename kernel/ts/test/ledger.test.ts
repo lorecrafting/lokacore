@@ -43,7 +43,7 @@ const fixture = {
       currency: R('resource', 'pennies'),
       price: 2,
       provider: R('npc', 'innkeep'),
-      benefit: { kind: 'meal', stock: R('resource', 'lantern_meals') },
+      benefit: { op: 'meal', stock: R('resource', 'lantern_meals') },
     },
   }),
   transports: defs('transport', {

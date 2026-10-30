@@ -501,7 +501,7 @@
         "key": "ordered_knife",
         "kind": "fact"
        },
-       "kind": "entitlement"
+       "op": "entitlement"
       },
       "action": {
        "action_key": "commission",
@@ -539,7 +539,7 @@
       "label": "service.forge_claim",
       "price": 1,
       "benefit": {
-       "kind": "claim",
+       "op": "claim",
        "service": {
         "cartridge_id": "toolbox_showcase",
         "cartridge_version": "0.0.1",
@@ -583,7 +583,7 @@
       "label": "service.forge_cancel",
       "price": 1,
       "benefit": {
-       "kind": "cancel",
+       "op": "cancel",
        "service": {
         "cartridge_id": "toolbox_showcase",
         "cartridge_version": "0.0.1",

@@ -19,7 +19,7 @@ defmodule Loka.ContentGiftTest do
          "name" => "service.barter",
          "narration" => "service.barter.used",
          "price" => 1,
-         "benefit" => %{"kind" => "claim", "service" => "knife_for_pelts"}
+         "benefit" => %{"op" => "claim", "service" => "knife_for_pelts"}
        }},
       {"text.json", &Map.merge(&1, %{"service.no_order" => "x", "service.not_ready" => "x"})}
     ]
@@ -27,7 +27,7 @@ defmodule Loka.ContentGiftTest do
     for {edits, expected} <- [
           {[
              service.(
-               &put_in(&1, ["benefit"], %{"kind" => "entitlement", "fact" => "traded_knife"})
+               &put_in(&1, ["benefit"], %{"op" => "entitlement", "fact" => "traded_knife"})
              ),
              {"text.json", &Map.put(&1, "service.already_paid", "x")}
            ], {"SCHEMA_VIOLATION", "#{at}.price"}},

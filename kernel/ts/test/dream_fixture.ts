@@ -95,7 +95,7 @@ function dreamSource(c: any) {
       name: 'service.room',
       narration: 'service.room.used',
       price: 3,
-      benefit: { kind: 'entitlement', fact: ref('fact', 'bed_paid') },
+      benefit: { op: 'entitlement', fact: ref('fact', 'bed_paid') },
     },
   };
   Object.assign(c.facts, {

@@ -6,7 +6,7 @@
   "narration": "service.raze_croft_hut.used",
   "price": 2,
   "benefit": {
-    "kind": "raze",
+    "op": "raze",
     "site": "holding_croft",
     "direction": "north"
   }

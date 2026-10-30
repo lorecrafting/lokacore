@@ -2590,325 +2590,6 @@
       ],
       "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
     },
-    "ServiceBenefit": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "properties": {
-            "escrow": {
-              "additionalProperties": false,
-              "dependentRequired": {
-                "ready_after": [
-                  "output"
-                ]
-              },
-              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
-              "properties": {
-                "custody": { "$ref": "#/$defs/DefinitionRef" },
-                "items": {
-                  "items": { "$ref": "#/$defs/DefinitionRef" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                },
-                "output": { "$ref": "#/$defs/DefinitionRef" },
-                "quantity": {
-                  "maximum": 16,
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "ready_after": {
-                  "maximum": 31536000,
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "items",
-                "quantity",
-                "custody"
-              ],
-              "type": "object"
-            },
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
-            "kind": { "const": "entitlement" }
-          },
-          "required": [
-            "kind",
-            "fact"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "debit": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "meal" },
-            "recovery": { "$ref": "#/$defs/DefinitionRef" },
-            "stock": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "stock",
-            "debit",
-            "recovery",
-            "amount"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "drink" },
-            "liquid": { "$ref": "#/$defs/DefinitionRef" },
-            "recovery": { "$ref": "#/$defs/DefinitionRef" },
-            "vessel": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "vessel",
-            "liquid",
-            "recovery",
-            "amount"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
-            "kind": { "const": "repair" }
-          },
-          "required": [
-            "kind",
-            "fact",
-            "amount"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "kind": { "const": "claim" },
-            "service": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "service"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "kind": { "const": "cancel" },
-            "service": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "service"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "account": { "$ref": "#/$defs/DefinitionRef" },
-            "amount": {
-              "maximum": 1000000,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "deposit" },
-            "vault": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "account",
-            "vault",
-            "amount"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "account": { "$ref": "#/$defs/DefinitionRef" },
-            "amount": {
-              "maximum": 1000000,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "withdraw" },
-            "vault": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "account",
-            "vault",
-            "amount"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "dependentRequired": {
-            "escrow": [
-              "fact"
-            ],
-            "fact": [
-              "escrow"
-            ]
-          },
-          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "escrow": {
-              "additionalProperties": false,
-              "description": "Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room.",
-              "properties": {
-                "custody": { "$ref": "#/$defs/DefinitionRef" },
-                "items": {
-                  "items": { "$ref": "#/$defs/DefinitionRef" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                },
-                "quantity": {
-                  "maximum": 16,
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "ready_after": {
-                  "maximum": 31536000,
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "items",
-                "quantity",
-                "custody",
-                "ready_after"
-              ],
-              "type": "object"
-            },
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
-            "kind": { "const": "build" },
-            "site": { "$ref": "#/$defs/DefinitionRef" },
-            "structure": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "structure",
-            "site",
-            "direction"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "escrow": {
-              "additionalProperties": false,
-              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
-              "properties": {
-                "custody": { "$ref": "#/$defs/DefinitionRef" },
-                "items": {
-                  "items": { "$ref": "#/$defs/DefinitionRef" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                },
-                "quantity": {
-                  "maximum": 16,
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "items",
-                "quantity",
-                "custody"
-              ],
-              "type": "object"
-            },
-            "kind": { "const": "mend" },
-            "site": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "site",
-            "direction"
-          ],
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "kind": { "const": "raze" },
-            "site": { "$ref": "#/$defs/DefinitionRef" }
-          },
-          "required": [
-            "kind",
-            "site",
-            "direction"
-          ],
-          "type": "object"
-        }
-      ],
-      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S4, a build or mend of a site's room."
-    },
     "Shop": {
       "additionalProperties": false,
       "description": "A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).",
@@ -3399,7 +3080,7 @@
               "escrow"
             ]
           },
-          "description": "Scripted action: Built rooms S6 (detail-target scripted actions only, at most one per outcome, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full). Service benefit: Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "description": "Scripted action: Built rooms S6 (detail-target scripted actions only, at most one per outcome, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full). Service benefit: Built rooms S2 (construction@1): raise structure at site's direction (site required on a service, lib/loka/content/steps.ex). structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
           "properties": {
             "direction": {
               "enum": [
@@ -5533,237 +5214,6 @@
       ],
       "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them."
     },
-    "partial.ServiceBenefit": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "properties": {
-            "escrow": {
-              "additionalProperties": false,
-              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
-              "properties": {
-                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "items": {
-                  "items": { "$ref": "#/$defs/DefinitionRef" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                },
-                "output": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "quantity": {
-                  "maximum": 16,
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "ready_after": {
-                  "maximum": 31536000,
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "type": "object"
-            },
-            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "kind": { "const": "entitlement" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "debit": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "meal" },
-            "recovery": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "stock": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "drink" },
-            "liquid": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "recovery": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "vessel": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "amount": {
-              "maximum": 2147483647,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "kind": { "const": "repair" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "kind": { "const": "claim" },
-            "service": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "kind": { "const": "cancel" },
-            "service": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "account": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "amount": {
-              "maximum": 1000000,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "deposit" },
-            "vault": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "account": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "amount": {
-              "maximum": 1000000,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "kind": { "const": "withdraw" },
-            "vault": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Built rooms S2 (construction@1): raise structure at site's direction. structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "escrow": {
-              "additionalProperties": false,
-              "description": "Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room.",
-              "properties": {
-                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "items": {
-                  "items": { "$ref": "#/$defs/DefinitionRef" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                },
-                "quantity": {
-                  "maximum": 16,
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "ready_after": {
-                  "maximum": 31536000,
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "type": "object"
-            },
-            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "kind": { "const": "build" },
-            "site": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "structure": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "escrow": {
-              "additionalProperties": false,
-              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
-              "properties": {
-                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
-                "items": {
-                  "items": { "$ref": "#/$defs/DefinitionRef" },
-                  "maxItems": 16,
-                  "minItems": 1,
-                  "type": "array"
-                },
-                "quantity": {
-                  "maximum": 16,
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "type": "object"
-            },
-            "kind": { "const": "mend" },
-            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
-          "properties": {
-            "direction": {
-              "enum": [
-                "north",
-                "south",
-                "east",
-                "west",
-                "up",
-                "down"
-              ]
-            },
-            "kind": { "const": "raze" },
-            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
-          },
-          "type": "object"
-        }
-      ],
-      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S4, a build or mend of a site's room."
-    },
     "partial.Shop": {
       "additionalProperties": false,
       "description": "A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).",
@@ -5803,6 +5253,481 @@
         "sold": { "$ref": "#/$defs/partial.TextKey" }
       },
       "type": "object"
+    },
+    "partial.Step": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "description": "Assign a fact.",
+          "properties": {
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "fact.assign" },
+            "value": { "$ref": "#/$defs/FactValue" },
+            "with": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
+          "properties": {
+            "amount": { "type": "integer" },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "fact.adjust" },
+            "with": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC)."
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "quest.activate" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "quest.resolve" },
+            "outcome": { "$ref": "#/$defs/Key" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "quest.fail" },
+            "outcome": { "$ref": "#/$defs/Key" },
+            "quest": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Suppress one authored population plan for duration logical seconds from this accepted fact-change cause, preserving current members and closing its current encounter.",
+          "properties": {
+            "duration": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "population.suppress" },
+            "plan": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Reaction: Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing. Scripted action: Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "properties": {
+            "co_present": {
+              "description": "Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION).",
+              "enum": [true]
+            },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "status.apply" },
+            "room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION)."
+            },
+            "status": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "tag": {
+              "$ref": "#/$defs/Tag",
+              "description": "Toolbox row W22 (only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing."
+            }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).",
+          "properties": {
+            "barrier": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "barrier.set" },
+            "tag": { "$ref": "#/$defs/Tag" },
+            "to": { "$ref": "#/$defs/BarrierState" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Reaction: Toolbox row G3 reader 3: end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins. Scripted action: Toolbox row G4: end the scripted action target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
+          "properties": {
+            "op": { "const": "status.cure" },
+            "status": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Add amount experience to the acting character's levelling row (toolbox row 4), saturating at the ResourceInt maximum; needs world.levelling.",
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "experience.grant" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
+          "properties": {
+            "op": { "const": "item.move" },
+            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1: plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.",
+          "properties": {
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "npc.move" },
+            "plan": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 37a (phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
+          "properties": {
+            "op": { "const": "population.spawn" },
+            "plan": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Homestead hs-1: one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
+          "properties": {
+            "op": { "const": "replenish.run" },
+            "replenish": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Settle S3-1: appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.",
+          "properties": {
+            "op": { "const": "narrate" },
+            "text": { "$ref": "#/$defs/partial.TextKey" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+          "properties": {
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "fact.stamp" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Emit a custom event.",
+          "properties": {
+            "event": { "$ref": "#/$defs/Key" },
+            "op": { "const": "event.emit" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29b (spell scripted actions only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": { "$ref": "#/$defs/DamageKind" },
+            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "damage" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "properties": {
+            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "light.ignite" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Adjust a resource of the actor's body by `by`, stopping at its bounds.",
+          "properties": {
+            "by": { "$ref": "#/$defs/ResourceInt" },
+            "op": { "const": "resource.adjust" },
+            "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Scripted action: Built rooms S6 (detail-target scripted actions only, at most one per outcome, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full). Service benefit: Built rooms S2 (construction@1): raise structure at site's direction (site required on a service, lib/loka/content/steps.ex). structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.",
+          "properties": {
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "escrow": {
+              "additionalProperties": false,
+              "description": "Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room.",
+              "properties": {
+                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "items": {
+                  "items": { "$ref": "#/$defs/DefinitionRef" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "quantity": {
+                  "maximum": 16,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "ready_after": {
+                  "maximum": 31536000,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "build" },
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "structure": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "skill.acquire" },
+            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "topic.grant" },
+            "topic": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "escrow": {
+              "additionalProperties": false,
+              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
+              "properties": {
+                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "items": {
+                  "items": { "$ref": "#/$defs/DefinitionRef" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "output": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "quantity": {
+                  "maximum": 16,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "ready_after": {
+                  "maximum": 31536000,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "entitlement" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "debit": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "meal" },
+            "recovery": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "stock": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "liquid": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "drink" },
+            "recovery": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "vessel": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "op": { "const": "repair" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "claim" },
+            "service": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "op": { "const": "cancel" },
+            "service": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "account": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "amount": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "deposit" },
+            "vault": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "account": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "amount": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": { "const": "withdraw" },
+            "vault": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.",
+          "properties": {
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "escrow": {
+              "additionalProperties": false,
+              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
+              "properties": {
+                "custody": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "items": {
+                  "items": { "$ref": "#/$defs/DefinitionRef" },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "quantity": {
+                  "maximum": 16,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "op": { "const": "mend" },
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
+          "properties": {
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "op": { "const": "raze" },
+            "site": { "$ref": "#/$defs/partial.DefinitionRef" }
+          },
+          "type": "object"
+        }
+      ],
+      "description": "One registered operation of a step list, discriminated by op. Scripted action outcome's explicit steps (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost)."
     },
     "partial.TargetSpec": {
       "anyOf": [
@@ -7433,7 +7358,10 @@
       "description": "Exact original-provider action and conserved quote with one typed immediate benefit.",
       "properties": {
         "action": { "$ref": "#/$defs/Key" },
-        "benefit": { "$ref": "#/$defs/partial.ServiceBenefit" },
+        "benefit": {
+          "$ref": "#/$defs/partial.Step",
+          "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S5, a build, mend or raze of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op)."
+        },
         "currency": { "$ref": "#/$defs/partial.DefinitionRef" },
         "extends": { "$ref": "#/$defs/Key" },
         "name": { "$ref": "#/$defs/partial.TextKey" },
@@ -9604,7 +9532,10 @@
       "description": "Exact original-provider action and conserved quote with one typed immediate benefit.",
       "properties": {
         "action": { "$ref": "#/$defs/Key" },
-        "benefit": { "$ref": "#/$defs/ServiceBenefit" },
+        "benefit": {
+          "$ref": "#/$defs/Step",
+          "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S5, a build, mend or raze of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op)."
+        },
         "currency": { "$ref": "#/$defs/DefinitionRef" },
         "name": { "$ref": "#/$defs/TextKey" },
         "narration": { "$ref": "#/$defs/TextKey" },

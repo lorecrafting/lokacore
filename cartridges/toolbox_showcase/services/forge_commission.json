@@ -6,7 +6,7 @@
   "narration": "service.forge_commission.used",
   "price": 3,
   "benefit": {
-    "kind": "entitlement",
+    "op": "entitlement",
     "fact": "ordered_knife",
     "escrow": {
       "items": [

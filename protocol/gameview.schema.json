@@ -489,7 +489,9 @@
       "properties": {
         "hostile": {
           "description": "Book hostile refusal: present while this NPC's disposition toward the viewer is hostile (toolbox row G11), a derived read; absent otherwise.",
-          "enum": [true]
+          "enum": [
+            true
+          ]
         },
         "refusal": {
           "description": "Book hostile refusal: the NPC's authored disposition.refuse line, present with hostile when authored.",
@@ -2532,7 +2534,7 @@
           "maximum": 2147483647
         },
         "benefit": {
-          "$ref": "service.schema.json#/$defs/ServiceBenefit"
+          "$ref": "step.schema.json#/$defs/Step"
         },
         "action": {
           "$ref": "#/$defs/AdvertisedAction"
@@ -2558,7 +2560,7 @@
           "label": "service.room",
           "price": 3,
           "benefit": {
-            "kind": "entitlement",
+            "op": "entitlement",
             "fact": {
               "cartridge_id": "service_probe",
               "cartridge_version": "1.0.0",

@@ -6,7 +6,7 @@
   "narration": "service.withdraw.used",
   "price": 1,
   "benefit": {
-    "kind": "withdraw",
+    "op": "withdraw",
     "account": "savings",
     "vault": "vault",
     "amount": 10

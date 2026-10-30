@@ -6,7 +6,7 @@
   "narration": "service.cancel.used",
   "price": 1,
   "benefit": {
-    "kind": "cancel",
+    "op": "cancel",
     "service": "commission"
   }
 }

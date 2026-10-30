@@ -6,7 +6,7 @@
   "narration": "service.raise_hut_plain.used",
   "price": 5,
   "benefit": {
-    "kind": "build",
+    "op": "build",
     "structure": "hut_plain",
     "site": "lane",
     "direction": "north"
