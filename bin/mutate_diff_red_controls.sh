@@ -94,7 +94,7 @@ chmod +x stub/mise
 git add . && git commit -qm change
 rc=0; PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out 2>&1 || rc=$?
 [ "$rc" = 1 ] || bad "exit $rc with SURVIVED rows, want 1"
-row() { grep -F "$1" out | grep -F "$2" | grep -q "^$3	"; }
+row() { grep -F "$1" "${4:-out}" | grep -F "$2" | grep -q "^$3	"; }
 row 'src/gate.ts:3' '< -> <=' red-narrow && grep -F 'src/gate.ts:3	< -> <=	' out | grep -q 'not ok .* - zero passes' \
   || bad 'tested guard: not killed with its failing test line'
 row 'src/gate.ts:3' 'drop if (n < 0)' red-narrow || bad 'tested guard drop: not killed'
@@ -120,7 +120,7 @@ head -1 out | grep -q '^mutate_diff: [0-9]* mutants' || bad 'count not printed f
   || bad 'renamed file with one edited line: not exactly that line'"'"'s 2 mutants'
 ! grep -q 'src/still2\?.ts' out || bad 'a pure rename planned mutants'
 rc=0; MUTATE_MINUTES=0 PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out0 2>&1 || rc=$?
-[ "$rc" = 3 ] && grep -F 'src/broken.ts:1' out0 | grep -q '^TIMEBOX	' || { bad "0-minute budget: exit $rc, setup ran past it"; cat out0; }
+[ "$rc" = 3 ] && grep -F 'src/broken.ts:1' out0 | grep -q '^TIMEBOX	' && row 'src/lonely.ts:3' '< -> <=' NOT-UNIQUE out0 || { bad "0-minute budget: exit $rc, setup ran past it"; cat out0; }
 rc=0; MUTATE_MINUTES=1 PATH="$R/stub:$PATH" sh bin/mutate_diff.sh HEAD~1 > out1 2>&1 || rc=$?
 [ "$rc" = 3 ] && grep -F 'lib/gate.ex:6' out1 | grep -q '^TIMEBOX	' || { bad "1-minute budget: exit $rc, bin/mutate.sh got the whole minute after setup"; cat out1; }
 rc=0; MUTATE_MINUTES=1.5 sh bin/mutate_diff.sh HEAD~1 > outx 2>&1 || rc=$?
