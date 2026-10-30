@@ -135,7 +135,7 @@ test('a say or shout with no narration echoes once in ink', () => {
   const echoes = () => b.text().filter((t) => t.startsWith('You '));
   say(b, 'hello');
   send(b, 'help', LABEL.shout);
-  assert.deepEqual(echoes(), ['You say "hello".', 'You shout "help".']);
+  assert.deepEqual(echoes(), ['You say, "Hello."', 'You shout, "Help!"']);
   assert.equal(spoken('say', undefined), undefined); // a wordless retry falls back to OUTCOME
 });
 
@@ -150,7 +150,7 @@ test('a typed word is said like its chip, even after the view moves on, and echo
   type(b, 'two words');
   assert.equal(revision(b), before);
   assert.ok(b.text().includes(LABEL.oneWord));
-  input().props.onChangeText('Xyzzy'); // said, and echoed, as the kernel folds it
+  input().props.onChangeText('Xyzzy'); // said as the kernel folds it, echoed as a sentence
   const stale = input(); // drawn before a background update, so its Say token is old
   const { view, token } = b.game.view();
   const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, shout')!;
@@ -161,7 +161,7 @@ test('a typed word is said like its chip, even after the view moves on, and echo
   assert.ok(!b.text().includes(LABEL.oneWord));
   assert.deepEqual(
     b.text().filter((t) => /xyzzy/i.test(t)),
-    ['You say "xyzzy".'],
+    ['You say, "Xyzzy."'],
   );
 });
 

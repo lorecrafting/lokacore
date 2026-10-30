@@ -293,6 +293,16 @@ otherwise; an authored line keeps its own text, except an `emote.performed` line
 in place; every other line is log. The page's own redraw (purse, list, contents) is the
   feedback. Another person's action is never quiet.
 - A page never draws the room log, so no line shows twice on one page.
+- Dialogue is novel prose (owner, 2026-10-30, Beads `loka-r9mr`): speaker, speech verb, the
+  listener when there is one, a comma, then the spoken line in double quotes. To the player:
+  `Nell says to you, "Well, stranger?"`; to the room: `Nell says, "Ale's a penny."`; the player:
+  `You say, "Ware."`, `You whisper to the jailer, "Ware."`, `You shout, "Ware!"`. The verbs in use
+  are say, whisper and shout (a question may read `asks` / `asks you`). The quoted line starts with a
+  capital and its closing stop sits inside the quotes; a line ending in `?` or `!` takes no added
+  comma or period. Never the colon form (`Nell: ...`) and never a bare quotation with no speaker.
+  An authored line that already attributes itself (`"Gate's shut," says the guard.`) is kept as
+  written; the Book never parses quotes to add a speaker. Authored dialogue that is a bare
+  quotation is a content fix (Beads `loka-r9mr` follow-up), not a Book rewrite.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
   same bindings and actor, the same pressed card target (the stock row or item), the same page
   visit, and no other line lies between. The merged line is the sentence once with " (N times)"
@@ -814,7 +824,7 @@ thing's **Cast a spell…** [list](#item-details-and-takedrop) ([World](#world-a
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:
-**You say "ware".**, **You whisper "ware" to the jailer.**, **You shout "ware".** (pass-1 R5);
+**You say, "Ware."**, **You whisper to the jailer, "Ware."**, **You shout, "Ware!"** (pass-1 R5; prose form, [Line placement](#line-placement));
 a receipt with narration draws that instead. Beyond this echo the Book never writes the typed
 word anywhere; only its writer sees it.
 

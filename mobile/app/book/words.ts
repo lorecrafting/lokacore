@@ -248,10 +248,10 @@ function answer(
 }
 
 // The Book's echo of an accepted speech press whose receipt has no narration (book-ui.md, Word bar),
-// the word folded as the kernel folds it; no word, no echo.
+// in novel prose (Line placement): the folded word capitalised, its stop inside the quotes; no word, no echo.
 export const spoken = (how: string, word: unknown, to?: string) =>
   typeof word === 'string'
-    ? `You ${how} "${word.toLowerCase()}"${to ? ` to ${to}` : ''}.`
+    ? `You ${how}${to ? ` to ${to}` : ''}, "${sentence(word.toLowerCase())}${how === 'shout' ? '!' : '.'}"`
     : undefined;
 
 type Events = Extract<DecisionResult, { kind: 'accepted' }>['events'];

@@ -6,7 +6,7 @@ import { Heard } from '../book/lines.tsx';
 const meta = {
   title: 'Book/Heard',
   component: Heard,
-  args: { said: { key: 1, text: 'You say "ware".' } },
+  args: { said: { key: 1, text: 'You say, "Ware."' } },
 } satisfies Meta<typeof Heard>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 export const Batch: Story = {
   play: async ({ canvasElement }) => {
     await expect(canvasElement.querySelector('[aria-live="polite"]')?.textContent).toBe(
-      'You say "ware".',
+      'You say, "Ware."',
     );
   },
 };
