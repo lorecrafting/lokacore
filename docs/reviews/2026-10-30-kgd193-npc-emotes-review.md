@@ -89,3 +89,10 @@ Question: the step `to` enum widened to `["subject","actor"]` stays green. Both 
   - drop the ownership check (`emotes.ex:12`).
 - Text player: `kernel/ts/play/spoken.ts` uses the same `emoteSentence`, so for a single player it reads the same as the Book.
 - CI at the head (`gh run list --commit 0c7938579...`): ci 41124887928, book-e2e 41124888041 and graph-diff 41124896223 all completed success.
+
+### Second opinion re-check (fix `ab6db7f400f1912cebc82dc8c41cc4e62df6d7de`)
+
+- Verdict: **APPROVE**.
+- Finding 1 is fixed. `kernel/ts/src/content/cartridge.ts:88` adds `'emotes'` to `DEFINITION_MAPS`, so `loadCartridge` (the only caller) now checks it. The new test `kernel/ts/test/emote.test.ts:222` computes the hash itself, and its expected code, path and data come from the input. Results: `emote.test.ts` passes 8/8. Red control: with the `'emotes'` line removed, that test alone fails (7 pass, 1 fail).
+- Finding 2 is closed by the PM ruling. `kernel/ts/src/mechanics/emote/line.ts:31` has the `ponytail:` comment, and the follow-up is filed as loka-u6wj (open, P3).
+- CI at `ab6db7f40` (`gh run list --commit`): ci 41128213253, book-e2e 41128213399 and graph-diff 41128221378 all completed success.
