@@ -57,7 +57,7 @@ defmodule Loka.Content.Steps do
   `steps` (a list, or one step such as a service's benefit) at `path` of `rel` in `context`
   (:reaction, :action, :choice or :service): SCHEMA_VIOLATION invalid_value at an op or field
   the context does not run, missing_property at a field it requires, the owning event
-  an op needs (`ctx.events`), and each step's references (`ctx.m`, `ctx.defs`).
+  an op needs (`ctx.events`), and the references of the fields it runs (`ctx.m`, `ctx.defs`).
   """
   def check(rel, path, step, context, ctx) when is_map(step),
     do: step(rel, path, step, context, ctx)
@@ -75,15 +75,17 @@ defmodule Loka.Content.Steps do
 
       fields ->
         missing(rel, path, s, context) ++
-          unrun(rel, path, s, fields) ++ refs(rel, path, s, event, ctx)
+          unrun(rel, path, s, fields) ++ refs(rel, path, s, fields, event, ctx)
     end
   end
 
-  # The step's owning event and references.
-  defp refs(rel, path, s, event, ctx) do
+  # The step's owning event and the references of the fields the context runs (a refused field
+  # has its own diagnostic).
+  defp refs(rel, path, s, fields, event, ctx) do
     if(event, do: owned(at(rel, path ++ ["op"]), event, ctx.events), else: []) ++
       for {f, kind} <- Map.get(Loka.Content.LeafRefs.steps(), s["op"], %{}),
           is_map_key(s, f),
+          fields == :any or f in fields,
           d <- reference(rel, path, {f, kind}, s, ctx.m, ctx.defs),
           do: d
   end

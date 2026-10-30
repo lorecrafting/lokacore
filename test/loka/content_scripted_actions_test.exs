@@ -111,11 +111,9 @@ defmodule Loka.ContentScriptedActionsTest do
       {%{"op" => "fact.adjust", "fact" => "chapel_bell_rung", "amount" => 1}, [refused.("op")]},
       {%{"op" => "drink", "vessel" => "cup", "liquid" => "ale", "recovery" => "r", "amount" => 1},
        [refused.("op")]},
+      # Breaks: a refused field is still reference-checked (no npc bram), a second diagnostic.
       {%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => true, "npc" => "bram"},
-       [
-         refused.("npc"),
-         d("UNRESOLVED_REFERENCE", at <> "npc", %{"target" => "recipe_sampler@0.0.1:npc/bram"})
-       ]}
+       [refused.("npc")]}
     ]
 
     for {step, diags} <- cases do
