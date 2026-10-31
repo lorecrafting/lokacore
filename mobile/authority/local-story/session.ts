@@ -96,6 +96,7 @@ export function openGame(db: Db, bundled: Bundled, host: HostPart) {
   return managedGame(story, cartridge, db);
 }
 
+const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
 function managedGame(
   story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
   cartridge: Cartridge,
@@ -107,7 +108,6 @@ function managedGame(
     for (const listener of listeners) listener(update);
   };
   const projection = (): Projection => ({ view: gameView(story.world()), token: story.token() });
-  const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
   let attempting = false;
   const attempt = (): Reply => {
     const outer = attempting; // a listener may re-enter attempt while this one drains
@@ -134,6 +134,7 @@ function managedGame(
   return Object.assign(game, {
     newGame: story.newGame,
     pulse: pulseOf(story, projection, before, emit, pending, attempt),
+    entityIds: () => story.world().entityIds, // definition ref -> id, for the author preview's record
   });
 }
 

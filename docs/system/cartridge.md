@@ -836,6 +836,45 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 source, a line may be written in place and lowered to a generated key
 ([inline prose](#source-shortcuts)).
 
+## Author preview
+
+`bin/loka dev <cartridge dir> --watch` ([`author.ts`](../../kernel/ts/play/author.ts)) compiles the
+source tree into the artifact the web preview bundles (`mobile/app/.dev-cartridge/current.json`,
+[`metro.config.js`](../../mobile/app/metro.config.js), `npm run author`) and serves a local,
+loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview proxies at
+`/__author/`. Release, test and e2e bundles never set `LOKA_DEV_CARTRIDGE`; a production bundle
+with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
+build. The author tools below exist only in that bundle and change no protocol, save or kernel_api.
+
+- **Keep my place.** The preview records each input the Book sends that the session saved (the
+  intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
+  in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
+  path through the normal command path, one step at a time; the first step the session does not
+  save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
+- **Fast loop.** An edit that changes only `text.json` is pushed to the open page as a text overlay
+  and shows at once: no compile, reload or replay. The full compile still runs after it and
+  reports its diagnostics to the column; its artifact is written on the next structural edit. Any
+  other edit compiles, and the page reloads and replays. A failed compile keeps the last good
+  artifact and names the fault. The release compile (`mix loka.compile`) and every CI check are
+  unchanged by the fast path; the overlay never becomes an artifact.
+- **Checkpoints.** A recorded path saved under a name is a plain file in the source tree,
+  `checkpoints/<name>.json` (the same steps as keep my place, versioned with the cartridge). The
+  column lists them; jumping to one starts the game over and replays it.
+- **Author column** (`?dev=1`, web only): the last compile's diagnostics in plain words
+  (`severity: file:line message`); current facts, quests and flags from the view; why an action
+  is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book
+  line opens its source `file:line` in the owner's editor (`POST /__author/open`, `LOKA_EDITOR`,
+  default `code --goto`); the game-time control; the checkpoint list; the still-to-write list.
+- **Still to write.** A text value of exactly `~` is a placeholder. The column and
+  `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
+  word counts of what is written. A release compile refuses a cartridge with placeholders
+  (`placeholder_text` at the key's path) unless `--allow-placeholders` is given.
+- **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue
+  lowered by [Source shortcuts](#source-shortcuts) into today's dialogue JSON and `text.json` keys
+  before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
+  scene file and line. Gate: a sampler dialogue re-expressed as a scene compiles byte-identical.
+  Rules: [owner decision](../decisions/owner-decision-handwritten-prose-2026-10-31.md).
+
 ## Development cartridges
 
 `cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets),
