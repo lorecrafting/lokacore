@@ -69,7 +69,7 @@ export const Carrying: StoryObj = {
 // Breaks: the carried sentence lost, its item not a link, or shop stock listed as carried.
 const letter = NpcChoiceView.view.entities[3]!;
 const nell = NpcChoiceView.view.entities[0]!;
-const lookView = (id: string, entities = NpcChoiceView.view.entities) => ({
+const lookView = (id: string, entities: unknown[] = NpcChoiceView.view.entities) => ({
   ...NpcChoiceView,
   view: { ...NpcChoiceView.view, entities },
   stack: [

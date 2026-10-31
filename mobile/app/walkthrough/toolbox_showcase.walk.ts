@@ -51,8 +51,6 @@ const steps = ({ screen, room }: Walk) => {
     await tap(new RegExp(`^${LABEL.inventory}`));
     await tap(item);
   };
-  // An item page opened from Inventory leaves back to Inventory (x6t.23), then on to World.
-  const putAway = () => tap(LABEL.leave).then(() => tap(LABEL.backToWorld));
   const position = turnTo(screen, tap);
   // A known word through the say field: open it, press the word's chip, press the send.
   const speak = async (word: string, how: string) => {
@@ -66,7 +64,7 @@ const steps = ({ screen, room }: Walk) => {
     for (let i = 0; i < times; i++) await tap(verb);
     await tap(LABEL.leave);
   };
-  return { tap, take, lesson, held, putAway, position, moves, speak, fixture };
+  return { tap, take, lesson, held, position, moves, speak, fixture };
 };
 type Steps = ReturnType<typeof steps>;
 
@@ -160,6 +158,7 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   await fixture('barrels', 'Hide');
   await moves('east', 'north');
   await tap(/^(?:the )?merchant, open$/i);
+  await tap(LABEL.lookPerson); // what a person carries is on their Look page (loka-aqnc)
   await take(/^(?:the )?merchant's purse, open/i, /^Lift$/);
   await moves('south', 'west');
   await shop(/^(?:the )?fence, open$/i, LABEL.sell, /^Merchant's purse — /);
@@ -172,13 +171,14 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   await tap(/^Open the strongroom door/);
   await tap('Go south');
   await take(/^(?:a )?strongroom chest, open$/i, /^Open a strongroom chest/);
-  await tap(/^Put a tallow candle/); // Open leaves us on the chest page
+  // Open turns to the chest's Inside page; Put stays on its item page (loka-mo0p)
+  for (const l of [LABEL.close, /^Put a tallow candle/, LABEL.lookInside]) await tap(l);
   await take(/^(?:a )?tallow candle, open/i, /^Take a tallow candle/);
   await settle();
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const loft = async (r: Walk, { tap, take, held, putAway, moves, speak, fixture }: Steps) => {
+const loft = async (r: Walk, { tap, take, held, moves, speak, fixture }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -202,12 +202,13 @@ const loft = async (r: Walk, { tap, take, held, putAway, moves, speak, fixture }
   await take(/^(?:the )?grimoire, open$/i, /^Take the grimoire/);
   await held(/^the grimoire/);
   await tap(/^Read/);
-  await putAway();
+  // The item leaves to Inventory (x6t.23), Inventory to Contents (loka-8lpm), then World.
+  for (const l of [LABEL.leave, LABEL.backToContents, LABEL.backToWorld]) await tap(l);
   await moves('south');
   await tap(/opens Contents$/);
   await tap(/^Character/);
-  await tap('Raise CHA');
-  await tap(LABEL.backToWorld);
+  // a section opened from Contents goes back to it (loka-8lpm)
+  for (const l of ['Raise CHA', LABEL.backToContents, LABEL.backToWorld]) await tap(l);
   await speak('ward', LABEL.cast);
 };
 
@@ -221,8 +222,8 @@ const magic = async (r: Walk, steps: Steps) => {
   await held(/^the oilcan/); // a use scripted action is offered on the held tool
   await tap(LABEL.useOn); // the oilcan's Pick list; a pick returns to World
   await tap(/, oil the winch$/);
-  await tap('Map');
-  await tap(/^Open/);
+  // the Map, a Contents section, draws no status line (loka-8lpm)
+  for (const l of ['Map', /^Open/, LABEL.backToWorld]) await tap(l);
   await held(/^the lantern/);
   await tap(/^Drop/); // the lit lantern left on the stair: the crypt below is dark
   await tap(LABEL.backToContents); // a Drop returns to Inventory (loka-8lpm)

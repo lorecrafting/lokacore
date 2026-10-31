@@ -79,9 +79,12 @@ test('real SQLite preserves original books through ground Take nested open Read 
     ['mill'],
   );
   reopen();
+  // book-ui.md Take/Drop: Contents, Inventory, the holder's page and its Inside page, then the book.
   assert.deepEqual(restoredItemPages(a.view(), a.book.screen().detail), [
+    { kind: 'contents' },
     { kind: 'carrying' },
     { kind: 'thing', id: chest },
+    { kind: 'inside', id: chest },
     { kind: 'thing', id: ward },
   ]);
   assert.deepEqual(a.book.screen().detail(ward), [LEDGER]);
