@@ -1,3 +1,4 @@
+// size: allow 545, quest@1's whole lifecycle and its offer's targets over one artifact loader
 // quest@1 (Early R7/R8 Q; 06 §1-§5, §43; 04 §5.2): accept_quest through the offer, the two
 // evidence policies, delivery, resolution, quest_state, the journal and the loader's quest
 // checks. Worlds are the errand known answer (protocol/fixtures/cartridge_errand_hash.json: Bram
@@ -14,7 +15,13 @@ import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.ge
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { decode, encode } from '../src/foundation/canonical.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { resolved as offered } from '../src/commands/actions.ts';
 import { holds } from '../src/mechanics/policy.ts';
+import { statusKey } from '../src/mechanics/status/shared.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { refString } from '../src/runtime/decision.ts';
+import { offerMaps } from '../src/view/invariants_view.ts';
 import { resolution } from '../src/mechanics/quest/lifecycle.ts';
 import { admit, adopt, gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
@@ -51,6 +58,7 @@ const world = (f: (c: any) => void = () => {}): World => {
   return newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], [1, 2, 3, 4]);
 };
 const quest = (c: any) => c.quests[`${E}:quest/lantern`];
+const bare = (c: any) => delete quest(c).offer.target; // a place action; the loader accepts it
 const strict = () => world((c) => (c.quests[`${E}:quest/lantern`].objective = STRICT));
 const cmd = (w: World, payload: object, id = CMD): Command =>
   ({
@@ -132,7 +140,7 @@ test('a second accept and an accept of an undeclared quest are refused', () => {
 // Breaks: the offer not resolving to accept_quest of its quest (the frozen accept request carries
 // no input), or still offered once the actor has an instance.
 test('the offer is a place action that resolves to accept_quest and is withdrawn after', () => {
-  const w = world();
+  const w = world(bare);
   const offer = { action_key: 'lantern', label: 'quest.lantern.accept', target: { kind: 'none' } };
   assert.deepEqual(plain(gameView(w).actions.find((a) => a.action_key === 'lantern')), {
     available: true,
@@ -165,7 +173,10 @@ test('the offer is a place action that resolves to accept_quest and is withdrawn
 // Breaks: the offer's policy ignored by admission or by the GameView.
 test('an offer whose policy fails is listed unavailable and accept is invalid_state', () => {
   const never = { op: 'not', item: { op: 'all', items: [] } };
-  const w = world((c) => (c.quests[`${E}:quest/lantern`].offer.policy = never));
+  const w = world((c) => {
+    bare(c);
+    quest(c).offer.policy = never;
+  });
   const listed = gameView(w).actions.find((a) => a.action_key === 'lantern');
   assert.deepEqual(plain(listed && 'reason' in listed && listed.reason), { code: 'invalid_state' });
   refused(w, ACCEPT, 'invalid_state');
@@ -268,7 +279,7 @@ test('resolution re-checks current possession and resolves an open instance once
 // activation), or one completed by its event not resolvable; delivery to an instance no longer
 // active (a re-take after objectives_complete or resolved then faults precondition_failed).
 test('a strict objective resolves only once its event completed it', () => {
-  const early = after(strict(), move('north'), take, ACCEPT);
+  const early = after(strict(), move('north'), take, move('south'), ACCEPT);
   assert.equal(resolved(early), 'quest_requirement');
   const complete = after(early, drop, take, drop, take);
   assert.deepEqual(state(complete), ['objectives_complete']);
@@ -352,6 +363,7 @@ test('the loader checks the installed quest capability', () => {
     without,
   );
   const contributed = world((c) => {
+    bare(c);
     c.rooms[`${E}:room/ferry_landing`].actions = [{ op: 'replace', actions: ['lantern'] }];
   });
   assert.deepEqual(
@@ -367,12 +379,11 @@ test('two strict quests on one item complete in quest order, also after a restor
     quest(c).objective = STRICT;
     c.quests[`${E}:quest/shed`] = { ...quest(c), key: 'shed' };
   });
-  const accepted = after(w, ACCEPT, move('north'));
-  const both = step(
-    accepted,
-    cmd(accepted, { ...ACCEPT, quest: ref('quest', 'shed') }, CMD2),
-    0,
-  ).world;
+  const accepted = after(w, ACCEPT);
+  const both = after(
+    step(accepted, cmd(accepted, { ...ACCEPT, quest: ref('quest', 'shed') }, CMD2), 0).world,
+    move('north'),
+  );
   const restored = {
     ...both,
     state: decode(encode(both.state as never)) as unknown as World['state'],
@@ -387,4 +398,148 @@ test('two strict quests on one item complete in quest order, also after a restor
       ],
     );
   }
+});
+
+// Quest offer target (loka-vx2v; cartridge.md Quest offer target), the NPC half on the errand world
+// (the detail half in quest_dialogue.test.ts, on the ferry's fixture).
+const onBram = (c: any) => (quest(c).offer.target = { kind: 'npc', npc: ref('npc', 'bram') });
+const bramOf = (w: World) => w.entityIds[`${E}:npc/bram`]!;
+const invocation = (w: World, target_ids: string[]) => {
+  const id = identify('scope', w.character, {
+    invocation_id: CMD,
+    actor_id: w.character,
+    action_key: 'lantern',
+    target_ids,
+    input: {},
+  });
+  assert.equal(id.kind, 'identified');
+  return id.kind === 'identified' ? resolve(w, id) : undefined;
+};
+const UNOFFERED = { kind: 'rejected', error: { code: 'unsupported_capability' } };
+// No listing anywhere in a valid view, and the invocation and the step refused with these codes.
+const withheld = (w: World, code: string) => {
+  const v = gameView(w);
+  assert.deepEqual(validate('GameView', v), []);
+  assert.ok(!JSON.stringify(v).includes('"action_key":"lantern"'));
+  refused(w, ACCEPT, code);
+};
+
+// Breaks: an NPC-targeted offer left on the World card, its entry not on the NPC, or a target that
+// slips into the invocation (rows 5-6).
+test('an offer naming an NPC is on that NPC, invoked with no target and refused with one', () => {
+  const w = world(onBram);
+  const v = gameView(w);
+  assert.deepEqual(validate('GameView', v), []);
+  assert.equal(
+    v.actions.some((a) => a.action_key === 'lantern'),
+    false,
+  );
+  const held = v.entities.find((e) => e.id === bramOf(w))!.actions;
+  assert.deepEqual(plain(held.filter((a) => a.action_key === 'lantern')), [
+    {
+      action_key: 'lantern',
+      label: 'quest.lantern.accept',
+      target: { kind: 'entity', scopes: ['room_occupants'] },
+      target_ids: [],
+      input: [],
+      available: true,
+    },
+  ]);
+  assert.deepEqual(plain((invocation(w, []) as Command).payload), {
+    type: 'accept_quest',
+    actor_id: w.character,
+    quest: QUEST,
+  });
+  assert.deepEqual(invocation(w, [bramOf(w)]), {
+    kind: 'rejected',
+    error: { code: 'unsupported_capability' },
+  });
+  const { world: next } = run(w, ACCEPT);
+  assert.deepEqual(state(next), ['active']);
+  assert.ok(!JSON.stringify(gameView(next).entities).includes('"action_key":"lantern"'));
+});
+
+// Breaks: an offer on an NPC who walked away or died stays open from here (row 7).
+test('an offer naming an NPC elsewhere or dead is not offered', () => {
+  const away = world((c) => {
+    onBram(c);
+    c.npcs[`${E}:npc/bram`].room = ref('room', 'village_green');
+  });
+  withheld(away, 'unsupported_capability');
+  assert.deepEqual(invocation(away, []), UNOFFERED);
+  const dead = world((c) => {
+    onBram(c);
+    c.npcs[`${E}:npc/bram`].hp = { gain: 0, maximum: 1, minimum: 0, start: 0 };
+  });
+  withheld(dead, 'unsupported_capability');
+});
+
+// Breaks: admission never asks whether the actor can see the NPC the offer is on (row 8).
+test('an offer naming a concealed NPC is not listed and accept is invalid_state', () => {
+  const w = world(onBram);
+  const hidden = ref('status', 'hidden');
+  const concealed = {
+    ...w,
+    cartridge: {
+      ...w.cartridge,
+      statuses: { [refString(hidden)]: { key: 'hidden', concealment: 'hidden' } },
+    },
+    state: {
+      ...w.state,
+      statuses: { [statusKey(bramOf(w), hidden)]: { generation: 1, active: true } },
+    },
+  } as World;
+  withheld(concealed, 'invalid_state');
+});
+
+// Breaks: offerMaps not naming a targeted offer, so a World card for it passes the invariant.
+test('world_lists_no_fixture_action refuses a targeted offer on the World card', () => {
+  const w = world(onBram);
+  const v = gameView(w);
+  const maps = offerMaps(Object.values(offered(w, w.character)));
+  assert.ok(check('world_lists_no_fixture_action', { view: v, ...maps }));
+  const held = v.entities.find((e) => e.id === bramOf(w))!.actions;
+  const entry = held.find((a) => a.action_key === 'lantern');
+  assert.equal(
+    check('world_lists_no_fixture_action', { view: { ...v, actions: [entry] }, ...maps }),
+    false,
+  );
+});
+
+// Breaks: gameview_agrees_with_admission false on a legal accept from the NPC's page, or blind to
+// an accepted offer the view does not show anywhere.
+test('an accept agrees with the view only when an offer is on the page', () => {
+  const w = world(onBram);
+  const view = gameView(w);
+  const command = cmd(w, ACCEPT);
+  const { decision } = step(w, command, 0);
+  const agrees = (v: unknown) =>
+    check('gameview_agrees_with_admission', { view: v, command, decision, words: {} });
+  assert.equal(decision.kind, 'accepted');
+  assert.ok(agrees(view));
+  assert.equal(agrees({ ...view, entities: [] }), false);
+});
+
+// Breaks: a target missing a field, carrying another branch's, or an unknown kind passing the contract.
+test('an offer target is one of two closed shapes', () => {
+  const room = ref('room', 'shed');
+  const npc = ref('npc', 'bram');
+  let lantern: any;
+  load((c) => (lantern = quest(c)));
+  const errors = (target: unknown) =>
+    validate('QuestDefinition', { ...lantern, offer: { ...lantern.offer, target } });
+  assert.deepEqual(errors({ kind: 'detail', room, detail: 'post' }), []);
+  assert.deepEqual(errors({ kind: 'npc', npc }), []);
+  for (const bad of [
+    { kind: 'detail', room },
+    { kind: 'detail', detail: 'post' },
+    { room, detail: 'post' },
+    { kind: 'npc' },
+    { npc },
+    { kind: 'npc', room, detail: 'post' },
+    { kind: 'detail', npc },
+    { kind: 'npc', npc, room },
+    { kind: 'detail', room, detail: 'post', npc },
+  ])
+    assert.ok(errors(bad).length, JSON.stringify(bad));
 });

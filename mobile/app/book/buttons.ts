@@ -228,6 +228,8 @@ function heldButtons(
       .flatMap((a) => {
         // An aimed spell is a Cast a spell… row on its target, an unavailable `Lux` row when refused (pick.ts).
         if (commandOf(a) === 'cast') return pickRows(button(a, ''), why(a, text), [e.id]);
+        // An action naming its own target (a quest offer): the card reads its label, on this page.
+        if (a.target_ids?.length === 0) return { ...button(a, ''), detail_id: e.id };
         const two = other(a, e.id);
         // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)
         if (two)

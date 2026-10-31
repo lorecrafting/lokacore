@@ -132,9 +132,11 @@ defmodule Loka.Content.Resolve do
     |> Loka.Content.NpcFields.expand(m, &expand/2)
   end
 
-  # A scripted action's target (ScriptedTarget): its detail a key, so a details map never matches.
+  # A scripted action's or a quest offer's target: a detail is a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
+
+  def expand(%{"kind" => "npc", "npc" => n} = t, m), do: %{t | "npc" => ref(n, "npc", m)}
 
   # Toolbox row G4: a use target's tool liquid.
   def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),

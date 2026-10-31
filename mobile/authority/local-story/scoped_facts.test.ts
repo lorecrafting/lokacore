@@ -195,7 +195,7 @@ const variant = build((dir) => {
   });
   put(dir, 'quests/errand.json', {
     name: 'quest.errand',
-    offer: { label: 'quest.errand', policy: all },
+    offer: { label: 'quest.errand', policy: all, target: { kind: 'npc', npc: 'smith' } },
     objective: { evidence: 'current_state', policy: all },
     deadline: { after: 120000, outcome: 'late' },
   });

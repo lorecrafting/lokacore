@@ -10,7 +10,6 @@ import {
   type DefinitionRef,
   type EntityId,
   type Key,
-  type ScriptedTarget,
   type TargetSpec,
   type TextKey,
   type UnavailableReason,
@@ -18,7 +17,7 @@ import {
 } from '../contracts.gen.ts';
 import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
-import { questOf } from '../mechanics/lookups.ts';
+import { detailOf, questOffers } from './quest_offers.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { permits } from '../mechanics/status/permits.ts';
 import { sub } from '../foundation/int.ts';
@@ -38,7 +37,7 @@ import { spellOf } from '../mechanics/scripted_action/shared.ts';
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
  * scripted action when it is one (whose invocation needs no target: the scripted action names its own), the quest
  * when it is a quest's offer (accept_quest of that quest), the speaker when it is a dialogue's
- * talk (its only target), the continuation when it is close_choice of the pending choice, and
+ * talk (its only target) or a targeted offer's NPC, the fixture a targeted offer draws on, the continuation when it is close_choice of the pending choice, and
  * whether it is an engine verb, whose rule is its target and input contract (see accepts).
  */
 export type Offered = {
@@ -52,6 +51,7 @@ export type Offered = {
   readonly scripted?: ScriptedAction;
   readonly quest?: DefinitionRef;
   readonly speaker?: EntityId;
+  readonly detail?: EntityId;
   readonly dialogue?: DefinitionRef;
   readonly continuation?: ContinuationId;
   readonly engine?: true;
@@ -131,15 +131,12 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
   const actions = Object.values(world.cartridge.actions).map(
     ({ name, ...a }): [string, Offered] => [a.key, { ...a, label: name as TextKey }],
   );
-  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
-  const quests = Object.values(world.cartridge.quests ?? {}).flatMap(({ key, offer }) => {
-    const quest = { cartridge_id, cartridge_version, kind: 'quest', key } as DefinitionRef;
-    if (!offer || questOf(world, actor, quest)) return [];
-    const command = 'accept_quest' as Key;
-    const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
-    return [[key, o] as [string, Offered]];
-  });
-  return Object.fromEntries([...actions, ...scripted_actions, ...quests, ...talks(world, actor)]);
+  return Object.fromEntries([
+    ...actions,
+    ...scripted_actions,
+    ...questOffers(world, actor),
+    ...talks(world, actor),
+  ]);
 }
 
 /**
@@ -194,17 +191,12 @@ const barred = (world: World, actor: CharacterId, type: string) =>
   !permits(world, actor)(type) &&
   Object.values(composed(world, actor)).some((a) => a.command === type);
 
-/** The target id of a scripted action's detail (the compiler checks it exists). */
-export const detailOf = (world: World, t: Extract<ScriptedTarget, { kind: 'detail' }>): EntityId =>
-  Object.keys(world.details).find(
-    (id) =>
-      world.details[id].room === world.roomIds[refString(t.room)] &&
-      world.details[id].key === t.detail,
-  ) as EntityId;
+export { detailOf };
 
-/** The detail an offered scripted action acts on; none for another action or a use scripted action (row G4). */
+/** The detail an offered scripted action or targeted quest offer acts on; none for another action or a use scripted action (row G4). */
 export const detailAt = (world: World, a: Offered) =>
-  a.scripted?.target.kind === 'detail' ? detailOf(world, a.scripted.target) : undefined;
+  a.detail ??
+  (a.scripted?.target.kind === 'detail' ? detailOf(world, a.scripted.target) : undefined);
 
 /**
  * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
@@ -258,7 +250,7 @@ export function refusalReason(
     };
   const use = useAdmission(world, matching[0]!.scripted, payload, steps); // row G4
   const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
-  const ok = (a: Offered, d = detailAt(world, a)) =>
+  const ok = (a: Offered, d = detailAt(world, a) ?? (a.quest && a.speaker)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
     holds(world, actor, a.policy, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.

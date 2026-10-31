@@ -28,6 +28,19 @@ test('board projection keeps bounded identities and selected descriptions separa
   const initial = genesis();
   assert.deepEqual(gameView(initial).notices, [
     {
+      id: detail(initial, 'mooring_post'),
+      key: 'mooring_post',
+      title: 'detail.mooring_post',
+      description: 'detail.mooring_post',
+      actions: ['lantern', 'oar'].map((k) => ({
+        action_key: k,
+        available: true,
+        input: [],
+        label: `quest.${k}.accept`,
+        target: { kind: 'none' },
+      })),
+    },
+    {
       id: detail(initial, 'tracks'),
       key: 'tracks',
       title: 'detail.tracks.title',

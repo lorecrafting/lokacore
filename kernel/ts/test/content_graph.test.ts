@@ -111,6 +111,21 @@ test('a quest with its own offer and no dialogue is reachable', () => {
   assert.deepEqual(reachReport(c).unreachable.quests, []);
 });
 
+// Breaks: an offer counted reachable though only an unreachable room or NPC carries it.
+test('a quest offered only on what the entry never reaches stays unreachable', () => {
+  const on = (target: Obj) => {
+    const c: Obj = fixture();
+    c.quests['f@1:quest/q2'].offer = { policy: { op: 'all', items: [] }, target };
+    return reachReport(c).unreachable.quests;
+  };
+  const detail = (room: string) => ({ kind: 'detail', room: R('room', room), detail: 'd' });
+  const npc = (key: string) => ({ kind: 'npc', npc: R('npc', key) });
+  assert.deepEqual(on(detail('attic')), ['f@1:quest/q2']);
+  assert.deepEqual(on(npc('hermit')), ['f@1:quest/q2']);
+  assert.deepEqual(on(detail('yard')), []);
+  assert.deepEqual(on(npc('guard')), []);
+});
+
 test('the graph holds every DefinitionRef with its path, and the op of the step holding it', () => {
   const { nodes, edges } = contentGraph(fixture());
   assert.deepEqual(nodes[0], { ref: 'f@1:room/hall', kind: 'room' });
