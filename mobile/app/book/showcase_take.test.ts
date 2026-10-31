@@ -7,7 +7,7 @@ import { book } from './__tests__/polish-book.test.ts';
 
 // Breaks: the showcase text lacks action.take (the card reads "action.take"); the card keeps the old
 // "Take: too heavy to carry." form; it shows its reason before a press; a press reaches the engine;
-// or the pressed card's name repeats the reason its hint reads.
+// or the pressed card reads its reason twice (in its name and its hint).
 test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and says why', () => {
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   for (const d of ['north', 'west', 'south']) {
@@ -22,10 +22,10 @@ test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and s
   assert.equal(head(), before);
   assert.ok(b.text().includes("Take\nIt's too heavy to carry."), JSON.stringify(b.text()));
   const card = b.draw().find((n) => n.props?.accessibilityState?.disabled);
-  // The reason is read once, as the hint; the name stays the label (book-ui.md, Unavailable actions).
+  // Pressed, the name holds the reason (label in name), so the hint drops it: read once.
   assert.deepEqual(
     [card?.props.accessibilityLabel, card?.props.accessibilityHint],
-    ['Take', "It's too heavy to carry."],
+    ["Take\nIt's too heavy to carry.", undefined],
   );
 });
 

@@ -45,8 +45,9 @@ export const levelWords = (
 ) => {
   const id = t.participants?.vessel;
   const { remaining, capacity, kind } = t.bindings ?? {};
+  if (!id || typeof remaining !== 'number' || typeof capacity !== 'number') return '';
   const v = [view, was].map((g) => g && things(g).find((e) => e.id === id)).find(Boolean);
-  if (!v || typeof remaining !== 'number' || typeof capacity !== 'number') return '';
+  if (!v) return '';
   // ponytail: with no name words, an indefinite short's article turns definite ("a skin" -> "the skin").
   const name = v.words
     ? `${v.words.article ? 'the ' : ''}${text(v.words.bare)}`

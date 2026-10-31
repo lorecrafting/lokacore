@@ -98,19 +98,20 @@ const linked = (label: string, link: string) => {
 };
 
 // The unavailable form: its own component, so its pressed state is the card's alone. The state
-// keeps the label and reason it was pressed on, so a changed card starts unpressed. Its name is
-// the label, then the rest of `name` (label in name); the reason is its hint alone, read once.
+// keeps the label and reason it was pressed on, so a changed card starts unpressed. Its name is the
+// shown text, then the rest of `name`, which starts with the label (label in name). Once pressed the
+// name holds the reason, so the hint drops it: read once either way.
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
 function Unavailable(p: { label: string; reason?: string; name?: string; link?: string }) {
-  const c = usePalette();
-  const t = useType();
+  const [c, t] = [usePalette(), useType()];
   const sentence = reasonSentence(p.reason);
   const [pressed, setPressed] = useState<string>();
   const shown = `${p.label}\n${sentence}`;
   const grayed = pressed === shown;
   const label = p.link ? linked(p.label, p.link) : p.label;
-  const a11y = p.label + (p.name ?? p.label).slice(p.label.length);
+  const a11y = (grayed && sentence ? shown : p.label) + (p.name ?? p.label).slice(p.label.length);
+  const hint = grayed ? '' : sentence;
   const press = () => {
     setPressed(shown);
     if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
@@ -123,13 +124,13 @@ function Unavailable(p: { label: string; reason?: string; name?: string; link?: 
   return (
     <View>
       {p.link ? (
-        <Tap label={a11y} refused={sentence} onPress={press}>
+        <Tap label={a11y} refused={hint} onPress={press}>
           {body}
         </Tap>
       ) : (
         <Pressable
           accessibilityLabel={a11y}
-          {...refusedProps(sentence)}
+          {...refusedProps(hint)}
           onPress={press}
           style={card(c, grayed)}
         >

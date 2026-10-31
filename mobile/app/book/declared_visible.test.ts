@@ -149,13 +149,16 @@ for (const [name, bytes] of artifacts()) {
         InsidePage({ screen: { view, text }, id: entity.id, open() {}, close() {} } as any),
       );
       const name = String(text(entity.name)).toLowerCase();
+      // A worn item reads in the wears sentence, the rest in the carries one (Menu.tsx InsidePage).
+      const worn = ('worn' in entity ? (entity.worn ?? []) : []).some((e) => e.id === held.id);
+      const verb = worn ? 'wears' : 'carries';
       assert.ok(
         page.some(
           (s) =>
-            s.startsWith(`${name} carries `) &&
+            s.startsWith(`${name} ${verb} `) &&
             s.includes(String(text(held.words?.bare ?? held.name)).toLowerCase()),
         ),
-        `${ref} in the carried sentence`,
+        `${ref} in the ${verb} sentence`,
       );
       checked++;
     }
