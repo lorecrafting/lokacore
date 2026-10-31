@@ -374,7 +374,7 @@ container), its `state` if it has a barrier, and as actions only `take` and its 
 (a `ContentView`, also with its explicit full-description TextKey; a recursive view is not
 allowed in the schemas). A visible NPC carries `worn`, its direct holdings whose definition
 declares a `slot` (ContentViews, `take` refused `not_present` without theft), shown to anyone who sees it;
-its other possessions show as `contents` only under `world.theft` (row 33); a worn item's contents are never
+its possessions, worn ones included, show as `contents` only under `world.theft` (row 33); a worn item's contents are never
 shown (c1-locks; loka-oc5i, the owner's NPC Look request in loka-ewtx: "list all the character items worn",
 the pack only with a skill). Reads: `containers`, item `slot`, `visible`; writes none; kernel_api 1.125;
 `equipment`, one entry per slot
