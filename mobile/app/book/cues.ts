@@ -33,7 +33,10 @@ export const soundOf = (cue: Cue): SoundName | undefined =>
   cue.silent ? undefined : (CUES[cue.name] as { sound?: SoundName }).sound;
 
 const amount = (v: GameView, key: string) =>
-  v.resources?.find((r) => r.resource.key === key)?.current ?? 0;
+  v.resources?.find((r) => r.resource.key === key)?.current;
+// A pool that only now appears, or just left the view, has not moved.
+const moved = (now: GameView, was: GameView, key: string) =>
+  (amount(now, key) ?? amount(was, key) ?? 0) - (amount(was, key) ?? amount(now, key) ?? 0);
 
 const named = (name: CueName, ids: string[], more?: Partial<Cue>): Cue[] =>
   ids.length ? [{ name, ids, ...more }] : [];
@@ -55,8 +58,9 @@ const questCues = (now: GameView, was: GameView) => {
 
 function combatCues(now: GameView, was: GameView) {
   const out: Cue[] = [];
-  // A status tick also lowers hp, and is silent: only a fall in combat is a blow (plan 3.3).
-  const loss = amount(was, 'hp') - amount(now, 'hp');
+  // Status ticks are silent, so only a fall in combat is a blow (plan 3.3).
+  // ponytail: a tick during combat still thuds; telling them apart needs the events of plan section 9.
+  const loss = -moved(now, was, 'hp');
   if (loss > 0 && (now.combat || was.combat)) out.push({ name: 'hp_loss', loss });
   if (!was.combat && now.combat) out.push({ name: 'combat_open' });
   if (was.combat && !now.combat) out.push({ name: 'combat_close' });
@@ -89,7 +93,7 @@ function itemCues(now: GameView, was: GameView): Cue[] {
     ...(was.equipment ?? []).flatMap((s) => s.item?.id ?? []),
   ]);
   const got = now.inventory.filter((e) => !held.has(e.id)).map((e) => e.id);
-  const pennies = amount(now, 'pennies') - amount(was, 'pennies');
+  const pennies = moved(now, was, 'pennies');
   return [
     ...named('pickup', got, pennies < 0 ? { silent: true } : undefined),
     ...(pennies ? [{ name: 'coin' } as const] : []),
@@ -121,7 +125,7 @@ function statusCues(now: GameView, was: GameView) {
 export function cuesOf(now: GameView, was: GameView | undefined): Cue[] {
   if (!was) return [];
   const chapter = now.chapter && was.chapter?.index !== now.chapter.index;
-  const level = (now.levelling?.level ?? 0) > (was.levelling?.level ?? 0);
+  const level = was.levelling && (now.levelling?.level ?? 0) > was.levelling.level;
   return [
     ...(chapter ? [{ name: 'chapter' } as const] : []),
     ...(level ? [{ name: 'level' } as const] : []),
@@ -135,9 +139,9 @@ export function cuesOf(now: GameView, was: GameView | undefined): Cue[] {
 }
 
 export type Queue = {
-  card?: boolean; // an S4 is on screen, until the page turns away
+  card?: boolean; // an S4 holds the queue until `until` or the page turning away
   playing?: Cue;
-  until: number; // when `playing` ends
+  until: number; // when `playing` or the card ends
   pending?: Cue;
   merged: Partial<Record<CueName, number>>; // when each S2 last fired
   toned: number; // when skill_up last sounded
@@ -158,6 +162,14 @@ function small(s: Queue, cue: Cue, now: number): Cue[] {
   return [cue];
 }
 
+const holdCard = (q: Queue, now: number): Queue => ({
+  ...q,
+  card: true,
+  playing: undefined,
+  pending: undefined,
+  until: now + motion.card.duration,
+});
+
 /**
  * One moment of the queue: `turned` cancels the leaving page's effects before this view's cues join.
  * A later S3 of another key than the pending one is dropped; the diff lists the story's first.
@@ -169,13 +181,9 @@ export function step(q: Queue, cues: Cue[], now: number, turned = false) {
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
   const chapter = cues.find((c) => CUES[c.name].s === 4);
-  if (s.card) return { q: s, fired };
-  if (chapter) {
-    return {
-      q: { ...s, card: true, playing: undefined, pending: undefined },
-      fired: [chapter],
-    };
-  }
+  if (s.card && now < s.until) return { q: s, fired };
+  s.card = false;
+  if (chapter) return { q: holdCard(s, now), fired: [chapter] };
   const play = (cue: Cue) => {
     const wash = cue.name === 'hp_loss' && now - s.washed >= motion.flash.gap;
     if (wash) s.washed = now;
@@ -214,16 +222,17 @@ export function useCues(view: GameView, catchingUp: boolean, turn: number) {
   const seen = useRef(turn);
   const settled = useRef<GameView>(undefined);
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     const advance = (cues: Cue[], turned = false) => {
-      const { q, fired } = step(queue.current, cues, Date.now(), turned);
+      const { q, fired } = step(queue.current, cues, performance.now(), turned);
       queue.current = q;
       for (const cue of fired) for (const listener of listeners) listener(cue);
+      // A timer can land a little early: it waits again rather than strand the pending cue.
+      if (q.pending) timer = setTimeout(() => advance([]), q.until - performance.now());
     };
     advance(cuesOf(view, catchingUp ? undefined : settled.current), turn !== seen.current);
     seen.current = turn;
     settled.current = catchingUp ? undefined : view;
-    if (!queue.current.pending) return;
-    const timer = setTimeout(() => advance([]), queue.current.until - Date.now());
     return () => clearTimeout(timer);
   }, [view, catchingUp, turn]);
 }

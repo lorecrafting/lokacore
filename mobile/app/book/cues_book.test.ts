@@ -12,6 +12,17 @@ const place = (id: string, more = {}) =>
 const hit = (hp: number) =>
   place('p', { combat: {}, resources: [{ resource: { key: 'hp' }, current: hp }] });
 
+// The hook's clock is monotonic; node's mock timers leave performance alone.
+function clock(t: any) {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let now = 1000;
+  t.mock.method(performance, 'now', () => now);
+  return (ms: number, early = 0) => {
+    now += ms - early;
+    t.mock.timers.tick(ms);
+  };
+}
+
 // One hook instance: its refs held, its effect rerun when a dep moves, as React does.
 function mount() {
   const slots: unknown[] = [];
@@ -62,29 +73,43 @@ test('catch-up is silent to its end, and the view after it is heard', (t) => {
 
 // Breaks: the pending blow never plays, plays early, or its timer survives a redraw.
 test('a pending cue plays when the beat ends', (t) => {
-  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+  const tick = clock(t);
   const heard = listen(t);
   const draw = mount();
   draw(hit(9), false, 0);
   draw(hit(8), false, 0);
   draw(hit(7), false, 0);
   assert.deepEqual(heard, ['hp_loss']);
-  t.mock.timers.tick(499);
+  tick(499);
   assert.deepEqual(heard, ['hp_loss']);
-  t.mock.timers.tick(1);
+  tick(1);
+  assert.deepEqual(heard, ['hp_loss', 'hp_loss']);
+});
+
+// Breaks: a timer landing a hair early strands the pending blow until some other change.
+test('a timer landing early waits again', (t) => {
+  const tick = clock(t);
+  const heard = listen(t);
+  const draw = mount();
+  draw(hit(9), false, 0);
+  draw(hit(8), false, 0);
+  draw(hit(7), false, 0);
+  tick(500, 1);
+  assert.deepEqual(heard, ['hp_loss']);
+  tick(1);
   assert.deepEqual(heard, ['hp_loss', 'hp_loss']);
 });
 
 // Breaks: a turn leaves the old page's blow to play on the new page, or every view counts as a turn.
 test('a page turn cancels the pending cue', (t) => {
-  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+  const tick = clock(t);
   const heard = listen(t);
   const draw = mount();
   draw(hit(9), false, 0);
   draw(hit(8), false, 0);
   draw(hit(7), false, 0);
   draw(hit(7), false, 1);
-  t.mock.timers.tick(1000);
+  tick(1000);
   assert.deepEqual(heard, ['hp_loss']);
 });
 

@@ -105,6 +105,13 @@ test('a fall on the view that closes combat is still a blow', () => {
   ]);
 });
 
+// Breaks: a character's first view with pools and a level plays coin, level and a blow as gains.
+test('fields that first appear, or leave, are no change', () => {
+  const full = pool(9, 5, { levelling: { level: 1 }, ...fight });
+  assert.deepEqual(cuesOf(full, view(fight)), []);
+  assert.deepEqual(cuesOf(view(fight), full), []);
+});
+
 // Breaks: taking off a worn item flicks as a pickup.
 test('an item off the body is no pickup', () => {
   const worn = view({ equipment: [{ slot: 'head', item: item('cap') }] });
@@ -200,8 +207,9 @@ test('a blow within a second of a wash keeps all but the wash', () => {
   assert.equal(step(a.q, [blow(2)], 2000).fired[0]?.wash, true);
 });
 
-// Breaks: anything survives the chapter, or a second card stacks, or others play under it.
-test('S4 clears the queue, fires alone, and holds until the page turns', () => {
+// Breaks: anything survives the chapter, or a second card stacks, or others play under it, or a
+// chapter with no page turn silences the Book for good.
+test('S4 clears the queue, fires alone, holds for the card or until the page turns', () => {
   let r = step(QUIET, [blow(1)], 1000);
   r = step(r.q, [blow(2)], 1100);
   r = step(r.q, [{ name: 'chapter' }, coin], 1200);
@@ -210,6 +218,8 @@ test('S4 clears the queue, fires alone, and holds until the page turns', () => {
   assert.equal(r.q.pending, undefined);
   assert.deepEqual(step(r.q, [{ name: 'chapter' }, coin, blow(3)], 1300).fired, []);
   assert.deepEqual(names(step(r.q, [coin], 1400, true).fired), ['coin']);
+  assert.deepEqual(step(r.q, [coin], 1799).fired, []);
+  assert.deepEqual(names(step(r.q, [coin], 1800).fired), ['coin']);
 });
 
 // Breaks: a turn leaves the leaving page's blow waiting; or a turn loses this view's own cues.
