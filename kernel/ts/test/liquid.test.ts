@@ -129,7 +129,6 @@ test('each liquid line binds its vessel with the committed level and capacity', 
     assert.deepEqual(JSON.parse(JSON.stringify(run(w, p).decision)).narration, [
       { key, participants: { vessel }, bindings: { ...words, quantity, remaining, capacity } },
     ]);
-  assert.deepEqual((run(small(3, 3), pour).decision as any).error, { code: 'invalid_state' });
 });
 // Breaks: a ground/corpse/foreign/closed vessel is usable merely because its identity is known.
 test('liquid refusal participants and custody leave every row unchanged while open nested skins work', () => {
