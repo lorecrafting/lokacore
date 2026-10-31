@@ -26,8 +26,8 @@ import { visible } from '../light/shared.ts';
 import { fatalTick } from './fatal.ts';
 import { expire, specOf } from './shared.ts';
 
-// A timed row: only it owns a job (a permanent one, row W8, has none).
-type Active = Required<Extract<StatusRow, { active: true }>>;
+// A row that owns a job: timed, or permanent and ticking (no ends_at, row W8, loka-rn3b).
+type Active = Extract<StatusRow, { active: true }> & { next_tick_at: number; job_id: JobId };
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);
@@ -37,7 +37,7 @@ type Active = Required<Extract<StatusRow, { active: true }>>;
  * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
  * sub-step writes the row's successor.
  */
-// size: allow 44, one due job saturates the tick, expires, or runs the fatal death sequence
+// size: allow 45, one due job saturates the tick, expires, or runs the fatal death sequence
 export function runStatus(
   world: World,
   command: Pick<Command, 'id'>,
@@ -58,7 +58,7 @@ export function runStatus(
   const player = actorOf(world, body) !== undefined;
   const tick = carried ?? row.next_tick_at;
   const visit = { ...world, state: { ...world.state, clock: now } };
-  const expired = now >= row.ends_at;
+  const expired = now >= (row.ends_at ?? Infinity);
   const due = !expired && spec.per_tick !== undefined && now >= tick;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };
   if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
@@ -71,12 +71,13 @@ export function runStatus(
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
     // ponytail: an item or room reuses the player's own expired line (third person for burning, the
     // only observed item status today); add a holder-specific key when a second-person one reaches them.
-    const lines = player || watched(visit, body, spec) ? [{ key: spec.narration.expired }] : [];
+    // Only a timed row expires, and a timed status declares expired (compiler, loka-rn3b).
+    const lines = player || watched(visit, body, spec) ? [{ key: spec.narration.expired! }] : [];
     return accepted(world, 'job_ran', ops, ended, lines);
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
   const next_tick_at = due ? add(tick, spec.tick_every) : untick(spec, row, tick);
-  const next = Math.min(next_tick_at, row.ends_at);
+  const next = Math.min(next_tick_at, row.ends_at ?? Infinity);
   const crossed = next <= world.state.clock;
   if (!crossed) ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
   const ran = accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
@@ -152,9 +153,9 @@ const happened = (
   payload: { type, body_id, status },
 });
 
-// A status that never ticks (row 2c) follows a refreshed end.
+// A status that never ticks (row 2c, always timed) follows a refreshed end.
 const untick = (spec: StatusDefinition, row: Active, tick: number) =>
-  spec.per_tick === undefined ? row.ends_at : tick;
+  spec.per_tick === undefined ? row.ends_at! : tick;
 
 // The row's next job, due at the earlier of its next tick and its end.
 const successor = (
@@ -177,7 +178,7 @@ const successor = (
     writer_group: 0,
     job_id,
     job: status,
-    due_time: Math.min(next_tick_at, row.ends_at),
+    due_time: Math.min(next_tick_at, row.ends_at ?? Infinity),
   },
 ];
 

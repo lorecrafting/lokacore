@@ -119,7 +119,7 @@ const holds = (world: World, body: EntityId) =>
  * Apply or refresh `status` on `body` (a body, a living NPC or an item) at the world's clock; an
  * unknown or immune status, a dead NPC or another kind of entity changes nothing.
  */
-// size: allow 43, a first application writes the row and schedules its job; a refresh writes only the end
+// size: allow 45, a first application writes the row and schedules its job; a refresh writes only the end; a permanent one may tick (loka-rn3b)
 export function applyStatus(
   world: World,
   body: EntityId,
@@ -140,16 +140,19 @@ export function applyStatus(
     value,
   });
   const generation = (prior?.generation ?? 0) + 1;
-  // A permanent status (row W8) has no end, tick or job (nor an hp_max modifier, so no settle).
-  if (spec.duration === 'permanent') return active ? [] : [change({ active: true, generation })];
+  // A permanent status (row W8) has no end, and without a per_tick no tick or job (loka-rn3b);
+  // it moves no hp_max, so its settle is empty.
+  const permanent = spec.duration === 'permanent';
+  if (permanent && (active || spec.per_tick === undefined))
+    return active ? [] : [change({ active: true, generation })];
   const now = world.state.clock;
-  const ends_at = add(now, spec.duration);
-  if (active) return [change(refreshed(world, active, ends_at))];
-  const next_tick_at = spec.per_tick === undefined ? ends_at : add(now, spec.tick_every);
+  const ends_at = permanent ? undefined : add(now, spec.duration as number);
+  if (active) return [change(refreshed(world, active, ends_at!))];
+  const next_tick_at = spec.per_tick === undefined ? ends_at! : add(now, spec.tick_every);
   const value = {
     active: true as const,
     generation,
-    ends_at,
+    ...(ends_at !== undefined && { ends_at }),
     next_tick_at,
     job_id: mint() as JobId,
   };
@@ -158,7 +161,7 @@ export function applyStatus(
     writer_group,
     job_id: value.job_id,
     job: status,
-    due_time: Math.min(next_tick_at, ends_at),
+    due_time: Math.min(next_tick_at, ends_at ?? Infinity),
   };
   return [...settleFor(world, body, status, writer_group), change(value), job];
 }

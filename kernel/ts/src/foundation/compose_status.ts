@@ -23,13 +23,13 @@ export function transitionStatus(
     : next.job_id === undefined
       ? // A permanent row (row W8) is its generation alone and never replaces a timed one.
         Object.keys(next).length === 2 && !(prior?.active && prior.job_id)
-      : next.ends_at !== undefined &&
-        next.next_tick_at !== undefined &&
-        next.ends_at > now &&
+      : next.next_tick_at !== undefined &&
         next.next_tick_at >= now &&
-        // An active row keeps its generation; a refresh or successor never shortens the end (and
-        // a permanent row, with no end, never turns timed).
-        (!prior?.active || next.ends_at >= prior.ends_at!);
+        (next.ends_at === undefined
+          ? // A ticking permanent row (loka-rn3b) is new or succeeds a ticking permanent one.
+            !prior?.active || (prior.ends_at === undefined && prior.job_id !== undefined)
+          : // A refresh or successor never shortens the end (and a permanent row never turns timed).
+            next.ends_at > now && (!prior?.active || next.ends_at >= prior.ends_at!));
   // A holder an entity.create earlier in this delta made has the kind it will hydrate as.
   const created = overlay.get(key({ kind: 'entity', entity_id: op.body_id }))?.value;
   const kind = known[op.body_id]?.kind ?? (created && createdKind(created));
@@ -47,7 +47,7 @@ export function transitionStatus(
   return { value: next as Json };
 }
 
-/** A delta's last write may not leave a timed status or bleed active past its end or a tick (skipped). */
+/** A delta's last write may not leave a status or bleed active past its end or a tick (skipped). */
 export function expiredStatus(w: { target: { kind: string }; value: Json }, horizon: number) {
   const v = w.value as Op['value'];
   return (

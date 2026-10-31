@@ -13,6 +13,7 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from 
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-needs-sampler-'));
@@ -132,4 +133,34 @@ test('a dry day on the flats drains thirst until a drink, and never past the poo
   // The empty pool reads as its own band, not the world's hp band "dying".
   const thirst = gameView(day).resources?.find((r) => r.resource.key === 'thirst');
   assert.deepEqual([thirst?.band, thirst?.tone], ['parched', 'danger']);
+});
+
+// Breaks (row W8, loka-rn3b): a ticking permanent status gets an end or a ring (ends_at, duration),
+// expires with the day as the timed thirsty does, stops ticking after its first tick, or survives
+// its cure.
+test('a permanent hungry ticks past the day until bread cures it', () => {
+  const c = structuredClone(content) as any;
+  const spec = c.statuses['needs_sampler@0.0.1:status/hungry'];
+  spec.duration = 'permanent';
+  delete spec.narration.expired;
+  const start = newWorld(c, ctx(CONTEXT), [1, 2, 3, 4]);
+  let w = play(start, { type: 'take', item_id: id(start, 'bread') });
+  w = play(w, { type: 'move', direction: 'east' });
+  const t0 = w.state.clock;
+  const hungry = () => gameView(w).conditions?.find((r) => r.label === 'condition.hungry');
+  const view = {
+    label: 'condition.hungry',
+    resource: 'hunger',
+    per_tick: -1,
+    tick_every: HOUR,
+    kind: 'debuff',
+  };
+  assert.deepEqual(hungry(), { ...view, next_tick_at: t0 + HOUR });
+  assert.deepEqual(validate('GameView', gameView(w)), []);
+  w = wait(w, t0 + 30 * HOUR + 1);
+  assert.deepEqual(labels(w), ['condition.hungry']);
+  assert.deepEqual(hungry(), { ...view, next_tick_at: t0 + 31 * HOUR });
+  assert.equal(pool(w, 'hunger'), 0);
+  w = play(w, { type: 'eat', item_id: id(w, 'bread') });
+  assert.equal(labels(w), undefined);
 });

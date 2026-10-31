@@ -305,8 +305,6 @@
   "conditions": [
    {
     "label": "condition.hungry",
-    "ends_at": 111600,
-    "duration": 86400,
     "next_tick_at": 28800,
     "resource": "hunger",
     "per_tick": -1,
@@ -325,8 +323,6 @@
    },
    {
     "label": "condition.thirsty",
-    "ends_at": 111600,
-    "duration": 86400,
     "next_tick_at": 28800,
     "resource": "thirst",
     "per_tick": -1,
