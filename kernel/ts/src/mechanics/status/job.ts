@@ -117,9 +117,10 @@ export const unsaid = (
 
 /** Whether this job's tick is a no-op that catch-up may fold (mechanics.md, W8 Catch-up). */
 export function folds(world: World, job_id: JobId, job: JobRow) {
-  const held = statusHolder(world, job_id);
+  const held = statusHolder(world, job_id); // only a status job's id matches a row
+  if (!held) return false;
   const spec = specOf(world, job.job);
-  if (!held || held.row.ends_at !== undefined || spec?.per_tick === undefined) return false;
+  if (held.row.ends_at !== undefined || spec?.per_tick === undefined) return false;
   const pool = resourceSpec(world, held.body, spec.resource);
   const body = world.entities[held.body]?.kind !== 'item' && !world.rooms[held.body];
   if (!body || !pool || level(world, held.body, spec.resource) === undefined) return false;
