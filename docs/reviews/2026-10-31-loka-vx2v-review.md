@@ -3,7 +3,7 @@
 - PR [#529](https://github.com/lorecrafting/lokacore/pull/529) `engine/quest-offer-target` at `8dd7f0ea2e960ee71c3c864bc803b3831dfe3158`, diff `origin/main...8dd7f0ea2` (main `68028bf74`).
 - Governing: `br show loka-vx2v`; [mechanics.md](../system/mechanics.md) Quest@1 and the offered-actions section (:215-219); [book-ui.md](../system/book-ui.md) (:62, :214-223, :299, :405, :452); [composition record](../system/architecture.md#building-mechanics-by-composition).
 - Reviewer: independent; authored none of the work.
-- Verdict: **CHANGES REQUIRED** at `8dd7f0ea2`; one blocker (one test assertion), one should-fix, two nits.
+- Verdict: **APPROVE WITH NOTES** at `f25bdb2ce` after re-check (below); first round **CHANGES REQUIRED** at `8dd7f0ea2`: one blocker (one test assertion), one should-fix, two nits.
 
 ## Must be true (written before reading the diff)
 
@@ -53,3 +53,19 @@ Hand mutants, all run narrow through `bin/mutate.sh`. Red: `quests.ex` inverted 
 PR claims rerun: the `quests.ex` and `resolve.ex` hand rows and `buttons.ts detail_id` are red, backed; cites `quest_offers.ts:54` and `buttons.ts:232` correct.
 
 CI at the reviewed head: graph-diff, ci and book-e2e completed success.
+
+## Re-check of the fixes at `f25bdb2ce576570e5fdfbae961f1aa80c55684e7`
+
+Verdict: **APPROVE WITH NOTES**. Scope: fix commit `f25bdb2ce`, the code it touched and its direct callers.
+
+| Finding | Disposition | Proof |
+| --- | --- | --- |
+| Blocker `invariants_view.ts:105` | Fixed | New test `world_lists_no_fixture_action allows an untargeted offer on the World card` asserts the offer is listed and the invariant true. Both the `\|\|` and `a.quest` mutants are red in `quests.test.ts`, run by hand. |
+| Should-fix `acceptRefused` | Documented, by PM ruling; no logic change | The docstring and mechanics.md:402 read true: callers are dialogue only (`rule.ts:197`, `shared.ts:238`), `holds` is false with no target, and `present` (`commands/target.ts:78`) covers both a detail and an NPC. NPC case probed in the first round; detail case read from code, not run. |
+| Nit `quest_offers.ts:54` | Fixed | `mutate-skip` gone; `priority: 100` red in `fixture_pages.test.ts`, run by hand. |
+| Nit PR body | Fixed | No longer draft; the stale phrases are gone; states that the `/code-review` range stops at `e48c8b12d` and that later commits had only this review. |
+| Nit `buttons.ts:232` | Open | Beads follow-up, not this slice. |
+
+New **nit** `kernel/ts/src/mechanics/dialogue/rule.ts:181`: the comment says `invalid_state` "when accept_quest would refuse it". For a `target_present` offer policy, `accept_quest` now admits while this path refuses, so the comment misleads a reader; behavior is as ruled. One-line fix whenever the file is next touched.
+
+CI at `f25bdb2ce`: graph-diff, ci and book-e2e completed success.
