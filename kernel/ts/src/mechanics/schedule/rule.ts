@@ -45,7 +45,7 @@ import { runReplenish } from '../containment/job.ts';
 import { runWage } from '../escort/job.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
-import { runStatus } from '../status/job.ts';
+import { runStatus, type Queue } from '../status/job.ts';
 import { moves } from '../status/bars.ts';
 
 import { runSight } from '../population/behavior.ts';
@@ -64,7 +64,7 @@ export const decideAt = (
   at?: number,
   tick?: number,
   joins?: Joins, // row FD1: the advance's holder groups, for a delayed reaction's run
-  queue?: Parameters<typeof runStatus>[7], // the drain's queue: how far a saturated tick may fold
+  queue?: Queue, // the drain's queue: how far a saturated tick may fold
 ): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {

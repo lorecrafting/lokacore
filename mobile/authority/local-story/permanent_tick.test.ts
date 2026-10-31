@@ -301,6 +301,24 @@ test('a tick due exactly at another job runs', (t) => {
   }
 });
 
+// Breaks: a job due at this very tick does not limit the fold, in one direct advance. thirsty raises the
+// floored hunger by 5 at 72000; hunger's tick there (ties run by job id, here hunger first) leaves 0, so
+// 5; the ticks at 75600, 79200 and 82800 leave 2. A fold past 72000 leaves 5.
+test('a raise due at the same time as a floored tick stops the fold', (t) => {
+  const save = begin(
+    t,
+    fixture((c, status) => {
+      Object.assign(status('thirsty'), {
+        resource: REF('resource', 'hunger'),
+        per_tick: 5,
+        tick_every: 72000,
+      });
+    }),
+  );
+  assert.equal(direct(save, 0, 82801).kind, 'saved');
+  assert.equal(pool(save, 'hunger'), 2);
+});
+
 // Breaks: clause 5 removed; a fold would swallow a listener's firings.
 test('a status_ticked listener keeps every tick', (t) => {
   const listened = fixture((c, status) => {

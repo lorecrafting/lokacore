@@ -28,7 +28,7 @@ import { visible } from '../light/shared.ts';
 import { fatalTick } from './fatal.ts';
 import { expire, specOf } from './shared.ts';
 
-type Queue = readonly (readonly [string, { due_time: number }])[];
+export type Queue = readonly (readonly [string, { due_time: number }])[];
 
 // A row that owns a job: timed, or permanent and ticking (no ends_at, row W8, loka-rn3b).
 type Active = Extract<StatusRow, { active: true }> & { next_tick_at: number; job_id: JobId };
@@ -149,10 +149,10 @@ function foldedTicks(
   let horizon = target;
   for (const [id, { due_time }] of queue) {
     const other = visit.state.jobs?.[id];
-    if (id === job_id || due_time <= visit.state.clock || due_time > horizon || !other) continue;
+    if (id === job_id || due_time < visit.state.clock || due_time > horizon || !other) continue;
     if (other.job.kind !== CLOCK_JOB && !folds(visit, id as JobId, other)) horizon = due_time - 1;
   }
-  return Math.floor((horizon - tick) / spec.tick_every) + 1;
+  return Math.max(1, Math.floor((horizon - tick) / spec.tick_every) + 1);
 }
 
 /**
