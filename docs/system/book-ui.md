@@ -133,8 +133,8 @@ Settings retains Start over and its confirmation/error handling, and holds the
 section it opens draw no status line (owner, 2026-10-30, loka-8lpm; the [page foot](#detail-page-order)
 rule). A section opened from Contents returns with **Back to Contents** (one page back), and Contents
 returns with **Back to World**; a section opened another way (Character from a status icon, the map
-from the joystick or footer, an Inventory restored on reopen) says **Back to World** and clears the
-stack to World. A page a section opens returns to that section (an item page's Leave to Inventory).
+from the joystick or footer) says **Back to World** and clears the stack to World; an Inventory
+restored on reopen sits on Contents and returns with **Back to Contents**. A page a section opens returns to that section (an item page's Leave to Inventory).
 A room change, death, combat, a new chapter, Start over and an accepted Take or Drop still clear
 straight to World.
 

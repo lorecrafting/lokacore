@@ -252,7 +252,18 @@ test('a vessel amount reads in words; exact empty and exact full are unambiguous
   const say = (quantity: number, capacity: number) =>
     liquidWords({ label: 'Water', quantity, capacity }, (k) => k);
   assert.deepEqual(
-    [say(0, 4), say(1, 4), say(2, 4), say(3, 4), say(4, 4), say(0, 1), say(1, 1), say(1, 2)],
+    [
+      say(0, 4),
+      say(1, 4),
+      say(2, 4),
+      say(3, 4),
+      say(4, 4),
+      say(0, 1),
+      say(1, 1),
+      say(1, 2),
+      say(1, 3),
+      say(2, 3),
+    ],
     [
       'Empty.',
       'Nearly empty, a little water left.',
@@ -262,6 +273,9 @@ test('a vessel amount reads in words; exact empty and exact full are unambiguous
       'Empty.',
       'Full of water.',
       'Half full of water.',
+      // book-ui.md Line placement: "a third or less" and "two thirds or more", edges included
+      'Nearly empty, a little water left.',
+      'Nearly full of water.',
     ],
   );
 });

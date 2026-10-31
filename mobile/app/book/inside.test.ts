@@ -8,7 +8,7 @@ import { pagesAfter } from './model.ts';
 import { restoredItemPages } from './item-pages.ts';
 
 // after the harness registers its .tsx loader
-const { resultPages } = await import('./updates.ts');
+const { openTurn, resultPages } = await import('./updates.ts');
 const showcase = bundle('toolbox_showcase_hash');
 // The Farm Yard's seed sack, opened: one turnip seed inside.
 const openSack = () => {
@@ -41,6 +41,18 @@ test('an accepted Open turns to the contents page; Leave returns to it, Close to
   h.tap(LABEL.close);
   h.tap(LABEL.leave);
   assert.deepEqual(h.stack, []);
+  h.unmount();
+  h.sql.close();
+});
+
+// Breaks: an accepted press on an already-open container's page (its first target the container)
+// stacks a second Inside page; only an Open that opens it turns there.
+test('a press on an already-open container stacks no Inside page', () => {
+  const h = openSack();
+  const id = (h.stack.at(-2) as { id: string }).id;
+  const view = h.p.screen().view;
+  const next = [{ kind: 'thing' as const, id }];
+  assert.deepEqual(openTurn(next, id, view, view), next);
   h.unmount();
   h.sql.close();
 });
