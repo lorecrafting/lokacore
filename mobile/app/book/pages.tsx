@@ -20,12 +20,6 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
-/**
- * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
- * (BOOK-UI-COMPONENTS.md, Where each fact lives).
- * - Use: entity lines, verb lines, the room title, the status position.
- * - Story: VerbLine.stories.tsx
- */
 // Exposed as disabled, still pressable. Web: aria-disabled by hand; as a prop RN web also sets the
 // native `disabled`, which drops the press.
 export const refusedProps = (hint: string) => ({
@@ -34,6 +28,12 @@ export const refusedProps = (hint: string) => ({
   accessibilityHint: hint || undefined,
   accessibilityState: { disabled: true },
 });
+/**
+ * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
+ * (BOOK-UI-COMPONENTS.md, Where each fact lives).
+ * - Use: entity lines, verb lines, the room title, the status position.
+ * - Story: VerbLine.stories.tsx
+ */
 export function Tap(p: {
   label: string;
   onPress: () => void;

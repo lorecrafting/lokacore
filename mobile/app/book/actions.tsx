@@ -12,6 +12,18 @@ import { focusTitle, titleContext } from './title.ts';
 import type { Button } from './presenter.ts';
 import { radius, size, space, type } from './tokens.ts';
 
+type CardProps = (
+  | {
+      b: Button;
+      press: (b: Button) => void;
+      label?: string;
+      name?: string;
+      note?: string;
+      link?: string;
+    }
+  | { label: string; onPress: () => void; expanded?: boolean }
+  | { label: string; reason?: string; name?: string; link?: string }
+) & { ref?: Ref<View> };
 /**
  * An offered action as a card.
  * - Use: a detail page's offered action or dialogue choice, the
@@ -27,20 +39,9 @@ import { radius, size, space, type } from './tokens.ts';
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
  *   sentence with no card. Shop lines stack in `Cards lines`.
  * - States: available; unavailable; unavailable, pressed; each as a card or a line.
- * - Story: ActionCard.stories.tsx; the line form NpcPage.stories.tsx (Shelf, Sale, Services)
+ * - Line form stories: NpcPage.stories.tsx (Shelf, Sale, Services).
+ * - Story: ActionCard.stories.tsx
  */
-type CardProps = (
-  | {
-      b: Button;
-      press: (b: Button) => void;
-      label?: string;
-      name?: string;
-      note?: string;
-      link?: string;
-    }
-  | { label: string; onPress: () => void; expanded?: boolean }
-  | { label: string; reason?: string; name?: string; link?: string }
-) & { ref?: Ref<View> };
 export function ActionCard(p: CardProps) {
   const c = usePalette();
   const t = useType();
