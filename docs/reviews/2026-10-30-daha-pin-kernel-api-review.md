@@ -1,0 +1,35 @@
+# Review: the save pin names the kernel_api, PR #519 (loka-daha)
+
+- PR [#519](https://github.com/lorecrafting/lokacore/pull/519) `fix/daha-pin-kernel-api` at `2caee4d1bbbbb13c71b9ad04453e59505bf4cc6e`, diff `origin/main...2caee4d1b` (merge base `eadb1b0f3`, kernel_api 1.125).
+- Governing: "BRIEF loka-daha" and PM rulings 2026-10-30 (`br show loka-daha`); [save.md](../system/save.md) Opening a story and refusals table; [cartridge.md](../system/cartridge.md) `requires.kernel_api`; [forward development](../decisions/owner-decision-forward-development-2026-10-05.md) (never silently deleted, migrated or retargeted; Start over allowed); [dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md) item 2 (narrowed).
+- Reviewer: independent; authored none of the work. First of two reviewers (save change, [WORKFLOW](../WORKFLOW.md)).
+- Verdict: **APPROVE WITH NOTES** (no blocker, no should-fix; three nits).
+
+## Must be true (written before reading the diff)
+
+1. Every new pin (first save and Start over) carries `INSTALLED.kernel_api`; no writer builds a pin without it.
+2. `openStory` compares it by equality before loading anything: older, newer and absent all refuse `pinned_release_missing` with in-place `newGame`, never `save_corrupt`.
+3. A refused save's bytes are unchanged; Start over replaces in place and the new pin names the installed kernel_api.
+4. A save made under the installed kernel_api reopens, whatever the host's `kernel_version`.
+5. Web and native hosts reach the same `openStory`; no host builds the pin.
+6. A later kernel_api bump refuses older saves with no `at_least`, hash fixture or transcript change.
+7. save.md narrows the dialogue-hub `save_corrupt` line; the PR cites both records; the three `'1.0'` test hosts read the kernel's version.
+
+Results: all hold. `first()` (`authority.ts:178`) is the only pin builder (`store.ts:206` writes the meta it is given; `load` and `replace` take `first()`); the check (`authority.ts:98`) runs after format/pin-parse and before `load`. App.tsx native (`:92`) and web (`:212`) both go through `createSession` -> `localSession` -> `openStory`.
+
+## Evidence
+
+- Focused at head: release_pin 4/4, saves 15/15, start_over 15/15, recovery 8/8, death 4/4.
+- Real refusal: main's `mobile/app/stories/live/green.sql` (a `loka-save-v2` save written by main's code, no `kernel_api`) loaded into SQLite and opened by the head's `openStory` on the showcase release: `pinned_release_missing`, `pinned.kernel_api` undefined, file bytes unchanged; `newGame()` -> `{kind:'replaced'}`, new pin `1.125`, 0 receipts; reopen -> `open`. The head's `green.sql` opens `open`.
+- Future bump: `world.ts:108` set to `1.126` (no cartridge change): showcase loads, cartridge 20/20, cartridge_rooms 5/5, release_pin+saves 19/19, the head's `green.sql` -> `pinned_release_missing` (pinned 1.125), bytes unchanged, Start over `replaced`. Reverted.
+- `bin/mutate_diff.sh origin/main`: 3 red-narrow (`authority.ts:98` `!==`->`===`, `&&`->`||`, `||`->`&&`), 1 NO-TESTS (`App.tsx:49`). A first run was BASELINE-RED from missing Elixir deps in the scratch worktree (mix), not the PR; rerun after linking deps.
+- Hand mutants (red): drop the comparison -> exactly release_pin tests 1-3 fail, 31 pass (release_pin+saves+start_over; the PR's claim reproduces); `kernel_api ?? INSTALLED` -> test 3 only; compare to `host.kernel_version` -> 4/4 fail; drop `kernel_api` from `first()` -> 14 fail incl. saves PIN.
+- CI on `2caee4d1b` (one `gh run list --commit`): graph-diff success; ci and book-e2e in progress.
+
+## Findings
+
+1. **Nit, PR body ("`git grep numeric_profile` finds only authority.ts, saves.test.ts and DIFFERENCES.md").** Rerun: it also finds the seven `mobile/app/stories/live/*.sql`. The conclusion (no schema or protocol type carries the pin, so no kernel_api bump) still holds; correct the sentence.
+2. **Nit, `mobile/authority/local-story/release_pin.test.ts:47-52`.** The pin tests write `loka-save-v1` saves (`first()`), while every shipped save is `loka-save-v2`, whose Start over goes through `replaceable()`'s header reconcile. Verified by hand above (main's v2 save: `replaced`, reopen `open`); no failing case found, so no test asked.
+3. **Nit, `mobile/app/App.tsx:49`.** NO-TESTS row for the author-preview save name; dev-only, `__DEV__`-guarded at `:47`. Accept.
+
+Other checks: `/code-review medium` result reported in the PR. Docs match the brief (save.md `:14-25`, `:37`, `:62`; cartridge.md `:22`, `:40`). Tests use literal expected kinds and the fixture hash; the PIN's `INSTALLED.kernel_api` is the kernel's input, not the authority's output.
