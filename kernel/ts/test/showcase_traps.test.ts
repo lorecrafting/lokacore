@@ -357,10 +357,9 @@ const mood = (w: World, id: string) =>
 const CALM = ['npc.goblin.short', 'npc.den_goblin.bare', 'npc.goblin.description'];
 const AFRAID = ['short_afraid', 'bare_afraid', 'description_afraid'].map((k) => `npc.goblin.${k}`);
 
-// Breaks: the den or its pack is missing, a said begone frightens (loudness dropped), the shout misses
-// the pack (the word), lands on the chief (immune dropped) or the player, the afraid span or its mood
-// differs (no `when`, so a calm goblin cowers; or the base words kept, so the Book draws "a goblin"),
-// or the afraid goblins stand and fight (fear dropped, or the flight is off fear).
+// Breaks: the den or pack is missing, the begone card offered outside the den, the shout misses the
+// pack (co_present dropped) or lands on the chief (immune dropped) or player, the afraid span or mood
+// differs (no `when`, or the base words kept), or the afraid pack stands (fear or its flight dropped).
 test('traps 8: in the den the shout frightens both goblins, not the chief; they flee south', () => {
   stair = go(go(w, 'west').world, 'west').world;
   w = go(go(stair, 'north').world, 'north').world;
@@ -368,10 +367,11 @@ test('traps 8: in the den the shout frightens both goblins, not the chief; they 
   den = w;
   const [a, b] = goblinsIn(w, 'chief_den');
   assert.ok(a && b, 'two goblins in the den');
-  assert.deepEqual(statuses(play(w, { type: 'say', word: 'begone' }).world, a!), []);
+  assert.ok(refused(stair, { type: 'perform', action: 'shout_begone' }));
   assert.deepEqual(mood(w, a!), CALM);
-  const s = play(w, { type: 'shout', word: 'begone' });
-  assert.deepEqual(s.lines, ['narration.afraid.applied', 'narration.afraid.applied']);
+  const s = perform(w, 'shout_begone');
+  const fear = 'narration.afraid.applied';
+  assert.deepEqual(s.lines, ['narration.shout_begone.success', fear, fear]);
   w = s.world;
   const T = w.state.clock;
   assert.deepEqual([afraidEnds(w, a), afraidEnds(w, b)], [T + 600, T + 600]);
@@ -484,7 +484,7 @@ test("traps sandbox twins: the cellar pack fears the shout and its chief's fall,
   const x = go(stair, 'down').world;
   const [a, b] = goblinsIn(x, 'sapper_cellar');
   const chief = npc(x, 'cellar_chief');
-  const s = play(x, { type: 'shout', word: 'begone' }).world;
+  const s = perform(x, 'shout_begone_cellar').world;
   assert.deepEqual(
     [statuses(s, a!), statuses(s, b!), statuses(s, chief)],
     [['afraid'], ['afraid'], []],

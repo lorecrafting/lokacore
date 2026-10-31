@@ -15,7 +15,7 @@
   },
   "known_npcs": [
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
     "name": "npc.hob.short"
    }
   ],
@@ -239,7 +239,7 @@
      "title": "room.shore_steps.title",
      "entities": [
       {
-       "id": "4c709491-5686-8d11-8f80-4dbda590664a",
+       "id": "ecec7a97-7c7b-8d13-bb1f-3d1caf814abe",
        "name": "item.net.short",
        "kind": "item"
       }
@@ -254,22 +254,22 @@
      "title": "room.fell_gate.title",
      "entities": [
       {
-       "id": "9a0f312a-387f-8e76-8eb6-1f14e438f88a",
+       "id": "252b9daa-0fda-8981-9fcb-95fc259a6575",
        "name": "item.cloak.short",
        "kind": "item"
       },
       {
-       "id": "677c012e-ec39-8552-8d4f-1811aa3e08b5",
+       "id": "17ebdbed-759e-8d08-9ef8-f9742608718a",
        "name": "item.hat.short",
        "kind": "item"
       },
       {
-       "id": "ecec7a97-7c7b-8d13-bb1f-3d1caf814abe",
+       "id": "124169af-8fcb-888a-9cc6-ebb5cf09ae9e",
        "name": "item.oilskin.short",
        "kind": "item"
       },
       {
-       "id": "a73c20e5-6215-859b-a573-fd34b4ffc92d",
+       "id": "c61c9739-77c4-8d53-b0d0-7666621f0042",
        "name": "item.scarf.short",
        "kind": "item"
       }
@@ -284,22 +284,22 @@
      "title": "room.village_green.title",
      "entities": [
       {
-       "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9",
+       "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
        "name": "npc.nell.short",
        "kind": "npc"
       },
       {
-       "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
+       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
        "name": "npc.reeve.short",
        "kind": "npc"
       },
       {
-       "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
+       "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
        "name": "item.apple.short",
        "kind": "item"
       },
       {
-       "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
+       "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
        "name": "item.letter.short",
        "kind": "item"
       }
@@ -314,22 +314,22 @@
      "title": "room.loft.title",
      "entities": [
       {
-       "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
+       "id": "c735ddfb-fc9d-866a-b5e0-1feb5a516bf6",
        "name": "npc.hedge_wizard.short",
        "kind": "npc"
       },
       {
-       "id": "a6579cfe-0b81-8c71-af34-20947857b1f0",
+       "id": "f8598a43-4a6f-8277-b092-c4449c71d2e2",
        "name": "item.lantern.short",
        "kind": "item"
       },
       {
-       "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
+       "id": "5d0ee8a3-538e-860b-beed-a91c1c9fc9ca",
        "name": "item.loft_bucket.short",
        "kind": "item"
       },
       {
-       "id": "26deb06d-744f-8b74-90eb-d41dbd1bc785",
+       "id": "ed46889f-3b43-8c50-854e-eb0f678931e7",
        "name": "item.oilcan.short",
        "kind": "item"
       }
@@ -344,12 +344,12 @@
      "title": "room.drill_yard.title",
      "entities": [
       {
-       "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8",
+       "id": "385d5416-3de6-82e4-aae0-775164b045c2",
        "name": "npc.aldous.short",
        "kind": "npc"
       },
       {
-       "id": "ca479bb2-783b-89b8-8948-2ebc1bd65d0e",
+       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
        "name": "item.poultice.short",
        "kind": "item"
       }
@@ -400,7 +400,7 @@
     },
     "input": [],
     "target_ids": [
-     "192ab4e9-ab36-8b5c-bb12-50a93f8cacd2"
+     "311fd11c-f827-8829-93cc-8fb9d45780e7"
     ],
     "available": true
    },
@@ -465,7 +465,7 @@
   ],
   "notices": [
    {
-    "id": "192ab4e9-ab36-8b5c-bb12-50a93f8cacd2",
+    "id": "311fd11c-f827-8829-93cc-8fb9d45780e7",
     "key": "sign_hub",
     "title": "detail.sign_hub.title",
     "description": "detail.sign_hub.description"
@@ -473,7 +473,7 @@
   ],
   "entities": [
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
     "name": "npc.hob.short",
     "words": {
      "bare": "npc.hob.bare"
@@ -498,7 +498,7 @@
     ]
    },
    {
-    "id": "f8598a43-4a6f-8277-b092-c4449c71d2e2",
+    "id": "fe91520e-73f4-8409-a933-1ef6d86a4055",
     "name": "item.loaf.short",
     "words": {
      "article": "a",
@@ -523,7 +523,7 @@
     ]
    },
    {
-    "id": "bc3d071f-472b-8655-9e2d-d5d0fe2edc5c",
+    "id": "90a83592-b743-8257-95a6-029721650767",
     "name": "item.waterskin.short",
     "words": {
      "article": "a",
@@ -580,10 +580,6 @@
   ],
   "position": "standing",
   "journal": [],
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -686,7 +682,7 @@
  "stack": [
   {
    "kind": "thing",
-   "id": "bc3d071f-472b-8655-9e2d-d5d0fe2edc5c"
+   "id": "90a83592-b743-8257-95a6-029721650767"
   }
  ],
  "log": [],

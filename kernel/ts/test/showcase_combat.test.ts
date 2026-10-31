@@ -1,5 +1,5 @@
 // The showcase's combat district, the Drill Yard, walked step by step (docs/showcase/combat-district.md,
-// "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn shout is its
+// "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn check is its
 // own branch); step 10 starts fresh in the social district and combat 11 and the tilt yard's pack
 // in the hub.
 // Every attack is chance 100 or 0, so the numbers are the plan's; the purse roll alone is seeded.
@@ -115,9 +115,9 @@ test('combat 1: the Drill Yard sign reads; the boar is heard from the yard only'
   assert.equal(cues(go(w, 'west').world), undefined);
 });
 
-// Breaks: the lesson grants no skill or sword, the lesson reopens after it is learned, Talk lists
-// the keyword dialogue, a say opens it from another room, or the bounty is not accepted.
-test('combat 2: the lesson gives the blade and the sword; say steel; the bounty', () => {
+// Breaks: the lesson grants no skill or sword, the lesson reopens after it is learned, Talk lacks the
+// steel answer, the hub ends on an answer, or the bounty is not accepted.
+test('combat 2: the lesson gives the blade and the sword; ask about steel; the bounty', () => {
   const lesson = talk(w, 'aldous');
   assert.equal(lesson.opened, 'aldous_lesson');
   w = choose(lesson.world, 'learn').world;
@@ -125,29 +125,25 @@ test('combat 2: the lesson gives the blade and the sword; say steel; the bounty'
   assert.deepEqual([fact(w, 'skill_blade'), where(w, sword)], [true, w.body]);
   w = wield(w);
   assert.ok(Object.values(w.slots).includes(where(w, sword)), 'the sword is wielded');
-  const said = play(w, { type: 'say', word: 'steel' });
-  const steel = said.world;
-  assert.equal(said.decision.kind === 'accepted' && said.decision.outcome, 'choice_opened');
-  assert.equal(open(steel), 'aldous_steel');
-  const elsewhere = play(go(w, 'west').world, { type: 'say', word: 'steel' });
-  assert.equal(elsewhere.decision.kind === 'accepted' && elsewhere.decision.outcome, 'spoken');
-  const plain = talk(leave(steel), 'aldous');
+  const plain = talk(w, 'aldous');
   assert.equal(plain.opened, 'aldous_talk');
-  w = choose(plain.world, 'bounty').world;
+  const steel = choose(plain.world, 'steel');
+  assert.deepEqual(steel.lines, ['narration.aldous_talk.steel']);
+  assert.equal(open(steel.world), 'aldous_talk'); // two answers: the talk returns to its hub
+  w = choose(steel.world, 'bounty').world;
   assert.equal(gameView(w).journal[0]?.state, 'active');
-  assert.equal(pending(w, w.character), undefined); // the hub's only answer ends the talk
+  w = leave(w);
+  assert.equal(pending(w, w.character), undefined);
 });
 
-// Breaks: the Book offers no "ware" chip, a say reaches Gil through the wall, a shout does not, a shout carries two exits (from
-// the inn), or Gil's description ignores the fact.
-test('combat 3: a shout of "ware" in the yard warns Gil; a say or a shout from the inn does not', () => {
-  const fromInn = play(go(w, 'east').world, { type: 'shout', word: 'ware' }).world;
-  assert.notEqual(fact(fromInn, 'gil_warned'), true);
-  w = play(w, { type: 'say', word: 'ware' }).world;
+// Breaks: the Shout a warning card is offered outside the yard (the inn), stays after use (its policy),
+// does not warn Gil, or Gil's description ignores the fact.
+test('combat 3: Shout a warning in the yard warns Gil; the inn offers no such card', () => {
+  assert.ok(refused(go(w, 'east').world, { type: 'perform', action: 'shout_warning' }));
   assert.notEqual(fact(w, 'gil_warned'), true);
-  assert.deepEqual(gameView(w).phrases, ['ware', 'begone']); // the Book's Shout chip
-  w = play(w, { type: 'shout', word: 'ware' }).world;
+  w = play(w, { type: 'perform', action: 'shout_warning' }).world;
   assert.equal(fact(w, 'gil_warned'), true);
+  assert.equal(refused(w, { type: 'perform', action: 'shout_warning' }), 'invalid_state');
   w = go(w, 'west').world;
   assert.equal(
     describeEntity(w, w.character, npc(w, 'gil'), 'description'),
@@ -370,7 +366,7 @@ test('combat 10: with the sword, the Warden takes hits for no loss; Flee holds',
 // Breaks: the bounty's resolve fires with no bounty taken (the round faults and the fight never
 // ends), or the kill credits experience it should not.
 test('combat 11: the raider falls before the bounty is taken; the fight ends normally', () => {
-  let s = play(go(fresh(CTX), 'west').world, { type: 'shout', word: 'ware' }).world;
+  let s = play(go(fresh(CTX), 'west').world, { type: 'perform', action: 'shout_warning' }).world;
   s = attack(go(s, 'west').world, 'raider');
   s = wait(s, s.state.clock + 450).world; // unarmed: Gil alone takes the raider's 3 hp
   assert.equal(fact(s, 'raider_slain'), true);
@@ -393,14 +389,17 @@ test('combat 11b: Aldous offers exactly one Talk before the lesson, after it, an
   assert.equal(talks(s), 1);
   s = choose(talk(s, 'aldous').world, 'learn').world;
   assert.equal(talks(s), 1);
-  s = play(s, { type: 'shout', word: 'ware' }).world;
+  s = play(s, { type: 'perform', action: 'shout_warning' }).world;
   s = attack(go(s, 'west').world, 'raider');
   s = wait(s, s.state.clock + 450).world;
   assert.equal(fact(s, 'raider_slain'), true);
   assert.equal(talks(go(s, 'east').world), 1);
   // The raider dies before the lesson: still one Talk, the lesson.
   s = attack(
-    go(play(go(fresh(CTX), 'west').world, { type: 'shout', word: 'ware' }).world, 'west').world,
+    go(
+      play(go(fresh(CTX), 'west').world, { type: 'perform', action: 'shout_warning' }).world,
+      'west',
+    ).world,
     'raider',
   );
   s = go(wait(s, s.state.clock + 450).world, 'east').world;
