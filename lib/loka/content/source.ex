@@ -1,10 +1,10 @@
-# size: allow 320, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 340, the scene-file entry, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Areas, Behaviours, Extends, Prose, Zones}
+  alias Loka.Content.{Areas, Behaviours, Extends, Prose, SceneFiles, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -41,11 +41,13 @@ defmodule Loka.Content.Source do
 
   @doc """
   Each recognised `.json` file under `dir` (dot files too) as `{rel, kind, value}` (`:invalid` if
-  undecodable; bundled: `{bundle rel, {kind, key, [dir, key]}, value}`), with its diagnostics.
+  undecodable; bundled: `{bundle rel, {kind, key, [dir, key]}, value}`; a `.scene` file as its
+  dialogue, SceneFiles), with its diagnostics.
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
+    files = SceneFiles.merge(files)
     {files, opened} = Areas.split(files, dirs())
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
@@ -64,7 +66,7 @@ defmodule Loka.Content.Source do
     # The directory name is literal, not glob syntax.
     {files, diags} =
       String.replace(dir, ~r/[\[\]{}*?\\]/, "\\\\\\0")
-      |> Path.join("**/*.json")
+      |> Path.join("**/*.{json,scene}")
       |> Path.wildcard(match_dot: true)
       |> Enum.filter(&File.regular?/1)
       # checkpoints/ holds the author preview's recorded paths, not content
@@ -85,6 +87,17 @@ defmodule Loka.Content.Source do
   defp entry(rel, dir), do: entry(rel, classify(rel), dir)
 
   defp entry(rel, :unknown, _), do: {nil, [diag("UNKNOWN_FIELD", at(rel, []))]}
+
+  # A scene's errors name its file and line (docs/system/cartridge.md, Source shortcuts).
+  defp entry(rel, {:scene_file, key}, dir) do
+    {value, bad} = SceneFiles.parse(File.read!(Path.join(dir, rel)))
+
+    diags =
+      for {n, text} <- bad,
+          do: diag("SCHEMA_VIOLATION", at(rel, []), %{"line" => n, "text" => text})
+
+    {{rel, {:dialogue, key, []}, value}, diags}
+  end
 
   defp entry(rel, kind, dir) do
     case JSON.decode(File.read!(Path.join(dir, rel)), [], object_finish: &finish/2) do
@@ -155,10 +168,18 @@ defmodule Loka.Content.Source do
   }
 
   defp classify(rel) do
-    case Path.split(rel) do
-      ["areas", _] -> :area
-      [dir, file] when is_map_key(@dirs, dir) -> {@dirs[dir], Path.rootname(file), []}
-      _ -> :unknown
+    case {Path.split(rel), Path.extname(rel)} do
+      {[dir, file], ".scene"} when dir in ~w(scenes dialogues) ->
+        {:scene_file, Path.rootname(file)}
+
+      {["areas", _], ".json"} ->
+        :area
+
+      {[dir, file], ".json"} when is_map_key(@dirs, dir) ->
+        {@dirs[dir], Path.rootname(file), []}
+
+      _ ->
+        :unknown
     end
   end
 

@@ -33,6 +33,10 @@ maud: line one
   gives: bowl
 ```
 
+`when:` names a true/false fact; `gives:` hands the player that item; a choice is keyed by its
+words (`choice_one`). What the scene cannot say (a keyword, an accept, a riddle) goes in
+`dialogues/<key>.json` beside it. An error names the scene file and line.
+
 Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file.
 
 ## Jump to a beat
