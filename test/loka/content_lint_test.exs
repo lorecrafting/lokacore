@@ -182,14 +182,16 @@ defmodule Loka.ContentLintTest do
           "The door shuts. Too late: the keeper changed the lock.",
           "North, the market: candles.",
           "A [painted board](board): rides north.",
-          "[Nell]: ale's a penny."
+          "[Nell]: ale's a penny.",
+          "You say, \"Hush.\" Price: a penny."
         ],
         do: assert({s, t.(s)} == {s, bad})
 
     for s <- [
           "The tide is in: water covers the cave.",
           "Your hand is quicker than the bones: you catch all five.",
-          "Nell says to you, \"Ale's a penny.\""
+          "Nell says to you, \"Ale's a penny.\"",
+          "Nell says to you, \"Wait. Listen: the tide turns.\""
         ],
         do: assert({s, t.(s)} == {s, []})
   end

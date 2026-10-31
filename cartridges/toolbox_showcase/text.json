@@ -1129,6 +1129,7 @@
   "narration.throw_bones.failure": "The bones scatter through your fingers.",
   "narration.throw_bones.success": "Your hand is quicker than the bones: you catch all five.",
   "narration.unwield_training_sword": "You put the training sword away.",
+  "narration.walker": "You have walked the green, the gate, the tollhouse, the mill and the church.",
   "narration.wanted.applied": "You are wanted now; the law will know your face.",
   "narration.wanted.expired": "No one is looking for you any more.",
   "narration.wanted.tick": "Someone looks at you twice.",
