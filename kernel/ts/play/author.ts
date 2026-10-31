@@ -34,7 +34,9 @@ if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
 }
 const source = resolve(dir);
 const live =
-  flag === '--watch' ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008), source) : undefined;
+  flag === '--watch'
+    ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008), source, out)
+    : undefined;
 // the canonical the page runs (the written artifact), the base of every overlay
 let written: Canonical | undefined = existsSync(out)
   ? JSON.parse(JSON.parse(readFileSync(out, 'utf8')).canonical)

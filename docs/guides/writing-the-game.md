@@ -42,8 +42,10 @@ are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 
 A broken edit keeps the last good page; the column's first line says what broke, as
 `error: rooms/cellar.json:12 unknown exit target "well"`. If a replay stops, the column names the
-step (`step 4 refused: talk Maud`) and the Book stays where the replay got to. Click any Book line
-to open its source in your editor.
+step (`step 4 refused: talk Maud`) and the Book stays where the replay got to. Alt-click (Option-click) any
+Book line to open its source in your editor (`LOKA_EDITOR`, default `code --goto`). The column's
+"Why" takes an action or dialogue key and explains the last recorded step: which rules fired and
+why the action was missing or refused.
 
 ## Before release
 

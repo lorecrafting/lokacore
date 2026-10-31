@@ -1,10 +1,19 @@
 // Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): the dev clock
-// control, keep my place and checkpoints (docs/system/cartridge.md#author-preview). Both drive the kernel's own
-// paths: the clock skews the host clocks, the place replays saved inputs through `invoke`.
+// control, keep my place, checkpoints and the author column (docs/system/cartridge.md#author-preview).
+// All drive the kernel's own paths: the clock skews the host clocks, the place replays saved inputs
+// through `invoke`, the column reads the view and the trace.
 import { useEffect, useState, type ReactNode } from 'react';
-import { Button, Platform, Text, TextInput, View } from 'react-native';
-import type { localSession } from '../../authority/local-story/session';
+import {
+  Button,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
+import { Column, seen, type Opened } from './column.tsx';
 import { listen, overlay } from './live.ts';
 import { asRefs, replay, type Place, type Step } from './place.ts';
 
@@ -14,7 +23,6 @@ export const devClock =
   new URLSearchParams(location.search).get('dev') === '1';
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
 export const skew = () => g.loka_dev_skew ?? 0;
-type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
 
 // The inputs the session saved, under the artifact hash, in localStorage; replayed once per page
 // load after a reload into a different artifact.
@@ -58,7 +66,11 @@ export function played(game: Opened | undefined) {
   if (!recorded.has(game))
     recorded.set(game, {
       ...game,
-      text: (key) => overlay[key] ?? game.text(key),
+      text: (key) => {
+        const words = overlay[key] ?? game.text(key);
+        seen.set(words, key);
+        return words;
+      },
       invoke: (intent) => {
         const reply = game.invoke(intent);
         if (reply.kind === 'saved' && reply.decision.kind === 'accepted')
@@ -84,7 +96,7 @@ function DevClock() {
     }
   };
   return (
-    <View style={{ position: 'absolute', top: 4, right: 4, flexDirection: 'row', gap: 4 }}>
+    <View style={{ flexDirection: 'row', gap: 4 }}>
       <TextInput
         aria-label="Game minutes"
         inputMode="numeric"
@@ -129,7 +141,7 @@ function Checkpoints(tools: Tools) {
       body: JSON.stringify({ steps: place.steps }),
     }).then((r) => (r.ok ? list() : alert(`Not saved: ${r.status}`)));
   return (
-    <View style={{ position: 'absolute', top: 40, right: 4, gap: 4, backgroundColor: 'white' }}>
+    <View style={{ gap: 4 }}>
       <View style={{ flexDirection: 'row', gap: 4 }}>
         <TextInput
           aria-label="Checkpoint name"
@@ -151,23 +163,28 @@ function Checkpoints(tools: Tools) {
   );
 }
 
-/** The Book with the author's tools over it (App mounts it only in the author preview). `redraw`
- * is App's state setter, stable, so the stream opens once per page. */
+/** The Book with the author column beside it (wide) or under it (narrow); App mounts it only in
+ * the author preview. `redraw` is App's state setter, stable, so the stream opens once per page. */
 export function DevPanel({ children, ...tools }: Tools & { children: ReactNode }) {
   const { redraw } = tools;
   const [said, setSaid] = useState<string[]>([]); // the last compile's diagnostics
   useEffect(() => listen((lines) => (setSaid(lines), redraw({}))), [redraw]);
+  const wide = useWindowDimensions().width >= 900;
+  const game = tools.session.game();
   const note = [placeNote, ...said].filter(Boolean).join('\n');
   return (
-    <>
-      {children}
-      <DevClock />
-      <Checkpoints {...tools} />
-      {note ? (
-        <Text style={{ position: 'absolute', bottom: 4, left: 4, backgroundColor: 'white' }}>
-          {note}
-        </Text>
-      ) : null}
-    </>
+    <View style={{ flex: 1, flexDirection: wide ? 'row' : 'column' }}>
+      <View style={{ flex: 1 }}>{children}</View>
+      <ScrollView
+        aria-label="Author column"
+        style={wide ? { width: 320, flexGrow: 0 } : { maxHeight: 200 }} // a ScrollView grows by default
+        contentContainerStyle={{ gap: 8, padding: 4, backgroundColor: 'white' }}
+      >
+        {note ? <Text selectable>{note}</Text> : null}
+        <DevClock />
+        <Checkpoints {...tools} />
+        {game ? <Column game={game} /> : null}
+      </ScrollView>
+    </View>
   );
 }

@@ -1,11 +1,18 @@
 // Fast loop: only a change confined to text values travels as an overlay; anything structural
 // does not (docs/system/cartridge.md#author-preview).
 import assert from 'node:assert/strict';
-import { mkdtempSync, readdirSync, readFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { serve, textOnly } from '../play/live.ts';
+import { lastRun, serve, sourceOf, textOnly } from '../play/live.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 
@@ -29,7 +36,7 @@ test('a change outside text is not text-only, even with the same text', () => {
 test('checkpoints: a name is a file under checkpoints/, the body a steps array', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
   const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir);
+  const server = serve(port, dir, join(dir, 'none.json'));
   t.after(() => server.close());
   const at = (path: string, init?: RequestInit) => fetch(`http://127.0.0.1:${port}${path}`, init);
   const steps = [{ advance: 1 }];
@@ -50,4 +57,54 @@ test('checkpoints: a name is a file under checkpoints/, the body a steps array',
   for (const bad of ['/checkpoints/../x', '/checkpoints/a%2F..%2Fx', '/checkpoints/A.B'])
     assert.equal((await at(bad, { method: 'PUT', body: JSON.stringify({ steps }) })).status, 404);
   assert.deepEqual(readdirSync(dir), ['checkpoints']);
+});
+
+// The column's source link. Breaks: a mention of the key (an exit naming `room.a`) wins over its
+// definition in text.json; inline prose (no key in any file) finds nothing; the editor is not run.
+test('open: a text key opens its definition, inline prose its words, in LOKA_EDITOR', async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
+  mkdirSync(join(dir, 'rooms'));
+  writeFileSync(
+    join(dir, 'rooms/a.json'),
+    '{\n  "key": "a",\n  "name": "line two",\n  "exit": "room.a"\n}\n',
+  );
+  writeFileSync(join(dir, 'text.json'), '{\n  "room.a": "line one"\n}\n');
+  assert.equal(sourceOf(dir, 'room.a'), 'text.json:2');
+  assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
+  assert.equal(sourceOf(dir, 'room.b', 'line three'), undefined);
+  const log = join(dir, 'opened');
+  process.env.LOKA_EDITOR = `printf %s > ${log}`;
+  const port = 20000 + Math.floor(Math.random() * 20000);
+  const server = serve(port, dir, join(dir, 'none.json'));
+  t.after(() => server.close());
+  const post = (path: string, sent: object) =>
+    fetch(`http://127.0.0.1:${port}${path}`, { method: 'POST', body: JSON.stringify(sent) });
+  const opened = await post('/open', { key: 'room.a' });
+  assert.equal(opened.status, 200);
+  assert.equal(await opened.json(), 'text.json:2');
+  for (let i = 0; i < 50 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
+  assert.equal(readFileSync(log, 'utf8'), `${join(dir, 'text.json')}:2`);
+  assert.equal((await post('/open', { key: 'room.b', words: 'line three' })).status, 404);
+  // the explainer takes one run: a start over's earlier rows are not sent to it
+  const run = (id: string) => `{"data":{},"event":"trace.run","ids":{"run_id":"${id}"}}`;
+  const step = (id: string) => `{"data":{},"event":"trace.command","ids":{"run_id":"${id}"}}`;
+  assert.deepEqual(lastRun([run('a'), step('a'), run('b'), step('b')]), [run('b'), step('b')]);
+  assert.deepEqual(lastRun([step('a')]), []);
+  const no = await post('/why', { trace: [] });
+  assert.equal(no.status, 400);
+  assert.equal(await no.json(), 'no run in the trace');
+  // a recorded run against the artifact the page runs reaches the explainer (why.test.ts W1)
+  const root = join(import.meta.dirname, '../../../');
+  const rows = readFileSync(`${root}cartridges/scene_sampler/transcripts/scene.jsonl`, 'utf8')
+    .trim()
+    .split('\n');
+  const scene = serve(port + 1, dir, `${root}protocol/fixtures/cartridge_scene_hash.json`);
+  t.after(() => scene.close());
+  const told = await fetch(`http://127.0.0.1:${port + 1}/why`, {
+    method: 'POST',
+    body: JSON.stringify({ trace: ['{"event":"trace.run","ids":{"run_id":"old"}}', ...rows] }),
+  });
+  assert.equal(told.status, 200, await told.clone().text());
+  const { reactions } = (await told.json()) as { reactions: { rule: string; fired: number }[] };
+  assert.equal(reactions.find((r) => r.rule.endsWith('reaction/bell_after'))?.fired, 1);
 });
