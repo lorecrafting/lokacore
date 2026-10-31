@@ -26,7 +26,7 @@ start)
       || git -C "$bin" ls-remote --exit-code --heads origin "$b" > /dev/null; do
       n=$((n + 1)); b=polish/session-$(date +%F)-$n
     done
-    git -C "$bin" worktree add -q -b "$b" "$wt" origin/main
+    git -C "$bin" worktree add -q --no-track -b "$b" "$wt" origin/main
     (cd "$wt" && mise exec -- mix deps.get --check-locked) || die 'mix deps.get failed'
   elif closed; then
     die "$closed_msg"

@@ -185,7 +185,7 @@ Claude Code specifics:
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
   Place worktrees outside paths the checks scan, and preserve unfinished ones. Create worktrees
   and scratch worktrees (the guard refuses others) in a sibling folder named `worktrees.noindex` next to the repo checkout
-  (`git worktree add -b <branch> ../worktrees.noindex/<name> origin/main`): Spotlight never indexes
+  (`git worktree add --no-track -b <branch> ../worktrees.noindex/<name> origin/main`; a branch tracking `origin/main` rebases onto main on `git pull --rebase`, loka-aeju, and `bin/push_slice.sh` sets its upstream): Spotlight never indexes
   a `.noindex` folder, and each indexed worktree kept `mds_stores` at 150-230% CPU for minutes.
   `bin/new_batch.sh <branch>` makes a batch branch that way (worktree, `bin/worktree_setup.sh`, push with upstream).
   A reviewer uses a separate detached worktree (`git worktree add --detach`).

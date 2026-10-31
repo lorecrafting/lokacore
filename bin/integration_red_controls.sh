@@ -675,6 +675,8 @@ day=polish/session-$(date +%F); git push -q origin "main:refs/heads/$day"
 web=$(pid $wp); expo=$(pid $ep); run polish_session.sh start start 0; S=$(cd "$R.session" 2> /dev/null && pwd -P) || S=$R.session
 [ "$(cwd $sbp)" = "$S/mobile/app" ] && [ "$(git -C "$S" branch --show-current)" = "$day-2" ] && grep -q 'mix deps.get' "$R.mise" \
   || bad 'polish_session start: not served from the session, wrong branch, or no deps'
+# Break (loka-aeju): the session branch tracks origin/main, so a pull --rebase there rebases onto main.
+! git -C "$S" rev-parse -q --verify '@{u}' > /dev/null 2>&1 || bad 'polish_session start: the session branch tracks a remote'
 sb=$(pid $sbp); run polish_session.sh start start-again 0
 [ "$(pid $sbp)" = "$sb" ] && grep -q 'already serving' "$R.out" || bad 'polish_session start-again: restarted'
 run preview_update.sh '' during-session 1; [ "$(pid $sbp)" = "$sb" ] || bad 'preview_update during-session: took the session Storybook'
@@ -874,12 +876,14 @@ wt=$R/worktrees.noindex/feat-x; rc=0; NB_LOG=$R/setup capped sh bin/new_batch.sh
 # Break: the printed status is a pipe's (tail) instead of git push's, so a rejected push reads as green.
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
 git clone -q "$O" . 2>/dev/null; git checkout -qb main; echo 1 > a.txt; git add a.txt; git commit -qm base; git push -q origin main
-git checkout -qb slice; echo 2 > a.txt; git commit -qam slice
+git checkout -qb slice --track origin/main; echo 2 > a.txt; git commit -qam slice
 mkdir "$tmp/ps"; printf '#!/bin/sh\necho "$*" > "$GH_LOG"; echo ci\n' > "$tmp/ps/gh"; chmod +x "$tmp/ps/gh"
 out=$(GH_LOG=$R.gh PATH="$tmp/ps:$PATH" sh "$bin/push_slice.sh" "$R" slice) && [ "$(echo "$out" | head -1)" = "PUSH_EXIT=0 $(git rev-parse slice)" ] || bad "push_slice: accepted push: $out"
 # Break (loka-ivjq.19): the hosted runs are looked up by a short or wrong sha, or a run's status is misread.
 case "$out" in *"ci: started"*"book-e2e: not started"*) ;; *) bad "push_slice: run status lines wrong: $out";; esac
 grep -q -- "--commit $(git rev-parse slice) " "$R.gh" || bad "push_slice: gh was not asked for the full pushed sha: $(cat "$R.gh")"
+# Break (loka-aeju): a slice branch made tracking origin/main keeps it, so a later pull --rebase rebases onto main.
+[ "$(git rev-parse --abbrev-ref 'slice@{u}')" = origin/slice ] || bad "push_slice: upstream not set to origin/slice: $(git rev-parse --abbrev-ref 'slice@{u}')"
 git clone -q "$O" "$R.other" && git -C "$R.other" checkout -q slice && echo 3 > "$R.other/a.txt" && git -C "$R.other" commit -qam other && git -C "$R.other" push -q origin slice
 echo 4 > a.txt; git commit -qam diverged
 out=$(sh "$bin/push_slice.sh" "$R" slice) && bad "push_slice: a rejected push exited 0: $out"
