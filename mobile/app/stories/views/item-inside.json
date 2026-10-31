@@ -63,6 +63,56 @@
      "to": "71697171-efcc-8028-9a88-60b32e4a73ad",
      "direction": "west"
     }
+   ],
+   "unexplored": [
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "down"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "east"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "up"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "west"
+    },
+    {
+     "from": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+     "direction": "east"
+    },
+    {
+     "from": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+     "direction": "south"
+    },
+    {
+     "from": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+     "direction": "west"
+    },
+    {
+     "from": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "direction": "up"
+    },
+    {
+     "from": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "direction": "west"
+    },
+    {
+     "from": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "direction": "east"
+    },
+    {
+     "from": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "direction": "north"
+    }
    ]
   },
   "known_npcs": [
