@@ -25,7 +25,7 @@ spec text; the [designer](../../docs/decisions/owner-decision-designer-role-2026
 
 Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
-   the touched layer's type/compile checks and the focused tests your diff touches ([Every agent](../../docs/WORKFLOW.md#every-agent)).
+   the touched layer's type/compile checks and the focused tests your diff touches ([Every agent](../../docs/WORKFLOW.md#every-agent); the Storybook MCP `test-run` takes [named story ids only](../../docs/WORKFLOW.md#storybook-test-run)).
    The pre-push hook runs `bin/prepush.sh` (the static checks of CI that the changed file types need; [CHECKS](../../docs/CHECKS.md)) and refuses a failing push: fix what fails.
    Push with `bin/push_slice.sh <slice worktree> <branch>` (the hook runs prepush in that worktree) and read its one line `PUSH_EXIT=<n> <sha>`; the log path follows it. Every finished slice in the hosted-PR and draft-batch lanes is pushed, even when the brief names no push: an unpushed head is not durable.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):

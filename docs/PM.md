@@ -73,7 +73,8 @@ Step 3 (build and self-review) is in [WORKFLOW](WORKFLOW.md#loop).
    `docs/reviews/<date>-<slice>-review.md` and regenerates [the index](reviews/README.md) with
    `bin/review_index.sh`; every other slice (polish, toolbox, docs) gets its findings as PR
    comments and no record ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
-   It returns the findings.
+   It returns the findings. The PM never pushes the record into the PR: that push cancels the developer's CI run;
+   a fix round carries it, otherwise `bin/after_merge.sh` does (loka-o0pw).
 
 Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
 
@@ -92,7 +93,7 @@ Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
    ROADMAP status-only lines (slice done, PR link, slice count) uncommitted and passes the subject; the script commits them on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    `bin/after_merge.sh` (run by `bin/merge_pr.sh`) does that bookkeeping after the PM's
-   ROADMAP edit: pull, close the issue, remove the worktree, branch and `review-<N>`, commit, push. Then tell the owner:
+   ROADMAP edit: pull, cherry-pick a records-only `review-<N>` not yet in `main`, close the issue, remove the worktree, branch and `review-<N>`, commit, push. Then tell the owner:
    PR link, verdict, notes; cite every PR as #N (Beads id, short description). Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
@@ -194,8 +195,10 @@ slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
-handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the
-decisions index is not part of it).
+handoff, naming any agent still running, and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the
+decisions index is not part of it). Before spawning for a handed-off branch, check its worktree's last commit
+(`git -C <worktree> log -1 --format=%cr`), the branch's remote and PR (`gh pr list --head <branch>`) and `ListAgents` for a live
+agent on it (a second developer spawned beside a live one in the same worktree, loka-mlok).
 
 This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or

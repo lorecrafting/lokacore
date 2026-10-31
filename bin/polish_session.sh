@@ -6,7 +6,7 @@
 #          A pushed (closed) session is refused (also by update) until its PR merges and after_merge removes it.
 #   update: fetch and merge origin/main into the session worktree (a fast-forward when it holds no commits); when the pull adds or renames
 #          a *.stories.tsx or *.mdx file or changes a package-lock.json, npm ci and restart the session's Storybook if it is served.
-#   close: refuses uncommitted or untracked files; pushes (hosted CI runs on the head), opens the PR
+#   close: refuses uncommitted or untracked files and a failing mobile/app/catalogue.test.ts; pushes (hosted CI runs on the head), opens the PR
 #          (or reuses the open one), then serves the preview checkout again (bin/preview_update.sh).
 set -eu
 me=polish_session
@@ -26,7 +26,7 @@ start)
       || git -C "$bin" ls-remote --exit-code --heads origin "$b" > /dev/null; do
       n=$((n + 1)); b=polish/session-$(date +%F)-$n
     done
-    git -C "$bin" worktree add -q -b "$b" "$wt" origin/main
+    git -C "$bin" worktree add -q --no-track -b "$b" "$wt" origin/main
     (cd "$wt" && mise exec -- mix deps.get --check-locked) || die 'mix deps.get failed'
   elif closed; then
     die "$closed_msg"
@@ -67,6 +67,8 @@ close)
   if [ -z "$(git -C "$wt" rev-list origin/main..HEAD)" ]; then
     echo "$me: no commits on $b; no push, no PR"
   else
+    # A detached component doc comment otherwise fails only on hosted CI, after the push (loka-iu6x).
+    (cd "$wt/mobile/app" && mise exec -- node --test --test-reporter=dot catalogue.test.ts) || die 'catalogue.test.ts failed: fix the doc comment; nothing pushed'
     git -C "$wt" push -q -u origin "$b" || die 'push failed; the session stays served'
     url=$(cd "$wt" && $GH pr list --head "$b" --state open --json url --jq '.[0].url // empty') || die 'gh pr list failed'
     [ -n "$url" ] || url=$(cd "$wt" && $GH pr create --base main --head "$b" --fill) || die 'gh pr create failed'

@@ -2,12 +2,15 @@
 # PM bookkeeping after a reviewed PR merged (docs/PM.md step 7), in the integration checkout:
 # pull main, close the Beads issue, remove the PR branch's worktree, delete the branch (local and
 # remote) and review-<PR>, commit the Beads export (plus a ROADMAP edit already made) and push main.
+# A review-<PR> not yet in main whose commits touch only docs/reviews/ is cherry-picked onto main first
+# (a record with no fix round; the PM pushing it into the PR cancelled the developer's CI, loka-o0pw).
 #   bin/after_merge.sh <PR> <beads-id[,beads-id...]> [ROADMAP commit subject]
 # Refuses unless the PR is MERGED, main is checked out and the tracked files are clean (untracked files are ignored, like pm_merge.sh) apart from
 # .beads/issues.jsonl, and docs/ROADMAP.md (which must then be edited) when a subject is given.
 # The pull and the Beads merge are bin/lib/beads_sync.sh (`br sync --merge`): a dirty export and a
 # moved main export fold together; only a row edited on both sides refuses, after main is pulled. Every other refusal
-# (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change, except that a stale script copy first fast-forwards main.
+# (including an unmerged branch, a review-<PR> touching other paths, or a dirty PR worktree) happens before any change,
+# except that a stale script copy first fast-forwards main and a failed record cherry-pick comes after the pull.
 # review-<PR> counts as merged when `git cherry` finds each of its commits' patches in origin/main.
 # A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
 # A rerun after a failed Beads commit works: br close is skipped for an issue already closed.
@@ -45,16 +48,27 @@ if git ls-remote --exit-code --heads origin "$branch" > /dev/null 2>&1; then
   git merge-base --is-ancestor "origin/$branch" origin/main || die "origin/$branch has commits not in main; nothing changed"
 fi
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git merge-base --is-ancestor "$branch" origin/main || die "$branch is not in origin/main; nothing changed"
-# The record reaches main cherry-picked onto the PR branch (step 5): every commit needs an equivalent there.
+# The record reached main on the PR branch (a fix round, step 5) or is picked here: records only.
 review=$(git rev-parse -q --verify "refs/heads/review-$pr") # the sha checked here is the one deleted
+picks=
 if [ -n "$review" ]; then
   cherry=$(git cherry origin/main "$review") || die "git cherry review-$pr failed; nothing changed"
-  case $cherry in *+*) die "review-$pr is not in origin/main; nothing changed" ;; esac
   # git cherry skips merge commits, whose resolution could hold unmerged content.
   [ -z "$(git rev-list --merges origin/main.."$review")" ] || die "review-$pr has a merge not in origin/main; nothing changed"
+  picks=$(printf '%s\n' "$cherry" | sed -n 's/^+ //p')
+  for c in $picks; do
+    f=$(git diff-tree --no-commit-id --name-only -r "$c" -- ':!docs/reviews/')
+    [ -z "$f" ] || die "review-$pr is not in origin/main and $c touches $f; nothing changed"
+  done
 fi
 [ -z "$subject" ] || git diff --quiet HEAD origin/main -- docs/ROADMAP.md || die 'main changed docs/ROADMAP.md: set your edit aside, pull, redo it'
 beads_sync
+# -X theirs: the record wins a docs/reviews/README.md clash; review_index.sh below regenerates it.
+# reset: cherry-pick refuses any staged change (a staged ROADMAP edit); the worktree keeps it and the add below restages it.
+if [ -n "$picks" ]; then
+  git reset -q && git cherry-pick -X theirs --empty=drop $picks > /dev/null \
+    || { git cherry-pick --abort; die "cherry-pick of review-$pr failed; main pulled, nothing else changed"; }
+fi
 # A rerun after a failed Beads commit finds the issue closed already.
 for i in $(echo "$id" | tr , ' '); do
   [ "$(br show "$i" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
@@ -66,9 +80,11 @@ done
 [ -z "$remote" ] || git push -q origin --delete "$branch" || die 'remote branch not deleted'
 sh bin/review_index.sh || die 'review index not regenerated'
 git add $j docs/reviews/README.md && { [ -z "$subject" ] || git add docs/ROADMAP.md; } || die 'add failed'
-if ! git diff --cached --quiet; then
-  git commit -qm "${subject:-Beads: close $id (merged #$pr)}" || die 'commit failed'
-  git diff --quiet -- $j || git commit -qm "Beads: export after $id (merged #$pr)" -- $j || die 'export commit failed'
+if [ -n "$picks" ] || ! git diff --cached --quiet; then
+  if ! git diff --cached --quiet; then
+    git commit -qm "${subject:-Beads: close $id (merged #$pr)}" || die 'commit failed'
+    git diff --quiet -- $j || git commit -qm "Beads: export after $id (merged #$pr)" -- $j || die 'export commit failed'
+  fi
   git push -q origin main || die 'push failed; commit is local'
 fi
 echo "after_merge: #$pr done ($id closed, $branch removed)"

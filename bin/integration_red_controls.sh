@@ -98,6 +98,9 @@ touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge dirty-worktree: changed something'
 git branch -q -f review-7 HEAD~0 2>/dev/null; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; git checkout -q main
 am unmerged-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge unmerged-review: changed something'
+# Break: an unquoted file list globs docs/review[s]/README.md into docs/reviews/README.md and passes it.
+git branch -q -f review-7 pr; git checkout -q review-7; mkdir 'docs/review[s]'; echo g > 'docs/review[s]/README.md'; git add docs; git commit -qm glob; git checkout -q main
+am glob-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge glob-review: a path outside docs/reviews/ passed'
 git branch -q -f review-7 pr
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
 echo r2 > docs/ROADMAP.md; echo u > owner.cjs # an untracked owner file must not block (loka-jxwu)
@@ -125,6 +128,23 @@ amk; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; 
   && git checkout -q main && git merge -q --no-ff pr2 -m merge2 && git push -q origin main)
 am cherry-picked 0
 ! git rev-parse -q --verify review-7 > /dev/null && grep -qx 'close loka-a --reason Merged #7' "$R.br" || bad 'after_merge cherry-picked: review-7 left or issue not closed'
+# Break: a records-only review-7 not in main (no fix round, loka-o0pw) is refused or deleted unpicked,
+# a README clash with a record main gained meanwhile stops the pick, or the pick is left unpushed
+# when nothing else is staged (export already on main, issue already closed).
+rec() { # <repo> <name>: commit docs/reviews/<name>-review.md and the regenerated index
+  (cd "$1" && echo "# $2" > "docs/reviews/$2-review.md" && sh bin/review_index.sh && git add docs/reviews && git commit -qm "$2")
+}
+amk; git checkout -q review-7; rec . 2026-01-01-own; git checkout -q main
+(cd "$M" && rec . 2026-01-02-m2 && git push -q origin main)
+echo r1 > docs/ROADMAP.md; git add docs/ROADMAP.md; echo r2 > docs/ROADMAP.md # a staged edit must not stop the pick
+am record-picked 0 'ROADMAP status: X merged (#7)'; git fetch -q origin
+git show origin/main:docs/reviews/2026-01-01-own-review.md > /dev/null && git show origin/main:docs/reviews/README.md | grep -q 2026-01-02-m2 \
+  && git show origin/main:docs/reviews/README.md | grep -q 2026-01-01-own && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] && ! git rev-parse -q --verify review-7 > /dev/null \
+  || { bad 'after_merge record-picked: record or index entry not on origin/main, or review-7 left'; sed 's/^/  /' "$R.out"; }
+amk; git checkout -q review-7; rec . 2026-01-01-own; git checkout -q main
+(cd "$M" && echo '{"id":"local-write"}' >> .beads/issues.jsonl && git commit -qam export && git push -q origin main)
+export ISSUE_STATUS=closed; am record-only 0; unset ISSUE_STATUS; git fetch -q origin
+git show origin/main:docs/reviews/2026-01-01-own-review.md > /dev/null || bad 'after_merge record-only: the picked record was not pushed'
 # Break: a merge on review-7 whose resolution main lacks is invisible to git cherry and deleted.
 amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; git merge -q --no-ff origin/main -m mrg
 echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main
@@ -618,6 +638,7 @@ case $* in
   *storybook* | *expo*) for a; do port=$a; done ;;
   *web:preview*) port=$LOKA_PREVIEW_PORT ;;
   'npm ci'*) mkdir -p node_modules; exit 0 ;;
+  *catalogue.test.ts*) exit "${CAT_RC:-0}" ;;
   *) exit 0 ;;
 esac
 exec perl -MIO::Socket::INET -e 'my $s = IO::Socket::INET->new(LocalAddr => "127.0.0.1", LocalPort => shift, Listen => 1, ReuseAddr => 1) or die "listen: $!"; sleep 120' "$port" loka-stub "$@"
@@ -658,6 +679,8 @@ day=polish/session-$(date +%F); git push -q origin "main:refs/heads/$day"
 web=$(pid $wp); expo=$(pid $ep); run polish_session.sh start start 0; S=$(cd "$R.session" 2> /dev/null && pwd -P) || S=$R.session
 [ "$(cwd $sbp)" = "$S/mobile/app" ] && [ "$(git -C "$S" branch --show-current)" = "$day-2" ] && grep -q 'mix deps.get' "$R.mise" \
   || bad 'polish_session start: not served from the session, wrong branch, or no deps'
+# Break (loka-aeju): the session branch tracks origin/main, so a pull --rebase there rebases onto main.
+! git -C "$S" rev-parse -q --verify '@{u}' > /dev/null 2>&1 || bad 'polish_session start: the session branch tracks a remote'
 sb=$(pid $sbp); run polish_session.sh start start-again 0
 [ "$(pid $sbp)" = "$sb" ] && grep -q 'already serving' "$R.out" || bad 'polish_session start-again: restarted'
 run preview_update.sh '' during-session 1; [ "$(pid $sbp)" = "$sb" ] || bad 'preview_update during-session: took the session Storybook'
@@ -695,6 +718,10 @@ git -C "$P" fetch -q origin main; git -C "$P" checkout -q --detach origin/main
 mkdir -p "$P/mobile/app/node_modules"; cksum < "$P/mobile/app/package-lock.json" > "$P/mobile/app/node_modules/.loka-lock-cksum"
 touch "$S/new-token.ts"; run polish_session.sh close untracked 1; [ "$(pid $sbp)" = "$sb" ] && [ ! -s "$R.gh" ] || bad 'polish_session untracked: changed something'
 git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak
+# Break: close pushes a session whose catalogue test fails (a detached doc comment, loka-iu6x).
+export CAT_RC=1; run polish_session.sh close catalogue-red 1; unset CAT_RC
+! git ls-remote --exit-code --heads origin "$day-2" > /dev/null && [ ! -s "$R.gh" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] \
+  || bad 'polish_session close catalogue-red: pushed, opened a PR, or the session not served'
 touch "$P/x"; run polish_session.sh close dirty-preview 1; rm "$P/x"
 [ "$(cwd $sbp)" = "$S/mobile/app" ] || bad 'polish_session close dirty-preview: no Storybook left serving the session'
 run polish_session.sh close close 0
@@ -838,11 +865,11 @@ rc=0; CF_NONE=1 PATH="$tmp/wc:$PATH" capped sh "$W/bin/ci_fail.sh" abc > /dev/nu
 # --- new_batch.sh --------------------------------------------------------------------------------
 # A main checkout cloned from a bare origin; stub worktree_setup.sh records the worktree it set up.
 # Break: the worktree is not under worktrees.noindex next to the main checkout, setup skips it, or
-# the branch is not pushed with upstream.
+# the branch is not pushed with upstream, or tracks origin/main before that push (loka-aeju).
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(cd "$(mktemp -d)" && pwd -P); mkdir "$R/main"; cd "$R/main"
 git clone -q "$O" . 2> /dev/null; git checkout -qb main; mkdir bin; cp "$bin/new_batch.sh" bin/
 printf '#!/bin/sh
-cd "$(dirname "$0")/.." && pwd -P > "$NB_LOG"
+cd "$(dirname "$0")/.." && pwd -P > "$NB_LOG"; ! git rev-parse -q --verify @{u} > /dev/null 2>&1 || echo tracks-main >> "$NB_LOG"
 ' > bin/worktree_setup.sh; chmod +x bin/worktree_setup.sh
 git add . && git commit -qm base && git push -q origin main
 wt=$R/worktrees.noindex/feat-x; rc=0; NB_LOG=$R/setup capped sh bin/new_batch.sh feat/x > "$R/out" 2>&1 || rc=$?
@@ -853,12 +880,14 @@ wt=$R/worktrees.noindex/feat-x; rc=0; NB_LOG=$R/setup capped sh bin/new_batch.sh
 # Break: the printed status is a pipe's (tail) instead of git push's, so a rejected push reads as green.
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
 git clone -q "$O" . 2>/dev/null; git checkout -qb main; echo 1 > a.txt; git add a.txt; git commit -qm base; git push -q origin main
-git checkout -qb slice; echo 2 > a.txt; git commit -qam slice
+git checkout -qb slice --track origin/main; echo 2 > a.txt; git commit -qam slice
 mkdir "$tmp/ps"; printf '#!/bin/sh\necho "$*" > "$GH_LOG"; echo ci\n' > "$tmp/ps/gh"; chmod +x "$tmp/ps/gh"
 out=$(GH_LOG=$R.gh PATH="$tmp/ps:$PATH" sh "$bin/push_slice.sh" "$R" slice) && [ "$(echo "$out" | head -1)" = "PUSH_EXIT=0 $(git rev-parse slice)" ] || bad "push_slice: accepted push: $out"
 # Break (loka-ivjq.19): the hosted runs are looked up by a short or wrong sha, or a run's status is misread.
 case "$out" in *"ci: started"*"book-e2e: not started"*) ;; *) bad "push_slice: run status lines wrong: $out";; esac
 grep -q -- "--commit $(git rev-parse slice) " "$R.gh" || bad "push_slice: gh was not asked for the full pushed sha: $(cat "$R.gh")"
+# Break (loka-aeju): a slice branch made tracking origin/main keeps it, so a later pull --rebase rebases onto main.
+[ "$(git rev-parse --abbrev-ref 'slice@{u}')" = origin/slice ] || bad "push_slice: upstream not set to origin/slice: $(git rev-parse --abbrev-ref 'slice@{u}')"
 git clone -q "$O" "$R.other" && git -C "$R.other" checkout -q slice && echo 3 > "$R.other/a.txt" && git -C "$R.other" commit -qam other && git -C "$R.other" push -q origin slice
 echo 4 > a.txt; git commit -qam diverged
 out=$(sh "$bin/push_slice.sh" "$R" slice) && bad "push_slice: a rejected push exited 0: $out"
