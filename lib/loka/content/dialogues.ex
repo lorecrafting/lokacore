@@ -247,12 +247,13 @@ defmodule Loka.Content.Dialogues do
   end
 
   defp role(rel, {name, %{"role" => kind} = r}, ctx) do
-    actor =
-      if name == "actor",
-        do: [diag("DUPLICATE_DEFINITION", at(rel, ["roles", "actor"]))],
+    # actor and speaker are bound by the kernel (Talk, Ask, Choose).
+    reserved =
+      if name in ["actor", "speaker"],
+        do: [diag("DUPLICATE_DEFINITION", at(rel, ["roles", name]))],
         else: []
 
-    actor ++ reference(rel, ["roles", name], kind, r, ctx.m, ctx.defs)
+    reserved ++ reference(rel, ["roles", name], kind, r, ctx.m, ctx.defs)
   end
 
   # ponytail: retain ordered choice diagnostics; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize

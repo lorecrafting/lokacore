@@ -174,7 +174,8 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // names. A skipped combat turn (loka-x6t.30)
 // names its status from the engine line combat.skipped; it has no actor when the player skipped. An NPC's
 // emote (G9) words from the view's emote table (line_words.ts emoteSentence). A line bound to a named
-// speaker and worded as one quotation reads `Nell says to you, "..."` (book-ui.md Line placement).
+// speaker and worded as one quotation reads `Nell says to you, "..."`, or `Nell says, "..."` to a
+// bystander (a named actor) (book-ui.md Line placement).
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -196,7 +197,7 @@ export const lineWords = (
     const said = text(t.key);
     const speaker = named(t.participants?.speaker);
     return speaker && /^["“][^"“”]*["”]$/.test(said)
-      ? `${cap(speaker)} says to you, ${said}`
+      ? `${cap(speaker)} says${actor ? '' : ' to you'}, ${said}`
       : said;
   }
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';

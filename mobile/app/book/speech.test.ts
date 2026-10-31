@@ -23,7 +23,7 @@ const words = (key: string, speaker?: string) =>
   lineWords({ key, participants: { actor: 'b', ...(speaker && { speaker }) } }, say, v);
 
 // Breaks (book-ui.md Line placement, loka-548k): an NPC's spoken line left as a bare quotation,
-// the speaker's name dropped or lowercase, or narration and an attributed quotation re-attributed.
+// the speaker's name dropped or lowercase, a bystander told "to you", or narration and an attributed quotation re-attributed.
 test('a line wholly one quotation reads as its named speaker saying it to you', () => {
   assert.equal(words('quoted', 'r'), 'Reeve Hal says to you, "Well, stranger?"');
   assert.equal(words('quoted', 'rat'), 'The rat says to you, "Well, stranger?"');
@@ -31,4 +31,7 @@ test('a line wholly one quotation reads as its named speaker saying it to you', 
   assert.equal(words('nods', 'r'), 'Nell nods.');
   assert.equal(words('tagged', 'r'), '"Fine," Nell says.');
   assert.equal(words('curly', 'r'), 'Reeve Hal says to you, “Well?”');
+  // A bystander reading someone else's (a named actor's) conversation is not addressed.
+  const seen = lineWords({ key: 'quoted', participants: { actor: 'rat', speaker: 'r' } }, say, v);
+  assert.equal(seen, 'Reeve Hal says, "Well, stranger?"');
 });

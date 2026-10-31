@@ -282,6 +282,7 @@ Owner and PM rulings 2026-10-24 ([narration log brief](https://github.com/lorecr
 engine emits every line; the Book only words and places it. An engine line's sentence comes from
 `mobile/packages/game-view/line_words.ts`, first person when the player acted, third person
 otherwise; an authored line keeps its own text, except an `emote.performed` line: its sentence is the emote's authored form that the reader's line selects (`others`; `to.you` when the reader is the target; otherwise `to.others`), worded by `line_words.ts` with `{actor}` and `{target}` filled in and capitalised as a sentence.
+A dialogue line whose narration binds a `speaker` and whose authored text is a bare quotation reads `<Speaker> says, "..."`, or `<Speaker> says to you, "..."` when the player is addressed; the Book never adds a speaker the binding does not name.
 
 - Every line lands in the room event log: narration, refusals, arrivals and departures, combat
   lines and a detail page's lines. Read text is the one exception ([Notice-board details](#notice-board-details)).
