@@ -1,6 +1,6 @@
 defmodule Loka.Content.Status do
   @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses, which may tick until cured, never move the derived hp maximum."
-  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
   def check(nil, _, _, _), do: []
@@ -18,7 +18,7 @@ defmodule Loka.Content.Status do
       else:
         gate(m) ++
           values(statuses, {m, settings}, defs, text) ++
-          foods(cures ++ later, m, defs) ++ meals(cures, m, defs, settings)
+          holders(m, defs) ++ foods(cures ++ later, m, defs) ++ meals(cures, m, defs, settings)
   end
 
   # Row hs-5: a meal's `applies` names statuses as its `cures` do.
@@ -57,6 +57,32 @@ defmodule Loka.Content.Status do
   defp trigger?(_), do: false
 
   defp permanent?(s), do: s["duration"] == "permanent"
+
+  # Row W8: a ticking permanent status goes on a body only: never a named item or room, a tag, or
+  # the subject of a status event, which may be either.
+  defp holders(m, defs) do
+    for {_, {rel, _, %{"steps" => steps} = r}} <- defs["reaction"] || %{},
+        {%{"op" => "status.apply"} = s, i} <- Enum.with_index(steps),
+        ticking?(Refs.resolve(ref(s["status"], "status", m), "status", m, defs)),
+        key <- off_body(s, r["on"]["event"]),
+        do: diag("SCHEMA_VIOLATION", at(rel, ["steps", i, key]), %{"error" => "invalid_value"})
+  end
+
+  defp ticking?({_, _, %{"per_tick" => _} = s}), do: permanent?(s)
+  defp ticking?(_), do: false
+
+  defp off_body(s, event) do
+    case Enum.filter(~w(item room tag), &Map.has_key?(s, &1)) do
+      [] ->
+        if event in ~w(status_applied status_ticked status_expired) and
+             not (Map.has_key?(s, "npc") or Map.has_key?(s, "co_present")),
+           do: ["status"],
+           else: []
+
+      named ->
+        named
+    end
+  end
 
   # Status readers 4-8: blocks, allows, resistances, perception, concealment or movement; such a
   # status may omit per_tick too.

@@ -17,14 +17,18 @@ import {
   admitted,
   type JobRow,
   type Mint,
+  refString,
   type World,
 } from '../../runtime/decision.ts';
 import { currentRound } from '../combat/round.ts';
+import { CLOCK_JOB } from '../schedule/daily.ts';
 import { replenishMovers } from '../containment/job.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
 import { visible } from '../light/shared.ts';
 import { fatalTick } from './fatal.ts';
 import { expire, specOf } from './shared.ts';
+
+type Queue = readonly (readonly [string, { due_time: number }])[];
 
 // A row that owns a job: timed, or permanent and ticking (no ends_at, row W8, loka-rn3b).
 type Active = Extract<StatusRow, { active: true }> & { next_tick_at: number; job_id: JobId };
@@ -37,7 +41,7 @@ type Active = Extract<StatusRow, { active: true }> & { next_tick_at: number; job
  * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
  * sub-step writes the row's successor.
  */
-// size: allow 45, one due job saturates the tick, expires, or runs the fatal death sequence
+// size: allow 47, one due job saturates or folds the tick, expires, or runs the fatal death sequence
 export function runStatus(
   world: World,
   command: Pick<Command, 'id'>,
@@ -46,6 +50,7 @@ export function runStatus(
   mint: Mint,
   now = job.due_time,
   carried?: number,
+  queue?: Queue,
 ) {
   const first = job.status === 'pending';
   const ops: DeltaOp[] = first ? [{ op: 'job.complete', writer_group: 0, job_id }] : [];
@@ -76,7 +81,8 @@ export function runStatus(
     return accepted(world, 'job_ran', ops, ended, lines);
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
-  const next_tick_at = due ? add(tick, spec.tick_every) : untick(spec, row, tick);
+  const ticks = due ? foldedTicks(visit, world.state.clock, job_id, job, tick, spec, queue) : 0;
+  const next_tick_at = due ? add(tick, spec.tick_every * ticks) : untick(spec, row, tick);
   const next = Math.min(next_tick_at, row.ends_at ?? Infinity);
   const crossed = next <= world.state.clock;
   if (!crossed) ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
@@ -108,6 +114,46 @@ export const unsaid = (
   lines.length && w.entities[statusHolder(w, job_id)?.body ?? '']?.kind === 'item'
     ? lines.filter((l) => !receipt.some((t) => t.key === l.key))
     : lines;
+
+/** Whether this job's tick is a no-op that catch-up may fold (mechanics.md, W8 Catch-up). */
+export function folds(world: World, job_id: JobId, job: JobRow) {
+  if (job.job.kind !== 'status') return false;
+  const held = statusHolder(world, job_id);
+  const spec = specOf(world, job.job);
+  if (!held || held.row.ends_at !== undefined || spec?.per_tick === undefined) return false;
+  const pool = resourceSpec(world, held.body, spec.resource);
+  const body = world.entities[held.body]?.kind !== 'item' && !world.rooms[held.body];
+  if (!body || !pool || level(world, held.body, spec.resource) === undefined) return false;
+  if (amount(world, held.body, spec).by !== 0 || pool.gain !== 0 || pool.regen) return false;
+  const ref = refString(job.job);
+  return !Object.values(world.cartridge.reactions ?? {}).some(
+    ({ on }) =>
+      on.event === 'status_ticked' && (on.status === undefined || refString(on.status) === ref),
+  );
+}
+
+/**
+ * The ticks from this one to the next: 1, or for a fold the first after the target and at or after
+ * another job's next queued run. Only the drain's queue shows a job in flight: its row is complete.
+ */
+function foldedTicks(
+  visit: World,
+  target: number,
+  job_id: JobId,
+  job: JobRow,
+  tick: number,
+  spec: StatusDefinition,
+  queue?: Queue,
+) {
+  if (!queue || !folds(visit, job_id, job)) return 1;
+  let horizon = target;
+  for (const [id, { due_time }] of queue) {
+    const other = visit.state.jobs?.[id];
+    if (id === job_id || due_time <= visit.state.clock || due_time > horizon || !other) continue;
+    if (other.job.kind !== CLOCK_JOB && !folds(visit, id as JobId, other)) horizon = due_time - 1;
+  }
+  return Math.floor((horizon - tick) / spec.tick_every) + 1;
+}
 
 /**
  * A due tick's change, saturated at the pool bounds (the op itself stays exact), and whether it

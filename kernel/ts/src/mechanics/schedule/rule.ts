@@ -55,7 +55,7 @@ import { built } from '../service/shared.ts';
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
 // runStatus, loka-6ztc).
-// size: allow 43, one run_job dispatch over every job kind (row FD1 adds reaction and its joins)
+// size: allow 44, one run_job dispatch over every job kind (row FD1 adds reaction and its joins)
 export const decideAt = (
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
@@ -64,6 +64,7 @@ export const decideAt = (
   at?: number,
   tick?: number,
   joins?: Joins, // row FD1: the advance's holder groups, for a delayed reaction's run
+  queue?: Parameters<typeof runStatus>[7], // the drain's queue: how far a saturated tick may fold
 ): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {
@@ -75,7 +76,7 @@ export const decideAt = (
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'status')
-      return runStatus(world, command, payload.job_id, row, mint, at, tick);
+      return runStatus(world, command, payload.job_id, row, mint, at, tick, queue);
     if (row.quest_instance_id) {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact
