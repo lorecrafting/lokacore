@@ -267,7 +267,7 @@ S3: the narrated line in the log dries with *gilt* (the words carry `warning`'s 
 `fg`); sound *note* high (two rising tones from the main theme's first interval, 180 ms apart, tier note); haptic *medium*. On the Character page the
 "Level 2, 1 point to spend" line (book-ui.md Levelling) carries *gilt* while points are unspent (steady, not
 animated). Why: a level is the game's one "you grew" moment; the status line adds nothing by rule, so the log
-line and the Character page carry it. P1. Cost S, Reanimated colour. **Owner question Q1.**
+line and the Character page carry it. P0. Cost S, Reanimated colour. **Owner question Q1.**
 
 **Raise** (spending a point): S2, the attribute value dries. No sound. P2.
 
@@ -275,26 +275,26 @@ line and the Character page carry it. P1. Cost S, Reanimated colour. **Owner que
 check's line dries, a failed one is already italic (refused form). No sound: a tick on every check would make
 dice audible in a book. Cue: `new` if ever wanted; recommend never.
 
-**Skill improves** (G5 growth; prose "Blade improves"): S2, *gilt* on that line; sound *tone* high (one tone, the level's first, tier whisper), at most once per 30 s so grinding does not nag (tune by ear); no haptic. Why: the owner wants growth heard (2026-10-31, reversing "silent"). P2. Cue:
+**Skill improves** (G5 growth; prose "Blade improves"): S2, *gilt* on that line; sound *tone* high (one tone, the level's first, tier whisper), at most once per 30 s so grinding does not nag (tune by ear); no haptic. Why: the owner wants growth heard (2026-10-31, reversing "silent"). P0. Cue:
 view-diff on `skills`.
 
 **New skill learned** (`skills` gains an entry): S2, the line *gilt*; sound *note* low (the quest's two tones);
-haptic *light*. Why: a new page in the character, kin to a quest closing and smaller than a level. P2. Cue:
+haptic *light*. Why: a new page in the character, kin to a quest closing and smaller than a level. P0. Cue:
 view-diff on `skills`.
 
 ### 3.6 Quests, story points, scenes, chapters (`quest/`, `scene/`, `dialogue/`)
 
 **Quest activated** (`journal` gains a quest with state active; `quest_activated` new): S2, the running head
-(`pages.tsx:70`) cross-fades from the old objective to the new over `motion.dry` (today a cut). Sound: *tone* low (one tone, the quest's first; the resolve answers it with two), tier note, P1 (owner, 2026-10-31);
+(`pages.tsx:70`) cross-fades from the old objective to the new over `motion.dry` (today a cut). Sound: *tone* low (one tone, the quest's first; the resolve answers it with two), tier note, P0 (owner, 2026-10-31);
 haptic none. Why: the owner chose the running head as the tracker; a cut makes it easy to miss, a fade makes it
 "the book turned to this". P0. Cost S, Reanimated opacity. Cue: view-diff.
 
 **Quest resolved** (`quest_resolved`, outcome success): S3, the running head *settles* (to `dim`, then out
 over `motion.settle`) before the next objective dries in; the journal line gilt for 600 ms; sound *note*
-low (the level's two tones a fifth lower, shared with a new skill learned, so they are kin, not twins); haptic *light*. P1. Cue: view-diff.
+low (the level's two tones a fifth lower, shared with a new skill learned, so they are kin, not twins); haptic *light*. P0. Cue: view-diff.
 
 **Quest failed / deadline passed** (`quest_failed`, W24): S2, the running head fades to `dim` then out, no
-gilt, no note; a single low *paper* close. Haptic *warning*. P1. Cue: view-diff on `journal` state.
+gilt, no note; a single low *paper* close. Haptic *warning*. P0. Cue: view-diff on `journal` state.
 
 **Hint changes** (W23, `QuestView.hint`): S0.
 
