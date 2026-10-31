@@ -1,6 +1,7 @@
-// Toolbox row W8 ticking permanent status rows through real SQLite (loka-rn3b): the needs sampler's
-// hungry made permanent keeps an active row with a tick and job but no end across a month of
-// catch-up and a cold reopen (docs/system/save.md, Status recovery).
+// Toolbox row W8 ticking permanent status rows through real SQLite (loka-rn3b, loka-sgqk): the needs
+// sampler's needs made permanent keep an active row with a tick and job but no end across a month of
+// catch-up and a cold reopen (docs/system/save.md, Status recovery), and saturated ticks fold
+// (docs/system/mechanics.md, W8 Catch-up). Times are seconds after the move east that applies them.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -8,7 +9,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { test } from 'node:test';
+import { test, type TestContext } from 'node:test';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import {
   gameView,
@@ -18,7 +19,8 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
-import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { checkpoint, coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-saves-'));
@@ -33,65 +35,374 @@ try {
 } finally {
   rmSync(scratch, { recursive: true });
 }
-const hungry = artifact.cartridge.statuses['needs_sampler@0.0.1:status/hungry'];
-hungry.duration = 'permanent';
-delete hungry.narration.expired;
-const canonical = encode(artifact.cartridge);
-const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
-const loaded = loadCartridge(
-  new TextEncoder().encode(JSON.stringify({ ...artifact, content_hash: bundle.sha256 })),
-  INSTALLED,
-);
-if (!loaded.ok) throw new Error(JSON.stringify(loaded));
-const initial = newWorld(
-  loaded.cartridge as Cartridge,
-  '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-  [1, 2, 3, 4],
-);
-const releases = [{ fresh: initial, content_hash: bundle.sha256 }] as const;
+
 const HOUR = 3600;
 const MONTH = 30 * 24 * HOUR;
+const ID = (kind: string, key: string) => `needs_sampler@0.0.1:${kind}/${key}`;
+const REF = (kind: string, key: string) => ({
+  cartridge_id: 'needs_sampler',
+  cartridge_version: '0.0.1',
+  kind,
+  key,
+});
+type Authored = {
+  statuses: Record<string, any>;
+  resources: Record<string, any>;
+  reactions: Record<string, any>;
+  facts: Record<string, any>;
+};
 
-// Breaks: load or recovery refuses or rewrites an active status row with a tick and job but no
-// ends_at, the catch-up drain expires it or stops its ticks, or the month's catch-up never ends.
-test('a ticking permanent hungry ticks through a month of catch-up and a cold reopen', (t) => {
-  const path = join(saves, 'hungry.db');
-  let p = elapsedHost(path, undefined, bundle);
-  t.after(() => {
-    p.sql.close();
-    rmSync(saves, { recursive: true, force: true });
-  });
-  const open = () => {
-    const s = openStory(p.db, releases, p.host);
-    if (s.kind !== 'open') throw new Error(s.kind);
-    return s;
+/** The needs sampler with hungry (and, unless the patch restores it, thirsty) made permanent. */
+function fixture(patch?: (c: Authored, status: (key: string) => any) => void) {
+  const compiled = structuredClone(artifact);
+  const authored: Authored = compiled.cartridge;
+  const status = (key: string) => authored.statuses[ID('status', key)];
+  for (const key of ['hungry', 'thirsty']) {
+    status(key).duration = 'permanent';
+    delete status(key).narration.expired;
+  }
+  patch?.(authored, status);
+  const canonical = encode(compiled.cartridge);
+  const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
+  const loaded = loadCartridge(
+    new TextEncoder().encode(JSON.stringify({ ...compiled, content_hash: bundle.sha256 })),
+    INSTALLED,
+  );
+  if (!loaded.ok) throw new Error(JSON.stringify(loaded));
+  const initial = newWorld(
+    loaded.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  return { bundle, initial, releases: [{ fresh: initial, content_hash: bundle.sha256 }] as const };
+}
+
+let saveNumber = 0;
+
+/** A save on disk that has moved east at time 0, so both needs are applied. */
+function begin(t: TestContext, f: ReturnType<typeof fixture> = fixture()) {
+  const path = join(saves, `${++saveNumber}.db`);
+  const clock = { wall: 10000, mono: 0 };
+  const s = {
+    path,
+    f,
+    p: elapsedHost(path, clock, f.bundle),
+    story: undefined as never as Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
   };
-  let story = open();
-  const moved = story.invoke({
+  const open = () => {
+    const story = openStory(s.p.db, f.releases, s.p.host);
+    if (story.kind !== 'open') throw new Error(story.kind);
+    s.story = story;
+  };
+  const reopen = () => {
+    s.p.sql.close();
+    s.p = elapsedHost(path, { ...s.p.clock }, f.bundle);
+    open();
+  };
+  t.after(() => s.p.sql.close());
+  open();
+  const moved = s.story.invoke({
     invocation_id: 'dddddddd-6666-4666-8666-000000000001',
-    actor_id: initial.character,
+    actor_id: f.initial.character,
     action_key: 'move',
     target_ids: [],
     input: { direction: 'east' },
   });
   assert.equal(moved.kind, 'saved');
-  const t0 = story.world().state.clock;
-  const ticking = (next_tick_at: number) => [
-    {
-      label: 'condition.hungry',
-      resource: 'hunger',
-      per_tick: -1,
-      tick_every: HOUR,
-      kind: 'debuff',
-      next_tick_at,
-    },
-  ];
-  const caught = story.elapsed({ expected_run_id: story.runId(), from: t0, until: t0 + MONTH + 1 });
-  assert.equal(caught.kind, 'saved');
-  p.sql.close();
-  p = elapsedHost(path, undefined, bundle);
-  story = open();
-  // The timed thirsty ended with its day; hungry still ticks, an hour past the month.
-  assert.deepEqual(gameView(story.world()).conditions, ticking(t0 + MONTH + HOUR));
-  coldReopen(path, bundle);
+  assert.equal(s.story.world().state.clock, 0);
+  return { ...s, reopen, s };
+}
+type Save = ReturnType<typeof begin>;
+
+/** Real catch-up: wall time passes (50 world units a second), then ClockDriver drains to `until`. */
+function drive({ s }: Save, until: number) {
+  const ms = (until - checkpoint(s.p.sql).target) * 20;
+  s.p.clock.wall += ms;
+  s.p.clock.mono += ms;
+  const run = s.story.runId();
+  let status = s.story.pulse('resume', run);
+  while (status.kind === 'catching_up') status = s.story.pulse('drain', run);
+  assert.equal(status.kind, 'ready');
+  assert.equal(s.story.world().state.clock, until);
+}
+
+const direct = ({ s }: Save, from: number, until: number) =>
+  s.story.elapsed({ expected_run_id: s.story.runId(), from, until });
+
+/** Job-by-job play: one elapsed command per tick, so at most one tick can run in each. */
+function stepwise(save: Save, every: number, until: number) {
+  let from = 0;
+  for (let due = every; due <= until; due += every) {
+    assert.equal(direct(save, from, due).kind, 'saved');
+    from = due;
+  }
+  assert.equal(direct(save, from, until).kind, 'saved');
+}
+
+const receipts = ({ s }: Save) =>
+  JSON.stringify(s.p.sql.prepare('SELECT * FROM receipt ORDER BY revision').all());
+const elapsedReceipts = ({ s }: Save) =>
+  (s.p.sql.prepare('SELECT command, response FROM receipt ORDER BY revision').all() as any[])
+    .map((r) => ({ until: JSON.parse(r.command).payload.until, ...JSON.parse(r.response) }))
+    .filter((r) => r.until !== undefined);
+const events = (save: Save, type: string) =>
+  elapsedReceipts(save).flatMap((r) => r.events.filter((e: any) => e.payload.type === type));
+const pool = ({ s }: Save, key: string) =>
+  gameView(s.story.world()).resources.find((r: any) => r.resource.key === key)!.current;
+const nextTicks = ({ s }: Save) =>
+  Object.fromEntries(
+    gameView(s.story.world()).conditions.map((c: any) => [c.label, c.next_tick_at]),
+  );
+const jobRows = ({ s }: Save) => {
+  const rows = Object.values(s.story.world().state.jobs ?? {}) as { job: { kind: string } }[];
+  return {
+    status: rows.filter((r) => r.job.kind === 'status').length,
+    calendar: rows.filter((r) => r.job.kind === 'calendar').length,
+  };
+};
+
+/** Hunger starts empty; a second status adds to it every 5000 (the A7 hand trace). */
+const fed = (c: Authored, status: (key: string) => any) => {
+  c.statuses[ID('status', 'fed')] = {
+    ...status('hungry'),
+    key: 'fed',
+    per_tick: 1,
+    tick_every: 5000,
+  };
+  c.resources[ID('resource', 'hunger')].start = 0;
+  c.reactions[ID('reaction', 'track_enter')].steps.push({
+    op: 'status.apply',
+    status: REF('status', 'fed'),
+  });
+};
+
+/** The month's end state: A4. */
+function assertMonth(save: Save) {
+  assert.equal(pool(save, 'hunger'), 0);
+  assert.equal(pool(save, 'thirst'), 0);
+  assert.equal(pool(save, 'hp'), 10);
+  assert.deepEqual(nextTicks(save), {
+    'condition.hungry': MONTH + HOUR,
+    'condition.thirsty': MONTH + HOUR,
+  });
+}
+
+// Breaks: load or recovery refuses or rewrites an active status row with a tick and job but no
+// ends_at, boundary still stops at a saturated job (720 steps, hence unbounded rows), or a fold
+// drops a pool change or its one event.
+test('a month of catch-up takes 11 steps, then survives a cold reopen', (t) => {
+  const save = begin(t);
+  const before = jobRows(save);
+  drive(save, MONTH + 1);
+  const hours = Array.from({ length: 10 }, (_, k) => (k + 1) * HOUR);
+  assert.deepEqual(
+    elapsedReceipts(save).map((r) => r.until),
+    [...hours, MONTH + 1],
+  );
+  const after = jobRows(save);
+  assert.deepEqual(
+    { status: after.status - before.status, calendar: after.calendar - before.calendar },
+    { status: 22, calendar: 11 },
+  );
+  assert.equal(events(save, 'status_ticked').length, 22);
+  assert.equal(events(save, 'clock_hour').length, 11);
+  const told = (key: string) =>
+    elapsedReceipts(save).flatMap((r) =>
+      (r.narration ?? []).filter((l: any) => l.key === key).map(() => r.until),
+    );
+  for (const need of ['hungry', 'thirsty']) assert.deepEqual(told(`narration.${need}.tick`), hours);
+  save.reopen();
+  assertMonth(save);
+  coldReopen(save.s.path, save.f.bundle);
 });
+
+// Breaks: a floor(...) + 1 count that is off by one, in either direction, at a tick boundary.
+test('a fold ends on the first tick past the target', (t) => {
+  for (const [until, ticks, next] of [
+    [36000, 20, 39600],
+    [36001, 20, 39600],
+    [39600, 22, 43200],
+  ] as const) {
+    const save = begin(t);
+    drive(save, until);
+    assert.equal(pool(save, 'hunger'), 0);
+    assert.equal(pool(save, 'thirst'), 0);
+    assert.equal(events(save, 'status_ticked').length, ticks);
+    assert.deepEqual(nextTicks(save), { 'condition.hungry': next, 'condition.thirsty': next });
+  }
+});
+
+// Breaks: the fold takes a tick that still changes a pool (a pool write lost). The queue reaches
+// the job in a direct advance too; ten moving ticks must each take 1.
+test('with nothing saturated, every tick runs in one advance', (t) => {
+  const save = begin(t);
+  assert.equal(direct(save, 0, 36000).kind, 'saved');
+  assert.equal(pool(save, 'hunger'), 0);
+  assert.deepEqual(nextTicks(save), { 'condition.hungry': 39600, 'condition.thirsty': 39600 });
+});
+
+// Breaks: an off-by-one in the jump or a pool write in the fold, against job-by-job play.
+test('48 hours through the driver ends where job-by-job play ends', (t) => {
+  const driven = begin(t);
+  const walked = begin(t);
+  const until = 48 * HOUR + 1;
+  drive(driven, until);
+  stepwise(walked, HOUR, until);
+  const state = ({ s }: Save) => {
+    const w = s.story.world();
+    return {
+      clock: w.state.clock,
+      rng: w.state.rng,
+      view: gameView(w).resources,
+      ticks: nextTicks({ s } as Save),
+    };
+  };
+  assert.deepEqual(state(driven), state(walked));
+  assert.equal(pool(driven, 'hunger'), 0);
+  assert.equal(pool(driven, 'thirst'), 0);
+  assert.deepEqual(nextTicks(driven), {
+    'condition.hungry': 176400,
+    'condition.thirsty': 176400,
+  });
+});
+
+// Breaks: the kernel jumps past another job, or the host stops only for non-status jobs. Hand trace:
+// -1 at each hour, +1 at each 5000: 3600:0 5000:1 7200:0 10000:1 10800:0 14400:0 15000:1 18000:0 20000:1.
+test('a saturated tick does not fold past another moving job', (t) => {
+  const driven = begin(t, fixture(fed));
+  drive(driven, 20000);
+  assert.equal(pool(driven, 'hunger'), 1);
+  const advanced = begin(t, fixture(fed));
+  assert.equal(direct(advanced, 0, 20000).kind, 'saved');
+  assert.equal(pool(advanced, 'hunger'), 1);
+});
+
+// Breaks: a horizon at the other job's due time, not before it, swallows the tick due with it.
+// hungry is saturated at 0 from 3600, and thirsty moves at 7200 only: hungry ticks at 3600 and 7200.
+test('a tick due exactly at another job runs', (t) => {
+  const tie = () =>
+    fixture((c, status) => {
+      c.resources[ID('resource', 'hunger')].start = 0;
+      status('thirsty').tick_every = 7200;
+    });
+  for (const [until, hungry] of [
+    [7199, { ticks: 1, next: 7200 }],
+    [7200, { ticks: 2, next: 10800 }],
+    [7201, { ticks: 2, next: 10800 }],
+  ] as const) {
+    const save = begin(t, tie());
+    drive(save, until);
+    const ticked = events(save, 'status_ticked').filter(
+      (e: any) => e.payload.status.key === 'hungry',
+    );
+    assert.equal(ticked.length, hungry.ticks);
+    assert.equal(nextTicks(save)['condition.hungry'], hungry.next);
+    assert.equal(pool(save, 'thirst'), until < 7200 ? 10 : 9);
+  }
+});
+
+// Breaks: clause 5 removed; a fold would swallow a listener's firings.
+test('a status_ticked listener keeps every tick', (t) => {
+  const listened = fixture((c) => {
+    c.facts[ID('fact', 'ticks')] = {
+      key: 'ticks',
+      version: 1,
+      meaning: 'hungry ticks heard',
+      scopes: ['player'],
+      value_type: { type: 'int', default: 0, minimum: 0, maximum: 100000 },
+    };
+    c.reactions[ID('reaction', 'hear')] = {
+      key: 'hear',
+      on: { event: 'status_ticked', status: REF('status', 'hungry') },
+      steps: [{ op: 'fact.adjust', fact: REF('fact', 'ticks'), amount: 1 }],
+    };
+  });
+  const save = begin(t, listened);
+  drive(save, 48 * HOUR);
+  assert.equal(
+    value(save.s.story.world(), listened.initial.character, REF('fact', 'ticks') as never),
+    48,
+  );
+});
+
+// Breaks: clause 4 removed; a fold skips the -100 that keeps taking back what mv regenerates.
+test('a tick on a regenerating pool never folds', (t) => {
+  const drained = () =>
+    fixture((c, status) => {
+      Object.assign(status('hungry'), { resource: REF('resource', 'mv'), per_tick: -100 });
+    });
+  const driven = begin(t, drained());
+  const walked = begin(t, drained());
+  drive(driven, 10801);
+  stepwise(walked, HOUR, 10801);
+  assert.equal(pool(driven, 'mv'), 0);
+  assert.equal(pool(walked, 'mv'), 0);
+});
+
+// Breaks: a fold or jump past the fatal point: hp 10, -1 an hour, minimum 0, dies at the tenth.
+test('a fatal tick in catch-up lands at its own time, not the target', (t) => {
+  const save = begin(
+    t,
+    fixture((c, status) => {
+      c.resources[ID('resource', 'hp')].minimum = 0;
+      Object.assign(status('hungry'), { resource: REF('resource', 'hp') });
+    }),
+  );
+  drive(save, MONTH + 1);
+  const died = elapsedReceipts(save).filter((r) =>
+    r.events.some((e: any) => e.payload.type === 'entity_died'),
+  );
+  assert.equal(died[0].until, 36000);
+});
+
+for (const kind of ['full', 'failed', 'lost'] as const) {
+  // Breaks: a folded step that half-commits, or that reconciles to something other than A4.
+  test(`the folded step, on a ${kind} COMMIT, is fenced and recovers to the month`, (t) => {
+    const save = begin(t);
+    assert.equal(direct(save, 0, 36000).kind, 'saved');
+    const { s } = save;
+    const before = receipts(save);
+    if (kind === 'full') {
+      const pages = (s.p.sql.prepare('PRAGMA page_count').get() as any).page_count;
+      s.p.sql.exec(`PRAGMA max_page_count=${pages}`);
+      assert.throws(() => direct(save, 36000, MONTH + 1), { errcode: 13 });
+      assert.equal(receipts(save), before);
+      s.p.sql.exec('PRAGMA max_page_count=1073741823');
+    } else {
+      if (kind === 'failed')
+        s.p.sql.exec(
+          'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+        );
+      s.p.fault.kind = kind;
+      s.p.fault.armed = true;
+      assert.equal(direct(save, 36000, MONTH + 1).kind, 'pending');
+      assert.equal(s.story.world().state.clock, 36000);
+      s.p.fault.reads = false;
+      save.reopen();
+    }
+    if (kind !== 'lost') {
+      assert.equal(s.story.world().state.clock, 36000);
+      assert.equal(direct(save, 36000, MONTH + 1).kind, 'saved');
+    }
+    assert.equal(elapsedReceipts(save).filter((r) => r.until === MONTH + 1).length, 1);
+    assertMonth(save);
+  });
+}
+
+// Breaks: replaying the folded step re-runs it rather than answering from its receipt.
+test('replaying the folded step answers from its receipt, byte for byte', (t) => {
+  const save = begin(t);
+  assert.equal(direct(save, 0, 36000).kind, 'saved');
+  const first = direct(save, 36000, MONTH + 1);
+  assert.equal(first.kind, 'saved');
+  const before = receipts(save);
+  const again = direct(save, 36000, MONTH + 1);
+  assert.equal(again.kind, 'saved');
+  assert.equal((again as { replay?: boolean }).replay, true);
+  const answer = ({ replay: _, ...rest }: any) => encode(rest);
+  assert.equal(answer(again), answer(first));
+  assert.equal(receipts(save), before);
+  assertMonth(save);
+});
+
+test.after(() => rmSync(saves, { recursive: true, force: true }));
