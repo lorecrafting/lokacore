@@ -171,18 +171,17 @@ test('other item actions retain their detail and show their consequences there',
   h.tap('A sewing box');
   h.tap('Open a sewing box');
   assert.equal(h.stack.at(-1)?.kind, 'inside'); // an accepted Open turns to the Inside page (loka-mo0p)
-  h.tap(LABEL.close);
+  h.tap('Close a sewing box'); // the Inside page's foot shuts the lid (loka-2qk5)
   assert.ok(h.labels().includes('Leave'));
-  assert.ok(h.labels().includes('Close a sewing box'));
+  assert.ok(h.labels().includes('Open a sewing box'));
   assert.ok(h.text().includes("You open the sewing box's lid."));
   assert.equal(h.p.screen().log.filter((l) => l === "You open the sewing box's lid.").length, 1);
   h.tap('Leave');
-  assert.ok(h.labels().includes('A sewing box, open'));
-  h.tap('A sewing box, open');
+  h.tap('A sewing box');
   assert.equal(h.text().includes("You open the sewing box's lid."), false); // a reopened item starts a new visit (loka-x6t.19)
   h.unmount();
   const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
-  r.tap('A sewing box, open');
+  r.tap('A sewing box');
   assert.equal(
     r.text().includes("You open the sewing box's lid."),
     false,

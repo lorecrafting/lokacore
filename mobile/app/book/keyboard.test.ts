@@ -202,7 +202,7 @@ test('Book captures movement keys only on an active World page', (t) => {
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
     });
-    const bottom = book.props.children.props.children.props.children[2]; // after the say shield
+    const bottom = book.props.children.props.children.props.children[0].props.children[2]; // after the say shield
     const footer = bottom
       .type(bottom.props) // null: a detail page draws no status line
       ?.props.children.find((child: any) => child?.type === Footer);
@@ -265,7 +265,7 @@ test('the chapter title page leaves only Continue', () => {
     startOver: () => {},
     shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
   });
-  const bottom = book.props.children.props.children.props.children[2]; // after the say shield
+  const bottom = book.props.children.props.children.props.children[0].props.children[2]; // after the say shield
   const [navigation, , status] = bottom.type(bottom.props).props.children; // the say shield between
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
