@@ -28,7 +28,7 @@
   "npc.jailer.short": "the jailer",
   "npc.jailer.room": "The [[jailer|jailer]] sits by the door with a ledger.",
   "npc.jailer.description": "A tired jailer with a ledger and a ring of keys.",
-  "trial.charge": "The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.",
+  "trial.charge": "The sergeant reads out that you are wanted in the square. Pay the fine or sit.",
   "dialogue.jailer.prompt": "The jailer taps the ledger. \"Five pennies, or you sit.\"",
   "dialogue.jailer.pay": "Pay the five-penny fine",
   "dialogue.jailer.plead": "Plead that you cannot pay",

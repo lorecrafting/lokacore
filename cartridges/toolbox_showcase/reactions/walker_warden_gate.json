@@ -43,6 +43,10 @@
   },
   "steps": [
     {
+      "op": "narrate",
+      "text": "narration.walker"
+    },
+    {
       "op": "fact.assign",
       "fact": "topic_walker_known",
       "value": true
