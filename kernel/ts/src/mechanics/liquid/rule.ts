@@ -17,6 +17,6 @@ export const decide: Rule<'liquid'> = (world, command, mint, steps) => {
     payload.type,
     result.ops,
     [event(world, command, mint, 1, payload)],
-    liquidNarration(world, payload.type, kind, quantity),
+    liquidNarration(world, payload, result.ops),
   );
 };

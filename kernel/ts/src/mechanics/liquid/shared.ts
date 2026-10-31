@@ -163,19 +163,28 @@ function consumePlan(world: World, p: Extract<Payload, { type: 'drink' | 'pour' 
   };
 }
 
+/** The line binds the vessel whose level changed (pour: the receiver) and its committed level (loka-tc2e). */
 export function liquidNarration(
   world: World,
-  type: 'filled' | 'poured' | 'drank',
-  kind: DefinitionRef,
-  quantity: number,
+  payload: ReturnType<typeof liquidPayload>,
+  ops: readonly DeltaOp[],
 ): readonly Text[] {
+  const vessel = payload.type === 'poured' ? payload.receiver_id : payload.vessel_id;
+  const set = ops.find((op) => op.op === 'liquid.set' && op.item_id === vessel) as Extract<
+    DeltaOp,
+    { op: 'liquid.set' }
+  >;
+  const liquid = world.cartridge.liquids![refString(payload.kind)];
   return [
     {
-      key: `liquid.${type}` as never,
+      key: `liquid.${payload.type}` as never,
+      participants: { vessel },
       bindings: {
-        kind: world.cartridge.liquids![refString(kind)].name,
-        unit_label: world.cartridge.liquids![refString(kind)].unit_label,
-        quantity,
+        kind: liquid.name,
+        unit_label: liquid.unit_label,
+        quantity: payload.quantity,
+        remaining: set.to.quantity,
+        capacity: world.liquidSpecs[vessel].capacity,
       },
     },
   ];
