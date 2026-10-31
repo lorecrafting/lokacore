@@ -90,10 +90,13 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
           code,
         }
       : rejected(code);
-  const participants = row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
-    actor: bodyOf(world, actor_id)!,
-    speaker: speakerOf(d, row)!,
-  });
+  const speaker = speakerOf(d, row);
+  const participants = {
+    ...row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
+      actor: bodyOf(world, actor_id)!,
+    }),
+    ...(speaker && { speaker }), // last: a role named speaker never rebinds it
+  };
   const riddle = d.riddle?.choice_id === choice_id ? d.riddle : undefined;
   const answer = command.payload.answer;
   if (riddle ? answer === undefined || !answerFits(riddle.bank, answer) : answer !== undefined)

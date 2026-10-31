@@ -195,7 +195,9 @@ export const lineWords = (
   if (t.key !== 'combat.skipped') {
     const said = text(t.key);
     const speaker = named(t.participants?.speaker);
-    return speaker && /^"[^"]*"$/.test(said) ? `${cap(speaker)} says to you, ${said}` : said;
+    return speaker && /^["“][^"“”]*["”]$/.test(said)
+      ? `${cap(speaker)} says to you, ${said}`
+      : said;
   }
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
   return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);

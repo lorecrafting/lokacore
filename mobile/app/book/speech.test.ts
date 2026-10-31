@@ -10,6 +10,7 @@ const SAY: Record<string, string> = {
   quoted: '"Well, stranger?"',
   nods: 'Nell nods.',
   tagged: '"Fine," Nell says.',
+  curly: '“Well?”',
 };
 const say = (k: string) => SAY[k] ?? k;
 const v = view({
@@ -29,4 +30,5 @@ test('a line wholly one quotation reads as its named speaker saying it to you', 
   assert.equal(words('quoted'), '"Well, stranger?"');
   assert.equal(words('nods', 'r'), 'Nell nods.');
   assert.equal(words('tagged', 'r'), '"Fine," Nell says.');
+  assert.equal(words('curly', 'r'), 'Reeve Hal says to you, “Well?”');
 });
