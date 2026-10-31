@@ -69,6 +69,8 @@ export const routes: Record<string, Step[]> = {
     ...contents(LABEL.inventory),
     'a loaf, open',
     'Drop a loaf',
+    LABEL.backToContents,
+    LABEL.backToWorld,
     'loaf, open',
     'Take a loaf',
   ],

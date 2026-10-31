@@ -381,6 +381,8 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('Remove a wool cloak');
   assert.equal(h.labels().includes('Drop a wool cloak'), true);
   h.tap('Drop a wool cloak');
+  h.tap(LABEL.backToContents); // a Drop from Contents › Inventory returns to Inventory
+  h.tap(LABEL.backToWorld);
   h.tap('An old trunk');
   assert.equal(
     h.text().some((s) => s.includes('more than you can carry')),

@@ -131,6 +131,7 @@ test('actual nested book Item opens locally and Read stays between description a
   assert.deepEqual(stack.at(-1), { kind: 'inside', id: chest });
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, latest);
   assert.deepEqual(restoredItemPages(p.screen().view, p.screen().detail), [
+    { kind: 'contents' },
     { kind: 'carrying' },
     { kind: 'thing', id: chest },
     { kind: 'inside', id: chest },
@@ -233,6 +234,7 @@ for (const settlement of ['pulse', 'title press'])
       }
       assert.equal(draw().props.screen.detail(book).length, 1);
       assert.deepEqual(draw().props.stack, [
+        { kind: 'contents' },
         { kind: 'carrying' },
         { kind: 'thing', id: chest },
         { kind: 'inside', id: chest },

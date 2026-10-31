@@ -60,7 +60,7 @@ export type Logs = {
   recovered?: boolean;
   narrationId?: string;
   confirmedRead?: string;
-  returnWorld?: boolean;
+  returnWorld?: boolean | 'section';
   returnDetail?: string;
   visits?: number; // the page visit a quiet line belongs to, counted when the open pages change
   open?: string;

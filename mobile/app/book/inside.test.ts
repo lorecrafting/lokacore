@@ -92,8 +92,22 @@ test('a corpse Take with items left returns to its Inside page', () => {
   assert.deepEqual(resultPages([...stack], screen), stack.slice(0, 2));
 });
 
-// Breaks: a cold reopen of a Read routes a person's held book through an Inside page they never draw.
-test('a restored Read goes through a container Inside page, never a person', () => {
+// Breaks: a Drop from Contents › Inventory › item clears to World instead of the section, which
+// Back would reach (loka-8lpm); a World-opened Drop stays put; or another item result (Give, a
+// pick) stops on the section instead of World.
+test('a Drop returns to its Contents section, else World', () => {
+  const view = { place: { id: 'p' }, entities: [], inventory: [] };
+  const screen = (returnWorld: unknown) => ({ returnWorld, view }) as never;
+  const section = [{ kind: 'contents' }, { kind: 'carrying' }] as const;
+  const item = [...section, { kind: 'thing', id: 'ear' }] as const;
+  assert.deepEqual(resultPages([...item], screen('section')), section);
+  assert.deepEqual(resultPages([{ kind: 'thing', id: 'ear' }], screen('section')), []);
+  assert.deepEqual(resultPages([...item], screen(true)), []);
+});
+
+// Breaks: a cold reopen of a Read skips the holder's Inside or Look page, or opens Inventory with no
+// Contents beneath it, so Back lands on World (loka-aqnc).
+test("a restored Read sits under Contents, Inventory and its holder's Inside or Look page", () => {
   const read = [{ action_key: 'read' }];
   const view = (kind: string) => ({
     entities: [
@@ -104,15 +118,14 @@ test('a restored Read goes through a container Inside page, never a person', () 
   });
   const pages = (kind: string) =>
     restoredItemPages(view(kind) as never, (id) => (id === 'b' ? ['text'] : []));
-  assert.deepEqual(pages('npc'), [
-    { kind: 'carrying' },
-    { kind: 'thing', id: 'h' },
-    { kind: 'thing', id: 'b' },
-  ]);
-  assert.deepEqual(pages('item').slice(1, 3), [
-    { kind: 'thing', id: 'h' },
-    { kind: 'inside', id: 'h' },
-  ]);
+  for (const kind of ['npc', 'item'])
+    assert.deepEqual(pages(kind), [
+      { kind: 'contents' },
+      { kind: 'carrying' },
+      { kind: 'thing', id: 'h' },
+      { kind: 'inside', id: 'h' },
+      { kind: 'thing', id: 'b' },
+    ]);
 });
 
 // Breaks: a person's Look page (loka-aqnc) closes on any turn while they carry nothing, as an

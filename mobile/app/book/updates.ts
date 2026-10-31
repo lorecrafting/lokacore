@@ -49,7 +49,12 @@ export const openTurn = (
 };
 
 export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
-  if (screen.returnWorld && !screen.view.combat) return [];
+  if (screen.returnWorld && !screen.view.combat) {
+    // A Drop from a Contents section keeps that section, as its Back does (loka-8lpm).
+    const at =
+      screen.returnWorld === 'section' ? next.findLastIndex((p) => p.kind === 'contents') : -1;
+    return at >= 0 ? next.slice(0, at + 2) : [];
+  }
   if (!screen.returnDetail) return next;
   const index = next.findIndex((p) => p.kind === 'thing' && p.id === screen.returnDetail);
   if (index >= 0) return next.slice(0, index + (next[index + 1]?.kind === 'inside' ? 2 : 1)); // its Inside page stays

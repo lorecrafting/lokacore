@@ -118,6 +118,8 @@ const pondAndStew = async (screen: Screen, { tap, take, held, position, moves }:
   await moves('west', 'north');
   await held(/^a cot/);
   await tap(/^Drop/);
+  await tap(LABEL.backToContents); // a Drop returns to Inventory (loka-8lpm)
+  await tap(LABEL.backToWorld);
   await position('resting');
   await position('standing');
   await moves('south', 'south');
@@ -223,6 +225,8 @@ const magic = async (r: Walk, steps: Steps) => {
   await tap(/^Open/);
   await held(/^the lantern/);
   await tap(/^Drop/); // the lit lantern left on the stair: the crypt below is dark
+  await tap(LABEL.backToContents); // a Drop returns to Inventory (loka-8lpm)
+  await tap(LABEL.backToWorld);
   await moves('down');
   await r.note('The dark crypt');
   await moves('up');

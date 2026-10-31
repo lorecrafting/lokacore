@@ -504,7 +504,7 @@ Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World with the engine's take line ([line placement](#line-placement)),
 the item named as the player saw it. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
-returns to World with the engine's drop line. Held items
+returns to World with the engine's drop line; an item opened from a Contents section (Contents › Inventory › item) returns instead to that section, Contents beneath it, as its Back would (loka-8lpm), and a cold reopen of a Read restores Contents, Inventory, each holder's page with its Inside or Look page, then the book. Held items
 open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 Authored narration takes precedence and meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
