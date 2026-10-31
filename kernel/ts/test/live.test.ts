@@ -51,9 +51,17 @@ test('checkpoints: a name is a file under checkpoints/, the body a steps array',
   assert.deepEqual(JSON.parse(readFileSync(join(dir, 'checkpoints/cellar-1.json'), 'utf8')), {
     steps,
   });
-  assert.deepEqual(await (await at('/checkpoints')).json(), ['cellar-1']);
-  assert.deepEqual(await (await at('/checkpoints/cellar-1')).json(), { steps });
+  const listed = await at('/checkpoints');
+  assert.equal(listed.status, 200);
+  assert.deepEqual(await listed.json(), ['cellar-1']);
+  const read = await at('/checkpoints/cellar-1');
+  assert.equal(read.status, 200);
+  assert.deepEqual(await read.json(), { steps });
   assert.equal((await at('/checkpoints/other')).status, 404);
+  assert.equal((await at('/checkpoints/cellar-1', { method: 'DELETE' })).status, 405);
+  const ac = new AbortController(); // the stream stays open; the status is the check
+  assert.equal((await at('/events', { signal: ac.signal })).status, 200);
+  ac.abort();
   for (const bad of ['/checkpoints/../x', '/checkpoints/a%2F..%2Fx', '/checkpoints/A.B'])
     assert.equal((await at(bad, { method: 'PUT', body: JSON.stringify({ steps }) })).status, 404);
   assert.deepEqual(readdirSync(dir), ['checkpoints']);
@@ -66,12 +74,14 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   mkdirSync(join(dir, 'rooms'));
   writeFileSync(
     join(dir, 'rooms/a.json'),
-    '{\n  "key": "a",\n  "name": "line two",\n  "exit": "room.a"\n}\n',
+    '{\n  "key": "a",\n  "name": "line two",\n  "details": {"room.a": "line three"}\n}\n',
   );
   writeFileSync(join(dir, 'text.json'), '{\n  "room.a": "line one"\n}\n');
+  writeFileSync(join(dir, 'one.json'), '{"room.c": "line four"}\n');
   assert.equal(sourceOf(dir, 'room.a'), 'text.json:2');
   assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
-  assert.equal(sourceOf(dir, 'room.b', 'line three'), undefined);
+  assert.equal(sourceOf(dir, 'room.c'), 'one.json:1');
+  assert.equal(sourceOf(dir, 'room.b', 'line five'), undefined);
   const log = join(dir, 'opened');
   writeFileSync(join(dir, 'ed'), `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}\n`, {
     mode: 0o755,
@@ -87,7 +97,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(await opened.json(), 'text.json:2');
   for (let i = 0; i < 50 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
   assert.equal(readFileSync(log, 'utf8'), `${join(dir, 'text.json')}:2`);
-  assert.equal((await post('/open', { key: 'room.b', words: 'line three' })).status, 404);
+  assert.equal((await post('/open', { key: 'room.b', words: 'line five' })).status, 404);
+  assert.equal((await fetch(`http://127.0.0.1:${port}/open`)).status, 404); // a GET is not a post
+  const bad = await fetch(`http://127.0.0.1:${port}/open`, { method: 'POST', body: '{' });
+  assert.equal(bad.status, 400);
   // Break: no Origin check, and any page the author visits can run LOKA_EDITOR (status 200)
   const foreign = await fetch(`http://127.0.0.1:${port}/open`, {
     method: 'POST',
@@ -100,6 +113,8 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   const step = (id: string) => `{"data":{},"event":"trace.command","ids":{"run_id":"${id}"}}`;
   assert.deepEqual(lastRun([run('a'), step('a'), run('b'), step('b')]), [run('b'), step('b')]);
   assert.deepEqual(lastRun([step('a')]), []);
+  assert.deepEqual(lastRun([run('a')]), [run('a')]); // the first row counts
+  assert.deepEqual(lastRun([step('a'), run('b')]), [run('b')]); // so does the last
   const no = await post('/why', { trace: [] });
   assert.equal(no.status, 400);
   assert.equal(await no.json(), 'no run in the trace');
