@@ -120,7 +120,6 @@ export default function Book(p: BookProps) {
   const current = useRef({ stack, view: screen.view });
   current.current = { stack, view: screen.view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
-  useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
     pr.leaveCombat(); // every turn leaves an ended Combat page (its foot is the only one shown)
     const view = pr.screen().view;
@@ -146,6 +145,7 @@ export default function Book(p: BookProps) {
       talkingOn={talkingOn}
       talkOn={talkOn}
       {...useSettings(p.shell)}
+      {...useUpdates(p, pr, state)}
     />
   );
 }
@@ -155,6 +155,7 @@ type ViewProps = {
   screen: Screen;
   stack: Page[];
   flip: { turn: number; dir: 1 | -1 };
+  resumes?: number; // returns from the background so far: the view that settles one plays no cues
   go: (pages: Page[], dir: 1 | -1) => void;
   press: (b: Button, detail?: string) => void;
   refused: (line: DetailLine) => void;
@@ -178,7 +179,7 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
-  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn);
+  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);

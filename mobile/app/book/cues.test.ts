@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cuesOf, QUIET, soundOf, step, type Cue, type CueName } from './cues.ts';
+import { motion } from './tokens.ts';
 
 const base = {
   actor_id: 'a',
@@ -25,6 +26,7 @@ const skill = (key: string, acquired: boolean, level?: number) => ({
   acquired,
   level,
 });
+const QUICK = motion.quick.duration;
 const fight = { combat: { encounter_id: 'e' } };
 
 // Each row breaks if that cue's trigger, or its sound, changes. [cue, was, now, sound].
@@ -284,19 +286,63 @@ test('S4 clears the queue, fires alone, holds for the card or until the page tur
   assert.equal(r.q.playing, undefined);
   assert.equal(r.q.pending, undefined);
   assert.deepEqual(step(r.q, [{ name: 'chapter' }, coin, blow(3)], 1300).fired, []);
-  assert.deepEqual(names(step(r.q, [coin], 1400, true).fired), ['coin']);
+  const away = step(r.q, [coin], 1400, true);
+  assert.deepEqual(away.fired, []);
+  assert.deepEqual(names(step(away.q, [], 1400 + QUICK).fired), ['coin']);
   assert.deepEqual(step(r.q, [coin], 1799).fired, []);
   assert.deepEqual(names(step(r.q, [coin], 1800).fired), ['coin']);
 });
 
-// Breaks: a turn leaves the leaving page's blow waiting; or a turn loses this view's own cues.
-test('a page turn cancels what is queued before this view joins', () => {
+// Breaks: a turn leaves the leaving page's blow waiting; a turn loses this view's own cues; or they
+// start at the turn, under a picture still covering the page (book-ui.md, Queue).
+test('a page turn cancels what is queued; the arriving cues start at the picture deadline', () => {
   let r = step(QUIET, [blow(1)], 1000);
   r = step(r.q, [blow(2)], 1100);
   const turned = step(r.q, [{ name: 'level' }], 1200, true);
-  assert.deepEqual(names(turned.fired), ['level']);
+  assert.deepEqual(turned.fired, []);
   assert.equal(turned.q.pending, undefined);
-  assert.deepEqual(names(step(r.q, [{ name: 'chapter' }], 1200, true).fired), ['chapter']);
+  assert.deepEqual(step(turned.q, [], 1200 + QUICK - 1).fired, []);
+  const due = step(turned.q, [], 1200 + QUICK);
+  assert.deepEqual(names(due.fired), ['level']);
+  assert.deepEqual(due.q.held, []);
+  const chapter = step(r.q, [{ name: 'chapter' }], 1200, true);
+  assert.deepEqual(names(step(chapter.q, [], 1200 + QUICK).fired), ['chapter']);
+});
+
+// Breaks: a second turn lets the first arriving page's cue play on the page after it.
+test('another turn inside the hold cancels the held cues', () => {
+  const first = step(QUIET, [{ name: 'level' }], 1000, true);
+  const second = step(first.q, [], 1100, true);
+  assert.deepEqual(step(second.q, [], 1100 + QUICK).fired, []);
+});
+
+// Breaks: two views inside a hold play one key twice, or the merged cue names only the first's items.
+test('small cues held together fire once with all their ids', () => {
+  const a = step(QUIET, [{ name: 'pickup', ids: ['a'] }], 1000, true);
+  const b = step(a.q, [{ name: 'pickup', ids: ['b'] }], 1050);
+  assert.deepEqual(step(b.q, [], 1000 + QUICK).fired, [{ name: 'pickup', ids: ['a', 'b'] }]);
+});
+
+// Breaks: a status tick in combat thuds (owner rule: silent); the per_tick sign is reversed, so a
+// blow reads wrong; or a healing tick hides part of a blow. Literals: a tick every 60 of -1 HP.
+test('a tick in combat is no blow; a blow beside a tick is its own size', () => {
+  const poison = (next_tick_at: number, per_tick = -1) => ({
+    conditions: [{ label: 'p', resource: 'hp', per_tick, tick_every: 60, next_tick_at }],
+  });
+  const fought = (hp: number, more: object) => view({ ...pool(hp), ...fight, ...more });
+  const hp = (now: GameView, was: GameView) =>
+    cuesOf(now, was).find((c) => c.name === 'hp_loss')?.loss;
+  assert.equal(hp(fought(9, poison(160)), fought(10, poison(100))), undefined);
+  assert.equal(hp(fought(8, poison(220)), fought(10, poison(100))), undefined); // two ticks
+  assert.equal(hp(fought(6, poison(160)), fought(10, poison(100))), 3);
+  assert.equal(hp(fought(9, poison(160, 2)), fought(10, poison(100, 2))), 3); // heals 2, blow 3
+  assert.equal(hp(fought(7, poison(100)), fought(10, poison(100))), 3); // no tick fell
+  const bleed = (next_tick_at: number, generation = 1) => ({
+    bleeding: { label: 'b', hp_loss: 2, tick_every: 100, next_tick_at, generation },
+  });
+  assert.equal(hp(fought(8, bleed(200)), fought(10, bleed(100))), undefined);
+  assert.equal(hp(fought(7, bleed(200)), fought(10, bleed(100))), 1);
+  assert.equal(hp(fought(7, bleed(200, 2)), fought(10, bleed(100))), 3); // a new wound, no tick
 });
 
 // Breaks: grinding nags, off by one either way; or the line loses its gilt with the tone.

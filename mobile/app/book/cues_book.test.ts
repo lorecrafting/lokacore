@@ -6,6 +6,7 @@ import { book } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { onCue, useCues } = await import('./cues.ts');
+const { motion } = await import('./tokens.ts');
 
 const place = (id: string, more = {}) =>
   ({ place: { id }, inventory: [], journal: [], ...more }) as unknown as GameView;
@@ -29,7 +30,7 @@ function mount() {
   let i = 0;
   let deps: unknown[] | undefined;
   let cleanup: (() => void) | undefined;
-  const draw = (view: GameView, catchingUp: boolean, turn: number) => {
+  const draw = (view: GameView, catchingUp: boolean, turn: number, resumes = 0) => {
     i = 0;
     const g = globalThis as any;
     g[Symbol.for('loka-book-test-state')] = (v: unknown) => [(slots[i++] ??= v), () => {}];
@@ -39,7 +40,7 @@ function mount() {
       cleanup?.();
       cleanup = f();
     };
-    useCues(view, catchingUp, turn);
+    useCues(view, catchingUp, turn, resumes);
   };
   return Object.assign(draw, { unmount: () => cleanup?.() });
 }
@@ -131,14 +132,67 @@ test('a page turn cancels the pending cue', (t) => {
   assert.deepEqual(heard, ['hp_loss']);
 });
 
+// Breaks: held cues never get a timer, or the timer outlives the Book.
+test('the arriving page cues play at the picture deadline, unless the Book unmounts', (t) => {
+  const tick = clock(t);
+  const heard = listen(t);
+  const draw = mount();
+  draw(place('a'), false, 0);
+  draw(place('b'), false, 1);
+  assert.deepEqual(heard, []);
+  tick(motion.quick.duration - 1);
+  assert.deepEqual(heard, []);
+  tick(1);
+  assert.deepEqual(heard, ['place']);
+  draw(place('c'), false, 2);
+  draw.unmount();
+  tick(1000);
+  assert.deepEqual(heard, ['place']);
+});
+
+// Breaks: an absence drained in one pulse is heard as cues (status_out here); or a plain clock tick,
+// or the first press after coming back, is silenced with it.
+test('what a resume settled is silent; the same time passing while open is not', (t) => {
+  const tick = clock(t);
+  const heard = listen(t);
+  const statused = () => {
+    const b = book(compiled('cartridges/recap_sampler') as never);
+    for (const d of ['east', 'west']) b.go(d);
+    b.draw();
+    tick(1000);
+    assert.ok(b.game.view().view.conditions?.length, 'poisoned before the absence');
+    heard.length = 0;
+    b.clock.wall += 60000;
+    b.clock.mono += 60000;
+    return b;
+  };
+  const away = statused();
+  assert.equal(away.game.pulse('resume').kind, 'ready');
+  away.draw();
+  assert.deepEqual(heard, []);
+  away.go('east');
+  away.draw();
+  tick(1000);
+  assert.ok(heard.includes('place'), JSON.stringify(heard));
+  away.unmount();
+  const open = statused();
+  assert.equal(open.game.pulse('active').kind, 'ready');
+  open.draw();
+  tick(1000);
+  assert.ok(heard.includes('status_out'), JSON.stringify(heard));
+  open.unmount();
+});
+
 // Breaks: Book stops feeding the bus, passes the wrong view, or a restored save is heard.
 test('the Book publishes a walk, and is silent opening and reopening', (t) => {
+  const tick = clock(t);
   const heard = listen(t);
   const showcase = compiled('cartridges/toolbox_showcase') as never;
   const b = book(showcase);
   assert.deepEqual(heard, []);
   b.go(b.game.view().view.exits[0]!.direction);
   b.draw();
+  tick(1000);
   assert.ok(heard.includes('place'), JSON.stringify(heard));
   const more = heard.length;
   const again = book(showcase, { sql: b.sql, clock: b.clock } as never);

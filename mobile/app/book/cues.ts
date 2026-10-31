@@ -38,6 +38,29 @@ const amount = (v: GameView, key: string) =>
 const moved = (now: GameView, was: GameView, key: string) =>
   (amount(now, key) ?? amount(was, key) ?? 0) - (amount(was, key) ?? amount(now, key) ?? 0);
 
+type Ticking = { next_tick_at?: number; tick_every?: number };
+const ticks = (was?: Ticking, now?: Ticking) =>
+  was?.tick_every && was.next_tick_at !== undefined && now?.next_tick_at !== undefined
+    ? (now.next_tick_at - was.next_tick_at) / was.tick_every
+    : 0;
+// HP the statuses took between two views; `per_tick` is signed, negative a loss (model.ts).
+function ticked(now: GameView, was: GameView) {
+  const same = now.bleeding?.generation === was.bleeding?.generation;
+  const bled = (same ? ticks(was.bleeding, now.bleeding) : 0) * (was.bleeding?.hp_loss ?? 0);
+  return (was.conditions ?? [])
+    .filter((c) => c.resource === 'hp')
+    .reduce(
+      (sum, c) =>
+        sum -
+        (c.per_tick ?? 0) *
+          ticks(
+            c,
+            now.conditions?.find((o) => o.label === c.label),
+          ),
+      bled,
+    );
+}
+
 const named = (name: CueName, ids: string[], more?: Partial<Cue>): Cue[] =>
   ids.length ? [{ name, ids, ...more }] : [];
 
@@ -58,9 +81,9 @@ const questCues = (now: GameView, was: GameView) => {
 
 function combatCues(now: GameView, was: GameView) {
   const out: Cue[] = [];
-  // Status ticks are silent, so only a fall in combat is a blow (plan 3.3).
-  // ponytail: a tick during combat still thuds; telling them apart needs the events of plan section 9.
-  const loss = -moved(now, was, 'hp');
+  // Status ticks are silent (owner rule), so only a fall in combat beyond them is a blow (plan 3.3).
+  // ponytail: the last tick of a status that just ended still thuds; the view no longer shows it.
+  const loss = -moved(now, was, 'hp') - ticked(now, was);
   if (loss > 0 && (now.combat || was.combat)) out.push({ name: 'hp_loss', loss });
   if (!was.combat && now.combat) out.push({ name: 'combat_open' });
   if (was.combat && !now.combat) out.push({ name: 'combat_close' });
@@ -146,13 +169,24 @@ export type Queue = {
   merged: Partial<Record<CueName, number>>; // when each S2 last fired
   toned: number; // when skill_up last sounded
   washed: number; // when an hp_loss last washed
+  held: Cue[]; // the arriving page's, until its picture deadline
+  heldUntil: number;
 };
-export const QUIET: Queue = { until: 0, merged: {}, toned: -Infinity, washed: -Infinity }; // mutate-skip: until is unread before a play or card sets it
+// mutate-skip: until is unread before a play or card sets it
+export const QUIET: Queue = {
+  until: 0,
+  merged: {},
+  toned: -Infinity,
+  washed: -Infinity,
+  held: [],
+  heldUntil: -Infinity,
+};
 
 // An S3 holds for the severity's 500 ms budget, which the blow wash fills.
 const BEAT = motion.flash.duration + motion.flash.out;
 
-// An S2: coalesced by key. skill_up past its limit keeps its gilt and loses its tone.
+// An S2: coalesced by key; a cue already fired gains no ids, so effects read the first view's.
+// skill_up past its limit keeps its gilt and loses its tone.
 function small(s: Queue, cue: Cue, now: number): Cue[] {
   if (now - (s.merged[cue.name] ?? -Infinity) < mix.coalesce) return [];
   s.merged[cue.name] = now;
@@ -161,6 +195,15 @@ function small(s: Queue, cue: Cue, now: number): Cue[] {
   s.toned = now;
   return [cue];
 }
+
+// Cues of one small key waiting together are one cue, with all their ids.
+const gathered = (cues: Cue[]) =>
+  cues.reduce<Cue[]>((out, cue) => {
+    const i = CUES[cue.name].s === 2 ? out.findIndex((o) => o.name === cue.name) : -1;
+    if (i < 0) return [...out, cue];
+    out[i] = { ...out[i]!, ids: [...(out[i]!.ids ?? []), ...(cue.ids ?? [])] };
+    return out;
+  }, []);
 
 const holdCard = (q: Queue, now: number): Queue => ({
   ...q,
@@ -171,15 +214,21 @@ const holdCard = (q: Queue, now: number): Queue => ({
 });
 
 /**
- * One moment of the queue: `turned` cancels the leaving page's effects before this view's cues join.
+ * One moment of the queue: `turned` cancels the leaving page's effects, and the arriving page's cues
+ * wait for its picture deadline (book-ui.md, Queue).
  * A later S3 of another key than the pending one is dropped; the diff lists the story's first.
  */
-export function step(q: Queue, cues: Cue[], now: number, turned = false) {
+export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   const s: Queue = turned
     ? { ...q, card: false, playing: undefined, pending: undefined }
     : { ...q };
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
+  s.held = [...(turned ? [] : q.held), ...arriving];
+  if (turned) s.heldUntil = now + motion.quick.duration;
+  if (now < s.heldUntil) return { q: s, fired };
+  const cues = gathered(s.held);
+  s.held = [];
   const chapter = cues.find((c) => CUES[c.name].s === 4);
   if (s.card && now < s.until) return { q: s, fired };
   s.card = false;
@@ -217,9 +266,10 @@ export const onCue = (listener: (cue: Cue) => void) => {
  * Feeds the queue from each new view and page turn. A first view is silent, and catch-up to its end:
  * the first view after it diffs against nothing.
  */
-export function useCues(view: GameView, catchingUp: boolean, turn: number) {
+export function useCues(view: GameView, catchingUp: boolean, turn: number, resumes = 0) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
+  const back = useRef(resumes);
   const settled = useRef<GameView>(undefined);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -228,11 +278,15 @@ export function useCues(view: GameView, catchingUp: boolean, turn: number) {
       queue.current = q;
       for (const cue of fired) for (const listener of listeners) listener(cue);
       // A timer can land a little early: it waits again rather than strand the pending cue.
-      if (q.pending) timer = setTimeout(() => advance([]), q.until - performance.now());
+      const due = q.held.length ? q.heldUntil : q.pending ? q.until : undefined;
+      if (due !== undefined) timer = setTimeout(() => advance([]), due - performance.now());
     };
-    advance(cuesOf(view, catchingUp ? undefined : settled.current), turn !== seen.current);
+    // An absence is no event: what a resume settled, however fast, is heard as nothing.
+    const away = catchingUp || resumes !== back.current;
+    advance(cuesOf(view, away ? undefined : settled.current), turn !== seen.current);
     seen.current = turn;
+    back.current = resumes;
     settled.current = catchingUp ? undefined : view;
     return () => clearTimeout(timer);
-  }, [view, catchingUp, turn]);
+  }, [view, catchingUp, turn, resumes]);
 }

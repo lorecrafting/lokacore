@@ -124,7 +124,7 @@ the eye is on, or scrolls. Ink dries in place; pops appear under the log, not in
 - **Senses** (G6 cues): the rule is "the sense is in the words, never an icon or colour"
   (book-ui.md Mechanic renderings). No visual. A sound bed may respond to the room, not to a cue line.
 - **Status ticks and expiry, item statuses** (owner rule: silent); the countdown ring is the whole story.
-- **NPC background life**: schedules, population births, patrol moves, crow flights out of sight, wages.
+- **NPC background life**: schedules, population births, patrol moves, crow flights out of sight. A wage paid in the player's pennies is the coin cue, as any change to them is.
   The prose says "Nell leaves."; an effect would make the world feel like it is performing for the player.
 - **Facts, knowledge, reputation, disposition, rumour, fear, scars**: narrated or not by content; no cue.
 - **Save**: confirmed saves are silent; "save not confirmed" is a Note (StatusLine pending state). A save
@@ -330,7 +330,7 @@ pickup pop fires as in 3.2 for a buy, but the coin plays instead of the flick, s
 
 **Service received** (sleep at the inn, a meal): S0 beyond the rest or eat entry.
 
-**Wage paid** (escort): S0; the pennies entry covers the player's side.
+**Wage paid** (escort): the coin cue when the player's pennies change (the pennies entry); S0 otherwise.
 
 ### 3.8 Food, liquid, water, rest, dreams (`food/`, `liquid/`, `water/`, `rested`)
 

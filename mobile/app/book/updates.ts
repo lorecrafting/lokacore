@@ -1,6 +1,6 @@
 // The Book's live updates: each GameView update redraws its pages, restores a remounted pending
 // Read or corpse Take, and turns the page on a terminal result.
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
@@ -79,10 +79,12 @@ const visit = (pr: Presenter, stack: Page[]) => pr.visit(stack.map(detailId));
 
 export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   const stack = s.current.current.stack;
+  const resumes = useRef(0);
   useEffect(() => visit(pr, stack), [pr, stack]);
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
+      if (update.kind === 'state' && update.resumed) resumes.current++;
       if (live) applyUpdate(p, pr, s, update);
     });
     p.shell.subscribed?.(true);
@@ -92,6 +94,7 @@ export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       p.shell.subscribed?.(false);
     };
   }, [p.game, pr, p.shell.recovered]);
+  return { resumes: resumes.current };
 }
 
 function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubscription) {

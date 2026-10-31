@@ -175,6 +175,7 @@ function pulseOf(
 ) {
   const run = story.runId();
   return (mode: Pulse = 'active'): ElapsedStatus => {
+    const resumed = mode === 'resume';
     try {
       if (story.runId() !== run) return { kind: 'replaced' };
       if (mode === 'resume') story.requestResume(run);
@@ -191,11 +192,11 @@ function pulseOf(
             reply,
           });
         const status = statusOf(reply);
-        emit({ kind: 'state', projection: projection(), status });
+        emit({ kind: 'state', projection: projection(), status, resumed });
         return status;
       }
       const status = story.pulse(mode, run);
-      emit({ kind: 'state', projection: projection(), status });
+      emit({ kind: 'state', projection: projection(), status, resumed });
       return status;
     } catch (e) {
       const status = statusOfError(e);
