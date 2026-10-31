@@ -54,7 +54,7 @@ button.replay:active{color:var(--fg)}
 .ctrl{font-family:var(--caps);font-size:14px;letter-spacing:1.1px;color:var(--action);min-height:var(--touch);display:inline-flex;align-items:center;cursor:pointer;user-select:none}
 .chip{display:inline-flex;align-items:center;min-height:var(--touch);padding:0 var(--sp-xl);border:1px solid var(--line);border-radius:var(--r-chip);background:var(--card);color:var(--action);font-size:17px;cursor:pointer;user-select:none;margin-right:var(--sp-sm)}
 .pop{position:absolute;left:var(--sp-page);font-size:13px;line-height:19px;color:var(--action);opacity:0;pointer-events:none}
-.wash{position:absolute;inset:0;background:var(--danger);opacity:0;pointer-events:none}
+.wash{position:absolute;inset:0;background:var(--action);opacity:0;pointer-events:none}
 .vig{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center, transparent 55%, var(--fg) 140%)}
 .glow{position:absolute;right:-40px;bottom:-40px;width:60%;aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(circle, var(--dark-action) 0%, transparent 70%)}
 .after{position:absolute;inset:0;background:var(--bg);opacity:0;pointer-events:none}
@@ -141,7 +141,7 @@ svg.map text{font-family:var(--caps);font-size:11px;fill:var(--fg)}
     <div class="title">A boar</div>
     <div class="log" id="dmgLog"><div>You swing. The boar is hurt.</div></div>
   </div><div class="wash"></div></div>
-  <p class="cap"><b>Fires on</b> the player's HP falling in combat (3.3; owner's choice). <b>Why</b> damage must land in the body before the number is read: the page swells 1.5 % and a <i>danger</i> wash rises in 120 ms and falls in 380; the HP value dries red. Dull paper thud, heavy haptic. Reduced motion: no swell, half wash. Flashes off: the number alone.</p>
+  <p class="cap"><b>Fires on</b> the player's HP falling in combat (3.3; owner's choice). <b>Why</b> damage must land in the body before the number is read: the page swells 1.5 % and an <i>action</i> oxblood wash rises in 120 ms and falls in 380; the HP value dries red. Dull paper thud, heavy haptic. Reduced motion: no swell, half wash. Flashes off: the number alone.</p>
   <div class="bar"><button class="replay" data-fx="damage" data-v="hit">Replay</button><button class="replay" data-fx="damage" data-v="crit">Critical</button><button class="replay" data-fx="damage" data-v="flurry">Three blows</button></div>
 </section>
 
@@ -354,7 +354,7 @@ svg.map text{font-family:var(--caps);font-size:11px;fill:var(--fg)}
     <div class="title">Nell's Shop</div>
     <div class="log" id="penLog"><div>You buy the rope for 2 pennies.</div></div>
   </div></div>
-  <p class="cap"><b>Fires on</b> the pennies resource changing (3.7). <b>Why</b> the status line is ink, not a purse: the value dries, one tick, a selection haptic; never a coin chime.</p>
+  <p class="cap"><b>Fires on</b> the pennies resource changing (3.7). <b>Why</b> money should sound like money: the value dries, one short coin clink (a tick stands in here), a selection haptic.</p>
   <div class="bar"><button class="replay" data-fx="pennies">Replay</button></div>
 </section>
 

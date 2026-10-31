@@ -53,14 +53,14 @@ still and says why.
 
 ### The effects language
 
-Four primitives, each with a vocabulary the catalogue reuses by name. Nothing outside them is proposed.
+Five primitives, each with a vocabulary the catalogue reuses by name. Nothing outside them is proposed.
 
 | Primitive | Vocabulary | Token source |
 |---|---|---|
-| **Ink** | *press* (a tapped word darkens toward `fg` then releases); *dry* (a new line enters at `dim` and settles to `fg`); *wash* (a tint over the page, `danger` for a blow, never more than `opacity.wash`); *settle* (a line that is finished fades to `dim`); *gilt* (a rare word briefly carries `warning`'s hue as a sheen, the lab's "Gilt words") | `color.*`, new `opacity.wash`, `motion.dry`, `motion.flash` |
+| **Ink** | *press* (a tapped word darkens toward `fg` then releases); *dry* (a new line enters at `dim` and settles to `fg`); *wash* (a tint over the page for a blow, `action` on light palettes and `danger` on dusk and dark, where `action` is amber, never more than `opacity.wash`); *settle* (a line that is finished fades to `dim`); *gilt* (a rare word briefly carries `warning`'s hue as a sheen, the lab's "Gilt words") | `color.*`, new `opacity.wash`, `motion.dry`, `motion.flash` |
 | **Paper** | *lift* (a card rises 1 px with a `line`-coloured shadow); *curl* (the page turn, built); *riffle* (several curls compressed, for travel); *flutter* (the page edge lifts in wind, lab); *flick* (the pickup pop's motion: a short rise-and-settle under the log) | `motion.turn`, `motion.quick`, new `motion.pop`, `motion.riffle` |
 | **Light** | *phase* (the palette cross-fade, built); *glow* (a warm radial at the page's hip when a lamp is lit, owner's choice, Beads x6t.7); *flicker* (candle, indoors at night, lab); *afterimage* (lightning: the page flashes to `bg` of the light palette and fades over 1.2 s, lab); *meteor* (built); *faint* (a slow breathing vignette at low HP, lab) | `color.*.bg`, new `motion.flicker`, `motion.afterimage`, `motion.breathe` |
-| **Sound** | *paper* (turn, flick, riffle, damp pages); *tick* (a 10 ms transient for a selection); *flick* (the pickup, a buy, any item into the hand: one recorded paper flick, Q7; replaces the lab's `pluck()`); *note* (a two-note rise cut from the main theme's first interval: high for level, low for quest resolved and new skill learned); *chord* (the lab's low open chord, chapter card only); *bed* (ambience loops: wind, surf, hearth, drip, crowd); *weather* (rain, thunder); *mechanism* (latch, lever, dial) | `sound.*` (section 6) |
+| **Sound** | *paper* (turn, flick, riffle, damp pages); *tick* (a 10 ms transient for a selection); *flick* (the pickup, any item into the hand: one recorded paper flick, Q7; replaces the lab's `pluck()`); *coin* (one short clink: buy, sell, pennies); *tone* (one note: quest gained, low; skill improves, high); *note* (a two-note rise cut from the main theme's first interval: high for level, low for quest resolved and new skill learned); *chord* (the lab's low open chord, chapter card only); *bed* (ambience loops: wind, surf, hearth, drip, crowd); *weather* (rain, thunder); *mechanism* (latch, lever, dial) | `sound.*` (section 6) |
 | **Haptic** | *selection* (iOS `selectionAsync`), *light*, *medium*, *heavy* impact, *warning*, *error* notification | `haptic.*` (section 7) |
 
 ### Severity scale
@@ -71,7 +71,7 @@ Every entry carries a severity; it decides stacking, loudness, haptic and what r
 |---|---|---|---|
 | S0 | silent | nothing; the prose is the effect | a status tick, an NPC leaving in the background |
 | S1 | whisper | type only, ≤ `motion.dry` (240 ms), no sound, no haptic | a new log line drying; a refused line |
-| S2 | note | one ink or paper change ≤ 300 ms, a tick or a flick at whisper loudness, selection haptic at most | a press; a pickup; a coin counted; a status icon arriving |
+| S2 | note | one ink or paper change ≤ 300 ms, a tick, coin, flick or tone, at whisper to note loudness, selection haptic at most | a press; a pickup; a coin counted; a status icon arriving |
 | S3 | beat | page-level change ≤ 500 ms, one sound at note loudness, light or medium haptic | a blow taken; a quest resolved; a lever thrown; lightning |
 | S4 | chapter | the whole page (blur, card), the chord, medium haptic; the only severity that waits for a tap | the chapter card; death and waking |
 
@@ -166,9 +166,9 @@ distinguish the player's unlock from a schedule's.
 `color.action`, text `+ sack` (the item's displayed name, from `EntityView`, never a presenter literal).
 Look: rises 6 px from `dim` to `action` over `motion.pop`, holds 1.8 s, fades. Two in one command: one line
 `+ sack, + rope`. Sound: *flick*, a recorded paper flick (Q7 decided: dry, not the lab's pluck), tier note, 3 variants ±4 %; the
-same flick serves a buy and any item gained, so the log has one sound for "into the hand" ([listening
+same flick serves any item gained, while a buy plays the coin instead, so the log has one sound for "into the hand" ([listening
 list](audio-listening-list.md#sound-one-family-for-the-log)). Haptic *light*. Why: the one reward the owner picked; it must feel
-like something came into the hand, and a paper flick is the book's version of a coin chime. P0. Cost S,
+like something came into the hand, and a paper flick is the book's own sound for it. P0. Cost S,
 Reanimated (one `Animated.Text` under `LogLines`). Cue: view-diff is enough for v1.
 
 **Drop / give / put in**: S0. The line says it; the pocket emptying needs no pop.
@@ -183,7 +183,7 @@ Placement: a radial *glow* at the page's hip (the lower outer corner, owner's ch
 `color.dark.action` at `opacity.glow` fading to transparent over 40 % of the page width, only on `dusk`
 and `dark` palettes. Look: fades in over `motion.palette`; *flicker* indoors (lab "candle"): the glow's opacity
 steps ±8 % every 80-140 ms, none under reduced motion. Sound: none on ignite (a match strike would be a
-sample for a one-frame event; P2 if the owner wants it). Haptic none. Why: the owner's chosen light. P1.
+sample for a one-frame event; P2 if the owner wants it). Haptic none. Why: the owner's chosen light in 2026-09; the design README lists lamp glow as not adopted, so it needs its own owner decision before Phase 2. P1.
 Cost M, Skia (a `RadialGradient` in the page's background layer, Reanimated-driven opacity; must be measured on
 the iPhone 11 before shipping with flicker on). Cue: view-diff.
 
@@ -197,7 +197,7 @@ S1.
 
 **Blow taken** (owner's choice: swell-and-red): trigger `resources` hp falls while `combat` is present
 (view-diff), or `attack_result` with `target_id` = actor and `hit` (new; also gives `loss`). Placement: the
-page background and the status line's hp item. Look: *wash* of `color.<palette>.danger` at `opacity.wash`
+page background and the status line's hp item. Look: *wash* (Q9: oxblood `action` on light palettes, `danger` on dusk and dark) at `opacity.wash`
 (0.18) with a scale *swell* of the page content to 1.015 and back over `motion.flash` (120 in, 380 out); the hp
 value dries red then back to `fg`. Under reduced motion: no swell, wash at half opacity for the same time; with
 Flashes off (section 8): no wash, the hp value alone. Sound: a dull *paper* thud (a closed book dropped on
@@ -334,10 +334,9 @@ pickup pop fires as in 3.2 for a buy, but the coin plays instead of the flick, s
 
 **Eat / drink / fill / pour**: S0. The line is the act; a gulp sample is the cartoon the owner ruled out.
 
-**Rest** (`rested`): S3, the page *phases* to the `dark` palette over `motion.palette` (whatever the hour),
-holds one beat, and the wake turn is a curl into the new hour's palette; sound: the paper turn only; haptic
-none. Under reduced motion: cut to dark, cut back. Why: sleep is the one time the book closes. P1. Cost S
-(reuses `usePaletteCurve`). Cue: view-diff on `time` plus the Rest action completing.
+**Rest** (`rested`): S1. The palette keeps following in-game time (owner rules: no override, and rest does not
+jump the clock), so rest is the page turn and its line, with no palette effect. Sound: the paper turn only;
+haptic none. P1. Cue: none.
 
 **Hunger / thirst statuses** (G13): the status entry.
 
@@ -532,7 +531,7 @@ Beat by beat; each uses only catalogue entries.
    under the log "+ sack" flicks up with the paper flick and a light haptic, holds, fades. No other item pops for the
    next 300 ms.
 3. **First blow** (the boar at boar_run): the Combat page curls open a touch louder, medium haptic. The boar's
-   line reads; on its hit the page swells 1.5 % and the plum wash rises and falls in half a second, the hp
+   line reads; on its hit the page swells 1.5 % and the oxblood wash rises and falls in half a second, the hp
    value dries red, the paper thud lands with a heavy haptic. The band phrase "the boar — hurt" presses when
    the player's blow lands. Three blows in a round are one wash that re-peaks.
 4. **Nightfall at the inn**: the status line reads dusk; the palette crosses to dusk over 1.5 s, then to dark
@@ -597,7 +596,7 @@ Android: the same via the audio focus the library requests (unknown granularity;
 
 ### Sourcing and naming
 
-CC0 only (freesound.org filtered to CC0, Kenney's audio packs, OpenGameArt CC0); keep each sample's source URL
+CC0 or CC BY, human-made only (freesound.org filtered to CC0, Kenney's audio packs, OpenGameArt CC0, Scott Buckley's CC BY library); keep each sample's source URL
 and author in `mobile/app/book/sounds/SOURCES.md` even when attribution is not required. Format: AAC in `.m4a`
 at 44.1 kHz mono for one-shots, stereo for beds; total bundle ≤ 3 MB for v1 (about 12 one-shots × 3 variants
 and 6 beds at 20 s). Names: `<bus>-<material>-<event>-<variant>.m4a`, e.g. `ui-paper-turn-01.m4a`,
@@ -691,7 +690,9 @@ first; each phase shippable alone.
 **Phase 0: foundations** (one developer slice, M)
 - Tokens: `motion.*` additions, `opacity.wash/washHard/glow/faint`, `sound.*` keyed table, `haptic` table
   (designer writes `tokens.ts`; developer wires).
-- `expo-audio` + `expo-haptics` installed; `AudioManager` with buses, preload, round-robin, ducking; `haptic()`
+- Owner, 2026-10-31: no phone testing for now; web analogues, with native stubbed until mobile resumes (`loka-k5ci`). Sound plays through the browser; haptics use `navigator.vibrate` where supported, plus a dev-only pulse in preview and Storybook. The native side is a no-op, and `expo-audio` and `expo-haptics` are installed on resume.
+- The asset manifest and its check (section 14, `loka-p2s8`).
+- `AudioManager` with buses, preload, round-robin, ducking; `haptic()`
   gated by the Settings chip. Both no-op on web/Storybook until the web target is verified.
 - Cue bus: a `useCues(view, was)` hook in `mobile/app/book/` that diffs the two views and emits named cues
   (`pickup`, `hp_loss`, `status_in`, `status_out`, `quest_on/off/fail`, `level`, `place`, `weather`, `combat_open/close`, `pennies`) with the S-queue (coalesce, replace, interrupt). Pure function + one test per
@@ -703,11 +704,11 @@ first; each phase shippable alone.
 **Phase 1: P0 batch** (S-M)
 press feedback (4.1), log dry (4.6), paper turn sample (3.1), pickup pop + flick (3.2), damage wash + thud +
 haptic (3.3), status icon pop/fade (3.4), running head cross-fade (3.6), chapter card blur + chord (3.6),
-save-error haptic (4.11), and, moved up by owner request, the coin clink (3.7) and quest and level tones (3.5, 3.6). Depends on Phase 0. Design review once for the batch.
+save-error haptic (4.11), and, moved up by owner request, the coin clink (3.7) and all quest, level and skill tones (3.5, 3.6), whatever priority their entries give. Depends on Phase 0. Design review once for the batch.
 
 **Phase 2: P1 batch** (M)
 place beds + weather layer + muffle (6; needs the room tag, Q3), hip glow + flicker (3.2), foe falls, blow
-dealt press, quest resolved/failed (3.6), level up gilt + note (3.5; Q1), rest phase (3.8),
+dealt press,
 map ink draw (3.10), lever/latch (3.11, needs 9.1), riddle (3.11), entity lines in/out (3.12), bell (3.12),
 choice chips stagger (3.6), tooltip haptic.
 
@@ -734,19 +735,17 @@ reviewer.
 
 **Owner decisions, 2026-10-31 (paraphrased).** The owner accepted the recommendations above for Q1, Q2, Q3,
 Q6, Q7, Q8 and Q9, then asked for music, cutscenes and JRPG-style battle music. That reverses the recommendations
-for Q4 (scenes may call named cues) and Q5 (there is music); section 14 holds the proposed design. Q2 is to be
-felt on a phone before the batch ships. The formal record in `docs/decisions/` is written when a batch opens.
+for Q4 (scenes may call named cues) and Q5 (there is music); section 14 holds the proposed design. Q2 ships on by default and is felt when mobile resumes. The formal record in `docs/decisions/` is written when a batch opens.
 
 ### Not covered
 
 - The Realm (multiplayer) and SayField send/receive sounds: out of v1 scope.
 - Retired Ashmere content and its rooms: not designed for.
-- Voice, or any licensed sound: none. Music: section 14; none of it is composed or sourced yet.
+- Voice: none. Any licensed sound: CC0 or CC BY only. Music: section 14; none of it is composed or sourced yet.
 - Mechanics with no engine yet (hirelings, bank, trial/jail, mounts, settlement S1-S4, chapter carry-over,
   writing group): their effects fall into the same vocabulary when they exist; the appendix marks them.
 - Measuring anything on a device (frame cost, loudness): all numbers are targets.
-- The lab effects archived by the owner are not re-proposed; this plan reuses from the lab: paper grain and
-  ink (as the base), candle flicker, lightning afterimage, meteors (built), page flutter, low-health faint,
+- The lab effects archived by the owner are not re-proposed, except where an entry flags it; this plan reuses from the lab: ink, candle flicker, lightning afterimage, meteors (built), page flutter, low-health faint,
   ink map, travel riffle, running head (built), pickup pop, damage flash, chapter card, gilt words, ambience,
   damp pages, muffle; drops footsteps, worn pages, ink drying as a page texture, things landing on the page,
   storm map, level-up card (folded into 3.5 without a card).
@@ -762,7 +761,7 @@ none of its melodies are to be imitated.
 | Moment | Music | Ends | Trigger | Cue |
 |---|---|---|---|---|
 | Title and opening | the main theme, whose first phrase becomes the chapter chord | fades into the first room's bed | launch | none |
-| Chapter card | a short arrangement of the theme, 8-15 s | fades on Continue | `chapter.index` rises | view-diff |
+| Chapter card | a short cut of the theme, 8-15 s | fades on Continue | `chapter.index` rises | view-diff |
 | Exploration | sparse: one 1-3 min piece on first entry to a new area, then at least 5-10 min of beds only | plays out, never cut | area changes | cartridge area tag |
 | Town or inn | a soft piece by time of day, same sparse rule | plays out | room tag | cartridge tag |
 | Ordinary fight | battle track (below) | victory, flight or death | `combat` appears | view-diff |
@@ -803,7 +802,7 @@ A scene line may optionally name, from a closed list:
 
 Rules: tap to advance, never timed; no effect delays Continue; a tap during an effect jumps to its end state; a
 returning player can skip a seen scene. Authors name cues; the engine and presenter own what they do. This needs a
-schema field and a `docs/system` amendment first. It reverses Q4's "not in v1".
+schema field and a `docs/system` amendment first. It reverses Q4's original recommendation.
 
 ### Mix, settings and budget
 
