@@ -43,3 +43,17 @@ Results: 2, 3, 6 hold; 5 holds for the Book tests but tests outside `mobile/app/
 - Probe (book harness, `penalty_sampler_hash` start room): `group().place` = ["Agree to find the den"]; drawn World labels are "Hall, look", "standing, change position" and the Contents hp line; the look page and Map draw nothing more.
 - PR claims rerun: "MapPage no-ActionCard lint" is backed (lint test above). "a Tap bleeds below only, so each Contents entry opens its own page" is not backed by any green run: its only behavioural test is the ContentsEntries story, which fails tsc (finding 4).
 - Rated, no finding: spells (cast from Character, accepted cast returns to World, refused card with its reason; `word_bar.test.ts:87-122`); InsidePage lid foot and Put cards (code read plus the `Inside` story); the dropped pass1_ui3/polish_detail Map-Read tests (the signpost Read is still reachable through the fixture link); Knock claim (`gate_sampler` knock is an authored detail action; no cartridge declares an exit knock).
+
+## Fix check (`09d3f3c22d27f767a3a5ead85ec3465da6da02e7`)
+
+Scope: fix commits `55ec65b5f`, `515de0f73`, `09d3f3c22` (`git diff 4f83fae68 09d3f3c22`); the merge `4f83fae68` is not reviewed.
+
+**Verdict: APPROVE WITH NOTES.**
+
+- Finding 1 (place actions): resolved by the owner's room anatomy ruling plus tracking. The World-cards revert is complete: `git diff 4f83fae68 09d3f3c22` touches no `mobile/app/book/*.tsx`. The 10 targetless quest offers are content defects tracked as loka-vx2v (P1, open). Allow-list `mobile/app/book/__tests__/polish-book.test.ts:66-67` names loka-vx2v and holds 5 keys, each a real quest file (`cartridges/{cellar,journal,levelling,penalty,quest,spells}_sampler/quests/*.json`). Red control: with the list emptied, the 30 harness tests run with `_build` show 135 tests, 2 red: "targetless action Offer to fetch Bram's lantern has no control" and "... Take up the apprenticeship ...". So the check is reached and matches on the quest id. Restored; `git status` clean.
+- Finding 2 (`c6_source_acceptance.test.ts:200,208`): passes locally.
+- Finding 3 (`smoke.test.ts:402`): passes locally.
+- Finding 4 (stories tsc): `tsc --noEmit -p .storybook` exits 0. Both hunks are type-only.
+- Findings 5 and 6: the PR body carries the `/code-review medium` table; the book-ui Knock sentence is fixed.
+- Note: `oar`, `cull` and `find_key` are never reached by the harness tests. Because they are matched on the key alone, an undrawn non-quest action with one of these keys would also pass. Accepted for a temporary list that is removed under loka-vx2v.
+- CI on `09d3f3c22` (`gh run list --commit`, read once, not waited on): graph-diff success; ci 41188469933 and book-e2e 41188469935 in progress.

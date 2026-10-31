@@ -15,7 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**
 - [Review: liquid line binds its vessel, PR #512 (loka-tc2e, kernel_api 1.122)](2026-10-30-tc2e-liquid-vessel-review.md): **APPROVE**
 - [Review: Permanent ticking status, PR #526 (loka-rn3b, loka-dw0k, kernel_api 1.128)](2026-10-30-rn3b-permanent-tick-review.md): **APPROVE WITH NOTES**
-- [Review: polish session 2026-10-30, PR #527](2026-10-30-polish-session-review.md): **CHANGES REQUIRED**
+- [Review: polish session 2026-10-30, PR #527](2026-10-30-polish-session-review.md): **APPROVE WITH NOTES**
 - [Review: a seen NPC shows its worn items, PR #517 (loka-oc5i, kernel_api 1.125)](2026-10-30-oc5i-npc-worn-review.md): **APPROVE WITH NOTES**
 - [Review: NPC emotes, PR #509 (loka-kgd.193 slice A)](2026-10-30-kgd193-npc-emotes-review.md): **APPROVE**
 - [Review: prologue outline working draft, PR #528 (loka-g5hh)](2026-10-30-g5hh-prologue-outline-review.md): **APPROVE WITH NOTES**
