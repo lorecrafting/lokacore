@@ -1,6 +1,6 @@
 id: mobile-book-log-prose
 valid:
-  - "const f = `You have learned ${name}.`;"
+  - "const f = `You learn ${name}.`;"
   - "const f = `${h}:${m}`;"
   - "const f = 'You can\\'t do that—locked.';"
   - "s.fault = c ? `Time stopped: ${code}` : undefined;"

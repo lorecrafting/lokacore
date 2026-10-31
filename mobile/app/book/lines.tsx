@@ -65,7 +65,7 @@ export function Note({ children }: { children: string }) {
  * The log: one Text per narration record, never records joined.
  * - Use: room, detail and combat logs; no lines, no block.
  * - Rules: narration and the Book's speech echo in ink. Every line the Book composes itself is a
- *   narrated event: one second-person sentence (`You have learned Cooking.`), never a `Label:
+ *   narrated event: one present-tense second-person sentence (`You learn Cooking.`), never a `Label:
  *   value`, drawn once in ink italic (palette.ts `narrated`; book-ui.md Line placement, loka-lsqi).
  *   A refused line is a narrated event with no tag or chip (owner pick mvlyp3gphp2t); its reason
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads

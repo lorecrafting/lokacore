@@ -301,7 +301,7 @@ export function presenter(game: Game) {
     leaveCombat: () => (s.ended = undefined),
     visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
-      if (why !== undefined) s.log.push({ text: `You could not start over. ${why}`, event: true });
+      if (why !== undefined) s.log.push({ text: `Start over fails. ${why}`, event: true });
     },
   };
 }

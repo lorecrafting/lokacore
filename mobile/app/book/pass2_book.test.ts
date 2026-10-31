@@ -25,7 +25,7 @@ test('a learned teach line drops its requirement', (t) => {
   const shown = b.text();
   assert.ok(shown.includes('You know Whittling.'), JSON.stringify(shown));
   // Breaks: the lesson leaves no narrated event in the teacher's history (loka-lsqi).
-  assert.ok(shown.includes('You have learned Whittling.'), JSON.stringify(shown));
+  assert.ok(shown.includes('You learn Whittling.'), JSON.stringify(shown));
   assert.ok(shown.includes('The carpenter teaches Woodcutting.'), JSON.stringify(shown));
   // the same page with every skill unqualified, then woodcutting locked (controlled views): the
   // requirement comes back (book-ui.md, Skill tree details; loka-x6t.24)

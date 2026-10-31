@@ -349,12 +349,12 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   addressed; the Book never adds a speaker the binding does not name.
 - A line the Book composes itself, not authored narration, dialogue or an engine line's
   `line_words.ts` sentence, is a **narrated event** (owner, 2026-10-30, Beads `loka-lsqi`): one
-  second-person sentence, drawn in the one narrated style ([LogLines](../BOOK-UI-COMPONENTS.md#component-catalogue)'s
+  second-person sentence in the present tense (PM, 2026-10-30), drawn in the one narrated style ([LogLines](../BOOK-UI-COMPONENTS.md#component-catalogue)'s
   doc comment), never `Label: value`. The kinds: a refusal (`You can't do that—locked.`); a
-  changed journal (`You make a note in your journal.`); a skill the reply taught (`You have learned
+  changed journal (`You make a note in your journal.`); a skill the reply taught (`You learn
   Cooking.`) or raised (`Your Cooking improves.`), in place on the teacher's page; a restored cue
-  (`You remember what you heard earlier.` before the cue); a failed Start over (`You could not
-  start over. <why>`). A new kind joins this list. The lint `mobile-book-log-prose` refuses a
+  (`You remember what you heard earlier.` before the cue); a failed Start over (`Start over
+  fails.` then the reason). A new kind joins this list. The lint `mobile-book-log-prose` refuses a
   colon label in a log line builder.
 - A vessel's liquid amount reads in words, never a count or unit label (owner, 2026-10-30, Beads
   `loka-ikat`), from quantity against capacity: `Empty.`; a third or less `Nearly empty, a little
@@ -927,4 +927,4 @@ word anywhere; only its writer sees it.
 
 Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws as an [unavailable card](#unavailable-actions), never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
 
-An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "You cannot learn Blade yet. <requirement>"; a learned one "You know Blade." with no requirement (nothing is left to meet, pass-2), or while unqualified "You know Blade but cannot use it yet. <requirement>"; the reply that taught it adds the narrated event "You have learned Blade." in place (loka-x6t.24; second-person prose, never a colon label, loka-lsqi).
+An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "You cannot learn Blade yet. <requirement>"; a learned one "You know Blade." with no requirement (nothing is left to meet, pass-2), or while unqualified "You know Blade but cannot use it yet. <requirement>"; the reply that taught it adds the narrated event "You learn Blade." in place (loka-x6t.24; second-person prose, never a colon label, loka-lsqi).

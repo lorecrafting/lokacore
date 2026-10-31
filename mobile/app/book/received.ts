@@ -187,7 +187,7 @@ const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
   (was.skills ? (now.skills ?? []) : []).flatMap((n): DetailLine[] => {
     const w = was.skills!.find((k) => k.skill.key === n.skill.key && k.skill.kind === n.skill.kind);
     const name = text(n.label);
-    if (n.acquired && !w?.acquired) return [{ text: `You have learned ${name}.`, event: true }];
+    if (n.acquired && !w?.acquired) return [{ text: `You learn ${name}.`, event: true }];
     if (w?.acquired && (n.level ?? 0) > (w.level ?? 0))
       return [{ text: `Your ${name} improves.`, event: true }];
     return [];

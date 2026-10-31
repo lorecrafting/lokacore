@@ -20,7 +20,7 @@ export const NarratedEvents: Story = {
   args: {
     lines: [
       'Aldous drills you until your arm aches.',
-      { text: 'You have learned Blade.', event: true },
+      { text: 'You learn Blade.', event: true },
       { text: 'Your Blade improves.', event: true },
       { text: 'You make a note in your journal.', event: true },
       { text: 'You remember what you heard earlier.', event: true },
@@ -30,7 +30,7 @@ export const NarratedEvents: Story = {
   },
   play: async ({ canvas }) => {
     const style = (t: string) => getComputedStyle(canvas.getByText(t));
-    const event = style('You have learned Blade.');
+    const event = style('You learn Blade.');
     await expect(event.fontStyle).toBe('italic');
     await expect(style("You can't do that—locked.").color).toBe(event.color);
     await expect(style('You make a note in your journal.').color).toBe(event.color);

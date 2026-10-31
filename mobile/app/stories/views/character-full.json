@@ -764,7 +764,7 @@
   "Aldous looks you over. \"Want to learn the blade?\"",
   "Aldous drills you until your arm aches, then hands you the training sword. \"Keep your guard up.\"",
   {
-   "text": "You have learned Blade.",
+   "text": "You learn Blade.",
    "event": true
   }
  ],
