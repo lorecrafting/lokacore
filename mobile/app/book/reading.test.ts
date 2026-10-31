@@ -223,19 +223,15 @@ test('Settings effect chips show, save and apply each setting', () => {
     ['haptics', true],
   ]);
   device.length = 0;
+  // Breaks: the module hears a change only after commit, so a preview in the same press plays the old value.
   radios()[1]!.props.onPress();
+  assert.deepEqual(device, [['sound', true]]);
   h.draw();
-  assert.deepEqual(device, [
-    ['sound', true],
-    ['music', true],
-    ['haptics', true],
-  ]);
   radios()[5]!.props.onPress();
   radios()[7]!.props.onPress();
   h.draw();
-  assert.deepEqual(device.slice(-3), [
+  assert.deepEqual(device, [
     ['sound', true],
-    ['music', true],
     ['haptics', false],
   ]);
   assert.deepEqual(Object.fromEntries(kept), {

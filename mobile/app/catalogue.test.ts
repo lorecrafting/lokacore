@@ -84,11 +84,10 @@ test('every exported component has a story that imports it', () => {
 // fonts are read through usePalette and `type`, so the groups checked are the named-value ones. Type
 // roles are read at the Reading size, through useType() (`const t = useType()`; loka-x6t.86).
 const NO_BOOK_CONSUMER: Record<string, string> = {
-  'space.hair': 'read only by dev chrome (the picker overlay, the System dashboard)',
-  'size.speechBar': 'the Log line row: waits until the log projects a speaker',
   'type.speaker': 'the Log line row: waits until the log projects a speaker',
   ...Object.fromEntries(
     [
+      'pageTurn',
       'pickup',
       'coin',
       'blow',
@@ -96,7 +95,6 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'skillNew',
       'questDone',
       'questFailed',
-      'skillUp',
       'questGained',
       'chapter',
     ].map((k) => [
@@ -118,7 +116,6 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'motion.press',
       'motion.dry',
       'motion.pop',
-      'motion.flash',
       'motion.settle',
       'motion.card',
     ].map((k) => [k, 'an effect not yet built; its slice reads it']),
@@ -132,7 +129,8 @@ test('every token has a consumer outside tokens.ts', async () => {
   const files = [...book.map((f) => `book/${f}`), 'App.tsx', 'SaveError.tsx'].map(read);
   // `t.` counts as a type read only where `t` is the Reading-size type (useType() or a Type parameter).
   const typed = files.filter((f) => /useType\(\)|\bt: Type\b/.test(f)).join('\n');
-  const code = files.join('\n');
+  const stripComments = (src: string) => src.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+  const code = stripComments(files.join('\n'));
   const groups = [
     'type',
     'space',
@@ -145,15 +143,21 @@ test('every token has a consumer outside tokens.ts', async () => {
     'haptic',
     'nightSky',
   ];
+  const typedCode = stripComments(typed);
+  const consumed = (name: string) => {
+    const [g, k] = name.split('.') as [string, string];
+    return (
+      new RegExp(`(\\b${g}|useType\\(\\))\\.${k}\\b`).test(code) ||
+      (g === 'type' && new RegExp(`\\bt\\.${k}\\b`).test(typedCode)) ||
+      (g === 'sound' && new RegExp(`\\bplay\\('${k}'\\)`).test(code)) ||
+      (g === 'haptic' && new RegExp(`\\bhaptic\\('${k}'\\)`).test(code))
+    );
+  };
   const dead = groups.flatMap((g) =>
     Object.keys(tokens[g])
       .map((k) => `${g}.${k}`)
-      .filter(
-        (name) =>
-          !(name in NO_BOOK_CONSUMER) &&
-          !new RegExp(`(\\b${g}|useType\\(\\))\\.${name.split('.')[1]}\\b`).test(code) &&
-          !(g === 'type' && new RegExp(`\\bt\\.${name.split('.')[1]}\\b`).test(typed)),
-      ),
+      .filter((name) => !(name in NO_BOOK_CONSUMER) && !consumed(name)),
   );
   assert.deepEqual(dead, []);
+  assert.deepEqual(Object.keys(NO_BOOK_CONSUMER).filter(consumed), [], 'stale escape: remove it');
 });

@@ -32,7 +32,7 @@ const unlock = () => {
       ambience.connect(ctx.destination);
       audio = { ctx, ambience };
     }
-    if (audio.ctx.state !== 'running') void audio.ctx.resume();
+    if (audio.ctx.state !== 'running') audio.ctx.resume().catch(() => {});
   } catch {} // no audio in this browser
 };
 for (const gesture of ['pointerup', 'touchend', 'keydown'])

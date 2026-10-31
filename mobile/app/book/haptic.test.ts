@@ -10,9 +10,10 @@ async function browser(t: import('node:test').TestContext, dev: boolean) {
     value: { vibrate: (p: unknown) => buzzes.push(p) },
   });
   Object.assign(globalThis, { __DEV__: dev });
-  t.mock.timers.enable({ apis: ['Date'], now: 1000 });
+  let clock = 1000;
+  t.mock.method(performance, 'now', () => clock);
   const mod: typeof import('./haptic.web.ts') = await import(`./haptic.web.ts?page=${page++}`);
-  return { ...mod, buzzes, tick: (ms: number) => t.mock.timers.tick(ms) };
+  return { ...mod, buzzes, tick: (ms: number) => (clock += ms) };
 }
 
 // Breaks: the setting does not gate, or a turned-on setting stays off.

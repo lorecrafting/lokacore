@@ -18,7 +18,7 @@ export const onPulse = (show: (kind: HapticKind) => void) => {
 };
 
 export function haptic(kind: HapticKind) {
-  const now = Date.now();
+  const now = performance.now(); // not Date: a clock set back would silence haptics
   if (!on || now - last < tokens.haptic.gap) return;
   last = now;
   globalThis.navigator?.vibrate?.(tokens.haptic[kind] as number | number[]);

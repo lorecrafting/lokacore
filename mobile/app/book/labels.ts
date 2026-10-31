@@ -50,7 +50,7 @@ export const LABEL = {
   spells: 'Spells',
   // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).
   inventory: 'Inventory',
-  // The Reading size setting (docs/system/book-ui.md#world-and-status-entry, loka-x6t.42).
+  // The effect settings (docs/system/book-ui.md, Effects, sound and haptics).
   sound: 'Sound',
   music: 'Music',
   haptics: 'Haptics',

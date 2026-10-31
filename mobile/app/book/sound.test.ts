@@ -70,9 +70,18 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
     ramps,
     levels,
     resumes: () => resumes,
-    gesture: () => listeners.pointerup!(),
+    gesture: (kind = 'pointerup') => listeners[kind]!(),
   };
 }
+
+// Breaks: one kind of gesture stops unlocking audio, so a keyboard or touch player has no sound all session.
+for (const kind of ['pointerup', 'touchend', 'keydown'])
+  test(`${kind} unlocks audio`, async () => {
+    const b = await browser();
+    b.gesture(kind);
+    b.play('coin');
+    assert.equal(b.els[0]!.url, 'coin.m4a');
+  });
 
 // Breaks: a sound plays before the browser allows it, or the first gesture does not unlock audio.
 test('a sound before the first gesture is dropped; after it, it plays', async () => {

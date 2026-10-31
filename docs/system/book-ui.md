@@ -775,8 +775,8 @@ outside the page turn, naming the kind, taking no touch or focus and hidden from
 player's build never has it.
 
 **Settings.** Sound, Music, Haptics and Flashes follow the Reading size and precede Start over, in
-that row pattern, each on by default and kept on the device, not in the save. Each previews itself
-on change. Music governs the theme cut; Sound every other sound. Reduced motion follows the system,
+that row pattern, each on by default and kept on the device, not in the save. Sound and Haptics
+preview themselves on change; Music and Flashes do not. Music governs the theme cut; Sound every other sound. Reduced motion follows the system,
 with no control of its own.
 
 **Queue.** One chapter or death interrupts and clears the queue. One large cue plays with one

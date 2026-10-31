@@ -1,5 +1,5 @@
 // The Settings the Book holds: the player's Reading size and effect settings.
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { hapticsOn } from './haptic';
 import {
   effects,
@@ -26,20 +26,26 @@ function useReading(shell: SettingStores): Reading {
   return { step, choose, type: readingType(readingFactor(step, shell.reading?.fontScale() ?? 1)) };
 }
 
-// The effect settings: each read at launch and given to its module, so a stored Off holds at once.
+// Each setting reaches its module before any effect runs, so a cue at launch or a preview in choose sees it.
+const applyEffect: Record<Effect, (on: boolean) => void> = {
+  sound: (on) => setMuted('sound', !on),
+  music: (on) => setMuted('music', !on),
+  haptics: hapticsOn,
+  flashes: () => {},
+};
+
+// The effect settings: each read at launch and given to its module.
 function useEffects(shell: SettingStores): Effects {
-  const [on, setOn] = useState(
-    () =>
-      Object.fromEntries(
-        effects.map((e) => [e, shell.effects?.[e].get() ?? true]),
-      ) as Effects['on'],
-  );
-  useEffect(() => {
-    setMuted('sound', !on.sound);
-    setMuted('music', !on.music);
-    hapticsOn(on.haptics);
-  }, [on]);
+  const [on, setOn] = useState(() => {
+    const read = (e: Effect) => {
+      const value = shell.effects?.[e].get() ?? true;
+      applyEffect[e](value);
+      return [e, value];
+    };
+    return Object.fromEntries(effects.map(read)) as Effects['on'];
+  });
   const choose = (e: Effect, value: boolean) => {
+    applyEffect[e](value);
     setOn((o) => ({ ...o, [e]: value }));
     shell.effects?.[e].set(value);
   };
