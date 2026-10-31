@@ -10,7 +10,7 @@ import { LABEL } from './book/labels.ts';
 
 const PLAIN: Record<string, string> = {
   save_corrupt: 'The save is damaged and cannot be read.',
-  pinned_release_missing: 'The save needs a version of the story this app does not have.',
+  pinned_release_missing: 'This save was made with a different version of the game.',
   unsupported_save_format:
     'The save was made by a newer version of the app. Update the app to go on.',
 };

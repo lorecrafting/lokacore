@@ -56,9 +56,13 @@ const saved = (edit: string) => {
 for (const [name, edit, pinned] of [
   ['an older kernel_api (1.0)', "json_set(pin, '$.kernel_api', '1.0')", '1.0'],
   ["a newer app's kernel_api (9.0)", "json_set(pin, '$.kernel_api', '9.0')", '9.0'],
-  ['no kernel_api (a pin from before loka-daha)', "json_remove(pin, '$.kernel_api')", undefined],
+  [
+    'no kernel_api (a pin from before loka-daha)',
+    "json_remove(pin, '$.kernel_api'); DELETE FROM head",
+    undefined,
+  ],
 ] as const)
-  // Breaks: openStory comparing the content hash only, a range, or a missing key as a match.
+  // Breaks: openStory comparing the content hash only, a range, a missing key as a match, or the pin check after load.
   test(`a save pinned to ${name} is refused at its pin on the same release; Start over pins the installed kernel_api`, () => {
     const path = saved(edit);
     const bytes = readFileSync(path);
