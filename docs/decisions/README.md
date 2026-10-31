@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-31 [Owner decision: every word the player reads is hand-written; a lowered prose scene format](owner-decision-handwritten-prose-2026-10-31.md)
 - 2026-10-30 [Owner decision: moods, ambient emotes and canned emotes are three builder tools](owner-decision-moods-ambient-emotes-2026-10-30.md)
 - 2026-10-28 [Owner decision: harness patterns (storage, roles, tools, briefs)](owner-decision-harness-patterns-2026-10-28.md)
 - 2026-10-24 [Owner decision: each room speaks from its own point of view](owner-decision-room-point-of-view-2026-10-24.md)
