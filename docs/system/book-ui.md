@@ -63,10 +63,12 @@ notice entry: every action, available or refused, draws on its target's fixture,
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
 main room page").
-The room list draws no door card: every door verb works from the
-[joystick](#minimap-map-and-presentation-controls), its release or a card under it (the Map has no door or movement actions, owner 2026-10-30; the cards, PM ruling 2026-10-30), and a door's state shows on the minimap: World
+World draws no door card: Open and Unlock work from the
+[joystick](#minimap-map-and-presentation-controls) (the Map has no door or movement actions, owner 2026-10-30), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
 would show in the minimap joystick thing, not in the main description or event log page").
+PM ruling 2026-10-30, pending owner confirmation against the rule above: every other offered door
+verb (Close, Lock, Knock) is an Action card under the joystick, so none is left without a control.
 The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
