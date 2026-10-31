@@ -86,7 +86,6 @@ export const routes: Record<string, Step[]> = {
   'item-container': [
     ...sack,
     'Open a seed sack',
-    LABEL.lookInside,
     'A turnip seed, open',
     'Take a turnip seed',
     'seed sack, open',
@@ -100,6 +99,7 @@ export const routes: Record<string, Step[]> = {
     'Take a waterskin',
     ...sack,
     'Open a seed sack',
+    LABEL.close,
     'Put a loaf in a seed sack',
     'Put a waterskin in a seed sack',
     LABEL.lookInside,
@@ -107,7 +107,6 @@ export const routes: Record<string, Step[]> = {
   'item-inside-empty': [
     ...sack,
     'Open a seed sack',
-    LABEL.lookInside,
     'A turnip seed, open',
     'Take a turnip seed',
     'seed sack, open',

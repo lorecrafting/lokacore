@@ -155,6 +155,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |
+| `InsidePage` | `book/Menu.tsx` | ItemPage |
 | `Item` | `book/Menu.tsx` | ItemPage |
 | `NightSky` | `book/NightSky.tsx` | NightSky |
 | `NpcPage` | `book/Npc.tsx` | NpcPage |

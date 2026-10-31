@@ -48,6 +48,7 @@ import {
   resultPages,
   useUpdates,
   wordTurn,
+  openTurn,
   type BookState,
   type Presenter,
 } from './updates.ts';
@@ -92,6 +93,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   }
   next = resultPages(next, after);
   next = wordTurn(next, b.action_key, before.view, after.view);
+  next = openTurn(next, b.target_ids[0], before.view, after.view);
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);

@@ -18,16 +18,14 @@ const openSack = () => {
   return h;
 };
 
-// Breaks: the item page lists the contents itself again, Look inside opens nothing, a row opens
-// no item page, the item's Leave skips the list, or Close lands anywhere but the sack's page.
-test('Look inside opens the contents page; Leave returns to it, Close to the item page', () => {
+// Breaks: an accepted Open stays on the item page, the item page lists the contents itself
+// again, a row opens no item page, the item's Leave skips the list, or Close lands anywhere but
+// the sack's page.
+test('an accepted Open turns to the contents page; Leave returns to it, Close to the item page', () => {
   const h = openSack();
-  const sack = h.stack.at(-1)!;
-  const opened = h.p.screen().detail((sack as { id: string }).id)[0]!;
-  assert.ok(h.text().includes(opened));
-  assert.ok(!h.text().includes(LABEL.inside), 'the item page draws no Inside list');
-  h.tap(LABEL.lookInside);
-  assert.deepEqual(h.stack.at(-1), { kind: 'inside', id: (sack as { id: string }).id });
+  const sack = h.stack.at(-2)!;
+  const id = (sack as { id: string }).id;
+  assert.deepEqual(h.stack.at(-1), { kind: 'inside', id });
   assert.ok(h.text().includes(LABEL.inside));
   h.tap('A turnip seed, open');
   assert.equal(h.stack.at(-1)!.kind, 'thing');
@@ -35,7 +33,12 @@ test('Look inside opens the contents page; Leave returns to it, Close to the ite
   assert.equal(h.stack.at(-1)!.kind, 'inside');
   h.tap(LABEL.close);
   assert.deepEqual(h.stack.at(-1), sack);
-  assert.ok(h.text().includes(opened), 'the item page visit outlives its Inside page');
+  const opened = h.p.screen().detail(id)[0]!;
+  assert.ok(h.text().includes(opened), 'Opened. stays in the item page history');
+  assert.ok(!h.text().includes(LABEL.inside), 'the item page draws no Inside list');
+  h.tap(LABEL.lookInside);
+  assert.deepEqual(h.stack.at(-1), { kind: 'inside', id });
+  h.tap(LABEL.close);
   h.tap(LABEL.leave);
   assert.deepEqual(h.stack, []);
   h.unmount();
@@ -45,7 +48,6 @@ test('Look inside opens the contents page; Leave returns to it, Close to the ite
 // Breaks: an emptied open container hides Look inside, or its page draws a bare title.
 test('an empty open container still looks inside, and says there is nothing', () => {
   const h = openSack();
-  h.tap(LABEL.lookInside);
   h.tap('A turnip seed, open');
   h.tap('Take a turnip seed');
   h.tap('seed sack, open');
@@ -58,7 +60,6 @@ test('an empty open container still looks inside, and says there is nothing', ()
 // Breaks: the contents page outlives its closed lid or the room, as other details do not.
 test('a closed lid or a room change clears the contents page', () => {
   const h = openSack();
-  h.tap(LABEL.lookInside);
   const stack = h.stack;
   const view = h.p.screen().view;
   const id = (stack.at(-1) as { id: string }).id;

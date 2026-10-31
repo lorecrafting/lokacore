@@ -167,6 +167,8 @@ test('other item actions retain their detail and show their consequences there',
   const h = book(items, a);
   h.tap('A sewing box');
   h.tap('Open a sewing box');
+  assert.equal(h.stack.at(-1)?.kind, 'inside'); // an accepted Open turns to the Inside page (loka-mo0p)
+  h.tap(LABEL.close);
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
   assert.ok(h.text().includes("You open the sewing box's lid."));

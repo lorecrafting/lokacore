@@ -4,7 +4,14 @@ import { useEffect } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
-import { conversation, initialPages, pagesAfter, restoredItemPages, type Page } from './model.ts';
+import {
+  conversation,
+  initialPages,
+  pagesAfter,
+  restoredItemPages,
+  things,
+  type Page,
+} from './model.ts';
 import { restoredNoticePages } from './notices.tsx';
 import type { presenter } from './presenter.ts';
 
@@ -23,6 +30,23 @@ export type BookState = {
 // its press settles at once or later.
 export const wordTurn = (next: Page[], key: string, was: Screen['view'], now: Screen['view']) =>
   WORDS.includes(key) && !was.choice && now.choice ? [...next, conversation(now)] : next;
+
+// An accepted Open turns from the container's item page to its Inside page (book-ui.md, Item details).
+export const openTurn = (
+  next: Page[],
+  target: string | undefined,
+  was: Screen['view'],
+  now: Screen['view'],
+) => {
+  const top = next.at(-1);
+  const state = (v: Screen['view']) => things(v).find((e) => e.id === target)?.state;
+  return top?.kind === 'thing' &&
+    top.id === target &&
+    state(was) !== 'open' &&
+    state(now) === 'open'
+    ? [...next, { kind: 'inside' as const, id: target }]
+    : next;
+};
 
 export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
   if (screen.returnWorld && !screen.view.combat) return [];
@@ -75,6 +99,8 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   if (terminal) next = resultPages(next, after);
   if (terminal && update.kind === 'completion')
     next = wordTurn(next, update.intent.action_key, before.view, after.view);
+  if (terminal && update.kind === 'completion')
+    next = openTurn(next, update.intent.target_ids[0], before.view, after.view);
   current.current = { stack: next, view: after.view };
   visit(pr, next);
   setStack(next);

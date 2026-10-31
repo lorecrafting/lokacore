@@ -141,7 +141,7 @@ export function ThingPage(p: {
 /**
  * An open container's contents as an anchored detail page of its item page (book-ui.md, Item
  * details and Take/Drop), as the dream page is of its bed.
- * - Use: the inside route, from the item page's Look inside.
+ * - Use: the inside route, from the item page's Look inside or an accepted Open.
  * - Rules: the container's name, then Inside and one Entity line per item, each opening its item
  *   page; no actions; Close returns to the item page and sends nothing.
  * - States: several items; empty (one Note).

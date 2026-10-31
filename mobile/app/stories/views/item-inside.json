@@ -1003,13 +1003,13 @@
   "You arrive from the north.",
   "You open the sack's tie.",
   {
-   "quiet": "[\"item.put\",{\"item\":\"item.loaf.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"f8598a43-4a6f-8277-b092-c4449c71d2e2\",\"331fb134-17eb-866f-a2fa-57583b9ac017\"],12]",
+   "quiet": "[\"item.put\",{\"item\":\"item.loaf.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"f8598a43-4a6f-8277-b092-c4449c71d2e2\",\"331fb134-17eb-866f-a2fa-57583b9ac017\"],14]",
    "plain": "You put a loaf in a seed sack.",
    "times": 1,
    "text": "You put a loaf in a seed sack."
   },
   {
-   "quiet": "[\"item.put\",{\"item\":\"item.waterskin.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"bc3d071f-472b-8655-9e2d-d5d0fe2edc5c\",\"331fb134-17eb-866f-a2fa-57583b9ac017\"],12]",
+   "quiet": "[\"item.put\",{\"item\":\"item.waterskin.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"bc3d071f-472b-8655-9e2d-d5d0fe2edc5c\",\"331fb134-17eb-866f-a2fa-57583b9ac017\"],14]",
    "plain": "You put a waterskin in a seed sack.",
    "times": 1,
    "text": "You put a waterskin in a seed sack."
