@@ -33,3 +33,15 @@ Results: all hold. `first()` (`authority.ts:178`) is the only pin builder (`stor
 3. **Nit, `mobile/app/App.tsx:49`.** NO-TESTS row for the author-preview save name; dev-only, `__DEV__`-guarded at `:47`. Accept.
 
 Other checks: `/code-review medium` result reported in the PR. Docs match the brief (save.md `:14-25`, `:37`, `:62`; cartridge.md `:22`, `:40`). Tests use literal expected kinds and the fixture hash; the PIN's `INSTALLED.kernel_api` is the kernel's input, not the authority's output.
+
+## Second opinion (independent; findings written before reading the record above)
+
+- Same head `2caee4d1bbbbb13c71b9ad04453e59505bf4cc6e`. Verdict: **CHANGES REQUIRED** (one blocker, test-only).
+- Must be true: (1) every pin writer adds `kernel_api`; (2) every open path compares it by equality **before** `load` (no replay, nothing written): absent, older, newer -> `pinned_release_missing`, Start over in place; (3) `save_corrupt` only for damage; (4) a same-kernel_api save reopens under any `kernel_version`; (5) nothing deleted, migrated or retargeted.
+- Adversarial paths checked: app update mid-session, fenced/unknown COMMIT, Start over and `reopen` (`session.ts:93`, the only `openStory` call outside tests) all reach `authority.ts:98`; the pin is one JSON column, so a crash cannot leave a half pin (a half save from an old build refuses at the pin, still Start over in place); downgrade (newer save) refuses with Start over per the PM's equality ruling; live `.sql` changes are only the `kernel_api` key (all 7 verified); `stories.test.ts` catches stale story saves after a later bump; `lib/` writes no save.
+- Reran: drop the comparison -> 31 pass, 3 fail (PR claim holds); `kernel_api: host.kernel_version` in `first()` -> red. CI on the head: ci, book-e2e, graph-diff success.
+
+### Findings
+
+1. **Blocker (reviewer.md step 3, swapped-order mutant green), `mobile/authority/local-story/release_pin.test.ts:69` (the cases at `:56-59`).** Mutant: move the kernel_api refusal from `authority.ts:98` to after `if (!loaded) ...` (`:103`). release_pin 4/4 and saves 15/15 stay green, because every case is a current save with only its pin edited, so `load` succeeds. That order is the bug this slice fixes: an older save the current kernel cannot load reports `save_corrupt`, and `load`'s `execSync(SCHEMA)` writes derived tables before the refusal. Fix (verified): in the no-kernel_api case also `DROP TABLE trace`, i.e. edit `"json_remove(pin, '$.kernel_api'); DROP TABLE trace"`: green on the head, red under the mutant (bytes changed).
+2. **Nit, PR body `numeric_profile` grep:** also matches the 7 live `.sql` (as finding 1 above).
