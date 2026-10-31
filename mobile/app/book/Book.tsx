@@ -177,6 +177,8 @@ type ViewProps = {
   reading?: Reading; // none: the Storybook's Reading global (the TypeContext above)
 };
 
+// A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
+const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -187,7 +189,6 @@ type ViewProps = {
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
-  const c = p.palette;
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
@@ -201,25 +202,27 @@ export function BookView(p: ViewProps) {
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
   return (
-    <PaletteContext value={c}>
+    <PaletteContext value={p.palette}>
       <TypeContext value={p.reading?.type ?? shown}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-          <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
-            {p.screen.view.combat || p.screen.ended ? (
-              <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-            ) : (
-              <Body
-                {...ctx}
-                page={page}
-                talkOn={p.talkOn ?? (() => {})}
-                chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-              />
-            )}
-          </PageTurn>
-          {say.open && shield(() => say.setOpen(false))}
-          <Bottom {...ctx} page={page} say={say} />
-          <Heard said={p.screen.said} />
-          {c.bg === color.dark.bg && <NightSky />}
+        <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
+          <View style={{ flex: 1, maxWidth: size.column }}>
+            <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={p.palette.bg}>
+              {p.screen.view.combat || p.screen.ended ? (
+                <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
+              ) : (
+                <Body
+                  {...ctx}
+                  page={page}
+                  talkOn={p.talkOn ?? (() => {})}
+                  chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+                />
+              )}
+            </PageTurn>
+            {say.open && shield(() => say.setOpen(false))}
+            <Bottom {...ctx} page={page} say={say} />
+            <Heard said={p.screen.said} />
+          </View>
+          {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>

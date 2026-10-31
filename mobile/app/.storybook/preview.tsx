@@ -10,7 +10,7 @@ const device = (
   name: string,
   width: number,
   height: number,
-  type: 'mobile' | 'tablet' = 'mobile',
+  type: 'mobile' | 'tablet' | 'desktop' = 'mobile',
 ) => ({
   name,
   styles: { width: `${width}px`, height: `${height}px` },
@@ -112,6 +112,8 @@ const preview: Preview = {
         ipadPro11: device('iPad Pro 11', 834, 1210, 'tablet'),
         ipadAir13: device('iPad Air 13', 1024, 1366, 'tablet'),
         ipadPro13: device('iPad Pro 13', 1032, 1376, 'tablet'),
+        // a desktop browser: the web Book's capped page column (book-ui.md, Page column)
+        desktop: device('Desktop', 1440, 900, 'desktop'),
       },
     },
     // Fail the smoke on any axe violation, colour contrast included.

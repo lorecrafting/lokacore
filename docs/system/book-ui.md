@@ -22,6 +22,14 @@ are listed in the generated [review index](../reviews/README.md). The per-mechan
 sections of retired chapters were removed on 2026-10-22; the rules they shared are stated below,
 and their text is at [the last commit that held them](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md).
 
+## Page column
+
+On a screen wider than a tablet (a desktop browser), the Book is a centred column no wider
+than a tablet (the page column [token](../../mobile/app/book/tokens.ts)), with the paper colour on
+both sides (owner, 2026-10-30). Everything the Book draws stays in that column: the page, its
+foot, the footer, the status line, the say field and overlays; only the night sky spans the
+window. A phone, narrower than the column, fills the screen.
+
 ## Room page anatomy
 
 The rule every World-page passage obeys ([owner decision](../decisions/owner-decision-room-page-anatomy-2026-10-23.md)).
