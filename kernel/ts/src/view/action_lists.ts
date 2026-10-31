@@ -331,6 +331,7 @@ function lightOffered(world: World, actor: CharacterId, a: Offered, item: Entity
 }
 
 function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
+  if (a.quest && a.speaker) return []; // the offer names its own target (loka-vx2v)
   if ((a.command === 'expedition' || a.command === 'cast') && id) return [id as EntityId];
   return id && light.VERBS.includes(a.command)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]

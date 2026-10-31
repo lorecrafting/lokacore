@@ -109,7 +109,7 @@ test('a scripted action aimed at a detail is its page card, titled by title or d
   assert.equal(sigil.title, 'detail.sigil');
   assert.deepEqual(
     sigil.actions.map((a: { action_key: string }) => a.action_key),
-    ['trace_sigil'],
+    ['trace_sigil', 'apprentice'],
   );
 });
 

@@ -1,6 +1,7 @@
 {
   "room.hall.title": "Hall",
-  "room.hall.description": "A bare hall. A pit lies east, a den west.",
+  "detail.cull_notice": "A notice nailed to the wall: the rats must go, and someone must find their den.",
+  "room.hall.description": "A bare hall. A pit lies east, a den west. A [notice](cull_notice) is nailed to the wall.",
   "room.pit.title": "Pit",
   "room.pit.description": "A shallow pit.",
   "room.den.title": "Den",

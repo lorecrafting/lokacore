@@ -64,7 +64,7 @@ storage half):
 4. **Resolve** (`commands/invocation.ts:75`): the action key must be in the actor's current ActionSet,
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
    look/talk one `target_id`; perform `target_id`, then a use scripted action's held tool as `item_id` ([row G4](mechanics.md#use-x-on-y-toolbox-row-g4)); take/drop one `item_id`; give `item_id`, `recipient_id`);
-   a scripted action fills its key, a quest offer its quest, `close_choice` the pending continuation; an
+   a scripted action fills its key, a quest offer its quest and takes no target (an empty `target_ids` means the action names its own target, whatever its target kind), `close_choice` the pending continuation; an
    input fills its field (`cast`'s `word` names a spell, [row 29a](mechanics.md#spell-cast-admission-toolbox-row-29a)); an
    aimed spell is offered on its target's entry, never in `spell_words`, and its offer fills `word` from its scripted action and `target_id` from `target_ids` (loka-x6t.109); the
    result must validate as a Command.
@@ -240,7 +240,7 @@ bell-first case, a typed Q2 failure transition without a new event.
 An actor's actions (`composed` in `kernel/ts/src/commands/actions.ts`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS` in `kernel/ts/src/commands/verbs.ts`, each with its target kind and input; policy always true), then the
 cartridge's actions, scripted actions, the offers of quests that have one and the actor has no instance
-of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
+of (a targeted offer only while its fixture or living NPC is in the actor's room), and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
 intersect; `apply` in `kernel/ts/src/commands/actions.ts`), then the answers to a pending choice (`choose`, `close_choice`), which no
 ordinary contribution removes; the combat restriction below takes precedence. A scripted action's

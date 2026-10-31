@@ -49,7 +49,7 @@ The scrolling World page is, top to bottom, and nothing else:
 
 No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
 fixture, person or item detail page; an action with no fixture, person or item target is not
-drawn, and content must give it one. On hold: a skill check (perception, lore) may add a sentence,
+drawn, and content must give it one. A quest offer draws on its target's page, reading its authored label. On hold: a skill check (perception, lore) may add a sentence,
 fixture or furniture to the description paragraph itself, never a block of its own. The minimap
 and joystick, the status line and the say field sit outside the scrolling page and keep their own
 rules below. A passage below that draws anything else on the World page is superseded; where the

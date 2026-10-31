@@ -6755,7 +6755,29 @@
           "additionalProperties": false,
           "properties": {
             "label": { "$ref": "#/$defs/partial.TextKey" },
-            "policy": { "$ref": "#/$defs/partial.Policy" }
+            "policy": { "$ref": "#/$defs/partial.Policy" },
+            "target": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "detail": { "$ref": "#/$defs/Key" },
+                    "kind": { "const": "detail" },
+                    "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+                  },
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": { "const": "npc" },
+                    "npc": { "$ref": "#/$defs/partial.DefinitionRef" }
+                  },
+                  "type": "object"
+                }
+              ],
+              "description": "The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen."
+            }
           },
           "type": "object"
         },
@@ -8736,7 +8758,38 @@
           "additionalProperties": false,
           "properties": {
             "label": { "$ref": "#/$defs/TextKey" },
-            "policy": { "$ref": "#/$defs/Policy" }
+            "policy": { "$ref": "#/$defs/Policy" },
+            "target": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "detail": { "$ref": "#/$defs/Key" },
+                    "kind": { "const": "detail" },
+                    "room": { "$ref": "#/$defs/DefinitionRef" }
+                  },
+                  "required": [
+                    "kind",
+                    "room",
+                    "detail"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": { "const": "npc" },
+                    "npc": { "$ref": "#/$defs/DefinitionRef" }
+                  },
+                  "required": [
+                    "kind",
+                    "npc"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "description": "The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen."
+            }
           },
           "required": [
             "label"
