@@ -4,6 +4,7 @@ import { key } from '../src/foundation/compose.ts';
 import { locate } from '../src/mechanics/knowledge/shared.ts';
 import { knock, decide } from '../src/mechanics/barrier/rule.ts';
 import { knowledgeView } from '../src/view/knowledge.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { resolve } from '../src/commands/target.ts';
 import { parse } from '../play/text.ts';
 import { fresh, npc, room } from './light_fixture.ts';
@@ -102,6 +103,7 @@ test('Map joins actor-owned visited rooms and only links with two visited endpoi
   // The shaft is placed and only another actor's visit: a stub. The lane's east and north lead to
   // rooms with no map position: neither link nor stub.
   assert.deepEqual(map.unexplored, [{ from: north, direction: 'down' }]);
+  assert.deepEqual(validate('MapView', map), []);
 });
 
 // Break: Knock checks a remembered speaker instead of actual presence, or opens the barrier.
