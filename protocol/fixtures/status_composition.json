@@ -2014,6 +2014,59 @@
       }
     },
     {
+      "id": "permanent-ticking-due-now",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "scars_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "scar"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "next_tick_at": 100,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "a0000000-0000-4000-8000-000000000002",
+              "status": {
+                "cartridge_id": "scars_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "scar"
+              }
+            },
+            "value": {
+              "active": true,
+              "generation": 1,
+              "next_tick_at": 100,
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            }
+          }
+        ]
+      }
+    },
+    {
       "id": "permanent-ticking-successor",
       "state": {
         "clock": 160,
