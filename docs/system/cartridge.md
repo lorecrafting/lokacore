@@ -863,14 +863,14 @@ build. The author tools below exist only in that bundle and change no protocol, 
   `checkpoints/<name>.json` (`{"steps": [...]}`, the same steps as keep my place, versioned with
   the cartridge; a name is `[a-z0-9_-]+`, never a path). The watcher reads and writes them
   (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
-  watcher's rebuild skip the directory. The column lists them; jumping to one starts the game over
+  watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
   and replays it.
-- **Author column** (`?dev=1`, web only): the last compile's diagnostics in plain words
+- **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`); current facts, quests and flags from the view; why an action
   is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book
   line opens its source `file:line` in the owner's editor (`POST /__author/open`, `LOKA_EDITOR`,
   default `code --goto`); the game-time control; the checkpoint list; the still-to-write list.
-- **Still to write.** A text value of exactly `~` is a placeholder. The column and
+- **Still to write.** A text value of exactly `~` is a placeholder. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
   word counts of what is written. A release compile refuses a cartridge with placeholders
   (`placeholder_text` at the key's path) unless `--allow-placeholders` is given.

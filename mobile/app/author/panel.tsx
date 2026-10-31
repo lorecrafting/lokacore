@@ -1,22 +1,18 @@
-// Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): the dev clock
-// control, keep my place, checkpoints and the author column (docs/system/cartridge.md#author-preview).
+// Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): keep my place and
+// the bridge the author panel page (tools/author-panel) drives over postMessage: the dev clock,
+// checkpoints, facts, quests, the trace and each Book line's source (docs/system/cartridge.md#author-preview).
 // All drive the kernel's own paths: the clock skews the host clocks, the place replays saved inputs
-// through `invoke`, the column reads the view and the trace.
-import { useEffect, useState, type ReactNode } from 'react';
-import {
-  Button,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+// through `invoke`, the panel reads the view and the trace.
+import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
+import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
-import { Column, seen, type Opened } from './column.tsx';
 import { listen, overlay } from './live.ts';
-import { asRefs, replay, type Place, type Step } from './place.ts';
+import { asRefs, caughtUp, replay, type Place, type Step } from './place.ts';
 
+export type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
+/** words -> text key, filled as the Book resolves text, so a clicked line names its source. */
+const seen = new Map<string, string>();
 export const devClock =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' &&
   Platform.OS === 'web' &&
@@ -49,8 +45,7 @@ export function restorePlace(game: Opened | undefined) {
   try {
     outcome = replay(place.steps, game, (ms) => {
       g.loka_dev_skew = skew() + ms;
-      let rounds = 0;
-      while (rounds++ < 1000 && game.pulse('drain').kind === 'catching_up');
+      caughtUp(game);
     });
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
@@ -91,41 +86,21 @@ export function played(game: Opened | undefined) {
 // Moves both host clocks forward by game minutes at the cartridge's rate, so the kernel's own
 // elapsed path delivers the time (none before D11 selection).
 type Manifest = { manifest: { time_policy?: { rate: number } } };
-function DevClock() {
-  const [minutes, setMinutes] = useState('60');
-  const advance = () => {
-    const rate = (JSON.parse(chapter.canonical) as Manifest).manifest.time_policy?.rate;
-    const m = Number(minutes);
-    if (rate && Number.isSafeInteger(m) && m > 0) {
-      const ms = Math.ceil((m * 60_000) / rate);
-      g.loka_dev_skew = skew() + ms;
-      keep({ advance: ms });
-    }
-  };
-  return (
-    <View style={{ flexDirection: 'row', gap: 4 }}>
-      <TextInput
-        aria-label="Game minutes"
-        inputMode="numeric"
-        value={minutes}
-        onChangeText={setMinutes}
-        style={{ width: 56, borderWidth: 1, backgroundColor: 'white' }}
-      />
-      <Button title="Advance game minutes" onPress={advance} />
-    </View>
-  );
+function advance(minutes: number) {
+  const rate = (JSON.parse(chapter.canonical) as Manifest).manifest.time_policy?.rate;
+  if (!rate || !Number.isSafeInteger(minutes) || minutes <= 0) return;
+  const ms = Math.ceil((minutes * 60_000) / rate);
+  g.loka_dev_skew = skew() + ms;
+  keep({ advance: ms });
 }
 
-// Named checkpoints: the recorded path saved as `checkpoints/<name>.json` in the source tree
-// (bin/loka dev --watch writes it); jumping starts the game over and replays the file's steps.
 type Tools = {
   redraw: (next: object) => void;
   session: { game: () => Opened | undefined };
   startOver: () => unknown;
 };
-const CHECKPOINTS = '/__author/checkpoints';
-async function jumpTo(name: string, { session, startOver }: Tools) {
-  const { steps } = (await (await fetch(`${CHECKPOINTS}/${name}`)).json()) as Place;
+// Jumping to a checkpoint starts the game over and replays the file's steps (the panel fetched them).
+function jumpTo(steps: Step[], { session, startOver }: Tools) {
   const before = session.game();
   startOver();
   const game = session.game();
@@ -134,64 +109,60 @@ async function jumpTo(name: string, { session, startOver }: Tools) {
   place.steps = steps;
   restorePlace(game);
 }
-function Checkpoints(tools: Tools) {
-  const [names, setNames] = useState<string[]>([]);
-  const [name, setName] = useState('');
-  const list = () =>
-    fetch(CHECKPOINTS)
-      .then((r) => r.json())
-      .then(setNames, () => setNames([]));
-  useEffect(() => void list(), []);
-  const save = () =>
-    fetch(`${CHECKPOINTS}/${name}`, {
-      method: 'PUT',
-      body: JSON.stringify({ steps: place.steps }),
-    }).then((r) => (r.ok ? list() : alert(`Not saved: ${r.status}`)));
-  return (
-    <View style={{ gap: 4 }}>
-      <View style={{ flexDirection: 'row', gap: 4 }}>
-        <TextInput
-          aria-label="Checkpoint name"
-          placeholder="name"
-          value={name}
-          onChangeText={setName}
-          style={{ width: 96, borderWidth: 1 }}
-        />
-        <Button
-          title="Save checkpoint"
-          onPress={save}
-          disabled={!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(name)} // live.ts NAME
-        />
-      </View>
-      {names.map((n) => (
-        <Button key={n} title={`Jump to ${n}`} onPress={() => jumpTo(n, tools)} />
-      ))}
-    </View>
-  );
-}
 
-/** The Book with the author column beside it (wide) or under it (narrow); App mounts it only in
- * the author preview. `redraw` is App's state setter, stable, so the stream opens once per page. */
-export function DevPanel({ children, ...tools }: Tools & { children: ReactNode }) {
-  const { redraw } = tools;
-  const [said, setSaid] = useState<string[]>([]); // the last compile's diagnostics
-  useEffect(() => listen((lines) => (setSaid(lines), redraw({}))), [redraw]);
-  const wide = useWindowDimensions().width >= 900;
-  const game = tools.session.game();
-  const note = [placeNote, ...said].filter(Boolean).join('\n');
-  return (
-    <View style={{ flex: 1, flexDirection: wide ? 'row' : 'column' }}>
-      <View style={{ flex: 1 }}>{children}</View>
-      <ScrollView
-        aria-label="Author column"
-        style={wide ? { width: 320, flexGrow: 0 } : { maxHeight: 200 }} // a ScrollView grows by default
-        contentContainerStyle={{ gap: 8, padding: 4, backgroundColor: 'white' }}
-      >
-        {note ? <Text selectable>{note}</Text> : null}
-        <DevClock />
-        <Checkpoints {...tools} />
-        {game ? <Column game={game} /> : null}
-      </ScrollView>
-    </View>
-  );
+// The panel protocol: the panel says hello (and after every Book reload, answered by `ready`), the
+// Book posts its state on every session update and answers `trace`; a Book line Alt-clicked posts
+// `line`. Only a local page may drive it: the panel's page and the Book's are different ports.
+const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+type Asked =
+  | { op: 'hello' }
+  | { op: 'advance'; minutes: number }
+  | { op: 'jump'; steps: Step[] }
+  | { op: 'trace' };
+let panel: { to: Window; origin: string } | undefined;
+const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
+const stateOf = (game: Opened) => ({
+  hash: chapter.sha256,
+  placeNote,
+  steps: place.steps,
+  facts: game.facts(),
+  quests: game.view().view.journal,
+});
+// Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
+const onClick = (e: MouseEvent) => {
+  if (!e.altKey) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const words = (e.target as HTMLElement).textContent ?? '';
+  tell({ line: { key: seen.get(words), words } });
+};
+/** Serves the author panel page for `game` while mounted; App calls it only in the author preview. */
+export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
+  const latest = useRef(tools); // App's closures change per render; the bridge lives per game
+  latest.current = tools;
+  useEffect(() => {
+    if (!devClock || !game) return;
+    const state = () => tell({ state: stateOf(game) });
+    const onMessage = (e: MessageEvent<Asked>) => {
+      if (!LOCAL.test(e.origin) || !(e.source instanceof Window) || !e.data?.op) return;
+      panel = { to: e.source, origin: e.origin };
+      if (e.data.op === 'trace') return void tell({ trace: game.trace() });
+      if (e.data.op === 'advance') advance(e.data.minutes);
+      if (e.data.op === 'jump') return jumpTo(e.data.steps, latest.current); // the new game posts its state
+      state();
+    };
+    window.addEventListener('message', onMessage);
+    document.addEventListener('click', onClick, true);
+    const unsubscribe = game.subscribe(state);
+    const unlisten = listen(() => latest.current.redraw({})); // a text overlay redraws in place
+    if (panel) state();
+    else if (window.parent !== window)
+      window.parent.postMessage({ loka: 'author', ready: true }, '*');
+    return () => {
+      window.removeEventListener('message', onMessage);
+      document.removeEventListener('click', onClick, true);
+      unsubscribe();
+      unlisten();
+    };
+  }, [game]);
 }

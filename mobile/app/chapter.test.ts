@@ -23,6 +23,7 @@ const panel = {
   restorePlace() {},
   resetPlace() {},
   skew: () => 0,
+  useAuthorPanel() {},
 };
 
 const require = createRequire(import.meta.url);

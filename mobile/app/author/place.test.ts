@@ -3,7 +3,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Intent, Reply } from '../../packages/game-view/session.ts';
-import { asRefs, replay, type Replayable, type Step } from './place.ts';
+import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { asRefs, caughtUp, replay, type Replayable, type Step } from './place.ts';
 
 const NPC = 'sampler@0.0.1:npc/maud';
 const intent = (target_ids: string[], input = {}) =>
@@ -72,4 +73,24 @@ test('a choice replays against the continuation this run issued', () => {
   const { game, sent } = session({}, [accepted], 'c2');
   replay([{ intent: intent([], { choice_id: 'go', continuation_id: 'c1' }) }], game, () => {});
   assert.deepEqual(sent[0]!.input, { choice_id: 'go', continuation_id: 'c2' });
+});
+
+// Breaks: a replayed advance only drains (a drain never captures the moved clocks), so the world
+// clock stays put and the next replayed input is refused as catching up, or the loop stops early.
+test('an advance step credits the moved dev clock before the next input', () => {
+  const a = elapsedHost();
+  try {
+    assert.equal(
+      a.game.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+      'saved',
+    );
+    const before = a.game.view().view.time;
+    a.clock.wall += 3_600_000;
+    a.clock.mono += 3_600_000;
+    caughtUp(a.game);
+    assert.equal(a.game.view().view.time, before + 180_000); // one real hour at the bundle's rate 50
+    assert.equal(a.game.pending(), false);
+  } finally {
+    a.sql.close();
+  }
 });

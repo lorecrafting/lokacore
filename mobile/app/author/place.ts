@@ -13,6 +13,14 @@ export type Replayable = {
   entityIds: () => Ids;
 };
 export type Outcome = { done: number; failed?: string };
+type Pulsed = { pulse: (mode: 'active' | 'drain') => { kind: string } };
+
+/** After the dev clock moved: credit the elapsed time now, so the next replayed input is not refused as catching up. */
+export function caughtUp(game: Pulsed) {
+  game.pulse('active'); // a drain never captures the clocks (elapsed.ts pulse); an active pulse does
+  let rounds = 0;
+  while (rounds++ < 1000 && game.pulse('drain').kind === 'catching_up');
+}
 
 const isRef = (target: string) => target.includes('@');
 

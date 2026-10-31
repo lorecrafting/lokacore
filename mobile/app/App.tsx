@@ -18,7 +18,14 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import { DevPanel, devClock, played, resetPlace, restorePlace, skew } from './author/panel.tsx';
+import {
+  devClock,
+  played,
+  resetPlace,
+  restorePlace,
+  skew,
+  useAuthorPanel,
+} from './author/panel.tsx';
 import { readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
@@ -237,19 +244,20 @@ export default function App() {
   const recovered = useRef<Recovery>({});
   const [bookShell] = useState(() => shellFor(recovered));
   useElapsed(game, recovered);
-  if (!activeSession) return null;
-  if (!loaded && !fontError) return null;
   const startOver = () => {
-    const before = activeSession.game();
-    const why = activeSession.startOver();
+    const before = activeSession!.game();
+    const why = activeSession!.startOver();
     // Only a start over that replaced the game opens a fresh book; a failed one keeps this book
     // and its log (which says why), so the log must not restart.
-    if (activeSession.game() !== before) {
+    if (activeSession!.game() !== before) {
       if (devClock) resetPlace();
       setStarts((n) => n + 1);
     } else redraw({});
     return why;
   };
+  useAuthorPanel({ redraw, session: { game: () => activeSession?.game() }, startOver }, game);
+  if (!activeSession) return null;
+  if (!loaded && !fontError) return null;
   if (!game)
     return (
       <SaveError
@@ -259,7 +267,5 @@ export default function App() {
         tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
       />
     );
-  const book = <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
-  const tools = { redraw, session: activeSession, startOver };
-  return devClock ? <DevPanel {...tools}>{book}</DevPanel> : book; // the pinned tree is the Book alone
+  return <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
 }

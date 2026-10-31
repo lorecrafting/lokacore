@@ -48,6 +48,7 @@ const server = http.createServer((request, response) => {
         ...result.headers,
         'cross-origin-opener-policy': 'same-origin',
         'cross-origin-embedder-policy': 'require-corp',
+        'cross-origin-resource-policy': 'same-site', // the author panel page (another port) frames it
       });
       result.pipe(response);
     },

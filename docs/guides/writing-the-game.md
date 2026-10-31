@@ -5,14 +5,17 @@ tool behaviour: [author preview](../system/cartridge.md#author-preview).
 
 ## Start the tools
 
-Two terminals, from the repository root:
+One command, from the repository root:
 
 ```sh
-mise exec -- bin/loka dev cartridges/<name> --watch
-cd mobile/app && npm run author
+bin/author.sh cartridges/<name>
 ```
 
-Open http://localhost:19006/?dev=1. The Book is the left two columns; the author column is the third.
+It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (`mobile/app`,
+`npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
+http://localhost:19009: the Book fills the page and the panel is the pane on the right (Compile at
+the top, then Play, State and Why; the source line at the foot). The sun/moon button switches light
+and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), 19006 (Book), `LOKA_PANEL_PORT` (panel, 19009).
 
 ## Write a scene
 
@@ -30,21 +33,21 @@ maud: line one
   gives: bowl
 ```
 
-Leave a line as `~` to come back to it; the column's Still to write lists every `~` by file.
+Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file.
 
 ## Jump to a beat
 
-Play to the moment you want to work on, then in the column type a name under Checkpoints and
+Play to the moment you want to work on, then in the panel's Play tab type a name under Checkpoints and
 Save. Later, pick it from the list: the game starts over and replays to that point. Checkpoints
 are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 
 ## Read an error
 
-A broken edit keeps the last good page; the column's first line says what broke, as
-`error: rooms/cellar.json:12 unknown exit target "well"`. If a replay stops, the column names the
+A broken edit keeps the last good page; the panel's Compile card says what broke, as
+`error: rooms/cellar.json:12 unknown exit target "well"`. If a replay stops, the panel names the
 step (`step 4 refused: talk Maud`) and the Book stays where the replay got to. Alt-click (Option-click) any
-Book line to open its source in your editor (`LOKA_EDITOR`, default `code --goto`). The column's
-"Why" takes an action or dialogue key and explains the last recorded step: which rules fired and
+Book line to open its source in your editor (`LOKA_EDITOR`, default `code --goto`). The panel's
+Why tab takes an action or dialogue key and explains the last recorded step: which rules fired and
 why the action was missing or refused.
 
 ## Every kind of content
@@ -57,7 +60,7 @@ come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.m
 
 Live preview is the same for every kind: a `text.json` edit reaches the page as you save; any
 other file (a shop, a structure, a population) recompiles, reloads the page and replays your
-recorded steps. An error reads as `error: <file>:<line> <what>` in the column's first line;
+recorded steps. An error reads as `error: <file>:<line> <what>` in the panel's Compile card;
 a compile diagnostic you run by hand reads as `CODE path` (`SCHEMA_VIOLATION rooms/well.exits`).
 
 | Kind | Smallest sampler | Needs first |
