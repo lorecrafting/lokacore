@@ -15,6 +15,10 @@ export const checkpoints = {
     fetch(`/__author/checkpoints/${name}`, { method: 'PUT', body: JSON.stringify({ steps }) }),
 };
 
+export type Todo = { file: string; words: number; placeholders: string[] };
+/** The `~` placeholders still to write, by file (kernel/ts/play/todo.ts). */
+export const todo = () => fetch('/__author/todo').then((r) => r.json() as Promise<Todo[]>);
+
 /** The last compile's plain-words diagnostics; `undefined` until the watcher answers. */
 export function useDiagnostics() {
   const [said, setSaid] = useState<string[]>();

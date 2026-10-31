@@ -8,7 +8,7 @@ import { Button } from './components/ui/button.tsx';
 import { Badge } from './components/ui/badge.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
-import { Compile, Facts, Play, Source, Why } from './sections.tsx';
+import { Compile, Facts, Play, Source, Todo, Why } from './sections.tsx';
 
 const THEME = 'loka-theme';
 function useTheme() {
@@ -74,8 +74,9 @@ export default function App() {
         <Header hash={book.state?.hash} dark={dark} toggle={toggle} />
         <Compile said={said} placeNote={book.state?.placeNote} />
         <Tabs defaultValue="play" className="min-h-0 flex-1 gap-0">
-          <TabsList className="mx-3 mt-2 grid w-auto grid-cols-3">
+          <TabsList className="mx-3 mt-2 grid w-auto grid-cols-4">
             <TabsTrigger value="play">Play</TabsTrigger>
+            <TabsTrigger value="write">Write</TabsTrigger>
             <TabsTrigger value="state">State</TabsTrigger>
             <TabsTrigger value="why">Why</TabsTrigger>
           </TabsList>
@@ -83,6 +84,9 @@ export default function App() {
             <div className="p-3">
               <TabsContent value="play">
                 <Play state={book.state} send={book.send} />
+              </TabsContent>
+              <TabsContent value="write">
+                <Todo said={said} />
               </TabsContent>
               <TabsContent value="state">
                 <Facts state={book.state} />

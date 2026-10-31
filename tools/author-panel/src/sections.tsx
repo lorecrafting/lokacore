@@ -1,7 +1,7 @@
 // The panel's sections, each reading the Book's state or the watcher's API; no game logic here.
-import { Bookmark, Clock, FileCode2 } from 'lucide-react';
+import { Bookmark, Clock, FileCode2, PenLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ask, checkpoints } from './author.ts';
+import { ask, checkpoints, type Todo as Row, todo } from './author.ts';
 import type { Line, State, Step } from './book.ts';
 import { Badge } from './components/ui/badge.tsx';
 import { Button } from './components/ui/button.tsx';
@@ -183,6 +183,41 @@ export function Why({ trace }: { trace: () => Promise<string[]> }) {
         </Button>
       </div>
       {told ? <pre className="overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs">{told}</pre> : null}
+    </div>
+  );
+}
+
+/** Still to write: every `~` by the file that owns it, with the words written there; read again
+ * after each compile (`said` changes), so a line just written leaves the list. */
+export function Todo({ said }: { said?: string[] }) {
+  const [rows, setRows] = useState<Row[]>();
+  useEffect(() => {
+    todo().then(setRows, () => setRows(undefined));
+  }, [said]);
+  return (
+    <div className="space-y-3">
+      <Heading>
+        <PenLine className="size-3.5" /> Still to write
+      </Heading>
+      {rows === undefined ? (
+        <p className="text-sm text-muted-foreground">Waiting for the watcher.</p>
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nothing left: every line is written.</p>
+      ) : (
+        rows.map((row) => (
+          <div key={row.file} className="text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs">{row.file}</span>
+              <Badge variant="secondary">{row.words} words</Badge>
+            </div>
+            <ul className="mt-1 list-disc pl-5 font-mono text-xs text-muted-foreground">
+              {row.placeholders.map((at) => (
+                <li key={at}>{at}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
     </div>
   );
 }

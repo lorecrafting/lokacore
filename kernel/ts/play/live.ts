@@ -19,6 +19,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { replayRecords } from './replay.ts';
+import { files, todo } from './todo.ts';
 import { why } from './why.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
@@ -69,14 +70,6 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
   writeFileSync(file, `${JSON.stringify({ steps }, null, 2)}\n`);
   return response.writeHead(204).end();
 }
-
-// The source tree's regular files, relative, text.json first (a key's definition beats a mention).
-const files = (dir: string, under = ''): string[] =>
-  readdirSync(join(dir, under), { withFileTypes: true })
-    .flatMap((f) => (f.isDirectory() ? files(dir, join(under, f.name)) : join(under, f.name)))
-    .filter((rel) => !rel.startsWith('checkpoints/'))
-    .sort() // readdir order differs by platform
-    .sort((a, b) => Number(b === 'text.json') - Number(a === 'text.json'));
 
 /** `rel:line` of the first line defining `key` (`"key":`), else of the first holding `words` as a
  * JSON string (inline prose has no key in the source); undefined when neither is in `source`. */
@@ -163,13 +156,15 @@ async function post(
 }
 
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, and the column's `POST /open` and `POST /why`. */
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts) and the column's `POST /open` and
+ * `POST /why`. */
 export function serve(port: number, source: string, artifact: string) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [] };
   const send = (client: ServerResponse) => client.write(`data: ${JSON.stringify(last)}\n\n`);
   const server = createServer((request, response) => {
     if (request.url?.startsWith('/checkpoints')) return void checkpoints(request, response, source);
+    if (request.url === '/todo') return void json(response, 200, todo(source));
     if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
       return void post(request, response, source, artifact);
     if (request.url !== '/events') return response.writeHead(404).end();

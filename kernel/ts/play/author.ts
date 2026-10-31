@@ -93,16 +93,23 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
   console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`);
   return true;
 }
+// The preview allows `~` placeholders; a release compile refuses them (mix loka.compile).
+const compile = (artifact: string) =>
+  spawnSync(
+    'mise',
+    ['exec', '--', 'mix', 'loka.compile', source, artifact, '--allow-placeholders'],
+    {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
+    },
+  );
 function build(): boolean {
   const started = performance.now();
   const tmp = mkdtempSync(join(tmpdir(), 'loka-dev-'));
   try {
     const artifact = join(tmp, 'artifact.json');
-    const run = spawnSync('mise', ['exec', '--', 'mix', 'loka.compile', source, artifact], {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
-    });
+    const run = compile(artifact);
     const said = `${run.stderr ?? ''}`
       .split('\n')
       .filter((l) => l.startsWith('{'))
