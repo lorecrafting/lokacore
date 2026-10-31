@@ -109,6 +109,8 @@ test('an unexplored stub admits no destination id or title, with a declared-key 
       `${key} red`,
     );
   }
+  // The required sweep above walks only listed fields; a map without stubs must still fail.
+  assert.notDeepEqual(validate('MapView', { rooms: [], links: [] }), []);
 });
 
 // Breaks: an empty map-position declaration bypasses the wire's nonempty requirement.
