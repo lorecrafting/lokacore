@@ -4,6 +4,7 @@ import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
 import { key } from '../foundation/compose.ts';
 import { activeStatuses } from '../mechanics/status/shared.ts';
+import { KernelError } from '../foundation/error.ts';
 
 // The engine default condition bands of 04 §15 (amendments 2026-10-01, 2026-10-02), highest
 // cut first, with their tones; a pool's own bands, else the cartridge's world.bands, replace it.
@@ -36,8 +37,9 @@ export function resources(world: World, body: EntityId | undefined): ResourceVie
         ),
     )
     .map(({ key: k }) => {
-      const resource = resourceRef(world, k);
-      return { resource, ...bandOf(world, body, k)! };
+      const band = bandOf(world, body, k);
+      if (!band) throw new KernelError('precondition_failed'); // a missing or corrupt body row, as living()
+      return { resource: resourceRef(world, k), ...band };
     })
     .sort((a, b) => cmp(refString(a.resource), refString(b.resource)));
 }

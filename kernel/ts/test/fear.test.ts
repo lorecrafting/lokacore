@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { key } from '../src/foundation/compose.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -231,4 +232,15 @@ test('an hp-less foe under the regen hp pool has no combat band; a goblin with h
   };
   assert.equal('band' in combat(npc(w, 'guard')), false);
   assert.equal(combat(a).band, 'ready'); // 6 of 6 hp: world.bands' top row
+});
+
+// loka-zvwh. Breaks: the body's own hp entry, unreadable without its row under the regen pool,
+// ships as a schema-invalid ResourceView (no current or band) instead of failing as living() does.
+test('a missing body hp row fails the view with precondition_failed', () => {
+  const { w } = den(content);
+  const resources = { ...w.state.resources };
+  delete resources[key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: w.body })];
+  assert.throws(() => gameView({ ...w, state: { ...w.state, resources } }), {
+    code: 'precondition_failed',
+  });
 });

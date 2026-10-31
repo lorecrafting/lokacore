@@ -36,3 +36,15 @@ test('an unseen opponent in the dark keeps its name and has no band', () => {
   assert.equal(view.name, 'npc.cellar_rat.short');
   assert.equal(view.band, undefined);
 });
+
+// loka-zvwh. Breaks: a foe with no hp of its own shows a band read from the pool (a non-regen
+// pool gives it the start value, a band that never changes), unlike its entities row.
+test('a foe without hp of its own has no band under a non-regen pool', () => {
+  const w = fighting(3);
+  const r = rat(w);
+  const view = combat({
+    ...w,
+    entities: { ...w.entities, [r]: { ...w.entities[r]!, hp: undefined } },
+  });
+  assert.equal('band' in view, false);
+});

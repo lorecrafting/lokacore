@@ -34,11 +34,17 @@ export const named = (world: World, actor: CharacterId, id: EntityId, steps: Ste
 
 type Fight = NonNullable<ReturnType<typeof engaged>>;
 export function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
-  // A foe is always named (even unseen); its hp band word shows only when seen and alive: a pack
-  // member a spell or status kills stays on the roster until the round-end prune (loka-y6yg.49).
+  // A foe is always named (even unseen); its hp band word shows only when it has hp of its own (no
+  // hp, no band: loka-ysbt ruling a, loka-zvwh), is seen and alive: a pack member a spell or status
+  // kills stays on the roster until the round-end prune (loka-y6yg.49).
   const foe = (id: EntityId) => {
+    const e = world.entities[id];
     const band =
-      visible(world, actor, id, steps) && living(world, id) && bandOf(world, id, 'hp')?.band;
+      e?.kind === 'npc' && // mutate-skip: type narrowing only; a foe is always an NPC
+      e.hp &&
+      visible(world, actor, id, steps) &&
+      living(world, id) &&
+      bandOf(world, id, 'hp')?.band;
     return { ...named(world, actor, id, steps), ...(band && { band }) };
   };
   return {
