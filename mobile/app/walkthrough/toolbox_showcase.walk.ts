@@ -92,7 +92,7 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves, fixture 
   await tap(LABEL.giveTo);
   await tap(/^The farmer, give a red apple/);
   await tap(/^(?:the )?farmer, open$/i);
-  await tap('Trade two pelts for a knife');
+  await tap('Trade two pelts for a knife.');
   await tap(LABEL.leave);
 };
 
