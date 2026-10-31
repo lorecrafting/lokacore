@@ -174,6 +174,7 @@ test('spell words: refused ones list their reason under Spells; lux casts once a
     b.tap(CONTENTS);
     b.tap('Character');
     const t = b.text();
+    b.tap(LABEL.backToContents);
     b.tap(LABEL.backToWorld);
     return t.slice(t.indexOf(LABEL.spells));
   };

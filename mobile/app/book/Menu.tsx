@@ -25,6 +25,8 @@ const SECTIONS: [Section, string][] = [
 /**
  * The Contents: one Entity line per section.
  * - Use: the status line's Contents button.
+ * - Rules: no status line; its foot is Back to World; a section it opens returns to it with Back to
+ *   Contents (book-ui.md, World and status entry).
  * - Story: SectionPages.stories.tsx
  */
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {

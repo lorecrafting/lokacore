@@ -175,7 +175,8 @@ test('remounted pending ear Take settles on its exact corpse detail', () => {
   a.sql.close();
 });
 
-// Breaks: room title scrolls away, room Ways returns, or Back pops to Contents instead of World.
+// Breaks: room title scrolls away, room Ways returns, a directly opened Map not back to World, or a
+// section opened from Contents drawing the status line or not going Back to Contents (loka-8lpm).
 test('room is focused while Map retains directions and every detail returns to the world', () => {
   const h = book();
   const roomScroll = h.draw().find((n) => n.type === 'ScrollView');
@@ -203,11 +204,7 @@ test('room is focused while Map retains directions and every detail returns to t
   assert.ok(h.labels().includes('Go north'));
   assert.ok(h.text().includes('Beyond north: Well Lane — a brass lantern.'));
   h.tap('Back to World');
-  h.tap(CONTENTS);
-  h.tap(LABEL.inventory);
-  h.tap('Back to World');
-  assert.ok(h.labels().includes('Old Bram, open'));
-  assert.equal(h.labels().includes(`${LABEL.inventory}, open`), false);
+  const status = () => h.labels().some((l) => CONTENTS.test(l));
   const sections = ['Character', LABEL.inventory, 'Map', 'Journal', 'Settings'];
   for (const section of sections) {
     h.tap(CONTENTS);
@@ -222,7 +219,10 @@ test('room is focused while Map retains directions and every detail returns to t
       h.labels().filter((label) => sections.includes(label)),
       [],
     );
-    h.tap('Back to World');
+    assert.ok(!status());
+    h.tap(LABEL.backToContents);
+    assert.ok(h.stack.length === 1 && h.text().includes('Contents') && !status());
+    h.tap(LABEL.backToWorld);
     assert.ok(h.labels().includes('Old Bram, open'));
   }
   h.sql.close();

@@ -41,6 +41,7 @@ type BodyProps = {
   chapterDone: () => void;
   world: () => void;
   back: () => void;
+  stack: Page[];
   reading?: Reading;
 };
 // The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
@@ -112,6 +113,11 @@ function PageBody(p: BodyProps & Talk) {
 function sectionPage(p: BodyProps, page: Page) {
   const { view, text } = p.screen;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
+  // Opened from Contents, a section returns to it (owner, 2026-10-30, loka-8lpm).
+  const home = {
+    world: p.world,
+    contents: p.stack.at(-2)?.kind === 'contents' ? p.back : undefined,
+  };
   if (page.kind === 'contents')
     return <ContentsPage open={(kind: Section) => p.open({ kind })} world={p.world} />;
   if (page.kind === 'character')
@@ -119,24 +125,24 @@ function sectionPage(p: BodyProps, page: Page) {
       <CharacterPage
         view={view}
         text={text}
-        world={p.world}
+        {...home}
         buttons={p.screen.buttons}
         press={p.press}
         pending={p.screen.pending}
       />
     );
   if (page.kind === 'map')
-    return <MapPage view={view} text={text} g={p.g} press={p.press} world={p.world} />;
+    return <MapPage view={view} text={text} g={p.g} press={p.press} {...home} />;
   if (page.kind === 'settings')
-    return <SettingsPage startOver={p.startOver} world={p.world} reading={p.reading} />;
-  if (page.kind === 'journal') return <JournalPage {...p.screen} world={p.world} press={p.press} />;
+    return <SettingsPage startOver={p.startOver} {...home} reading={p.reading} />;
+  if (page.kind === 'journal') return <JournalPage {...p.screen} {...home} press={p.press} />;
   return (
     <CarryingPage
       items={view.inventory}
       equipment={view.equipment}
       text={text}
       open={openThing}
-      world={p.world}
+      {...home}
     />
   );
 }

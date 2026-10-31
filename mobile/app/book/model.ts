@@ -56,9 +56,10 @@ export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
 
-// A detail page draws no status line (owner pick mvlrlvappy4w); the shell keeps it elsewhere.
-export const detailPage = (page: Page | undefined) =>
-  ['thing', 'board', 'notice', 'dialogue', 'shelf', 'sale', 'inside'].includes(page?.kind ?? '');
+// A detail page (owner pick mvlrlvappy4w), Contents and its sections (loka-8lpm) draw no status line.
+const DETAIL =
+  'thing board notice dialogue shelf sale inside contents character carrying map journal settings';
+export const detailPage = (page: Page | undefined) => DETAIL.split(' ').includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 

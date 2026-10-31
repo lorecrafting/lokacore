@@ -94,8 +94,7 @@ export const NellShop: StoryObj = {
     await tap(/; opens Contents$/);
     await tap('Character, open');
     await page.findByText(/^pennies\s+6$/); // paid; pennies stay off the status line
-    await tap('Back to World');
-    await tap(/; opens Contents$/);
+    await tap(LABEL.backToContents);
     await tap(`${LABEL.inventory}, open`);
     await page.findByLabelText('a cob of bread, open');
   },

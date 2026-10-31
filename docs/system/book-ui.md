@@ -129,8 +129,14 @@ The enabled status/resources tap opens Contents. It lists exactly **Character**,
 row. Character shows existing projected resources and position, without unrelated index links.
 Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
-[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
-**Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
+[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Contents and every
+section it opens draw no status line (owner, 2026-10-30, loka-8lpm; the [page foot](#detail-page-order)
+rule). A section opened from Contents returns with **Back to Contents** (one page back), and Contents
+returns with **Back to World**; a section opened another way (Character from a status icon, the map
+from the joystick or footer, an Inventory restored on reopen) says **Back to World** and clears the
+stack to World. A page a section opens returns to that section (an item page's Leave to Inventory).
+A room change, death, combat, a new chapter, Start over and an accepted Take or Drop still clear
+straight to World.
 
 Settings opens with the **Reading size**: Standard, Large or Larger, one chosen, kept on the
 device (not in the save) and Standard until changed. It scales the reading text (prose, entity
@@ -223,7 +229,7 @@ claim; only exits from the actor's current room show live availability/refusal f
 ordinary Move admission, including any ingress rule.
 The current-room marker and a level stepper are visible; a room detail names that known
 room and its known exits. While a room detail is open, Back to map is the page's nearest return,
-beside Back to World. An unvisited endpoint, NPC or item is never drawn merely because
+beside the section's own return ([Contents](#world-and-status-entry)). An unvisited endpoint, NPC or item is never drawn merely because
 the cartridge contains it or adjacent sight names it. Existing current-room exit and door
 controls retain live admission. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
@@ -267,12 +273,13 @@ Give to…), then asks, Trade and services (a person's page orders its own cards
 spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World follows the [room page anatomy](#room-page-anatomy).
-A page's local returns (Leave, Back to World, Back to board, Back to map,
+A page's local returns (Leave, Back to World, Back to Contents, Back to board, Back to map,
 Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
-control ends the page; offered actions never do. Item, notice, board, NPC and shop pages draw
-no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pending save shows
+control ends the page; offered actions never do. Item, notice, board, NPC and shop pages, Contents and its
+sections draw no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23;
+loka-8lpm): a pending save shows
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
-fault show there as on every page. Combat, Character, Contents, the map and World keep the
+fault show there as on every page. Combat and World keep the
 [status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
 foot. A control that opens a child (Resume dream, Look inside) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
 
@@ -796,7 +803,7 @@ One row per mechanic whose Book rendering is a short rule: worn affects, display
 
 ## Levelling details
 
-GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows on the Character page's status line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
+GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows as the foot's **save not confirmed** line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
 
 ## Lore details
 
