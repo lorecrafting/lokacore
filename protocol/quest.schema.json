@@ -21,6 +21,47 @@
             },
             "policy": {
               "$ref": "policy.schema.json#/$defs/Policy"
+            },
+            "target": {
+              "description": "The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen.",
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "detail"
+                    },
+                    "room": {
+                      "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                    },
+                    "detail": {
+                      "$ref": "action.schema.json#/$defs/Key"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "room",
+                    "detail"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "npc"
+                    },
+                    "npc": {
+                      "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "npc"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             }
           },
           "required": [

@@ -213,9 +213,10 @@ room description is the first variant whose `when` holds, else the base (`descri
 chosen the same way. Details are named through their aliases ([target resolution](protocol.md#target-resolution)).
 
 A scripted action whose target is a detail is offered only on that detail's NoticeView `actions` (loka-x6t.120); `view.actions`
-never lists it. A detail some scripted action of the actor's set targets is projected as a NoticeView while visible in the
+never lists it. A detail some scripted action of the actor's set or quest offer targets is projected as a NoticeView while visible in the
 actor's room, titled by its authored `title` (room.schema.json) or, without one, its description.
-Engine verbs and quest offers stay in `view.actions` for the Book's chrome; the invariant
+Engine verbs stay in `view.actions` for the Book's chrome. A targeted quest offer draws on its fixture's NoticeView or its NPC's
+entity entry, never in `view.actions`; only an untargeted offer (loader-level, compiler-refused) stays there. The invariant
 `world_lists_no_fixture_action` holds it.
 
 ## readable@1 (`mechanics/readable/rule.ts`)
@@ -397,7 +398,8 @@ A quest starts through its offer, which is optional, a quest-resolution reaction
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
 accept action), withdrawn once the actor has an instance (`commands/actions.ts:138`), so a second accept
-and an undeclared quest are refused before the rule. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
+and an undeclared quest are refused before the rule. An offer with a target is admitted only while that target is in the actor's
+room and alive (else `unsupported_capability`) and seen (else `invalid_state`); a dialogue choice's `accept` reads no offer target. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
 stored) or `post_activation_event` (met by an `item_acquired` of the named item into the
