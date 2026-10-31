@@ -116,6 +116,7 @@ test('fields that first appear, or leave, are no change', () => {
 test('a skill or level that stands still is silent, one first numbered has risen', () => {
   const blade = (level?: number) => view({ skills: [skill('blade', true, level)] });
   assert.deepEqual(cuesOf(blade(2), blade(2)), []);
+  assert.deepEqual(cuesOf(blade(), blade(0)), []);
   assert.deepEqual(names(cuesOf(blade(1), blade())), ['skill_up']);
   const lv = (level: number) => view({ levelling: { level } });
   assert.deepEqual(cuesOf(lv(3), lv(3)), []);

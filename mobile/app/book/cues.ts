@@ -23,7 +23,7 @@ const CUES = {
   place: { s: 1 },
   combat_open: { s: 3 },
   combat_close: { s: 3 },
-} satisfies Record<string, { s: 1 | 2 | 3 | 4; sound?: SoundName }>;
+} satisfies Record<string, { s: 1 | 2 | 3 | 4; sound?: SoundName }>; // mutate-skip: a type
 
 export type CueName = keyof typeof CUES;
 /** `ids`: what the cue names (items, skills, quests, status labels). `silent`: effects, no sound. `wash: false`: the Flash limit. */
