@@ -1,7 +1,12 @@
 {
   "name": "quest.find_key.title",
   "offer": {
-    "label": "quest.find_key.accept"
+    "label": "quest.find_key.accept",
+    "target": {
+      "kind": "detail",
+      "room": "hall",
+      "detail": "hook"
+    }
   },
   "objective": {
     "evidence": "post_activation_event",

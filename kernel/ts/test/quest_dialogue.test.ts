@@ -9,7 +9,10 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
@@ -127,4 +130,127 @@ test("an accept is invalid_state while its quest's offer policy fails", () => {
   const s = accept(w);
   assert.deepEqual(s.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.equal(s.world, w);
+});
+
+// Quest offer target (loka-vx2v; cartridge.md Quest offer target), the fixture half.
+const offerOn = (c: any, room: string, detail: string) =>
+  (c.quests[`${F}:quest/lantern`].offer.target = {
+    kind: 'detail',
+    room: ref('room', room),
+    detail,
+  });
+const onPost = (f: (c: any) => void = () => {}) =>
+  world((c) => {
+    offerOn(c, 'ferry_landing', 'mooring_post');
+    f(c);
+  });
+const post = (w: World) => gameView(w).notices!.find((n) => n.key === 'mooring_post');
+const invocation = (w: World) => {
+  const id = identify('scope', w.character, {
+    invocation_id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b',
+    actor_id: w.character,
+    action_key: 'lantern',
+    target_ids: [],
+    input: {},
+  });
+  assert.equal(id.kind, 'identified');
+  return id.kind === 'identified' ? resolve(w, id) : undefined;
+};
+const ACCEPT = { type: 'accept_quest', quest: ref('quest', 'lantern') };
+
+// Breaks: the World card stays beside the fixture's, the fixture's scripted card lost, or a target
+// slipping into the payload (rows 1-2).
+test('an offer naming a detail is that notice card, and invokes with no target', () => {
+  const w = onPost();
+  const v = gameView(w);
+  assert.deepEqual(validate('GameView', v), []);
+  assert.equal(
+    v.actions.some((a) => a.action_key === 'lantern'),
+    false,
+  );
+  const offers = post(w)!.actions!;
+  assert.ok(offers.some((a) => a.action_key === 'coil_rope'));
+  assert.deepEqual(JSON.parse(JSON.stringify(offers.filter((a) => a.action_key === 'lantern'))), [
+    {
+      action_key: 'lantern',
+      label: 'quest.lantern.accept',
+      target: { kind: 'none' },
+      input: [],
+      available: true,
+    },
+  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify((invocation(w) as Command).payload)), {
+    type: 'accept_quest',
+    actor_id: w.character,
+    quest: ref('quest', 'lantern'),
+  });
+  const s = run(w, ACCEPT);
+  const types = s.decision.kind === 'accepted' ? s.decision.events.map((e) => e.payload.type) : [];
+  assert.deepEqual(types, ['quest_activated']);
+  assert.ok(!JSON.stringify(gameView(s.world)).includes('"action_key":"lantern"'));
+  // Breaks: the invariant false on this legal accept, or blind when the page lost it.
+  const command = {
+    world_context_id: CONTEXT,
+    payload: { actor_id: w.character, ...ACCEPT },
+  };
+  const agrees = (view: unknown) =>
+    check('gameview_agrees_with_admission', { view, command, decision: s.decision, words: {} });
+  assert.ok(agrees(v));
+  assert.equal(agrees({ ...v, notices: [] }), false);
+});
+
+// Breaks: accept from another room because a lit detail is `visible` from anywhere (row 3).
+test('an offer naming a detail is not offered from another room', () => {
+  const w = run(onPost(), { type: 'move', direction: 'north' }).world;
+  assert.deepEqual(validate('GameView', gameView(w)), []);
+  assert.ok(!JSON.stringify(gameView(w)).includes('"action_key":"lantern"'));
+  const refused = { kind: 'rejected', error: { code: 'unsupported_capability' } };
+  assert.deepEqual(invocation(w), refused);
+  assert.deepEqual(run(w, ACCEPT).decision, refused);
+});
+
+// Breaks: `here` listing a quest's detail offer the actor cannot see, or admission allowing it (row 4).
+test('an offer naming an unseen detail is not listed and accept is invalid_state', () => {
+  const w = onPost((c) => (c.rooms[`${F}:room/ferry_landing`].dark = true));
+  const v = gameView(w);
+  assert.deepEqual(validate('GameView', v), []);
+  assert.ok(!JSON.stringify(v).includes('"action_key":"lantern"'));
+  assert.deepEqual(run(w, ACCEPT).decision, {
+    kind: 'rejected',
+    error: { code: 'invalid_state' },
+  });
+});
+
+// Breaks: the offer's target read when a dialogue activates the quest (row 9).
+test('a dialogue accept activates a quest whose offer target is elsewhere', () => {
+  const w = world((c) => {
+    const rooms = c.rooms;
+    rooms[`${F}:room/village_green`].details = {
+      well: rooms[`${F}:room/ferry_landing`].details.mooring_post,
+    };
+    offerOn(c, 'village_green', 'well');
+  });
+  assert.ok(!JSON.stringify(gameView(w).actions).includes('"action_key":"lantern"'));
+  const s = accept(talk(w)[0]);
+  assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
+  assert.deepEqual(
+    gameView(s.world).journal.map((q) => [q.quest.key, q.state]),
+    [['lantern', 'active']],
+  );
+});
+
+// Breaks: a fixture with no other action losing its page, the migrated offers' common case.
+test('a fixture whose only action is the offer still has its notice', () => {
+  const w = world((c) => {
+    const { details } = c.rooms[`${F}:room/ferry_landing`];
+    details.well = details.mooring_post;
+    offerOn(c, 'ferry_landing', 'well');
+  });
+  const v = gameView(w);
+  assert.deepEqual(validate('GameView', v), []);
+  const cards = (v.notices ?? []).filter((n) => n.actions?.some((a) => a.action_key === 'lantern'));
+  assert.deepEqual(
+    cards.map((n) => n.actions?.map((a) => a.action_key)),
+    [['lantern']],
+  );
 });

@@ -5,9 +5,7 @@ yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a
 session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #527 (e5515bd48); written 2026-10-30 by Claude Code (Opus 5.5), PM session 30f61613.
-Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of weekly limit ...
-this will be my last week before a break so yeah make it right!"
+AS OF main after #529 (loka-vx2v, quest offer targets, kernel_api 1.129); written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page.
 
 ## Direction (owner 2026-10-30)
 
@@ -27,29 +25,18 @@ this will be my last week before a break so yeah make it right!"
 
 ## Next, in order
 
-1. Owner is reviewing the beats (said they will continue in the morning). Then, per the PM's plan the owner
-   heard: a one-page prologue pitch and a player-verb pass per beat (what the player does, which mechanic, which
-   engine gap), the map of the 18 rooms, scene sheets for Part 1, then build Part 1.
-2. Engine gaps known now, build before the downgrade: loka-vx2v quest offers need a fixture or NPC target (10
-   sampler offers have no Book control until then; temporary allow-list in
-   `mobile/app/book/__tests__/polish-book.test.ts`); loka-sgqk catch-up cost with permanent ticking needs (a
-   month away is about 36k steps and 345 MB of save); companion remarks were retired (FD10) and the companion
-   is central, so check whether the prologue needs them; needs switched on by story events and room text by
-   stage are expected to be content only (verify in the player-verb pass).
-3. loka-mpu9 lean workflow into AGENTS.md and WORKFLOW before about 2026-11-10.
-4. loka-n4dg effects brief (designer), then the owner's pick, then Fable builds.
-5. Polish follow-ups: loka-6sig dead Gil still answers the shout; loka-c5uu delete undrawn "Ask where" buttons;
-   loka-lk8i band text wording; loka-tol6 service noun; loka-fsfq picker queue gitignore. Condition icons
-   (loka-x6t.63) owner undecided.
-6. Engine follow-ups (epic loka-ewtx): loka-zmqs, loka-dgko, loka-w9id (plan first), loka-0vrs (plan first).
-7. Held until after the owner's polish pass: loka-698n, loka-8ghm (showcase; may be moot now it is frozen).
+1. loka-sgqk catch-up cost with permanent ticking needs (kernel_api 1.130): brief, developer, reviewer, second opinion.
+2. loka-mpu9 lean workflow into AGENTS.md and WORKFLOW: the owner sees the diff before merge.
+3. loka-kgd.194.23 authoring tools (Fable developer running on draft PR, branch `tools/authoring`): keep my place, fast loop, checkpoints, author column, every-kind coverage and starters, still-to-write, scene files last. Independent reviewer after it. Owner asked for a nice UI and is choosing a component kit.
+4. loka-g5hh.2 level-up rush (owner, quoted: "yes we also want that wow style rush too"): design pass, then brief; with loka-ot39 and loka-x6t.59 (P1). No skill-point pool in the prologue; the owner has not confirmed recording this as a decision.
+5. Prologue gaps as the parallel session files them; then the proposed release work below.
+6. Follow-ups: loka-xy1js, loka-9g1q1 (from #529); loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
 
-Merged 2026-10-30 after #520: #521 docs, #522 retro, #523 showcase speech as cards (loka-eyk7), #524 map stubs
-(loka-6bmd, kernel_api 1.127), #525 colon sweep and colon-label lint (loka-pxa0), #526 permanent ticking needs
-(loka-rn3b, loka-dw0k, kernel_api 1.128), #527 polish batch 3 (hidden permanent refusals, one conversation exit,
-Look as a card, web column, Contents tap fix, lidded Close and Put on Inside, narrated-event italics, no Say
-icon with spell cards on Character, the Map as dots and lines; doors: the Book draws no Close or Lock, owner
-option C), #528 the prologue outline.
+Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
+
+Owner rule 2026-10-31: every word the player reads in the prologue is hand-written by the owner; agents leave structure with empty text (record lands with loka-kgd.194.23).
+
+Merged 2026-10-31: #529 quest offer targets (loka-vx2v).
 
 ## Retro 2026-10-30b (awaiting owner approval)
 
@@ -67,6 +54,7 @@ the designer; read [Room page anatomy](system/book-ui.md#room-page-anatomy) befo
 
 ## Waiting on the owner
 
+- Store fees, iOS first, the save guarantee; the component kit for the authoring UI.
 - The beats review; the two PM defaults in the outline (the Vowed are dozens; the other cradles stay sealed).
 - Approval of the two retro items above; condition icons (loka-x6t.63).
 

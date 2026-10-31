@@ -554,7 +554,7 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
 - Each list is sorted by ref. ponytail: static initial state, rooms reached through exits only (a
   room reached by travel, a ferry or a scripted action shows unreachable, a quest's own `offer` counts
-  without evaluating its policy, and a quest without one that only a scripted action, reaction or action
+  without evaluating its policy, only if its target's room or NPC is reachable (a bare offer counts), and a quest without one that only a scripted action, reaction or action
   names shows unreachable), no dialogue choices or reaction chains, and engine read sites with no op are not reads (such a fact may show `write_only`); any
   other engine writer shows its fact `read_only`. A committed graph waits for a consumer (R6, L6).
 
@@ -1161,6 +1161,10 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 ## Puzzle declarations
 
 [Order and dial puzzles](mechanics.md#sequence-and-combination-puzzles-toolbox-row-26) add no field: bounded int instance facts, actions on room details, reactions on `action_completed {action}` with `fact.assign` or `fact.adjust`, and a barrier `opens_when` of `fact_compare`s, as the fact, reaction, [standing](#standing-and-disposition-declarations) and barrier declarations already check. Sampler: `cartridges/puzzles_sampler`.
+
+## Quest offer target
+
+A quest's optional `offer.target` names the fixture or NPC the offer draws on: `{kind: "detail", room, detail}` or `{kind: "npc", npc}`, with `room` and `npc` short refs (`protocol/quest.schema.json`). A reference that does not resolve is `UNRESOLVED_REFERENCE` at `quests/<key>.offer.target` (`.detail` beneath it for a missing fixture). The compiler refuses an offer without a target (`SCHEMA_VIOLATION` `invalid_value` at `quests/<key>.offer.target`), since the Room page draws no loose action ([book-ui.md](book-ui.md#room-page-anatomy)); the loader still accepts one and lists it on World. [Admission](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) reads the target; a dialogue choice's `accept` does not.
 
 ## Quest deadlines
 

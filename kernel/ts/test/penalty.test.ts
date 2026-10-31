@@ -295,3 +295,20 @@ test('the loader refuses each malformed penalty', () => {
     [at('.experience.percent'), at('.experience.percent'), at('.items'), 'loaded'],
   );
 });
+
+// Breaks: the cull quest's page unreachable in the Book (the hall's notice unlinked from its
+// description, or the offer not on the notice's page) (loka-vx2v).
+test("the hall's description links the notice, whose page holds the cull offer", () => {
+  const v = gameView(hall(0)) as any;
+  assert.deepEqual(validate('GameView', v), []);
+  assert.ok(kat.value.text['room.hall.description'].includes('[notice](cull_notice)'));
+  const page = v.notices.find((n: any) => n.key === 'cull_notice');
+  assert.deepEqual(
+    page.actions.map((a: any) => a.action_key),
+    ['cull'],
+  );
+  assert.deepEqual(
+    v.actions.filter((a: any) => a.action_key === 'cull'),
+    [],
+  );
+});

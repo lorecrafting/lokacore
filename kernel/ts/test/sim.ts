@@ -1,4 +1,4 @@
-// size: allow 561, seed-picked corpus, --cartridge loader and offers incl. notice scripted actions (reused by play/flows.ts)
+// size: allow 565, seed-picked corpus, --cartridge loader and offers incl. notice scripted actions (reused by play/flows.ts)
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -368,6 +368,8 @@ export function offers(world: World, view: GameView, g: Gen): Payload[] {
   for (const n of view.notices ?? [])
     for (const a of n.actions ?? [])
       if (set[a.action_key]?.scripted) options.push({ type: 'perform', action: a.action_key });
+      else if (set[a.action_key]?.quest)
+        options.push({ type: 'accept_quest', quest: set[a.action_key]!.quest });
       else if (set[a.action_key]?.command === 'fill' && a.target_ids?.length === 2)
         options.push(aimed('fill', a.target_ids[0], a.target_ids[1]));
   for (const e of view.entities)
@@ -393,11 +395,13 @@ export function offers(world: World, view: GameView, g: Gen): Payload[] {
   for (const e of [...view.entities, ...view.inventory, ...worn, ...inside])
     for (const a of e.actions)
       options.push(
-        aimed(
-          set[a.action_key]!.command,
-          a.target_ids?.[0] ?? e.id,
-          a.target_ids?.[1] ?? g.pick([...npcs, STALE]),
-        ),
+        set[a.action_key]!.quest
+          ? { type: 'accept_quest', quest: set[a.action_key]!.quest }
+          : aimed(
+              set[a.action_key]!.command,
+              a.target_ids?.[0] ?? e.id,
+              a.target_ids?.[1] ?? g.pick([...npcs, STALE]),
+            ),
       );
   for (const [d, detail] of Object.entries(world.details))
     if (detail.room === here) options.push({ type: 'look', target_id: d });
