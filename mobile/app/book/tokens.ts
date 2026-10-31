@@ -139,7 +139,7 @@ export const motion = {
   press: { duration: 90, easing: 'ease', out: 160 }, // ActionCard, Control, Chip, Tap, letter tile -- mutate-skip: uncalibrated design value
   dry: { duration: 240, easing: 'linear', lag: 60 }, // a new log line; lag: a narrated event after its line -- mutate-skip: uncalibrated design value
   pop: { duration: 220, easing: 'ease', from: 0.6 }, // a status icon arriving, scaling up from `from` -- mutate-skip: uncalibrated design value
-  flash: { duration: 120, easing: 'inOutQuad', out: 380 }, // the blow wash -- mutate-skip: uncalibrated design value
+  flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000 }, // the blow wash; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad' }, // a resolved running head retiring -- mutate-skip: uncalibrated design value
   card: { duration: 600, easing: 'inOutQuad', out: 300, stagger: 120, blurFrom: 6, blurTo: 12 }, // chapter card over the leaving page's blur (Skia sigma) -- mutate-skip: uncalibrated design value
 };
@@ -167,6 +167,7 @@ export const mix = {
   bus: { ambience: 2, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
   duck: { db: -6, duration: 300, out: 1200 },
   spread: 0.04,
+  coalesce: 300, // small cues of one key inside this many ms are one
 };
 
 // Haptic kinds to their web analogue, a navigator.vibrate pattern in ms (uncalibrated); the native

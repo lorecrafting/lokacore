@@ -129,7 +129,8 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Running head:
   `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card`, blur sigma
   `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
-  hold levels and kinds; the sound table names each sound's haptic.
+  hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
+  within `mix.coalesce`; `motion.flash.gap` is the Flash limit.
 - **Blow wash.** `opacity.wash` under the ink over `motion.flash`: `action` on `light` and `dawn`,
   `danger` on `dusk` and `dark` (amber `action` reads as lamplight, not harm). Half opacity under
   reduced motion. The hp value dries in the same role and back to `fg`. Exemption from the 4.5:1

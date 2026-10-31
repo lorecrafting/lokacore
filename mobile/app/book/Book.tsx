@@ -29,6 +29,7 @@ import {
   type Palette,
 } from './palette.ts';
 import type { Effects, Reading } from './reading.ts';
+import { useCues } from './cues.ts';
 import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
@@ -177,6 +178,7 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
+  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);

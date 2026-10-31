@@ -101,13 +101,13 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'chapter',
     ].map((k) => [
       `sound.${k}`,
-      'reached as sound[name] in play(name); its first caller comes with the cue bus',
+      'reached as sound[name] in play(name); its first caller comes with loka-gj82.4',
     ]),
   ),
   ...Object.fromEntries(
     ['light', 'medium', 'heavy', 'selection', 'warning', 'error'].map((k) => [
       `haptic.${k}`,
-      'reached as tokens.haptic[kind] in haptic(kind); its first caller comes with the cue bus',
+      'reached as tokens.haptic[kind] in haptic(kind); its first caller comes with loka-gj82.4',
     ]),
   ),
   'mix.spread': 'pitch variation waits for the real samples',
