@@ -48,8 +48,8 @@ The scrolling World page is, top to bottom, and nothing else:
    the player moves through that exit, after the movement line; World draws no warning block.
 
 No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
-fixture, person or item detail page (a PM ruling pending owner confirmation excepts a room's
-targetless place actions, [World and status entry](#world-and-status-entry)). On hold: a skill check (perception, lore) may add a sentence,
+fixture, person or item detail page; an action with no fixture, person or item target is not
+drawn, and content must give it one. On hold: a skill check (perception, lore) may add a sentence,
 fixture or furniture to the description paragraph itself, never a block of its own. The minimap
 and joystick, the status line and the say field sit outside the scrolling page and keep their own
 rules below. A passage below that draws anything else on the World page is superseded; where the
@@ -64,13 +64,6 @@ notice entry: every action, available or refused, draws on its target's fixture,
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
 main room page").
-PM ruling 2026-10-30, pending owner confirmation: a room's place action offered with no target
-and on no fixture page (such as "Agree to find the den") draws on World as an
-[Action card](../../mobile/app/book/actions.tsx) after the people and items; one a fixture also
-offers stays on that fixture's page. This departs from "World draws
-no verb line [or] unavailable card" above and from
-[interaction-patterns §2](../design/interaction-patterns.md#every-action-sits-on-a-fixture-person-or-item-page);
-the Map no longer draws them.
 World draws no door card: Open and Unlock work from the
 [joystick](#minimap-map-and-presentation-controls) (the Map has no door or movement actions, owner 2026-10-30), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
@@ -910,8 +903,8 @@ The GameView may offer these; the Book draws no control for them, on any page:
   [joystick](#minimap-map-and-presentation-controls).
 - Where (PM 2026-10-30): the Map rings the current room and a tapped dot names its room.
 
-Any other World-level action (a door verb or a room's place action) with no control fails the Book
-harness's stranded-verb check, which lists this section (`UNDRAWN_VERBS`).
+Any other World-level action (a door verb or an action with no target) with no control fails the
+Book harness's stranded-verb check, which lists this section (`UNDRAWN_VERBS`).
 
 ## Word bar
 

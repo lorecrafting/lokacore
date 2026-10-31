@@ -12,7 +12,7 @@ const room = (description: string) => ({
   },
   text: (key: string) => key,
   log: [],
-  g: { place: [], world: [], door: () => [] },
+  g: { place: [], door: () => [] },
   press: () => {},
   open: () => {},
 });

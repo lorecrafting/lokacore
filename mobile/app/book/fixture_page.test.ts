@@ -67,7 +67,7 @@ const draw = async (
       view,
       text,
       log: [],
-      g: { place: [], world: [], door: () => [] },
+      g: { place: [], door: () => [] },
       press: () => {},
       open: () => {},
       links: proseLinks(p),
