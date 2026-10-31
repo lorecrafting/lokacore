@@ -33,16 +33,16 @@
   },
   "known_npcs": [
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
-    "name": "npc.hob.short"
+    "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
+    "name": "npc.nell.short"
    },
    {
-    "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
+    "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
     "name": "npc.reeve.short"
    },
    {
-    "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9",
-    "name": "npc.nell.short"
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "name": "npc.hob.short"
    }
   ],
   "levelling": {
@@ -256,12 +256,12 @@
      "title": "room.warden_gate.title",
      "entities": [
       {
-       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
+       "id": "35df8677-520a-8fc5-9d23-d7a01888247f",
        "name": "npc.tam.short",
        "kind": "npc"
       },
       {
-       "id": "dc5fce99-4e8a-89d0-9a6b-72be27764473",
+       "id": "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
        "name": "npc.warden.short",
        "kind": "npc"
       }
@@ -276,17 +276,17 @@
      "title": "room.crossroads_inn.title",
      "entities": [
       {
-       "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
+       "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
        "name": "npc.hob.short",
        "kind": "npc"
       },
       {
-       "id": "f8598a43-4a6f-8277-b092-c4449c71d2e2",
+       "id": "fe91520e-73f4-8409-a933-1ef6d86a4055",
        "name": "item.loaf.short",
        "kind": "item"
       },
       {
-       "id": "bc3d071f-472b-8655-9e2d-d5d0fe2edc5c",
+       "id": "90a83592-b743-8257-95a6-029721650767",
        "name": "item.waterskin.short",
        "kind": "item"
       }
@@ -301,17 +301,17 @@
      "title": "room.moot_hall.title",
      "entities": [
       {
-       "id": "e26d5050-0ec1-8ec4-a164-209a07f75784",
+       "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
        "name": "npc.bess.short",
        "kind": "npc"
       },
       {
-       "id": "542dc207-7ae5-8fc4-8643-4854106d9e84",
+       "id": "677c012e-ec39-8552-8d4f-1811aa3e08b5",
        "name": "item.hall_roll.short",
        "kind": "item"
       },
       {
-       "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
+       "id": "4c2b24ad-1e89-8d16-9b4b-1fb2d613fb25",
        "name": "item.hall_strongbox.short",
        "kind": "item"
       }
@@ -335,7 +335,7 @@
      "title": "room.church.title",
      "entities": [
       {
-       "id": "c0cb9608-9c13-82b3-9d76-a4202ff015f5",
+       "id": "5bf18294-67a8-81c3-b59c-296b88fad837",
        "name": "item.parish_roll.short",
        "kind": "item"
       }
@@ -386,7 +386,7 @@
     },
     "input": [],
     "target_ids": [
-     "fe8a933a-59bb-8e0c-b129-e40cd6678f85"
+     "56362445-0a33-8900-9bd2-1cfa0e0e1cfb"
     ],
     "available": true
    },
@@ -429,7 +429,7 @@
   ],
   "notices": [
    {
-    "id": "fe8a933a-59bb-8e0c-b129-e40cd6678f85",
+    "id": "56362445-0a33-8900-9bd2-1cfa0e0e1cfb",
     "key": "sign_social",
     "title": "detail.sign_social.title",
     "description": "detail.sign_social.description"
@@ -437,7 +437,7 @@
   ],
   "entities": [
    {
-    "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9",
+    "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
     "name": "npc.nell.short",
     "words": {
      "bare": "npc.nell.bare"
@@ -490,7 +490,7 @@
     ],
     "shop": [
      {
-      "item_id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
+      "item_id": "9c602831-e905-8f59-ab25-e9f615e2669c",
       "name": "item.bread.short",
       "buy": {
        "price": 4,
@@ -505,7 +505,7 @@
     ],
     "contents": [
      {
-      "id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
+      "id": "9c602831-e905-8f59-ab25-e9f615e2669c",
       "name": "item.bread.short",
       "words": {
        "article": "a",
@@ -528,12 +528,12 @@
         "input": []
        }
       ],
-      "container_id": "f0e76c82-d099-811e-a6ba-caef3f2615e9"
+      "container_id": "135ad56f-dfaa-8e43-985d-9dd1e051753b"
      }
     ]
    },
    {
-    "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
+    "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
     "name": "npc.reeve.short",
     "words": {
      "article": "the",
@@ -560,7 +560,7 @@
     ]
    },
    {
-    "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
+    "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
     "name": "item.apple.short",
     "words": {
      "article": "an",
@@ -584,7 +584,7 @@
     ]
    },
    {
-    "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
+    "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
     "name": "item.letter.short",
     "words": {
      "article": "a",
@@ -628,10 +628,6 @@
   ],
   "position": "standing",
   "journal": [],
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -649,7 +645,7 @@
    "prompt": {
     "key": "dialogue.reeve_talk.prompt"
    },
-   "speaker_id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
+   "speaker_id": "8a445b6f-2095-87c7-9a12-852d422d4599",
    "closable": true,
    "choices": [
     {
@@ -759,7 +755,7 @@
  "stack": [
   {
    "kind": "thing",
-   "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783"
+   "id": "8a445b6f-2095-87c7-9a12-852d422d4599"
   }
  ],
  "log": [
@@ -768,7 +764,7 @@
  ],
  "combatLog": [],
  "details": {
-  "dce25ff1-322e-80ae-8f48-e0c4062c2783": [
+  "8a445b6f-2095-87c7-9a12-852d422d4599": [
    "The Reeve says to you, \"Well, stranger?\""
   ]
  }

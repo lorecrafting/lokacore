@@ -8,7 +8,8 @@ set -u
 [ $# = 2 ] || { echo "usage: bin/push_slice.sh <worktree> <branch>" >&2; exit 2; }
 [ "$(git -C "$1" branch --show-current)" = "$2" ] || { echo "push_slice: $2 is not the branch checked out in $1" >&2; exit 2; }
 log=$(mktemp "${TMPDIR:-/tmp}/push_slice.XXXXXX") || exit 2
-git -C "$1" push origin "$2" >"$log" 2>&1
+# -u: a branch made tracking origin/main would otherwise pull --rebase from main (loka-aeju).
+git -C "$1" push -u origin "$2" >"$log" 2>&1
 n=$?
 echo "PUSH_EXIT=$n $(git -C "$1" rev-parse "$2" 2>/dev/null)"
 echo "log: $log"

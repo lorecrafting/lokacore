@@ -1,0 +1,25 @@
+{
+  "name": "actions.shout_begone",
+  "aliases": [
+    "begone"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "chief_den",
+    "detail": "den_bones"
+  },
+  "priority": 5,
+  "outcomes": {
+    "success": {
+      "steps": [
+        {
+          "op": "event.emit",
+          "event": "shouted_begone"
+        }
+      ],
+      "narration": {
+        "actor": "narration.shout_begone.success"
+      }
+    }
+  }
+}

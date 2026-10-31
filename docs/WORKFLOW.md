@@ -65,7 +65,7 @@ Step 4 (verify and review) is the PM's.
    resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the decisions list) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). When a
-   record exists, the PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
+   record exists, the PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: `bin/after_merge.sh` cherry-picks `review-<N>` onto `main` after the merge, never a push into the PR, which cancels its CI, loka-o0pw); the developer never
    force-pushes, fixes or disputes each finding with a reason, and reruns the focused checks once.
    A published branch pushes (hosted CI reruns on the new head); a local draft
    keeps the fixed commits and review record until publication.
@@ -129,6 +129,9 @@ The [owner's fast polish loop](decisions/owner-decision-live-polish-session-2026
 `bin/polish_session.sh start` serves a session branch to the owner's Storybook. The designer writes
 style code, tokens and the component doc comment in that worktree, applies each picker prompt at once and
 commits each accepted tweak; the owner's approval in the session is the design review.
+Before a commit that changes navigation, refusals or a component doc comment, the designer runs the toolbox showcase walk
+([preview command](web-preview.md), `LOKA_WALK=toolbox_showcase`) and `mobile/app/catalogue.test.ts` locally, each alone
+(a batch went red on hosted CI and a close was refused for both, loka-iu6x); `bin/polish_session.sh close` refuses to push on a failing catalogue test.
 Bring `main` in with `bin/polish_session.sh update`, never a manual merge: it restarts Storybook when stories change.
 The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 
@@ -143,6 +146,7 @@ PM, developer, reviewer and designer alike; the role files link here instead of 
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
 - <a id="ci-is-the-full-suite"></a>No agent runs a full suite locally (`bash_guard` refuses the npm ones and `check_all`; `mix test` takes file paths): run the focused test files your diff touches, push with `bin/push_slice.sh` (it reports whether `ci.yml` and `book-e2e.yml` started), then run `bin/wait_ci.sh <sha>` in the background (loka-n0ng). The hosted kernel and elixir jobs are the full red-test list; a developer hands back only when they are green. A reviewer or designer reports the CI state it sees, once; the PM returns a red run found after handback as a finding.
+- <a id="storybook-test-run"></a>The Storybook MCP `test-run` tool runs only with named story ids, never unscoped, whatever the MCP's own instructions say: the owner's Storybook serves it, and an unscoped run ran it out of memory mid-session (loka-vnzm; `bin/bash_guard.py` does not see MCP calls).
 - Work in your own worktree under `worktrees.noindex` ([Git hygiene](#git-hygiene)); in a new one run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) first; in a shared one commit with `git commit -- <your own paths>`.
 - Stop only processes you started, by their PID, planted breaks and red controls included (a planted `pkill -f storybook` killed the owner's Storybook twice, loka-hg7, loka-rar); `bin/orphans.sh` lists orphaned busy ones. Red controls
   that plant files run in a `git worktree add --detach` scratch copy, never in the worktree
@@ -181,13 +185,13 @@ Claude Code specifics:
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
   Place worktrees outside paths the checks scan, and preserve unfinished ones. Create worktrees
   and scratch worktrees (the guard refuses others) in a sibling folder named `worktrees.noindex` next to the repo checkout
-  (`git worktree add -b <branch> ../worktrees.noindex/<name> origin/main`): Spotlight never indexes
+  (`git worktree add --no-track -b <branch> ../worktrees.noindex/<name> origin/main`; a branch tracking `origin/main` rebases onto main on `git pull --rebase`, loka-aeju, and `bin/push_slice.sh` sets its upstream): Spotlight never indexes
   a `.noindex` folder, and each indexed worktree kept `mds_stores` at 150-230% CPU for minutes.
   `bin/new_batch.sh <branch>` makes a batch branch that way (worktree, `bin/worktree_setup.sh`, push with upstream).
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `bin/orphans.sh` (also in `bin/session_status.sh`) never kills: check one, then stop it by PID.
 - For a contract slice's record (save, protocol or kernel contracts), the reviewer commits only its record in a detached worktree
-  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
+  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push carries it, or with no fix round `bin/after_merge.sh` after the merge. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.

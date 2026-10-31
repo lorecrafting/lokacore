@@ -55,7 +55,6 @@ toolbox_showcase reactions/fold_song.json: writes state with no narrate step and
 toolbox_showcase reactions/gate_shut.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/gift_apple.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/gift_ledger.json: writes state with no narrate step and no "silent": true
-toolbox_showcase reactions/gil_hears.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/hide.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/hush.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/kindle.json: writes state with no narrate step and no "silent": true

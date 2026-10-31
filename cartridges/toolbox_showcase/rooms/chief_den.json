@@ -5,5 +5,14 @@
     "south": {
       "to": "plate_passage"
     }
+  },
+  "details": {
+    "den_bones": {
+      "aliases": [
+        "bones"
+      ],
+      "description": "detail.den_bones",
+      "title": "detail.den_bones.title"
+    }
   }
 }

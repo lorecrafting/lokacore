@@ -1,0 +1,7 @@
+{
+  "extends": "shout_begone",
+  "target": {
+    "room": "sapper_cellar",
+    "detail": "cellar_flags"
+  }
+}
