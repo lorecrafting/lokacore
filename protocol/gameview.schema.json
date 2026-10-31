@@ -2935,6 +2935,29 @@
       ],
       "description": "A known directed exit between visited rooms; carries no live traversal availability."
     },
+    "UnexploredExitView": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "direction": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "from",
+        "direction"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "from": "aaaaaaaa-0000-4000-8000-000000000001",
+          "direction": "east"
+        }
+      ],
+      "description": "A seen exit from a visited room whose destination the actor has not visited; the (from, direction) pair is its stable id, and it carries no destination id, title or coordinates."
+    },
     "KnownNpcView": {
       "type": "object",
       "properties": {
@@ -2972,11 +2995,18 @@
           "items": {
             "$ref": "gameview.schema.json#/$defs/KnownConnectionView"
           }
+        },
+        "unexplored": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/UnexploredExitView"
+          }
         }
       },
       "required": [
         "rooms",
-        "links"
+        "links",
+        "unexplored"
       ],
       "additionalProperties": false,
       "examples": [
@@ -2990,10 +3020,16 @@
               "z": 0
             }
           ],
-          "links": []
+          "links": [],
+          "unexplored": [
+            {
+              "from": "aaaaaaaa-0000-4000-8000-000000000001",
+              "direction": "east"
+            }
+          ]
         }
       ],
-      "description": "The actor’s visited places and connections between visited endpoints."
+      "description": "The actor’s visited places, connections between visited endpoints and seen exits toward unvisited places."
     },
     "CueView": {
       "description": "One sense cue reaching the actor's room (toolbox row G6): its sense, authored text and, for a cue from another room, the direction of the first exit on the shortest way to its source.",

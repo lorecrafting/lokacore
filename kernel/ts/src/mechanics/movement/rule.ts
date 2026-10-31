@@ -28,7 +28,7 @@ import {
   values,
 } from '../../runtime/decision.ts';
 import type { DefinitionRef, EntityId } from '../../contracts.gen.ts';
-import { exitTo, hidden } from '../lookups.ts';
+import { exitTo, shownExit } from '../lookups.ts';
 import { moveSequence } from './sequence.ts';
 import { passage } from './shared.ts';
 export { passage, fare } from './shared.ts';
@@ -49,7 +49,7 @@ export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const room = world.rooms[world.state.containers[body]];
   const actor = actorOf(world, body);
   if (!actor) return []; // only an admitted character's body sees exits
-  const shown = (d: string) => has(room.exits, d) && !hidden(world, room, d, actor);
+  const shown = (d: string) => !!shownExit(world, room, d, actor);
   return COMPASS.filter(shown).map((direction) => {
     const barred = passage(world, room, direction, actor, steps);
     if (barred) return { direction, code: barred };
