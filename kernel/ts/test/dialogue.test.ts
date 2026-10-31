@@ -86,7 +86,7 @@ const events = (d: Extract<DecisionResult, { kind: 'accepted' }>) =>
 
 // Breaks: talk opening no continuation, another occurrence id than the command's ordinal 0,
 // roles by another order or re-resolved later, or a talk with no stamp of the revision it commits
-// at (choose would then fault precondition_failed).
+// at (choose would then fault precondition_failed), or a prompt line with no speaker (loka-548k).
 test('talk opens one pending choice bound to EntityIds, stamped with its revision', () => {
   const { decision, world: w } = ok(held(), talk, 3, TALK);
   assert.equal(decision.outcome, 'choice_opened');
@@ -110,7 +110,7 @@ test('talk opens one pending choice bound to EntityIds, stamped with its revisio
     [{ type: 'choice_opened', continuation_id: C }],
   );
   assert.deepEqual(decision.narration, [
-    { key: 'dialogue.bram.prompt', participants: { actor: BODY } },
+    { key: 'dialogue.bram.prompt', participants: { actor: BODY, speaker: BRAM } },
   ]);
   assert.equal(w.state.choices![C]!.opened_revision, 3);
 });
@@ -314,7 +314,7 @@ test('leave hands the lantern to Bram, sets party_led and resolves quest and cho
   assert.deepEqual(decision.narration, [
     {
       key: 'narration.bram.leave',
-      participants: { actor: BODY, bram: BRAM, lantern: LANTERN },
+      participants: { actor: BODY, bram: BRAM, lantern: LANTERN, speaker: BRAM },
     },
   ]);
   assert.equal(w.state.containers[LANTERN], BRAM);
@@ -546,8 +546,9 @@ test('a lantern taken before accepting still lets leave resolve', () => {
   assert.equal(quest(ok(opened, choose('leave'), 4).world), 'resolved');
 });
 
-// Breaks (06 §43, §33: no silent rebinding): choose resolving a role's entity by its definition
-// instead of the row, so a world whose Bram definition now names another entity pins that one.
+// Breaks (06 §43, §33: no silent rebinding): choose resolving a role's entity, or the speaker
+// (loka-548k), by its definition instead of the row, so a rebound Bram definition pins that one.
+// Also: the actor bound as the speaker.
 test('choose pins the row bindings even if the definition would resolve elsewhere', () => {
   const w = talked();
   const rebound = { ...w, entityIds: { ...w.entityIds, [`${F}:npc/bram`]: GREEN as never } };
@@ -556,6 +557,7 @@ test('choose pins the row bindings even if the definition would resolve elsewher
     actor: BODY,
     bram: BRAM,
     lantern: LANTERN,
+    speaker: BRAM,
   });
 });
 

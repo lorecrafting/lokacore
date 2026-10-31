@@ -28,7 +28,10 @@ const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
 const LANTERN = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
 const LEAVE = 'You hand Bram the lantern. He lifts it toward the reeds and calls the others in.';
 const B = [
-  { key: 'narration.bram.leave', participants: { actor: BODY, bram: BRAM, lantern: LANTERN } },
+  {
+    key: 'narration.bram.leave',
+    participants: { actor: BODY, bram: BRAM, lantern: LANTERN, speaker: BRAM },
+  },
 ];
 type P = (string | number | null)[];
 const adapt = (sql: DatabaseSync): Db => ({

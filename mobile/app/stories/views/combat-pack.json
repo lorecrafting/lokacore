@@ -376,6 +376,7 @@
       }
      }
     ],
+    "band": "ready",
     "contents": [
      {
       "id": "d5a6adf6-dc23-847c-9436-62f3a288bd99",
@@ -415,6 +416,7 @@
       "input": []
      }
     ],
+    "band": "ready",
     "contents": [
      {
       "id": "4916d02f-f380-82aa-aee6-f0aa54a79b29",

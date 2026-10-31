@@ -10,12 +10,14 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**
 - [Review: liquid line binds its vessel, PR #512 (loka-tc2e, kernel_api 1.122)](2026-10-30-tc2e-liquid-vessel-review.md): **APPROVE**
 - [Review: NPC emotes, PR #509 (loka-kgd.193 slice A)](2026-10-30-kgd193-npc-emotes-review.md): **APPROVE**
 - [Review: C4 naming batch final head, PR #501 (loka-ivjq.29)](2026-10-30-c4-final-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice B, layout.json and name_variants (loka-ivjq.29)](2026-10-30-c4-b-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice A, capability keys (loka-ivjq.29)](2026-10-30-c4-a-review.md): **APPROVE**
+- [Review: dialogue lines bind their speaker, PR #514 (loka-548k, kernel_api 1.122)](2026-10-30-548k-dialogue-speaker-review.md): **APPROVE WITH NOTES**
 - [Review: PR #496, Realm live operations sketch (docs only)](2026-10-29-pr496-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice Z, docs sweep (loka-ivjq.4)](2026-10-29-c3-z-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice X, cross-slice compiler diagnostic fixes (loka-ivjq.4)](2026-10-29-c3-x-review.md): **APPROVE WITH NOTES**

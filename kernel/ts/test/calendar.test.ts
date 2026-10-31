@@ -12,7 +12,7 @@ import { loadCartridge } from '../src/content/cartridge.ts';
 import { hourOf, nextHour, status } from '../src/mechanics/calendar.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { gameView } from '../src/view/view.ts';
-import { newWorld, step } from '../src/runtime/world.ts';
+import { INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const base = () => structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
@@ -56,7 +56,7 @@ const load = (change: (c: any) => void = () => {}) => {
   return loadCartridge(
     new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${hash}"}`),
     {
-      kernel_api: '1.0',
+      kernel_api: INSTALLED.kernel_api,
       capabilities: Object.fromEntries(Object.keys(c.lock.capabilities).map((k) => [k, [1]])),
       content_schema: 1,
       rule_ir: 1,

@@ -61,5 +61,11 @@ export function ask(
   const ops = answer?.grants ? grant(world, actor_id, run, answer.grants).ops : [];
   const asked = { type: 'asked', entity_id: target_id, topic, answered: !!answer } as const;
   const text = answer?.text ?? (world.entities[target_id] as NpcEntity).ask!.unknown;
-  return accepted(world, 'asked', ops, [event(world, command, mint, 1, asked)], [{ key: text }]);
+  return accepted(
+    world,
+    'asked',
+    ops,
+    [event(world, command, mint, 1, asked)],
+    [{ key: text, participants: { speaker: target_id } }],
+  );
 }
