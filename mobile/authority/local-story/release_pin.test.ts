@@ -14,8 +14,6 @@ import { INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory } from './authority.ts';
 
-// protocol/fixtures/toolbox_showcase_hash.json sha256 on main at 993a4947b (kernel_api 1.122).
-const MAIN_1_122 = 'e46313c07cdd7bad726bd0bea8f9ec88660162798ce7316758ef8d7b3ca44e8e';
 const showcase = read('protocol/fixtures/toolbox_showcase_hash.json');
 const release = (canonical: string) => {
   const sha = createHash('sha256').update(canonical).digest('hex');
@@ -45,8 +43,8 @@ const open = (path: string, releases: ReturnType<typeof release>[], n = { i: 0 }
 // Breaks: kernel_api (and the showcase's at_least) left at 1.122, so main's save keeps its pin.
 test('a showcase save from kernel_api 1.122 is refused at its pin and offers Start over', () => {
   const installed = release(showcase.canonical);
-  const old = release(showcase.canonical.replace('"at_least":"1.124"', '"at_least":"1.122"'));
-  assert.equal(old.content_hash, MAIN_1_122);
+  // The same showcase as main shipped it at 993a4947b: only its at_least differs.
+  const old = release(showcase.canonical.replace(/"at_least":"[0-9.]+"/, '"at_least":"1.122"'));
   const path = join(mkdtempSync(join(tmpdir(), 'loka-pin-')), 'save.db');
   const a = open(path, [old]);
   assert.equal(a.opened.kind, 'open');

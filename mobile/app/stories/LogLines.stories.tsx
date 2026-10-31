@@ -48,8 +48,7 @@ export const NpcEmotes: Story = {
   args: { lines: ['A goblin cowers in fear.', 'Nell bows to you.', 'Nell bows to the goblin.'] },
 };
 
-// loka-548k: an NPC's dialogue line, worded through lineWords from its speaker binding, so drift
-// in the wording breaks this story (book-ui.md Line placement: dialogue is novel prose).
+// An NPC's dialogue line, worded by lineWords from its speaker (book-ui.md Line placement).
 const NELL = { entities: [{ id: 'nell', kind: 'npc', name: 'npc.nell', actions: [] }] } as never;
 const SAY: Record<string, string> = { 'npc.nell': 'Nell', prompt: '"Well, stranger?"' };
 const speech = lineWords(
