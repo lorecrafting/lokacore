@@ -1,8 +1,7 @@
 # PM handoff
 
 The present only: open work, next steps, owner questions, and standing owner rules the repo does not state
-yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a pushed fix) and before a
-session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
+yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
 AS OF main after #529 (loka-vx2v, quest offer targets, kernel_api 1.129); written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page.
