@@ -59,7 +59,7 @@ defmodule Loka.ContentSceneFilesTest do
 
     File.write!(
       Path.join(tmp, "dialogues/maud.scene"),
-      "npc: maud\nwhen: met_maud\n\nmaud: line one\nmaud: line two\n- Take it\n  maud: line three\n  gives: bowl\n"
+      "npc: maud\nwhen: met_maud\n\nmaud: line one\nmaud: line two: aside\n- Take it.\n  maud: line three\n  gives: bowl\n"
     )
 
     File.write!(
@@ -87,8 +87,8 @@ defmodule Loka.ContentSceneFilesTest do
 
     assert {"text.json", :text,
             %{
-              "dialogue.maud.prompt" => "line one\nline two",
-              "dialogue.maud.choices.take_it.label" => "Take it",
+              "dialogue.maud.prompt" => "line one\nline two: aside",
+              "dialogue.maud.choices.take_it.label" => "Take it.",
               "dialogue.maud.choices.take_it.narration" => "line three"
             }} in files
 
