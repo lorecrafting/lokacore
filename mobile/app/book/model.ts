@@ -79,8 +79,7 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  // A person's pages, shop and Look pages included, go with them (Shelf.tsx); an Inside page with
-  // its lid.
+  // A person's pages, shop and Look pages included, go with them (Shelf.tsx); an Inside, its lid.
   const gone = stack.findIndex((p) => {
     const at = 'id' in p && visible.find((e) => e.id === p.id);
     return (
@@ -116,7 +115,8 @@ export function group(all: Button[]) {
   const place = buttons.filter(
     (b) => !b.detail_id && (!aimed(b) || b.place) && !dir(b) && !notVerb(b.action_key),
   );
-  const paged = buttons.filter((b) => b.detail_id).map((b) => b.action_key); // a fixture's offers
+  const offer = (b: Button) => b.action_key + JSON.stringify(b.input);
+  const paged = buttons.filter((b) => b.detail_id).map(offer); // the offers a fixture page draws
   return {
     look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
     exits: buttons.flatMap((b) =>
@@ -132,7 +132,7 @@ export function group(all: Button[]) {
     ),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
     place,
-    world: place.filter((b) => !aimed(b) && !paged.includes(b.action_key)), // PM 2026-10-30
+    world: place.filter((b) => !aimed(b) && !paged.includes(offer(b))), // PM 2026-10-30
     word: all.filter((b) => WORDS.includes(b.action_key)),
     on: (id: string) =>
       buttons

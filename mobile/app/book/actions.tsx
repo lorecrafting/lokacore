@@ -250,8 +250,8 @@ export function Cards({ children, lines }: { children: ReactNode; lines?: boolea
 }
 
 /**
- * A room's offered place action as an italic `action` line.
- * - Use: the room's list, after the entity lines.
+ * An offered exit action as an italic `action` line.
+ * - Use: the water room's Surface, after the entity lines (a room's place action is an Action card).
  * - Rules: an unavailable one is the Action card's unavailable form (its plain label) after the
  *   available lines, never dropped.
  * - States: available; unavailable.

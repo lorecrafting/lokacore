@@ -11,6 +11,7 @@ import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-ho
 import { control, pressable } from './control.test.ts';
 import { fadeStub } from './fade-stub.ts';
 import type { Button } from '../presenter.ts';
+import type { GameView } from '../../../packages/game-view/session.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -58,12 +59,11 @@ const { default: Book } = await import('../Book.tsx');
 const { doorPick, pressDoor } = await import('../Footer.tsx');
 const { commandOf } = await import('../buttons.ts');
 
-// Every World-level action has a control: on World, each door verb and each of World's place actions
-// (`group().world`, the offered actions no target or fixture page draws) is drawn (a pressable reading its label), the release
-// presses a shut door's pick, and the rest are undrawn on purpose (book-ui.md, Verbs the Book does
-// not draw). Runs on every draw of every test.
-const UNDRAWN_VERBS = ['say', 'shout', 'where', 'close', 'lock'];
-let room: { g: { world: Button[] } } | undefined; // the drawn RoomPage's props: World is showing
+// Every World-level action has a control: on World, each door verb and each targetless place action
+// no notice offers is drawn (a pressable reading its label), the release presses a shut door's pick,
+// and the rest are undrawn on purpose (book-ui.md, Verbs the Book does not draw). Runs on every draw.
+const UNDRAWN_VERBS = ['close', 'lock'];
+let room: { g: { place: Button[] }; view: GameView } | undefined; // RoomPage's props: World shows
 function stranded(rendered: any[]) {
   const f = rendered.find((n) => n.type?.name === 'Footer')?.props;
   const drawn = rendered.filter(pressable).map((n) => n.props.accessibilityLabel);
@@ -74,7 +74,13 @@ function stranded(rendered: any[]) {
         has(b) || (!e.available && b === doorPick(f.door(e.direction))),
         `door verb ${b.label} has no control`,
       );
-  for (const b of room?.g.world ?? []) assert.ok(has(b), `place action ${b.label} has no control`);
+  const v = room?.view;
+  const notice = [...(v?.notices ?? []), ...(v?.notice_boards ?? []).flatMap((n) => n.notices)];
+  for (const b of room?.g.place.filter((b) => !b.target_ids.length) ?? [])
+    assert.ok(
+      has(b) || notice.some((n) => n.actions?.some((a) => a.action_key === b.action_key)),
+      `place action ${b.label} has no control`,
+    );
 }
 type Shell = Parameters<typeof Book>[0]['shell'];
 export const bundle = (name = 'containers_cartridge_sampler_hash') =>

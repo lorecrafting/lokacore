@@ -7,6 +7,7 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { CONTENTS, pressable } from './__tests__/control.test.ts';
+import { radius } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
@@ -232,15 +233,16 @@ test('room is focused, the Map offers no Go, and every detail returns to the wor
   h.sql.close();
 });
 
-// Breaks: a room's place action (no target, so no detail page draws it) has no control once the
-// Map stops drawing it (PM 2026-10-30; the stranded check in polish-book.test.ts fails every draw).
+// Breaks: a room's place action (no target, no detail page) has no control or is a verb line (PM 2026-10-30).
 test('a place action is an Action card on World and its press is sent', () => {
   const h = book(bundle('penalty_sampler_hash'));
-  const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+  const den = 'Agree to find the den';
   assert.equal(h.stack.length, 0);
-  h.tap('Agree to find the den');
-  assert.equal(receipts(), 1);
-  assert.equal(h.labels().includes('Agree to find the den'), false);
+  const card = h.draw().find((n) => pressable(n) && n.props.accessibilityLabel === den);
+  assert.equal(card?.props.style.borderRadius, radius.card); // an Action card, not a verb line
+  h.tap(den);
+  assert.equal(h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 1);
+  assert.equal(h.labels().includes(den), false);
   h.sql.close();
 });
 

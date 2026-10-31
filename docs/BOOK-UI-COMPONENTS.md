@@ -28,7 +28,7 @@ For every agent writing `mobile/app/book/` or its stories ([audit](https://githu
 
 ## Grammar
 
-Start from the existing page type. World obeys the [room page anatomy](system/book-ui.md#room-page-anatomy): title, description, people, items, log, nothing else; a mechanic's action goes on a fixture, person or item page, its ambient output in the log. World shows the room title and authored
+Start from the existing page type. World obeys the [room page anatomy](system/book-ui.md#room-page-anatomy): title, description, people, items, log, nothing else (one exception pending owner confirmation, [place actions](system/book-ui.md#world-and-status-entry)); a mechanic's action goes on a fixture, person or item page, its ambient output in the log. World shows the room title and authored
 description with inline links for fixed room fixtures, then separate present
 player/NPC and loose-item paragraphs when projected. Each linked subject opens
 its detail when the current projection supplies that route; general scenery

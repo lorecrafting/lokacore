@@ -48,7 +48,8 @@ The scrolling World page is, top to bottom, and nothing else:
    the player moves through that exit, after the movement line; World draws no warning block.
 
 No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
-fixture, person or item detail page. On hold: a skill check (perception, lore) may add a sentence,
+fixture, person or item detail page (a PM ruling pending owner confirmation excepts a room's
+targetless place actions, [World and status entry](#world-and-status-entry)). On hold: a skill check (perception, lore) may add a sentence,
 fixture or furniture to the description paragraph itself, never a block of its own. The minimap
 and joystick, the status line and the say field sit outside the scrolling page and keep their own
 rules below. A passage below that draws anything else on the World page is superseded; where the
