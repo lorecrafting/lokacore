@@ -1,14 +1,17 @@
 // The book's page shell and its shared controls (the room page: Body.tsx; the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { onCue } from './cues.ts';
+import { InkText, Reanimated, useAnimatedStyle } from './fade.ts';
 import { plain, type Pool } from './model.ts';
+import { useDrying, useInk, usePress, useThin } from './press.ts';
 import { tapBleed } from './reading.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
-import { opacity, size, space } from './tokens.ts';
+import { motion, opacity, size, space } from './tokens.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
 export { useTitleFocus };
@@ -32,6 +35,8 @@ export const refusedProps = (hint: string) => ({
  * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
  * (BOOK-UI-COMPONENTS.md, Where each fact lives).
  * - Use: entity lines, verb lines, the room title, the status position.
+ * - Rules: pressed, its ink thins at `opacity.press`, whatever colours the words inside it hold (a
+ *   nested Text cannot animate on native); no haptic unless `pulse` says, none refused and no thinning.
  * - Story: VerbLine.stories.tsx
  */
 export function Tap(p: {
@@ -40,7 +45,10 @@ export function Tap(p: {
   children: ReactNode;
   shrink?: boolean; // may give up width in a row (the status position truncates)
   refused?: string; // an unavailable line (book-ui.md, Unavailable actions): disabled yet pressable, this its hint
+  pulse?: 'selection'; // the entity line's press
 }) {
+  const press = usePress(p.refused === undefined ? p.pulse : undefined);
+  const ink = useThin(press, p.refused !== undefined);
   // Hit area, no shown space; below only, so the next line in a run covers none of this one (loka-462d).
   const b = tapBleed(useType().body.lineHeight);
   const bleed = { paddingBottom: b, marginBottom: -b };
@@ -51,10 +59,33 @@ export function Tap(p: {
       accessibilityLabel={p.label}
       {...(p.refused === undefined ? {} : refusedProps(p.refused))}
       onPress={() => p.onPress()} // no press event: the handler takes none
+      {...press.handlers}
       style={{ minHeight: size.touch, justifyContent: 'center', ...bleed, ...shrink }}
     >
-      {p.children}
+      <Reanimated.View style={[shrink, ink]}>{p.children}</Reanimated.View>
     </Pressable>
+  );
+}
+
+// What the head last drew: it sits inside the page turn, whose remount forgets it.
+let lastHead: string | undefined;
+
+// A gained quest's objective over the old one, across `motion.dry` (reduced: `motion.fade`).
+function HeadFade(p: { was?: string; words: string; style: object }) {
+  const dry = useDrying();
+  const arriving = useAnimatedStyle(() => ({ opacity: dry.value }));
+  const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
+  return (
+    <View>
+      {p.was ? (
+        <Reanimated.View style={[{ position: 'absolute', left: 0, right: 0 }, leaving]} aria-hidden>
+          <Text style={p.style}>{p.was}</Text>
+        </Reanimated.View>
+      ) : null}
+      <Reanimated.View style={arriving}>
+        <Text style={p.style}>{p.words}</Text>
+      </Reanimated.View>
+    </View>
   );
 }
 
@@ -73,18 +104,27 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   const quest = view.journal.find(
     (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
   );
-  if (!quest) return null;
-  return (
-    <Text
-      style={{
-        ...t.runningHead,
-        color: c.dim,
-        paddingHorizontal: space.page,
-        paddingTop: space.page,
-      }}
-    >
-      {plain(text(quest.journal!))}
-    </Text>
+  const words = quest && plain(text(quest.journal!));
+  const [gained, setGained] = useState<{ was?: string; words?: string }>();
+  useEffect(() => {
+    const was = lastHead;
+    lastHead = words;
+    return onCue((cue) => {
+      if (cue.name === 'quest_on' && quest && cue.ids?.includes(quest.quest.key))
+        setGained({ was, words });
+    });
+  }, [words, quest?.quest.key]); // eslint-disable-line
+  if (!words) return null;
+  const style = {
+    ...t.runningHead,
+    color: c.dim,
+    paddingHorizontal: space.page,
+    paddingTop: space.page,
+  };
+  return gained?.words === words ? (
+    <HeadFade was={gained.was} style={style} words={words} />
+  ) : (
+    <Text style={style}>{words}</Text>
   );
 }
 
@@ -92,7 +132,8 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
  * Local navigation that is not an offered action (Leave, Back to ..., Close, Got it, Start over).
  * - Use: PageFoot returns and local buttons.
  * - Rules: Start over is a Control wherever it appears: its confirmation carries the weight, never
- *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill.
+ *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill. An ink press and a selection
+ *   haptic on press-in.
  * - States: enabled; disabled.
  * - Story: Control.stories.tsx
  */
@@ -105,12 +146,15 @@ export function Control(p: {
   const { label, onPress, disabled, onInk } = p;
   const c = usePalette();
   const t = useType();
+  const press = usePress('selection');
+  const ink = useInk(press, disabled ? c.dim : onInk ? c.bg : c.fg, onInk ? c.dim : c.action);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
       onPress={() => onPress()} // no press event: the handler takes none
+      {...press.handlers}
       style={{
         minHeight: size.touch,
         minWidth: size.touch,
@@ -120,7 +164,7 @@ export function Control(p: {
         opacity: disabled ? opacity.disabled : 1,
       }}
     >
-      <Text style={{ ...t.control, color: disabled ? c.dim : onInk ? c.bg : c.fg }}>{label}</Text>
+      <InkText style={[t.control, ink]}>{label}</InkText>
     </Pressable>
   );
 }

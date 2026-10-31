@@ -148,7 +148,7 @@ export function NoticePage(
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c, t)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c, t)}>Remaining: {detail.remaining}</Text>}
-      <LogLines lines={history(p.screen, detail.id, description)} />
+      <LogLines lines={history(p.screen, detail.id, description)} of={p.screen.detail(detail.id)} />
       {'transport' in detail && detail.transport && fare(c, t, detail.transport)}
       {!!board?.notices.length && (
         <View>

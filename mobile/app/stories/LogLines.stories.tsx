@@ -1,7 +1,11 @@
 // LogLines: the event log and detail history (LogLines's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { useState } from 'react';
+import { Button } from 'react-native';
+import { expect, waitFor } from 'storybook/test';
 import { LogLines } from '../book/lines.tsx';
+import type { DetailLine } from '../book/logs.ts';
+import { markDrawn } from '../book/logs.ts';
 import { lineWords } from '../book/words.ts';
 
 const meta = {
@@ -13,6 +17,37 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Narration: Story = {};
+
+// Only the line entering this redraw dries (book-ui.md, Effects, sound and haptics).
+// Breaks: the older line re-dries (it would leave its settled ink), or the new line never settles.
+function Growing() {
+  // One array grown in place, as a screen's log is: the mark belongs to the array.
+  const [lines] = useState<DetailLine[]>(() => {
+    const old = ['The water is black and still.'];
+    markDrawn(old);
+    return old;
+  });
+  const [, redraw] = useState(0);
+  return (
+    <>
+      <LogLines lines={lines} />
+      <Button
+        title="Add a line"
+        onPress={() => redraw(lines.push('A bell carries over the yard.'))}
+      />
+    </>
+  );
+}
+export const NewLineDries: Story = {
+  render: () => <Growing />,
+  play: async ({ canvas, userEvent }) => {
+    const color = (text: string) => getComputedStyle(canvas.getByText(text)).color;
+    const settled = color('The water is black and still.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Add a line' }));
+    await expect(color('The water is black and still.')).toBe(settled);
+    await waitFor(() => expect(color('A bell carries over the yard.')).toBe(settled));
+  },
+};
 
 // Every narrated event kind (book-ui.md Line placement, loka-lsqi): one ink italic style, no colon.
 // Breaks: an event line draws dim or upright again, or two kinds draw differently.

@@ -1,4 +1,4 @@
-// size: allow 560, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 575, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -374,7 +374,9 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
   const text = (key: string) => (key === 'condition.fed' ? 'fed' : key);
   const icons = (conditions: any[], open?: () => void) => {
     const [shown, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
-    return [...shown, more].filter(Boolean).map((e: any) => e.type(e.props));
+    return [...shown.map((arrival: any) => arrival.props.children), more]
+      .filter(Boolean)
+      .map((e: any) => e.type(e.props));
   };
   const names = (es: any[]) => es.map((e) => e.props.accessibilityLabel);
   const opened: string[] = [];
@@ -413,7 +415,7 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
       .props.children[0];
   assert.equal(row({ conditions: five }).props.open, open);
   assert.equal(row({ conditions: five, locked: true }).props.open, undefined);
-  assert.equal(row({ conditions: [] }), false);
+  assert.deepEqual(row({ conditions: [] }).props.conditions, []);
   const locked = icons(five);
   assert.deepEqual(
     locked.map((e) => [e.type, e.props.accessibilityRole]),
@@ -462,7 +464,11 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   assert.equal(share(undefined, 3600), undefined); // no end
   // The Icon's child: a Ring (track, then halves, then the disc) or the bare disc.
   const ring = (ends_at?: number, duration?: number, locked = false) => {
-    const [icon] = StatusIcons({
+    const [
+      {
+        props: { children: icon },
+      },
+    ] = StatusIcons({
       conditions: [at(ends_at, duration)],
       time: 720,
       text: (k: string) => k,
@@ -532,7 +538,11 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
   assert.deepEqual(turns(0), { right: -180, left: 0 });
   // Rendered: the previous view (288 degrees) came 250 ms ago, this one shows 286.8.
   const ring = () => {
-    const [icon] = StatusIcons({
+    const [
+      {
+        props: { children: icon },
+      },
+    ] = StatusIcons({
       conditions: [{ label: 'fed', kind: 'buff', ends_at: 3600, duration: 3600 }] as any,
       time: 732,
       text: (k: string) => k,

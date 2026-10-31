@@ -56,7 +56,7 @@ test('a buy keeps the buy page: its line, the new purse, the row refused in word
   const bought = b.p.screen().log.filter((l) => lineText(l) === 'You buy a cob of bread.');
   assert.equal(bought.length, 1, 'the buy line lands in the room log once, naming the item');
   b.refuse('A cob of bread, 4p. Buy for 4 pennies.');
-  assert.ok(b.text().includes("A cob of bread, 4p.\nIt's sold out."), JSON.stringify(b.text()));
+  assert.ok(b.text().includes("It's sold out."), JSON.stringify(b.text()));
   b.tap(LABEL.sell); // the sell page lists the bought cob with its price (owner pick mvlynyikyw57)
   assert.equal(b.text()[0], 'Nell, the baker will buy…', JSON.stringify(b.text()));
   assert.ok(

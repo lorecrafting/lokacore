@@ -86,14 +86,13 @@ export function StatusLine(p: StatusProps) {
   const items = leading(c, t, p);
   return (
     <View>
-      {!!p.conditions?.length && (
-        <StatusIcons
-          conditions={p.conditions}
-          time={p.time}
-          text={p.text}
-          open={p.locked ? undefined : p.openCharacter}
-        />
-      )}
+      {/* Mounted when empty too, so the last icon's fade plays. */}
+      <StatusIcons
+        conditions={p.conditions ?? []}
+        time={p.time}
+        text={p.text}
+        open={p.locked ? undefined : p.openCharacter}
+      />
       <View style={statusRow}>
         {/* Two wrap units, so the only break falls before the pools. */}
         <View style={{ ...group, ...shrink }}>

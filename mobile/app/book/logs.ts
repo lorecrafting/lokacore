@@ -112,6 +112,25 @@ export function logLines(s: Logs, lines: DetailLine[], page?: DetailLine[], quie
   (s.merged ??= []).push(plain);
 }
 
+// Each log's lines by a number that never shifts: `gone` counts the lines dropped from its front, and
+// `drawn` is the first number no page has drawn yet, so a page return or a trim re-dries nothing and
+// a quiet merge, in place, is not new (LogLines).
+const marks = new WeakMap<readonly DetailLine[], { gone: number; drawn: number }>();
+export const logMark = (lines: readonly DetailLine[]) => {
+  const mark = marks.get(lines) ?? { gone: 0, drawn: 0 };
+  marks.set(lines, mark);
+  return mark;
+};
+export const markDrawn = (lines: readonly DetailLine[]) => {
+  const mark = logMark(lines);
+  mark.drawn = mark.gone + lines.length;
+};
+export const dropLines = (lines: DetailLine[], count = lines.length) => {
+  const n = Math.max(count, 0);
+  logMark(lines).gone += n;
+  lines.splice(0, n);
+};
+
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
@@ -145,6 +164,7 @@ export function restoredLogs(game: Game, text: Say): Logs {
       ),
     );
   s.log.push(...cueLines(s, view, text));
+  [s.log, s.combatLog, ...s.details.values()].forEach(markDrawn); // history never dries
   return s;
 }
 
@@ -170,11 +190,11 @@ export function savedNarration(game: Game, s: Logs, command_id?: string) {
 export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
   if (was.place.id !== now.place.id) {
-    s.log.length = 0;
+    dropLines(s.log);
     s.noted = new Set();
     s.away = undefined; // held lines belong to the room left, as its log
   }
-  if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
+  if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) dropLines(s.combatLog);
   if (was.combat && !now.combat) s.ended = was.combat;
 }
 
@@ -228,14 +248,14 @@ export function visit(s: Logs, open: (string | undefined)[]) {
 // Leave the conversation: a fresh history; an open choice's waits for its close to commit.
 export function leaveLog(s: Logs, id: string, open: boolean) {
   if (open) s.left = id;
-  else s.details.get(id)?.splice(0);
+  else dropLines(s.details.get(id) ?? []);
 }
 
 // The committed close of that Leave (its close_choice, or the talk's authored exit) empties the
 // history before the reply's own lines; a refused one keeps the question.
 export function closedLog(s: Logs, accepted: boolean) {
   if (s.retry?.button.label !== LABEL.leaveConversation || !s.left) return;
-  if (accepted) s.details.get(s.left)?.splice(0);
+  if (accepted) dropLines(s.details.get(s.left) ?? []);
   s.left = undefined;
 }
 

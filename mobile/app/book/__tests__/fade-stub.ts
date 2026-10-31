@@ -7,6 +7,9 @@ export const fadeStub = {
     'data:text/javascript,export const usePaletteCurve=()=>undefined,' +
     'useReducedMotion=()=>globalThis.reducedMotion??true,' +
     "Reanimated={View:'View'},Easing={linear:t=>t},useAnimatedStyle=f=>f()," +
-    'useSharedValue=value=>({value}),withTiming=(v,o)=>(globalThis.timings?.push(o.duration),v)',
+    "InkText=p=>({type:'Text',key:null,props:{allowFontScaling:false,...p}}),LiftPressable='Pressable',curveOf=()=>undefined,ReduceMotion={Never:'never'}," +
+    'FadeOut={duration:()=>({reduceMotion:()=>undefined})},' +
+    'interpolateColor=(v,r,o)=>(v>0?o[1]:o[0]),withDelay=(d,v)=>(globalThis.delays?.push(d),v),' +
+    'useSharedValue=value=>globalThis.sharedSlot?.(value)??{value},withTiming=(v,o)=>(globalThis.timings?.push(o.duration),v)',
   shortCircuit: true,
 };

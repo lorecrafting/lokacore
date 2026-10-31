@@ -135,7 +135,7 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
     ],
   );
   const [plain, chosen] = chips().map((n) => [
-    n.props.style,
+    Object.assign({}, ...n.props.style),
     nodes(n.props.children)[0].props.style,
   ]);
   const page = drawn().find((n) => n.type === 'SafeAreaView').props.style.backgroundColor;
@@ -225,15 +225,24 @@ test('Settings effect chips show, save and apply each setting', () => {
   device.length = 0;
   // Breaks: the module hears a change only after commit, so a preview in the same press plays the old value.
   radios()[1]!.props.onPress();
-  assert.deepEqual(device, [['sound', true]]);
+  // and Sound and Haptics preview themselves after applying; Flashes has nothing to preview.
+  assert.deepEqual(device, [
+    ['sound', true],
+    ['play', 'pageTurn'],
+  ]);
   h.draw();
   radios()[5]!.props.onPress();
   radios()[7]!.props.onPress();
   h.draw();
   assert.deepEqual(device, [
     ['sound', true],
+    ['play', 'pageTurn'],
     ['haptics', false],
+    ['haptic', 'selection'],
   ]);
+  device.length = 0;
+  radios()[5]!.props.onPress(); // Off again: no change, no preview
+  assert.deepEqual(device, [['haptics', false]]);
   assert.deepEqual(Object.fromEntries(kept), {
     'effects.music': 'off',
     'effects.sound': 'off',

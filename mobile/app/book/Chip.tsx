@@ -1,6 +1,8 @@
 // A word chip: one known word under the say field as a pill.
 import type { ReactNode } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { LiftPressable } from './fade.ts';
+import { useLift, usePress } from './press.ts';
 import { Text } from './Text.tsx';
 import { LABEL } from './labels.ts';
 import { Note } from './lines.tsx';
@@ -8,11 +10,20 @@ import { usePalette, useType } from './palette.ts';
 import { effects, steps, type Effects, type Reading } from './reading.ts';
 import { opacity, radius, size, space } from './tokens.ts';
 
+const box = {
+  minHeight: size.touch,
+  minWidth: size.touch,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: space.lg,
+} as const;
+
 /**
  * One word as a pill (book-ui.md, Word bar).
  * - Use: the say field's known words (named by the word; a press fills the field); a radio row
  *   setting (Reading size).
  * - Rules: a row wraps, never truncates. Unavailable: not pressable; chosen: role radio, checked.
+ *   A press lifts with a selection haptic; chosen holds the pressed colour.
  * - States: available; unavailable; pending; chosen.
  * - Story: Chip.stories.tsx
  */
@@ -26,31 +37,33 @@ export function Chip(p: {
   const c = usePalette();
   const t = useType();
   const off = !p.onPress || !!p.pending;
+  const press = usePress('selection');
+  const lift = useLift(press, p.chosen ? c.fg : c.card, !!p.chosen);
   return (
-    <Pressable
+    <LiftPressable
+      {...press.handlers}
       accessibilityRole={p.chosen === undefined ? 'button' : 'radio'}
       aria-checked={p.chosen} // a radio's state; axe rejects aria-selected on a radio
       accessibilityLabel={p.label}
       aria-busy={!!p.pending} // RN web maps aria-busy, not accessibilityState.busy
       disabled={off}
       onPress={() => p.onPress?.()} // no press event: the handler takes none
-      style={{
-        minHeight: size.touch,
-        minWidth: size.touch,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: space.lg,
-        backgroundColor: p.chosen ? c.fg : c.card,
-        borderColor: c.line,
-        borderWidth: size.rule,
-        borderRadius: radius.chip,
-        opacity: p.onPress ? 1 : opacity.disabled,
-      }}
+      style={[
+        {
+          ...box,
+          backgroundColor: p.chosen ? c.fg : c.card,
+          borderColor: c.line,
+          borderWidth: size.rule,
+          borderRadius: radius.chip,
+          opacity: p.onPress ? 1 : opacity.disabled,
+        },
+        lift,
+      ]}
     >
       <Text style={{ ...t.control, color: p.chosen ? c.bg : p.onPress ? c.fg : c.dim }}>
         {p.word}
       </Text>
-    </Pressable>
+    </LiftPressable>
   );
 }
 

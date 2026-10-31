@@ -22,12 +22,12 @@ registerHooks({
     // Metro picks the platform file; here each device module records what the Book tells it.
     if (specifier === './sound')
       return {
-        url: 'data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m])',
+        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n)=>globalThis.bookDevice?.push(['play',n])",
         shortCircuit: true,
       };
-    if (specifier === './haptic')
+    if (specifier === './haptic' || specifier === './book/haptic')
       return {
-        url: "data:text/javascript,export const hapticsOn=(o)=>globalThis.bookDevice?.push(['haptics',o]);export const onPulse=()=>()=>{}",
+        url: "data:text/javascript,export const hapticsOn=(o)=>globalThis.bookDevice?.push(['haptics',o]);export const onPulse=()=>()=>{};export const haptic=(k)=>globalThis.bookDevice?.push(['haptic',k])",
         shortCircuit: true,
       };
     if (specifier === './PageTurn.tsx')
@@ -111,10 +111,12 @@ export const fixture = bundle();
 (globalThis as any)[Symbol.for('loka-book-test-effect')] = () => {};
 
 // Expand pure components only. Native animation and map gestures are exercised in Simulator review.
-let owner: unknown; // the component whose hooks run now: a slot another component held starts fresh
-// ponytail: keyed by type, not instance, and state only (effects: Book's alone today); key by element if a story needs it.
-export function nodes(element: any): any[] {
-  if (Array.isArray(element)) return element.flatMap(nodes);
+// The component whose hooks run now, by its place in the tree as React keys it: a place another
+// component held starts fresh, and a list growing above a component leaves its hooks alone.
+let here = '';
+let hook = 0;
+export function nodes(element: any, at = ''): any[] {
+  if (Array.isArray(element)) return element.flatMap((e, i) => nodes(e, `${at}.${e?.key ?? i}`));
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
@@ -122,22 +124,24 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Heard') return [element];
     // The dev pulse draws nothing until fired, and its hooks would take a slot the page's state holds.
     if (element.type.name === 'HapticPulse') return [];
-    if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
-    owner = element.type;
+    const place = `${at}/${element.type.name}`;
+    if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children, place)];
+    here = place;
+    hook = 0;
     if (element.type.name === 'RoomPage') room = element.props;
-    return nodes(element.type(element.props));
+    return nodes(element.type(element.props), place);
   }
   // A context element (the Book's palette) provides its value to the components below it.
   if (element.type?.$$typeof === Symbol.for('react.context')) {
     const outer = element.type._currentValue;
     element.type._currentValue = element.props.value;
     try {
-      return [element, ...nodes(element.props.children)];
+      return [element, ...nodes(element.props.children, at)];
     } finally {
       element.type._currentValue = outer;
     }
   }
-  return [element, ...nodes(element.props?.children)];
+  return [element, ...nodes(element.props?.children, `${at}/${String(element.type)}`)];
 }
 export const words = (element: any): string =>
   Array.isArray(element)
@@ -184,14 +188,14 @@ export function book(
     }
     return narration(command_id);
   };
-  const state: any[] = [];
-  const owners: unknown[] = [];
-  let slot = 0;
-  const effects = new Map<number, { deps: unknown[]; cleanup?: () => void }>();
+  const state = new Map<string, any>();
+  const effects = new Map<string, { deps: unknown[]; cleanup?: () => void }>();
   const queued: (() => void)[] = [];
+  const seen = new Set<string>(); // the places this draw reached; the rest have unmounted
   const useEffect = (f: () => (() => void) | undefined, deps: unknown[]) => {
-    const i = slot++,
+    const i = `${here}:${hook++}`,
       old = effects.get(i);
+    seen.add(i);
     if (old && old.deps.length === deps.length && deps.every((d, j) => Object.is(d, old.deps[j])))
       return;
     queued.push(() => {
@@ -200,24 +204,23 @@ export function book(
     });
   };
   const useState = (initial: any) => {
-    const i = slot++;
-    if (owners[i] !== owner) {
-      owners[i] = owner;
-      state[i] = typeof initial === 'function' ? initial() : initial;
-    }
+    const i = `${here}:${hook++}`;
+    seen.add(i);
+    if (!state.has(i)) state.set(i, typeof initial === 'function' ? initial() : initial);
     return [
-      state[i],
+      state.get(i),
       (v: any) => {
-        state[i] = typeof v === 'function' ? v(state[i]) : v;
+        state.set(i, typeof v === 'function' ? v(state.get(i)) : v);
       },
     ];
   };
   const draw = () => {
-    slot = 0;
-    owner = Book;
+    here = 'Book';
+    hook = 0;
     (globalThis as any)[Symbol.for('loka-book-test-state')] = useState;
     (globalThis as any)[Symbol.for('loka-book-test-effect')] = useEffect;
     room = undefined;
+    seen.clear();
     const rendered = nodes(
       Book({
         game,
@@ -232,6 +235,12 @@ export function book(
       }),
     );
     for (const effect of queued.splice(0)) effect();
+    for (const i of state.keys()) if (!seen.has(i)) state.delete(i);
+    for (const [i, e] of effects)
+      if (!seen.has(i)) {
+        e.cleanup?.();
+        effects.delete(i);
+      }
     stranded(rendered);
     return rendered;
   };
@@ -270,10 +279,10 @@ export function book(
   if (game.view().view.chapter && !game.view().view.ancestry_choices) tap('Continue');
   return {
     get p() {
-      return state[0];
+      return state.get('Book:0');
     },
     get stack() {
-      return state[1];
+      return state.get('Book:1');
     },
     game,
     sql,

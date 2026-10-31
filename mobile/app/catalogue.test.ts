@@ -87,7 +87,6 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
   'type.speaker': 'the Log line row: waits until the log projects a speaker',
   ...Object.fromEntries(
     [
-      'pageTurn',
       'pickup',
       'coin',
       'blow',
@@ -103,21 +102,17 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
     ]),
   ),
   ...Object.fromEntries(
-    ['light', 'medium', 'heavy', 'selection', 'warning', 'error'].map((k) => [
+    ['light', 'medium', 'heavy'].map((k) => [
       `haptic.${k}`,
       'reached as tokens.haptic[kind] in haptic(kind); its first caller comes with loka-gj82.4',
     ]),
   ),
   'mix.spread': 'pitch variation waits for the real samples',
   ...Object.fromEntries(
-    [
-      'opacity.press',
-      'opacity.wash',
-      'motion.press',
-      'motion.dry',
-      'motion.pop',
-      'motion.settle',
-    ].map((k) => [k, 'an effect not yet built; its slice reads it']),
+    ['opacity.wash', 'motion.settle'].map((k) => [
+      k,
+      'an effect not yet built; its slice reads it',
+    ]),
   ),
 };
 test('every token has a consumer outside tokens.ts', async () => {
