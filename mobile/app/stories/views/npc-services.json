@@ -109,28 +109,28 @@
   },
   "known_npcs": [
    {
-    "id": "15076a66-097b-8dbc-85ec-bd166d6ecab9",
+    "id": "21f61dc2-0501-8853-a8ff-88ed5dbd71b7",
     "name": "npc.clerk_b.short"
    },
    {
-    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
+    "id": "73868cdd-0749-8a27-877e-1059c7fcbd74",
     "name": "npc.merchant.short"
    },
    {
-    "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1",
-    "name": "npc.smith.short"
-   },
-   {
-    "id": "676a7640-aee6-8d70-a326-ed19a6d9a130",
+    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
     "name": "npc.guard.short"
    },
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
-    "name": "npc.hob.short"
+    "id": "a1a7315c-1753-8b62-a1a1-e42cb54b3446",
+    "name": "npc.smith.short"
    },
    {
-    "id": "ca9abb6b-add9-8496-9f83-3c6069959fb6",
+    "id": "b0abb6c3-7896-807a-a308-5f6ee0ddd150",
     "name": "npc.chandler.short"
+   },
+   {
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "name": "npc.hob.short"
    }
   ],
   "levelling": {
@@ -344,22 +344,22 @@
      "title": "room.market_row.title",
      "entities": [
       {
-       "id": "ca9abb6b-add9-8496-9f83-3c6069959fb6",
+       "id": "b0abb6c3-7896-807a-a308-5f6ee0ddd150",
        "name": "npc.chandler.short",
        "kind": "npc"
       },
       {
-       "id": "15076a66-097b-8dbc-85ec-bd166d6ecab9",
+       "id": "21f61dc2-0501-8853-a8ff-88ed5dbd71b7",
        "name": "npc.clerk_b.short",
        "kind": "npc"
       },
       {
-       "id": "676a7640-aee6-8d70-a326-ed19a6d9a130",
+       "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
        "name": "npc.guard.short",
        "kind": "npc"
       },
       {
-       "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
+       "id": "73868cdd-0749-8a27-877e-1059c7fcbd74",
        "name": "npc.merchant.short",
        "kind": "npc"
       }
@@ -460,7 +460,7 @@
   ],
   "entities": [
    {
-    "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1",
+    "id": "a1a7315c-1753-8b62-a1a1-e42cb54b3446",
     "name": "npc.smith.short",
     "words": {
      "article": "the",
@@ -560,7 +560,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "3924002c-1621-899b-a2b3-c34d2c4cdcf1"
+        "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
        ],
        "available": false,
        "reason": {
@@ -604,7 +604,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "3924002c-1621-899b-a2b3-c34d2c4cdcf1"
+        "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
        ],
        "available": false,
        "reason": {
@@ -648,7 +648,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "3924002c-1621-899b-a2b3-c34d2c4cdcf1"
+        "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
        ],
        "available": false,
        "reason": {
@@ -662,7 +662,7 @@
     ]
    },
    {
-    "id": "ed46889f-3b43-8c50-854e-eb0f678931e7",
+    "id": "07ad588e-b649-82d6-95ed-118cbf97e8f2",
     "name": "item.ore_01.short",
     "words": {
      "article": "a",
@@ -687,7 +687,7 @@
     ]
    },
    {
-    "id": "124169af-8fcb-888a-9cc6-ebb5cf09ae9e",
+    "id": "286a9781-0c21-8be9-88f3-edf8d1a50c34",
     "name": "item.ore_02.short",
     "words": {
      "article": "a",
@@ -712,7 +712,7 @@
     ]
    },
    {
-    "id": "07ad588e-b649-82d6-95ed-118cbf97e8f2",
+    "id": "c0cb9608-9c13-82b3-9d76-a4202ff015f5",
     "name": "item.ore_03.short",
     "words": {
      "article": "a",
@@ -737,7 +737,7 @@
     ]
    },
    {
-    "id": "286a9781-0c21-8be9-88f3-edf8d1a50c34",
+    "id": "8cc7de14-8a90-8e87-86ec-1c743f77e9ee",
     "name": "item.ore_04.short",
     "words": {
      "article": "a",
@@ -782,10 +782,6 @@
   ],
   "position": "standing",
   "journal": [],
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -888,7 +884,7 @@
  "stack": [
   {
    "kind": "thing",
-   "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1"
+   "id": "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
   }
  ],
  "log": [

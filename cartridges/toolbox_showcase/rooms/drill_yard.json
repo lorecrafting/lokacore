@@ -36,6 +36,13 @@
         "bench"
       ],
       "description": "detail.bench"
+    },
+    "yard_gate": {
+      "aliases": [
+        "gate"
+      ],
+      "description": "detail.yard_gate",
+      "title": "detail.yard_gate.title"
     }
   }
 }

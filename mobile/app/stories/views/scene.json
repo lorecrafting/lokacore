@@ -392,7 +392,7 @@
   ],
   "entities": [
    {
-    "id": "6b2b9c4f-6781-82f4-a079-908def5908f6",
+    "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7",
     "name": "npc.wat.short",
     "words": {
      "bare": "npc.wat.bare"
@@ -403,7 +403,7 @@
     "band": "ready",
     "contents": [
      {
-      "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
+      "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
       "name": "item.letter.short",
       "words": {
        "article": "a",
@@ -412,12 +412,12 @@
       "description": "item.letter.description",
       "kind": "item",
       "actions": [],
-      "container_id": "6b2b9c4f-6781-82f4-a079-908def5908f6"
+      "container_id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7"
      }
     ]
    },
    {
-    "id": "2d56c2ba-0c40-8b90-aaa4-deafc9c16c53",
+    "id": "3b4da12e-4604-8c79-b8c2-2d3f1db2681c",
     "name": "item.hut_loaf.short",
     "words": {
      "article": "a",
@@ -429,7 +429,7 @@
     "actions": []
    },
    {
-    "id": "9bef0b0f-b2ab-860c-a3eb-6e75bd81e857",
+    "id": "08b595bc-213e-89d1-a063-08f39c5187b3",
     "name": "item.trough_skin.short",
     "words": {
      "article": "a",
@@ -496,10 +496,6 @@
    "index": 1,
    "count": 2
   },
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -602,7 +598,7 @@
  "stack": [
   {
    "kind": "thing",
-   "id": "6b2b9c4f-6781-82f4-a079-908def5908f6"
+   "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7"
   }
  ],
  "log": [
@@ -612,7 +608,7 @@
  ],
  "combatLog": [],
  "details": {
-  "6b2b9c4f-6781-82f4-a079-908def5908f6": [
+  "63441f36-3a9b-8b10-9acd-43f4b5e634c7": [
    "Wat eyes the letter in your hand.",
    "Wat takes the letter and breaks the seal.",
    {

@@ -92,20 +92,20 @@
   },
   "known_npcs": [
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
-    "name": "npc.hob.short"
-   },
-   {
-    "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
-    "name": "npc.reeve.short"
-   },
-   {
-    "id": "e26d5050-0ec1-8ec4-a164-209a07f75784",
+    "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
     "name": "npc.bess.short"
    },
    {
-    "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9",
+    "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
     "name": "npc.nell.short"
+   },
+   {
+    "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
+    "name": "npc.reeve.short"
+   },
+   {
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "name": "npc.hob.short"
    }
   ],
   "levelling": {
@@ -331,22 +331,22 @@
      "title": "room.village_green.title",
      "entities": [
       {
-       "id": "f0e76c82-d099-811e-a6ba-caef3f2615e9",
+       "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
        "name": "npc.nell.short",
        "kind": "npc"
       },
       {
-       "id": "dce25ff1-322e-80ae-8f48-e0c4062c2783",
+       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
        "name": "npc.reeve.short",
        "kind": "npc"
       },
       {
-       "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
+       "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
        "name": "item.apple.short",
        "kind": "item"
       },
       {
-       "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
+       "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
        "name": "item.letter.short",
        "kind": "item"
       }
@@ -459,7 +459,7 @@
   ],
   "notices": [
    {
-    "id": "f3c7442b-1155-8f9a-8482-3a4f621a90fd",
+    "id": "dd8c6f46-accd-87e3-af31-b0caf37caeeb",
     "key": "hall_cupboard",
     "title": "detail.hall_cupboard.title",
     "description": "detail.hall_cupboard",
@@ -476,7 +476,7 @@
     ]
    },
    {
-    "id": "5618d912-3e17-8488-a2e6-0927cff37eb5",
+    "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
     "key": "hall_lectern",
     "title": "detail.hall_lectern.title",
     "description": "detail.hall_lectern",
@@ -496,7 +496,7 @@
     ]
    },
    {
-    "id": "dd8c6f46-accd-87e3-af31-b0caf37caeeb",
+    "id": "4c9c088a-aede-8ef6-906d-8bc0a9bc1701",
     "key": "hall_strongbox_lock",
     "title": "detail.hall_strongbox_lock.title",
     "description": "detail.hall_strongbox_lock",
@@ -515,7 +515,7 @@
   ],
   "entities": [
    {
-    "id": "e26d5050-0ec1-8ec4-a164-209a07f75784",
+    "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
     "name": "npc.bess.short",
     "words": {
      "bare": "npc.bess.bare"
@@ -552,7 +552,7 @@
     ],
     "shop": [
      {
-      "item_id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
+      "item_id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
       "name": "item.hall_bread.short",
       "buy": {
        "price": 4,
@@ -567,7 +567,7 @@
     ],
     "contents": [
      {
-      "id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
+      "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
       "name": "item.hall_bread.short",
       "words": {
        "article": "a",
@@ -590,12 +590,12 @@
         "input": []
        }
       ],
-      "container_id": "e26d5050-0ec1-8ec4-a164-209a07f75784"
+      "container_id": "10798f17-56fe-899f-b1f1-2165bc7aa94a"
      }
     ]
    },
    {
-    "id": "542dc207-7ae5-8fc4-8643-4854106d9e84",
+    "id": "677c012e-ec39-8552-8d4f-1811aa3e08b5",
     "name": "item.hall_roll.short",
     "words": {
      "article": "a",
@@ -619,7 +619,7 @@
     ]
    },
    {
-    "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
+    "id": "4c2b24ad-1e89-8d16-9b4b-1fb2d613fb25",
     "name": "item.hall_strongbox.short",
     "words": {
      "article": "the",
@@ -667,10 +667,6 @@
   ],
   "position": "standing",
   "journal": [],
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,

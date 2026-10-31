@@ -278,14 +278,7 @@ test('a word that settles later still turns to its conversation', () => {
   assert.ok(b.labels().includes('Thank her'));
 });
 
-// Breaks (pass-1 R5): the echo shown beside a spoken press's own narration (the den's begone
-// shout, toolbox_showcase reactions/begone.json, frightens both goblins).
-test('a shout whose receipt narrates shows the narration, not the echo', () => {
-  const b = book(compiled('cartridges/toolbox_showcase') as never);
-  for (const d of ['west', 'down', 'north', 'north']) (b.map(), b.tap(`Go ${d}`));
-  send(b, 'begone', LABEL.shout);
-  const shown = b.text();
-  const cowers = 'The goblin cowers, eyeing the way out.';
-  assert.equal(shown.filter((t) => t === cowers).length, 2, JSON.stringify(shown));
-  assert.ok(!shown.some((t) => t.startsWith('You shout')), JSON.stringify(shown));
-});
+// Breaks (pass-1 R5): the echo shown beside a spoken press's own narration. Lost fixture: the
+// showcase's spoken begone reaction became a card (loka-eyk7) and no cartridge has a spoken
+// reaction whose receipt narrates; the PM decides between a sampler fixture and retiring this.
+test.skip('a spoken press whose receipt narrates shows the narration, not the echo', () => {});

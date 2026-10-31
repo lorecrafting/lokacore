@@ -277,7 +277,7 @@
   "topics": [],
   "combat": {
    "encounter_id": "d8de6604-8212-8c0d-a187-64bf21f91e3c",
-   "opponent_id": "ee075a63-404c-8db6-8aee-a7f40ea30f16",
+   "opponent_id": "dae37be6-777f-8cc2-9150-358c305d326e",
    "name": "npc.goblin.short",
    "words": {
     "article": "a",
@@ -287,7 +287,7 @@
    "band": "ready",
    "active_opponents": [
     {
-     "id": "ee075a63-404c-8db6-8aee-a7f40ea30f16",
+     "id": "dae37be6-777f-8cc2-9150-358c305d326e",
      "name": "npc.goblin.short",
      "words": {
       "article": "a",
@@ -326,12 +326,12 @@
      "title": "room.drill_yard.title",
      "entities": [
       {
-       "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8",
+       "id": "385d5416-3de6-82e4-aae0-775164b045c2",
        "name": "npc.aldous.short",
        "kind": "npc"
       },
       {
-       "id": "ca479bb2-783b-89b8-8948-2ebc1bd65d0e",
+       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
        "name": "item.poultice.short",
        "kind": "item"
       }
@@ -384,7 +384,7 @@
   ],
   "entities": [
    {
-    "id": "ee075a63-404c-8db6-8aee-a7f40ea30f16",
+    "id": "dae37be6-777f-8cc2-9150-358c305d326e",
     "name": "npc.goblin.short",
     "words": {
      "article": "a",
@@ -413,7 +413,7 @@
     "band": "ready",
     "contents": [
      {
-      "id": "d5a6adf6-dc23-847c-9436-62f3a288bd99",
+      "id": "7b72a594-271c-8c13-93f9-9268c2d98f40",
       "name": "item.ear.short",
       "words": {
        "article": "a",
@@ -422,7 +422,7 @@
       "description": "item.ear.description",
       "kind": "item",
       "actions": [],
-      "container_id": "ee075a63-404c-8db6-8aee-a7f40ea30f16"
+      "container_id": "dae37be6-777f-8cc2-9150-358c305d326e"
      }
     ]
    },
@@ -487,10 +487,6 @@
   ],
   "position": "standing",
   "journal": [],
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,

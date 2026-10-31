@@ -25,9 +25,6 @@ cellars." (`combat-district.md`'s `sign_combat` text; combat 1 pins the key, not
 
 ## Manifest changes
 
-- `speech.phrases: ["ware", "begone"]` (`speech_sampler/cartridge.json`; needs kernel_api 1.98,
-  the showcase is at 1.102). This also puts Gil's `ware` on the Book's Word bar: [matrix row](../SHOWCASE.md#pairwise-mechanic-matrix)
-  "say and shout x keyword dialogue" loses its kernel-only note (Beads `loka-kgd.72` closed by #391).
 - Capabilities: none new (movement, inspectable_detail, scripted_action, check, skills, status,
   reaction, population, speech, barrier, liquid, readable are declared).
 - Status `poisoned` ([row 1](../system/mechanics.md#status-effects-over-time-toolbox-row-1);
@@ -68,7 +65,7 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
 > the same whether you find it or not. Its poison wears off in two hours, or at once with the bitters
 > locked behind the dial east. The three levers in the hall east have an order, written on a note
 > past the plate; the dial's numbers are on a slate behind the lever door. North of the plate a
-> chief keeps two goblins. Shout "begone" and the goblins break and run once you strike; kill the
+> chief keeps two goblins. Shout "Begone!" at the bones and the goblins break and run once you strike; kill the
 > chief and they run too. Down these stairs is a cellar with all of it, and the plate there is
 > under your feet already.
 
@@ -119,8 +116,9 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
   `night_end` 6, `replacement_delay` and `wander_interval` 8640000, `pack {flight_below_percent 25,
   flight_fare 0, narration}` with `enemy_fled` keyed `south` and `north` (plan 2's built plans).
   `cellar_goblin`, `cellar_goblins` and `cellar_chief` are the same shapes with home `sapper_cellar`.
-- Reaction `begone`: `on {event: spoken, word: "begone", loudness: "shout"}`, `apply status.apply
-  afraid` (`fear_sampler/reactions/begone.json`: lands on each hearer within one exit; the chief is
+- Action `shout_begone` on the detail `chief_den/den_bones` (`shout_begone_cellar` extends it on
+  `sapper_cellar/cellar_flags`) emits `shouted_begone`; reaction `begone`: `on {event: custom_event,
+  custom: shouted_begone}`, `apply status.apply {status: afraid, co_present: true}` (the chief is
   immune). Reaction `chief_fell`: `on {event: entity_died, victim: chief}`, `apply status.apply
   {status: afraid, co_present: true}` (`leader_fell.json`); `cellar_chief_fell` likewise.
 
@@ -139,7 +137,7 @@ except where a step says so, so T is also the clock through step 6.
 | 5 | Back south, east; `pull_a`, `pull_c` (wrong order); Open north; then `pull_a`, `pull_b`, `pull_c`; Open north; read `vault_slate`. | `pull_a` sets 1 (`lever_a_step`); `pull_c` fires `lever_c_reset` (1 is not 2: assign 0), then `lever_c_step` reads 0 and does nothing: `lever_stage` 0 and Open north `invalid_state`. After A, B, C: 3, Open north `opened`, the slate's text. Pulling `lever_c` again now resets to 0 and the open door stays open (a barrier once open stays open; row 26's known limit, named on the slate). | puzzles x barriers |
 | 6 | Three turns of `wheel_1`, one of `wheel_2`, one of `wheel_3`; Open east; one more turn of `wheel_3`; Open east; take `bitters_skin`; Drink. | First Open `invalid_state`; wheels `[3, 1, 2]`, Open `opened`; the skin held; Drink ends `poisoned` with no tick (hp 10), one dose left; the Conditions line is empty. Ten turns of one wheel read 0 again (the wrap). | puzzles x barriers; cure x statuses |
 | 7 | Branch from step 1's state (undisarmed): north; south and north again at once; wait to the next `clock_hour`; south then north. | First entry: `poisoned` (generation 1, `ends_at` entry + 7200), `plate_sprung` true; second entry changes nothing. At the hour `plate_sprung` false; the re-entry refreshes `ends_at` to re-entry + 7200, generation still 1 (row 1: a refresh moves only the end). Left alone from the first entry: ticks at +1800, +3600, +5400 (hp 9, 8, 7), the expired line at +7200. | traps x statuses x reset |
-| 8 | From step 6: north twice to `chief_den` (disarmed plate); `shout begone`; Attack the lower-id goblin; two rounds. | The shout: `afraid` on both goblins (`ends_at` +600), nothing on the chief (immune) or the player; each goblin's mood reads afraid (W6): its name "a cowering goblin", its description "The goblin shrinks against the wall, eyes on the way out." Round 1: the player hits goblin A (6 to 4); A flees south before its blow. Round 2: B flees before the player strikes. Both stand in `plate_passage` (the disarmed plate is quiet: no `poisoned` row on either), the encounter is `closed`, hp 10. | fear x pack x shout |
+| 8 | From step 6: north twice to `chief_den` (disarmed plate); Shout "Begone!" (the bones' card); Attack the lower-id goblin; two rounds. | The shout: `afraid` on both goblins (`ends_at` +600), nothing on the chief (immune) or the player; each goblin's mood reads afraid (W6): its name "a cowering goblin", its description "The goblin shrinks against the wall, eyes on the way out." Round 1: the player hits goblin A (6 to 4); A flees south before its blow. Round 2: B flees before the player strikes. Both stand in `plate_passage` (the disarmed plate is quiet: no `poisoned` row on either), the encounter is `closed`, hp 10. | fear x pack x offered action |
 | 9 | Fresh den (a new world through steps 1 to 6 with no shout): Attack the chief; one round. Then Attack goblin A; two rounds. | The chief falls at the player's blow (2 damage, hp 2): `entity_died`, experience 10, `chief_fell` puts `afraid` on both goblins (co-present, living; not on the player); the encounter closes. Then the same flight as step 8: A at 4, both in `plate_passage`, hp 10. Calm control (a third world, nobody afraid, the chief left alone): after two rounds on A the player is at 8 and A at 2, both goblins still in the den (one pack member strikes per round, plan 2 step 9). | fear x pack x death |
 
 Sandbox `sapper_cellar`: the plate is under the player's feet on arrival (poisoned at once, unless
@@ -173,14 +171,13 @@ units (7200, 600, the `clock_hour` job); no device clock.
 - Book e2e `mobile/app/tests/showcase_traps.e2e.ts`, the happy path in the real UI at phone width:
   Aldous's Talk and the wield, down, Search and Disarm cards (twice), north, Read the note, the
   three Pull cards, Open, Read the slate, five Turn cards, Open, Take, Drink, north twice, the
-  Word bar's Shout chip "begone", Attack, and the two "flees" lines. Every verb here is a card or a
+  Shout "Begone!" card, Attack, and the two "flees" lines. Every verb here is a card or a
   chip; nothing is kernel-only.
 
 ## Blind AI playtest focus
 
 Does the player search before walking the passage, or learn by being bitten? Does the player find
-the note before pulling the levers? Does "begone" read as something to shout, from the
-sign alone? Does the Poisoned line say what it is and how long, in words, without a colour?
+the note before pulling the levers? Does the bones' Shout "Begone!" card read as the way to break the pack? Does the Poisoned line say what it is and how long, in words, without a colour?
 
 ## Matrix cells this plan adds
 

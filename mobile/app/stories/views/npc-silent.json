@@ -88,12 +88,12 @@
   },
   "known_npcs": [
    {
-    "id": "65d77be3-068c-8eff-a84e-8b17a5777bcc",
-    "name": "npc.fence.short"
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "name": "npc.hob.short"
    },
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
-    "name": "npc.hob.short"
+    "id": "b887681c-2d13-8cab-a2e3-6b4388ee0dd9",
+    "name": "npc.fence.short"
    }
   ],
   "levelling": {
@@ -402,7 +402,7 @@
   ],
   "notices": [
    {
-    "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
+    "id": "e89b9f79-f8a1-8062-a340-1996b92e8a39",
     "key": "barrels",
     "title": "detail.barrels.title",
     "description": "detail.barrels",
@@ -421,7 +421,7 @@
   ],
   "entities": [
    {
-    "id": "65d77be3-068c-8eff-a84e-8b17a5777bcc",
+    "id": "b887681c-2d13-8cab-a2e3-6b4388ee0dd9",
     "name": "npc.fence.short",
     "words": {
      "article": "the",
@@ -447,7 +447,7 @@
     ],
     "shop": [
      {
-      "item_id": "501c86cf-4ccd-8392-a43b-5e8e9da838dd",
+      "item_id": "72a863ed-f50b-8d73-80a2-06a8371df0c3",
       "name": "item.merchant_purse.short",
       "buy": {
        "price": 6,
@@ -461,7 +461,7 @@
       }
      },
      {
-      "item_id": "a1451e93-408d-8bbb-8485-a3c04b023270",
+      "item_id": "88d0018b-7bfd-89be-aef9-dc1d36e5e929",
       "name": "item.beeswax_candle.short",
       "buy": {
        "price": 4,
@@ -475,7 +475,7 @@
       }
      },
      {
-      "item_id": "80dd2a25-dfa2-8e54-8b4b-c52d42f8e572",
+      "item_id": "9c71d3ac-0152-870d-ae3b-9fc5ae74e4fe",
       "name": "item.yard_purse.short",
       "buy": {
        "price": 6,
@@ -511,10 +511,6 @@
   ],
   "position": "standing",
   "journal": [],
-  "phrases": [
-   "ware",
-   "begone"
-  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -617,7 +613,7 @@
  "stack": [
   {
    "kind": "thing",
-   "id": "65d77be3-068c-8eff-a84e-8b17a5777bcc"
+   "id": "b887681c-2d13-8cab-a2e3-6b4388ee0dd9"
   }
  ],
  "log": [
