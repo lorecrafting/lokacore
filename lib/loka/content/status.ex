@@ -80,11 +80,7 @@ defmodule Loka.Content.Status do
 
   defp status(rel, s, {m, settings}, defs, text) do
     Refs.reference(rel, [], "resource", s, m, defs) ++
-      if(not permanent?(s) and s["tick_every"] >= s["duration"],
-        do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
-        else: []
-      ) ++
-      per_tick(rel, s) ++
+      timing(rel, s) ++
       missing_text(rel, ["name"], [s["name"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
       refs(rel, s, m, defs) ++
@@ -92,6 +88,13 @@ defmodule Loka.Content.Status do
   end
 
   defp readers(rel, s), do: commands(rel, s) ++ perception(rel, s)
+
+  defp timing(rel, s) do
+    if(not permanent?(s) and s["tick_every"] >= s["duration"],
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
+      else: []
+    ) ++ per_tick(rel, s) ++ expired(rel, s)
+  end
 
   # Status reader 6: a perception names a sense (the schema subset has no minProperties).
   defp perception(rel, %{"perception" => p}) when map_size(p) == 0,
@@ -109,17 +112,21 @@ defmodule Loka.Content.Status do
         do: diag("UNKNOWN_COMMAND", at(rel, [field, i]))
   end
 
-  # Never 0; only a modifying (row 2c), fear (row W21) or reader (4, 5, 6, 8) status may omit it; a permanent one
-  # (row W8) never ticks, so it declares none.
+  # Never 0; only a modifying (row 2c), fear (row W21), reader (4, 5, 6, 8) or permanent (row W8) status
+  # may omit it.
   defp per_tick(rel, s) do
     if s["per_tick"] == 0 or
-         if(permanent?(s),
-           do: s["per_tick"] != nil,
-           else:
-             s["per_tick"] == nil and s["modifies"] == nil and s["fear"] == nil and not reader?(s)
-         ),
+         (s["per_tick"] == nil and s["modifies"] == nil and s["fear"] == nil and not reader?(s) and
+            not permanent?(s)),
        do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
        else: []
+  end
+
+  # A timed status tells its expiry; a permanent one (row W8) never expires, so it may omit the line.
+  defp expired(rel, s) do
+    if permanent?(s) or Map.has_key?(s["narration"] || %{}, "expired"),
+      do: [],
+      else: [diag("SCHEMA_VIOLATION", at(rel, ["narration", "expired"]))]
   end
 
   defp refs(rel, s, m, defs), do: modifies(rel, s, m, defs) ++ pierced_by(rel, s, m, defs)
