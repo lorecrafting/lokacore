@@ -15,8 +15,7 @@ import { book, bundle, fixture, nodes, words } from './__tests__/polish-book.tes
 // target name or leaves Map open; a queued stale Take reopens its obsolete detail.
 test('only confirmed pickup returns World, including a retry from another page', () => {
   const h = book();
-  h.map();
-  h.tap('Go north');
+  h.go('north');
   h.tap('A brass lantern');
   assert.deepEqual(
     h.labels().filter((s) => !CONTENTS.test(s)),
@@ -35,8 +34,7 @@ test('only confirmed pickup returns World, including a retry from another page',
   assert.match(h.p.screen().fault!, /readonly/);
   h.tap('Leave');
   h.sql.exec('PRAGMA query_only = 0');
-  h.map();
-  h.tap('Go south'); // retries Take; the player remains at Well Lane
+  h.go('south'); // retries Take; the player remains at Well Lane
   assert.equal(h.game.view().view.place.title.key, 'room.well_lane.title');
   assert.ok(h.text().includes('Well Lane'));
   assert.equal(h.labels().includes('Take a brass lantern'), false);
@@ -66,8 +64,7 @@ test('only confirmed pickup returns World, including a retry from another page',
 // incomplete press is sent.
 test('a held item offers Give to… only a present recipient and logs the confirmed gift once', () => {
   const h = book();
-  h.map();
-  h.tap('Go north');
+  h.go('north');
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   const item = h.game.view().view.inventory[0];
@@ -85,8 +82,7 @@ test('a held item offers Give to… only a present recipient and logs the confir
   h.tap('Leave');
   h.tap(LABEL.backToContents); // item Leave returned to Carrying
   h.tap(LABEL.backToWorld);
-  h.map();
-  h.tap('Go south');
+  h.go('south');
   h.tap(CONTENTS);
   h.tap(LABEL.inventory);
   h.tap('a brass lantern, open');
@@ -121,8 +117,7 @@ test("the farmer's page has no Give an item…; the apple's page gives to the fa
 // Breaks: inventory Drop stays in detail, falsely succeeds while pending, or retry loses its name.
 test('inventory Drop returns World with one named event only after confirmation', () => {
   const h = book();
-  h.map();
-  h.tap('Go north');
+  h.go('north');
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   h.tap(CONTENTS);
@@ -146,8 +141,7 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.tap(LABEL.backToContents); // item Leave returned to Carrying
   h.tap(LABEL.backToWorld);
   h.sql.exec('PRAGMA query_only = 0');
-  h.map();
-  h.tap('Go south'); // retries Drop without walking
+  h.go('south'); // retries Drop without walking
   assert.deepEqual(h.game.view().view.inventory, []);
   assert.ok(h.labels().includes('A brass lantern, open'));
   assert.ok(h.labels().includes('standing, change position'));
@@ -171,18 +165,17 @@ test('other item actions retain their detail and show their consequences there',
   h.tap('A sewing box');
   h.tap('Open a sewing box');
   assert.equal(h.stack.at(-1)?.kind, 'inside'); // an accepted Open turns to the Inside page (loka-mo0p)
-  h.tap(LABEL.close);
+  h.tap('Close a sewing box'); // the Inside page's foot shuts the lid (loka-2qk5)
   assert.ok(h.labels().includes('Leave'));
-  assert.ok(h.labels().includes('Close a sewing box'));
+  assert.ok(h.labels().includes('Open a sewing box'));
   assert.ok(h.text().includes("You open the sewing box's lid."));
   assert.equal(h.p.screen().log.filter((l) => l === "You open the sewing box's lid.").length, 1);
   h.tap('Leave');
-  assert.ok(h.labels().includes('A sewing box, open'));
-  h.tap('A sewing box, open');
+  h.tap('A sewing box');
   assert.equal(h.text().includes("You open the sewing box's lid."), false); // a reopened item starts a new visit (loka-x6t.19)
   h.unmount();
   const r = book(items, { ...a, game: openGame(a.db, items, a.host) }); // and after a cold reopen
-  r.tap('A sewing box, open');
+  r.tap('A sewing box');
   assert.equal(
     r.text().includes("You open the sewing box's lid."),
     false,
@@ -308,7 +301,7 @@ test('delayed Take returns once with its original item name after a conflicting 
 });
 
 // Breaks: delayed quest completion loses original NPC history or repeats the neutral journal event.
-test('delayed actual quest completion adds one authored result and Journal updated in original history', () => {
+test('delayed actual quest completion adds one authored result and the journal event in original history', () => {
   const h = book(bundle('containers_sampler_v010_hash')),
     completed: GameSubscription[] = [];
   h.game.subscribe((u) => {
@@ -334,7 +327,7 @@ test('delayed actual quest completion adds one authored result and Journal updat
     );
     assert.deepEqual(
       history.filter((s: unknown) => typeof s !== 'string'),
-      [{ text: 'Journal updated', event: true }],
+      [{ text: 'You make a note in your journal.', event: true }],
     );
     assert.equal(h.p.update(completed[0]), false);
     assert.equal(history.filter((s: unknown) => typeof s !== 'string').length, 1);
@@ -348,8 +341,7 @@ test('delayed actual quest completion adds one authored result and Journal updat
 test('actual trunk detail explains refused Take and restores its button after Remove then Drop', () => {
   const h = book();
   const go = (direction: string) => {
-    h.map();
-    h.tap(`Go ${direction}`);
+    h.go(direction);
   };
   const take = (name: string) => {
     h.tap(h.labels().find((l: string) => l.toLowerCase() === `${name}, open`)!); // first name capitalised
@@ -435,32 +427,13 @@ test('a notice page shows its description once and every other read line as read
   assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'You read it twice.', 'Leave']);
 });
 
-// Break: a body read again on entry (Map Read, then opening the signpost) shows twice now that
-// the notice page keeps equal lines (loka-x6t.81, loka-x6t.101).
-test('the signpost read from the Map, then opened, shows its body once', () => {
-  const h = book(bundle('toolbox_showcase_hash'));
-  try {
-    h.map();
-    h.tap('Read the signpost');
-    h.tap(LABEL.backToWorld);
-    assert.equal(h.labels().includes('The inn signpost, open'), false); // linked in the prose (loka-x6t.105)
-    h.tap('signpost, open');
-    assert.equal(h.text().filter((line) => line.startsWith('Four roads')).length, 1);
-  } finally {
-    h.unmount();
-    h.sql.close();
-  }
-});
-
 // Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
 // before any quest is active, or repeats on the Journal page (Page's doc comment).
 test('the running head shows the active quest objective on room and NPC pages', () => {
   const head = 'Clear the five rats from the Lantern cellar.'; // quest.mauds_cellar.active
   const h = book();
-  h.map();
-  h.tap('Go north');
-  h.map();
-  h.tap('Go east');
+  h.go('north');
+  h.go('east');
   assert.equal(h.text().includes(head), false);
   h.tap('Widow Maud');
   h.tap('Talk to Widow Maud');

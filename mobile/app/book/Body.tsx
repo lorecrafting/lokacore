@@ -131,8 +131,7 @@ function sectionPage(p: BodyProps, page: Page) {
         pending={p.screen.pending}
       />
     );
-  if (page.kind === 'map')
-    return <MapPage view={view} text={text} g={p.g} press={p.press} {...home} />;
+  if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
   if (page.kind === 'settings')
     return <SettingsPage startOver={p.startOver} {...home} reading={p.reading} />;
   if (page.kind === 'journal') return <JournalPage {...p.screen} {...home} press={p.press} />;

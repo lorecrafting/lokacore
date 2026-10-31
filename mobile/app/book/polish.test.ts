@@ -11,6 +11,8 @@ import { LABEL } from './labels.ts';
 import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
+const NOTE = 'You make a note in your journal.';
+
 // Breaks: confirmed ear Take returns to World, leaves the stale ear child open, or restores
 // its pickup on the World log instead of the exact corpse after reopening; or the nested ear
 // shows Back to container beside Leave, two returns to the same page (loka-x6t.94).
@@ -175,9 +177,9 @@ test('remounted pending ear Take settles on its exact corpse detail', () => {
   a.sql.close();
 });
 
-// Breaks: room title scrolls away, room Ways returns, a directly opened Map not back to World, or a
+// Breaks: room title scrolls away, room or Map Go returns, a directly opened Map not back to World, or a
 // section opened from Contents drawing the status line or not going Back to Contents (loka-8lpm).
-test('room is focused while Map retains directions and every detail returns to the world', () => {
+test('room is focused, the Map offers no Go, and every detail returns to the world', () => {
   const h = book();
   const roomScroll = h.draw().find((n) => n.type === 'ScrollView');
   assert.equal(words(roomScroll).includes('Ferry Landing'), false);
@@ -200,9 +202,11 @@ test('room is focused while Map retains directions and every detail returns to t
   assert.ok(h.labels().includes('Old Bram, open'));
   assert.equal(h.text().includes('North'), false);
   assert.equal(h.text().includes('Beyond north: Well Lane — a brass lantern.'), false);
-  h.map();
-  assert.ok(h.labels().includes('Go north'));
-  assert.ok(h.text().includes('Beyond north: Well Lane — a brass lantern.'));
+  h.map(); // the Map draws; it offers no movement (owner 2026-10-30)
+  assert.equal(
+    h.labels().some((l) => l.startsWith('Go ')),
+    false,
+  );
   h.tap('Back to World');
   const status = () => h.labels().some((l) => CONTENTS.test(l));
   const sections = ['Character', LABEL.inventory, 'Map', 'Journal', 'Settings'];
@@ -240,10 +244,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   assert.doesNotThrow(() => h.tap("Offer to fetch Bram's lantern"));
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.journal[0].state, 'active');
-  assert.deepEqual(h.p.screen().detail(speaker).slice(-2), [
-    result,
-    { text: 'Journal updated', event: true },
-  ]);
+  assert.deepEqual(h.p.screen().detail(speaker).slice(-2), [result, { text: NOTE, event: true }]);
   const fault = 'Saved result; narration recovery unavailable: no such table: missing_narration';
   assert.ok(h.text().includes(fault));
   // A screen reader hears the reason too, not only the Start over button's label.
@@ -251,8 +252,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   assert.ok(startOver && !words(startOver).includes(fault));
   h.tap('Leave the conversation');
   h.tap('Leave');
-  h.map();
-  h.tap('Go north'); // a fresh move, not a replay of the committed choice
+  h.go('north'); // a fresh move, not a replay of the committed choice
   assert.ok(h.text().includes('Well Lane'));
   assert.equal(
     h.p
@@ -316,7 +316,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   assert.deepEqual(h.p.screen().detail(speaker), [
     prompt,
     "You say you'll fetch it. Bram nods toward the path north.",
-    { text: 'Journal updated', event: true },
+    { text: NOTE, event: true },
   ]);
   const flow = nodes(h.draw().find((n) => n.type === 'ScrollView'));
   assert.deepEqual(h.text().slice(0, 3), [
@@ -324,7 +324,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
     'Old Bram',
     'A ferryman with rope-scarred hands and a coat that has never been dry.',
   ]);
-  const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === 'Journal updated');
+  const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === NOTE);
   assert.equal(flow[cue].props.style.fontStyle, 'italic');
   // The reply ended the kernel conversation; the page stays in it: no Talk, only its Leave.
   assert.equal(
@@ -336,20 +336,20 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.tap('Leave the conversation'); // the later fresh visit offers Talk again
   h.tap('Leave');
   h.map();
-  assert.equal(h.text().includes('Journal updated'), false);
-  h.tap('Go north');
+  assert.equal(h.text().includes(NOTE), false);
+  h.tap('Back to World');
+  h.go('north');
   h.tap('A brass lantern');
   const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');
   h.clock.wall += 250;
   h.clock.mono += 250;
   assert.equal(h.game.pulse().kind, 'ready');
   drawnTake.props.onPress(); // Breaks: the old-token shortcut keeps an item page after confirmed pickup.
-  h.map();
-  h.tap('Go south');
+  h.go('south');
   h.tap('Old Bram');
-  assert.equal(h.text().includes('Journal updated'), false); // a fresh visit hides past talk
+  assert.equal(h.text().includes(NOTE), false); // a fresh visit hides past talk
   h.tap('Talk to Old Bram');
-  assert.equal(h.text().includes('Journal updated'), false); // nor does a new conversation (loka-x6t.19)
+  assert.equal(h.text().includes(NOTE), false); // nor does a new conversation (loka-x6t.19)
   h.tap('Keep the lantern');
   assert.equal(h.game.view().view.scene!.index, 1);
   assert.deepEqual(h.labels(), ['Continue']);
@@ -415,7 +415,7 @@ test('an NPC choice retried from the world keeps its result in the original deta
   ]);
   assert.deepEqual(h.p.screen().detail(bram).slice(-2), [
     "You say you'll fetch it. Bram nods toward the path north.",
-    { text: 'Journal updated', event: true },
+    { text: NOTE, event: true },
   ]);
   h.sql.close();
 });
@@ -478,20 +478,6 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     'Satchel and lamp are here.',
   ]);
   assert.deepEqual(groups([entity('lamp', 'item')]), ['Lamp is here.']);
-});
-
-// Breaks: the Map foot loses Back to map or its clear, or Back to World leaves a page on the stack.
-test('a chosen map place adds Back to map before Back to World', () => {
-  const h = book(compiled('cartridges/toolbox_showcase') as never);
-  h.map();
-  const returns = () => h.labels().filter((x) => x.startsWith('Back to'));
-  h.tap('Crossroads Inn, current place');
-  assert.deepEqual(returns(), ['Back to map', 'Back to World']);
-  h.tap('Back to map');
-  assert.deepEqual(returns(), ['Back to World']);
-  h.tap('Back to World');
-  assert.deepEqual(h.stack, []);
-  h.sql.close();
 });
 
 // Breaks: a return turns forward or an opened page turns back (BOOK-UI-COMPONENTS.md#page-turn,

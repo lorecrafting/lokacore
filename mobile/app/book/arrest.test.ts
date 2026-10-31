@@ -16,16 +16,13 @@ for (const failed of [false, true])
   test(`a wanted walk north lands on the cell page with the arrest and charge lines${failed ? ' (no read-back)' : ''}`, () => {
     const trial = compiled('cartridges/trial_sampler') as never;
     const b = book(trial);
-    b.map();
-    b.tap('Open the barred cell door (east)');
-    b.tap('Back to World');
+    b.go('east'); // the footer opens the shut cell door
     assert.ok(b.text().includes('You open the barred cell door.'), JSON.stringify(b.text())); // a square line to lose
     for (const c of ['the crier, open', /^Talk/, 'Confess to the theft']) b.tap(c);
     b.tap(LABEL.leaveConversation);
     b.tap(LABEL.leave);
-    b.map();
     if (failed) b.failNarration();
-    b.tap('Go north');
+    b.go('north');
     const shown = b.text();
     assert.equal(shown[0], 'Cell');
     const arm = shown.indexOf(
@@ -44,11 +41,5 @@ for (const failed of [false, true])
       reopened.slice(at, at + 2),
       shown.slice(arm, arm + 2),
       JSON.stringify(reopened),
-    );
-    b.map();
-    const map = b.text(); // the cell door's exit card reads West; its line keeps the state (UF2)
-    assert.ok(
-      map.includes('West') && map.includes('The barred cell door: closed'),
-      JSON.stringify(map),
     );
   });

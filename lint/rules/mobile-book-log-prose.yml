@@ -1,0 +1,25 @@
+id: mobile-book-log-prose
+language: tsx
+severity: error
+message: 'A log line reads as novel prose: a Book-composed line is a second-person narrated event, never a `Label: value` (book-ui.md Line placement, loka-lsqi).'
+# The builders of log and receipt lines, and the lesson note that echoes a log event.
+files:
+  - mobile/app/book/words.ts
+  - mobile/app/book/logs.ts
+  - mobile/app/book/received.ts
+  - mobile/app/book/recap.ts
+  - mobile/app/book/reasons.ts
+  - mobile/app/book/pick.ts
+  - mobile/app/book/presenter.ts
+  - mobile/app/book/skills.tsx
+  - mobile/packages/game-view/line_words.ts
+# A colon label: a word or ")" then ": " in a string or template piece, or a piece that opens on ": ".
+# A fault (`s.fault = ...`) is the Fault component's, not a log line.
+rule:
+  kind: string_fragment
+  regex: '[A-Za-z)]: |^: '
+  not:
+    inside:
+      kind: assignment_expression
+      has: { field: left, regex: '\.fault$' }
+      stopBy: end

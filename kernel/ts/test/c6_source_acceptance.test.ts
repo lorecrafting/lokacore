@@ -197,7 +197,7 @@ test('a legal detour retains the next checkpoint and hides an inapplicable direc
   assert.equal(journal().direction, undefined);
   assert.equal(
     expeditionLine(journal(), (key) => (key === 'room.glade.title' ? 'Glade' : key)),
-    'Next checkpoint: Glade.',
+    'Your next checkpoint is Glade.',
   );
   assert.equal(a.command({ type: 'move', direction: 'west' }).kind, 'accepted');
   assert.equal(journal().cursor, 1);
@@ -205,6 +205,6 @@ test('a legal detour retains the next checkpoint and hides an inapplicable direc
   assert.equal(journal().next_title, 'room.glade.title');
   assert.equal(
     expeditionLine(journal(), (key) => (key === 'room.glade.title' ? 'Glade' : key)),
-    'Next: west to Glade.',
+    'Next you go west to Glade.',
   );
 });

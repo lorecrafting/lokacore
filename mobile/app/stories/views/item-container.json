@@ -982,7 +982,7 @@
   "You open the sack's tie.",
   "You take a turnip seed.",
   {
-   "quiet": "[\"item.put\",{\"item\":\"item.seed_01.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"4aca6f3f-73f0-8539-943c-7303d8236a8c\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],12]",
+   "quiet": "[\"item.put\",{\"item\":\"item.seed_01.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"4aca6f3f-73f0-8539-943c-7303d8236a8c\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],6]",
    "plain": "You put a turnip seed in a seed sack.",
    "times": 1,
    "text": "You put a turnip seed in a seed sack."

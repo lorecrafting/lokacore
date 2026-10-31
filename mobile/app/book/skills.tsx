@@ -149,8 +149,29 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
   );
 }
 
-// The spell words refused here, each with its reason (owner, mvl9qy5ut2x2), then each aimed spell's
-// Cast on… list of its targets (loka-x6t.109.5): the target pages' Cast a spell… rows (buttons.ts).
+// The spell words castable here, each a card sending Cast's wordless twin with that word (loka-evzt);
+// marked a pick so an accepted cast turns to World with its line, as an aimed pick does.
+const castCards = (
+  words: ReturnType<typeof castWords>,
+  buttons?: Button[],
+  press?: (b: Button) => void,
+) => {
+  const cast = buttons?.find((b) => b.action_key === 'cast' && !('word' in b.input));
+  if (!cast || !press) return [];
+  return words
+    .filter((s) => s.available)
+    .map(({ word }) => (
+      <ActionCard
+        key={word}
+        b={{ ...cast, label: `${word}, cast`, input: { word }, pick: {} }}
+        press={press}
+      />
+    ));
+};
+
+// The castable cards, then those refused here, each with its reason (owner, mvl9qy5ut2x2), then
+// each aimed spell's Cast on… list of its targets (loka-x6t.109.5): the target pages' Cast a
+// spell… rows (buttons.ts).
 export function spells(p: {
   view?: GameView;
   text: (key: string) => string;
@@ -158,12 +179,15 @@ export function spells(p: {
   press?: (b: Button) => void;
   pending?: boolean;
 }) {
-  const refused = p.view?.spell_words?.length ? castWords(p.view).filter((s) => !s.available) : [];
+  const words = p.view?.spell_words?.length ? castWords(p.view) : [];
+  const cards = castCards(words, p.buttons, p.press);
+  const refused = words.filter((s) => !s.available);
   const aimed = (p.buttons ?? []).filter((b) => b.pick && commandOf(b) === 'cast');
-  if (!refused.length && !aimed.length) return null;
+  if (!cards.length && !refused.length && !aimed.length) return null;
   return (
     <View>
       <SectionTitle>{LABEL.spells}</SectionTitle>
+      {cards}
       {refused.map((s) => (
         <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, p.text)} />
       ))}
@@ -204,9 +228,11 @@ export const npcSkills = (
       const locked = s.locked && !s.acquired; // learned reads first, as on the Character page
       return (
         <Text key={s.skill.key} style={note(c, t)}>
-          {s.acquired || locked
-            ? `${p.text(s.label)}: ${locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
-            : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
+          {locked
+            ? `You cannot learn ${p.text(s.label)} yet`
+            : s.acquired
+              ? `You know ${p.text(s.label)}${s.qualified ? '' : ' but cannot use it yet'}`
+              : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
           {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
           {s.qualified && !locked ? '.' : `. ${p.text(s.requirement)}`}
         </Text>

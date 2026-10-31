@@ -22,7 +22,7 @@ walk(
     await horse(screen, 'Mount the horse');
     await moves(screen, 'north');
     await settle();
-    // Mounted, the map's East card is unavailable and it offers no Go east.
+    // Mounted, east to the fen is refused; the Map draws its exit and offers no Go (owner 2026-10-30).
     await screen.getByRole('button', 'Map').tap();
     await settle();
     await screen.getByRole('button', LABEL.backToWorld).tap();

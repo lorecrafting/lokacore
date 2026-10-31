@@ -6,10 +6,10 @@ import { CONTENTS } from './__tests__/control.test.ts';
 
 // Breaks: the map scrolls only when its drawing changes size, so going back to the current room's
 // level, when both levels draw the same size, leaves the marker off a narrow page.
-// layout.json: the shore steps two rooms (144 each) east of the inn, the undercroft below.
+// layout.json: the shore steps two rooms (72 each) east of the inn, the undercroft below.
 test('the Map scrolls back to the current room when its level is shown again', () => {
   const b = book(bundle('toolbox_showcase_hash'));
-  for (const d of ['down', 'up', 'east']) (b.map(), b.tap(`Go ${d}`));
+  for (const d of ['down', 'up', 'east']) b.go(d);
   b.tap(CONTENTS);
   b.tap('Map');
   const xs: number[] = [];
@@ -19,5 +19,5 @@ test('the Map scrolls back to the current room when its level is shown again', (
   b.draw();
   b.tap('Next map level');
   b.draw();
-  assert.deepEqual(xs, [288]);
+  assert.deepEqual(xs, [144]);
 });

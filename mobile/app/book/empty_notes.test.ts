@@ -22,14 +22,11 @@ test('Inventory says it carries nothing only when no item is held', () => {
 
 // Breaks: the no-exit note shows beside a known exit, or is missing in a room with none.
 test('Map says no way out is known only when the room has no exit', () => {
-  const groups = { exits: [], place: [], door: () => [], on: () => [] };
   const page = (exits: object[]) =>
     text(
       MapPage({
         view: { exits, place: { title: { key: 'Room' } } },
         text: say,
-        g: groups,
-        press: none,
         world: none,
       } as any),
     );

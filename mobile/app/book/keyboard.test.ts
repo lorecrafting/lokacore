@@ -116,17 +116,17 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
   const refusals: DetailLine[] = [];
-  const knocked: string[] = []; // exits whose door was tried; only west offers Open or Unlock
-  const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
-    direction,
-    available: true,
-  }));
+  const openWest = { label: 'Open', action_key: 'open', target_ids: [], input: {} }; // only west's door
+  const opened: unknown[] = [];
+  const directions = ['north', 'south', 'west', 'east', 'up', 'down'];
+  const exits = directions.map((direction) => ({ direction, available: true }));
   const props = {
     keyboardEnabled: true,
     exits,
     text: (key: string) => key,
     go: (direction: string) => walked.push(direction),
-    door: (direction: string) => (knocked.push(direction), direction === 'west'),
+    door: (direction: string) => (direction === 'west' ? [openWest] : []),
+    press: (b: unknown) => opened.push(b),
     refused: (line: DetailLine) => refusals.push(line),
     openMap: () => {},
     learned: { seen: () => true, see: () => {} },
@@ -149,7 +149,7 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   exits.splice(0, 5, shut('north', 'locked'), exits[1]!, shut('west', 'locked'));
   exits.push(shut('up', 'closed'), shut('down', 'locked'));
   for (const name of ['ArrowUp', 'PageUp', 'PageDown', 'ArrowLeft']) assert.equal(key(name), true);
-  assert.deepEqual(knocked, ['north', 'north', 'up', 'down', 'west']);
+  assert.deepEqual(opened, [openWest]);
   assert.equal(walked.length, 6);
   assert.deepEqual(refusals, [
     { kind: 'refused', reason: 'closed', text: 'The way north is closed.' },
@@ -202,7 +202,7 @@ test('Book captures movement keys only on an active World page', (t) => {
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
     });
-    const bottom = book.props.children.props.children.props.children[2]; // after the say shield
+    const bottom = book.props.children.props.children.props.children[0].props.children[1]; // after the page
     const footer = bottom
       .type(bottom.props) // null: a detail page draws no status line
       ?.props.children.find((child: any) => child?.type === Footer);
@@ -265,12 +265,12 @@ test('the chapter title page leaves only Continue', () => {
     startOver: () => {},
     shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
   });
-  const bottom = book.props.children.props.children.props.children[2]; // after the say shield
-  const [navigation, , status] = bottom.type(bottom.props).props.children; // the say shield between
+  const bottom = book.props.children.props.children.props.children[0].props.children[1]; // after the page
+  const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
-  // past the (absent) icon row: the row, its two wrap units (line one; the button and say icon)
-  const button = StatusLine(status.props).props.children[1].props.children[1].props.children[0];
+  // past the (absent) icon row: the row, its two wrap units (line one; the button)
+  const button = StatusLine(status.props).props.children[1].props.children[1].props.children;
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
@@ -298,7 +298,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children[1].props.children[1].props.children[0];
+  const button = status.props.children[1].props.children[1].props.children;
   const contents = button.type(button.props);
   const text = (e: any): string =>
     e && typeof e === 'object' ? [e.props.children].flat().map(text).join('') : String(e ?? '');

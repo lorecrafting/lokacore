@@ -855,7 +855,7 @@
  "log": [
   "You arrive from the north.",
   {
-   "quiet": "[\"commerce.bought\",{\"item\":\"item.bread.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"135ad56f-dfaa-8e43-985d-9dd1e051753b\",\"9c602831-e905-8f59-ab25-e9f615e2669c\"],5]",
+   "quiet": "[\"commerce.bought\",{\"item\":\"item.bread.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"135ad56f-dfaa-8e43-985d-9dd1e051753b\",\"9c602831-e905-8f59-ab25-e9f615e2669c\"],3]",
    "plain": "You buy a cob of bread.",
    "times": 1,
    "text": "You buy a cob of bread."

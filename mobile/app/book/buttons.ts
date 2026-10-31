@@ -138,13 +138,13 @@ const askButtons = (v: GameView, text: Say): Press[] =>
       ),
   );
 
-// The say field's sends (book-ui.md, Word bar): only while no combat, scene or conversation is open.
+// The word field's sends (book-ui.md, Word bar): only while no combat, scene or conversation is open.
 export const WORDS = ['say', 'whisper', 'shout', 'cast'];
 export const wordless = (v: GameView) => Boolean(v.combat || v.scene || v.choice);
 // The spell words known here: none unless Cast is offered here.
 export const castWords = (v: GameView) =>
   !wordless(v) && v.actions.some((a) => a.action_key === 'cast') ? (v.spell_words ?? []) : [];
-// The say field's word chips: the known phrases, then the spell words castable here.
+// The word field's chips (the Realm's): the known phrases, then the spell words castable here.
 export const knownWords = (v: GameView) => [
   ...new Set([
     ...(v.phrases ?? []),
@@ -154,7 +154,7 @@ export const knownWords = (v: GameView) => [
   ]),
 ];
 // Say, shout, cast and each whisper without a word: the live twins of every typed word
-// (actionContext) that the say field and the NPC page's Whisper send.
+// (actionContext): the Realm's word field, the Character page's spell cards and the NPC page's Whisper send them.
 function wordButtons(v: GameView, text: Say): Press[] {
   if (wordless(v)) return [];
   const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);

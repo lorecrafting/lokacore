@@ -34,6 +34,5 @@ export const Disabled: Story = {
 // The rest of the catalogue's Control labels; Got it sits on the tip's fill (Tip.stories).
 export const Leave: Story = { args: { label: 'Leave' } };
 export const BackToBoard: Story = { args: { label: 'Back to board' } };
-export const BackToMap: Story = { args: { label: 'Back to map' } };
 export const Close: Story = { args: { label: 'Close' } };
 export const ResumeDream: Story = { args: { label: 'Resume dream' } };

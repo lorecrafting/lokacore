@@ -41,8 +41,7 @@ function cartridge() {
 test('cast-opened fight: rounds drained by a press still print every round and the death', (t) => {
   const b = book(cartridge() as never);
   t.after(() => b.sql.close());
-  b.map();
-  b.tap('Go east');
+  b.go('east');
   b.tap('A wight, open');
   b.tap('Cast a spell…');
   b.tap('Flamma, cast flamma on a wight'); // the aimed spell's row on the wight's page

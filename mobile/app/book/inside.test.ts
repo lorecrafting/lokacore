@@ -19,28 +19,43 @@ const openSack = () => {
 };
 
 // Breaks: an accepted Open stays on the item page, the item page lists the contents itself
-// again, a row opens no item page, the item's Leave skips the list, or Close lands anywhere but
-// the sack's page.
-test('an accepted Open turns to the contents page; Leave returns to it, Close to the item page', () => {
+// again, a row opens no item page, the item's Leave skips the list, or the Inside foot is a local
+// Close that leaves the lid open instead of the sack's own Close (loka-2qk5).
+test('an accepted Open turns to the contents page; its foot closes the lid', () => {
   const h = openSack();
   const sack = h.stack.at(-2)!;
   const id = (sack as { id: string }).id;
   assert.deepEqual(h.stack.at(-1), { kind: 'inside', id });
   assert.ok(h.text().includes(LABEL.inside));
+  assert.ok(!h.labels().includes(LABEL.close), 'no local Close beside the lid');
   h.tap('A turnip seed, open');
   assert.equal(h.stack.at(-1)!.kind, 'thing');
   h.tap(LABEL.leave);
   assert.equal(h.stack.at(-1)!.kind, 'inside');
-  h.tap(LABEL.close);
-  assert.deepEqual(h.stack.at(-1), sack);
-  const opened = h.p.screen().detail(id)[0]!;
-  assert.ok(h.text().includes(opened), 'Opened. stays in the item page history');
+  h.tap('Close a seed sack');
+  assert.deepEqual(h.stack, [sack]);
+  const [opened, closed] = h.p.screen().detail(id);
+  assert.ok(opened && closed && h.text().includes(opened) && h.text().includes(closed));
   assert.ok(!h.text().includes(LABEL.inside), 'the item page draws no Inside list');
-  h.tap(LABEL.lookInside);
-  assert.deepEqual(h.stack.at(-1), { kind: 'inside', id });
-  h.tap(LABEL.close);
-  h.tap(LABEL.leave);
-  assert.deepEqual(h.stack, []);
+  assert.deepEqual(h.labels(), ['Open a seed sack', LABEL.leave]);
+  h.unmount();
+  h.sql.close();
+});
+
+// Breaks: the Inside page offers no Put card for a held item, offers one for the item already
+// inside, or a Put pressed there leaves the page (loka-2qk5).
+test("the Inside page puts a held item in with the item page's own Put", () => {
+  const h = book(showcase);
+  const steps = routes['item-inside']!;
+  for (const step of steps.slice(0, -1))
+    typeof step === 'function' ? step(h as never) : h.tap(step as string);
+  const inside = h.stack.at(-1)!;
+  assert.equal(inside.kind, 'inside');
+  h.tap('Put a loaf in a seed sack');
+  assert.deepEqual(h.stack.at(-1), inside);
+  assert.ok(h.labels().includes('A loaf, open'));
+  assert.ok(h.labels().includes('Put a waterskin in a seed sack'));
+  assert.ok(!h.labels().some((l) => l.startsWith('Put a loaf')));
   h.unmount();
   h.sql.close();
 });

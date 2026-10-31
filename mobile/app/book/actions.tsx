@@ -5,7 +5,7 @@ import { Text } from './Text.tsx';
 import { refusedProps, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { onKey, unseen } from './lines.tsx';
-import { reasonSentence } from './reasons.ts';
+import { hides, reasonSentence } from './reasons.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { picks, type Pick } from './pick.ts';
 import { focusTitle, titleContext } from './title.ts';
@@ -31,9 +31,10 @@ type CardProps = (
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form
  *   (book-ui.md, Unavailable actions): the same card reading its plain label, never `label: reason`;
  *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, reasons.ts), read
- *   once. It is exposed as disabled yet stays focusable and pressable, its sentence its hint. With
+ *   once; a permanent refusal (`hides`, reasons.ts) draws nothing. It is exposed as disabled yet
+ *   stays focusable and pressable, its sentence its hint. With
  *   `onPress` it sends nothing: a Pick list's option (with `expanded`) or a card that opens a child
- *   page (the NPC page's Trade). A row may show its own label, accessible name and quiet note in
+ *   page (the NPC page's Trade and Look, an item's Look inside). A row may show its own label, accessible name and quiet note in
  *   place of the Button's label. With `link` it is a shop line, not a card (book-ui.md, Shop
  *   lines): a Tap reading its label as prose, the `link` words in the room link style
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
@@ -45,7 +46,7 @@ type CardProps = (
 export function ActionCard(p: CardProps) {
   const c = usePalette();
   const t = useType();
-  if (!('b' in p) && !('onPress' in p)) return <Unavailable {...p} />;
+  if (!('b' in p) && !('onPress' in p)) return hides(p.reason) ? null : <Unavailable {...p} />;
   const label = p.label ?? ('b' in p ? p.b.label : '');
   if ('b' in p && p.link)
     return (

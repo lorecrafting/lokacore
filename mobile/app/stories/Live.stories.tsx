@@ -71,7 +71,7 @@ export const ReeveErrand: StoryObj = {
     await tap('Reeve, open');
     await tap('Talk to the Reeve');
     await tap('Take the letter to Wat');
-    await page.findByText('Journal updated'); // the real kernel answered: the quest began
+    await page.findByText('You make a note in your journal.'); // the real kernel answered: the quest began
     await tap('Leave the conversation');
     await tap('Leave');
     await page.findByText("Take the Reeve's letter to Wat on the fell."); // the running head

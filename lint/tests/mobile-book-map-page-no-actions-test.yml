@@ -1,0 +1,7 @@
+id: mobile-book-map-page-no-actions
+valid:
+  - "function MapPage(p) { return <Page><DiscoveredMap view={p.view} /></Page>; }"
+  - "function CarryingPage(p) { return <Page><ActionCard b={b} press={p.press} /></Page>; }"
+invalid:
+  - "function MapPage(p) { return <Page><ActionCard b={b} press={p.press} /></Page>; }"
+  - "function MapPage(p) { return <Page>{p.list.map((b) => <ActionCard key={b.id} b={b} press={p.press}>x</ActionCard>)}</Page>; }"

@@ -1,4 +1,4 @@
-// SayField: the one-word field under the status line (SayField's doc comment).
+// SayField: the one-word field, kept for the Realm's room speech (SayField's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { SayField } from '../book/SayField.tsx';
@@ -37,5 +37,17 @@ export const KnownWords: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'lux' }));
     await expect(args.sends[0]!.send).not.toHaveBeenCalled();
     await expect(canvas.getByLabelText('A word')).toHaveValue('lux');
+  },
+};
+
+// Breaks: two words sent as one, refused without the note, or Escape not closing the field.
+export const BadWord: Story = {
+  play: async ({ canvas, args, userEvent }) => {
+    await userEvent.type(canvas.getByLabelText('A word'), 'two words');
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await expect(canvas.getByText('One word, letters only.')).toBeVisible();
+    await expect(args.sends[0]!.send).not.toHaveBeenCalled();
+    await userEvent.type(canvas.getByLabelText('A word'), '{Escape}'); // the press moved focus to Say
+    await expect(args.close).toHaveBeenCalledTimes(1);
   },
 };

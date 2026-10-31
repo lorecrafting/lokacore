@@ -10,6 +10,8 @@ import { openGame } from '../../../authority/local-story/session.ts';
 import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { control, pressable } from './control.test.ts';
 import { fadeStub } from './fade-stub.ts';
+import type { Button } from '../presenter.ts';
+import type { GameView } from '../../../packages/game-view/session.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -54,6 +56,36 @@ registerHooks({
   },
 });
 const { default: Book } = await import('../Book.tsx');
+const { doorPick, pressDoor } = await import('../Footer.tsx');
+const { commandOf } = await import('../buttons.ts');
+
+// Every World-level action has a control: a door verb is drawn (a pressable reading its label) or is
+// a shut door's release pick, a targetless action is a notice's; the rest are undrawn on purpose
+// (book-ui.md, Verbs the Book does not draw, and Room page anatomy). Runs on every draw.
+const UNDRAWN_VERBS = ['close', 'lock'];
+// ponytail: temporary; quest offers have no target field yet (loka-vx2v). Drop when content gives them one.
+const UNTARGETED_QUESTS = ['lantern', 'oar', 'cull', 'find_key', 'apprentice'];
+let room: { g: { place: Button[] }; view: GameView } | undefined; // RoomPage's props: World shows
+function stranded(rendered: any[]) {
+  const f = rendered.find((n) => n.type?.name === 'Footer')?.props;
+  const drawn = rendered.filter(pressable).map((n) => n.props.accessibilityLabel);
+  const has = (b: Button) => UNDRAWN_VERBS.includes(commandOf(b)) || drawn.includes(b.label);
+  for (const e of f?.exits ?? [])
+    for (const b of f.door(e.direction))
+      assert.ok(
+        has(b) || (!e.available && b === doorPick(f.door(e.direction))),
+        `door verb ${b.label} has no control`,
+      );
+  const v = room?.view;
+  const notice = [...(v?.notices ?? []), ...(v?.notice_boards ?? []).flatMap((n) => n.notices)];
+  for (const b of room?.g.place.filter((b) => !b.target_ids.length) ?? [])
+    assert.ok(
+      has(b) ||
+        UNTARGETED_QUESTS.includes(b.action_key) ||
+        notice.some((n) => n.actions?.some((a) => a.action_key === b.action_key)),
+      `targetless action ${b.label} has no control`,
+    );
+}
 type Shell = Parameters<typeof Book>[0]['shell'];
 export const bundle = (name = 'containers_cartridge_sampler_hash') =>
   JSON.parse(
@@ -79,6 +111,7 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Heard') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     owner = element.type;
+    if (element.type.name === 'RoomPage') room = element.props;
     return nodes(element.type(element.props));
   }
   // A context element (the Book's palette) provides its value to the components below it.
@@ -170,6 +203,7 @@ export function book(
     owner = Book;
     (globalThis as any)[Symbol.for('loka-book-test-state')] = useState;
     (globalThis as any)[Symbol.for('loka-book-test-effect')] = useEffect;
+    room = undefined;
     const rendered = nodes(
       Book({
         game,
@@ -183,6 +217,7 @@ export function book(
       }),
     );
     for (const effect of queued.splice(0)) effect();
+    stranded(rendered);
     return rendered;
   };
   const buttons = () => draw().filter(pressable);
@@ -196,10 +231,20 @@ export function book(
     assert.ok(card, `no unavailable ${shown}`);
     card.props.onPress();
   };
-  const map = () => {
-    const footer = draw().find((n) => n.type.name === 'Footer');
-    assert.ok(footer);
-    footer.props.openMap();
+  const footer = () => {
+    const f = draw().find((n) => n.type.name === 'Footer');
+    assert.ok(f);
+    return f.props;
+  };
+  const map = () => footer().openMap();
+  // One step as the minimap's arrow key takes it (Footer's walker): an open exit walks, a shut door
+  // presses its offered Unlock, else Open.
+  const go = (direction: string) => {
+    const f = footer();
+    const e = f.exits.find((x: { direction: string }) => x.direction === direction);
+    assert.ok(e, `no exit ${direction}`);
+    if (e.available) f.go(direction);
+    else assert.ok(pressDoor(f.door(direction), f.press), `the way ${direction} is shut`);
   };
   const text = () =>
     draw()
@@ -228,6 +273,7 @@ export function book(
     tap,
     refuse,
     map,
+    go,
     text,
   };
 }

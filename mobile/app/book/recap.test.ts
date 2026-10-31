@@ -36,7 +36,7 @@ const ids =
     `00000000-0000-4000-8000-${String(n++).padStart(12, '0')}`;
 function poisoned() {
   const b = book(bundle as never, undefined, ids());
-  for (const d of ['east', 'west']) (b.map(), b.tap(`Go ${d}`));
+  for (const d of ['east', 'west']) b.go(d);
   return b;
 }
 const away = (ms: number) => wait(poisoned(), ms);
@@ -79,8 +79,7 @@ test('a three-hour absence logs one collapsed recap entry at the end, counts by 
   shown = b.text();
   assert.equal(count(shown, LABEL.awayRecap), 1);
   assert.equal(shown[shown.indexOf(LABEL.awayRecap) + 7], 'You take a pebble.');
-  b.map();
-  b.tap('Go north');
+  b.go('north');
   assert.equal(count(b.text(), LABEL.awayRecap), 0);
 });
 
@@ -134,8 +133,7 @@ test('a press during catch-up ends the recap', () => {
   b.clock.wall += HOURS3;
   b.clock.mono += HOURS3;
   assert.equal(pulse(b).kind, 'catching_up');
-  b.map();
-  b.tap('Go north');
+  b.go('north');
   wait(b, 0);
   assert.equal(count(b.text(), LABEL.awayRecap), 0);
   assert.equal(count(b.text(), 'Garden'), 1);
@@ -261,8 +259,7 @@ function deadly() {
 // or holds them (or the rest of the settlement) into a recap.
 test('a poison death while away opens the hall page on the tick, fall and waking lines', () => {
   const b = book(deadly() as never, undefined, ids());
-  b.map();
-  b.tap('Go east');
+  b.go('east');
   const shown = wait(b, HOURS3).text();
   assert.equal(shown[0], 'Stone Hall', JSON.stringify(shown));
   assert.equal(count(shown, LABEL.awayRecap), 0);

@@ -10,7 +10,7 @@ export type Harness = ReturnType<typeof book> & { steps: Step[] };
 const go =
   (...directions: string[]): Step =>
   (b) => {
-    for (const d of directions) (b.map(), b.tap(`Go ${d}`));
+    for (const d of directions) b.go(d);
   };
 
 // Real time passes: the elapsed clocks advance and the game catches up (a pulse).
@@ -78,6 +78,8 @@ export const routes: Record<string, Step[]> = {
   'room-at-night': [night, 'Crossroads Inn, look'],
   'npc-choice': [go('south'), ...reeve],
   'npc-shop': [...nell],
+  // Nell's talk, its only authored choice Leave: the foot's (loka-512o).
+  'npc-talk-leave': [...nell, /^Talk/],
   'npc-shelf': [...nell, LABEL.trade, 'A cob of bread, 4p. Buy for 4 pennies.'],
   'npc-silent': [go('down', 'west'), 'fence, open'],
   'npc-services': [go('down', 'north', 'north'), 'smith, open'],
@@ -93,7 +95,8 @@ export const routes: Record<string, Step[]> = {
     'seed sack, open',
     'Put a turnip seed in a seed sack',
   ],
-  // A loaf and the waterskin put into the open sack beside its seed: three things inside.
+  // Open turns to the Inside page; a loaf put in there beside the seed, the held waterskin's
+  // Put card still offered (loka-2qk5).
   'item-inside': [
     'loaf, open',
     'Take a loaf',
@@ -101,10 +104,7 @@ export const routes: Record<string, Step[]> = {
     'Take a waterskin',
     ...sack,
     'Open a seed sack',
-    LABEL.close,
     'Put a loaf in a seed sack',
-    'Put a waterskin in a seed sack',
-    LABEL.lookInside,
   ],
   'item-inside-empty': [
     ...sack,
@@ -128,9 +128,9 @@ export const routes: Record<string, Step[]> = {
         throw new Error('not bleeding');
     },
   ],
+  'map-start': [(b) => b.map()],
+  'map-rooms': [go('east', 'west'), ...hall, (b) => b.map()],
   'map-two-levels': [go('up'), (b) => b.map()],
-  'map-barred': [...hall, (b) => b.map()],
-  'map-where': [...hall, (b) => b.map(), 'Ask where Bess, the alewife is'],
   journal: [...errand, ...contents('Journal')],
   'carrying-empty': [...contents(LABEL.inventory)],
   'carrying-held': ['loaf, open', 'Take a loaf', ...contents(LABEL.inventory)],

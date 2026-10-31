@@ -90,7 +90,7 @@ test('a restored pickup stays in the room log after reopen, never on the corpse 
   a.sql.close();
 });
 
-// Breaks: a detail page draws the status line again (its Contents button, compass or say icon),
+// Breaks: a detail page draws the status line again (its Contents button or compass),
 // or an offered action or the status line follows the page's Leave (owner pick mvlrlvappy4w).
 test('a detail page has no status line and Leave is its last control', () => {
   const h = book(bundle('containers_sampler_v010_hash'));

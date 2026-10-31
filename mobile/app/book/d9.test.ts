@@ -23,7 +23,11 @@ test('Book keeps the bell scene and labels restored cue as past', () => {
     [],
   ]);
   assert.deepEqual(narrationLines(record, view, text, true), [
-    ['You pull the rope.', 'Earlier: The bell carries over the yard.'],
+    [
+      'You pull the rope.',
+      { text: 'You remember what you heard earlier.', event: true },
+      'The bell carries over the yard.',
+    ],
     [],
   ]);
 });

@@ -16,13 +16,6 @@
      "x": 0,
      "y": 2,
      "z": 0
-    },
-    {
-     "id": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
-     "title": "room.moot_hall.title",
-     "x": 0,
-     "y": 3,
-     "z": 0
     }
    ],
    "links": [
@@ -34,16 +27,6 @@
     {
      "from": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
      "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
-     "direction": "north"
-    },
-    {
-     "from": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
-     "to": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
-     "direction": "south"
-    },
-    {
-     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
-     "to": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
      "direction": "north"
     }
    ],
@@ -74,27 +57,19 @@
     },
     {
      "from": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
+     "direction": "south"
+    },
+    {
+     "from": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
      "direction": "up"
     },
     {
      "from": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
      "direction": "west"
-    },
-    {
-     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
-     "direction": "east"
-    },
-    {
-     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
-     "direction": "west"
     }
    ]
   },
   "known_npcs": [
-   {
-    "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
-    "name": "npc.bess.short"
-   },
    {
     "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
     "name": "npc.nell.short"
@@ -302,67 +277,107 @@
   ],
   "topics": [],
   "place": {
-   "id": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+   "id": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
    "title": {
-    "key": "room.moot_hall.title"
+    "key": "room.village_green.title"
    },
    "description": {
-    "key": "room.moot_hall.description"
+    "key": "room.village_green.description"
    }
   },
   "exits": [
    {
-    "available": false,
+    "available": true,
     "direction": "east",
-    "door": {
-     "name": "barrier.hall_cupboard.short",
-     "state": "closed",
-     "actions": []
-    },
-    "reason": {
-     "code": "exit_closed"
+    "sight": {
+     "room": "308fdba0-75a4-8483-9ac3-7c91575c75c1",
+     "title": "room.warden_gate.title",
+     "entities": [
+      {
+       "id": "35df8677-520a-8fc5-9d23-d7a01888247f",
+       "name": "npc.tam.short",
+       "kind": "npc"
+      },
+      {
+       "id": "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
+       "name": "npc.warden.short",
+       "kind": "npc"
+      }
+     ]
     }
    },
    {
     "available": true,
     "direction": "north",
     "sight": {
-     "room": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
-     "title": "room.village_green.title",
+     "room": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "title": "room.crossroads_inn.title",
      "entities": [
       {
-       "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
-       "name": "npc.nell.short",
+       "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+       "name": "npc.hob.short",
        "kind": "npc"
       },
       {
-       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
-       "name": "npc.reeve.short",
-       "kind": "npc"
-      },
-      {
-       "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
-       "name": "item.apple.short",
+       "id": "fe91520e-73f4-8409-a933-1ef6d86a4055",
+       "name": "item.loaf.short",
        "kind": "item"
       },
       {
-       "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
-       "name": "item.letter.short",
+       "id": "90a83592-b743-8257-95a6-029721650767",
+       "name": "item.waterskin.short",
        "kind": "item"
       }
      ]
     }
    },
    {
-    "available": false,
+    "available": true,
+    "direction": "south",
+    "sight": {
+     "room": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "title": "room.moot_hall.title",
+     "entities": [
+      {
+       "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
+       "name": "npc.bess.short",
+       "kind": "npc"
+      },
+      {
+       "id": "677c012e-ec39-8552-8d4f-1811aa3e08b5",
+       "name": "item.hall_roll.short",
+       "kind": "item"
+      },
+      {
+       "id": "4c2b24ad-1e89-8d16-9b4b-1fb2d613fb25",
+       "name": "item.hall_strongbox.short",
+       "kind": "item"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "up",
+    "sight": {
+     "room": "329aae20-7fc7-8e3d-9119-ad44c022c439",
+     "title": "room.mill.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
     "direction": "west",
-    "door": {
-     "name": "barrier.iron_door.short",
-     "state": "closed",
-     "actions": []
-    },
-    "reason": {
-     "code": "exit_closed"
+    "sight": {
+     "room": "6a70d262-b6ea-8b64-9809-ec7f79d1521e",
+     "title": "room.church.title",
+     "entities": [
+      {
+       "id": "5bf18294-67a8-81c3-b59c-296b88fad837",
+       "name": "item.parish_roll.short",
+       "kind": "item"
+      }
+     ]
     }
    }
   ],
@@ -399,6 +414,21 @@
     ]
    },
    {
+    "action_key": "read",
+    "label": "actions.read_sign",
+    "target": {
+     "kind": "entity",
+     "scopes": [
+      "inspectable_details"
+     ]
+    },
+    "input": [],
+    "target_ids": [
+     "56362445-0a33-8900-9bd2-1cfa0e0e1cfb"
+    ],
+    "available": true
+   },
+   {
     "available": true,
     "action_key": "rest",
     "label": "action.rest",
@@ -409,34 +439,12 @@
    },
    {
     "available": true,
-    "action_key": "say",
-    "label": "action.say",
-    "target": {
-     "kind": "none"
-    },
-    "input": [
-     "word"
-    ]
-   },
-   {
-    "available": true,
     "action_key": "scan",
     "label": "action.scan",
     "target": {
      "kind": "none"
     },
     "input": []
-   },
-   {
-    "available": true,
-    "action_key": "shout",
-    "label": "action.shout",
-    "target": {
-     "kind": "none"
-    },
-    "input": [
-     "word"
-    ]
    },
    {
     "available": true,
@@ -459,73 +467,25 @@
   ],
   "notices": [
    {
-    "id": "dd8c6f46-accd-87e3-af31-b0caf37caeeb",
-    "key": "hall_cupboard",
-    "title": "detail.hall_cupboard.title",
-    "description": "detail.hall_cupboard",
-    "actions": [
-     {
-      "available": true,
-      "action_key": "force_hall_cupboard",
-      "label": "actions.force_hall_cupboard",
-      "target": {
-       "kind": "none"
-      },
-      "input": []
-     }
-    ]
-   },
-   {
-    "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
-    "key": "hall_lectern",
-    "title": "detail.hall_lectern.title",
-    "description": "detail.hall_lectern",
-    "actions": [
-     {
-      "available": false,
-      "action_key": "think_hall_lectern",
-      "label": "actions.think_hall_lectern",
-      "target": {
-       "kind": "none"
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
-     }
-    ]
-   },
-   {
-    "id": "4c9c088a-aede-8ef6-906d-8bc0a9bc1701",
-    "key": "hall_strongbox_lock",
-    "title": "detail.hall_strongbox_lock.title",
-    "description": "detail.hall_strongbox_lock",
-    "actions": [
-     {
-      "available": true,
-      "action_key": "pick_hall_strongbox",
-      "label": "actions.pick_hall_strongbox",
-      "target": {
-       "kind": "none"
-      },
-      "input": []
-     }
-    ]
+    "id": "56362445-0a33-8900-9bd2-1cfa0e0e1cfb",
+    "key": "sign_social",
+    "title": "detail.sign_social.title",
+    "description": "detail.sign_social.description"
    }
   ],
   "entities": [
    {
-    "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
-    "name": "npc.bess.short",
+    "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
+    "name": "npc.nell.short",
     "words": {
-     "bare": "npc.bess.bare"
+     "bare": "npc.nell.bare"
     },
-    "description": "npc.bess.description",
+    "description": "npc.nell.description",
     "kind": "npc",
     "actions": [
      {
-      "available": true,
-      "action_key": "bess_talk",
+      "available": false,
+      "action_key": "nell_ash",
       "label": "action.talk",
       "target": {
        "kind": "entity",
@@ -533,27 +493,46 @@
         "room_occupants"
        ]
       },
-      "input": []
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
      },
      {
-      "available": true,
-      "action_key": "whisper",
-      "label": "action.whisper",
+      "available": false,
+      "action_key": "nell_rumour",
+      "label": "action.talk",
       "target": {
        "kind": "entity",
        "scopes": [
         "room_occupants"
        ]
       },
-      "input": [
-       "word"
-      ]
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "nell_talk",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
      }
     ],
     "shop": [
      {
-      "item_id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
-      "name": "item.hall_bread.short",
+      "item_id": "9c602831-e905-8f59-ab25-e9f615e2669c",
+      "name": "item.bread.short",
       "buy": {
        "price": 4,
        "available": true
@@ -567,14 +546,14 @@
     ],
     "contents": [
      {
-      "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
-      "name": "item.hall_bread.short",
+      "id": "9c602831-e905-8f59-ab25-e9f615e2669c",
+      "name": "item.bread.short",
       "words": {
        "article": "a",
-       "bare": "item.hall_bread.bare",
-       "plural": "item.hall_bread.plural"
+       "bare": "item.bread.bare",
+       "plural": "item.bread.plural"
       },
-      "description": "item.hall_bread.description",
+      "description": "item.bread.description",
       "kind": "item",
       "actions": [
        {
@@ -590,18 +569,42 @@
         "input": []
        }
       ],
-      "container_id": "10798f17-56fe-899f-b1f1-2165bc7aa94a"
+      "container_id": "135ad56f-dfaa-8e43-985d-9dd1e051753b"
      }
     ]
    },
    {
-    "id": "677c012e-ec39-8552-8d4f-1811aa3e08b5",
-    "name": "item.hall_roll.short",
+    "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
+    "name": "npc.reeve.short",
     "words": {
-     "article": "a",
-     "bare": "item.hall_roll.bare"
+     "article": "the",
+     "bare": "npc.reeve.bare"
     },
-    "description": "item.hall_roll.description",
+    "description": "npc.reeve.description",
+    "kind": "npc",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "reeve_talk",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": []
+     }
+    ]
+   },
+   {
+    "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
+    "name": "item.apple.short",
+    "words": {
+     "article": "an",
+     "bare": "item.apple.bare"
+    },
+    "description": "item.apple.description",
     "kind": "item",
     "actions": [
      {
@@ -619,18 +622,17 @@
     ]
    },
    {
-    "id": "4c2b24ad-1e89-8d16-9b4b-1fb2d613fb25",
-    "name": "item.hall_strongbox.short",
+    "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
+    "name": "item.letter.short",
     "words": {
-     "article": "the",
-     "bare": "item.hall_strongbox.bare"
+     "article": "a",
+     "bare": "item.letter.bare"
     },
-    "description": "item.hall_strongbox.description",
+    "description": "item.letter.description",
     "kind": "item",
-    "state": "closed",
     "actions": [
      {
-      "available": false,
+      "available": true,
       "action_key": "take",
       "label": "action.take",
       "target": {
@@ -639,10 +641,7 @@
         "room_contents"
        ]
       },
-      "input": [],
-      "reason": {
-       "code": "too_heavy"
-      }
+      "input": []
      }
     ]
    }
@@ -679,6 +678,21 @@
    "tide": "high"
   },
   "recap_after": 90000,
+  "choice": {
+   "continuation_id": "b8c95efe-eaa1-89eb-bac3-087c5e30c77a",
+   "prompt": {
+    "key": "dialogue.nell_talk.prompt"
+   },
+   "speaker_id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
+   "closable": true,
+   "choices": [
+    {
+     "choice_id": "leave",
+     "label": "dialogue.nell_talk.leave",
+     "available": true
+    }
+   ]
+  },
   "resources": [
    {
     "resource": {
@@ -735,7 +749,7 @@
      "kind": "resource",
      "key": "mv"
     },
-    "current": 98,
+    "current": 99,
     "maximum": 100,
     "band": "mv_ready",
     "tone": "normal"
@@ -768,12 +782,18 @@
  },
  "stack": [
   {
-   "kind": "map"
+   "kind": "thing",
+   "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b"
   }
  ],
  "log": [
-  "You arrive from the north."
+  "You arrive from the north.",
+  "Nell nods over her loaves."
  ],
  "combatLog": [],
- "details": {}
+ "details": {
+  "135ad56f-dfaa-8e43-985d-9dd1e051753b": [
+   "Nell nods over her loaves."
+  ]
+ }
 }

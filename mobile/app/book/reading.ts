@@ -41,5 +41,5 @@ export const readingType = (f: number): Type =>
   Object.fromEntries(
     Object.entries(type).map(([k, s]) => [k, 'fontSize' in s ? scale(s, f) : s]),
   ) as Type;
-// A Tap's vertical bleed: a reading line grown to a touch-sized target (BOOK-UI-COMPONENTS.md).
-export const tapBleed = (lineHeight: number) => Math.max(0, (size.touch - lineHeight) / 2);
+// A Tap's bleed, below only: a reading line grown to a touch-sized target (BOOK-UI-COMPONENTS.md).
+export const tapBleed = (lineHeight: number) => Math.max(0, size.touch - lineHeight);

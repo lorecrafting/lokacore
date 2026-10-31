@@ -12,6 +12,9 @@ cp kernel/ts/src/runtime/world.ts kernel/ts/src/runtime/world.ts.red
 cp kernel/ts/src/mechanics/movement/rule.ts kernel/ts/src/mechanics/movement/rule.ts.red
 [ "$core_only" -eq 1 ] || cp mobile/packages/game-view/session.ts mobile/packages/game-view/session.ts.red
 [ "$core_only" -eq 1 ] || cp mobile/app/.storybook/picker/overlay.ts mobile/app/.storybook/picker/overlay.ts.red
+[ "$core_only" -eq 1 ] || cp mobile/app/book/words.ts mobile/app/book/words.ts.red
+[ "$core_only" -eq 1 ] || cp mobile/app/book/DiscoveredMap.tsx mobile/app/book/DiscoveredMap.tsx.red
+[ "$core_only" -eq 1 ] || cp mobile/app/book/sections.tsx mobile/app/book/sections.tsx.red
 cleanup() {
   rm -f $planted
   rmdir lib/loka/core 2>/dev/null
@@ -19,6 +22,9 @@ cleanup() {
   mv kernel/ts/src/mechanics/movement/rule.ts.red kernel/ts/src/mechanics/movement/rule.ts
   [ "$core_only" -eq 1 ] || mv mobile/packages/game-view/session.ts.red mobile/packages/game-view/session.ts
   [ "$core_only" -eq 1 ] || mv mobile/app/.storybook/picker/overlay.ts.red mobile/app/.storybook/picker/overlay.ts
+  [ "$core_only" -eq 1 ] || mv mobile/app/book/words.ts.red mobile/app/book/words.ts
+  [ "$core_only" -eq 1 ] || mv mobile/app/book/DiscoveredMap.tsx.red mobile/app/book/DiscoveredMap.tsx
+  [ "$core_only" -eq 1 ] || mv mobile/app/book/sections.tsx.red mobile/app/book/sections.tsx
 }
 trap cleanup EXIT
 echo 'defmodule Loka.Core.RedControl do def x, do: File.read!("x") end' > lib/loka/core/red_control.ex
@@ -57,6 +63,12 @@ echo "import type { World } from '../../../kernel/ts/src/index.ts';" >> mobile/p
 # The picker: a book/ import and a raw colour on the manager side; a third colour in the overlay.
 printf "import { color } from '../../book/tokens.ts';\nexport const raw = { border: '1px solid #7b2d20', c: color };\n" > mobile/app/.storybook/picker/red_control.tsx
 echo 'layer.style.cssText = `background:#7b2d20`;' >> mobile/app/.storybook/picker/overlay.ts
+# A colon-label log line (mobile-book-log-prose).
+echo 'export const learnedLine = (label: string) => `${label}: learned`;' >> mobile/app/book/words.ts
+# An action card on the Map drawing (mobile-book-map-no-actions).
+echo 'export const card = <ActionCard b={b} press={press} />;' >> mobile/app/book/DiscoveredMap.tsx
+# A Where card back on the Map page (mobile-book-map-page-no-actions).
+echo 'function MapPage() { return <ActionCard b={b} press={press} />; }' >> mobile/app/book/sections.tsx
 fi
 if [ "$core_only" -eq 1 ]; then
   out=$(ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src kernel/ts/test 2>&1)

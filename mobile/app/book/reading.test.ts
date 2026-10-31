@@ -51,7 +51,7 @@ test('each step scales every text role, the system scale stops at the cap, modif
   assert.equal(readingType(max).control.fontFamily, type.control.fontFamily);
   assert.deepEqual(
     steps.map((f) => tapBleed(readingType(f).body.lineHeight)),
-    [8, 6, 4, 1],
+    [16, 12, 8, 2],
   );
   assert.equal(tapBleed(48), 0);
   const big = readingType(max);
@@ -135,5 +135,5 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
   const title = drawn().find((n) => String(sized(n)) === '39,45');
   assert.equal(title.props.style.textAlign, 'center');
   assert.ok(drawn().some((n) => String(sized(n)) === '20,29'));
-  assert.ok(drawn().some((n) => n.type === 'Pressable' && n.props.style?.paddingVertical === 1));
+  assert.ok(drawn().some((n) => n.type === 'Pressable' && n.props.style?.paddingBottom === 2));
 });

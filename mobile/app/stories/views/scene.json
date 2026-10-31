@@ -608,7 +608,7 @@
    "Wat eyes the letter in your hand.",
    "Wat takes the letter and breaks the seal.",
    {
-    "text": "Journal updated",
+    "text": "You make a note in your journal.",
     "event": true
    }
   ]

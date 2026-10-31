@@ -1,0 +1,716 @@
+{
+ "view": {
+  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+  "map": {
+   "rooms": [
+    {
+     "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "title": "room.crossroads_inn.title",
+     "x": 0,
+     "y": 0,
+     "z": 0
+    }
+   ],
+   "links": [],
+   "unexplored": [
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "down"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "east"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "up"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "west"
+    }
+   ]
+  },
+  "known_npcs": [
+   {
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "name": "npc.hob.short"
+   }
+  ],
+  "levelling": {
+   "level": 1,
+   "experience": 0,
+   "next": 30,
+   "unspent": 0
+  },
+  "skills": [
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "blade"
+    },
+    "label": "skill.blade.label",
+    "requirement": "skill.blade.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "carpentry"
+    },
+    "label": "skill.carpentry.label",
+    "requirement": "skill.carpentry.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "locked": true,
+    "profession": "profession.forestry"
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "carving"
+    },
+    "label": "skill.carving.label",
+    "requirement": "skill.carving.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "locked": true,
+    "profession": "profession.woodcraft"
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "cooking"
+    },
+    "label": "skill.cooking.label",
+    "requirement": "skill.cooking.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "profession": "profession.kitchen"
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "disarm"
+    },
+    "label": "skill.disarm.label",
+    "requirement": "skill.disarm.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "intimidate"
+    },
+    "label": "skill.intimidate.label",
+    "requirement": "skill.intimidate.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "pick"
+    },
+    "label": "skill.pick.label",
+    "requirement": "skill.pick.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "stealth"
+    },
+    "label": "skill.stealth.label",
+    "requirement": "skill.stealth.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "whittling"
+    },
+    "label": "skill.whittling.label",
+    "requirement": "skill.whittling.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "profession": "profession.woodcraft"
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "woodcutting"
+    },
+    "label": "skill.woodcutting.label",
+    "requirement": "skill.woodcutting.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "profession": "profession.forestry"
+   }
+  ],
+  "attributes": [
+   {
+    "attribute": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "attribute",
+     "key": "alertness"
+    },
+    "value": 0
+   },
+   {
+    "attribute": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "attribute",
+     "key": "cha"
+    },
+    "value": 6
+   },
+   {
+    "attribute": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "attribute",
+     "key": "dex"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "attribute",
+     "key": "str"
+    },
+    "value": 10
+   }
+  ],
+  "topics": [],
+  "place": {
+   "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+   "title": {
+    "key": "room.crossroads_inn.title"
+   },
+   "description": {
+    "key": "room.crossroads_inn.description"
+   }
+  },
+  "exits": [
+   {
+    "available": true,
+    "direction": "down",
+    "sight": {
+     "room": "1d977082-84af-8453-b374-f8e9be74e514",
+     "title": "room.undercroft.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
+    "direction": "east",
+    "sight": {
+     "room": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "title": "room.shore_steps.title",
+     "entities": [
+      {
+       "id": "ecec7a97-7c7b-8d13-bb1f-3d1caf814abe",
+       "name": "item.net.short",
+       "kind": "item"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "north",
+    "sight": {
+     "room": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "title": "room.fell_gate.title",
+     "entities": [
+      {
+       "id": "252b9daa-0fda-8981-9fcb-95fc259a6575",
+       "name": "item.cloak.short",
+       "kind": "item"
+      },
+      {
+       "id": "17ebdbed-759e-8d08-9ef8-f9742608718a",
+       "name": "item.hat.short",
+       "kind": "item"
+      },
+      {
+       "id": "124169af-8fcb-888a-9cc6-ebb5cf09ae9e",
+       "name": "item.oilskin.short",
+       "kind": "item"
+      },
+      {
+       "id": "c61c9739-77c4-8d53-b0d0-7666621f0042",
+       "name": "item.scarf.short",
+       "kind": "item"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "south",
+    "sight": {
+     "room": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
+     "title": "room.village_green.title",
+     "entities": [
+      {
+       "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
+       "name": "npc.nell.short",
+       "kind": "npc"
+      },
+      {
+       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
+       "name": "npc.reeve.short",
+       "kind": "npc"
+      },
+      {
+       "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
+       "name": "item.apple.short",
+       "kind": "item"
+      },
+      {
+       "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
+       "name": "item.letter.short",
+       "kind": "item"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "up",
+    "sight": {
+     "room": "8a20c3d3-0f0f-84ec-b058-d27c85d5ba17",
+     "title": "room.loft.title",
+     "entities": [
+      {
+       "id": "c735ddfb-fc9d-866a-b5e0-1feb5a516bf6",
+       "name": "npc.hedge_wizard.short",
+       "kind": "npc"
+      },
+      {
+       "id": "f8598a43-4a6f-8277-b092-c4449c71d2e2",
+       "name": "item.lantern.short",
+       "kind": "item"
+      },
+      {
+       "id": "5d0ee8a3-538e-860b-beed-a91c1c9fc9ca",
+       "name": "item.loft_bucket.short",
+       "kind": "item"
+      },
+      {
+       "id": "ed46889f-3b43-8c50-854e-eb0f678931e7",
+       "name": "item.oilcan.short",
+       "kind": "item"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "west",
+    "sight": {
+     "room": "251e7a71-b5ad-8d22-858b-533e52cc5415",
+     "title": "room.drill_yard.title",
+     "entities": [
+      {
+       "id": "385d5416-3de6-82e4-aae0-775164b045c2",
+       "name": "npc.aldous.short",
+       "kind": "npc"
+      },
+      {
+       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
+       "name": "item.poultice.short",
+       "kind": "item"
+      }
+     ]
+    }
+   }
+  ],
+  "actions": [
+   {
+    "available": true,
+    "action_key": "cast",
+    "label": "action.cast",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "word"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "look",
+    "label": "action.look",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "action_key": "read",
+    "label": "actions.read_sign",
+    "target": {
+     "kind": "entity",
+     "scopes": [
+      "inspectable_details"
+     ]
+    },
+    "input": [],
+    "target_ids": [
+     "311fd11c-f827-8829-93cc-8fb9d45780e7"
+    ],
+    "available": true
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "say",
+    "label": "action.say",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "word"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "scan",
+    "label": "action.scan",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "shout",
+    "label": "action.shout",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "word"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "notices": [
+   {
+    "id": "311fd11c-f827-8829-93cc-8fb9d45780e7",
+    "key": "sign_hub",
+    "title": "detail.sign_hub.title",
+    "description": "detail.sign_hub.description"
+   }
+  ],
+  "entities": [
+   {
+    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "name": "npc.hob.short",
+    "words": {
+     "bare": "npc.hob.bare"
+    },
+    "description": "npc.hob.description",
+    "kind": "npc",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "whisper",
+      "label": "action.whisper",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [
+       "word"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "fe91520e-73f4-8409-a933-1ef6d86a4055",
+    "name": "item.loaf.short",
+    "words": {
+     "article": "a",
+     "bare": "item.loaf.bare",
+     "plural": "item.loaf.plural"
+    },
+    "description": "item.loaf.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "take",
+      "label": "action.take",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": []
+     }
+    ]
+   },
+   {
+    "id": "90a83592-b743-8257-95a6-029721650767",
+    "name": "item.waterskin.short",
+    "words": {
+     "article": "a",
+     "bare": "item.waterskin.bare",
+     "plural": "item.waterskin.plural"
+    },
+    "description": "item.waterskin.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "take",
+      "label": "action.take",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": []
+     }
+    ],
+    "liquid": {
+     "kind": {
+      "cartridge_id": "toolbox_showcase",
+      "cartridge_version": "0.0.1",
+      "key": "water",
+      "kind": "liquid"
+     },
+     "quantity": 4,
+     "capacity": 4,
+     "unit_label": "liquid.units",
+     "label": "liquid.water"
+    }
+   }
+  ],
+  "inventory": [],
+  "equipment": [
+   {
+    "slot": "body"
+   },
+   {
+    "slot": "cloak"
+   },
+   {
+    "slot": "head"
+   },
+   {
+    "slot": "neck"
+   },
+   {
+    "slot": "wield"
+   }
+  ],
+  "position": "standing",
+  "journal": [],
+  "time": 25200,
+  "calendar_status": {
+   "day": 1,
+   "hour": 7,
+   "subdivision": 0,
+   "solar": "day",
+   "lunar": "new",
+   "weather": "heat",
+   "season": "spring",
+   "tide": "high"
+  },
+  "recap_after": 90000,
+  "resources": [
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "ash"
+    },
+    "current": 0,
+    "maximum": 5,
+    "band": "dying",
+    "tone": "danger"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "hp"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "hunger"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "fed",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "ma"
+    },
+    "current": 5,
+    "maximum": 5,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "mv"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "mv_ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "pennies"
+    },
+    "current": 10,
+    "maximum": 100,
+    "band": "purse_empty",
+    "tone": "danger"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "thirst"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "quenched",
+    "tone": "normal"
+   }
+  ]
+ },
+ "stack": [
+  {
+   "kind": "map"
+  }
+ ],
+ "log": [],
+ "combatLog": [],
+ "details": {}
+}

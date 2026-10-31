@@ -81,6 +81,10 @@ const readingOf = (g: unknown) => {
   } as const;
 };
 
+// A drawn card has a rule round it; a Control has none (loka-hvfj).
+type Find = { findByRole: (role: 'button', o: { name: string }) => Promise<HTMLElement> };
+export const isCard = async (canvas: Find, name: string) =>
+  getComputedStyle(await canvas.findByRole('button', { name })).borderTopWidth !== '0px';
 // Page stories carry `tags: ['!autodocs']` inline (the CSF indexer reads only a literal array): a Docs
 // page would mount every page's BookView at once.
 export const pageStory = (

@@ -14,8 +14,28 @@ type Story = StoryObj<typeof meta>;
 
 export const Narration: Story = {};
 
-export const SystemLine: Story = {
-  args: { lines: ['You read the notice.', { text: 'Journal updated.', event: true }] },
+// Every narrated event kind (book-ui.md Line placement, loka-lsqi): one ink italic style, no colon.
+// Breaks: an event line draws dim or upright again, or two kinds draw differently.
+export const NarratedEvents: Story = {
+  args: {
+    lines: [
+      'Aldous drills you until your arm aches.',
+      { text: 'You learn Blade.', event: true },
+      { text: 'Your Blade improves.', event: true },
+      { text: 'You make a note in your journal.', event: true },
+      { text: 'You remember what you heard earlier.', event: true },
+      'The bell carries over the yard.',
+      { kind: 'refused', reason: 'locked', text: "You can't do that—locked." },
+    ],
+  },
+  play: async ({ canvas }) => {
+    const style = (t: string) => getComputedStyle(canvas.getByText(t));
+    const event = style('You learn Blade.');
+    await expect(event.fontStyle).toBe('italic');
+    await expect(style("You can't do that—locked.").color).toBe(event.color);
+    await expect(style('You make a note in your journal.').color).toBe(event.color);
+    await expect(style('The bell carries over the yard.').color).toBe(event.color);
+  },
 };
 
 // Breaks: a boxed reason chip comes back on the line, or the reason leaves its accessible name.

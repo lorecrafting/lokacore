@@ -9,6 +9,7 @@ import type {
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
 import { cueLine } from './model.ts';
+import { LABEL } from './labels.ts';
 import { lineText, lineWords, withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
@@ -23,7 +24,11 @@ export const narrationLines = (
 ) => [
   [
     ...rendered(last, view, text, false, was),
-    last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '',
+    // A restored cue is past: a narrated event says so before it (loka-lsqi, no colon label).
+    ...(last?.cue && past
+      ? [{ text: 'You remember what you heard earlier.', event: true as const }]
+      : []),
+    last?.cue ? text(last.cue.key) : '',
   ].filter(Boolean),
   rendered(last, view, text, true, was),
 ];
@@ -226,9 +231,10 @@ export function leaveLog(s: Logs, id: string, open: boolean) {
   else s.details.get(id)?.splice(0);
 }
 
-// The committed close of that Leave empties the history; a refused one keeps the question.
+// The committed close of that Leave (its close_choice, or the talk's authored exit) empties the
+// history before the reply's own lines; a refused one keeps the question.
 export function closedLog(s: Logs, accepted: boolean) {
-  if (s.retry?.button.action_key !== 'close_choice' || !s.left) return;
+  if (s.retry?.button.label !== LABEL.leaveConversation || !s.left) return;
   if (accepted) s.details.get(s.left)?.splice(0);
   s.left = undefined;
 }

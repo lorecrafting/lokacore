@@ -399,7 +399,7 @@ test('a start over that fails during play keeps the game and its retry', () => {
   a.press('Go north');
   assert.match(a.now().fault!, /readonly/);
   a.startOver();
-  assert.equal(a.now().log.at(-1), '(start over: attempt to write a readonly database)');
+  assert.match((a.now().log.at(-1) as { text: string }).text, /^Start over fails\. .*readonly/);
   assert.equal(a.c.failed(), undefined); // a cached failure would outlive the play's recovery
   a.sql().exec('PRAGMA query_only = 0');
   a.press('Scan');

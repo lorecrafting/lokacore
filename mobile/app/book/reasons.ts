@@ -14,5 +14,6 @@ const SAID: Record<string, string> = {
 const said = (r: string) =>
   (/^[A-Z]/.test(r) ? r : `You can't do that—${r}`).replace(/[.!?]?$/, (m) => m || '.');
 export const reasonSentence = (r = '') => SAID[r] ?? said(r);
-// A refused Attack names its target where the card knows it: "You can't hurt the Reeve." (loka-xyyd).
-export const cannotHurt = (target: string) => `You can't hurt ${target}.`;
+// A permanent refusal hides its card; the player cannot change it (book-ui.md, Unavailable actions).
+const HIDDEN = ['cannot_be_hurt'].map((k) => reason(k, k));
+export const hides = (r = '') => HIDDEN.includes(r);

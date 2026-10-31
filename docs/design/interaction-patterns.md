@@ -25,7 +25,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
   [decision](../decisions/owner-decision-room-page-anatomy-2026-10-23.md); spec
   [Room page anatomy](../system/book-ui.md#room-page-anatomy).
 - Enforcement: `refused_verbs.test.ts:66` (an aimed verb draws on its page, not World);
-  `word_bar.test.ts:48` (word chips only in the open say field); `room_anatomy.test.ts` (the World
+  `word_bar.test.ts` (single-player draws no say icon or word field); `room_anatomy.test.ts` (the World
   page's pressables are the title, prose links, people and items; cues are log lines).
 
 ### Person (NPC or PC) detail
@@ -34,7 +34,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
   nonempty); options in fixed groups: Talk, Trade, Use an item…, Cast a spell…, Lift/Take,
   Ask about, services; Leave last.
 - Never appears: Give an item… (gifts start from the item), the NPC's name inside the Talk label,
-  a status line, compass or say icon.
+  a status line or compass.
 - Source: [NPC dialogue and action details](../system/book-ui.md#npc-dialogue-and-action-details),
   [dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md).
 - Enforcement: `polish_detail.test.ts:107` (no Give an item…), `detail_visit.test.ts:96` (no
@@ -150,11 +150,12 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 ### Aimed spells
 
 - Rule: Cast a spell… appears on person and item pages, on the Character Spells block ("Flamma,
-  cast on…") and per foe on the Combat page; a refused spell lists its reason under Spells.
+  cast on…") and per foe on the Combat page; a refused spell lists its reason under Spells. An
+  untargeted spell word is a Spells card `lux, cast`; an accepted cast turns to World.
 - Why: a spell is aimed like any other targeted action; the Spells block is the only place to read
   why one is refused.
 - Source: [Word bar](../system/book-ui.md#word-bar) (spell words), [Combat interaction](../system/book-ui.md#combat-interaction).
-- Enforcement: `word_bar.test.ts:171`.
+- Enforcement: `word_bar.test.ts` (spells test).
 
 ## 3. Navigation
 
@@ -173,12 +174,14 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Doors move through the minimap and joystick
 
-- Rule: no door cards on World; releasing the joystick toward a shut door presses Unlock when
-  available, else Open; the minimap tick tells closed from locked; a refusal logs one line.
+- Rule: no door cards in the room list or on the Map (owner 2026-10-30); releasing the joystick toward a shut door presses Unlock when
+  available, else Open; Close and Lock are not drawn (owner 2026-10-30, [book-ui.md](../system/book-ui.md#verbs-the-book-does-not-draw)); an authored Knock is on the door fixture's page;
+  the minimap tick tells closed from locked; a refusal logs one line.
 - Why: movement is spatial, so it lives on the spatial control, not in the prose.
 - Source: [Minimap, Map and presentation controls](../system/book-ui.md#minimap-map-and-presentation-controls).
-- Enforcement: joystick and minimap tests under `mobile/app/book/`; none yet for "no door card on
-  World" beyond `room_anatomy.test.ts`.
+- Enforcement: joystick and minimap tests under `mobile/app/book/`; the book harness fails any draw
+  that leaves an offered door verb other than Close and Lock without a control; `pass1_ui3.test.ts` for the room list;
+  `map_drawing.test.ts` for the Map.
 
 ### Page turns
 
@@ -255,10 +258,10 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 ### No chips or boxed tags in the game world
 
 - Rule: nothing inside a page is drawn as a chip, tag or box; state is a sentence. Known-word
-  Chips exist only in the open say field, outside the page.
+  Chips exist only in the Realm's say field, outside the page; single-player draws none.
 - Why: the page is a printed book; boxes belong to the controls around it.
 - Source: [Word bar](../system/book-ui.md#word-bar), pick mvlyp3gphp2t.
-- Enforcement: `word_bar.test.ts:48`; [mobile-book-bleed-only-tap]; none yet forbidding a Chip
+- Enforcement: `word_bar.test.ts`; [mobile-book-bleed-only-tap]; none yet forbidding a Chip
   inside a page.
 
 ### Closed containers

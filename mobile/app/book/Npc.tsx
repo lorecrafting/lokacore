@@ -18,7 +18,6 @@ import { purse } from './Shelf.tsx';
 import { LABEL } from './labels.ts';
 import { offerLine, serviceOrder, talkOf } from './offers.ts';
 import { balance, hostileRefusal } from './words.ts';
-import { cannotHurt } from './reasons.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -47,6 +46,7 @@ function Choice(p: {
       {absent(p.view) !== '' && <Text style={note(c, t)}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
+        if (b && b === exit(p.g)) return null; // the foot's Leave the conversation sends it
         const riddle = p.choice.riddle;
         if (b && riddle?.choice_id === o.choice_id)
           return (
@@ -63,6 +63,13 @@ function Choice(p: {
     </View>
   );
 }
+
+// An authored choice whose whole label is the Book's Leave or Close is the talk's exit
+// (loka-512o): the foot sends it, so the content omits it.
+const exit = (g: Grouped) =>
+  g.choice.find(
+    (b) => b.action_key === 'choose' && ([LABEL.leave, LABEL.close] as string[]).includes(b.label),
+  );
 
 type NpcProps = {
   view: GameView;
@@ -88,15 +95,16 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   cards (owner picks mvlrlvappy4w, mvlymuams73l): one Talk card reading `Talk`, its accessible
  *   name the offer's own label (the first available talk; with none, no card and no filler
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
- *   an Attack refused because the person cannot be hurt (unavailable, `You can't hurt the Reeve.`),
  *   Ask about; then the services and, under Your order, an open order's claim and cancel (its
  *   commission hidden), each a shop line, not a card (book-ui.md Shop lines:
- *   `Order a knife, 3p.`, the label the link, named `Order a knife, 3p. 3 pennies.`). A **Look** Control
- *   (not in conversation) opening the Look page (InsidePage), Leave in the PageFoot. No Whisper
+ *   `Order a knife, 3p.`, the label the link, named `Order a knife, 3p. 3 pennies.`). Last, a **Look**
+ *   card (not in conversation; loka-hvfj) opening the Look page (InsidePage) and sending nothing;
+ *   Leave in the PageFoot. No Whisper
  *   (loka-x6t.115), no Give an item… card, no list of what the person carries. The purse shows
- *   only beside a priced service. History restarts after Leave the conversation.
- * - States: choice; shop; services; open order; nothing to say (no line); closed conversation;
- *   cannot be hurt.
+ *   only beside a priced service. History restarts after Leave the conversation. One exit: an
+ *   authored choice labelled exactly Leave or Close is not drawn; the foot sends it (loka-512o).
+ * - States: choice; a talk whose only choice is Leave; shop; services; open order; nothing to say (no line); closed conversation;
+ *   cannot be hurt (no Attack card).
  * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
@@ -104,7 +112,7 @@ export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const enemy = hostile(p.npc);
-  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
+  // Where is never drawn (book-ui.md, Verbs the Book does not draw); on this page they are here.
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const { talk, answer, foot } = conversation(p, choice);
   const services = serviceOrder(p.npc && 'services' in p.npc ? (p.npc.services ?? []) : []);
@@ -124,7 +132,11 @@ export function NpcPage(p: NpcProps) {
       )}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}
-      {!talk && p.npc && p.look && <Control label={LABEL.lookPerson} onPress={p.look} />}
+      {!talk && p.npc && p.look && (
+        <Cards>
+          <ActionCard label={LABEL.lookPerson} onPress={p.look} />
+        </Cards>
+      )}
     </Page>
   );
 }
@@ -158,10 +170,7 @@ function Offered(
         lists={all.filter((k) => k.label !== LABEL.giveAnItem)}
         state={shown}
       />
-      <Cards>
-        {plain.filter((b) => b.command !== 'ask').map(card)}
-        {unhurt(p.npc, p.text)}
-      </Cards>
+      <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>
       <Cards>{plain.filter((b) => b.command === 'ask').map(card)}</Cards>
       <Cards lines>{p.services.plain.map((s) => service(s, p))}</Cards>
       {p.services.order.length > 0 && <SectionTitle>{LABEL.yourOrder}</SectionTitle>}
@@ -170,18 +179,10 @@ function Offered(
   );
 }
 
-// An Attack refused because the person cannot be hurt (loka-xyyd): the unavailable card naming them.
-const unhurt = (npc: Thing, text: NpcProps['text']) =>
-  (npc.actions ?? [])
-    .filter((a) => !a.available && a.reason.cause === 'cannot_be_hurt')
-    .map((a) => (
-      <ActionCard key={a.action_key} label={text(a.label)} reason={cannotHurt(text(npc.name))} />
-    ));
-
 // Answering keeps the page in conversation even after the kernel closes it; only Leave the
 // conversation returns to the NPC's own actions (Talk, shop, services).
 const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => {
-  const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
+  const close = choice && (exit(p.g) ?? p.g.choice.find((b) => b.action_key === 'close_choice'));
   const talk = !!choice || !!p.talking;
   const answer = (b: Button) => {
     if (b.action_key === 'choose') p.talk?.(true);

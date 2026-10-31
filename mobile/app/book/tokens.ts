@@ -87,7 +87,7 @@ export const type = {
   tile: { fontFamily: font.head, fontSize: 23, lineHeight: 28 }, // a riddle letter on a touch-sized card
   chapterLabel: { fontFamily: font.caps, fontSize: 13, lineHeight: 20, letterSpacing: 2.6 }, // the chapter card's "Chapter one" (the mock's `.chapter small`)
   chapterTitle: { fontFamily: font.head, fontSize: 38, lineHeight: 40 }, // the chapter card's title (the mock's `.chapter b`): 38, a step above pageTitle (26)
-  // Modifiers over another style: an entity line's name; a verb line and a system log line.
+  // Modifiers over another style: an entity line's name; a verb line and a narrated event.
   named: {
     fontWeight: '500' as const,
     textDecorationLine: 'underline' as const,
@@ -117,6 +117,7 @@ export const size = {
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
   statusIcon: 28, // a status icon's disc, inside a size.touch box
   unseen: 1, // a box a screen reader reads and the eye cannot see (the live region)
+  column: 768, // the Book's widest page column (tablet width), centred on a desktop; a phone fills the screen
 };
 
 export const radius = { card: 10, chip: 22 }; // chip: a pill, half size.touch

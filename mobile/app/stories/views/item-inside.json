@@ -838,44 +838,6 @@
        }
       ],
       "container_id": "a73c20e5-6215-859b-a573-fd34b4ffc92d"
-     },
-     {
-      "id": "90a83592-b743-8257-95a6-029721650767",
-      "name": "item.waterskin.short",
-      "words": {
-       "article": "a",
-       "bare": "item.waterskin.bare",
-       "plural": "item.waterskin.plural"
-      },
-      "description": "item.waterskin.description",
-      "kind": "item",
-      "actions": [
-       {
-        "available": true,
-        "action_key": "take",
-        "label": "action.take",
-        "target": {
-         "kind": "entity",
-         "scopes": [
-          "room_contents"
-         ]
-        },
-        "input": []
-       }
-      ],
-      "liquid": {
-       "kind": {
-        "cartridge_id": "toolbox_showcase",
-        "cartridge_version": "0.0.1",
-        "key": "water",
-        "kind": "liquid"
-       },
-       "quantity": 4,
-       "capacity": 4,
-       "unit_label": "liquid.units",
-       "label": "liquid.water"
-      },
-      "container_id": "a73c20e5-6215-859b-a573-fd34b4ffc92d"
      }
     ]
    },
@@ -916,7 +878,93 @@
     }
    }
   ],
-  "inventory": [],
+  "inventory": [
+   {
+    "id": "90a83592-b743-8257-95a6-029721650767",
+    "name": "item.waterskin.short",
+    "words": {
+     "article": "a",
+     "bare": "item.waterskin.bare",
+     "plural": "item.waterskin.plural"
+    },
+    "description": "item.waterskin.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "90a83592-b743-8257-95a6-029721650767",
+       "d74bfe67-ee0c-839e-b5e1-ef2095ae3109"
+      ]
+     },
+     {
+      "available": true,
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "90a83592-b743-8257-95a6-029721650767",
+       "a73c20e5-6215-859b-a573-fd34b4ffc92d"
+      ]
+     },
+     {
+      "action_key": "drink",
+      "command": "drink",
+      "label": "action.drink",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "90a83592-b743-8257-95a6-029721650767"
+      ],
+      "available": true
+     }
+    ],
+    "liquid": {
+     "kind": {
+      "cartridge_id": "toolbox_showcase",
+      "cartridge_version": "0.0.1",
+      "key": "water",
+      "kind": "liquid"
+     },
+     "quantity": 4,
+     "capacity": 4,
+     "unit_label": "liquid.units",
+     "label": "liquid.water"
+    }
+   }
+  ],
   "equipment": [
    {
     "slot": "body"
@@ -1049,16 +1097,10 @@
   "You arrive from the north.",
   "You open the sack's tie.",
   {
-   "quiet": "[\"item.put\",{\"item\":\"item.loaf.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"fe91520e-73f4-8409-a933-1ef6d86a4055\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],14]",
+   "quiet": "[\"item.put\",{\"item\":\"item.loaf.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"fe91520e-73f4-8409-a933-1ef6d86a4055\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],7]",
    "plain": "You put a loaf in a seed sack.",
    "times": 1,
    "text": "You put a loaf in a seed sack."
-  },
-  {
-   "quiet": "[\"item.put\",{\"item\":\"item.waterskin.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"90a83592-b743-8257-95a6-029721650767\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],14]",
-   "plain": "You put a waterskin in a seed sack.",
-   "times": 1,
-   "text": "You put a waterskin in a seed sack."
   }
  ],
  "combatLog": [],

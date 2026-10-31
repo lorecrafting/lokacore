@@ -5,9 +5,8 @@ import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
-import { Footer, pressDoor } from './Footer.tsx';
-import { StatusLine, useSay } from './Status.tsx';
-import { shield } from './SayField.tsx';
+import { Footer } from './Footer.tsx';
+import { StatusLine } from './Status.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -177,6 +176,8 @@ type ViewProps = {
   reading?: Reading; // none: the Storybook's Reading global (the TypeContext above)
 };
 
+// A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
+const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -187,11 +188,9 @@ type ViewProps = {
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
-  const c = p.palette;
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const say = useSay(p.screen, g, p.press, page);
   const ctx = {
     ...p,
     g,
@@ -201,25 +200,26 @@ export function BookView(p: ViewProps) {
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
   return (
-    <PaletteContext value={c}>
+    <PaletteContext value={p.palette}>
       <TypeContext value={p.reading?.type ?? shown}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-          <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
-            {p.screen.view.combat || p.screen.ended ? (
-              <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-            ) : (
-              <Body
-                {...ctx}
-                page={page}
-                talkOn={p.talkOn ?? (() => {})}
-                chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-              />
-            )}
-          </PageTurn>
-          {say.open && shield(() => say.setOpen(false))}
-          <Bottom {...ctx} page={page} say={say} />
-          <Heard said={p.screen.said} />
-          {c.bg === color.dark.bg && <NightSky />}
+        <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
+          <View style={{ flex: 1, maxWidth: size.column }}>
+            <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={p.palette.bg}>
+              {p.screen.view.combat || p.screen.ended ? (
+                <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
+              ) : (
+                <Body
+                  {...ctx}
+                  page={page}
+                  talkOn={p.talkOn ?? (() => {})}
+                  chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+                />
+              )}
+            </PageTurn>
+            <Bottom {...ctx} page={page} />
+            <Heard said={p.screen.said} />
+          </View>
+          {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
@@ -237,7 +237,6 @@ type BottomProps = {
   page?: Page;
   startOver: () => void;
   shell: Shell;
-  say: ReturnType<typeof useSay>;
 };
 
 function Bottom(p: BottomProps) {
@@ -259,7 +258,6 @@ function Bottom(p: BottomProps) {
       }}
     >
       {nav && navigation(p)}
-      {p.say.open && shield(() => p.say.setOpen(false))}
       {!view.ancestry_choices && !detail && statusLine(p)}
       {detail && pending && (
         <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>
@@ -270,7 +268,7 @@ function Bottom(p: BottomProps) {
   );
 }
 
-// The status line under the footer, its say field live on the open World page.
+// The status line under the footer.
 function statusLine(p: BottomProps) {
   const { view, text, pending, ended } = p.screen;
   // A tap on the position line acts only on the open World page.
@@ -289,7 +287,6 @@ function statusLine(p: BottomProps) {
       pending={pending}
       open={() => p.open({ kind: 'contents' })}
       openCharacter={() => p.open({ kind: 'character' })}
-      say={p.say.sends.length ? p.say : undefined}
     />
   );
 }
@@ -303,7 +300,8 @@ function navigation(p: BottomProps) {
       exits={view.exits}
       text={text}
       go={p.walk}
-      door={(d) => pressDoor(p.g.door(d), p.press)}
+      door={p.g.door}
+      press={p.press}
       refused={p.refused}
       learned={p.shell.learned}
       openMap={() => p.open({ kind: 'map' })}

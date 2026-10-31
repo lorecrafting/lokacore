@@ -2,8 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { reasonSentence } from './reasons.ts';
-import { reason, reasonOf, refusedSentence } from './words.ts';
+import { reason, refusedSentence } from './words.ts';
 
 const read = (file: string) =>
   JSON.parse(readFileSync(new URL(`../../../protocol/${file}`, import.meta.url), 'utf8'));
@@ -33,10 +32,11 @@ test('every refusal cause has its own reason word', () => {
   );
 });
 
-// An hp-less person's refused Attack (loka-xyyd), as its card and its log line say it where no
-// target is known. Breaks: the card reads "You can't do that—cannot be hurt.", or the log line is lost.
-test('cannot_be_hurt reads as its own sentence on the card and in the log', () => {
-  const r = { code: 'invalid_target', cause: 'cannot_be_hurt' };
-  assert.equal(reasonSentence(reasonOf(r)), "That can't be hurt.");
-  assert.equal(refusedSentence(r), "That can't be hurt.");
+// An hp-less person's refused Attack (loka-xyyd) has no card (loka-3751) but keeps its log line.
+// Breaks: the log line reads "You can't do that—cannot be hurt." or is lost.
+test('cannot_be_hurt reads as its own sentence in the log', () => {
+  assert.equal(
+    refusedSentence({ code: 'invalid_target', cause: 'cannot_be_hurt' }),
+    "That can't be hurt.",
+  );
 });

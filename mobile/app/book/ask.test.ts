@@ -17,8 +17,7 @@ const topic = (key: string) => ({
 });
 function smith() {
   const b = book(bundle as never);
-  b.map();
-  b.tap('Go north');
+  b.go('north');
   b.tap('the smith'); // third in the room's sentence, so lower case
   return b;
 }

@@ -11,8 +11,7 @@ test('glade without an axe: the real Book says why Chop wood is refused', (t) =>
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   t.after(() => b.sql.close());
   for (const d of ['north', 'west', 'south', 'west']) {
-    b.map();
-    b.tap(`Go ${d}`);
+    b.go(d);
   }
   b.tap('oak, open');
   b.refuse('Chop wood');

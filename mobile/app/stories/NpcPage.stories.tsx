@@ -3,13 +3,14 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { ShelfPage } from '../book/Shelf.tsx';
-import { pageStory } from './screen.tsx';
+import { isCard, pageStory } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcShopView from './views/npc-shop.json';
 import NpcServicesView from './views/npc-services.json';
 import NpcClosedView from './views/npc-closed.json';
 import NpcShelfView from './views/npc-shelf.json';
 import NpcSilentView from './views/npc-silent.json';
+import { View } from 'react-native';
 import { LABEL } from '../book/labels.ts';
 
 const meta: Meta = {
@@ -169,32 +170,35 @@ export const WornItem: StoryObj = {
     await expect(canvas.queryByText(/holding it|not here/i)).toBeNull();
   },
 };
-// An Attack on a person with no hp (loka-xyyd) is the unavailable card naming them (book-ui.md,
-// Unavailable actions). Breaks: no card, or "You can't do that—cannot be hurt."
-const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
-const attack = { available: false, action_key: 'attack', label: 'action.attack', reason };
-export const AttackRefused: StoryObj = {
-  ...pageStory({
-    ...NpcChoiceView,
-    view: {
-      ...NpcChoiceView.view,
-      choice: undefined,
-      entities: NpcChoiceView.view.entities.map((e) =>
-        e === reeve ? { ...e, actions: [attack] } : e,
-      ),
-    },
-  }),
+// Breaks: a grayed Attack on an hp-less person, or none on one with hp (loka-3751; book-ui.md).
+const refused = { available: false, reason: { code: 'invalid_target', cause: 'cannot_be_hurt' } };
+const attack = (offer: object, band?: string) => {
+  const actions = [{ action_key: 'attack', label: 'action.attack', ...offer }];
+  const view = { ...NpcChoiceView.view, choice: undefined, entities: reeveWith({ band, actions }) };
+  return pageStory({ ...NpcChoiceView, view });
+};
+const panes = [attack(refused), attack({ available: true }, 'ready')];
+export const AttackHidden: StoryObj = {
+  ...panes[0],
   args: { words: { 'action.attack': 'Attack' } },
-  name: 'Attack refused',
+  render: (args, ctx) => (
+    <>
+      {panes.map((s, i) => (
+        <View key={i} testID={`pane${i}`}>
+          {s.render!(args, ctx)}
+        </View>
+      ))}
+    </>
+  ),
+  name: 'No Attack on an NPC that cannot be hurt',
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: 'Attack' }));
-    await expect(await canvas.findByText(/You can't hurt the Reeve\./)).toBeVisible();
+    await within(canvas.getByTestId('pane1')).findByRole('button', { name: /^Attack/ });
+    await expect(canvas.getAllByRole('button', { name: /^Attack/ })).toHaveLength(1);
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
 type Canvas = Parameters<NonNullable<StoryObj['play']>>[0]['canvas'];
-// Breaks: a shop row drawn as a card, or its noun not in the room link style (book-ui.md, NPC shop
-// and services).
+// Breaks: a shop row drawn as a card, or its noun not link-styled (book-ui.md, NPC shop, services).
 const shopLine = async (canvas: Canvas, name: string, noun: string) => {
   const line = await canvas.findByRole('button', { name });
   await expect(getComputedStyle(line).borderTopWidth).toBe('0px');
@@ -208,9 +212,8 @@ export const Shelf: StoryObj = {
   name: 'Shop, buy page',
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: LABEL.sell });
-    await userEvent.click(
-      await shopLine(canvas, 'A cob of bread, 4p. Buy for 4 pennies.', 'cob of bread'),
-    );
+    const cob = 'A cob of bread, 4p. Buy for 4 pennies.';
+    await userEvent.click(await shopLine(canvas, cob, 'cob of bread'));
     await canvas.findByText(/It's sold out\./, { selector: '[role=button] *' });
   },
 };
@@ -232,9 +235,8 @@ export const Services: StoryObj = {
     await shopLine(canvas, 'Order a knife, 3p. 3 pennies.', 'Order a knife');
   },
 };
-// The smith with a knife on order, shaped from the Services view (the route needs two lumps of ore):
-// the knife still at the forge, so cancel is offered and claim refused not ready; the commission
-// hides and they sit under Your order.
+// The smith with a knife on order, from Services (the route needs two lumps of ore): knife is at
+// the forge, so cancel is offered, claim refused not ready, both under Your order; no commission.
 const smith = NpcServicesView.view.entities.find((e) => 'services' in e && e.services)!;
 const offered = smith.services!.filter((s) => s.benefit.op !== 'entitlement');
 const open = offered.map((s) =>
@@ -267,10 +269,9 @@ export const ClosedConversation: StoryObj = {
   ...pageStory(NpcClosedView),
   name: 'Closed conversation',
 };
-
 // An NPC's mood is its name and description variants (owner 2026-10-30, W6): the afraid goblin.
 // The fence's view without its shop, so no Trade card. Breaks: the page title or description ignores
-// the view's variant keys, or the title is not capitalised.
+// the view's variant keys, the title is not capitalised, or Look is a Control, not a card (loka-hvfj).
 const moodView = {
   ...NpcSilentView,
   view: {
@@ -289,6 +290,7 @@ export const Mood: StoryObj = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('A cowering goblin')).toBeVisible();
     await expect(canvas.queryByText(LABEL.trade)).toBeNull();
+    await expect(await isCard(canvas, LABEL.lookPerson)).toBe(true);
     await expect(
       await canvas.findByText(
         'The goblin shrinks against the wall, its notched blade low, eyes on the way out.',
