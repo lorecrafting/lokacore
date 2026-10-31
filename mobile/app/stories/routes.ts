@@ -95,7 +95,8 @@ export const routes: Record<string, Step[]> = {
     'seed sack, open',
     'Put a turnip seed in a seed sack',
   ],
-  // A loaf and the waterskin put into the open sack beside its seed: three things inside.
+  // Open turns to the Inside page; a loaf put in there beside the seed, the held waterskin's
+  // Put card still offered (loka-2qk5).
   'item-inside': [
     'loaf, open',
     'Take a loaf',
@@ -103,10 +104,7 @@ export const routes: Record<string, Step[]> = {
     'Take a waterskin',
     ...sack,
     'Open a seed sack',
-    LABEL.close,
     'Put a loaf in a seed sack',
-    'Put a waterskin in a seed sack',
-    LABEL.lookInside,
   ],
   'item-inside-empty': [
     ...sack,

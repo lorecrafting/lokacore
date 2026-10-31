@@ -32,7 +32,17 @@ export const OpenContainer: StoryObj = {
     await expect(await isCard(canvas, LABEL.lookInside)).toBe(true);
   },
 };
-export const Inside: StoryObj = { ...pageStory(ItemInsideView), name: 'Inside' };
+// Breaks: a lidded sack's Inside foot is a local Close instead of its own Close, or the held
+// waterskin's Put card is missing (loka-2qk5).
+export const Inside: StoryObj = {
+  ...pageStory(ItemInsideView),
+  name: 'Inside',
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: 'Close a seed sack' });
+    await expect(await isCard(canvas, 'Put a waterskin in a seed sack')).toBe(true);
+    await expect(canvas.queryByRole('button', { name: LABEL.close })).toBeNull();
+  },
+};
 export const InsideEmpty: StoryObj = { ...pageStory(ItemInsideEmptyView), name: 'Inside, empty' };
 export const Fuel: StoryObj = { ...pageStory(ItemFuelView), name: 'Fuel' };
 export const TooHeavy: StoryObj = { ...pageStory(ItemTooHeavyView), name: 'Too heavy' };

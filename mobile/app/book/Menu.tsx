@@ -150,11 +150,14 @@ export function ThingPage(p: {
  *   from the projected hp band, "<Name> looks to be <band phrase>." (no band, no sentence), then
  *   what they wear, "<Name> wears a scorched apron and a badge.", then what else they carry,
  *   "<Name> carries a flask and a knife.", each name an inline link to its item page; nothing
- *   worn or carried, no sentence for it. No actions; Close returns to the item or NPC page and
- *   sends nothing.
- * - States: several items; empty (one Note); a person with a band, carrying things; wearing and
- *   carrying; wearing only; a person with no band, carrying nothing (the person's states:
- *   NpcPage.stories.tsx Look).
+ *   worn or carried, no sentence for it. A container's page then draws the item page's own Put
+ *   into cards, one per held item (loka-2qk5); a person's draws no actions. A lidded container's
+ *   foot is its engine Close as offered, an Action card ("Close a seed sack"): accepted, the lid
+ *   shuts, this page goes and the item page shows Open; a lidless container's or a person's foot
+ *   is a local Close back to the item or NPC page that sends nothing.
+ * - States: several items, with Put cards; empty (one Note); a person with a band, carrying
+ *   things; wearing and carrying; wearing only; a person with no band, carrying nothing (the
+ *   person's states: NpcPage.stories.tsx Look).
  * - Story: ItemPage.stories.tsx
  */
 export function InsidePage(p: {
@@ -162,32 +165,67 @@ export function InsidePage(p: {
   id: string;
   open: (p: Route) => void;
   close: () => void;
+  g?: ReturnType<typeof group>;
+  press?: (b: Button, detail?: string) => void;
 }) {
   const { view, text } = p.screen;
   const [c, t] = [usePalette(), useType()];
   const thing = things(view).find((e) => e.id === p.id);
   const open = (id: string) => p.open({ kind: 'thing', id });
   const name = thing ? cap(text(thing.name)) : LABEL.item;
+  // A container's own buttons, as its item page offers them: Put into as cards, its Close as the foot.
+  const own = thing?.kind === 'npc' ? [] : (p.g?.on(p.id) ?? []);
+  const press = (b: Button) => p.press?.(b, p.id);
+  const lid = own.find((b) => commandOf(b) === 'close');
+  const foot = lid ? (
+    <ActionCard b={lid} press={press} />
+  ) : (
+    <Control label={LABEL.close} onPress={p.close} />
+  );
+  const puts = own.filter((b) => commandOf(b) === 'put' && !b.pick);
   return (
-    <Page title={name} foot={<Control label={LABEL.close} onPress={p.close} />}>
+    <Page title={name} foot={foot}>
       {thing?.kind !== 'npc' ? (
-        inside({ thing, contents: within(view, p.id), text, open }) || (
-          <Note>{LABEL.nothingInside}</Note>
-        )
-      ) : (
         <>
-          {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
-          {'band' in thing && thing.band && (
-            <Text style={prose(c, t)}>
-              {LABEL.looksToBe(name, bandPhrase({ band: thing.band }, text))}
-            </Text>
+          {inside({ thing, contents: within(view, p.id), text, open }) || (
+            <Note>{LABEL.nothingInside}</Note>
           )}
-          {'worn' in thing &&
-            carries({ group: thing.worn ?? [], carrier: name, verb: 'wears', text, open })}
-          {carries({ group: held(view, thing), carrier: name, text, open })}
+          <Cards>{puts.map((b) => putCard(b, press))}</Cards>
         </>
+      ) : (
+        lookAt({ thing, name, screen: p.screen, open, c, t })
       )}
     </Page>
+  );
+}
+
+const putCard = (b: Button, press: (b: Button) => void) => (
+  <ActionCard key={cardKey(b)} b={b} press={press} />
+);
+
+// A person's Look: description, condition, then what they wear and carry (InsidePage rules).
+function lookAt(p: {
+  thing: Thing;
+  name: string;
+  screen: Screen;
+  open: (id: string) => void;
+  c: ReturnType<typeof usePalette>;
+  t: ReturnType<typeof useType>;
+}) {
+  const { thing, name, open, c, t } = p;
+  const { view, text } = p.screen;
+  return (
+    <>
+      {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
+      {'band' in thing && thing.band && (
+        <Text style={prose(c, t)}>
+          {LABEL.looksToBe(name, bandPhrase({ band: thing.band }, text))}
+        </Text>
+      )}
+      {'worn' in thing &&
+        carries({ group: thing.worn ?? [], carrier: name, verb: 'wears', text, open })}
+      {carries({ group: held(view, thing), carrier: name, text, open })}
+    </>
   );
 }
 

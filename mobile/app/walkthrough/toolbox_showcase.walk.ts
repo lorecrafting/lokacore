@@ -171,8 +171,8 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   await tap(/^Open the strongroom door/);
   await tap('Go south');
   await take(/^(?:a )?strongroom chest, open$/i, /^Open a strongroom chest/);
-  // Open turns to the chest's Inside page; Put stays on its item page (loka-mo0p)
-  for (const l of [LABEL.close, /^Put a tallow candle/, LABEL.lookInside]) await tap(l);
+  // Open turns to the chest's Inside page, which offers the held candle's Put (loka-2qk5)
+  await tap(/^Put a tallow candle/);
   await take(/^(?:a )?tallow candle, open/i, /^Take a tallow candle/);
   await settle();
 };
