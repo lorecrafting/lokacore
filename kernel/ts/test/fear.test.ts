@@ -257,6 +257,12 @@ test('an hp-less NPC is offered Attack unavailable, cannot_be_hurt, and refused 
   );
   const observation = { view, command, decision: refused.decision, resolves };
   assert.ok(check('gameview_agrees_with_admission', observation));
+  // The control: a view that offered this Attack as available disagrees with the refusal.
+  const lied = structuredClone(view);
+  lied.entities
+    .find((e) => e.id === npc(w, 'guard'))!
+    .actions.find((x) => x.action_key === 'attack')!.available = true;
+  assert.equal(check('gameview_agrees_with_admission', { ...observation, view: lied }), false);
   assert.equal(gameView(play(w, { type: 'attack', target_id: a })).combat!.band, 'ready');
 });
 
@@ -270,7 +276,14 @@ test('a hostile hp-less NPC never engages; the goblins are calm', () => {
   });
   assert.deepEqual(den(c).w.state.encounters ?? {}, {});
   c.npcs['fear_sampler@0.0.1:npc/guard'].hp = c.npcs['fear_sampler@0.0.1:npc/goblin'].hp;
-  assert.equal(Object.keys(den(c).w.state.encounters ?? {}).length, 1); // the control: with hp it does
+  const fought = den(c).w;
+  assert.equal(Object.keys(fought.state.encounters ?? {}).length, 1); // the control: with hp it does
+  // loka-zvwh: a save from before 1.126 holds that fight against a foe with no hp; it shows no band.
+  const guard = npc(fought, 'guard');
+  const { hp: _, ...bare } = fought.entities[guard] as any;
+  const old = { ...fought, entities: { ...fought.entities, [guard]: bare } };
+  assert.equal(gameView(fought).combat!.band, 'ready');
+  assert.equal('band' in gameView(old).combat!, false);
 });
 
 // loka-zvwh. Breaks: the body's own hp entry, unreadable without its row under the regen pool,
