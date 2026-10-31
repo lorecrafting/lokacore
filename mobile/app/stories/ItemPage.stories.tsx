@@ -2,7 +2,9 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { InsidePage, Item, ThingPage } from '../book/Menu.tsx';
 import { ItemDetails } from '../book/skills.tsx';
-import { pageStory } from './screen.tsx';
+import { expect } from 'storybook/test';
+import { LABEL } from '../book/labels.ts';
+import { isCard, pageStory } from './screen.tsx';
 import ItemPlainView from './views/item-plain.json';
 import ItemTooHeavyView from './views/item-too-heavy.json';
 import ItemContainerView from './views/item-container.json';
@@ -25,6 +27,10 @@ export const Plain: StoryObj = {
 export const OpenContainer: StoryObj = {
   ...pageStory(ItemContainerView),
   name: 'Open container',
+  // Breaks: Look inside drawn as a centered Control, not a card after the options (loka-hvfj).
+  play: async ({ canvas }) => {
+    await expect(await isCard(canvas, LABEL.lookInside)).toBe(true);
+  },
 };
 export const Inside: StoryObj = { ...pageStory(ItemInsideView), name: 'Inside' };
 export const InsideEmpty: StoryObj = { ...pageStory(ItemInsideEmptyView), name: 'Inside, empty' };

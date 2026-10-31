@@ -95,8 +95,9 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
  *   Ask about; then the services and, under Your order, an open order's claim and cancel (its
  *   commission hidden), each a shop line, not a card (book-ui.md Shop lines:
- *   `Order a knife, 3p.`, the label the link, named `Order a knife, 3p. 3 pennies.`). A **Look** Control
- *   (not in conversation) opening the Look page (InsidePage), Leave in the PageFoot. No Whisper
+ *   `Order a knife, 3p.`, the label the link, named `Order a knife, 3p. 3 pennies.`). Last, a **Look**
+ *   card (not in conversation; loka-hvfj) opening the Look page (InsidePage) and sending nothing;
+ *   Leave in the PageFoot. No Whisper
  *   (loka-x6t.115), no Give an item… card, no list of what the person carries. The purse shows
  *   only beside a priced service. History restarts after Leave the conversation. One exit: an
  *   authored choice labelled exactly Leave or Close is not drawn; the foot sends it (loka-512o).
@@ -129,7 +130,11 @@ export function NpcPage(p: NpcProps) {
       )}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}
-      {!talk && p.npc && p.look && <Control label={LABEL.lookPerson} onPress={p.look} />}
+      {!talk && p.npc && p.look && (
+        <Cards>
+          <ActionCard label={LABEL.lookPerson} onPress={p.look} />
+        </Cards>
+      )}
     </Page>
   );
 }

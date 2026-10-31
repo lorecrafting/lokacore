@@ -304,7 +304,7 @@ loka-8lpm): a pending save shows
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
 fault show there as on every page. Combat and World keep the
 [status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
-foot. A control that opens a child (Resume dream, Look inside) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
+foot. A control that opens a child stays in the content: Resume dream as a Control, and a person's **Look** and a container's **Look inside** as Action cards, last after the page's other cards, that send nothing (owner, 2026-10-30, loka-hvfj). An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
 
 ## Line placement
 
@@ -428,8 +428,8 @@ about](#fd7-ask-details), then the services. The foot is Leave. The Talk card re
 its accessible name stays the offer's label ("Talk to Nell"). Several Talk offers draw one Talk
 card, the first available one; with none available the page draws nothing in its place, no
 filler line and never "Talk: not now" (owner pick mvlyb5x2m9i3): a person with nothing to do
-shows title, description, then Look and Leave. **Look.** Outside a conversation a **Look** Control
-ends the person's page, after the cards and before Leave, and opens their Look page, an anchored
+shows title, description, then Look and Leave. **Look.** Outside a conversation a **Look** Action card
+ends the person's page, the last card, before Leave; it sends nothing, and opens their Look page, an anchored
 detail of the person's page as the [Inside](#item-details-and-takedrop) page is of its container
 (owner, 2026-10-30, loka-aqnc). It draws the person's name as title, their description as prose, then
 what they visibly bear in the fixed order condition, worn, carried. Condition is one prose sentence from the person's
@@ -555,7 +555,7 @@ open their same item detail from Inventory, with existing offered Drop/other act
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 Authored narration takes precedence and meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
 Retry retains original action/target context and appends each confirmed Take/Drop event only once.
-**Inside.** A container whose contents are reachable (an open lid, or a corpse or lidless container with contents) never lists them on its item page: a **Look inside** Control follows its options and opens its **Inside** page, an anchored detail of the item page as the dream page is of its bed (owner, 2026-10-30, loka-mo0p); an accepted Open on the item page turns straight to it. That page draws the container's name as title, the section title **Inside** and one Entity line per directly held item, each opening that item's own page; an empty one draws one Note, **There is nothing inside.** It draws no actions (Open, Close, Take from and Put into stay on the item page) and its foot is a local **Close** that returns to the item page and sends nothing. A contained item's Leave returns to the Inside page. The page goes when its container goes, when the lid closes, when the contents stop being reachable (an emptied corpse), and on a room change, death or Map as every detail does; a cold reopen of a contained Read restores item page, Inside page and item page.
+**Inside.** A container whose contents are reachable (an open lid, or a corpse or lidless container with contents) never lists them on its item page: a **Look inside** Action card follows its options, sends nothing and opens its **Inside** page, an anchored detail of the item page as the dream page is of its bed (owner, 2026-10-30, loka-mo0p); an accepted Open on the item page turns straight to it. That page draws the container's name as title, the section title **Inside** and one Entity line per directly held item, each opening that item's own page; an empty one draws one Note, **There is nothing inside.** It draws no actions (Open, Close, Take from and Put into stay on the item page) and its foot is a local **Close** that returns to the item page and sends nothing. A contained item's Leave returns to the Inside page. The page goes when its container goes, when the lid closes, when the contents stop being reachable (an emptied corpse), and on a room change, death or Map as every detail does; a cold reopen of a contained Read restores item page, Inside page and item page.
 When Take removes an item from a corpse's Contents, the confirmed result returns to
 that corpse's Inside page (its item page once the corpse is empty), where the take line is quiet ([line placement](#line-placement)), and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse

@@ -34,7 +34,7 @@ type CardProps = (
  *   once; a permanent refusal (`hides`, reasons.ts) draws nothing. It is exposed as disabled yet
  *   stays focusable and pressable, its sentence its hint. With
  *   `onPress` it sends nothing: a Pick list's option (with `expanded`) or a card that opens a child
- *   page (the NPC page's Trade). A row may show its own label, accessible name and quiet note in
+ *   page (the NPC page's Trade and Look, an item's Look inside). A row may show its own label, accessible name and quiet note in
  *   place of the Button's label. With `link` it is a shop line, not a card (book-ui.md, Shop
  *   lines): a Tap reading its label as prose, the `link` words in the room link style
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and

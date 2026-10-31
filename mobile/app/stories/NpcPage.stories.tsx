@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { ShelfPage } from '../book/Shelf.tsx';
-import { pageStory } from './screen.tsx';
+import { isCard, pageStory } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcShopView from './views/npc-shop.json';
 import NpcServicesView from './views/npc-services.json';
@@ -269,10 +269,9 @@ export const ClosedConversation: StoryObj = {
   ...pageStory(NpcClosedView),
   name: 'Closed conversation',
 };
-
 // An NPC's mood is its name and description variants (owner 2026-10-30, W6): the afraid goblin.
 // The fence's view without its shop, so no Trade card. Breaks: the page title or description ignores
-// the view's variant keys, or the title is not capitalised.
+// the view's variant keys, the title is not capitalised, or Look is a Control, not a card (loka-hvfj).
 const moodView = {
   ...NpcSilentView,
   view: {
@@ -291,6 +290,7 @@ export const Mood: StoryObj = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('A cowering goblin')).toBeVisible();
     await expect(canvas.queryByText(LABEL.trade)).toBeNull();
+    await expect(await isCard(canvas, LABEL.lookPerson)).toBe(true);
     await expect(
       await canvas.findByText(
         'The goblin shrinks against the wall, its notched blade low, eyes on the way out.',

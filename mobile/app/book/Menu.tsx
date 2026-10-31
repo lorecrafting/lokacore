@@ -92,8 +92,8 @@ const inside = (p: { thing?: Thing; contents: Thing[]; text: Say; open: (id: str
  * as Action cards (book-ui.md, Item details and take/drop).
  * - Use: Item only.
  * - Rules: a refused action reads the same word as an offered one; a container whose contents are
- *   reachable (an open lid, or listed contents) draws a Look inside Control after its options, never
- *   its contents (InsidePage).
+ *   reachable (an open lid, or listed contents) draws a Look inside card after its options
+ *   (loka-hvfj), sending nothing and opening InsidePage, never its contents.
  * - States: plain; open container (Look inside); fuel; too heavy; held by a person (theft lane:
  *   Lift and its Note); worn by a person outside the theft lane (no Take, no Note).
  * - Story: ItemPage.stories.tsx
@@ -111,7 +111,6 @@ export function ThingPage(p: {
   lookInside: () => void;
   leave: () => void;
 }) {
-  const refusals = notes(p.thing, p.label, p.holder);
   return (
     <Page
       title={p.thing ? cap(p.text(p.thing.name)) : LABEL.item}
@@ -120,7 +119,7 @@ export function ThingPage(p: {
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
       {p.holder && <Note>{heldBy(cap(p.text(p.holder)))}</Note>}
-      {refusals}
+      {notes(p.thing, p.label, p.holder)}
       <Cards>
         {p.actions
           .filter((b) => !b.pick)
@@ -132,7 +131,9 @@ export function ThingPage(p: {
         <PickLists {...p} page={p.thing.id} buttons={p.actions} />
       )}
       {p.thing && opens(p.view, p.thing) && (
-        <Control label={LABEL.lookInside} onPress={p.lookInside} />
+        <Cards>
+          <ActionCard label={LABEL.lookInside} onPress={p.lookInside} />
+        </Cards>
       )}
     </Page>
   );
