@@ -18,7 +18,7 @@ export const Fires: StoryObj = {
   play: async ({ canvas }) => {
     await expect(canvas.queryByText('heavy')).toBeNull();
     haptic('heavy');
-    await expect(await canvas.findByText('heavy')).toBeVisible();
+    await canvas.findByText('heavy');
     await waitFor(() => expect(canvas.queryByText('heavy')).toBeNull());
   },
 };

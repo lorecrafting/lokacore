@@ -5,7 +5,8 @@ import { mix, sound } from './tokens.ts';
 type SoundName = keyof typeof sound;
 type Bus = keyof typeof mix.bus;
 
-// ponytail: one sample per name, no variants or pitch spread until the files land (loka-gj82.4).
+// ponytail: one sample per name, no variants or pitch spread, a new element per play (so a load at
+// each press) until the files land (loka-gj82.4).
 let urls: Partial<Record<SoundName, string>> = {};
 /** The samples; the manifest fills them (loka-p2s8). */
 export const sources = (given: typeof urls) => {
@@ -13,26 +14,29 @@ export const sources = (given: typeof urls) => {
 };
 
 const busOf = (name: SoundName): Bus =>
-  name === 'chapter' ? 'music' : name === 'pageTurn' ? 'ui' : 'sfx';
+  name === 'chapter' ? 'music' : name === 'pageTurn' || name === 'pickup' ? 'ui' : 'sfx';
 const live: Record<Bus, (() => void)[]> = { ambience: [], sfx: [], ui: [], music: [] };
 const muted = { sound: false, music: false };
 const groupOf = (bus: Bus) => (bus === 'music' ? 'music' : 'sound');
 const amp = (db: number) => 10 ** (db / 20);
 
-// Made on the first gesture: until then the browser has locked audio and a sound is dropped.
+// Made on the first gesture: until then the browser has locked audio and a sound is dropped. Every
+// later gesture resumes it too: a touch's press-in does not count as activation, and a phone call
+// suspends a running context. `ambience` is what ducking ramps; no bed plays through it yet.
 let audio: { ctx: AudioContext; ambience: GainNode } | undefined;
 const unlock = () => {
   try {
-    if (audio) return;
-    const ctx = new AudioContext();
-    const ambience = ctx.createGain();
-    ambience.connect(ctx.destination);
-    audio = { ctx, ambience };
-    void ctx.resume();
+    if (!audio) {
+      const ctx = new AudioContext();
+      const ambience = ctx.createGain();
+      ambience.connect(ctx.destination);
+      audio = { ctx, ambience };
+    }
+    if (audio.ctx.state !== 'running') void audio.ctx.resume();
   } catch {} // no audio in this browser
 };
-for (const gesture of ['pointerdown', 'keydown'])
-  globalThis.addEventListener?.(gesture, unlock, { once: true });
+for (const gesture of ['pointerup', 'touchend', 'keydown'])
+  globalThis.addEventListener?.(gesture, unlock);
 
 let ducking = 0;
 const duck = (db: number, ms: number) => {
@@ -49,11 +53,13 @@ export function play(name: SoundName) {
   if (!audio || !url || muted[groupOf(bus)]) return;
   try {
     const voices = live[bus];
-    if (voices.length >= mix.bus[bus]) voices[0]!(); // the oldest is stolen
     const el = new Audio(url);
-    el.volume = amp(mix.tier[sound[name].tier as keyof typeof mix.tier]);
     const node = audio.ctx.createMediaElementSource(el);
-    node.connect(bus === 'ambience' ? audio.ambience : audio.ctx.destination);
+    const level = audio.ctx.createGain(); // not el.volume: iOS Safari ignores it
+    level.gain.value = amp(mix.tier[sound[name].tier as keyof typeof mix.tier]);
+    node.connect(level);
+    level.connect(audio.ctx.destination);
+    if (voices.length >= mix.bus[bus]) voices[0]!(); // the oldest is stolen, once its heir exists
     const ducks = bus === 'sfx' && sound[name].tier === 'beat';
     const stop = () => {
       const at = voices.indexOf(stop);
@@ -61,6 +67,7 @@ export function play(name: SoundName) {
       voices.splice(at, 1);
       el.pause();
       node.disconnect();
+      level.disconnect();
       if (ducks && --ducking === 0) duck(0, mix.duck.out);
     };
     voices.push(stop);
