@@ -117,7 +117,6 @@ export const unsaid = (
 
 /** Whether this job's tick is a no-op that catch-up may fold (mechanics.md, W8 Catch-up). */
 export function folds(world: World, job_id: JobId, job: JobRow) {
-  if (job.job.kind !== 'status') return false;
   const held = statusHolder(world, job_id);
   const spec = specOf(world, job.job);
   if (!held || held.row.ends_at !== undefined || spec?.per_tick === undefined) return false;
