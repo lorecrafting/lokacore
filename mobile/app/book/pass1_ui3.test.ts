@@ -1,12 +1,12 @@
 // Pass-1 UI3 (book-ui.md, World and status entry; Map): the Map draws no log (UF1), a door's state
-// line only when no exit card already carries it (UF2), and a shut door's Open also on World (R4).
+// line beside its exit card, which reads only its direction (UF2), and a shut door's Open also on World (R4).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 
-// Breaks: the Map draws the log again (UF1); the door line repeats the exit card's "closed" or
-// "locked", or drops while the door is open (UF2); World draws a door card again (owner 2026-10-23
+// Breaks: the Map draws the log again (UF1); the exit card reads "East: locked" again, or the door
+// line drops (UF2); World draws a door card again (owner 2026-10-23
 // reverses R4: doors work from the Map and the joystick), or a repeat Map press sends another command.
 test('doors sampler lane: Map door lines, none on World, after closing the hut door', (t) => {
   const b = book(compiled('cartridges/doors_sampler') as never);
@@ -18,12 +18,12 @@ test('doors sampler lane: Map door lines, none on World, after closing the hut d
   b.map();
   const before = b.text();
   assert.ok(before.includes('The hut door: open'));
-  assert.ok(before.includes('East: locked'));
-  assert.ok(!before.includes('The gate: locked'));
+  assert.ok(before.includes('East') && !before.some((l) => l.startsWith('East:')));
+  assert.ok(before.includes('The gate: locked'));
   b.tap('Close the hut door (north)');
   const map = b.text();
-  assert.ok(map.includes('North: closed'));
-  assert.ok(!map.includes('The hut door: closed'));
+  assert.ok(map.includes('North'));
+  assert.ok(map.includes('The hut door: closed'));
   assert.ok(!map.includes('You close the hut door.'), JSON.stringify(map));
   b.tap('Back to World');
   const world = b.text();

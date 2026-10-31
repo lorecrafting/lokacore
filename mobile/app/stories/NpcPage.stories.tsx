@@ -1,6 +1,6 @@
 // C row Pages, NPC (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { ShelfPage } from '../book/Shelf.tsx';
 import { pageStory } from './screen.tsx';
@@ -64,11 +64,22 @@ export const Carrying: StoryObj = {
     ).toBeTruthy();
   },
 };
-// A person's Look page (book-ui.md, NPC page): description, then what they carry as one sentence
-// of inline links. The Reeve carries the letter here; Nell's bread is her shop stock, not carried.
-// Breaks: the carried sentence lost, its item not a link, or shop stock listed as carried.
+// A person's Look page (book-ui.md, NPC page): description, their condition from the hp band, then
+// what they wear and what else they carry, each one sentence of inline links. The Reeve is hurt,
+// wears a cloak and carries the letter here; Nell has no band and her bread is her shop stock.
+// Breaks: the condition, worn or carried sentence lost or out of order, its item not a link, a
+// condition drawn without a band, shop stock listed as carried, or a worn item repeated as carried.
 const letter = NpcChoiceView.view.entities[3]!;
 const nell = NpcChoiceView.view.entities[0]!;
+const cloak = {
+  id: 'cloak',
+  kind: 'item',
+  name: 'item.cloak.short',
+  words: { article: 'a', bare: 'item.cloak.bare', plural: 'item.cloak.plural' },
+  slot: 'body',
+  container_id: reeve.id,
+  actions: [],
+};
 const lookView = (id: string, entities: unknown[] = NpcChoiceView.view.entities) => ({
   ...NpcChoiceView,
   view: { ...NpcChoiceView.view, entities },
@@ -77,38 +88,130 @@ const lookView = (id: string, entities: unknown[] = NpcChoiceView.view.entities)
     { kind: 'inside', id },
   ],
 });
+// The Reeve as the view projects them: worn always, contents (worn included) only under theft.
+const reeveWith = (dress: object) =>
+  NpcChoiceView.view.entities
+    .filter((e) => e !== letter)
+    .map((e) => (e === reeve ? { ...e, band: 'hurt', worn: [cloak], ...dress } : e));
+const after = (a: Element, b: Element) =>
+  expect(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 export const Look: StoryObj = {
   ...pageStory(
-    lookView(
-      reeve.id,
-      NpcChoiceView.view.entities
-        .filter((e) => e !== letter)
-        .map((e) =>
-          e === reeve ? { ...e, contents: [{ ...letter, container_id: reeve.id }] } : e,
-        ),
-    ),
+    lookView(reeve.id, reeveWith({ contents: [cloak, { ...letter, container_id: reeve.id }] })),
   ),
   name: 'Look',
   play: async ({ canvas }) => {
-    await canvas.findByText(/^The Reeve carries a/);
+    const wears = await canvas.findByText(/^The Reeve wears a/);
+    const carries = canvas.getByText(/^The Reeve carries a/);
+    await after(canvas.getByText('The Reeve looks to be hurt.'), wears);
+    await after(wears, carries);
+    await expect(carries).not.toHaveTextContent('cloak');
+    await expect(canvas.getByRole('button', { name: 'wool cloak, open' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'sealed letter, open' })).toBeVisible();
   },
 };
-export const LookNothing: StoryObj = {
-  ...pageStory(lookView(nell.id)),
-  name: 'Look, carrying nothing',
+// Breaks: a person who only wears things gains a carries sentence (no theft: no contents).
+export const LookWorn: StoryObj = {
+  ...pageStory(lookView(reeve.id, reeveWith({}))),
+  name: 'Look, wearing only',
   play: async ({ canvas }) => {
-    await canvas.findByRole('button', { name: LABEL.close });
+    await canvas.findByText(/^The Reeve wears a/);
     await expect(canvas.queryByText(/carries/)).toBeNull();
   },
 };
+// Nell as the view projects her: worn always, here empty. Breaks: an empty worn draws "Nell wears ."
+export const LookNothing: StoryObj = {
+  ...pageStory(
+    lookView(
+      nell.id,
+      NpcChoiceView.view.entities.map((e) => (e === nell ? { ...e, worn: [] } : e)),
+    ),
+  ),
+  name: 'Look, carrying nothing',
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: LABEL.close });
+    await expect(canvas.queryByText(/carries|wears|looks to be/)).toBeNull();
+  },
+};
+// The cloak's page, opened from the worn sentence without theft (book-ui.md, Item details): its
+// take is refused not_present. Breaks: a Take or Lift button, a refusal card or "is holding it".
+export const WornItem: StoryObj = {
+  ...pageStory({
+    ...lookView(
+      reeve.id,
+      reeveWith({
+        worn: [
+          {
+            ...cloak,
+            actions: [
+              {
+                action_key: 'take',
+                label: 'action.take',
+                target_ids: [cloak.id],
+                available: false,
+                reason: { code: 'not_present' },
+              },
+            ],
+          },
+        ],
+      }),
+    ),
+    stack: [
+      { kind: 'thing', id: reeve.id },
+      { kind: 'inside', id: reeve.id },
+      { kind: 'thing', id: cloak.id },
+    ],
+  }),
+  name: 'Worn item page',
+  play: async ({ canvas }) => {
+    await canvas.findByRole('heading', { name: 'A wool cloak' });
+    await expect(canvas.queryByRole('button', { name: /take|lift/i })).toBeNull();
+    await expect(canvas.queryByText(/holding it|not here/i)).toBeNull();
+  },
+};
+// An Attack on a person with no hp (loka-xyyd) is the unavailable card naming them (book-ui.md,
+// Unavailable actions). Breaks: no card, or "You can't do that—cannot be hurt."
+const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
+const attack = { available: false, action_key: 'attack', label: 'action.attack', reason };
+export const AttackRefused: StoryObj = {
+  ...pageStory({
+    ...NpcChoiceView,
+    view: {
+      ...NpcChoiceView.view,
+      choice: undefined,
+      entities: NpcChoiceView.view.entities.map((e) =>
+        e === reeve ? { ...e, actions: [attack] } : e,
+      ),
+    },
+  }),
+  args: { words: { 'action.attack': 'Attack' } },
+  name: 'Attack refused',
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Attack' }));
+    await expect(await canvas.findByText(/You can't hurt the Reeve\./)).toBeVisible();
+  },
+};
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
-// Breaks: the buy page loses its Sell card while the player holds something the shop buys.
+type Canvas = Parameters<NonNullable<StoryObj['play']>>[0]['canvas'];
+// Breaks: a shop row drawn as a card, or its noun not in the room link style (book-ui.md, NPC shop
+// and services).
+const shopLine = async (canvas: Canvas, name: string, noun: string) => {
+  const line = await canvas.findByRole('button', { name });
+  await expect(getComputedStyle(line).borderTopWidth).toBe('0px');
+  await expect(getComputedStyle(within(line).getByText(noun)).textDecorationLine).toBe('underline');
+  return line;
+};
+// Breaks: the buy page loses its Sell card while the player holds something the shop buys, or a
+// sold-out line's press does not gray it with its sentence.
 export const Shelf: StoryObj = {
   ...pageStory(NpcShelfView),
   name: 'Shop, buy page',
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: LABEL.sell });
+    await userEvent.click(
+      await shopLine(canvas, 'A cob of bread, 4p. Buy for 4 pennies.', 'cob of bread'),
+    );
+    await canvas.findByText(/It's sold out\./, { selector: '[role=button] *' });
   },
 };
 // The story's page turns are spies, so the sell page is its own stack.
@@ -118,10 +221,17 @@ export const Sale: StoryObj = {
   ...pageStory({ ...NpcShelfView, stack: [...NpcShelfView.stack, { kind: 'sale', id: keeper }] }),
   name: 'Shop, sell page',
   play: async ({ canvas }) => {
-    await canvas.findByRole('button', { name: 'Cob of bread — 1p' });
+    await shopLine(canvas, 'A cob of bread, 1p. Sell for 1 penny.', 'cob of bread');
   },
 };
-export const Services: StoryObj = { ...pageStory(NpcServicesView), name: 'Services' };
+// Breaks: a service drawn as a card, or its name losing the action and price.
+export const Services: StoryObj = {
+  ...pageStory(NpcServicesView),
+  name: 'Services',
+  play: async ({ canvas }) => {
+    await shopLine(canvas, 'Order a knife, 3p. 3 pennies.', 'Order a knife');
+  },
+};
 // The smith with a knife on order, shaped from the Services view (the route needs two lumps of ore):
 // the knife still at the forge, so cancel is offered and claim refused not ready; the commission
 // hides and they sit under Your order.
@@ -149,6 +259,7 @@ export const OpenOrder: StoryObj = {
   play: async ({ canvas }) => {
     await canvas.findByText(LABEL.yourOrder);
     await expect(canvas.queryByText(/^Order a knife/)).toBeNull();
+    await shopLine(canvas, 'Cancel the order, 1p. 1 penny.', 'Cancel the order');
   },
 };
 export const NothingToSay: StoryObj = { ...pageStory(NpcSilentView), name: 'Nothing to do' };

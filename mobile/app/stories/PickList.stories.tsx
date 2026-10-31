@@ -1,6 +1,6 @@
 // PickList: a page's Pick a second thing options (PickLists' doc comment; book-ui.md).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 import { useState } from 'react';
 import { PickLists } from '../book/actions.tsx';
 import { Text } from '../book/Text.tsx';
@@ -62,13 +62,18 @@ export const Open: Story = {
   },
 };
 
-// A resting tool is a `label: reason` note, not a row. Breaks: the note presses.
+// A resting tool is a disabled row under its plain name; a press shows the reason and sends nothing.
+// Breaks: the row reads `label: reason`, is not disabled, or its press reaches the engine.
 export const UnavailableRow: Story = {
   args: { buttons: [pair('quench', 'bucket'), pair('quench', 'flint', 'resting')] },
-  play: async ({ canvas, userEvent }) => {
+  play: async ({ canvas, args, userEvent }) => {
     await open(canvas, userEvent);
-    await expect(canvas.getByText(/resting/)).toBeVisible();
-    await expect(canvas.queryByRole('button', { name: /^Flint/ })).toBeNull();
+    const row = canvas.getByRole('button', { name: /^Flint/ });
+    await expect(row).toHaveAttribute('aria-disabled', 'true');
+    await expect(row).not.toHaveTextContent(/resting/);
+    await userEvent.click(row);
+    await waitFor(() => expect(row).toHaveTextContent(/resting/i));
+    await expect(args.press).not.toHaveBeenCalled();
   },
 };
 

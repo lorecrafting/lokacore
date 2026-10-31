@@ -34,6 +34,27 @@ export const amountWords = (quantity: number, capacity: number, of: string) => {
   return `Half full of ${of}`;
 };
 
+// A Fill, Pour or Drink line's level after it, from the line's own bindings (never today's view,
+// so an old line keeps its level): " The waterskin is half full of water." (book-ui.md, Line
+// placement). No vessel binding, or a vessel neither view names: nothing.
+export const levelWords = (
+  t: { bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
+  text: (key: string) => string,
+  view: GameView,
+  was?: GameView,
+) => {
+  const id = t.participants?.vessel;
+  const { remaining, capacity, kind } = t.bindings ?? {};
+  if (!id || typeof remaining !== 'number' || typeof capacity !== 'number') return '';
+  const v = [view, was].map((g) => g && things(g).find((e) => e.id === id)).find(Boolean);
+  if (!v) return '';
+  // ponytail: with no name words, an indefinite short's article turns definite ("a skin" -> "the skin").
+  const name = v.words
+    ? `${v.words.article ? 'the ' : ''}${text(v.words.bare)}`
+    : text(v.name).replace(/^(an?|some) /i, 'the ');
+  return ` ${cap(name)} is ${lower(amountWords(remaining, capacity, lower(text(String(kind)))))}.`;
+};
+
 // A vessel's liquid: "Half full of water."
 export const liquidWords = (
   l: { label: string; quantity: number; capacity: number },

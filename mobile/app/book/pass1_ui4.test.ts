@@ -98,9 +98,7 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
     'Leave',
   ]);
   const book = await page(view, ID.book);
-  const [holder, lift] = ['Npc.nell.short is holding it.', 'Lift: not yours.'].map((l) =>
-    book.indexOf(l),
-  );
+  const [holder, lift] = ['Npc.nell.short is holding it.', 'Lift'].map((l) => book.indexOf(l));
   assert.ok(holder >= 0 && lift > holder, JSON.stringify(book)); // book-ui.md: holder Note first
   for (const id of ['coin', 'pebble'] as const) {
     const lines = await page(view, ID[id]);
@@ -142,9 +140,9 @@ test('detail options: act on it, then move it, then store it', async () => {
 });
 
 // Breaks: a refused two-target offer that is no use pair (a Put resting, cooldown) is let through
-// as a use pair would be and draws as a pressable card, or loses its "not yet" note as a use
-// pair's Pick list row would.
-test('a resting Put draws no card but keeps its note', async () => {
+// as a use pair would be and draws as an available card, or goes missing as a use pair's Pick
+// list row would.
+test('a resting Put draws as its unavailable card', async () => {
   const v = nellView();
   const resting = {
     available: false,
@@ -158,13 +156,13 @@ test('a resting Put draws no card but keeps its note', async () => {
   const corpse = await page(view, ID.corpse);
   assert.deepEqual(
     corpse.filter((l) => l.startsWith('Put')),
-    ['Put: not yet.'],
+    ['Put'],
   );
 });
 
 // Breaks: an item page with no actions, contents or notes draws a filler line instead of title,
 // description, Leave (owner pick mvlyb5x2m9i3); or a cartridge without action label text prints the
-// refusal's raw key, "action.take: not yours." (loka-x6t.53).
+// refusal's raw key, "action.take" (loka-x6t.53).
 test('a refusal reads its word; an empty item page draws no filler', async () => {
   const v = nellView();
   const refused = action('take', { available: false, reason: { code: 'permission_denied' } });
@@ -173,7 +171,7 @@ test('a refusal reads its word; an empty item page draws no filler', async () =>
     entities: [...v.entities, thing('coin', [refused]), thing('pebble', [])],
   } as GameView;
   const coin = await page(view, ID.coin);
-  assert.ok(coin.includes('Take: not yours.'), JSON.stringify(coin));
+  assert.ok(coin.includes('Take'), JSON.stringify(coin)); // its plain verb; the reason waits for a press
   const pebble = await page(view, ID.pebble);
   assert.equal(pebble.at(-1), LABEL.leave, JSON.stringify(pebble));
   assert.ok(!pebble.includes('Nothing to do here.'), JSON.stringify(pebble));
@@ -224,6 +222,65 @@ test('one balance Note after the description on a page with a priced service', a
   assert.ok(!draw({ ...bare, services: [service(1)] }, true).includes('You have 10p.')); // a conversation hides it
   assert.ok(!draw({ ...bare, services: [service(0)] }).includes('You have 10p.'));
   assert.ok(!draw(bare).some((l) => l.startsWith('You have')));
+});
+
+// Breaks: a person who cannot be hurt (Attack refused, cause cannot_be_hurt; loka-xyyd) loses the
+// unavailable Attack card, draws it twice, or a press does not show "You can't hurt <name>."
+// (book-ui.md, Unavailable actions).
+test("an hp-less person's page shows its unavailable Attack; a press reads You can't hurt them", async () => {
+  const { NpcPage } = await import('./Npc.tsx');
+  const g = globalThis as any;
+  const hook = Symbol.for('loka-book-test-state');
+  const stateless = g[hook];
+  const slots: unknown[] = [];
+  let i = 0;
+  g[hook] = (v: unknown) => {
+    const k = i++;
+    if (!(k in slots)) slots[k] = v;
+    return [slots[k], (x: unknown) => (slots[k] = x)];
+  };
+  try {
+    const v = nellView();
+    const nell = v.entities.find((e) => e.shop)!;
+    const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
+    const attack = { ...action('attack'), available: false, reason };
+    const view = {
+      ...v,
+      entities: v.entities.map((e) => (e.id === nell.id ? { ...e, actions: [attack] } : e)),
+    } as GameView;
+    const s = screenOf(view);
+    const text = (k: string) =>
+      ({ 'action.attack': 'Attack', [nell.name]: 'Nell' })[k] ?? s.text(k);
+    const npc = s.view.entities.find((e) => e.id === nell.id);
+    const draw = () => {
+      i = 0;
+      return nodes(
+        NpcPage({
+          ...s,
+          text,
+          npc,
+          g: group(s.buttons),
+          press() {},
+          leave() {},
+          open() {},
+        } as never),
+      );
+    };
+    const cards = draw().filter((n) => n.props?.accessibilityState?.disabled);
+    assert.deepEqual(
+      cards.map((n) => n.props.accessibilityLabel),
+      ['Attack'],
+    );
+    cards[0].props.onPress();
+    assert.ok(
+      draw()
+        .filter((n) => n.type === 'Text')
+        .map(words)
+        .includes("Attack\nYou can't hurt Nell."),
+    );
+  } finally {
+    g[hook] = stateless;
+  }
 });
 
 // Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or

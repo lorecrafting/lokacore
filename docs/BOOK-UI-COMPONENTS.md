@@ -207,7 +207,7 @@ a new component needs a real consumer, its comment and its line here in the same
 existing pieces, no new token: the option is an available `ActionCard` that takes a local press
 instead of a `Button` and carries `accessibilityState.expanded`; while open, its rows render
 directly beneath it as a `Cards` stack of `ActionCard`s (available) and the `ActionCard`
-unavailable form (`label: reason`), inset `space.lg` from the option so they read as its
+unavailable form (its plain label; a press shows the reason, [Book UI](system/book-ui.md#unavailable-actions)), inset `space.lg` from the option so they read as its
 children. No chevron or other glyph: the label's ellipsis says it opens. At phone width rows take
 the full inset width, a long name wraps and never truncates, and the open list stays in the
 page's scroll; opening scrolls the first row into view. Web keyboard: Tab and Shift-Tab move
@@ -222,8 +222,8 @@ thickness token, since no platform's `Text` sets one); linked, or plain prose wh
 projected.
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
-chips and scene pick cards. The mock's shop price rows are not adopted either: a stock row and a sale
-row are each an `ActionCard` on `ShelfPage` (owner picks mvlrlvappy4w, mvlynyikyw57, 2026-10-23).
+chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an
+`ActionCard` in its line form (`link`), a prose line in `Cards lines` ([shop lines](system/book-ui.md#npc-dialogue-and-action-details), owner 2026-10-30).
 
 ## Page turn
 

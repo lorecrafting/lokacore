@@ -52,12 +52,10 @@ type Live = {
   text: Record<string, string>;
   buttons: string[];
   lines: string[];
-  notes: string[];
 };
 
 // In the page, in one turn: the live GameView the Book draws (App.tsx keeps the session on
-// globalThis), its offer labels' texts, and the top page's visible button names and text lines;
-// notes are the lines outside the event log (lines.tsx LogLines).
+// globalThis), its offer labels' texts, and the top page's visible button names and text lines.
 const live = (): Live => {
   const shown = (selector: string) =>
     [...document.querySelectorAll(selector)].filter(
@@ -78,9 +76,6 @@ const live = (): Live => {
     text: Object.fromEntries(keys.map((a) => [a.label, game.text(a.label) ?? ''])),
     buttons: shown('[role="button"]').map((b) => b.getAttribute('aria-label') ?? ''),
     lines: lines.map((e) => e.textContent ?? ''),
-    notes: lines
-      .filter((e) => !e.closest('[data-testid="log-lines"]'))
-      .map((e) => e.textContent ?? ''),
   };
 };
 
@@ -100,9 +95,9 @@ const placeOffers = (view: View) =>
   );
 
 // The room page against its GameView (pass-1 check 8; book-ui.md Room page anatomy): no place
-// offer is a control or a `label: reason` note, no shut door's Open or Unlock is a card (owner
+// offer is a control (an unavailable card is a button too), no shut door's Open or Unlock is a card (owner
 // 2026-10-23: the Map and the joystick open doors), and no text is a raw key.
-function roomDrawn({ view, text, buttons, lines, notes }: Live) {
+function roomDrawn({ view, text, buttons, lines }: Live) {
   if (view.scene || view.combat || view.choice) return { problems: [], seen: 'not World' };
   // An untexted label shows its key's last word (words.ts sayers).
   const label = (a: Offer) =>
@@ -116,9 +111,6 @@ function roomDrawn({ view, text, buttons, lines, notes }: Live) {
   const named = buttons.map((b) => b.toLowerCase());
   const problems = [
     ...place.filter((a) => named.includes(label(a))).map((a) => `World verb "${label(a)}"`),
-    ...place
-      .filter((a) => notes.some((l) => l.toLowerCase().startsWith(`${label(a)}: `)))
-      .map((a) => `refused note "${label(a)}" on World`),
     // A door card would read `label door (direction)`; World draws none.
     ...doors
       .filter(({ a, dir }) =>

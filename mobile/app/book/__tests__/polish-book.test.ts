@@ -37,7 +37,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View',Value:class{},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility(){}},Easing={},Animated={View:'View',Value:class{},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -188,6 +188,14 @@ export function book(
   const buttons = () => draw().filter(pressable);
   const labels = () => buttons().map((n) => n.props.accessibilityLabel);
   const tap = (shown: string | RegExp) => control(draw(), shown).props.onPress();
+  // Press an unavailable Action card (book-ui.md, Unavailable actions): it reads its plain label.
+  const refuse = (shown: string) => {
+    const card = draw().find(
+      (n) => n.props?.accessibilityState?.disabled && n.props.accessibilityLabel === shown,
+    );
+    assert.ok(card, `no unavailable ${shown}`);
+    card.props.onPress();
+  };
   const map = () => {
     const footer = draw().find((n) => n.type.name === 'Footer');
     assert.ok(footer);
@@ -218,6 +226,7 @@ export function book(
     draw,
     labels,
     tap,
+    refuse,
     map,
     text,
   };

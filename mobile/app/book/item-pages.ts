@@ -6,15 +6,22 @@ export const things = (v: GameView): Thing[] =>
     ...v.entities,
     ...v.inventory,
     ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
-  ].flatMap((e) => [e, ...(e.contents ?? [])]);
+  ].flatMap((e) => [e, ...(e.contents ?? []), ...worn(e)]);
+// What a person wears that the theft lane does not also list (loka-oc5i). Its take stays refused
+// (not_present), which no item page draws (book-ui.md, Item details and Take/Drop).
+const worn = (e: Thing) =>
+  'worn' in e ? (e.worn ?? []).filter((w) => !e.contents?.some((c) => c.id === w.id)) : [];
 // The things directly inside a container (or held by a person).
 export const within = (v: GameView, id: string) =>
   things(v).filter((e) => 'container_id' in e && e.container_id === id);
 // What a living NPC carries (its Look page, InsidePage): Take on one is the steal (row 33). Shop
-// stock is the shop page's, not carried.
+// stock is the shop page's and worn items the worn sentence's, not carried.
 export const held = (v: GameView, npc: Thing) => {
-  const stock = 'shop' in npc ? (npc.shop ?? []).map((o) => o.item_id) : [];
-  return within(v, npc.id).filter((e) => !stock.includes(e.id));
+  const shown = [
+    ...('shop' in npc ? (npc.shop ?? []).map((o) => o.item_id) : []),
+    ...('worn' in npc ? (npc.worn ?? []).map((w) => w.id) : []),
+  ];
+  return within(v, npc.id).filter((e) => !shown.includes(e.id));
 };
 // Its contents are reachable: an open lid, or contents the GameView lists (book-ui.md, Item details).
 export const opens = (v: GameView, thing: Thing) =>

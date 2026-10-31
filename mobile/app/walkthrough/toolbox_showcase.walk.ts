@@ -92,7 +92,7 @@ const crafts = async (screen: Screen, { tap, take, lesson, held, moves, fixture 
   await tap(LABEL.giveTo);
   await tap(/^The farmer, give a red apple/);
   await tap(/^(?:the )?farmer, open$/i);
-  await tap('Trade two pelts for a knife');
+  await tap('Trade two pelts for a knife.');
   await tap(LABEL.leave);
 };
 
@@ -153,7 +153,7 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   await npc(/^(?:the )?clerk, open$/i, /^Deposit five pennies/);
   await moves('west', 'north');
   await npc(/^(?:the )?market clerk, open$/i, /^Withdraw five pennies/);
-  await shop(/^(?:the )?chandler, open$/i, /^Tallow candle — /);
+  await shop(/^(?:the )?chandler, open$/i, /tallow candle, \d+p\. Buy for /);
   await moves('south', 'west');
   await fixture('barrels', 'Hide');
   await moves('east', 'north');
@@ -161,7 +161,7 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   await tap(LABEL.lookPerson); // what a person carries is on their Look page (loka-aqnc)
   await take(/^(?:the )?merchant's purse, open/i, /^Lift$/);
   await moves('south', 'west');
-  await shop(/^(?:the )?fence, open$/i, LABEL.sell, /^Merchant's purse — /);
+  await shop(/^(?:the )?fence, open$/i, LABEL.sell, /merchant's purse, \d+p\. Sell for /);
   await moves('east', 'east');
   await npc(/^(?:the )?clerk, open$/i, /^Buy the strongroom/);
   await take(/^(?:the )?strongroom key, open$/i, /^Take the strongroom key/);

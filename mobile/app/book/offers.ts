@@ -1,6 +1,7 @@
 // Captured provider offers retain their exact target, quote and action alias.
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
+import { LABEL } from './labels.ts';
 import { cap } from './words.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -34,6 +35,14 @@ export function priceNote({ benefit: b, price }: Offer): string {
 /** A priced offer's label with its note; a price-0 barter's authored label names its inputs. */
 export const offerLabel = (s: Offer, text: Say, note = (n: string) => ` — ${n}`) =>
   s.price ? `${text(s.label)}${note(priceNote(s))}` : text(s.label);
+
+/** A service's shop line (book-ui.md, Shop lines): `Order a knife, 3p.`, its label the link, named `Order a knife, 3p. 3 pennies.`. */
+export const offerLine = (s: Offer, text: Say) => {
+  const shown = offerLabel(s, text, (n) => `, ${n}`);
+  const label = /[.!?]$/.test(shown) ? shown : `${shown}.`;
+  const spoken = priceNote(s).replace(/(\d+)p\b/g, (_, d) => LABEL.pennies(Number(d)));
+  return { label, link: text(s.label), name: s.price ? `${label} ${cap(spoken)}.` : label };
+};
 
 export function serviceButtons(v: GameView, text: Say): Press[] {
   return v.entities.flatMap((e) =>

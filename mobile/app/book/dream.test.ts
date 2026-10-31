@@ -139,7 +139,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   const ui = render(a.game);
   ui.draw();
   ui.tap('Maud');
-  ui.tap('Rent room — 3p');
+  ui.tap('Rent room, 3p. 3 pennies.');
   ui.tap('Leave');
   ui.walk('up');
   ui.tap('bed, open');
@@ -200,7 +200,9 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   );
   assert.equal(cold.stack().at(-1).kind, 'notice');
   assert.ok(!cold.text().includes('Dream acknowledged.'));
-  assert.ok(cold.text().includes('Rest: not now'));
+  const rest = cold.draw().find((n) => n.props?.accessibilityLabel === 'Rest');
+  assert.ok(rest?.props.accessibilityState?.disabled, 'Rest is an unavailable card');
+  assert.equal(rest.props.accessibilityHint, "You can't do that—not now.");
   assert.ok(!cold.labels().includes('Resume dream'));
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM report').get()!.n, 0);
 });
@@ -212,7 +214,7 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   const ui = render(a.game);
   ui.draw();
   ui.tap('Maud');
-  ui.tap('Rent room — 3p');
+  ui.tap('Rent room, 3p. 3 pennies.');
   ui.tap('Leave');
   ui.walk('up');
   ui.tap('bed, open');

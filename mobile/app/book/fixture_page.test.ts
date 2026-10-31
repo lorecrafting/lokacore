@@ -91,19 +91,14 @@ test('a linked fixture opens its page on tap and its card sends the offer', asyn
   assert.deepEqual(done.slice(1), [{ action_key: 'gather_ash', target_ids: [], input: {} }]);
 });
 
-// Break: a refused offer on the page draws as a pressable card, or is dropped with its reason.
-test('a refused fixture offer draws its reason on the page, not a card', async () => {
+// Break: a refused offer on the page reads `label: reason`, is not exposed as disabled, or is
+// dropped with its reason (book-ui.md, Unavailable actions).
+test('a refused fixture offer is an unavailable card under its plain label, its reason its hint', async () => {
   const { page } = await draw({ available: false, reason: { code: 'insufficient_resource' } });
-  assert.equal(
-    page.some((n) => n.props?.accessibilityLabel === 'Gather ash'),
-    false,
-  );
-  assert.ok(
-    page
-      .filter((n) => n.type === 'Text')
-      .map(words)
-      .some((t) => t.startsWith('Gather ash: ')),
-  );
+  const card = page.find((n) => n.props?.accessibilityLabel === 'Gather ash');
+  assert.deepEqual(card?.props.accessibilityState, { disabled: true });
+  assert.equal(card.props.accessibilityHint, 'You are too exhausted.');
+  assert.ok(!page.some((n) => n.type === 'Text' && words(n).includes(':')));
 });
 
 // Break (PR #464 ruling 4): a refused Read on a linked notice opens its page with no reason shown.
@@ -118,6 +113,6 @@ test('a refused Read draws its reason on the notice page', async () => {
     target_ids: ['n1'],
   };
   const { page } = await draw({}, undefined, [read]);
-  const shown = page.filter((n) => n.type === 'Text').map(words);
-  assert.ok(shown.includes('Read: Too dark to read.'), JSON.stringify(shown));
+  const card = page.find((n) => n.props?.accessibilityLabel === 'Read');
+  assert.equal(card?.props.accessibilityHint, 'Too dark to read.');
 });

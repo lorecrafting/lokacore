@@ -1,6 +1,6 @@
 // The thing and Contents views use the existing book controls (the NPC page: Npc.tsx).
 import { View } from 'react-native';
-import { cap, plain, things, type group, type Page as Route } from './model.ts';
+import { bandPhrase, cap, plain, things, type group, type Page as Route } from './model.ts';
 import { held, opens, within } from './item-pages.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
@@ -66,7 +66,7 @@ const notes = (thing: Thing | undefined, label: Say, held?: string) => {
           <ActionCard
             key={a.action_key}
             label={held && commandOf(a) === 'take' ? LABEL.lift : label(a.label)} // E14, refused too
-            reason={`${a.word}.`}
+            reason={a.word}
           />
         ))}
       </View>
@@ -94,7 +94,8 @@ const inside = (p: { thing?: Thing; contents: Thing[]; text: Say; open: (id: str
  * - Rules: a refused action reads the same word as an offered one; a container whose contents are
  *   reachable (an open lid, or listed contents) draws a Look inside Control after its options, never
  *   its contents (InsidePage).
- * - States: plain; open container (Look inside); fuel; too heavy; held by a person.
+ * - States: plain; open container (Look inside); fuel; too heavy; held by a person (theft lane:
+ *   Lift and its Note); worn by a person outside the theft lane (no Take, no Note).
  * - Story: ItemPage.stories.tsx
  */
 export function ThingPage(p: {
@@ -144,11 +145,15 @@ export function ThingPage(p: {
  * - Use: the inside route, from the item page's Look inside or an accepted Open, or the NPC page's
  *   Look.
  * - Rules: the container's name, then Inside and one Entity line per item, each opening its item
- *   page. A person's: their name, the description as prose, then what they carry as one sentence,
+ *   page. A person's: their name, the description as prose, their condition as one prose sentence
+ *   from the projected hp band, "<Name> looks to be <band phrase>." (no band, no sentence), then
+ *   what they wear, "<Name> wears a scorched apron and a badge.", then what else they carry,
  *   "<Name> carries a flask and a knife.", each name an inline link to its item page; nothing
- *   carried, no sentence. No actions; Close returns to the item or NPC page and sends nothing.
- * - States: several items; empty (one Note); a person carrying things; a person carrying nothing
- *   (the person's states: NpcPage.stories.tsx Look).
+ *   worn or carried, no sentence for it. No actions; Close returns to the item or NPC page and
+ *   sends nothing.
+ * - States: several items; empty (one Note); a person with a band, carrying things; wearing and
+ *   carrying; wearing only; a person with no band, carrying nothing (the person's states:
+ *   NpcPage.stories.tsx Look).
  * - Story: ItemPage.stories.tsx
  */
 export function InsidePage(p: {
@@ -161,12 +166,9 @@ export function InsidePage(p: {
   const [c, t] = [usePalette(), useType()];
   const thing = things(view).find((e) => e.id === p.id);
   const open = (id: string) => p.open({ kind: 'thing', id });
-  const carried = thing?.kind === 'npc' ? held(view, thing) : [];
+  const name = thing ? cap(text(thing.name)) : LABEL.item;
   return (
-    <Page
-      title={thing ? cap(text(thing.name)) : LABEL.item}
-      foot={<Control label={LABEL.close} onPress={p.close} />}
-    >
+    <Page title={name} foot={<Control label={LABEL.close} onPress={p.close} />}>
       {thing?.kind !== 'npc' ? (
         inside({ thing, contents: within(view, p.id), text, open }) || (
           <Note>{LABEL.nothingInside}</Note>
@@ -174,8 +176,14 @@ export function InsidePage(p: {
       ) : (
         <>
           {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
-          {carried.length > 0 &&
-            carries({ group: carried, carrier: cap(text(thing.name)), text, open })}
+          {'band' in thing && thing.band && (
+            <Text style={prose(c, t)}>
+              {LABEL.looksToBe(name, bandPhrase({ band: thing.band }, text))}
+            </Text>
+          )}
+          {'worn' in thing &&
+            carries({ group: thing.worn ?? [], carrier: name, verb: 'wears', text, open })}
+          {carries({ group: held(view, thing), carrier: name, text, open })}
         </>
       )}
     </Page>
@@ -199,7 +207,13 @@ export function Item(p: {
   const items = things(p.screen.view);
   const thing = items.find((e) => e.id === p.id);
   const holder = thing && 'container_id' in thing && items.find((e) => e.id === thing.container_id);
-  const held = holder && holder.kind === 'npc' ? holder.name : undefined;
+  // The theft lane only: a worn item outside the person's contents has no Lift and no Note (loka-oc5i).
+  const lifts =
+    holder &&
+    holder.kind === 'npc' &&
+    'contents' in holder &&
+    holder.contents?.some((c) => c.id === p.id);
+  const held = lifts ? holder.name : undefined;
   return (
     <ThingPage
       thing={thing}

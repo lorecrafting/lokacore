@@ -16,8 +16,9 @@ import { space } from './tokens.ts';
 import { picks } from './pick.ts';
 import { purse } from './Shelf.tsx';
 import { LABEL } from './labels.ts';
-import { offerLabel, serviceOrder, talkOf } from './offers.ts';
+import { offerLine, serviceOrder, talkOf } from './offers.ts';
 import { balance, hostileRefusal } from './words.ts';
+import { cannotHurt } from './reasons.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -87,12 +88,15 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   cards (owner picks mvlrlvappy4w, mvlymuams73l): one Talk card reading `Talk`, its accessible
  *   name the offer's own label (the first available talk; with none, no card and no filler
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
- *   Ask about, then services, an open order's claim and cancel under Your order with its
- *   commission hidden. A **Look** Control
+ *   an Attack refused because the person cannot be hurt (unavailable, `You can't hurt the Reeve.`),
+ *   Ask about; then the services and, under Your order, an open order's claim and cancel (its
+ *   commission hidden), each a shop line, not a card (book-ui.md Shop lines:
+ *   `Order a knife, 3p.`, the label the link, named `Order a knife, 3p. 3 pennies.`). A **Look** Control
  *   (not in conversation) opening the Look page (InsidePage), Leave in the PageFoot. No Whisper
  *   (loka-x6t.115), no Give an item… card, no list of what the person carries. The purse shows
  *   only beside a priced service. History restarts after Leave the conversation.
- * - States: choice; shop; services; open order; nothing to say (no line); closed conversation.
+ * - States: choice; shop; services; open order; nothing to say (no line); closed conversation;
+ *   cannot be hurt.
  * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
@@ -154,16 +158,25 @@ function Offered(
         lists={all.filter((k) => k.label !== LABEL.giveAnItem)}
         state={shown}
       />
-      <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>
       <Cards>
-        {plain.filter((b) => b.command === 'ask').map(card)}
-        {p.services.plain.map((s) => service(s, p))}
+        {plain.filter((b) => b.command !== 'ask').map(card)}
+        {unhurt(p.npc, p.text)}
       </Cards>
+      <Cards>{plain.filter((b) => b.command === 'ask').map(card)}</Cards>
+      <Cards lines>{p.services.plain.map((s) => service(s, p))}</Cards>
       {p.services.order.length > 0 && <SectionTitle>{LABEL.yourOrder}</SectionTitle>}
-      <Cards>{p.services.order.map((s) => service(s, p))}</Cards>
+      <Cards lines>{p.services.order.map((s) => service(s, p))}</Cards>
     </>
   );
 }
+
+// An Attack refused because the person cannot be hurt (loka-xyyd): the unavailable card naming them.
+const unhurt = (npc: Thing, text: NpcProps['text']) =>
+  (npc.actions ?? [])
+    .filter((a) => !a.available && a.reason.cause === 'cannot_be_hurt')
+    .map((a) => (
+      <ActionCard key={a.action_key} label={text(a.label)} reason={cannotHurt(text(npc.name))} />
+    ));
 
 // Answering keeps the page in conversation even after the kernel closes it; only Leave the
 // conversation returns to the NPC's own actions (Talk, shop, services).
@@ -199,15 +212,16 @@ const about = (c: Palette, t: Type, p: NpcProps, priced: boolean) => (
   </>
 );
 
-// A service as an Action card; unavailable, its Note with the reason.
+// A service as a shop line (ActionCard's line form); unavailable, the same line, its press showing the reason.
 function service(s: Offer, p: NpcProps & { actions: Button[] }) {
   const b = p.actions.find((b) => b.action_key === s.action.action_key);
+  const l = offerLine(s, p.text);
   return b ? (
-    <ActionCard key={s.service.key} b={b} press={p.press} />
+    <ActionCard key={s.service.key} b={b} press={p.press} {...l} />
   ) : (
     <ActionCard
       key={s.service.key}
-      label={offerLabel(s, p.text, (n) => ` (${n})`)}
+      {...l}
       reason={s.action.available ? undefined : why(s.action, p.text)}
     />
   );

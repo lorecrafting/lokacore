@@ -144,9 +144,9 @@ test('a pick without narration logs the use line once', () => {
   assert.equal(b.p.screen().log.filter((s: string) => s === line).length, 1);
 });
 
-// Breaks: a resting pair becomes a pressable row or loses its reason; Escape leaves the list open
+// Breaks: a resting pair becomes an available row or loses its reason; Escape leaves the list open
 // or drops focus instead of returning it to the option.
-test('a resting pair is a `label: reason` row; Escape closes the list onto its option', () => {
+test('a resting pair is an unavailable row; Escape closes the list onto its option', () => {
   const b = yard();
   refused(b, 'cooldown');
   here(b, 'cart');
@@ -154,12 +154,13 @@ test('a resting pair is a `label: reason` row; Escape closes the list onto its o
   b.tap(LABEL.useAnItem);
   const focused: string[] = [];
   option().props.ref.current = { focus: () => focused.push('option') };
-  assert.ok(b.text().includes('A bucket: not yet.'), JSON.stringify(b.text()));
+  b.refuse('A bucket');
+  assert.ok(b.text().includes("A bucket\nYou can't do that—not yet."), JSON.stringify(b.text()));
   assert.deepEqual(rows(b), []);
   b.draw()
     .find((n) => n.props.onKeyDown)
     .props.onKeyDown({ key: 'Escape', preventDefault() {} });
   assert.deepEqual(focused, ['option']);
   assert.equal(option().props['aria-expanded'], false);
-  assert.ok(!b.text().includes('A bucket: not yet.'));
+  assert.ok(!b.text().some((l) => l.startsWith('A bucket')));
 });

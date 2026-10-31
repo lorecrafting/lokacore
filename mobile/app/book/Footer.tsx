@@ -114,9 +114,9 @@ const walker =
     if (e?.available) (at.go(e.direction), learn());
     else if (e && at.door(e.direction)) setNote('');
     else if (e) {
-      const reason = why(e, at.text); // a screen reader hears it too
-      (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
-      at.refused(refused(e, at.text));
+      const line = refused(e, at.text); // its one sentence; a screen reader hears it too
+      (setNote(line.text), AccessibilityInfo.announceForAccessibility(line.text));
+      at.refused(line);
     }
   };
 

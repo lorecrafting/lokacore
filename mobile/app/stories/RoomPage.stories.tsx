@@ -12,6 +12,7 @@ import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
 import emoteText from '../../../cartridges/emote_sampler/text.json';
+import toolboxText from '../../../cartridges/toolbox_showcase/text.json';
 import { lineWords } from '../book/words.ts';
 
 const meta: Meta = {
@@ -237,5 +238,49 @@ export const MoodPair: StoryObj = {
   name: 'Two afraid goblins',
   play: async ({ canvas }) => {
     await sentence(canvas, ['Two cowering goblins'], 'Two cowering goblins are here.');
+  },
+};
+
+// Fill and Drink lines at empty, partial and full, worded by lineWords from each line's own
+// bindings (book-ui.md, Line placement). Breaks: a liquid line drops its level or names the
+// vessel by its indefinite short.
+const skinView = {
+  ...RoomLongLogView.view,
+  inventory: [
+    {
+      id: 'skin',
+      kind: 'item',
+      name: 'item.waterskin.short',
+      words: { bare: 'item.waterskin.bare', article: 'a' },
+      actions: [],
+    },
+  ],
+};
+const toolboxSay = (k: string) => (toolboxText as Record<string, string>)[k] ?? k;
+const liquidLine = (key: string, remaining: number) =>
+  lineWords(
+    {
+      key,
+      participants: { vessel: 'skin' },
+      bindings: { kind: 'liquid.water', remaining, capacity: 4 },
+    },
+    toolboxSay,
+    skinView as never,
+  );
+export const LiquidLines: StoryObj = {
+  ...pageStory({
+    ...RoomLongLogView,
+    view: skinView,
+    log: [
+      liquidLine('liquid.drank', 0),
+      liquidLine('liquid.drank', 2),
+      liquidLine('liquid.filled', 4),
+    ],
+  }),
+  name: 'Liquid lines',
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('You drink. The waterskin is empty.')).toBeVisible();
+    await expect(canvas.getByText('You drink. The waterskin is half full of water.')).toBeVisible();
+    await expect(canvas.getByText('You fill it. The waterskin is full of water.')).toBeVisible();
   },
 };

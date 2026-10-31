@@ -21,7 +21,7 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.88 (story checks: 328 px, third line, truncation), x6t.66 (icon follow-ups), x6t.63 (icon set), loka-15g and loka-kgd.7 (condition cap and short form).
 
 ## 3. Action cards, verbs, entity lines
-- book-actioncard--short, --two-line-label, --list-of-six, --with-unavailable-note
+- book-actioncard--short, --two-line-label, --list-of-six, --unavailable
 - book-verbline--one, --three-in-a-room, --with-refused
 - book-entityline--npc-with-carried-note, --item, --held, --worn, --inside, --notice-with-remaining-count, --contents-row, --run
 - Look at: label wrap, the unavailable "label: reason" form, note placement.

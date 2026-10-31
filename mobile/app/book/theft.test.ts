@@ -46,6 +46,8 @@ registerHooks({
 });
 const { InsidePage, Item, ThingPage } = await import('./Menu.tsx');
 const { NpcDetail, NpcPage } = await import('./Npc.tsx');
+const buttons = await import('./buttons.ts');
+const { heldBy } = await import('./words.ts');
 
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
@@ -185,4 +187,85 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
   } as any);
   // The sentence, then its inline link's own Text; the coin is shop stock, b2 another's.
   assert.deepEqual(texts(nodes(carried)), ['M', 'M carries box.', 'box', 'Close']);
+});
+
+// Breaks: the Look page drops the condition sentence, words a band key as the raw key, draws a
+// sentence for a person with no band, or puts it after the carried sentence (book-ui.md, NPC page).
+// Phrases: toolbox_showcase text.json for ready/hurt/dying; an unauthored key reads its words.
+test("a person's Look page names their condition from the band, none without one", () => {
+  const words: Record<string, string> = {
+    'band.ready': 'ready',
+    'band.hurt': 'hurt',
+    'band.dying': 'dying',
+  };
+  const look = (band?: string) => {
+    const m = { id: 'm', kind: 'npc', name: 'Bess', actions: [], ...(band && { band }) };
+    const box = { id: 'box', kind: 'item', name: 'box', actions: [], container_id: 'm' };
+    const view = { entities: [m, box], inventory: [] };
+    const text = (k: string) => words[k] ?? k;
+    return texts(nodes(InsidePage({ screen: { view, text }, id: 'm', open() {} } as any)));
+  };
+  assert.deepEqual(look('ready').slice(0, 3), [
+    'Bess',
+    'Bess looks to be ready.',
+    'Bess carries box.',
+  ]);
+  assert.equal(look('hurt')[1], 'Bess looks to be hurt.');
+  assert.equal(look('dying')[1], 'Bess looks to be dying.');
+  assert.equal(look('covered_in_blood')[1], 'Bess looks to be covered in blood.');
+  assert.deepEqual(look().slice(0, 2), ['Bess', 'Bess carries box.']);
+});
+
+// Breaks (loka-oc5i): the Look page drops the worn sentence or draws it out of order (condition,
+// worn, carried), the carried sentence repeats a worn item (listed in contents or not), an empty
+// worn draws a bare "wears", or a worn item's page outside the theft lane (the person lists other
+// contents) shows the unavailable Take (as Lift, "not here") or the holding Note; inside it keeps Lift.
+test("a person's Look page names what they wear; a worn item's page has no Take without theft", () => {
+  const { buttonsOf } = buttons;
+  const take = (available: boolean) => ({
+    action_key: 'take',
+    label: 'action.take',
+    target_ids: ['apron'],
+    available,
+    ...(!available && { reason: { code: 'not_present' } }),
+  });
+  const apron = { id: 'apron', kind: 'item', name: 'apron', slot: 'body', container_id: 'm' };
+  const knife = { id: 'knife', kind: 'item', name: 'knife', actions: [], container_id: 'm' };
+  const view = (theft: boolean) => {
+    const worn = { ...apron, actions: [take(theft)] };
+    const m = {
+      id: 'm',
+      kind: 'npc',
+      name: 'Bess',
+      band: 'hurt',
+      actions: [],
+      worn: [worn],
+      contents: theft ? [worn, knife] : [knife],
+    };
+    return { entities: [m], inventory: [], exits: [], actions: [], place: { id: 'p' } } as any;
+  };
+  const text = (k: string) => (k === 'band.hurt' ? 'hurt' : k);
+  const look = (v: any) =>
+    texts(nodes(InsidePage({ screen: { view: v, text }, id: 'm', open() {} } as any)));
+  assert.deepEqual(
+    look(view(true)).filter((s) => s.startsWith('Bess')),
+    ['Bess', 'Bess looks to be hurt.', 'Bess wears apron.', 'Bess carries knife.'],
+  );
+  assert.deepEqual(
+    look(view(false)).filter((s) => s.startsWith('Bess')),
+    ['Bess', 'Bess looks to be hurt.', 'Bess wears apron.', 'Bess carries knife.'],
+  );
+  const bare = view(false);
+  bare.entities[0].worn = []; // a seen NPC always has worn; empty draws no "Bess wears ."
+  assert.deepEqual(
+    look(bare).filter((s) => s.startsWith('Bess')),
+    ['Bess', 'Bess looks to be hurt.', 'Bess carries knife.'],
+  );
+  const page = (v: any) => {
+    const screen = { view: v, text, label: text, detail: () => [], pending: false };
+    const g = group(buttonsOf(v, text, text));
+    return texts(nodes(Item({ id: 'apron', screen, g, press() {}, open() {}, world() {} } as any)));
+  };
+  assert.deepEqual(page(view(false)), ['Apron', 'Leave']);
+  assert.deepEqual(page(view(true)).slice(-3), [heldBy('Bess'), 'Lift', 'Leave']);
 });

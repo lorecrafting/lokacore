@@ -92,7 +92,7 @@ test('two equal buys on a shop page are each read in full', () => {
   for (const c of ['Go down', 'Go north']) (b.map(), b.tap(c));
   for (const c of ['chandler, open', LABEL.trade]) b.tap(c);
   const batches = [0, 1].map(() => {
-    b.tap(/^Tallow candle — /);
+    b.tap(/tallow candle, \d+p\. Buy for /);
     assert.deepEqual(live(b), ['polite', 'You buy a tallow candle.']);
     return b.draw().find((n) => n.type?.name === 'Heard')!.props.said.key;
   });

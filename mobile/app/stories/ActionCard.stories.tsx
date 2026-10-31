@@ -1,7 +1,7 @@
 // ActionCard: a detail page's offered action or dialogue choice (ActionCard's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import type { ComponentProps, ReactElement } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 import { ActionCard, Cards } from '../book/actions.tsx';
 import { button } from './fixtures.ts';
 
@@ -41,16 +41,22 @@ export const ListOfSix: Story = {
   ),
 };
 
-// Breaks: the unavailable form is pressable, or loses its label or reason.
-export const WithUnavailableNote: Story = {
+// Breaks: the unavailable card reads `label: reason`, is not exposed as disabled, or a press
+// does not gray it and show its reason as one sentence (book-ui.md, Unavailable actions).
+export const Unavailable: Story = {
   render: (args) => (
     <Cards>
       <ActionCard {...args} />
       <ActionCard label="Buy a lantern" reason="sold out" />
     </Cards>
   ),
-  play: async ({ canvas }) => {
-    await expect(canvas.getByText('Buy a lantern: sold out')).toBeVisible();
-    await expect(canvas.queryByRole('button', { name: /Buy a lantern/ })).toBeNull();
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const card = canvas.getByRole('button', { name: 'Buy a lantern' });
+    await expect(card).toHaveAttribute('aria-disabled', 'true');
+    await expect(card).toHaveTextContent(/^Buy a lantern$/);
+    await userEvent.click(card);
+    await waitFor(() => expect(card).toHaveTextContent(/^Buy a lantern\s+It's sold out\.$/));
+    await expect(canvasElement.querySelector('[aria-live]')).toHaveTextContent("It's sold out.");
+    await expect(card).toHaveAccessibleName(/^Buy a lantern\s+It's sold out\.$/);
   },
 };

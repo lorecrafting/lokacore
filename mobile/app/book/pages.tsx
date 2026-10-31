@@ -20,6 +20,14 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
+// Exposed as disabled, still pressable. Web: aria-disabled by hand; as a prop RN web also sets the
+// native `disabled`, which drops the press.
+export const refusedProps = (hint: string) => ({
+  accessibilityRole: 'button' as const,
+  ref: (n: unknown) => (n as Element | null)?.setAttribute?.('aria-disabled', 'true'),
+  accessibilityHint: hint || undefined,
+  accessibilityState: { disabled: true },
+});
 /**
  * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
  * (BOOK-UI-COMPONENTS.md, Where each fact lives).
@@ -31,6 +39,7 @@ export function Tap(p: {
   onPress: () => void;
   children: ReactNode;
   shrink?: boolean; // may give up width in a row (the status position truncates)
+  refused?: string; // an unavailable line (book-ui.md, Unavailable actions): disabled yet pressable, this its hint
 }) {
   const b = tapBleed(useType().body.lineHeight);
   const bleed = { paddingVertical: b, marginVertical: -b }; // hit area, no shown space
@@ -39,6 +48,7 @@ export function Tap(p: {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
+      {...(p.refused === undefined ? {} : refusedProps(p.refused))}
       onPress={() => p.onPress()} // no press event: the handler takes none
       style={{ minHeight: size.touch, justifyContent: 'center', ...bleed, ...shrink }}
     >

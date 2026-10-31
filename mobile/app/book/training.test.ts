@@ -291,8 +291,8 @@ function nodes(element: any): any[] {
     : [element, ...nodes(element.props?.children)];
 }
 // Breaks: the teach card for a learned skill drops, or keeps a price card (book-ui.md Skill tree
-// details, H3): a choice the kernel advertises unavailable draws as one `label: reason` note.
-test('an unavailable teach choice draws as label: reason with no price card', () => {
+// details, H3): a choice the kernel advertises unavailable draws as one unavailable card.
+test('an unavailable teach choice draws as its unavailable card with no price card', () => {
   const view = {
     entities: [],
     choice: {
@@ -318,7 +318,8 @@ test('an unavailable teach choice draws as label: reason with no price card', ()
     open() {},
   });
   const lines = words(page).filter((w) => w.includes('swords'));
-  assert.deepEqual(lines, ['Learn swords — 2 pennies: You already know swords.']);
+  assert.deepEqual(lines, ['Learn swords — 2 pennies']);
+  assert.ok(nodes(page).some((n) => n.props?.accessibilityHint === 'You already know swords.'));
 });
 
 // Breaks: teacher controls route outside their NPC detail, replay duplicates success, or cold
