@@ -848,9 +848,9 @@ build. The author tools below exist only in that bundle and change no protocol, 
 
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
-  in game minutes) under the artifact's hash. After a reload into a different hash it replays the
+  in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
   path through the normal command path, one step at a time; the first step the session does not
-  save stops the replay and is named by its ordinal and reply. Nothing writes state directly.
+  save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
 - **Fast loop.** An edit that changes only `text.json` is pushed to the open page as a text overlay
   and shows at once: no compile, reload or replay. The full compile still runs after it and
   reports its diagnostics to the column; its artifact is written on the next structural edit. Any
