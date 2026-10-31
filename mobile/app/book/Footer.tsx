@@ -8,9 +8,10 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
-import type { Button, DetailLine } from './presenter.ts';
+import { cardKey, type Button, type DetailLine } from './presenter.ts';
 import { commandOf } from './buttons.ts';
 import { Control } from './pages.tsx';
+import { ActionCard, Cards } from './actions.tsx';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space } from './tokens.ts';
 import { LABEL } from './labels.ts';
@@ -20,7 +21,8 @@ type Props = {
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
-  door: (direction: string) => boolean; // presses a shut exit's offered Unlock, else Open; false if none
+  door: (direction: string) => Button[]; // the offered verbs on that exit's door
+  press: (b: Button) => void;
   refused: (line: DetailLine) => void; // a drag toward a closed exit: its line for the log
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
@@ -54,9 +56,11 @@ const keys: Record<string, string> = {
  *   the footer.
  * - Rules: press to zoom, drag toward a path to light it, release to walk, drag back to the middle
  *   to cancel; a tap opens the Map page. Release toward a shut door presses its offered Unlock, else
- *   Open; with neither it logs the refusal ("The door to the south is locked."). A walk keeps the
- *   action and context from the drag start; the presenter revalidates its token.
- * - States: at rest; held; an exit barred by a closed or a locked door.
+ *   Open; with neither it logs the refusal ("The door to the south is locked."). Every other offered
+ *   door verb (Close, Lock, Knock) is an Action card under the joystick, so no door verb is left
+ *   without a control (PM ruling 2026-10-30). A walk keeps the action and context from the drag start;
+ *   the presenter revalidates its token.
+ * - States: at rest; held; an exit barred by a closed or a locked door; with door verb cards.
  * - Story: Footer.stories.tsx
  */
 export function Footer(p: Props) {
@@ -95,13 +99,34 @@ export function Footer(p: Props) {
         </View>
         <View style={rule(c)} />
       </View>
+      {doorVerbs(p)}
+    </View>
+  );
+}
+
+// The door verbs a release does not press: an open door's Close, a closed one's Lock, a locked one's Knock.
+export function doorVerbs({ exits, door, press }: Props) {
+  const rest = exits.flatMap((e) => {
+    const all = door(e.direction);
+    const released = e.available ? undefined : doorPick(all);
+    return all.filter((b) => b !== released);
+  });
+  return (
+    <View style={{ marginHorizontal: space.page }}>
+      <Cards>
+        {rest.map((b) => (
+          <ActionCard key={cardKey(b)} b={b} press={press} />
+        ))}
+      </Cards>
     </View>
   );
 }
 
 // A shut door's way through on release: its offered Unlock, else Open (owner 2026-10-23).
+export const doorPick = (door: Button[]) =>
+  ['unlock', 'open'].flatMap((c) => door.filter((x) => commandOf(x) === c))[0];
 export const pressDoor = (door: Button[], press: (b: Button) => void) => {
-  const b = ['unlock', 'open'].flatMap((c) => door.filter((x) => commandOf(x) === c))[0];
+  const b = doorPick(door);
   if (b) press(b);
   return !!b;
 };
@@ -112,7 +137,7 @@ const walker =
   (learn: () => void, setNote: (note: string) => void) => (d: string | null, at: Props) => {
     const e = at.exits.find((x) => x.direction === d);
     if (e?.available) (at.go(e.direction), learn());
-    else if (e && at.door(e.direction)) setNote('');
+    else if (e && pressDoor(at.door(e.direction), at.press)) setNote('');
     else if (e) {
       const line = refused(e, at.text); // its one sentence; a screen reader hears it too
       (setNote(line.text), AccessibilityInfo.announceForAccessibility(line.text));

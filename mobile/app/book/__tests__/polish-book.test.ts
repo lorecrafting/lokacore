@@ -54,6 +54,21 @@ registerHooks({
   },
 });
 const { default: Book } = await import('../Book.tsx');
+const { doorPick, doorVerbs, pressDoor } = await import('../Footer.tsx');
+
+// Every offered door verb has a control on World (owner 2026-10-30): the release presses a shut
+// door's pick, and each other verb is drawn (a pressable reading its label). Runs on every draw of every test.
+function stranded(rendered: any[]) {
+  const f = rendered.find((n) => n.type?.name === 'Footer')?.props;
+  if (!f) return;
+  const drawn = rendered.filter(pressable).map((n) => n.props.accessibilityLabel);
+  for (const e of f.exits)
+    for (const b of f.door(e.direction))
+      assert.ok(
+        (!e.available && b === doorPick(f.door(e.direction))) || drawn.includes(b.label),
+        `door verb ${b.label} has no control`,
+      );
+}
 type Shell = Parameters<typeof Book>[0]['shell'];
 export const bundle = (name = 'containers_cartridge_sampler_hash') =>
   JSON.parse(
@@ -74,7 +89,7 @@ export function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
-    if (element.type.name === 'Footer') return [element];
+    if (element.type.name === 'Footer') return [element, ...nodes(doorVerbs(element.props))];
     // The live region repeats page lines for a screen reader: page text leaves it out (live_region.test.ts reads it).
     if (element.type.name === 'Heard') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
@@ -183,6 +198,7 @@ export function book(
       }),
     );
     for (const effect of queued.splice(0)) effect();
+    stranded(rendered);
     return rendered;
   };
   const buttons = () => draw().filter(pressable);
@@ -209,7 +225,7 @@ export function book(
     const e = f.exits.find((x: { direction: string }) => x.direction === direction);
     assert.ok(e, `no exit ${direction}`);
     if (e.available) f.go(direction);
-    else assert.ok(f.door(direction), `the way ${direction} is shut`);
+    else assert.ok(pressDoor(f.door(direction), f.press), `the way ${direction} is shut`);
   };
   const text = () =>
     draw()

@@ -1,0 +1,6 @@
+id: mobile-book-map-no-actions
+valid:
+  - "function DiscoveredMap() { return <Svg><Circle r={DOT} /></Svg>; }"
+invalid:
+  - "function DiscoveredMap() { return <View><ActionCard b={b} press={press} /></View>; }"
+  - "function DiscoveredMap() { return <Cards><ActionCard label={l} onPress={go}>x</ActionCard></Cards>; }"

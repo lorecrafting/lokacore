@@ -63,8 +63,8 @@ notice entry: every action, available or refused, draws on its target's fixture,
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
 main room page").
-World draws no door card: Open and Unlock work from the
-[joystick](#minimap-map-and-presentation-controls) (the Map has no actions, owner 2026-10-30), and a door's state shows on the minimap: World
+The room list draws no door card: every door verb works from the
+[joystick](#minimap-map-and-presentation-controls), its release or a card under it (the Map has no door or movement actions, owner 2026-10-30; the cards, PM ruling 2026-10-30), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
 would show in the minimap joystick thing, not in the main description or event log page").
 The description
@@ -124,9 +124,8 @@ the `words.ts` outcome word ("Time passes.") draws only for a receipt with no na
 (pass-1 UO). No card, note or banner. Attempts, pending/refused/stale
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
 save status/error UI remains accurate; NPC histories stay independently bounded. Map
-retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
-on World only (pass-1 UF1). An exit's door state line ("The hut door: open", the cartridge's door name capitalised) always draws:
-an unavailable exit card reads its plain direction until pressed; the door's action cards stay (pass-1 UF2).
+draws no event log: the log lives on World only (pass-1 UF1); it draws no exit or door lines either
+([Minimap](#minimap-map-and-presentation-controls)).
 The World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
@@ -242,16 +241,19 @@ as one sentence ([unavailable actions](#unavailable-actions)) and logs the refus
 one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Release (or an arrow key)
 toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
 logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
-and walks nowhere. The reader actions name the reason too ("Go west, locked").
+and walks nowhere. Every other offered door verb is an Action card under the joystick, in the
+engine's words: an open door's Close, a closed door's Lock (offered only with the key), a locked
+door's Knock where the exit offers one; no offered door verb is left without a control (PM ruling
+2026-10-30). The reader actions name the reason too ("Go west, locked").
 Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; the footer and its keys are
-the Book's only movement and door-opening controls. Gesture/drawing details remain in
+the Book's only movement and door controls. Gesture/drawing details remain in
 [joystick](../../mobile/app/book/joystick.ts) and [footer](../../mobile/app/book/Footer.tsx).
 
 Map is a scrolling projection, distinct from the enlarged joystick, drawn as dots and lines
 ([DiscoveredMap](../../mobile/app/book/DiscoveredMap.tsx), owner 2026-10-30, loka-wz6f). It holds
-no actions: no movement, door or room cards and no Go; the footer walks and opens doors. Releases
+no movement, door or room cards and no Go; the footer walks and works doors. Releases
 without discovery metadata draw no map and keep the current place line.
 
 The [discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-contract)

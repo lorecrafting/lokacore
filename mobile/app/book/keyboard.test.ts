@@ -116,17 +116,17 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
   const refusals: DetailLine[] = [];
-  const knocked: string[] = []; // exits whose door was tried; only west offers Open or Unlock
-  const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
-    direction,
-    available: true,
-  }));
+  const openWest = { label: 'Open', action_key: 'open', target_ids: [], input: {} }; // only west's door
+  const opened: unknown[] = [];
+  const directions = ['north', 'south', 'west', 'east', 'up', 'down'];
+  const exits = directions.map((direction) => ({ direction, available: true }));
   const props = {
     keyboardEnabled: true,
     exits,
     text: (key: string) => key,
     go: (direction: string) => walked.push(direction),
-    door: (direction: string) => (knocked.push(direction), direction === 'west'),
+    door: (direction: string) => (direction === 'west' ? [openWest] : []),
+    press: (b: unknown) => opened.push(b),
     refused: (line: DetailLine) => refusals.push(line),
     openMap: () => {},
     learned: { seen: () => true, see: () => {} },
@@ -149,7 +149,7 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   exits.splice(0, 5, shut('north', 'locked'), exits[1]!, shut('west', 'locked'));
   exits.push(shut('up', 'closed'), shut('down', 'locked'));
   for (const name of ['ArrowUp', 'PageUp', 'PageDown', 'ArrowLeft']) assert.equal(key(name), true);
-  assert.deepEqual(knocked, ['north', 'north', 'up', 'down', 'west']);
+  assert.deepEqual(opened, [openWest]);
   assert.equal(walked.length, 6);
   assert.deepEqual(refusals, [
     { kind: 'refused', reason: 'closed', text: 'The way north is closed.' },

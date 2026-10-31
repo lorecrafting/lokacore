@@ -1,0 +1,10 @@
+id: mobile-book-map-no-actions
+language: tsx
+severity: error
+message: 'The Map drawing holds no actions (docs/system/book-ui.md, Minimap, Map and presentation controls): the footer walks and works doors; draw no ActionCard here.'
+files: [mobile/app/book/DiscoveredMap.tsx]
+rule:
+  any:
+    - kind: jsx_self_closing_element
+    - kind: jsx_opening_element
+  has: { field: name, regex: '^ActionCard$' }

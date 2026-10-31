@@ -5,7 +5,7 @@ import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
-import { Footer, pressDoor } from './Footer.tsx';
+import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
 import {
   group,
@@ -300,7 +300,8 @@ function navigation(p: BottomProps) {
       exits={view.exits}
       text={text}
       go={p.walk}
-      door={(d) => pressDoor(p.g.door(d), p.press)}
+      door={p.g.door}
+      press={p.press}
       refused={p.refused}
       learned={p.shell.learned}
       openMap={() => p.open({ kind: 'map' })}
