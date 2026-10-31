@@ -117,7 +117,6 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'motion.dry',
       'motion.pop',
       'motion.settle',
-      'motion.card',
     ].map((k) => [k, 'an effect not yet built; its slice reads it']),
   ),
 };
