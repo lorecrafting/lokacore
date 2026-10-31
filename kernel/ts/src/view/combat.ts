@@ -36,11 +36,11 @@ type Fight = NonNullable<ReturnType<typeof engaged>>;
 export function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
   // A foe is always named (even unseen); its hp band word shows only when seen and alive: a pack
   // member a spell or status kills stays on the roster until the round-end prune (loka-y6yg.49).
-  const foe = (id: EntityId) => ({
-    ...named(world, actor, id, steps),
-    ...(visible(world, actor, id, steps) &&
-      living(world, id) && { band: bandOf(world, id, 'hp').band }),
-  });
+  const foe = (id: EntityId) => {
+    const band =
+      visible(world, actor, id, steps) && living(world, id) && bandOf(world, id, 'hp')?.band;
+    return { ...named(world, actor, id, steps), ...(band && { band }) };
+  };
   return {
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,

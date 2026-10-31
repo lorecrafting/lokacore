@@ -8,7 +8,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -215,4 +216,19 @@ test('co_present with no room frightens no one', () => {
     () => 'j' as never,
   );
   assert.deepEqual(r && r.kind === 'accepted' ? r.delta.ops : r, []);
+});
+
+// loka-zvwh. Breaks: the combat view reads an hp-less foe's band from the regen hp pool (NaN level,
+// a TypeError in bandOf), or the guard also drops a foe's band that has hp of its own.
+test('an hp-less foe under the regen hp pool has no combat band; a goblin with hp has one', () => {
+  const c = structuredClone(content) as any;
+  c.npcs['fear_sampler@0.0.1:npc/guard'].attack = { chance: 100, damage_min: 1, damage_max: 1 };
+  const { w, a } = den(c);
+  const combat = (target: string) => {
+    const view = gameView(play(w, { type: 'attack', target_id: target }));
+    assert.deepEqual(validate('GameView', view), []);
+    return view.combat!;
+  };
+  assert.equal('band' in combat(npc(w, 'guard')), false);
+  assert.equal(combat(a).band, 'ready'); // 6 of 6 hp: world.bands' top row
 });
