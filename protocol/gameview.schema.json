@@ -487,6 +487,10 @@
     },
     "EntityView": {
       "properties": {
+        "band": {
+          "$ref": "action.schema.json#/$defs/Key",
+          "description": "A visible living NPC's hp condition band key (its pool's band table, loka-ysbt); absent for items, the body and an NPC without its own hp. No hp number is sent."
+        },
         "hostile": {
           "description": "Book hostile refusal: present while this NPC's disposition toward the viewer is hostile (toolbox row G11), a derived read; absent otherwise.",
           "enum": [

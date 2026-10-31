@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
+import { key } from '../src/foundation/compose.ts';
 import { gameView, newWorld } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -200,5 +201,37 @@ test('7. the vault refuses and hides its ledger; nested items stay out of reach'
   assert.deepEqual(
     [pennies(w, npc(w, 'vault')), value(w, w.character, ref('fact', 'savings'))],
     [20, 0],
+  );
+});
+
+// loka-ysbt (PM ruling a): only an NPC with its own hp shows a condition band. Breaks: a band on
+// the hp-less shopkeeper (this regen hp pool gives it NaN, which crashed the view), the guard's
+// band missing, or the band read off the wrong row of the engine default table (world.bands
+// removed; guard hp 0..10, hand-checked: 10 top, 9 the 90 cut, 5 the 50 cut, 1 the 10 cut).
+test('8. the market guard (own hp) shows its hp band; the hp-less shopkeeper shows none', () => {
+  const at = fresh((c) => {
+    delete c.world.bands;
+    c.npcs[`${S}:npc/guard`].hp = { minimum: 0, maximum: 10, start: 10, gain: 0 };
+  });
+  const w = go(at, 'west');
+  const hp = (value: number): World => ({
+    ...w,
+    state: {
+      ...w.state,
+      resources: {
+        ...w.state.resources,
+        [key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: npc(w, 'guard') })]: {
+          value,
+          at: w.state.clock,
+        },
+      },
+    },
+  });
+  const seen = (v: World, k: string) => gameView(v).entities.find((e) => e.id === npc(v, k))!;
+  assert.equal('band' in seen(w, 'shopkeeper'), false);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
+  assert.deepEqual(
+    [10, 9, 5, 1].map((v) => seen(hp(v), 'guard').band),
+    ['perfect_health', 'slightly_scratched', 'many_nasty_wounds', 'almost_dead'],
   );
 });
