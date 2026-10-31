@@ -114,6 +114,7 @@ test('ask lists on NPCs with an ask; the matching answer grants its topic, else 
 // Breaks: the Book's ask invocation (the GameView action on the NPC, the topic as input) resolved
 // without its NPC (TARGETS in commands/invocation.ts lacks ask), so every ask from the view is
 // refused unsupported_capability; step-level tests send ready Commands and never see it.
+// Also (loka-548k): the answer not bound to the asked NPC as speaker, so the Book prints it bare.
 test("the smith's offered ask, invoked as the Book does, is admitted and answers", () => {
   const w = square();
   const i = identify('ask-test', w.character, {
@@ -127,7 +128,9 @@ test("the smith's offered ask, invoked as the Book does, is admitted and answers
   assert.ok('payload' in command, JSON.stringify(command));
   const r = play(w, command.payload);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  assert.equal((r.decision as { narration?: { key: string }[] }).narration?.[0]?.key, 'smith.mill');
+  assert.deepEqual((r.decision as { narration?: unknown[] }).narration, [
+    { key: 'smith.mill', participants: { speaker: id(w, 'smith') } },
+  ]);
 });
 
 // Breaks: an unknown topic asked (the known-topic check dropped), an answer's when ignored or

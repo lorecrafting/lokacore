@@ -18,7 +18,12 @@ import {
   type ChoiceRow,
   type World,
 } from '../../../kernel/ts/src/runtime/decision.ts';
-import { answerFits, bind, openable } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import {
+  answerFits,
+  bind,
+  openable,
+  speakerOf,
+} from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import type { Story } from './save.ts';
@@ -62,13 +67,11 @@ export function dialogueDetail(
     !openable(s.world, source, row.choice_ids)
   )
     return invalid();
-  const speaker = Object.entries(source.roles).find(
-    ([, r]) => r.role === 'npc' && same(r.npc, source.npc),
-  )?.[0];
-  const detail = row.roles.find((r) => r.role === speaker)?.entity_id;
+  const detail = speakerOf(source, row);
   const participants = Object.fromEntries([
     ['actor', bodyOf(s.world, p.actor_id)],
     ...row.roles.map((r) => [r.role, r.entity_id]),
+    ...(detail ? [['speaker', detail]] : []),
   ]);
   const riddle = source.riddle?.choice_id === p.choice_id ? source.riddle : undefined;
   if (

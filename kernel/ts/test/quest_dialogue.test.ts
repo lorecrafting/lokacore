@@ -85,7 +85,10 @@ test('an accept choice activates its quest; the talk opens the first dialogue th
     ['quest_activated', 'choice_resolved'],
   );
   assert.deepEqual(s.decision.narration, [
-    { key: 'narration.bram.carry', participants: { actor: w.body, bram: bram(w) } },
+    {
+      key: 'narration.bram.carry',
+      participants: { actor: w.body, bram: bram(w), speaker: bram(w) },
+    },
   ]);
   assert.deepEqual(
     gameView(s.world).journal.map((q) => [q.quest.key, q.state]),

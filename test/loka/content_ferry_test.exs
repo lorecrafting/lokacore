@@ -231,6 +231,8 @@ defmodule Loka.ContentFerryTest do
        ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.steps[0].value", %{})},
       {dialogue(&put_in(&1, ~w(roles actor), %{"role" => "npc", "npc" => "bram"})),
        d("DUPLICATE_DEFINITION", at <> ".roles.actor", %{})},
+      {dialogue(&put_in(&1, ~w(roles speaker), %{"role" => "npc", "npc" => "bram"})),
+       d("DUPLICATE_DEFINITION", at <> ".roles.speaker", %{})},
       {dialogue(&Map.put(&1, "choices", %{})),
        d("SCHEMA_VIOLATION", at <> ".choices", %{"error" => "too_few_items"})},
       {Map.merge(dialogue(& &1, "dialogues/lantern.json"), %{"dialogues/bram.json" => nil}),

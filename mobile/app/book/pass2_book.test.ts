@@ -79,7 +79,9 @@ test('a reopen during a talk shows its question once', () => {
   go(b, 'north', 'west', 'west');
   b.tap('carpenter, open');
   b.tap('Talk to the carpenter');
-  const ask = b.text().filter((x) => x.startsWith('"Knife, axe or saw?'));
+  const ask = b
+    .text()
+    .filter((x) => x.startsWith('The carpenter says to you, "Knife, axe or saw?'));
   assert.equal(ask.length, 1, JSON.stringify(b.text()));
   b.unmount();
   const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
@@ -88,6 +90,32 @@ test('a reopen during a talk shows its question once', () => {
     ask,
     JSON.stringify(r.text()),
   );
+  r.unmount();
+  a.sql.close();
+});
+
+// Breaks (book-ui.md Line placement, loka-548k): the question re-shown after an answer (hub return,
+// received.ts) or after a cold reopen past the talk receipt (logs.ts) printed as a bare quotation.
+test('a re-shown question reads as the speaker saying it, after an answer and a reopen', () => {
+  const cart = compiled('cartridges/toolbox_showcase') as never;
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, cart);
+  const b = book(cart, a);
+  go(b, 'north', 'west', 'west');
+  b.tap('carpenter, open');
+  b.tap('Talk to the carpenter');
+  b.tap('Learn whittling');
+  const asks = (t: string[]) => t.filter((x) => x.includes('Knife, axe or saw?'));
+  const said = 'The carpenter says to you, "Knife, axe or saw?';
+  const shown = asks(b.text());
+  assert.equal(shown.length, 2, JSON.stringify(b.text()));
+  assert.ok(
+    shown.every((x) => x.startsWith(said)),
+    JSON.stringify(shown),
+  );
+  b.unmount();
+  const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
+  const again = asks(r.text());
+  assert.ok(again.length > 0 && again.every((x) => x.startsWith(said)), JSON.stringify(r.text()));
   r.unmount();
   a.sql.close();
 });
