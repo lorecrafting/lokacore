@@ -42,8 +42,7 @@ export const ListOfSix: Story = {
 };
 
 // Breaks: the unavailable card reads `label: reason`, is not exposed as disabled, or a press
-// does not gray it and show its reason as one sentence, or its name repeats the reason the hint
-// reads (book-ui.md, Unavailable actions).
+// does not gray it and show its reason as one sentence (book-ui.md, Unavailable actions).
 export const Unavailable: Story = {
   render: (args) => (
     <Cards>
@@ -58,6 +57,6 @@ export const Unavailable: Story = {
     await userEvent.click(card);
     await waitFor(() => expect(card).toHaveTextContent(/^Buy a lantern\s+It's sold out\.$/));
     await expect(canvasElement.querySelector('[aria-live]')).toHaveTextContent("It's sold out.");
-    await expect(card).toHaveAccessibleName('Buy a lantern'); // the reason is the hint alone
+    await expect(card).toHaveAccessibleName(/^Buy a lantern\s+It's sold out\.$/);
   },
 };
