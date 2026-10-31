@@ -57,9 +57,8 @@ if [ -n "$review" ]; then
   [ -z "$(git rev-list --merges origin/main.."$review")" ] || die "review-$pr has a merge not in origin/main; nothing changed"
   picks=$(printf '%s\n' "$cherry" | sed -n 's/^+ //p')
   for c in $picks; do
-    for f in $(git diff-tree --no-commit-id --name-only -r "$c"); do
-      case $f in docs/reviews/*) ;; *) die "review-$pr is not in origin/main and $c touches $f; nothing changed" ;; esac
-    done
+    f=$(git diff-tree --no-commit-id --name-only -r "$c" -- ':!docs/reviews/')
+    [ -z "$f" ] || die "review-$pr is not in origin/main and $c touches $f; nothing changed"
   done
 fi
 [ -z "$subject" ] || git diff --quiet HEAD origin/main -- docs/ROADMAP.md || die 'main changed docs/ROADMAP.md: set your edit aside, pull, redo it'

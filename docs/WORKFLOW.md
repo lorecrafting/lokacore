@@ -191,7 +191,7 @@ Claude Code specifics:
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `bin/orphans.sh` (also in `bin/session_status.sh`) never kills: check one, then stop it by PID.
 - For a contract slice's record (save, protocol or kernel contracts), the reviewer commits only its record in a detached worktree
-  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push carries it, or with no fix round `bin/after_merge.sh` after the merge, with no standalone record push. During local development, the reviewer commits
+  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push carries it, or with no fix round `bin/after_merge.sh` after the merge. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.

@@ -98,6 +98,9 @@ touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge dirty-worktree: changed something'
 git branch -q -f review-7 HEAD~0 2>/dev/null; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; git checkout -q main
 am unmerged-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge unmerged-review: changed something'
+# Break: an unquoted file list globs docs/review[s]/README.md into docs/reviews/README.md and passes it.
+git branch -q -f review-7 pr; git checkout -q review-7; mkdir 'docs/review[s]'; echo g > 'docs/review[s]/README.md'; git add docs; git commit -qm glob; git checkout -q main
+am glob-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge glob-review: a path outside docs/reviews/ passed'
 git branch -q -f review-7 pr
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
 echo r2 > docs/ROADMAP.md; echo u > owner.cjs # an untracked owner file must not block (loka-jxwu)
@@ -862,11 +865,11 @@ rc=0; CF_NONE=1 PATH="$tmp/wc:$PATH" capped sh "$W/bin/ci_fail.sh" abc > /dev/nu
 # --- new_batch.sh --------------------------------------------------------------------------------
 # A main checkout cloned from a bare origin; stub worktree_setup.sh records the worktree it set up.
 # Break: the worktree is not under worktrees.noindex next to the main checkout, setup skips it, or
-# the branch is not pushed with upstream.
+# the branch is not pushed with upstream, or tracks origin/main before that push (loka-aeju).
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(cd "$(mktemp -d)" && pwd -P); mkdir "$R/main"; cd "$R/main"
 git clone -q "$O" . 2> /dev/null; git checkout -qb main; mkdir bin; cp "$bin/new_batch.sh" bin/
 printf '#!/bin/sh
-cd "$(dirname "$0")/.." && pwd -P > "$NB_LOG"
+cd "$(dirname "$0")/.." && pwd -P > "$NB_LOG"; ! git rev-parse -q --verify @{u} > /dev/null 2>&1 || echo tracks-main >> "$NB_LOG"
 ' > bin/worktree_setup.sh; chmod +x bin/worktree_setup.sh
 git add . && git commit -qm base && git push -q origin main
 wt=$R/worktrees.noindex/feat-x; rc=0; NB_LOG=$R/setup capped sh bin/new_batch.sh feat/x > "$R/out" 2>&1 || rc=$?

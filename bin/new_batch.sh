@@ -9,7 +9,7 @@ b=$1
 main=$(git -C "$(dirname "$0")" worktree list --porcelain | sed -n '1s/^worktree //p')
 wt=$(dirname "$main")/worktrees.noindex/$(echo "$b" | tr / -)
 git -C "$main" fetch -q origin main
-git -C "$main" worktree add -q -b "$b" "$wt" origin/main
+git -C "$main" worktree add -q --no-track -b "$b" "$wt" origin/main
 "$wt/bin/worktree_setup.sh"
 git -C "$wt" push -q -u origin "$b"
 echo "$wt $(git -C "$wt" rev-parse HEAD)"
