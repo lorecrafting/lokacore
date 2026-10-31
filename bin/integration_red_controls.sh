@@ -133,9 +133,10 @@ rec() { # <repo> <name>: commit docs/reviews/<name>-review.md and the regenerate
 }
 amk; git checkout -q review-7; rec . 2026-01-01-own; git checkout -q main
 (cd "$M" && rec . 2026-01-02-m2 && git push -q origin main)
-am record-picked 0; git fetch -q origin
+echo r1 > docs/ROADMAP.md; git add docs/ROADMAP.md; echo r2 > docs/ROADMAP.md # a staged edit must not stop the pick
+am record-picked 0 'ROADMAP status: X merged (#7)'; git fetch -q origin
 git show origin/main:docs/reviews/2026-01-01-own-review.md > /dev/null && git show origin/main:docs/reviews/README.md | grep -q 2026-01-02-m2 \
-  && git show origin/main:docs/reviews/README.md | grep -q 2026-01-01-own && ! git rev-parse -q --verify review-7 > /dev/null \
+  && git show origin/main:docs/reviews/README.md | grep -q 2026-01-01-own && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] && ! git rev-parse -q --verify review-7 > /dev/null \
   || { bad 'after_merge record-picked: record or index entry not on origin/main, or review-7 left'; sed 's/^/  /' "$R.out"; }
 amk; git checkout -q review-7; rec . 2026-01-01-own; git checkout -q main
 (cd "$M" && echo '{"id":"local-write"}' >> .beads/issues.jsonl && git commit -qam export && git push -q origin main)

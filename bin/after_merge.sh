@@ -65,8 +65,11 @@ fi
 [ -z "$subject" ] || git diff --quiet HEAD origin/main -- docs/ROADMAP.md || die 'main changed docs/ROADMAP.md: set your edit aside, pull, redo it'
 beads_sync
 # -X theirs: the record wins a docs/reviews/README.md clash; review_index.sh below regenerates it.
-[ -z "$picks" ] || git cherry-pick -X theirs --empty=drop $picks > /dev/null \
-  || { git cherry-pick --abort; die "cherry-pick of review-$pr failed; main pulled, nothing else changed"; }
+# reset: cherry-pick refuses any staged change (a staged ROADMAP edit); the worktree keeps it and the add below restages it.
+if [ -n "$picks" ]; then
+  git reset -q && git cherry-pick -X theirs --empty=drop $picks > /dev/null \
+    || { git cherry-pick --abort; die "cherry-pick of review-$pr failed; main pulled, nothing else changed"; }
+fi
 # A rerun after a failed Beads commit finds the issue closed already.
 for i in $(echo "$id" | tr , ' '); do
   [ "$(br show "$i" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
@@ -78,9 +81,11 @@ done
 [ -z "$remote" ] || git push -q origin --delete "$branch" || die 'remote branch not deleted'
 sh bin/review_index.sh || die 'review index not regenerated'
 git add $j docs/reviews/README.md && { [ -z "$subject" ] || git add docs/ROADMAP.md; } || die 'add failed'
-if ! git diff --cached --quiet; then
-  git commit -qm "${subject:-Beads: close $id (merged #$pr)}" || die 'commit failed'
-  git diff --quiet -- $j || git commit -qm "Beads: export after $id (merged #$pr)" -- $j || die 'export commit failed'
+if [ -n "$picks" ] || ! git diff --cached --quiet; then
+  if ! git diff --cached --quiet; then
+    git commit -qm "${subject:-Beads: close $id (merged #$pr)}" || die 'commit failed'
+    git diff --quiet -- $j || git commit -qm "Beads: export after $id (merged #$pr)" -- $j || die 'export commit failed'
+  fi
+  git push -q origin main || die 'push failed; commit is local'
 fi
-[ -z "$(git rev-list origin/main..HEAD)" ] || git push -q origin main || die 'push failed; commit is local'
 echo "after_merge: #$pr done ($id closed, $branch removed)"
