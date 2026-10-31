@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **CHANGES REQUIRED**
 - [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
 - [Review: an NPC with no hp of its own cannot be hurt, PR #518 (loka-xyyd, kernel_api 1.126)](2026-10-30-xyyd-unhurtable-review.md): **APPROVE**
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**
