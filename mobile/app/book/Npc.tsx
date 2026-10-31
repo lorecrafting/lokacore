@@ -67,7 +67,9 @@ function Choice(p: {
 // An authored choice whose whole label is the Book's Leave or Close is the talk's exit
 // (loka-512o): the foot sends it, so the content omits it.
 const exit = (g: Grouped) =>
-  g.choice.find((b) => b.action_key === 'choose' && [LABEL.leave, LABEL.close].includes(b.label));
+  g.choice.find(
+    (b) => b.action_key === 'choose' && ([LABEL.leave, LABEL.close] as string[]).includes(b.label),
+  );
 
 type NpcProps = {
   view: GameView;

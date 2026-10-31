@@ -1,5 +1,6 @@
-// Word bar (docs/system/book-ui.md, Word bar): the say field, its known-word chips, the NPC
-// page's Whisper and the Character page's Spells through the real authority and Book. Expected text is literal from cartridges/speech_sampler and
+// Word bar (docs/system/book-ui.md, Word bar): no say icon or field in single-player (loka-evzt), the
+// Character page's Spells, and the say machinery kept for the Realm (twins, echo, conversation turn)
+// through the real authority and Book. Expected text is literal from cartridges/speech_sampler and
 // cartridges/spells_sampler text.json; facts are the samplers' reaction facts.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -10,13 +11,12 @@ import { CONTENTS } from './__tests__/control.test.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { buttonsOf, castWords, WORDS } from './buttons.ts';
-import { intentOf } from './model.ts';
 import { LABEL } from './labels.ts';
 import { spoken } from './words.ts';
+import { conversation } from './model.ts';
 
 const speech = compiled('cartridges/speech_sampler');
 const spells = compiled('cartridges/spells_sampler');
-const ward = compiled('cartridges/ward_sampler');
 type Book = ReturnType<typeof book>;
 const facts = (b: Book) =>
   Object.fromEntries(
@@ -25,106 +25,48 @@ const facts = (b: Book) =>
       .all()
       .map((r: any) => [JSON.parse(r.key).fact.key, JSON.parse(r.value)]),
   );
-const revision = (b: Book) => b.sql.prepare('SELECT revision FROM head').get()!.revision;
-const type = (b: Book, word: string) => {
-  const input = b.draw().find((n) => n.type === 'TextInput');
-  assert.ok(input, 'no word input');
-  assert.equal(input.props.allowFontScaling, false, 'the word input scales twice'); // reading.ts sizes it
-  input.props.onChangeText(word);
-  b.draw()
-    .find((n) => n.type === 'TextInput')
-    .props.onSubmitEditing();
+// No Book control sends speech in single-player: the Realm's opener will press the same wordless
+// twin with the typed word; here the presenter does, and the Book redraws.
+const speak = (b: Book, key: string, word: string) => {
+  const twin = b.p.screen().buttons.find((x: any) => x.action_key === key && !('word' in x.input));
+  assert.ok(twin, `no wordless ${key}`);
+  b.p.press({ ...twin, input: { word } });
+  b.draw();
 };
-// Says a word through the status line's say icon and field.
-const say = (b: Book, word: string) => (b.tap(LABEL.sayToRoom), type(b, word));
-// Sends a known word through the say field: open it, press the word's chip, press the send.
-const send = (b: Book, word: string, how: string) => (
-  b.tap(LABEL.sayToRoom),
-  b.tap(word),
-  b.tap(how)
-);
-// Breaks: word chips drawn on the page (the removed Word block), the known phrases not offered as
-// chips under the open field, or a chip that sends instead of filling the field.
-test('the open say field lists the known phrases as chips that fill it', () => {
+
+// Breaks (loka-evzt): the say icon, its field or a Say or Shout control drawn in single-player while
+// the engine offers say, shout and cast, or a speech twin leaking into the cards as `, say`.
+test('single-player draws no say icon, field, Say or Shout while the engine offers them', () => {
   const b = book(speech as never);
-  assert.ok(!b.labels().some((x) => /^\w+, (say|shout|cast|whisper)/.test(x)), 'no word chips');
-  b.tap(LABEL.sayToRoom);
+  const offered = b.game.view().view.actions.map((a) => a.action_key);
+  assert.ok(
+    ['say', 'shout'].every((k) => offered.includes(k)),
+    'the sampler offers speech',
+  );
   const l = b.labels();
-  assert.deepEqual(l.slice(l.indexOf(LABEL.shout) + 1, l.indexOf(LABEL.shout) + 4), [
-    'ward',
-    'help',
-    'hello',
-  ]);
-  const before = revision(b);
-  b.tap('ward');
-  assert.equal(revision(b), before, 'a chip only fills the field');
-  assert.equal(b.draw().find((n) => n.type === 'TextInput').props.value, 'ward');
+  for (const gone of ['Say to the room', LABEL.say, LABEL.shout, LABEL.cast])
+    assert.ok(!l.includes(gone), gone);
+  assert.ok(!l.some((x) => /^\w*, (say|shout|cast|whisper)/.test(x)), 'no speech card or chip');
+  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'no word field');
 });
 
-// Breaks: a tap outside the open say field reaching what lies beneath (an exit, a card, the
-// pools) or leaving the field open; a shield drawn under what it should cover.
-test('a tap outside the open say field closes it unsent and presses nothing beneath', () => {
+// Breaks: a word press not admitted (wrong input shape), or the Book's word turn not turning to the
+// conversation it opens (the Realm's opener presses through it, as pressBook does).
+test('saying ward opens the elder conversation and the word turn turns to it', async () => {
+  const { wordTurn } = await import('./updates.ts'); // after book()'s .tsx loader
   const b = book(speech as never);
-  b.tap(LABEL.sayToRoom);
-  const drawn = b.draw();
-  const shield = (n: any) => n.type === 'Pressable' && n.props.accessible === false;
-  const shields = drawn.filter(shield);
-  assert.equal(shields.length, 3, 'over the page, the footer and the status row');
-  // A later sibling draws on top: each shield after what it covers, all before the field.
-  const at = (f: (n: any) => boolean) => drawn.findIndex(f);
-  const field = at((n) => n.type === 'TextInput');
-  assert.ok(shields.every((s) => drawn.indexOf(s) < field));
-  assert.ok(drawn.indexOf(shields[2]) > at((n) => n.props?.accessibilityLabel === LABEL.sayToRoom));
-  const before = revision(b);
-  shields[0].props.onPress();
-  assert.equal(revision(b), before, 'nothing sent');
-  assert.ok(!b.draw().some((n) => n.type === 'TextInput' || shield(n)), 'field and shields gone');
-});
-
-// Breaks: the say field reopening when the player returns to the room it was opened in (the
-// stored room compared, never cleared).
-test('leaving the room closes the say field, and returning does not reopen it', () => {
-  const b = book(speech as never);
-  const go = (d: string) =>
-    b
-      .draw()
-      .find((n) => n.type.name === 'Footer')
-      .props.go(d);
-  const start = b.game.view().view.place.id;
-  b.tap(LABEL.sayToRoom);
-  go('east');
-  assert.notEqual(b.game.view().view.place.id, start, 'no move');
-  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'open in the new room');
-  go('west');
-  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'reopened on return');
-});
-
-// Breaks: Escape closing the field only from the text field, not from a send or a chip.
-test('Escape anywhere in the open say field closes it unsent', () => {
-  const b = book(speech as never);
-  b.tap(LABEL.sayToRoom);
-  const before = revision(b);
-  const field = b.draw().find((n) => n.type === 'View' && n.props.onKeyDown);
-  field.props.onKeyDown({ key: 'Escape', preventDefault() {} });
-  assert.equal(revision(b), before, 'nothing sent');
-  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'field still open');
-});
-
-// Breaks: a word press not admitted (wrong input shape), the conversation it opens not turned to,
-// or the say icon left showing while a conversation is open.
-test('saying ward opens the elder conversation and hides the say icon', () => {
-  const b = book(speech as never);
-  say(b, 'ward');
-  const shown = b.text();
-  assert.ok(shown.includes('The elder leans close. "The ward fails at the new moon."'));
-  assert.ok(b.labels().includes('Thank her'));
-  assert.ok(!b.labels().includes(LABEL.sayToRoom));
+  const was = b.game.view().view;
+  speak(b, 'say', 'ward');
+  const now = b.game.view().view;
+  assert.ok(now.choice, 'a conversation opens');
+  assert.deepEqual(wordTurn([], 'say', was, now), [conversation(now)]);
+  assert.deepEqual(wordTurn([], 'wave', was, now), [], 'only a word turns');
 });
 
 // Breaks: a shout sent as a say (the watchman next door would not hear it).
 test('shouting help in the square alerts the watchman next door', () => {
   const b = book(speech as never);
-  send(b, 'help', LABEL.shout);
+  speak(b, 'shout', 'help');
   assert.deepEqual(facts(b), { elder_heard: true, watchman_alerted: true });
 });
 
@@ -133,42 +75,16 @@ test('shouting help in the square alerts the watchman next door', () => {
 test('a say or shout with no narration echoes once in ink', () => {
   const b = book(speech as never);
   const echoes = () => b.text().filter((t) => t.startsWith('You '));
-  say(b, 'hello');
-  send(b, 'help', LABEL.shout);
+  speak(b, 'say', 'hello');
+  speak(b, 'shout', 'help');
   assert.deepEqual(echoes(), ['You say, "Hello."', 'You shout, "Help!"']);
   assert.equal(spoken('say', undefined), undefined); // a wordless retry falls back to OUTCOME
 });
 
-// Breaks: a typed word not sent as a Say (or sent with the token of a view that has moved on),
-// a bad word sent to the kernel, no note on a bad word, or the typed word shown other than as
-// its one Say echo (pass-1 R5).
-test('a typed word is said like its chip, even after the view moves on, and echoed once', () => {
-  const b = book(speech as never);
-  const input = () => b.draw().find((n) => n.type === 'TextInput');
-  b.tap(LABEL.sayToRoom);
-  const before = revision(b);
-  type(b, 'two words');
-  assert.equal(revision(b), before);
-  assert.ok(b.text().includes(LABEL.oneWord));
-  input().props.onChangeText('Xyzzy'); // said as the kernel folds it, echoed as a sentence
-  const stale = input(); // drawn before a background update, so its Say token is old
-  const { view, token } = b.game.view();
-  const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, shout')!;
-  b.game.invoke(intentOf({ ...hello, token })); // not through the Book: no new generation
-  const after = revision(b);
-  stale.props.onSubmitEditing();
-  assert.ok(revision(b) > after);
-  assert.ok(!b.text().includes(LABEL.oneWord));
-  assert.deepEqual(
-    b.text().filter((t) => /xyzzy/i.test(t)),
-    ['You say, "Xyzzy."'],
-  );
-});
-
 // Breaks: a refused spell word's reason missing from the Character page's Spells, a refused word
-// offered as a chip, a spell word offered where Cast is not, or a cast through the field not
-// admitted (mana unchanged).
-test('spell words: refused ones list their reason under Spells; lux casts once ash is gathered', () => {
+// drawn castable, a spell word offered where Cast is not, or a Spells card cast not admitted
+// (mana unchanged).
+test('spell words: refused ones list their reason under Spells; lux casts there once ash is gathered', () => {
   const b = book(spells as never);
   const spellsBlock = (refused: string) => {
     b.tap(CONTENTS);
@@ -195,10 +111,11 @@ test('spell words: refused ones list their reason under Spells; lux casts once a
   b.tap('hearth, open');
   b.tap('Gather ash');
   b.tap(LABEL.leave);
-  b.tap(LABEL.sayToRoom);
-  assert.ok(!b.labels().includes('ward'), 'a refused word is no chip');
-  b.tap('lux');
-  b.tap(LABEL.cast);
+  b.tap(CONTENTS);
+  b.tap('Character');
+  b.refuse('ward, cast'); // still refused: never the castable card
+  b.tap('lux, cast');
+  assert.ok(b.labels().includes('hearth, open'), 'back on World');
   const mana = b.game.view().view.resources.find((r) => r.resource.key === 'mana');
   assert.equal(mana?.current, 1);
   assert.ok(b.text().includes('The ash flares and a pale light hangs in the air.'));
@@ -210,7 +127,7 @@ test('no word press without a word, nor in combat, a scene or a conversation', (
   const v = book(speech as never).game.view().view;
   const say = (k: string) => k;
   const words = (w: GameView) => buttonsOf(w, say, say).filter((p) => WORDS.includes(p.action_key));
-  // wordless twins are the field's sends (say, shout, cast, whisper per person)
+  // wordless twins, kept for the Realm (say, shout, cast, whisper per person)
   const keyboard = words(v);
   assert.deepEqual(
     keyboard.map((p) => [p.action_key, p.input]),
@@ -228,41 +145,6 @@ test('no word press without a word, nor in combat, a scene or a conversation', (
   assert.deepEqual(words({ ...v, choice: open('npc-choice').choice }), [], 'conversation');
 });
 
-// Breaks: the say field gated on phrases (ward_sampler offers Say with none, so
-// "drench" was unsayable), or the keyboard's wordless Say drawn as a chip.
-test('Say without phrases still offers the keyboard, and a typed word is heard', () => {
-  const b = book(ward as never);
-  say(b, 'drench');
-  assert.ok(!b.draw().some((n) => n.type === 'TextInput'), 'a sent word closes the field');
-  const said = b.sql.prepare('SELECT command FROM receipt').all();
-  assert.deepEqual(
-    said.map((r: any) => JSON.parse(r.command).payload.word),
-    ['drench'],
-  );
-});
-
-// Breaks: Enter sending while a press is pending (the presenter would retry the pending press).
-test('Enter while a press is pending sends nothing', () => {
-  const a = elapsedHost(':memory:', undefined, speech as never);
-  const b = book(speech as never, a);
-  a.fault.kind = 'lost';
-  a.fault.armed = true;
-  send(b, 'hello', LABEL.shout);
-  assert.ok(b.game.pending());
-  b.tap(LABEL.sayToRoom);
-  b.draw()
-    .find((n) => n.type === 'TextInput')
-    .props.onChangeText('xyzzy');
-  assert.ok(b.draw().find((n) => n.props.accessibilityLabel === LABEL.say).props.disabled);
-  let sent = 0;
-  const invoke = b.game.invoke;
-  b.game.invoke = (i) => (sent++, invoke(i));
-  b.draw()
-    .find((n) => n.type === 'TextInput')
-    .props.onSubmitEditing();
-  assert.equal(sent, 0);
-});
-
 // Breaks: a word press that settles later (its commit acknowledgement lost, then recovered by a
 // pulse) not turning to the conversation it opens, as a press that settles at once does.
 test('a word that settles later still turns to its conversation', () => {
@@ -270,7 +152,7 @@ test('a word that settles later still turns to its conversation', () => {
   const b = book(speech as never, a);
   a.fault.kind = 'lost';
   a.fault.armed = true;
-  say(b, 'ward');
+  speak(b, 'say', 'ward');
   assert.ok(b.game.pending());
   assert.ok(!b.labels().includes('Thank her'));
   a.fault.reads = false;

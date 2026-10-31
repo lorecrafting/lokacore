@@ -47,8 +47,9 @@ type Character = { view?: GameView; text: Say; pending?: boolean } & Home &
 
 /**
  * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
- * spell word refused here in ActionCard's unavailable form `<word>, cast` (book-ui.md, Unavailable actions), none when
- * none is, and each aimed spell's Cast on… list (book-ui.md, Skill tree details; Word bar).
+ * spell word castable here as an ActionCard `<word>, cast` (an accepted cast turns to World with its
+ * line), each refused here in its unavailable form (book-ui.md, Unavailable actions), and each aimed
+ * spell's Cast on… list (book-ui.md, Skill tree details; Word bar); no Spells when none is.
  * - Use: Contents, and the status pools when only pennies show.
  * - Story: SectionPages.stories.tsx
  */

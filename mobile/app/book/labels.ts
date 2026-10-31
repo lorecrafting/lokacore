@@ -43,11 +43,10 @@ export const LABEL = {
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
   awayRecap: 'While you were away',
-  // The say field's sends, the status line's say icon and field; the Character page's Spells.
+  // The word field's sends (the Realm's room speech, loka-evzt); the Character page's Spells.
   say: 'Say',
   shout: 'Shout',
   cast: 'Cast',
-  sayToRoom: 'Say to the room',
   aWord: 'A word',
   oneWord: 'One word, letters only.',
   spells: 'Spells',

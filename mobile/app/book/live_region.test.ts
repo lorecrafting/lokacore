@@ -20,14 +20,12 @@ const live = (b: ReturnType<typeof book>) => {
   const region = heard.type(heard.props);
   return [region.props['aria-live'], words(region)];
 };
+// No Book control says a word in single-player (loka-evzt): the presenter presses Say's twin.
 const say = (b: ReturnType<typeof book>, word: string) => {
-  b.tap(LABEL.sayToRoom);
-  b.draw()
-    .find((n) => n.type === 'TextInput')
-    .props.onChangeText(word);
-  b.draw()
-    .find((n) => n.type === 'TextInput')
-    .props.onSubmitEditing();
+  const twin = b.p
+    .screen()
+    .buttons.find((x: any) => x.action_key === 'say' && !('word' in x.input));
+  b.p.press({ ...twin, input: { word } });
 };
 
 // Breaks: no region, an assertive one, a press not read, or an earlier press read again.

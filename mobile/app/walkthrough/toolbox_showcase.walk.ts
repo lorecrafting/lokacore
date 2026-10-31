@@ -22,7 +22,6 @@ const turnTo = (screen: Screen, tap: (label: RegExp) => Promise<void>) => async 
     await tap(/change position$/);
 };
 
-// size: allow 46, the shared step helpers (tap, take, lesson, fixture ...) close over one screen
 const steps = ({ screen, room }: Walk) => {
   // Every arrival checks the room page against its GameView (walk.ts room).
   const moves = async (...directions: string[]) => {
@@ -52,19 +51,13 @@ const steps = ({ screen, room }: Walk) => {
     await tap(item);
   };
   const position = turnTo(screen, tap);
-  // A known word through the say field: open it, press the word's chip, press the send.
-  const speak = async (word: string, how: string) => {
-    await tap(LABEL.sayToRoom);
-    await tap(new RegExp(`^${word}$`));
-    await tap(new RegExp(`^${how}$`));
-  };
   // A fixture's verbs live on its page (book-ui.md, Room page anatomy): open it, press, Leave.
   const fixture = async (name: string, verb: string, times = 1) => {
     await tap(`${name}, open`);
     for (let i = 0; i < times; i++) await tap(verb);
     await tap(LABEL.leave);
   };
-  return { tap, take, lesson, held, position, moves, speak, fixture };
+  return { tap, take, lesson, held, position, moves, fixture };
 };
 type Steps = ReturnType<typeof steps>;
 
@@ -178,7 +171,7 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const loft = async (r: Walk, { tap, take, held, moves, speak, fixture }: Steps) => {
+const loft = async (r: Walk, { tap, take, held, moves, fixture }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -208,13 +201,14 @@ const loft = async (r: Walk, { tap, take, held, moves, speak, fixture }: Steps) 
   await tap(/opens Contents$/);
   await tap(/^Character/);
   // a section opened from Contents goes back to it (loka-8lpm)
-  for (const l of ['Raise CHA', LABEL.backToContents, LABEL.backToWorld]) await tap(l);
-  await speak('ward', LABEL.cast);
+  await tap('Raise CHA');
+  // a spell word casts from Character's Spells; an accepted cast turns to World (loka-evzt)
+  await tap(/^ward, cast$/);
 };
 
 const magic = async (r: Walk, steps: Steps) => {
   const { screen } = r;
-  const { tap, take, held, moves, speak } = steps;
+  const { tap, take, held, moves } = steps;
   await loft(r, steps);
   await take(/^(?:the )?oilcan, open$/i, /^Take the oilcan/);
   await take(/^(?:the )?loft bucket, open$/i, /^Take the loft bucket/);

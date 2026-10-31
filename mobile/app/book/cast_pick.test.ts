@@ -45,8 +45,7 @@ const FLAMMA = 'You speak flamma and a bolt of fire leaps from your hand and bur
 test("the wight's Cast a spell… lists Flamma alone; the pick opens the fight", (t) => {
   const b = book(cartridge() as never);
   t.after(() => b.sql.close());
-  b.tap('Say to the room');
-  assert.ok(!b.labels().some((l) => /flamma|lux/i.test(l)), 'no aimed spell chip');
+  assert.ok(!b.labels().some((l) => /flamma|lux/i.test(l)), 'no aimed spell card on World');
   b.tap('wight, open');
   assert.ok(!b.labels().some((l) => /^Flamma/.test(l)), 'no card before the list opens');
   b.tap('Cast a spell…');

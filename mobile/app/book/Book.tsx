@@ -6,8 +6,7 @@ import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer, pressDoor } from './Footer.tsx';
-import { StatusLine, useSay } from './Status.tsx';
-import { shield } from './SayField.tsx';
+import { StatusLine } from './Status.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -192,7 +191,6 @@ export function BookView(p: ViewProps) {
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const say = useSay(p.screen, g, p.press, page);
   const ctx = {
     ...p,
     g,
@@ -218,8 +216,7 @@ export function BookView(p: ViewProps) {
                 />
               )}
             </PageTurn>
-            {say.open && shield(() => say.setOpen(false))}
-            <Bottom {...ctx} page={page} say={say} />
+            <Bottom {...ctx} page={page} />
             <Heard said={p.screen.said} />
           </View>
           {p.palette.bg === color.dark.bg && <NightSky />}
@@ -240,7 +237,6 @@ type BottomProps = {
   page?: Page;
   startOver: () => void;
   shell: Shell;
-  say: ReturnType<typeof useSay>;
 };
 
 function Bottom(p: BottomProps) {
@@ -262,7 +258,6 @@ function Bottom(p: BottomProps) {
       }}
     >
       {nav && navigation(p)}
-      {p.say.open && shield(() => p.say.setOpen(false))}
       {!view.ancestry_choices && !detail && statusLine(p)}
       {detail && pending && (
         <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>
@@ -273,7 +268,7 @@ function Bottom(p: BottomProps) {
   );
 }
 
-// The status line under the footer, its say field live on the open World page.
+// The status line under the footer.
 function statusLine(p: BottomProps) {
   const { view, text, pending, ended } = p.screen;
   // A tap on the position line acts only on the open World page.
@@ -292,7 +287,6 @@ function statusLine(p: BottomProps) {
       pending={pending}
       open={() => p.open({ kind: 'contents' })}
       openCharacter={() => p.open({ kind: 'character' })}
-      say={p.say.sends.length ? p.say : undefined}
     />
   );
 }

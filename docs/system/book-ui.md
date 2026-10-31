@@ -57,8 +57,8 @@ Book still draws it, the passage names the Beads item that removes it.
 ## World and status entry
 
 World is one current-room page ([room page anatomy](#room-page-anatomy)). Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
-description, the people and items sentences and, last, the event log (words go through the
-[say field](#word-bar)). World draws no verb line, [unavailable card](#unavailable-actions) or
+description, the people and items sentences and, last, the event log (no word field in
+single-player, [Word bar](#word-bar)). World draws no verb line, [unavailable card](#unavailable-actions) or
 notice entry: every action, available or refused, draws on its target's fixture, person or item
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
@@ -307,7 +307,7 @@ combat details follow this order; World follows the [room page anatomy](#room-pa
 A page's local returns (Leave, Back to World, Back to Contents, Back to board, Back to map,
 Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
 control ends the page; offered actions never do. Item, notice, board, NPC and shop pages, Contents and its
-sections draw no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23;
+sections draw no status line or compass (owner pick mvlrlvappy4w, 2026-10-23;
 loka-8lpm): a pending save shows
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
 fault show there as on every page. Combat and World keep the
@@ -602,7 +602,7 @@ and confirmed receipt routing. There is no separate storage session or recipient
 **Pick a second thing.** An action that needs a second object never draws one card per pair; its page draws one option that opens a list of the GameView's pairs, and a pick sends one (owner 2026-10-23, quoted: "you click that option and it opens a list and you pick an item and then the item detail closes with an echo the log"). There are four such options drawn, each a `LABEL` word ending in an ellipsis:
 - **Use an item…** on a target's page (an item, a person, a notice or a fixture with a page): one row per carried tool the GameView lists in a use pair (G4) on this target, target_ids [target, tool], labelled with the tool's projected name.
 - **Use on…** on a held tool's page: one row per target the GameView lists in a use pair with this tool, labelled with the target's projected name.
-- **Cast a spell…** on a target's page: one row per aimed spell the GameView offers on it, labelled with the spell's word (`lux`), as the say field's chips name it. The cast-with-target command is engine row loka-x6t.109; until it lands no target lists one.
+- **Cast a spell…** on a target's page: one row per aimed spell the GameView offers on it, labelled with the spell's word (`lux`). The cast-with-target command is engine row loka-x6t.109; until it lands no target lists one.
 - **Give an item…** is not drawn: a person's page has no Give card (owner pick mvlymuams73l, 2026-10-23); the item's Give to… gives.
 - **Give to…** on a held item's page, its reverse (PM 2026-10-23, for symmetry with Use on…): one row per person the GameView lists in a Give pair with this item, labelled with the person's projected name.
 
@@ -893,29 +893,27 @@ batch); the Book adds no words but the heading, the count and the accessible nam
 
 ## Word bar
 
-The World page has no Word block (owner, mvl9qy5ut2x2): every word is sent through the one-word
-field. Saying is never a chip row (owner, wordbar1 2026-10-23). While `say`, `shout` or `cast` is
-offered and no combat, scene or conversation is open, the
-[status line](#world-and-status-entry) ends with a say icon named **Say to the room** (expanded while open; [look](../../mobile/app/book/Status.tsx));
-a tap opens the one-word field ([SayField](../../mobile/app/book/SayField.tsx)) under the line with **Say**, **Shout** and **Cast** Controls, each only while that action is offered. A press sends that action with the typed word and closes the field; Enter sends the first; Escape (from the
-field, a Control or a chip) or the icon closes it unsent; a new room or a fight closes it, and a
-return to the room does not reopen it. When it closes, focus goes back to the control that opened it. A tap anywhere outside the open field, its Controls and
-its chips (the page, the footer, the status line, the icon's own spot) also closes it unsent and
-presses nothing beneath: a second tap is needed to act there (owner, mvl9rtp93gex). The cover
-that takes that tap is not focusable, so a screen reader still closes with the expanded icon or
-Escape. Whisper is hidden on every page until loka-x6t.115 (owner pick mvlrlvappy4w, 2026-10-23). Each send is the GameView's wordless twin of the action, so it stays live. A word that is not 1 to 32 letters is not sent, keeps the field open and
-shows the Note **One word, letters only.** Nothing sends while an action is pending. A typed word that opens a conversation turns to it.
+The World page has no Word block (owner, mvl9qy5ut2x2). Saying is never a chip row (owner,
+wordbar1 2026-10-23). Single-player draws no say icon and no word field, on any page, even
+while the GameView offers `say` or `shout` (owner, loka-evzt 2026-10-30, paraphrased: no
+conversation icon until the online Realm). Whisper is hidden on every page until loka-x6t.115
+(owner pick mvlrlvappy4w, 2026-10-23).
 
-Known words are [Chips](../BOOK-UI-COMPONENTS.md) under the open field, each named by its word: on
-the status line, the cartridge phrases (GameView `phrases`), then each learned spell word the
-GameView offers to cast here (`spell_words`, only while Cast is offered; never an unlearned or a
-refused one). A chip press only fills the field (and
-clears the bad-word Note); it never sends. A refused spell word is no chip: the Character page
-lists it under a **Spells** section title as an [unavailable card](#unavailable-actions) `word, cast`
-(`lux, cast`); no refused word, no Spells section.
-Cast in the say field is for untargeted words only: a spell aimed at a thing is a row of that
-thing's **Cast a spell…** [list](#item-details-and-takedrop) ([World](#world-and-status-entry), owner
-2026-10-23). An aimed spell (cartridge `aimed`, loka-x6t.109) is never a chip or a Spells-section line: the GameView offers it on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in that page's Cast a spell… pick list.
+A spell word is cast from the Character page. While `cast` is offered, its **Spells** section
+(under that section title) lists each learned untargeted spell word of the GameView's
+`spell_words` as an [ActionCard](../BOOK-UI-COMPONENTS.md) `word, cast` (`lux, cast`), the
+castable ones first, then each refused one in its [unavailable](#unavailable-actions) form; an
+unlearned word is never listed; no word, no Spells section. A press sends the GameView's wordless
+twin of Cast with that word; an accepted cast turns to World, where its line lands
+([Line placement](#line-placement)), as an aimed pick does; a refused press stays on Character.
+An aimed spell (cartridge `aimed`, loka-x6t.109) is never a Spells line: the GameView offers it
+on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in
+that page's **Cast a spell…** pick list ([World](#world-and-status-entry), owner 2026-10-23).
+
+The one-word field ([SayField](../../mobile/app/book/SayField.tsx)) is kept, with no opener, for
+the Realm's room speech; its rules (sends, the bad-word Note, chips that only fill, closing) are
+its doc comment's. Each send is the GameView's wordless twin of its action; a sent word that opens
+a conversation turns to it.
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:

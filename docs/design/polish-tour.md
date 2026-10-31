@@ -54,7 +54,7 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.56 (lore shown twice on Character), x6t.57.
 
 ## 9. Say field and away recap
-- book-sayfield--send, --pending, --known-words
+- book-sayfield--send, --pending, --known-words, --bad-word (the Realm's; no single-player opener)
 - book-awayrecap--collapsed, --open, --milestone
 - Look at: chip density under the field, the bad-word note.
 - Known: none filed.

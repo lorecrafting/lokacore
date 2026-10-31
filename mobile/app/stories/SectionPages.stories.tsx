@@ -83,6 +83,30 @@ export const CharacterAimedSpell: StoryObj = {
     await expect(canvas.queryByText(/, cast:/)).toBeNull();
   },
 };
+// Spell words cast from Spells (book-ui.md, Word bar; loka-evzt): a castable word is a card, a
+// refused one its unavailable line. Breaks: no card, or the refused word reads as castable.
+export const CharacterSpells: StoryObj = {
+  ...pageStory({
+    ...CharacterFullView,
+    view: {
+      ...CharacterFullView.view,
+      spell_words: [
+        { word: 'lux', available: true },
+        { word: 'ward', available: false, reason: { code: 'invalid_state' } },
+      ],
+    },
+  }),
+  name: 'Character with spell words',
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'lux, cast' })).not.toHaveAttribute(
+      'aria-disabled',
+    );
+    await expect(canvas.getByRole('button', { name: 'ward, cast' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+  },
+};
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 // Each entry opens its own section, even pressed at the foot of its shown line (loka-462d).
 // Breaks: the next entry's hit area covers this one's line, or an entry opens another section.
