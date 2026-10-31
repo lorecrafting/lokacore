@@ -13,7 +13,7 @@ import {
   type SQLiteDatabase,
 } from 'expo-sqlite';
 import Storage from 'expo-sqlite/kv-store';
-import { KERNEL_ID, localSession } from '../authority/local-story/session';
+import { INSTALLED, KERNEL_ID, localSession } from '../authority/local-story/session';
 import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
@@ -37,15 +37,17 @@ export const fonts = {
 // deleteDatabaseSync removes the main file only; SQLite discards a -journal left beside the new,
 // empty file rather than replaying it, so nothing else needs deleting.
 // The bundled chapter is the toolbox showcase (retired chapter: docs/decisions/owner-decision-retire-first-chapter-2026-10-21.md). One fixed
-// save name: web keeps a storage slot per file, so after a content change the pinned-release
+// save name: web keeps a storage slot per file, so after a content change or a kernel_api bump the pinned-release
 // refusal offers Start over; earlier chapters' saves stay untouched.
 // ponytail: no story picker until the approved release needs one.
-// The author preview (metro.config.js) keeps one save per edited cartridge's hash: an edit starts
+// The author preview (metro.config.js) keeps one save per kernel_api and edited cartridge's hash: an edit starts
 // fresh without re-pinning the release save or meeting pinned_release_missing, and nothing is
 // deleted. ponytail: those dev saves pile up in the browser; clear the site's data to drop them.
 const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
 if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
-const NAME = devCartridge ? `loka-dev-${chapter.sha256.slice(0, 16)}.db` : 'loka-showcase.db';
+const NAME = devCartridge
+  ? `loka-dev-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db`
+  : 'loka-showcase.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
 const commit = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? `${'0'.repeat(40)}-dirty`;

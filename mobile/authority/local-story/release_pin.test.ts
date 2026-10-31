@@ -27,7 +27,8 @@ const release = (canonical: string) => {
   return { content_hash: sha, fresh };
 };
 const releases: [Release] = [release(showcase.canonical)];
-const open = (path: string, kernel_version = 'k', n = { i: 0 }) => {
+let ids = 0; // shared, so Start over's run differs from the refused save's
+const open = (path: string, kernel_version = 'k') => {
   const sql = new DatabaseSync(path);
   type P = (string | number | null)[];
   const db = {
@@ -37,7 +38,7 @@ const open = (path: string, kernel_version = 'k', n = { i: 0 }) => {
     getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
     isInTransactionSync: () => sql.isTransaction,
   };
-  const newId = () => `aaaaaaaa-0000-4000-8000-${String(++n.i).padStart(12, '0')}`;
+  const newId = () => `aaaaaaaa-0000-4000-8000-${String(++ids).padStart(12, '0')}`;
   return { sql, opened: openStory(db as never, releases, { kernel_version, newId }) };
 };
 const pinOf = (sql: DatabaseSync) =>
