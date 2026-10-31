@@ -618,6 +618,7 @@ case $* in
   *storybook* | *expo*) for a; do port=$a; done ;;
   *web:preview*) port=$LOKA_PREVIEW_PORT ;;
   'npm ci'*) mkdir -p node_modules; exit 0 ;;
+  *catalogue.test.ts*) exit "${CAT_RC:-0}" ;;
   *) exit 0 ;;
 esac
 exec perl -MIO::Socket::INET -e 'my $s = IO::Socket::INET->new(LocalAddr => "127.0.0.1", LocalPort => shift, Listen => 1, ReuseAddr => 1) or die "listen: $!"; sleep 120' "$port" loka-stub "$@"
@@ -695,6 +696,10 @@ git -C "$P" fetch -q origin main; git -C "$P" checkout -q --detach origin/main
 mkdir -p "$P/mobile/app/node_modules"; cksum < "$P/mobile/app/package-lock.json" > "$P/mobile/app/node_modules/.loka-lock-cksum"
 touch "$S/new-token.ts"; run polish_session.sh close untracked 1; [ "$(pid $sbp)" = "$sb" ] && [ ! -s "$R.gh" ] || bad 'polish_session untracked: changed something'
 git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak
+# Break: close pushes a session whose catalogue test fails (a detached doc comment, loka-iu6x).
+export CAT_RC=1; run polish_session.sh close catalogue-red 1; unset CAT_RC
+! git ls-remote --exit-code --heads origin "$day-2" > /dev/null && [ ! -s "$R.gh" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] \
+  || bad 'polish_session close catalogue-red: pushed, opened a PR, or the session not served'
 touch "$P/x"; run polish_session.sh close dirty-preview 1; rm "$P/x"
 [ "$(cwd $sbp)" = "$S/mobile/app" ] || bad 'polish_session close dirty-preview: no Storybook left serving the session'
 run polish_session.sh close close 0

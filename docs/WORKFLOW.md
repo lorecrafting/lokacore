@@ -129,6 +129,9 @@ The [owner's fast polish loop](decisions/owner-decision-live-polish-session-2026
 `bin/polish_session.sh start` serves a session branch to the owner's Storybook. The designer writes
 style code, tokens and the component doc comment in that worktree, applies each picker prompt at once and
 commits each accepted tweak; the owner's approval in the session is the design review.
+Before a commit that changes navigation, refusals or a component doc comment, the designer runs the toolbox showcase walk
+([preview command](web-preview.md), `LOKA_WALK=toolbox_showcase`) and `mobile/app/catalogue.test.ts` locally, each alone
+(a batch went red on hosted CI and a close was refused for both, loka-iu6x); `bin/polish_session.sh close` refuses to push on a failing catalogue test.
 Bring `main` in with `bin/polish_session.sh update`, never a manual merge: it restarts Storybook when stories change.
 The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 
