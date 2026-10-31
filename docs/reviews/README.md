@@ -13,7 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**
 - [Review: liquid line binds its vessel, PR #512 (loka-tc2e, kernel_api 1.122)](2026-10-30-tc2e-liquid-vessel-review.md): **APPROVE**
-- [Review: a seen NPC shows its worn items, PR #517 (loka-oc5i, kernel_api 1.125)](2026-10-30-oc5i-npc-worn-review.md): **CHANGES REQUIRED**
+- [Review: a seen NPC shows its worn items, PR #517 (loka-oc5i, kernel_api 1.125)](2026-10-30-oc5i-npc-worn-review.md): **APPROVE WITH NOTES**
 - [Review: NPC emotes, PR #509 (loka-kgd.193 slice A)](2026-10-30-kgd193-npc-emotes-review.md): **APPROVE**
 - [Review: C4 naming batch final head, PR #501 (loka-ivjq.29)](2026-10-30-c4-final-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice B, layout.json and name_variants (loka-ivjq.29)](2026-10-30-c4-b-review.md): **APPROVE WITH NOTES**

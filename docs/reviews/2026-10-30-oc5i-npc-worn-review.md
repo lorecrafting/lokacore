@@ -4,7 +4,7 @@
 - Governing: "BRIEF loka-oc5i" with PM ruling B (`br show loka-oc5i`); epic `loka-ewtx` notes (kernel_api by merge order); [protocol.md](../system/protocol.md) GameView entities, NPC holdings (amended `:375-380`); [mechanics.md](../system/mechanics.md) equipment@1 (`:104`) and theft row 33 (`:3308`); [forward development](../decisions/owner-decision-forward-development-2026-10-05.md) (release-pin refusal, Start over); AGENTS.md "Writing tests".
 - PM positions taken as settled: slot-declaration limit until loka-0vrs; `worn` ignores the NPC get lock.
 - Reviewer: independent; authored none of the work.
-- Verdict: **CHANGES REQUIRED** (two should-fix, both small; one open merge item for the PM; one nit; no blocker). The branch cannot merge as is (conflicts), and after the merge no test guards a main-release save.
+- Verdict at `0d4bad9f0`: **APPROVE WITH NOTES** (fix re-check below). Original verdict at `c91704826`: **CHANGES REQUIRED** (two should-fix, both small; one open merge item for the PM; one nit; no blocker). The branch cannot merge as is (conflicts), and after the merge no test guards a main-release save.
 
 ## Must be true (written before reading the diff)
 
@@ -43,3 +43,15 @@ Judged, no finding:
 
 - `/code-review medium` reported in the PR body (9 findings).
 - CI (`gh run list --commit c91704826c91f28c00c999dd5cf50a9c40d4efa2`): ci success, book-e2e success, graph-diff success.
+
+## Fix re-check at `0d4bad9f01343e2af7fd183fae45904ab3a8e9a6`
+
+Scope: `28c51cbb4` (merge of origin/main, keep 1.125, `bin/regen.sh`) and `0d4bad9f0` only. The head merges cleanly with main `e61a02d35` (#516; main kernel_api still 1.124).
+
+- Finding 1, fixed. `saves.test.ts` equals origin/main (allowance 560, pin test gone). `release_pin.test.ts:2-3,43-47` pins `1.124`: green at head. Red controls, each alone, reverted: showcase hash fixture `at_least` 1.125 -> 1.124 fails 1; `world.ts:108` INSTALLED -> `1.124` fails 1.
+- Finding 2, fixed. `invariants_view.ts:210` adds `...view.entities.flatMap((e) => e.worn ?? [])`; theft test 9 now checks `gameview_agrees_with_admission` true on the honest view and false on the drift view. With the line deleted test 9 fails (7/8); restored 8/8.
+- Finding 3, resolved. One transcript checked: `transcripts/commerce.jsonl` differs from origin/main only in `content_hash` (`d9fdc5c1…` -> `e3c09776…`); the diff with hashes normalised is empty.
+- Note (nit, PR body): lines 15 and 21 still describe the dropped `saves.test.ts` 1.123 pin test; update it to point at `release_pin.test.ts`.
+- CI (`gh run list --commit 0d4bad9f0…`, seen once): graph-diff success; ci and book-e2e in_progress.
+
+Re-check verdict at `0d4bad9f0`: **APPROVE WITH NOTES** (one PR-body nit).
