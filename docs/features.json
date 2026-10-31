@@ -1014,6 +1014,7 @@
       "MapView",
       "KnownRoomView",
       "KnownConnectionView",
+      "UnexploredExitView",
       "KnownNpcView",
       "LocatedNpc",
       "CommandPayload",

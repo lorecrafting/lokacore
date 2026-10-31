@@ -51,6 +51,17 @@ export function hidden(world: World, room: RoomDefinition, direction: string, ac
   return !!until && value(world, actor, until.fact) !== until.equals;
 }
 
+/** The exit `actor` sees in `direction`: present and not hidden (sight and the map share it). */
+export const shownExit = (
+  world: World,
+  room: RoomDefinition,
+  direction: string,
+  actor: CharacterId,
+): Connection | undefined =>
+  has(room.exits, direction) && !hidden(world, room, direction, actor)
+    ? exitOf(room, direction)
+    : undefined;
+
 /** The room a direction's exit leads to, if the room has that exit. */
 export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef | undefined =>
   exitOf(room, direction)?.to;
