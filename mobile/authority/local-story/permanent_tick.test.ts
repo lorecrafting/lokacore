@@ -349,21 +349,23 @@ test('a timed status never folds and still ends with its day', (t) => {
   assert.deepEqual(nextTicks(save), { 'condition.hungry': 93600 });
 });
 
-// Breaks: clause 4 removed. mv regenerates 18 an hour; a tick every half hour finds it at 0, then not:
-// a fold at 3600 would skip the -100s and leave 36 at the target; job by job the tick at 10800 leaves 0.
+// Breaks: clause 4 removed. mv regenerates 18 an hour, 0.3 a minute; a tick every minute still finds it
+// at 0 (a change of 0), so a fold would skip the -100s and leave it regrown; job by job the tick at 10800 leaves 0.
 test('a tick on a regenerating pool never folds', (t) => {
   const drained = () =>
     fixture((c, status) => {
       Object.assign(status('hungry'), {
         resource: REF('resource', 'mv'),
         per_tick: -100,
-        tick_every: 1800,
+        tick_every: 60,
       });
+      // Its hourly tick would stop the fold anyway.
+      status('thirsty').tick_every = 10 * MONTH;
     });
   const driven = begin(t, drained());
   const walked = begin(t, drained());
   drive(driven, 10801);
-  stepwise(walked, 1800, 10801);
+  stepwise(walked, 60, 10801);
   assert.equal(pool(driven, 'mv'), 0);
   assert.equal(pool(walked, 'mv'), 0);
 });
