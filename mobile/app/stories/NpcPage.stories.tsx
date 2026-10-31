@@ -119,12 +119,54 @@ export const LookWorn: StoryObj = {
     await expect(canvas.queryByText(/carries/)).toBeNull();
   },
 };
+// Nell as the view projects her: worn always, here empty. Breaks: an empty worn draws "Nell wears ."
 export const LookNothing: StoryObj = {
-  ...pageStory(lookView(nell.id)),
+  ...pageStory(
+    lookView(
+      nell.id,
+      NpcChoiceView.view.entities.map((e) => (e === nell ? { ...e, worn: [] } : e)),
+    ),
+  ),
   name: 'Look, carrying nothing',
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: LABEL.close });
-    await expect(canvas.queryByText(/carries|looks to be/)).toBeNull();
+    await expect(canvas.queryByText(/carries|wears|looks to be/)).toBeNull();
+  },
+};
+// The cloak's page, opened from the worn sentence without theft (book-ui.md, Item details): its
+// take is refused not_present. Breaks: a Take or Lift button, a refusal card or "is holding it".
+export const WornItem: StoryObj = {
+  ...pageStory({
+    ...lookView(
+      reeve.id,
+      reeveWith({
+        worn: [
+          {
+            ...cloak,
+            actions: [
+              {
+                action_key: 'take',
+                label: 'action.take',
+                target_ids: [cloak.id],
+                available: false,
+                reason: { code: 'not_present' },
+              },
+            ],
+          },
+        ],
+      }),
+    ),
+    stack: [
+      { kind: 'thing', id: reeve.id },
+      { kind: 'inside', id: reeve.id },
+      { kind: 'thing', id: cloak.id },
+    ],
+  }),
+  name: 'Worn item page',
+  play: async ({ canvas }) => {
+    await canvas.findByRole('heading', { name: 'A wool cloak' });
+    await expect(canvas.queryByRole('button', { name: /take|lift/i })).toBeNull();
+    await expect(canvas.queryByText(/holding it|not here/i)).toBeNull();
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
