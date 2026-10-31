@@ -233,9 +233,8 @@ function advertise(
         : undefined));
   // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
   const short = unpaid(world, bodyOf(world, actor)!, admitted, a.scripted?.costs ?? []);
-  return code
-    ? { available: false, ...shown, reason: refused ?? { code, ...short } }
-    : { available: true, ...shown };
+  const reason = refused ?? (typeof code === 'object' ? code : { code, ...short }); // Attack's cause
+  return code ? { available: false, ...shown, reason } : { available: true, ...shown };
 }
 
 function harvestOffered(

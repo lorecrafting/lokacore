@@ -707,7 +707,8 @@ paid, full MV, sold out and unavailable exact payment without changing error cod
 (`error.schema.json`, owner Q13 option A): the one reason a shared code
 stands for, so a client can tell the player. `not_standing` is a move while the actor is not
 standing (`invalid_state`, position@1); `cursed` is a remove a curse holds on (`invalid_state`,
-equipment@1, loka-x6t.38). The code stays the contract; a
+equipment@1, loka-x6t.38); `cannot_be_hurt` is an Attack on an NPC that cannot be hurt, today one
+with no hp of its own (`invalid_target`, combat@1, loka-xyyd). The code stays the contract; a
 reader that does not know `cause` reads the code alone, and a value without it stays valid.
 The actual bed is an inspectable detail with `bed {title, entitlement}`; its
 local projection emits ordinary targetless Rest and never changes raw Rest admission.

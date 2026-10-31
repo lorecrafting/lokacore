@@ -792,6 +792,15 @@ scan, targeting, dialogue and Give paths; malformed explicit HP remains corrupti
 
 Attack admits a living standing character/body and one living explicitly attackable NPC
 in the same nonsanctuary room, with no modal scene or open encounter for either participant.
+An attackable NPC has hp of its own: Attack on one without refuses `invalid_target` with
+cause `cannot_be_hurt` ([RefusalCause](../../protocol/error.schema.json)), and the GameView offers
+that Attack unavailable with the same reason (one query, `attackRefused`). A hostile NPC
+without hp never engages (`hostileAt`), so no round ever targets a body with no hp
+(loka-xyyd, after the #515 ruling "no hp, no band"). Composition record: consumer Attack
+and the GameView Attack offer; reads the NPC definition's `hp`; writes, events, jobs and save
+rows: none new; reused `attackRefused`, `hostileAt` and the RefusalCause route; new: the
+`cannot_be_hurt` cause, a generic name a later protection flag (loka-w9id) reuses. Installed
+kernel 1.126.
 It creates an encounter and its first round job at now + the authored interval; it does
 not attack immediately, advance time or draw RNG. The encounter pins character, body,
 NPC, room, round and current job. While the encounter is open, the final shared
