@@ -175,7 +175,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 ### Doors move through the minimap and joystick
 
 - Rule: no door cards in the room list or on the Map (owner 2026-10-30); releasing the joystick toward a shut door presses Unlock when
-  available, else Open; Close and Lock are not drawn (owner 2026-10-30, [book-ui.md](../system/book-ui.md#verbs-the-book-does-not-draw)); Knock is on the door's own page;
+  available, else Open; Close and Lock are not drawn (owner 2026-10-30, [book-ui.md](../system/book-ui.md#verbs-the-book-does-not-draw)); an authored Knock is on the door fixture's page;
   the minimap tick tells closed from locked; a refusal logs one line.
 - Why: movement is spatial, so it lives on the spatial control, not in the prose.
 - Source: [Minimap, Map and presentation controls](../system/book-ui.md#minimap-map-and-presentation-controls).

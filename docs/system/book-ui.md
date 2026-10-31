@@ -244,8 +244,8 @@ one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Rele
 toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
 logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
 and walks nowhere. Close and Lock are not drawn ([Verbs the Book does not draw](#verbs-the-book-does-not-draw));
-Knock is an action on the door's own page; any other offered door verb without a control fails
-the stranded-verb check. The reader actions name the reason too ("Go west, locked").
+An authored Knock is an action on the door fixture's page; the engine's exit Knock has no control
+yet (no cartridge declares one), so it and any other offered door verb fail the stranded-verb check. The reader actions name the reason too ("Go west, locked").
 Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; the footer and its keys are
@@ -901,7 +901,7 @@ The GameView may offer these; the Book draws no control for them, on any page:
   [joystick](#minimap-map-and-presentation-controls).
 - Where (PM 2026-10-30): the Map rings the current room and a tapped dot names its room.
 
-Any other offered verb with no control fails the Book harness's stranded-verb check, which lists
+Any other offered door verb with no control fails the Book harness's stranded-verb check, which lists
 the door half of this section (`UNDRAWN_DOOR_VERBS`).
 
 ## Word bar
