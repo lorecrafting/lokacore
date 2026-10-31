@@ -1,3 +1,4 @@
+// size: allow 570, every fold case shares the one compiled needs fixture and save harness
 // Toolbox row W8 ticking permanent status rows through real SQLite (loka-rn3b, loka-sgqk): the needs
 // sampler's needs made permanent keep an active row with a tick and job but no end across a month of
 // catch-up and a cold reopen (docs/system/save.md, Status recovery), and saturated ticks fold
@@ -21,6 +22,8 @@ import {
 import { openStory } from './authority.ts';
 import { checkpoint, coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
+import { folds } from '../../../kernel/ts/src/mechanics/status/job.ts';
+import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-saves-'));
@@ -317,6 +320,107 @@ test('a raise due at the same time as a floored tick stops the fold', (t) => {
   );
   assert.equal(direct(save, 0, 82801).kind, 'saved');
   assert.equal(pool(save, 'hunger'), 2);
+});
+
+// Breaks: a later job lifts the horizon an earlier one set. Same raises as above; fed also ticks at
+// 80000 on thirst. A fold past 72000 misses 75600 and 79200 and leaves 4.
+test('a second job due later does not lift the fold past the first', (t) => {
+  const save = begin(
+    t,
+    fixture((c, status) => {
+      fed(c, status);
+      Object.assign(status('fed'), {
+        resource: REF('resource', 'thirst'),
+        per_tick: -1,
+        tick_every: 80000,
+      });
+      Object.assign(status('thirsty'), {
+        resource: REF('resource', 'hunger'),
+        per_tick: 5,
+        tick_every: 72000,
+      });
+    }),
+  );
+  assert.equal(direct(save, 0, 82801).kind, 'saved');
+  assert.equal(pool(save, 'hunger'), 2);
+});
+
+// Breaks: a horizon short of the second before the job. thirsty moves at 7201, so hungry's tick at 7200
+// folds with the one at 3600: one event, next 10800.
+test('a tick one second before another job folds', (t) => {
+  const save = begin(
+    t,
+    fixture((c, status) => {
+      c.resources[ID('resource', 'hunger')].start = 0;
+      status('thirsty').tick_every = 7201;
+    }),
+  );
+  assert.equal(direct(save, 0, 8000).kind, 'saved');
+  const ticked = events(save, 'status_ticked').filter(
+    (e: any) => e.payload.status.key === 'hungry',
+  );
+  assert.equal(ticked.length, 1);
+  assert.equal(nextTicks(save)['condition.hungry'], 10800);
+});
+
+// Breaks: each clause of the predicate, on forms no compiled cartridge reaches or no play path shows
+// apart. hungry on a floored hunger folds; each change below takes one clause away.
+test('the fold predicate refuses each clause alone', (t) => {
+  const world = begin(
+    t,
+    fixture((c) => {
+      c.resources[ID('resource', 'hunger')].start = 0;
+    }),
+  ).s.story.world() as any;
+  const hunger = key(REF('resource', 'hunger') as never);
+  const [at, row] = Object.entries<any>(world.state.statuses).find(
+    ([, r]) => world.state.jobs[r.job_id]?.job.key === 'hungry',
+  )!;
+  const job = world.state.jobs[row.job_id];
+  const holder = (body_id: string) => ({
+    ...world,
+    state: {
+      ...world.state,
+      statuses: { [JSON.stringify({ ...JSON.parse(at), body_id })]: row },
+    },
+  });
+  const spec = (patch: object) => ({
+    ...world,
+    resourceSpecs: {
+      ...world.resourceSpecs,
+      [hunger]: { ...world.resourceSpecs[hunger], ...patch },
+    },
+  });
+  const heard = (status?: object) => ({
+    ...world,
+    cartridge: {
+      ...world.cartridge,
+      reactions: { hear: { on: { event: 'status_ticked', status } } },
+    },
+  });
+  const item = Object.entries<any>(world.entities).find(([, e]) => e.kind === 'item')![0];
+  const { [hunger]: _, ...undeclared } = world.resourceSpecs;
+  const body = JSON.parse(at).body_id;
+  const unreadable = {
+    ...world,
+    entityResourceSpecs: {
+      [key({ kind: 'resource', resource: REF('resource', 'hunger'), entity_id: body } as never)]:
+        world.resourceSpecs[hunger],
+    },
+  };
+  for (const [name, w, expected] of [
+    ['as it stands', world, true],
+    ['on an item', holder(item), false],
+    ['on a room', holder(Object.keys(world.rooms)[0]!), false],
+    ['undeclared pool', { ...world, resourceSpecs: undeclared }, false],
+    ['unreadable pool', unreadable, false],
+    ['gain', spec({ gain: 1 }), false],
+    ['regen', spec({ regen: { amount: 1, every: 60 } }), false],
+    ['listener on it', heard(REF('status', 'hungry')), false],
+    ['listener on any status', heard(), false],
+    ['listener on another status', heard(REF('status', 'thirsty')), true],
+  ] as const)
+    assert.equal(folds(w, row.job_id, job), expected, name);
 });
 
 // Breaks: clause 5 removed; a fold would swallow a listener's firings.

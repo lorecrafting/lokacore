@@ -81,8 +81,8 @@ export function runStatus(
     return accepted(world, 'job_ran', ops, ended, lines);
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
-  const ticks = due ? foldedTicks(visit, world.state.clock, job_id, job, tick, spec, queue) : 0;
-  const next_tick_at = due ? add(tick, spec.tick_every * ticks) : untick(spec, row, tick);
+  const fold = () => foldedTicks(visit, world.state.clock, job_id, job, tick, spec, queue);
+  const next_tick_at = due ? add(tick, spec.tick_every * fold()) : untick(spec, row, tick);
   const next = Math.min(next_tick_at, row.ends_at ?? Infinity);
   const crossed = next <= world.state.clock;
   if (!crossed) ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
@@ -149,7 +149,7 @@ function foldedTicks(
   let horizon = target;
   for (const [id, { due_time }] of queue) {
     const other = visit.state.jobs?.[id];
-    if (id === job_id || due_time < visit.state.clock || due_time > horizon || !other) continue;
+    if (due_time < visit.state.clock || due_time > horizon || !other) continue;
     if (due_time === visit.state.clock && other.status !== 'pending') continue; // ran just now
     if (other.job.kind !== CLOCK_JOB && !folds(visit, id as JobId, other)) horizon = due_time - 1;
   }

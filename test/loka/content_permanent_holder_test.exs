@@ -52,4 +52,17 @@ defmodule Loka.ContentPermanentHolderTest do
     assert {:ok, _, _} =
              Loka.ContentSource.compile(dir, [ticking(), {"reactions/curse.json", body}])
   end
+
+  # Breaks: the default-subject refusal also takes a named body on a status event.
+  test "a status event may name a body with co_present", %{dir: dir} do
+    on_tick = fn r ->
+      r
+      |> Map.delete("when")
+      |> Map.put("on", %{"event" => "status_ticked"})
+      |> holder("co_present", true)
+    end
+
+    assert {:ok, _, _} =
+             Loka.ContentSource.compile(dir, [ticking(), {"reactions/curse.json", on_tick}])
+  end
 end
