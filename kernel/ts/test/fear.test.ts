@@ -258,10 +258,9 @@ test('an hp-less NPC is offered Attack unavailable, cannot_be_hurt, and refused 
   const observation = { view, command, decision: refused.decision, resolves };
   assert.ok(check('gameview_agrees_with_admission', observation));
   // The control: a view that offered this Attack as available disagrees with the refusal.
-  const lied = structuredClone(view);
-  lied.entities
-    .find((e) => e.id === npc(w, 'guard'))!
-    .actions.find((x) => x.action_key === 'attack')!.available = true;
+  const lied = structuredClone(view) as any;
+  const attack = (e: any) => e.actions.find((x: any) => x.action_key === 'attack');
+  attack(lied.entities.find((e: any) => e.id === npc(w, 'guard'))).available = true;
   assert.equal(check('gameview_agrees_with_admission', { ...observation, view: lied }), false);
   assert.equal(gameView(play(w, { type: 'attack', target_id: a })).combat!.band, 'ready');
 });
