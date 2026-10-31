@@ -339,7 +339,11 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   fuel takes the same bands with the noun `fuel` and its state after a comma: `Nearly full of fuel,
   lit.`, `Empty, unlit.` (owner, 2026-10-30, Beads `loka-nkcr`). One helper words both
   (`amountWords`, `mobile/app/book/pick.ts`) on the item page; a liquid also on a twin row's note. A
-  Fill, Pour or Drink log line is its sentence alone; the open page's redraw shows the new amount.
+  Fill, Pour or Drink log line is its sentence, then the level it left in the vessel it binds (Pour:
+  the receiver) as a second sentence from the same helper: `You drink. The waterskin is half full
+  of water.` The level comes from the line's own bindings (`remaining`, `capacity`, loka-tc2e), so
+  an older line keeps its level; the vessel is named definite (`the waterskin`); a line binding no
+  vessel the view names keeps its sentence alone.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
   same bindings and actor, the same pressed card target (the stock row or item), the same page
   visit, and no other line lies between. The merged line is the sentence once with " (N times)"

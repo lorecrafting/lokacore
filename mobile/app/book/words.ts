@@ -12,6 +12,7 @@ import type {
 import type { DetailLine } from './logs.ts';
 import { emoteSentence, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
+import { levelWords } from './pick.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -103,15 +104,9 @@ export const SENTENCE: Record<string, string> = {
 export type Refusal = { code: string; cause?: string };
 // A shut door's refusal ("The door to the south is locked.", owner 2026-10-23); none when open.
 const AT: Record<string, string> = { up: 'above', down: 'below' };
-export const doorSentence = ({
-  direction,
-  door,
-}: {
-  direction: string;
-  door?: { state: string };
-}) =>
-  door && door.state !== 'open'
-    ? `The door ${AT[direction] ?? `to the ${direction}`} is ${door.state}.`
+export const doorSentence = (x: { direction: string; door?: { state: string } }) =>
+  x.door && x.door.state !== 'open'
+    ? `The door ${AT[x.direction] ?? `to the ${x.direction}`} is ${x.door.state}.`
     : undefined;
 export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
@@ -175,9 +170,9 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 
 // One narration line's words: an engine key from the shared table (packages/game-view/line_words.ts), in the
 // third person when its actor is a person the view, or the view before the step (one who left), names.
-// A skipped combat turn (loka-x6t.30) names its status from the engine line combat.skipped; it has no
-// actor when the player skipped. An NPC's emote (G9) words from the view's emote table (line_words.ts
-// emoteSentence). A bound speaker's bare quotation reads `Nell says [to you], "..."` (book-ui.md).
+// A skipped combat turn (loka-x6t.30) names its status from engine line combat.skipped, actorless when
+// the player skipped; an NPC's emote (G9) words from the view's emote table; a liquid line adds its
+// level (pick.ts levelWords). A bound speaker's quotation reads `Nell says [to you], "..."` (book-ui.md).
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -196,7 +191,8 @@ export const lineWords = (
     lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
   if (told) return told;
   if (t.key !== 'combat.skipped') {
-    const [said, speaker] = [text(t.key), named(t.participants?.speaker)];
+    const said = text(t.key) + levelWords(t, text, view, was);
+    const speaker = named(t.participants?.speaker);
     return speaker && /^["“][^"“”]*["”]$/.test(said)
       ? `${cap(speaker)} says${actor ? '' : ' to you'}, ${said}`
       : said;

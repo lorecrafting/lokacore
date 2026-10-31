@@ -10,6 +10,8 @@ import {
 } from '../../authority/local-story/__tests__/liquid-bundle.test.ts';
 import { presenter } from './presenter.ts';
 import { liquidWords } from './pick.ts';
+import { lineWords } from './words.ts';
+import { view } from './__tests__/combat-book.test.ts';
 import { buttonsOf, actionContext, group, pagesAfter, intentOf, things } from './model.ts';
 const pin = liquidBundle();
 function invoke(game: Game, action_key: string, target_ids: string[] = [], input: object = {}) {
@@ -95,10 +97,17 @@ test('Book restores liquid narration on the exact saved source detail after SQLi
     invoke(game, 'fill', [well, original]);
     assert.equal(game.lastNarration()!.detail_id, well);
     game = openGame(p.db, pin, p.host);
-    assert.match(presenter(game).screen().detail(well).join(' '), /You fill the skin\./);
+    // The line names the level the fill left, from its own bindings (book-ui.md, Line placement).
+    assert.match(
+      presenter(game).screen().detail(well).join(' '),
+      /You fill the skin\. The waterskin is full of water\./,
+    );
     invoke(game, 'drink', [original]);
     game = openGame(p.db, pin, p.host);
-    assert.match(presenter(game).screen().detail(original).join(' '), /You drink\./);
+    assert.match(
+      presenter(game).screen().detail(original).join(' '),
+      /You drink\. The waterskin is nearly full of water\./,
+    );
     assert.equal(game.view().view.inventory.find((e) => e.id === original)!.liquid!.quantity, 3);
   } finally {
     p.sql.close();
@@ -192,7 +201,7 @@ test('loaded liquid aliases reach exact Book presses and matching target/input/p
         assert.equal(game.pending(), true);
         p.fault.reads = false;
         const line = ui.press(button, owner);
-        assert.match(line, /^You (fill the skin|drink|pour)\.$/);
+        assert.match(line, /^You (fill the skin|drink|pour)\. The [\w ]+ is [\w ,]+\.$/);
         assert.equal(ui.screen().detail(owner).length, 1);
         const receipt = p.sql
           .prepare('SELECT command,response FROM receipt ORDER BY revision DESC LIMIT 1')
@@ -278,4 +287,45 @@ test('a vessel amount reads in words; exact empty and exact full are unambiguous
       'Nearly full of water.',
     ],
   );
+});
+
+// Breaks: a Fill, Pour or Drink line drops its level, words it from the view's current amount
+// instead of the line's own bindings, names the source not the bound vessel, keeps the short's
+// indefinite article, or adds a level to a line with no vessel (book-ui.md, Line placement).
+test('a liquid line names the level it left in its vessel, from its own bindings', () => {
+  const SAY: Record<string, string> = {
+    'liquid.drank': 'You drink.',
+    'liquid.poured': 'You pour it out.',
+    'liquid.water': 'Water',
+    skin: 'a waterskin',
+    cup: 'a cup',
+  };
+  const say = (k: string) => SAY[k] ?? k;
+  const liquid = { label: 'liquid.water', quantity: 4, capacity: 4 }; // today's level, not the line's
+  const v = view({
+    entities: [],
+    inventory: [
+      { id: 's', kind: 'item', name: 'skin', actions: [], liquid },
+      { id: 'c', kind: 'item', name: 'cup', actions: [] },
+    ],
+  } as never);
+  const line = (key: string, vessel: string | undefined, remaining: number, capacity = 4) =>
+    lineWords(
+      {
+        key,
+        participants: vessel ? { vessel } : {},
+        bindings: { kind: 'liquid.water', remaining, capacity },
+      },
+      say,
+      v,
+    );
+  assert.deepEqual(
+    [line('liquid.drank', 's', 0), line('liquid.drank', 's', 2), line('liquid.poured', 'c', 3, 3)],
+    [
+      'You drink. The waterskin is empty.',
+      'You drink. The waterskin is half full of water.',
+      'You pour it out. The cup is full of water.',
+    ],
+  );
+  assert.equal(line('liquid.drank', undefined, 2), 'You drink.');
 });
