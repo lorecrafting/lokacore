@@ -1193,6 +1193,9 @@ at least the liquid's authored positive integer drink amount, consumes exactly
 that amount and narrates the committed kind/amount. A smaller remainder refuses
 unchanged; there is no partial last serving. Emptying resets kind to null. B7
 water drinking changes no HP, MV, needs, faction, money, RNG or clock (since [row G13](#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) a liquid's `cures` may end statuses).
+Each Fill, Pour and Drink verb line (not a service's served drink) binds participant
+`vessel` (Fill and Drink: the vessel; Pour: the receiver) with `remaining`, that vessel's
+committed quantity, and its `capacity` (loka-tc2e).
 
 Effective item mass is shell mass plus quantity times the liquid's grams/unit,
 in the existing carrying calculation, not a second stored load. The compiler
