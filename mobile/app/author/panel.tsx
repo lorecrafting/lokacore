@@ -144,8 +144,8 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     if (!devClock || !game) return;
     const state = () => tell({ state: stateOf(game) });
     const onMessage = (e: MessageEvent<Asked>) => {
-      if (!LOCAL.test(e.origin) || !(e.source instanceof Window) || !e.data?.op) return;
-      panel = { to: e.source, origin: e.origin };
+      if (!LOCAL.test(e.origin) || !e.source || !e.data?.op) return;
+      panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
       if (e.data.op === 'advance') advance(e.data.minutes);
       if (e.data.op === 'jump') return jumpTo(e.data.steps, latest.current); // the new game posts its state

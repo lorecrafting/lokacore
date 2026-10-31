@@ -1,7 +1,7 @@
 // The author panel page: the Book preview framed on the left, the writer's tools on the right
 // (docs/system/cartridge.md#author-preview, docs/guides/writing-the-game.md).
 import { BookOpen, Moon, Sun } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useDiagnostics } from './author.ts';
 import { BOOK, useBook } from './book.ts';
 import { Button } from './components/ui/button.tsx';
@@ -13,7 +13,9 @@ import { Compile, Facts, Play, Source, Why } from './sections.tsx';
 const THEME = 'loka-theme';
 function useTheme() {
   const [dark, setDark] = useState(
-    () => (localStorage.getItem(THEME) ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark',
+    () =>
+      (localStorage.getItem(THEME) ??
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark',
   );
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
@@ -34,10 +36,29 @@ function Header({ hash, dark, toggle }: { hash?: string; dark: boolean; toggle: 
       ) : (
         <Badge variant="secondary">waiting for the Book</Badge>
       )}
-      <Button variant="ghost" size="icon-sm" className="ml-auto" onClick={toggle} aria-label="Toggle dark mode">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="ml-auto"
+        onClick={toggle}
+        aria-label="Toggle dark mode"
+      >
         {dark ? <Sun /> : <Moon />}
       </Button>
     </header>
+  );
+}
+
+function Book({ frame }: { frame: RefObject<HTMLIFrameElement | null> }) {
+  // allow: a cross-origin frame is only crossOriginIsolated (SharedArrayBuffer for the SQLite worker) when the parent delegates it
+  return (
+    <iframe
+      ref={frame}
+      title="Book preview"
+      src={`${BOOK}/?dev=1`}
+      allow="cross-origin-isolated"
+      className="min-h-0 flex-1 border-0 bg-white"
+    />
   );
 }
 
@@ -48,7 +69,7 @@ export default function App() {
   const [dark, toggle] = useTheme();
   return (
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
-      <iframe ref={frame} title="Book preview" src={`${BOOK}/?dev=1`} className="min-h-0 flex-1 border-0 bg-white" />
+      <Book frame={frame} />
       <aside className="flex w-[400px] shrink-0 flex-col border-l max-[900px]:h-1/2 max-[900px]:w-full max-[900px]:border-t max-[900px]:border-l-0">
         <Header hash={book.state?.hash} dark={dark} toggle={toggle} />
         <Compile said={said} placeNote={book.state?.placeNote} />
