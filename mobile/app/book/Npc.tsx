@@ -46,6 +46,7 @@ function Choice(p: {
       {absent(p.view) !== '' && <Text style={note(c, t)}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
+        if (b && b === exit(p.g)) return null; // the foot's Leave the conversation sends it
         const riddle = p.choice.riddle;
         if (b && riddle?.choice_id === o.choice_id)
           return (
@@ -62,6 +63,11 @@ function Choice(p: {
     </View>
   );
 }
+
+// An authored choice whose whole label is the Book's Leave or Close is the talk's exit
+// (loka-512o): the foot sends it, so the content omits it.
+const exit = (g: Grouped) =>
+  g.choice.find((b) => b.action_key === 'choose' && [LABEL.leave, LABEL.close].includes(b.label));
 
 type NpcProps = {
   view: GameView;
@@ -92,8 +98,9 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   `Order a knife, 3p.`, the label the link, named `Order a knife, 3p. 3 pennies.`). A **Look** Control
  *   (not in conversation) opening the Look page (InsidePage), Leave in the PageFoot. No Whisper
  *   (loka-x6t.115), no Give an item… card, no list of what the person carries. The purse shows
- *   only beside a priced service. History restarts after Leave the conversation.
- * - States: choice; shop; services; open order; nothing to say (no line); closed conversation;
+ *   only beside a priced service. History restarts after Leave the conversation. One exit: an
+ *   authored choice labelled exactly Leave or Close is not drawn; the foot sends it (loka-512o).
+ * - States: choice; a talk whose only choice is Leave; shop; services; open order; nothing to say (no line); closed conversation;
  *   cannot be hurt (no Attack card).
  * - Story: NpcPage.stories.tsx
  */
@@ -168,7 +175,7 @@ function Offered(
 // Answering keeps the page in conversation even after the kernel closes it; only Leave the
 // conversation returns to the NPC's own actions (Talk, shop, services).
 const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => {
-  const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
+  const close = choice && (exit(p.g) ?? p.g.choice.find((b) => b.action_key === 'close_choice'));
   const talk = !!choice || !!p.talking;
   const answer = (b: Button) => {
     if (b.action_key === 'choose') p.talk?.(true);

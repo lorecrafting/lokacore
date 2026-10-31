@@ -111,3 +111,29 @@ test('a multi-choice talk has no authored Leave; the foot Leave the conversation
   b.tap(LABEL.leaveConversation);
   assert.equal(b.labels().includes('Insult the village'), false);
 });
+
+// Breaks (loka-512o): Nell's single-choice talk draws its authored Leave beside the foot's; or the
+// foot sends close_choice (no "You take your leave."); or a stale left history after the second exit.
+test("a talk's authored Leave is the foot's: one Leave the conversation, sending that choice", () => {
+  const b = book(showcase as never);
+  b.map();
+  b.tap('Go south');
+  b.tap('Nell, open');
+  for (let i = 0; i < 2; i++) {
+    b.tap(/^Talk/);
+    assert.deepEqual(
+      b.labels().filter((l) => /^(Leave|Close)\b/.test(l)),
+      [LABEL.leaveConversation],
+    );
+    b.tap(LABEL.leaveConversation);
+    assert.ok(
+      b.labels().some((l) => /^Talk/.test(l)),
+      JSON.stringify(b.labels()),
+    );
+    assert.equal(
+      b.text().filter((t) => t === 'You take your leave.').length,
+      1,
+      JSON.stringify(b.text()),
+    );
+  }
+});

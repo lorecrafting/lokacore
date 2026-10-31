@@ -481,7 +481,7 @@ no past conversation log on a fresh visit to the page or after Leave the convers
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
-action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk. A talk with a single authored choice keeps its own Leave (loka-x6t.21). The conversation belongs to
+action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk (loka-x6t.21). A talk has one exit, the foot (owner, 2026-10-30, loka-512o): an authored choice whose whole label is the Book's **Leave** or **Close** is never drawn among the choices; Leave the conversation sends that choice itself, so its narration and effects stand. The conversation belongs to
 that page visit (the Book's latch, not the NPC): leaving the page any other way (Contents, Map,
 Back to World) ends it, and reopening the person shows their actions again. This supersedes the
 viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
@@ -497,9 +497,10 @@ metadata, not story prose, a new game event or transcript persistence.
 
 There is one foot control and no separate Close: **Leave** outside a conversation (local World
 navigation, no engine verb) and **Leave the conversation** inside one. When a matching
-`close_choice` is actually offered, Leave the conversation invokes it under
+authored exit choice (above) or `close_choice` is actually offered, Leave the conversation invokes it (the authored exit first) under
 [live action freshness](#live-action-freshness) and, only after confirmation, returns to that
-person's page with their actions offered again, never to World; an absent speaker (the targetless
+person's page with their actions offered again, its history fresh but for the exit's own narration
+(**You take your leave.**), never to World; an absent speaker (the targetless
 close of a departed NPC) returns to World. An unconfirmed/refused/faulted close retains the detail
 and honest save/error UI; a retry keeps its original context. Without a matching closable choice
 (the kernel already closed a one-reply answer), Leave the conversation is local: it ends the
