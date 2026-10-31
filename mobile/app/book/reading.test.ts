@@ -93,6 +93,19 @@ test('the stored Reading size reads Standard unless it is a step, and a failed w
   assert.doesNotThrow(() => broken.set('larger'));
 });
 
+// Breaks: a shell with no reading store (no saved step, no system scale) drawn at another size than
+// Standard at scale 1.
+test('with no reading store the pages draw at Standard, unscaled', () => {
+  const sizes = (h: ReturnType<typeof book>) =>
+    h.draw().flatMap((n) => (n.type === 'Text' ? [n.props.style?.lineHeight] : []));
+  const standard = book(undefined, undefined, undefined, undefined, {
+    get: () => 'standard',
+    set: () => {},
+    fontScale: () => 1,
+  });
+  assert.deepEqual(sizes(book()), sizes(standard));
+});
+
 // Breaks: the Settings row not a radio group with one checked step, the chosen chip not drawn inverted,
 // the choice not saved or not reaching the page, the launch not reading the stored step, or the system
 // scale ignored.
