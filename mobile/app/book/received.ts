@@ -193,7 +193,11 @@ function detailRoute(
   // Leaving a present NPC's conversation returns to that NPC's page; an absent speaker's, to World.
   const closed =
     accepted?.outcome === 'choice_closed' && !now.entities.some((e) => e.id === attempt.detail);
-  s.returnWorld = (itemChanged && !pickup) || closed;
+  // A Drop keeps a Contents section open (loka-8lpm); other item results go to World.
+  s.returnWorld =
+    itemChanged && !pickup && accepted?.outcome === 'dropped'
+      ? 'section'
+      : (itemChanged && !pickup) || closed;
   const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
   const detail =
     pickup ??

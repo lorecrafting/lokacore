@@ -129,8 +129,14 @@ The enabled status/resources tap opens Contents. It lists exactly **Character**,
 row. Character shows existing projected resources and position, without unrelated index links.
 Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
-[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
-**Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
+[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Contents and every
+section it opens draw no status line (owner, 2026-10-30, loka-8lpm; the [page foot](#detail-page-order)
+rule). A section opened from Contents returns with **Back to Contents** (one page back), and Contents
+returns with **Back to World**; a section opened another way (Character from a status icon, the map
+from the joystick or footer) says **Back to World** and clears the stack to World; an Inventory
+restored on reopen sits on Contents and returns with **Back to Contents**. A page a section opens returns to that section (an item page's Leave to Inventory).
+A room change, death, combat, a new chapter, Start over and an accepted Take or Drop still clear
+straight to World.
 
 Settings opens with the **Reading size**: Standard, Large or Larger, one chosen, kept on the
 device (not in the save) and Standard until changed. It scales the reading text (prose, entity
@@ -223,7 +229,7 @@ claim; only exits from the actor's current room show live availability/refusal f
 ordinary Move admission, including any ingress rule.
 The current-room marker and a level stepper are visible; a room detail names that known
 room and its known exits. While a room detail is open, Back to map is the page's nearest return,
-beside Back to World. An unvisited endpoint, NPC or item is never drawn merely because
+beside the section's own return ([Contents](#world-and-status-entry)). An unvisited endpoint, NPC or item is never drawn merely because
 the cartridge contains it or adjacent sight names it. Existing current-room exit and door
 controls retain live admission. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
@@ -267,14 +273,15 @@ Give to…), then asks, Trade and services (a person's page orders its own cards
 spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World follows the [room page anatomy](#room-page-anatomy).
-A page's local returns (Leave, Back to World, Back to board, Back to map,
+A page's local returns (Leave, Back to World, Back to Contents, Back to board, Back to map,
 Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
-control ends the page; offered actions never do. Item, notice, board, NPC and shop pages draw
-no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23): a pending save shows
+control ends the page; offered actions never do. Item, notice, board, NPC and shop pages, Contents and its
+sections draw no status line, compass or say icon (owner pick mvlrlvappy4w, 2026-10-23;
+loka-8lpm): a pending save shows
 as one dim **save not confirmed** line in the foot under Leave, and the catching-up line and a
-fault show there as on every page. Combat, Character, Contents, the map and World keep the
+fault show there as on every page. Combat and World keep the
 [status line](#world-and-status-entry). World, a scene, a chapter title, the ancestry choice and combat have no
-foot. A control that opens a child (Resume dream) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
+foot. A control that opens a child (Resume dream, Look inside) stays in the content. An NPC or item detail's history belongs to the page visit: it starts empty when the page opens and is dropped when it closes by any route (Leave, a Back control, Contents, Map, a room change, death); a line shows at most once on one page ([line placement](#line-placement)). Combat closure and the notice-board readable restore are the exceptions in their sections.
 
 ## Line placement
 
@@ -290,10 +297,32 @@ A dialogue line whose narration binds a `speaker` and whose authored text is a b
   **in place** (the open page's history and the room log), **log** (the room log only) or
   **quiet** (the room log only, compacted; no text on the open page). Quiet so far: the player's
   own buy and sale on the buy and sell pages, and the player's own take and put on an open
-  container's page (a corpse included). Any other line whose receipt routes to the open page is
+  container's item or Inside page (a corpse included). Any other line whose receipt routes to the open page is
 in place; every other line is log. The page's own redraw (purse, list, contents) is the
   feedback. Another person's action is never quiet.
 - A page never draws the room log, so no line shows twice on one page.
+- Every log line reads as novel prose (owner, 2026-10-30, Beads `loka-r9mr`): no colon label
+  (`Name: ...`) anywhere in the log. A found person reads `Nell is here.` or `Nell was last seen
+  at the Landing, 2m ago.`; an appositive name closes with a comma before its verb (`Bess, the
+  alewife, is here.`); a refusal with no sentence of its own reads `You can't do that—locked.`
+  Dialogue: speaker, speech verb, the
+  listener when there is one, a comma, then the spoken line in double quotes. To the player:
+  `Nell says to you, "Well, stranger?"`; to the room: `Nell says, "Ale's a penny."`; the player:
+  `You say, "Ware."`, `You whisper to the jailer, "Ware."`, `You shout, "Ware!"`. The Book's own
+  echo uses say, whisper and shout; an authored line chooses its own verb. The quoted line starts with a
+  capital and its closing stop sits inside the quotes; a line ending in `?` or `!` takes no added
+  comma or period. Never the colon form (`Nell: ...`) and never a bare quotation with no speaker.
+  An authored line that already attributes itself (`"Gate's shut," says the guard.`) is kept as
+  written; the Book never parses quotes to add a speaker. Authored dialogue that is a bare
+  quotation is a content fix (Beads `loka-548k`), not a Book rewrite.
+- A vessel's liquid amount reads in words, never a count or unit label (owner, 2026-10-30, Beads
+  `loka-ikat`), from quantity against capacity: `Empty.`; a third or less `Nearly empty, a little
+  water left.`; between `Half full of water.`; two thirds or more `Nearly full of water.`; exact
+  capacity `Full of water.` Only exact 0 reads empty and only exact capacity reads full. A light's
+  fuel takes the same bands with the noun `fuel` and its state after a comma: `Nearly full of fuel,
+  lit.`, `Empty, unlit.` (owner, 2026-10-30, Beads `loka-nkcr`). One helper words both
+  (`amountWords`, `mobile/app/book/pick.ts`) on the item page; a liquid also on a twin row's note. A
+  Fill, Pour or Drink log line is its sentence alone; the open page's redraw shows the new amount.
 - Compaction: a quiet line merges into the room log's last line when both have the same key, the
   same bindings and actor, the same pressed card target (the stock row or item), the same page
   visit, and no other line lies between. The merged line is the sentence once with " (N times)"
@@ -371,7 +400,18 @@ about](#fd7-ask-details), then the services. The foot is Leave. The Talk card re
 its accessible name stays the offer's label ("Talk to Nell"). Several Talk offers draw one Talk
 card, the first available one; with none available the page draws nothing in its place, no
 filler line and never "Talk: not now" (owner pick mvlyb5x2m9i3): a person with nothing to do
-shows title, description, then Leave. A person's page draws no Give an item… card: a gift is
+shows title, description, then Look and Leave. **Look.** Outside a conversation a **Look** Control
+ends the person's page, after the cards and before Leave, and opens their Look page, an anchored
+detail of the person's page as the [Inside](#item-details-and-takedrop) page is of its container
+(owner, 2026-10-30, loka-aqnc). It draws the person's name as title, their description as prose, then
+what they visibly bear in the fixed order condition, worn, carried (condition and worn wait on
+loka-ysbt and loka-oc5i and draw nothing until then; no placeholder). Carried is one sentence,
+**<Name> carries a flask and a knife.**, joined as the [room's who-is-here
+sentence](#room-page-anatomy) is (articles, serial comma and "and", plurals collapsed), each item an
+inline link opening its item page; GameView has no pronoun, so it names the person. With nothing
+carried it draws no sentence and no Note. Carried means the person's directly held items offered
+under `world.theft`, less their shop stock. The page draws no actions; its foot is a local **Close**
+that returns to the person's page and sends nothing, and it goes with the person, carrying or not. A person's page draws no Give an item… card: a gift is
 given from the item's own Give to… (owner pick mvlymuams73l). **Trade** shows while the
 person's shop has a row; it opens the child buy page **<Name> can sell you…**, as a notice opens
 from its board, and its Leave returns to the person. The buy page holds one buy card per stock
@@ -386,7 +426,7 @@ loka-x6t.117). A buy or sale keeps its page open, with no page turn and no retur
 the room log; the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
 "Cob of bread — 4p: sold out"; a thing sold leaves the sell list). A row that goes moves focus to
 the page title. Shop stock is not listed
-under the person's Held. Each service is its own Action card
+as carried on the person's Look page. Each service is its own Action card
 with its authored label; the claim and cancel of an order sit under a **Your order** Section
 title after the order card, and show only while an order is open (either is offered, or either
 is refused for a reason other than `service.no_order`); while Your order shows, the commission
@@ -462,21 +502,21 @@ A shop reason from the cartridge is a lowercase fragment with no period.
 ## Item details and Take/Drop
 
 Inventory separates Held from Worn slots, including empty slots. Held/worn item
-taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
-reachable contents and current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
+taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World with the engine's take line ([line placement](#line-placement)),
 the item named as the player saw it. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
-returns to World with the engine's drop line. Held items
+returns to World with the engine's drop line; an item opened from a Contents section (Contents › Inventory › item) returns instead to that section, Contents beneath it, as its Back would (loka-8lpm), and a cold reopen of a Read restores Contents, Inventory, each holder's page with its Inside or Look page, then the book. Held items
 open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 Authored narration takes precedence and meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
 Retry retains original action/target context and appends each confirmed Take/Drop event only once.
+**Inside.** A container whose contents are reachable (an open lid, or a corpse or lidless container with contents) never lists them on its item page: a **Look inside** Control follows its options and opens its **Inside** page, an anchored detail of the item page as the dream page is of its bed (owner, 2026-10-30, loka-mo0p); an accepted Open on the item page turns straight to it. That page draws the container's name as title, the section title **Inside** and one Entity line per directly held item, each opening that item's own page; an empty one draws one Note, **There is nothing inside.** It draws no actions (Open, Close, Take from and Put into stay on the item page) and its foot is a local **Close** that returns to the item page and sends nothing. A contained item's Leave returns to the Inside page. The page goes when its container goes, when the lid closes, when the contents stop being reachable (an emptied corpse), and on a room change, death or Map as every detail does; a cold reopen of a contained Read restores item page, Inside page and item page.
 When Take removes an item from a corpse's Contents, the confirmed result returns to
-that corpse detail, where the take line is quiet ([line placement](#line-placement)), and keeps
+that corpse's Inside page (its item page once the corpse is empty), where the take line is quiet ([line placement](#line-placement)), and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps **Inside** and Take.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, are the carried sentence of their [Look page](#npc-dialogue-and-action-details) (not Inside, never a list on the person's page), each link opening the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps its **Inside** page and Take.
 
-A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Inside: Open is one of its own cards (first group), an accepted Open keeps the page, logs **Opened.** and the next GameView adds the Inside list; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
+A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Look inside: Open is one of its own cards (first group), an accepted Open logs **Opened.** in the item page's history and turns to the Inside page (owner, 2026-10-30, loka-mo0p), so Close shows the line on the item page, now with Look inside; a refused or pending Open stays on the item page; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**; one refused because the load is full reads
@@ -524,8 +564,9 @@ and answers "You take it up." and "You put it away."; any other slot reads Wear 
 put it on." and "You take it off.". A cure's authored `edible.label` names its verb the same way
 (**Apply** a poultice); an authored narration line always wins over these defaults.
 
-**Fuel and light.** An item with fuel shows `Fuel <remaining> of <capacity>, lit/unlit` from the
-confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside Remove when worn.
+**Fuel and light.** An item with fuel words its amount and lit state from the confirmed view
+([line placement](#line-placement)); Ignite, Douse and Refuel sit in its ordinary action list,
+beside Remove when worn.
 A two-item action names both items on its button (`Refuel <source> from <supply>`); the item that
 owns the control keeps the history, and the bound participant's page does not repeat it. The
 presenter owns no fuel arithmetic or clock. A dark room keeps exits, inventory and recovery
@@ -543,7 +584,7 @@ detail, Pour and Drink to their source vessel. The Book owns no liquid math.
 **Held readables.** Opening a held book sends no Read; Read is an explicit option. Its confirmed
 text joins that item's history and the page stays. A child of an open held container pushes its
 own detail; its foot is Leave alone, which pops locally without a command to the page the item
-was opened from (the container, the person holding it, or inventory), and Back to World clears
+was opened from (the container's Inside page, the person holding it, or inventory), and Back to World clears
 the stack. There is no Back to container: it went to the same page (loka-x6t.94). Closed or locked ancestors expose no child Read. Cold reopen restores the latest committed
 Read to its original history, opening a route only when custody still reaches it.
 
@@ -774,7 +815,7 @@ One row per mechanic whose Book rendering is a short rule: worn affects, display
 
 ## Levelling details
 
-GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows on the Character page's status line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
+GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows as the foot's **save not confirmed** line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
 
 ## Lore details
 
@@ -815,7 +856,7 @@ thing's **Cast a spell…** [list](#item-details-and-takedrop) ([World](#world-a
 
 An accepted `say`, `whisper` or `shout` whose receipt
 carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:
-**You say "ware".**, **You whisper "ware" to the jailer.**, **You shout "ware".** (pass-1 R5);
+**You say, "Ware."**, **You whisper to the jailer, "Ware."**, **You shout, "Ware!"** (pass-1 R5; prose form, [Line placement](#line-placement));
 a receipt with narration draws that instead. Beyond this echo the Book never writes the typed
 word anywhere; only its writer sees it.
 

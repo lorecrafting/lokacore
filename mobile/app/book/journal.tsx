@@ -10,12 +10,13 @@ import type { Button } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { ActionCard } from './actions.tsx';
 import { AwayRecap, Note } from './lines.tsx';
-import { Control, Page, SectionTitle } from './pages.tsx';
+import { Control, home, Page, SectionTitle } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import type { ChronicleDay } from './chronicle.ts';
 
 type JournalProps = Parameters<typeof LoreDetails>[0] & {
   world: () => void;
+  contents?: () => void;
   chronicle: () => readonly ChronicleDay[];
 };
 
@@ -33,7 +34,7 @@ export function JournalPage(p: JournalProps) {
   const t = useType();
   const [days] = useState(p.chronicle); // read once as the Journal opens, never live
   return (
-    <Page title={LABEL.journal} foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
+    <Page title={LABEL.journal} foot={home(p)}>
       {!view.journal.length && !view.topics?.length && !days.length && (
         <Note>{LABEL.nothingWritten}</Note>
       )}

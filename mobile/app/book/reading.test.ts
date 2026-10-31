@@ -125,6 +125,7 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
   assert.equal(nodes(chips()[2].props.children)[0].props.style.fontSize, 21); // 1.3 x 1.2 caps at 1.5
   // the system never scales a Book line again
   assert.ok(drawn().every((n) => n.type !== 'Text' || n.props.allowFontScaling === false));
+  h.tap('Back to Contents');
   h.tap('Back to World');
   assert.ok(body() > 0); // body 28 x 1.5
   // loka-x6t.86: the title and the status line scale too (pageTitle 26/30, small 13/19 x 1.5); the

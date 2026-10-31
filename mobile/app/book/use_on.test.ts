@@ -19,6 +19,8 @@ function yard() {
   b.tap(/^Inventory/);
   b.tap(/torch/);
   b.tap(/^Drop/);
+  b.tap(LABEL.backToContents); // a Drop returns to Inventory
+  b.tap(LABEL.backToWorld);
   return b;
 }
 type Book = ReturnType<typeof yard>;

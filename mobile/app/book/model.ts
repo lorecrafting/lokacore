@@ -10,7 +10,7 @@ import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { cap, doorSentence, dur, message, reasonOf, refusedSentence, why } from './words.ts';
-import { things } from './item-pages.ts';
+import { opens, things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
@@ -49,16 +49,17 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing' | 'board' | 'notice' | 'dream' | 'shelf' | 'sale'; id: string }
+  | { kind: 'thing' | 'board' | 'notice' | 'dream' | 'shelf' | 'sale' | 'inside'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
 
-// A detail page draws no status line (owner pick mvlrlvappy4w); the shell keeps it elsewhere.
-export const detailPage = (page: Page | undefined) =>
-  ['thing', 'board', 'notice', 'dialogue', 'shelf', 'sale'].includes(page?.kind ?? '');
+// A detail page (owner pick mvlrlvappy4w), Contents and its sections (loka-8lpm) draw no status line.
+const DETAIL =
+  'thing board notice dialogue shelf sale inside contents character carrying map journal settings';
+export const detailPage = (page: Page | undefined) => DETAIL.split(' ').includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 
@@ -78,13 +79,15 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  // A person's pages, shop pages included, go with them (Shelf.tsx).
-  const gone = stack.findIndex(
-    (p) =>
-      'id' in p &&
-      ['thing', 'shelf', 'sale'].includes(p.kind) &&
-      !visible.some((e) => e.id === p.id),
-  );
+  // A person's pages, shop and Look pages included, go with them (Shelf.tsx); an Inside page with
+  // its lid.
+  const gone = stack.findIndex((p) => {
+    const at = 'id' in p && visible.find((e) => e.id === p.id);
+    return (
+      ['thing', 'shelf', 'sale', 'inside'].includes(p.kind) &&
+      (!at || (p.kind === 'inside' && at.kind !== 'npc' && !opens(after, at)))
+    );
+  });
   if (gone < 0) return stack;
   const page = stack[gone];
   if (page.kind === 'thing' && after.choice?.speaker_id === page.id)

@@ -7,6 +7,7 @@ export const LABEL = {
   leave: 'Leave',
   leaveConversation: 'Leave the conversation',
   backToWorld: 'Back to World',
+  backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
   backToMap: 'Back to map',
   close: 'Close',
@@ -22,6 +23,11 @@ export const LABEL = {
   startOverLoses: 'Your saved game will be lost.',
   cancel: 'Cancel',
   inside: 'Inside',
+  // An open container's Inside page: the item page's control and the empty page's note.
+  lookInside: 'Look inside',
+  nothingInside: 'There is nothing inside.',
+  // A person's page control to their Look page (loka-aqnc).
+  lookPerson: 'Look',
   held: 'Held',
   // Take, on an item a living NPC holds (pass-1 E14).
   lift: 'Lift',

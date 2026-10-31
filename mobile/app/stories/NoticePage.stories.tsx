@@ -46,17 +46,17 @@ export const FixtureWithCards: StoryObj = {
       'actions.gather_ash': 'Gather ash',
     },
   },
-  name: 'Fixture with cards',
+  name: 'Room feature with actions',
 };
 
 // The showcase authors no dream, so the resume control takes a synthetic notice.
-// Breaks: an available dream shows no Resume control, or an acknowledged one still offers it.
+// Breaks: an available dream shows no Resume control, or a finished dream's bed offers it or shows a line.
 const notice = (dream: object) => ({ id: 'n', dream }) as never;
 export const DreamAvailable: StoryObj = {
-  name: 'Dream resume',
+  name: 'Bed: Resume dream',
   render: () => <DreamResume detail={notice({ available: true, index: 1 })} open={() => {}} />,
 };
 export const DreamAcknowledged: StoryObj = {
-  name: 'Dream acknowledged',
+  name: 'Bed: dream finished',
   render: () => <DreamResume detail={notice({ available: false, index: -1 })} open={() => {}} />,
 };

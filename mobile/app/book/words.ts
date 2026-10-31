@@ -91,7 +91,7 @@ export const message = (m: { key: string; bindings?: Record<string, unknown> }, 
   m.key === 'resource.short'
     ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
     : text(m.key);
-// A refusal's own sentence, not "The way north is …" or "You can't do that: …": keyed by the
+// A refusal's own sentence, not "The way north is …" or "You can't do that—…": keyed by the
 // GameError's cause (RefusalCause), then by its code.
 const SENTENCE: Record<string, string> = {
   insufficient_resource: 'You are too exhausted.',
@@ -128,6 +128,8 @@ export const used = (label: string, target: string, tool: string) =>
 export const cast = (label: string, target: string) => `You cast ${lower(label)} on ${target}.`;
 export const reason = (code: string, cause?: string) =>
   (cause && CAUSE[cause]) ?? REASON[code] ?? code.replaceAll('_', ' ');
+// An appositive name closes with a comma before its verb: "Bess, the alewife, is here." (Line placement)
+export const subject = (name: string) => (name.includes(', ') ? `${name},` : name);
 export const reasonOf = (r: Refusal) => reason(r.code, r.cause);
 // An item page's refusal notes (book-ui.md, too heavy; pass-1 E8): a locked Take reads as ownership.
 export const NOTED: Record<string, string> = {
@@ -237,18 +239,20 @@ function answer(
     return {
       kind: 'refused',
       reason: reasonOf(d.error),
-      text: refusedSentence(d.error) ?? `You can't do that: ${reasonOf(d.error)}.`,
+      text: refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`, // prose, no colon (Line placement)
     };
   }
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {
     const location = d.location;
-    const who = nameOf(view, location.target_id, text) || 'They';
-    if (location.status === 'here') return `${who}: here.`;
+    // novel prose, no colon label (book-ui.md, Line placement)
+    const name = nameOf(view, location.target_id, text);
+    const [who, is, was] = name ? [subject(name), 'is', 'was'] : ['They', 'are', 'were'];
+    if (location.status === 'here') return `${who} ${is} here.`;
     if (location.status === 'unknown') return 'Their whereabouts are unknown.';
     const room = view.map?.rooms.find((r) => r.id === location.room_id);
     const ago = view.time - location.at; // a clock behind the sighting still reads just now
-    return `${who}: last seen at ${room ? text(room.title) : 'a previously observed place'}, ${ago < 120 ? 'just now' : `${dur(ago)} ago`}.`;
+    return `${who} ${was} last seen at ${room ? text(room.title) : 'a previously observed place'}, ${ago < 120 ? 'just now' : `${dur(ago)} ago`}.`;
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
@@ -257,10 +261,10 @@ function answer(
 }
 
 // The Book's echo of an accepted speech press whose receipt has no narration (book-ui.md, Word bar),
-// the word folded as the kernel folds it; no word, no echo.
+// in novel prose (Line placement): the folded word capitalised, its stop inside the quotes; no word, no echo.
 export const spoken = (how: string, word: unknown, to?: string) =>
   typeof word === 'string'
-    ? `You ${how} "${word.toLowerCase()}"${to ? ` to ${to}` : ''}.`
+    ? `You ${how}${to ? ` to ${to}` : ''}, "${sentence(word.toLowerCase())}${how === 'shout' ? '!' : '.'}"`
     : undefined;
 
 type Events = Extract<DecisionResult, { kind: 'accepted' }>['events'];

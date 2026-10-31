@@ -101,7 +101,7 @@ test("Character's Cast on… lists a spell's targets; the pick turns to World wi
   character();
   b.tap('Lux, cast on…');
   assert.ok(b.text().includes('The lantern: need 1 ash'), b.text().join(' | '));
-  b.tap(/opens Contents/);
+  b.tap('Back to Contents');
   b.tap('Inventory, open');
   b.tap(/lantern/);
   b.tap('Cast a spell…');

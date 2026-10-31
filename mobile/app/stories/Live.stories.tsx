@@ -94,8 +94,7 @@ export const NellShop: StoryObj = {
     await tap(/; opens Contents$/);
     await tap('Character, open');
     await page.findByText(/^pennies\s+6$/); // paid; pennies stay off the status line
-    await tap('Back to World');
-    await tap(/; opens Contents$/);
+    await tap(LABEL.backToContents);
     await tap(`${LABEL.inventory}, open`);
     await page.findByLabelText('a cob of bread, open');
   },
@@ -108,6 +107,7 @@ export const SackContents: StoryObj = {
     await tap('seed sack, open');
     // the page a turn brings takes focus at its title (pages.tsx titleFocus), for screen readers
     await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('heading'));
+    await tap(LABEL.lookInside);
     await tap('A turnip seed, open'); // its Inside row
     await tap('Take a turnip seed');
     // book-ui.md (Take from a container): the pickup line shows, then the sack reopens with Put and Leave

@@ -55,6 +55,7 @@ test('only confirmed pickup returns World, including a retry from another page',
   h.tap('Leave');
   assert.equal(h.game.view().token, token);
   assert.ok(h.text().includes('Held')); // item Leave returns to Carrying, not World
+  h.tap(LABEL.backToContents);
   h.tap(LABEL.backToWorld);
   assert.ok(h.text().includes('Well Lane'));
   h.sql.close();
@@ -82,7 +83,8 @@ test('a held item offers Give to… only a present recipient and logs the confir
   assert.equal(h.game.view().token, token);
   assert.equal(receipts(), before);
   h.tap('Leave');
-  h.tap(LABEL.backToWorld); // item Leave returned to Carrying
+  h.tap(LABEL.backToContents); // item Leave returned to Carrying
+  h.tap(LABEL.backToWorld);
   h.map();
   h.tap('Go south');
   h.tap(CONTENTS);
@@ -141,7 +143,8 @@ test('inventory Drop returns World with one named event only after confirmation'
     false,
   );
   h.tap('Leave');
-  h.tap(LABEL.backToWorld); // item Leave returned to Carrying
+  h.tap(LABEL.backToContents); // item Leave returned to Carrying
+  h.tap(LABEL.backToWorld);
   h.sql.exec('PRAGMA query_only = 0');
   h.map();
   h.tap('Go south'); // retries Drop without walking
@@ -167,6 +170,8 @@ test('other item actions retain their detail and show their consequences there',
   const h = book(items, a);
   h.tap('A sewing box');
   h.tap('Open a sewing box');
+  assert.equal(h.stack.at(-1)?.kind, 'inside'); // an accepted Open turns to the Inside page (loka-mo0p)
+  h.tap(LABEL.close);
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
   assert.ok(h.text().includes("You open the sewing box's lid."));
@@ -364,7 +369,8 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('a wool cloak, open');
   h.tap('Wear a wool cloak');
   h.tap('Leave');
-  h.tap(LABEL.backToWorld); // item Leave returned to Carrying
+  h.tap(LABEL.backToContents); // item Leave returned to Carrying
+  h.tap(LABEL.backToWorld);
   go('up');
   h.tap('An old trunk');
   assert.ok(h.text().includes('Take: more than you can carry.'));
@@ -375,6 +381,8 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('Remove a wool cloak');
   assert.equal(h.labels().includes('Drop a wool cloak'), true);
   h.tap('Drop a wool cloak');
+  h.tap(LABEL.backToContents); // a Drop from Contents › Inventory returns to Inventory
+  h.tap(LABEL.backToWorld);
   h.tap('An old trunk');
   assert.equal(
     h.text().some((s) => s.includes('more than you can carry')),

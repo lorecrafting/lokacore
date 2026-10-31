@@ -26,21 +26,23 @@ import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from
 import { size, space } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
-import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
+import { band, Control, home, type Home, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 import { LABEL } from './labels.ts';
 
-const home = (world: () => void) => <Control label={LABEL.backToWorld} onPress={world} />;
-
 type Say = (key: string) => string;
+type Carrying = Home & {
+  items: readonly Thing[];
+  equipment?: GameView['equipment'];
+  text: Say;
+  open: (id: string) => void;
+};
 type Grouped = ReturnType<typeof group>;
 
 // A profession box is drawn even unacquired (book-ui.md Skill tree details), so it counts as known.
 const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
 
-type Character = { view?: GameView; text: Say; world: () => void; pending?: boolean } & Pick<
-  GameView,
-  'resources' | 'position'
-> &
+type Character = { view?: GameView; text: Say; pending?: boolean } & Home &
+  Pick<GameView, 'resources' | 'position'> &
   Parameters<typeof RaiseCards>[0];
 
 /**
@@ -60,7 +62,7 @@ export function CharacterPage(p: Character) {
   const name = p.view?.actor_name;
   const known = resources.length || p.view?.attributes?.length || p.view?.skills?.some(knownSkill);
   return (
-    <Page title={LABEL.character} foot={home(p.world)}>
+    <Page title={LABEL.character} foot={home(p)}>
       {!known && !name && <Note>{LABEL.nothingKnown}</Note>}
       {name && <Text style={prose(c, t)}>{p.text(name)}</Text>}
       {position && <Text style={prose(c, t)}>{cap(position)}</Text>}
@@ -130,17 +132,11 @@ export function AncestryPage(p: {
  * - Rules: an empty Worn slot is a Note; its slot label lends the item line its bleed.
  * - Story: SectionPages.stories.tsx
  */
-export function CarryingPage(p: {
-  items: readonly Thing[];
-  equipment?: GameView['equipment'];
-  text: Say;
-  open: (id: string) => void;
-  world: () => void;
-}) {
+export function CarryingPage(p: Carrying) {
   const c = usePalette();
   const t = useType();
   return (
-    <Page title={LABEL.inventory} foot={home(p.world)}>
+    <Page title={LABEL.inventory} foot={home(p)}>
       <SectionTitle>{LABEL.held}</SectionTitle>
       {p.items.length === 0 && <Note>{LABEL.carryingNothing}</Note>}
       {p.items.length > 0 && (
@@ -214,13 +210,14 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
  * - States: discovered, two levels; barred exits; Where.
  * - Story: MapPage.stories.tsx
  */
-export function MapPage(p: {
-  view: GameView;
-  text: Say;
-  g: Grouped;
-  press: (b: Button) => void;
-  world: () => void;
-}) {
+export function MapPage(
+  p: {
+    view: GameView;
+    text: Say;
+    g: Grouped;
+    press: (b: Button) => void;
+  } & Home,
+) {
   const c = usePalette();
   const t = useType();
   const [selected, select] = useState<string | null>(null);
@@ -231,7 +228,7 @@ export function MapPage(p: {
       foot={
         <>
           {chosen && <Control label={LABEL.backToMap} onPress={() => select(null)} />}
-          <Control label={LABEL.backToWorld} onPress={p.world} />
+          {home(p)}
         </>
       }
     >
@@ -275,9 +272,9 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
  * - Rules: `startOver` asks first: it destroys the save (10 §31; the shell's confirm).
  * - Story: SectionPages.stories.tsx
  */
-export function SettingsPage(p: { startOver: () => void; world: () => void; reading?: Reading }) {
+export function SettingsPage(p: { startOver: () => void; reading?: Reading } & Home) {
   return (
-    <Page title={LABEL.settings} foot={home(p.world)}>
+    <Page title={LABEL.settings} foot={home(p)}>
       {p.reading && <ReadingSize {...p.reading} />}
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>

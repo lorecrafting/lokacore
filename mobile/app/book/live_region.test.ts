@@ -35,9 +35,9 @@ test("the Book reads each press's new line politely", () => {
   const b = book(showcase as never);
   assert.deepEqual(live(b), ['polite', '']);
   say(b, 'ware');
-  assert.deepEqual(live(b), ['polite', 'You say "ware".']);
+  assert.deepEqual(live(b), ['polite', 'You say, "Ware."']);
   say(b, 'begone');
-  assert.deepEqual(live(b), ['polite', 'You say "begone".']);
+  assert.deepEqual(live(b), ['polite', 'You say, "Begone."']);
 });
 
 // Breaks: the restored log read at open, a redraw counted as a new batch, a repeat not read again, the trim at 200 lines losing a

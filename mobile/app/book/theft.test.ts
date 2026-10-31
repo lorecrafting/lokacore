@@ -13,6 +13,7 @@ import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
+import { LABEL } from './labels.ts';
 
 const ts = createRequire(import.meta.url)('typescript');
 registerHooks({
@@ -43,7 +44,7 @@ registerHooks({
     };
   },
 });
-const { Item, ThingPage } = await import('./Menu.tsx');
+const { InsidePage, Item, ThingPage } = await import('./Menu.tsx');
 const { NpcDetail, NpcPage } = await import('./Npc.tsx');
 
 function nodes(element: any): any[] {
@@ -53,6 +54,16 @@ function nodes(element: any): any[] {
     ? nodes(element.type(element.props))
     : [element, ...nodes(element.props?.children)];
 }
+// A Text's words, its inline links' words included.
+const line = (n: any): string =>
+  typeof n === 'string'
+    ? n
+    : Array.isArray(n)
+      ? n.map(line).join('')
+      : n?.props
+        ? line(n.props.children)
+        : '';
+const texts = (ns: any[]) => ns.filter((n) => n.type === 'Text').map(line);
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-theft-book-'));
 let artifact;
@@ -81,8 +92,8 @@ const canonical = JSON.stringify(sorted(artifact.cartridge));
 const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 
 // Breaks: GameView stops listing what a living NPC holds, the NPC page (Body's route for an NPC)
-// drops its Held list or its line stops opening the item's page, or a living NPC's holdings list
-// under Inside instead of Held (designer, row 33). Expected page text is independent literals from the sampler's text.json.
+// lists it again or loses Look, or the Look page's carried sentence drops the item or stops
+// opening its page (designer, row 33; loka-aqnc). Expected page text is independent literals from the sampler's text.json.
 test('a merchant entry lists the purse it holds; the purse offers Take', (t) => {
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
   t.after(() => a.sql.close());
@@ -106,50 +117,72 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
       open: (r) => opened.push(r),
     }),
   );
-  const text = merchant.filter((n) => n.type === 'Text').map((n) => n.props.children);
-  assert.deepEqual(text, [
+  assert.deepEqual(texts(merchant), [
     'A merchant',
     'A merchant with a fat purse.',
-    'Held',
-    'A purse',
+    'Look',
     'Leave',
   ]);
-  const row = merchant.find((n) => n.props.accessibilityLabel === 'A purse, open');
-  assert.ok(row, 'Held row for the purse');
-  row.props.onPress();
+  merchant.find((n) => n.props.accessibilityLabel === LABEL.lookPerson).props.onPress();
+  assert.deepEqual(opened.pop(), { kind: 'inside', id: id('npc.merchant.short') });
+  const look = nodes(
+    InsidePage({ screen, id: id('npc.merchant.short'), open: (r) => opened.push(r), close() {} }),
+  );
+  assert.deepEqual(texts(look).slice(0, 3), [
+    'A merchant',
+    'A merchant with a fat purse.',
+    'A merchant carries a purse.',
+  ]);
+  look.find((n) => n.props.accessibilityLabel === 'a purse, open').props.onPress();
   const [purse] = opened as { kind: string; id: string }[];
   assert.equal(purse?.kind, 'thing');
   const item = nodes(Item({ id: purse.id, screen, g, press: book.press, open() {}, world() {} }));
   const words = item.filter((n) => n.type === 'Text').map((n) => n.props.children);
   assert.deepEqual(words.slice(-3), ['A merchant is holding it.', 'Lift', 'Leave']); // pass-1 E14
-  // A container (any non-NPC entry) keeps Inside.
+  // A container (any non-NPC entry) offers Look inside, its contents on their own page (loka-mo0p).
   const box = { id: 'box', kind: 'item', name: 'box', actions: [] };
   const coin = { ...box, id: 'coin', name: 'coin' };
+  const view = { entities: [box, { ...coin, container_id: 'box' }], inventory: [] };
   const shelf = nodes(
-    ThingPage({ thing: box, text: (k: string) => k, actions: [], log: [], contents: [coin] }),
-  );
-  assert.ok(shelf.some((n) => n.props.children === 'Inside'));
-  // Held lists only this NPC's things, and steps aside while a conversation runs.
-  const m = { id: 'm', kind: 'npc', name: 'm', actions: [] };
-  const held = (talking: boolean) =>
-    nodes(
-      NpcPage({
-        view: {
-          entities: [m, { ...box, container_id: 'm' }, { ...coin, container_id: 'other' }],
-          inventory: [],
-        },
-        npc: m,
-        text: (k: string) => k,
-        g: { on: () => [], word: [] },
-        press() {},
-        log: [],
-        leave() {},
-        open() {},
-        talking,
-      } as any),
-    )
-      .filter((n) => n.type === 'Text')
-      .map((n) => n.props.children);
-  assert.deepEqual(held(false).slice(1), ['Held', 'Box', 'Leave']);
-  assert.ok(!held(true).includes('Held'));
+    ThingPage({ thing: box, text: (k: string) => k, actions: [], log: [], view } as any),
+  ).map((n) => n.props.children);
+  assert.ok(shelf.includes(LABEL.lookInside) && !shelf.includes(LABEL.inside));
+  // Look stands in for the list and steps aside while a conversation runs; the Look page carries
+  // only this person's things, shop stock left out (Npc.tsx Rules, InsidePage).
+  const m = { id: 'm', kind: 'npc', name: 'm', actions: [], shop: [{ item_id: 'coin' }] };
+  const npcView = {
+    entities: [
+      m,
+      { ...box, container_id: 'm' },
+      { ...coin, container_id: 'm' },
+      { ...box, id: 'b2', name: 'b2', container_id: 'other' },
+    ],
+    inventory: [],
+  };
+  const page = (talking: boolean) =>
+    texts(
+      nodes(
+        NpcPage({
+          view: npcView,
+          npc: m,
+          text: (k: string) => k,
+          g: { on: () => [], word: [] },
+          press() {},
+          log: [],
+          leave() {},
+          open() {},
+          look() {},
+          talking,
+        } as any),
+      ),
+    );
+  assert.deepEqual(page(false), ['M', 'Look', 'Leave']);
+  assert.deepEqual(page(true), ['M', 'Leave the conversation']);
+  const carried = InsidePage({
+    screen: { view: npcView, text: (k: string) => k },
+    id: 'm',
+    open() {},
+  } as any);
+  // The sentence, then its inline link's own Text; the coin is shop stock, b2 another's.
+  assert.deepEqual(texts(nodes(carried)), ['M', 'M carries box.', 'box', 'Close']);
 });

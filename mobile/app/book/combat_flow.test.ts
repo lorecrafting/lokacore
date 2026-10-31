@@ -260,7 +260,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.answer({ kind: 'saved', decision: { kind: 'rejected', error: { code: 'exit_locked' } } });
     h.tap('Flee');
     assert.ok(h.texts().includes('Combat'));
-    assert.ok(h.texts().includes("You can't do that: locked."));
+    assert.ok(h.texts().includes("You can't do that—locked."));
     const road = view({
       combat: undefined,
       place: { id: 'road', title: { key: 'road.title' }, description: { key: 'road.description' } },
@@ -284,7 +284,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     assert.equal(h.texts().includes('You escape to the road.'), false);
     assert.equal(h.texts().filter((t) => t.includes('Crows')).length, 1);
     assert.equal(h.texts().includes('You strike the marsh rat.'), false);
-    assert.equal(h.texts().includes("You can't do that: locked."), false);
+    assert.equal(h.texts().includes("You can't do that—locked."), false);
   } finally {
     h.close();
   }
