@@ -1104,7 +1104,7 @@
   "narration.shocked.applied": "Sparks crawl over the golem.",
   "narration.shocked.expired": "The sparks die away.",
   "narration.shocked.tick": "Sparks crackle on the golem.",
-  "narration.shout_begone.success": "You roar \"Begone!\" into the smoke.",
+  "narration.shout_begone.success": "You roar \"Begone!\"",
   "narration.shout_warning.success": "You shout \"Ware!\" over the wall, and Gil's answer comes back from the gate yard.",
   "narration.shove_drover.failure": "The drover does not budge.",
   "narration.shove_drover.success": "You shove the drover off his post.",
