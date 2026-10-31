@@ -43,3 +43,20 @@ Meaning checks (settled): the ancestry lines (`Broad shoulders give you strength
   - mobile `book/arrest`, `book/readable`.
 
 CI on `117468f9d`: ci, book-e2e and graph-diff all success (one `gh run list --commit`). The PR body reports `/code-review medium` (9 findings).
+
+## Fix check: `117468f9d..c0cce16b3` (APPROVE)
+
+Scope: only the fix diff (`c0cce16b3536b18db3035a68927bad351ef62431`).
+
+1. Fixed. `test/loka/content_lint_test.exs:186` refuses `You say, "Hush." Price: a penny.`. Mutant M1 (drop `["”’]?`, `lint.ex:256`) is now red at `:176`.
+2. Fixed. `narration.walker` and `narration.wanderer` are the first step of the five `walker_*` reactions and of `codex_sampler/reactions/wanderer.json`. The existing `not topic_*_known` guard stays and no `at_least` moved. Throwaway Book walk of `codex_sampler` (hall, mill, yard, road, study, then a second lap): the line shows once, on entering the fifth room (`[0,0,0,0,0,0,1,0,0,0,0,0]`). The five walker lines leave `test/loka/lint_baseline.txt`. The text reads as second-person prose.
+3. Fixed with the quote skip at `lint.ex:262`.
+   - Mutant M3 (drop the kept stop `\\1`) is red at `:176`.
+   - Mutant M4 (delete the quote-skip line) is red at `:176`.
+   - No gap: a label after quoted speech is still refused, with straight or curly quotes, after `"Hush,"`, and with an unclosed quote. Only labels inside a quotation pass.
+4. Documented as limits (four-word lead-in, short-clause false positive) in `docs/CHECKS.md:107`; accepted.
+5. Fixed. `trial_sampler/text.json:31` now reads "The sergeant reads out that you are wanted in the square." The pin at `arrest.test.ts:37` is updated.
+
+At `c0cce16b3`: `content_lint_test.exs` 20 passed. `bin/regen.sh` left a clean tree, so the transcripts, stories and `codex_sampler_hash` fixture are regenerated.
+
+CI on `c0cce16b3` (`gh run list --commit`): ci success, book-e2e success.
