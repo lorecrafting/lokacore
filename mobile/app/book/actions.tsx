@@ -2,7 +2,7 @@
 import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
-import { Tap } from './pages.tsx';
+import { refusedProps, Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { onKey, unseen } from './lines.tsx';
 import { reasonSentence } from './reasons.ts';
@@ -22,21 +22,36 @@ import { radius, size, space, type } from './tokens.ts';
  *   once. It is exposed as disabled yet stays focusable and pressable, its sentence its hint. With
  *   `onPress` it sends nothing: a Pick list's option (with `expanded`) or a card that opens a child
  *   page (the NPC page's Trade). A row may show its own label, accessible name and quiet note in
- *   place of the Button's label.
- * - States: available; unavailable; unavailable, pressed.
- * - Story: ActionCard.stories.tsx
+ *   place of the Button's label. With `link` it is a shop line, not a card (book-ui.md, Shop
+ *   lines): a Tap reading its label as prose, the `link` words in the room link style
+ *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
+ *   sentence with no card. Shop lines stack in `Cards lines`.
+ * - States: available; unavailable; unavailable, pressed; each as a card or a line.
+ * - Story: ActionCard.stories.tsx; the line form NpcPage.stories.tsx (Shelf, Sale, Services)
  */
-export function ActionCard(
-  p: (
-    | { b: Button; press: (b: Button) => void; label?: string; name?: string; note?: string }
-    | { label: string; onPress: () => void; expanded?: boolean }
-    | { label: string; reason?: string }
-  ) & { ref?: Ref<View> },
-) {
+type CardProps = (
+  | {
+      b: Button;
+      press: (b: Button) => void;
+      label?: string;
+      name?: string;
+      note?: string;
+      link?: string;
+    }
+  | { label: string; onPress: () => void; expanded?: boolean }
+  | { label: string; reason?: string; name?: string; link?: string }
+) & { ref?: Ref<View> };
+export function ActionCard(p: CardProps) {
   const c = usePalette();
   const t = useType();
-  if (!('b' in p) && !('onPress' in p)) return <Unavailable label={p.label} reason={p.reason} />;
+  if (!('b' in p) && !('onPress' in p)) return <Unavailable {...p} />;
   const label = p.label ?? ('b' in p ? p.b.label : '');
+  if ('b' in p && p.link)
+    return (
+      <Tap label={p.name || label} onPress={() => p.press(p.b)}>
+        <Text style={prose(c, t)}>{linked(label, p.link)}</Text>
+      </Tap>
+    );
   return (
     <Pressable
       ref={p.ref}
@@ -67,36 +82,59 @@ const card = (c: ReturnType<typeof usePalette>, grayed = false) => ({
   paddingHorizontal: space.lg,
 });
 
+// A shop line's words with its `link` words drawn as the room link (lines.tsx nameLink's style).
+const linked = (label: string, link: string) => {
+  const i = label.indexOf(link);
+  return i < 0
+    ? [label]
+    : [
+        label.slice(0, i),
+        <Text key="link" style={type.named}>
+          {link}
+        </Text>,
+        label.slice(i + link.length),
+      ];
+};
+
 // The unavailable form: its own component, so its pressed state is the card's alone. The state
-// keeps the label and reason it was pressed on, so a changed card starts unpressed.
+// keeps the label and reason it was pressed on, so a changed card starts unpressed. Its name is the
+// shown text, then the rest of `name`, which starts with the label (label in name).
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
-function Unavailable(p: { label: string; reason?: string }) {
+function Unavailable(p: { label: string; reason?: string; name?: string; link?: string }) {
   const c = usePalette();
   const t = useType();
   const sentence = reasonSentence(p.reason);
   const [pressed, setPressed] = useState<string>();
   const shown = `${p.label}\n${sentence}`;
   const grayed = pressed === shown;
+  const label = p.link ? linked(p.label, p.link) : p.label;
+  const a11y = (grayed && sentence ? shown : p.label) + (p.name ?? p.label).slice(p.label.length);
+  const press = () => {
+    setPressed(shown);
+    if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
+  };
+  const body = (
+    <Text style={grayed ? note(c, t) : prose(c, t)}>
+      {grayed && sentence ? [label, `\n${sentence}`].flat() : label}
+    </Text>
+  );
   return (
     <View>
-      <Pressable
-        // web: aria-disabled by hand; as a prop RN web also sets the native `disabled`, which drops the press
-        ref={(n) => (n as unknown as Element | null)?.setAttribute?.('aria-disabled', 'true')}
-        accessibilityRole="button"
-        accessibilityLabel={grayed && sentence ? shown : p.label} // the name starts with the shown text
-        accessibilityHint={sentence || undefined}
-        accessibilityState={{ disabled: true }} // native: exposed as disabled, still pressable
-        onPress={() => {
-          setPressed(shown);
-          if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
-        }}
-        style={card(c, grayed)}
-      >
-        <Text style={grayed ? note(c, t) : prose(c, t)}>
-          {grayed && sentence ? [p.label, `\n${sentence}`] : p.label}
-        </Text>
-      </Pressable>
+      {p.link ? (
+        <Tap label={a11y} refused={sentence} onPress={press}>
+          {body}
+        </Tap>
+      ) : (
+        <Pressable
+          accessibilityLabel={a11y}
+          {...refusedProps(sentence)}
+          onPress={press}
+          style={card(c, grayed)}
+        >
+          {body}
+        </Pressable>
+      )}
       <View aria-live="polite" style={unseen}>
         {grayed && sentence ? <Text>{sentence}</Text> : null}
       </View>
@@ -198,12 +236,13 @@ export function PickLists(p: {
 /**
  * A stack of Action cards, one block of its page.
  * - Use: every stack of Action cards.
- * - Rules: draws nothing when empty, so an empty list adds no block gap.
+ * - Rules: draws nothing when empty, so an empty list adds no block gap. With `lines`, a run of
+ *   shop lines with no gap between them, like a room's entity lines.
  * - Story: ActionCard.stories.tsx
  */
-export function Cards({ children }: { children: ReactNode }) {
+export function Cards({ children, lines }: { children: ReactNode; lines?: boolean }) {
   return Children.toArray(children).length ? (
-    <View style={{ gap: space.sm }}>{children}</View>
+    <View style={lines ? undefined : { gap: space.sm }}>{children}</View>
   ) : null;
 }
 

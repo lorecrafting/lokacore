@@ -103,6 +103,11 @@ export const LABEL = {
   shelterUsed: 'Shelter used.',
   hint: (hint: string) => `Hint: ${hint}`,
   look: (title: string) => `${title}, look`,
+  // A shop line (book-ui.md, shop lines): shown "A cob of bread, 4p.", its name adds "Buy for 4 pennies.".
+  shopLine: (thing: string, price: number) => `${thing}, ${price}p.`,
+  pennies: (n: number) => (n === 1 ? '1 penny' : `${n} pennies`),
+  buyFor: (n: number) => `Buy for ${LABEL.pennies(n)}.`,
+  sellFor: (n: number) => `Sell for ${LABEL.pennies(n)}.`,
 } as const;
 
 // A collapsed group's count in the room sentence, "two crows", from two; digits from 10 (loka-6qi).

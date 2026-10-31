@@ -204,7 +204,7 @@ rule never refreshes an already-sent invocation or weakens authority freshness/a
 ## Unavailable actions
 
 (Owner, 2026-10-30, Beads `loka-uzt6`.) An action the GameView lists unavailable (Take too heavy,
-a shop row not afforded, a blocked exit, a refused pick row, teach card or spell word) is the same
+a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a refused pick row, teach card or spell word) is the same
 [Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. It is
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint.
 A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
@@ -430,23 +430,34 @@ under `world.theft`, less their shop stock. The page draws no actions; its foot 
 that returns to the person's page and sends nothing, and it goes with the person, carrying or not. A person's page draws no Give an item… card: a gift is
 given from the item's own Give to… (owner pick mvlymuams73l). **Trade** shows while the
 person's shop has a row; it opens the child buy page **<Name> can sell you…**, as a notice opens
-from its board, and its Leave returns to the person. The buy page holds one buy card per stock
-row ("Cob of bread — 4p"; refused, "Cob of bread — 4p: can't afford"), then the purse Note
+from its board, and its Leave returns to the person. The buy page holds one **shop line** per stock
+row, then the purse Note
 **You have <n>p.** under the list, the visit history, then a **Sell** card (no ellipsis), drawn
 only while the player holds something the person will buy. Sell opens the child sell page
-**<Name> will buy…** (owner pick mvlynyikyw57): one card per thing the GameView offers to sell
-to this person, with its price ("Cob of bread — 1p"), then the purse and history; Leave
+**<Name> will buy…** (owner pick mvlynyikyw57): one shop line per thing the GameView offers to sell
+to this person, at its price, then the purse and history; Leave
 returns to the buy page. It lists only what the engine marks sellable (wider sale lists are
 loka-x6t.117). A buy or sale keeps its page open, with no page turn and no return to the person (owner,
 2026-10-23): its own line is quiet ([line placement](#line-placement)), drawn on neither page and kept in
-the room log; the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
-"Cob of bread — 4p: sold out"; a thing sold leaves the sell list). A row that goes moves focus to
+the room log; the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form;
+a thing sold leaves the sell list). A row that goes moves focus to
 the page title. Shop stock is not listed
-as carried on the person's Look page. Each service is its own Action card
-with its authored label; the claim and cancel of an order sit under a **Your order** Section
-title after the order card, and show only while an order is open (either is offered, or either
+as carried on the person's Look page. Each service is a shop line
+of its authored label; the claim and cancel of an order are shop lines under a **Your order** Section
+title after the order line, and show only while an order is open (either is offered, or either
 is refused for a reason other than `service.no_order`); while Your order shows, the commission
-card is not drawn. The purse Note shows on the NPC page only when a priced service is drawn,
+line is not drawn.
+
+**Shop lines** (owner, 2026-10-30, Beads `loka-ck8k`). A buy, sell or service row is one line of
+[novel prose](#line-placement), never a card or button: a sentence with its price, closed by a
+period, whose noun is the underlined link in the room links' style; the whole line is the press
+target (a `Tap` line). A good reads `A cob of bread, 4p.` with "cob of bread" linked; a service reads
+its authored label, `Order a knife, 3p.`, the label linked (the GameView projects no service noun).
+Its accessible name is the shown text, then the action and the price in words (label in name):
+`A cob of bread, 4p. Buy for 4 pennies.`, `… Sell for 1 penny.`; a service's label is already its
+action, so `Order a knife, 3p. 3 pennies.`. A refused line reads the same plain sentence and follows
+[Unavailable actions](#unavailable-actions) (grayed, its reason sentence beneath, both read in its
+name). Leave, Back, Trade and Sell stay controls and cards. The purse Note shows on the NPC page only when a priced service is drawn,
 after the description; pennies show nowhere else on a detail page, and "can't afford" stays a
 bare reason (pass-1 E15). It shows
 no past conversation log on a fresh visit to the page or after Leave the conversation; lines since that visit began or that Leave are the only
@@ -497,7 +508,7 @@ and absent speakers get no invented body, inferred name suffix or substituted ro
 Player descriptions are required when real player entities/descriptions are projected; there is
 currently no player-presence UI.
 
-**Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; unavailable, it is an [unavailable card](#unavailable-actions) reading the same label. The label names the inputs.
+**Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no price, never "free", and its name is that label; unavailable, it is an [unavailable line](#unavailable-actions) reading the same label. The label names the inputs.
 
 **Hostile refusal.** The Book cannot tell hostility from refusal codes (`invalid_state` also
 means a full load or an open encounter), so the NPC EntityView carries `hostile: true` while
@@ -510,7 +521,7 @@ without one the sentence [words](../../mobile/app/book/words.ts) owns ("<Name> w
 nothing to do with you."). No Talk, Trade or Ask about card is drawn; services and lessons
 stay as offered; the foot is Leave. The authored line names the mood, never the cause
 ("Nell turns her back on you.", not what the player did); hostility ending redraws the actions
-without a line. A buy page card's reason is always a word from `words.ts` `reason()` ("not now",
+without a line. A shop line's reason is always a word from `words.ts` `reason()` ("not now",
 "too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
 stays "sold out", and one refused `insufficient_resource` reads "can't afford" (`buyReason`).
 A shop reason from the cartridge is a lowercase fragment with no period.

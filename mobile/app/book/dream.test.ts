@@ -139,7 +139,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   const ui = render(a.game);
   ui.draw();
   ui.tap('Maud');
-  ui.tap('Rent room — 3p');
+  ui.tap('Rent room, 3p. 3 pennies.');
   ui.tap('Leave');
   ui.walk('up');
   ui.tap('bed, open');
@@ -214,7 +214,7 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   const ui = render(a.game);
   ui.draw();
   ui.tap('Maud');
-  ui.tap('Rent room — 3p');
+  ui.tap('Rent room, 3p. 3 pennies.');
   ui.tap('Leave');
   ui.walk('up');
   ui.tap('bed, open');

@@ -222,8 +222,8 @@ thickness token, since no platform's `Text` sets one); linked, or plain prose wh
 projected.
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
-chips and scene pick cards. The mock's shop price rows are not adopted either: a stock row and a sale
-row are each an `ActionCard` on `ShelfPage` (owner picks mvlrlvappy4w, mvlynyikyw57, 2026-10-23).
+chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an
+`ActionCard` in its line form (`link`), a prose line in `Cards lines` ([shop lines](system/book-ui.md#npc-dialogue-and-action-details), owner 2026-10-30).
 
 ## Page turn
 

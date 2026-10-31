@@ -7,7 +7,6 @@ import { LogLines, Note } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import { things } from './item-pages.ts';
-import type { Row } from './pick.ts';
 import { balance, buyReason, buysTitle, sellReason, sellsTitle } from './words.ts';
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Say = (key: string) => string;
@@ -18,49 +17,54 @@ type Stock = NonNullable<GameView['entities'][number]['shop']>[number];
 export const purse = (v: GameView) =>
   v.resources?.find((r) => r.resource.key === 'pennies')?.current;
 
-// A row's bare name, "Cob of bread", from the stocked thing's words, else its short name.
-const bare = (v: GameView, o: Stock, text: Say) =>
-  cap(text(things(v).find((e) => e.id === o.item_id)?.words?.bare ?? o.name));
+// One shop line: shown "A cob of bread, 4p.", its noun the link, named "A cob of bread, 4p. Buy for 4 pennies.".
+type Line = { label: string; link: string; name: string } & ({ b: Button } | { reason: string });
+const line = (v: GameView, o: Stock, text: Say, price: number, verb: (n: number) => string) => {
+  const w = things(v).find((e) => e.id === o.item_id)?.words;
+  const noun = text(w?.bare ?? o.name);
+  const link = w?.article ? noun : cap(noun);
+  const label = LABEL.shopLine(w?.article ? `${cap(w.article)} ${link}` : link, price);
+  return { label, link, name: `${label} ${verb(price)}` };
+};
 
-// One sell-page row per thing the player may sell; stock the player does not hold is no row.
-const sales = (v: GameView, shop: readonly Stock[], sells: Button[], text: Say): Row[] =>
-  shop.flatMap((o): Row[] => {
-    const label = `${bare(v, o, text)} — ${o.sell.price}p`;
+// One sell-page line per thing the player may sell; stock the player does not hold is no line.
+const sales = (v: GameView, shop: readonly Stock[], sells: Button[], text: Say): Line[] =>
+  shop.flatMap((o): Line[] => {
+    const l = line(v, o, text, o.sell.price, LABEL.sellFor);
     const b = sells.find((s) => s.target_ids[1] === o.item_id);
-    if (b) return [{ b, label, name: label }];
-    return o.sell.message ? [{ label, reason: sellReason(o.sell, text) }] : [];
+    if (b) return [{ ...l, b }];
+    return o.sell.message ? [{ ...l, reason: sellReason(o.sell, text) }] : [];
   });
 
-// One buy-page row per stock row; a refused one keeps its words.ts reason.
-const buys = (v: GameView, shop: readonly Stock[], offered: Button[], text: Say): Row[] =>
+// One buy-page line per stock row; a refused one keeps its words.ts reason.
+const buys = (v: GameView, shop: readonly Stock[], offered: Button[], text: Say): Line[] =>
   shop.map((o) => {
-    const label = `${bare(v, o, text)} — ${o.buy.price}p`;
+    const l = line(v, o, text, o.buy.price, LABEL.buyFor);
     const b = offered.find((b) => b.action_key === 'buy' && b.target_ids[1] === o.item_id);
-    return b ? { b, label, name: label } : { label, reason: buyReason(o.buy.reason ?? '') };
+    return b ? { ...l, b } : { ...l, reason: buyReason(o.buy.reason ?? '') };
   });
 
-// A pressed row that goes (the last one sold, or sold out) moves focus to the page title.
-function ShopCards(p: { view: GameView; rows: Row[]; press: (b: Button) => void }) {
+// A pressed line that goes (the last one sold, or sold out) moves focus to the page title.
+function ShopLines(p: { view: GameView; rows: Line[]; press: (b: Button) => void }) {
   const { sent } = useFocus(
     undefined,
     p.view,
     p.rows.filter((r) => 'b' in r),
   );
   return (
-    <Cards>
+    <Cards lines>
       {p.rows.map((r) =>
         'b' in r ? (
           <ActionCard
             key={r.label}
-            b={r.b}
-            label={r.label}
+            {...r}
             press={(b) => {
               sent.current = r.label;
               p.press(b);
             }}
           />
         ) : (
-          <ActionCard key={r.label} label={r.label} reason={r.reason} />
+          <ActionCard key={r.label} {...r} />
         ),
       )}
     </Cards>
@@ -72,14 +76,15 @@ function ShopCards(p: { view: GameView; rows: Row[]; press: (b: Button) => void 
  * mvlynyikyw57, 2026-10-23).
  * - Use: the buy page the NPC page's Trade card opens, and the sell page its Sell card opens;
  *   Leave returns one page.
- * - Rules: the buy page, titled `<Name> can sell you…`, draws one buy card per stock row
- *   (`Cob of bread — 4p`; refused, the unavailable card under the same label, its press showing
- *   `You can't afford it.`, book-ui.md Unavailable actions), the purse Note, this visit's history, then the Sell card, drawn only with a row.
- *   The sell page, titled `<Name> will buy…`, draws one card per thing the player may sell with
- *   its price, then the purse and history. A buy or sale keeps its page, no page turn (owner,
+ * - Rules: the buy page, titled `<Name> can sell you…`, draws one shop line per stock row
+ *   (ActionCard's line form, book-ui.md Shop lines: `A cob of bread, 4p.`, the noun the
+ *   link, named `A cob of bread, 4p. Buy for 4 pennies.`; refused, the same line, its press graying it with
+ *   `You can't afford it.`), the purse Note, this visit's history, then the Sell card, drawn only
+ *   with a line. The sell page, titled `<Name> will buy…`, draws one line per thing the player may
+ *   sell (`… Sell for N pennies.`), then the purse and history. A buy or sale keeps its page, no page turn (owner,
  *   2026-10-23): its line joins the person's visit history (shared with the NPC page), the purse
  *   and the list redraw (sold out takes the refused form; a thing sold leaves the sell list), and
- *   a row that goes moves focus to the page title. No status line (a detail page).
+ *   a line that goes moves focus to the page title. No status line (a detail page).
  * - States: buyable; refused; sell page; nothing to sell.
  * - Story: NpcPage.stories.tsx
  */
@@ -112,7 +117,7 @@ export function ShelfPage(p: {
       title={p.sale ? buysTitle(name) : sellsTitle(name)}
       foot={<Control label={LABEL.leave} onPress={p.back} />}
     >
-      <ShopCards view={view} rows={rows} press={press} />
+      <ShopLines view={view} rows={rows} press={press} />
       {money !== undefined && <Note>{balance(money)}</Note>}
       <LogLines lines={p.screen.detail(p.id)} />
       {!p.sale && sell.length > 0 && (

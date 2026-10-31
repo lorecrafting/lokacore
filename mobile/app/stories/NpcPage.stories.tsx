@@ -1,6 +1,6 @@
 // C row Pages, NPC (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { ShelfPage } from '../book/Shelf.tsx';
 import { pageStory } from './screen.tsx';
@@ -103,12 +103,26 @@ export const LookNothing: StoryObj = {
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
-// Breaks: the buy page loses its Sell card while the player holds something the shop buys.
+type Canvas = Parameters<NonNullable<StoryObj['play']>>[0]['canvas'];
+// Breaks: a shop row drawn as a card, or its noun not in the room link style (book-ui.md, NPC shop
+// and services).
+const shopLine = async (canvas: Canvas, name: string, noun: string) => {
+  const line = await canvas.findByRole('button', { name });
+  await expect(getComputedStyle(line).borderTopWidth).toBe('0px');
+  await expect(getComputedStyle(within(line).getByText(noun)).textDecorationLine).toBe('underline');
+  return line;
+};
+// Breaks: the buy page loses its Sell card while the player holds something the shop buys, or a
+// sold-out line's press does not gray it with its sentence.
 export const Shelf: StoryObj = {
   ...pageStory(NpcShelfView),
   name: 'Shop, buy page',
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: LABEL.sell });
+    await userEvent.click(
+      await shopLine(canvas, 'A cob of bread, 4p. Buy for 4 pennies.', 'cob of bread'),
+    );
+    await canvas.findByText(/It's sold out\./, { selector: '[role=button] *' });
   },
 };
 // The story's page turns are spies, so the sell page is its own stack.
@@ -118,10 +132,17 @@ export const Sale: StoryObj = {
   ...pageStory({ ...NpcShelfView, stack: [...NpcShelfView.stack, { kind: 'sale', id: keeper }] }),
   name: 'Shop, sell page',
   play: async ({ canvas }) => {
-    await canvas.findByRole('button', { name: 'Cob of bread — 1p' });
+    await shopLine(canvas, 'A cob of bread, 1p. Sell for 1 penny.', 'cob of bread');
   },
 };
-export const Services: StoryObj = { ...pageStory(NpcServicesView), name: 'Services' };
+// Breaks: a service drawn as a card, or its name losing the action and price.
+export const Services: StoryObj = {
+  ...pageStory(NpcServicesView),
+  name: 'Services',
+  play: async ({ canvas }) => {
+    await shopLine(canvas, 'Order a knife, 3p. 3 pennies.', 'Order a knife');
+  },
+};
 // The smith with a knife on order, shaped from the Services view (the route needs two lumps of ore):
 // the knife still at the forge, so cancel is offered and claim refused not ready; the commission
 // hides and they sit under Your order.
@@ -149,6 +170,7 @@ export const OpenOrder: StoryObj = {
   play: async ({ canvas }) => {
     await canvas.findByText(LABEL.yourOrder);
     await expect(canvas.queryByText(/^Order a knife/)).toBeNull();
+    await shopLine(canvas, 'Cancel the order, 1p. 1 penny.', 'Cancel the order');
   },
 };
 export const NothingToSay: StoryObj = { ...pageStory(NpcSilentView), name: 'Nothing to do' };

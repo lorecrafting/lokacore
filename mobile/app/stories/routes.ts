@@ -78,7 +78,7 @@ export const routes: Record<string, Step[]> = {
   'room-at-night': [night, 'Crossroads Inn, look'],
   'npc-choice': [go('south'), ...reeve],
   'npc-shop': [...nell],
-  'npc-shelf': [...nell, LABEL.trade, 'Cob of bread — 4p'],
+  'npc-shelf': [...nell, LABEL.trade, 'A cob of bread, 4p. Buy for 4 pennies.'],
   'npc-silent': [go('down', 'west'), 'fence, open'],
   'npc-services': [go('down', 'north', 'north'), 'smith, open'],
   'npc-closed': [go('north', 'north', 'east'), 'Wat, open'],
