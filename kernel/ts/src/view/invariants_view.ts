@@ -201,12 +201,13 @@ function advertised(
   );
 }
 
-// The view's entry for an entity id: in the room, held (or inside either, c1-locks), or worn.
+// An entity id's view entry: in the room, held (or inside either, c1-locks), NPC-worn, or equipped.
 const entityView = (view: GameView, id: string): EntityView | ContentView | undefined =>
   [
     ...view.entities,
     ...view.inventory,
     ...[...view.entities, ...view.inventory].flatMap((e) => e.contents ?? []),
+    ...view.entities.flatMap((e) => e.worn ?? []),
     ...(view.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].find((e) => e.id === id);
 

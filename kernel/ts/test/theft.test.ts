@@ -17,6 +17,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { cartridgeOf, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-theft-sampler-'));
@@ -250,6 +251,18 @@ test('9. without theft the merchant shows its slotted badge as worn, nothing els
     [['take', false, 'not_present']],
   );
   assert.deepEqual(validate('GameView', v), []);
+  // The admission invariant reads worn: a view offering the worn take as available disagrees with
+  // its refusal. Breaks: entityView (invariants_view.ts) not looking in `worn`.
+  const payload = { actor_id: w.character, ...take(w, 'badge') };
+  const command = { world_context_id: w.context, payload };
+  const observation = { view: v, command, decision: send(w, payload).decision };
+  assert.ok(check('gameview_agrees_with_admission', observation));
+  const offer = (e: typeof merchant) => ({
+    ...e,
+    worn: e.worn?.map((c) => ({ ...c, actions: [{ ...c.actions[0]!, available: true }] })),
+  });
+  const drift = { ...v, entities: v.entities.map((e) => (e === merchant ? offer(e) : e)) };
+  assert.equal(check('gameview_agrees_with_admission', { ...observation, view: drift }), false);
   // An empty worn list is absent, never []: the schema refuses it (minItems 1).
   const bare = v.entities.map((e) => (e === merchant ? { ...e, worn: [] } : e));
   assert.notDeepEqual(validate('GameView', { ...v, entities: bare }), []);
