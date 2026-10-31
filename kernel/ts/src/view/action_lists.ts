@@ -68,10 +68,10 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const body = bodyOf(world, actor);
   const take = takeAdmission(world, actor, body, steps);
   const here = (a: Offered, d = detailAt(world, a)) =>
-    d === undefined
-      ? [undefined, 'spell'].includes(a.scripted?.target.kind)
-      : world.details[d].room === world.state.containers[body!] &&
-        light.visible(world, actor, d, steps);
+    [undefined, 'spell'].includes(a.scripted?.target.kind) ||
+    (d !== undefined &&
+      world.details[d].room === world.state.containers[body!] &&
+      light.visible(world, actor, d, steps));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !hidden(world, actor, a))

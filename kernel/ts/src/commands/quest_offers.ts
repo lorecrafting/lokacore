@@ -51,7 +51,7 @@ export function questOffers(world: World, actor: CharacterId): [string, Offered]
       target: { kind: 'none' },
       ...on,
       input: [],
-      priority: 0,
+      priority: 0, // mutate-skip: moved unchanged, every offer ranks 0
       command,
       quest,
     };

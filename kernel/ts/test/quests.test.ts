@@ -1,4 +1,4 @@
-// size: allow 520, quest@1's whole lifecycle and its offer's targets over one artifact loader
+// size: allow 545, quest@1's whole lifecycle and its offer's targets over one artifact loader
 // quest@1 (Early R7/R8 Q; 06 §1-§5, §43; 04 §5.2): accept_quest through the offer, the two
 // evidence policies, delivery, resolution, quest_state, the journal and the loader's quest
 // checks. Worlds are the errand known answer (protocol/fixtures/cartridge_errand_hash.json: Bram
@@ -514,4 +514,28 @@ test('an accept agrees with the view only when an offer is on the page', () => {
   assert.equal(decision.kind, 'accepted');
   assert.ok(agrees(view));
   assert.equal(agrees({ ...view, entities: [] }), false);
+});
+
+// Breaks: a target missing a field, carrying another branch's, or an unknown kind passing the contract.
+test('an offer target is one of two closed shapes', () => {
+  const room = ref('room', 'shed');
+  const npc = ref('npc', 'bram');
+  let lantern: any;
+  load((c) => (lantern = quest(c)));
+  const errors = (target: unknown) =>
+    validate('QuestDefinition', { ...lantern, offer: { ...lantern.offer, target } });
+  assert.deepEqual(errors({ kind: 'detail', room, detail: 'post' }), []);
+  assert.deepEqual(errors({ kind: 'npc', npc }), []);
+  for (const bad of [
+    { kind: 'detail', room },
+    { kind: 'detail', detail: 'post' },
+    { room, detail: 'post' },
+    { kind: 'npc' },
+    { npc },
+    { kind: 'npc', room, detail: 'post' },
+    { kind: 'detail', npc },
+    { kind: 'npc', npc, room },
+    { kind: 'detail', room, detail: 'post', npc },
+  ])
+    assert.ok(errors(bad).length, JSON.stringify(bad));
 });
