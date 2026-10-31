@@ -1,9 +1,24 @@
 # Delivery workflow: PM, developer, reviewer
 
-Every milestone slice (one PR) runs through the PM, developer and reviewer roles; UI-changing
-slices also use the designer. Claude Code runs them as the
-main session plus the subagents in [`.claude/agents/`](../.claude/agents/developer.md).
 [AGENTS.md](../AGENTS.md) rules apply to every role.
+
+## Lean default
+
+The default since the [owner's lean decision](decisions/owner-decision-lean-workflow-2026-10-31.md):
+
+- **One session works directly:** it plans, builds, self-reviews and merges, one PR per slice. It spawns a
+  subagent for a fresh reviewer or an independent read, not for a PM, designer, developer chain. The roles
+  below apply when a slice is too large for one session or the owner asks for them.
+- **Engine change** (`kernel/`, `lib/`, `protocol/`, `schemas/`, `mobile/authority/`): Opus designs it; one fresh
+  independent reviewer, with a second opinion where [Review count](#review-count) requires it.
+- **Everything else** (cartridge content, walks, Book style, tools, docs): no separate reviewer. Compiler, content
+  lint, the affected walkthrough and hosted CI are the gate; the session's self-review stays.
+- **Models:** Sonnet for content and mechanical edits; Opus for engine design and review.
+- **Content:** no mutation runs. Prologue prose is the [owner's alone](system/owner-rules.md#process).
+- **Polish:** notes go to Beads and land as one batch on the owner's go.
+- **[HANDOFF](HANDOFF.md):** rewritten once per session, at its end.
+
+Claude Code runs the roles as the main session plus the subagents in [`.claude/agents/`](../.claude/agents/developer.md).
 
 | Role | Who | Model | Owns |
 |---|---|---|---|
@@ -23,7 +38,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); a purely mechanical slice (owner 2026-10-21, see the implementation row) | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
 | Brief drafting | Opus for a row that follows an existing pattern, an S row or content (owner, 2026-10-14; never Sonnet since 2026-10-23) | Opus drafts every other brief too (a new module, a Realm-sensitive row, a new interaction pattern); Fable drafts a save, protocol or core engine contract brief while weekly usage is under about 80%, else Opus; Sonnet never drafts a brief (owner 2026-10-23 accepted the PM recommendation, quoted: "okay lets go with your rec") |
 | Slice implementation, tests, fix rounds | `developer`, Opus for save, protocol, new-content and judgement slices; Sonnet for purely mechanical slices (re-snapshots, transcript re-recording, moving tests onto existing content) ([owner rules](system/owner-rules.md#process), owner 2026-10-21) | — |
-| Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
+| Independent review, fix re-check | fresh `reviewer`, Opus, for an engine change ([lean default](#lean-default)) | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as main writer; decided small spec text may come from the PM, see the roles note below the table). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to the Opus designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
 
 
@@ -32,12 +47,11 @@ unanchored on the author's work, and that is the only wall worth paying for. Any
 doc it is already touching (HANDOFF included) instead of leaving it for its "owner"; the PM writes small spec
 text that is already decided (a ruling, a paragraph) itself and the reviewer checks it; spawn the designer for
 design decisions, not to type decided text ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
-**Review count** ([owner decision](decisions/owner-decision-one-reviewer-default-2026-10-04.md)):
-one fresh independent reviewer is the default for a mechanics PR. Add a separate
+<a id="review-count"></a>**Review count** ([owner decision](decisions/owner-decision-one-reviewer-default-2026-10-04.md)):
+one fresh independent reviewer is the default for an engine change. Add a separate
 second opinion (another fresh reviewer) when the change alters save/reconciliation behavior, protocol or
 portable foundation contracts, `kernel/ts/src/runtime/proposal.ts`, or closes a milestone
-gate; the PM may add one for a concrete risk found in the first review. Small content,
-copy and docs changes receive one short review. A second opinion supplements the
+gate; the PM may add one for a concrete risk found in the first review. A second opinion supplements the
 independent reviewer; it never replaces that reviewer.
 PM ruling 2026-10-28, under owner delegation (paraphrased): housekeeping batches P, T and Docs get one
 review per batch, on its final head; contract batches C1-C3 get a review per slice plus a Fable review of the final head.
@@ -209,9 +223,7 @@ Claude Code specifics:
 
 ## Review stance
 
-Review depth scales with risk: a docs-only or config-only slice, or one that only changes
-content numbers or UI styling ([playtest decision](archive/decisions/owner-decision-playtest-2026-09-25.md)),
-gets a short review (no mutation testing), a contract freeze gets the full one.
+Review depth scales with risk: a contract freeze gets the full review; other engine changes are proportionate.
 For save-affecting work, the developer supplies a compact result from the existing real-SQLite
 reopen, failed-COMMIT, lost-acknowledgement and receipt-replay tests, plus the relevant red
 control. The reviewer reads failures and the changed contract/code, not full passing logs.

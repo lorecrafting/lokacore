@@ -891,9 +891,10 @@ saved bytes and exact mismatch refusal.
 
 The slice samplers (`cartridges/<name>_sampler`) each exercise one slice; most carry replayable
 transcripts (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
-`kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
-Ferryman's Lantern" (its stats and gate: [owner rules](owner-rules.md#product-and-scope)); its
-known answer remains historical proof.
+`kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is a frozen conformance fixture, not a game, and never ships: it hosts
+the frozen traces in `docs/spec/conformance/lantern-traces.json` (R6P, "The Ferryman's Lantern";
+its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its manifest carries no
+description field, so this line is its marker; nothing else may be built on it.
 
 ## Skill and bleed declarations
 

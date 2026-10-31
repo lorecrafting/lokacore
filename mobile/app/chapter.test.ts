@@ -168,6 +168,9 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     edit.close();
     session = run();
     assert.equal(session.game(), undefined);
+    // Breaks: a changed-hash save refused as save_corrupt, which Start over would replace blind.
+    assert.equal(session.failed()?.kind, 'pinned_release_missing');
+    assert.equal((session.failed() as { replace?: boolean }).replace, false);
     assert.equal(session.failed()?.startOver, true);
     assert.equal(pin().content_hash, '0'.repeat(64));
     assert.equal(session.startOver(), undefined);

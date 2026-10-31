@@ -1,11 +1,10 @@
 # PM handoff
 
 The present only: open work, next steps, owner questions, and standing owner rules the repo does not state
-yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a pushed fix) and before a
-session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
+yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #529 (loka-vx2v, quest offer targets, kernel_api 1.129); written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page.
+AS OF main after #533 (loka-mpu9, lean workflow); written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page.
 
 ## Direction (owner 2026-10-30)
 
@@ -26,7 +25,7 @@ AS OF main after #529 (loka-vx2v, quest offer targets, kernel_api 1.129); writte
 ## Next, in order
 
 1. loka-sgqk catch-up cost with permanent ticking needs (kernel_api 1.130): brief, developer, reviewer, second opinion.
-2. loka-mpu9 lean workflow into AGENTS.md and WORKFLOW: the owner sees the diff before merge.
+2. loka-4hik.31 retire the Bram and Lantern fixtures, then loka-4hik.30 and loka-4hik.4: after the weekly reset (2026-11-04), Sonnet.
 3. loka-kgd.194.23 authoring tools (Fable developer running on draft PR, branch `tools/authoring`): keep my place, fast loop, checkpoints, author column, every-kind coverage and starters, still-to-write, scene files last. Independent reviewer after it. Owner asked for a nice UI and is choosing a component kit.
 4. loka-g5hh.2 level-up rush (owner, quoted: "yes we also want that wow style rush too"): design pass, then brief; with loka-ot39 and loka-x6t.59 (P1). No skill-point pool in the prologue; the owner has not confirmed recording this as a decision.
 5. Prologue gaps as the parallel session files them; then the proposed release work below.
@@ -36,7 +35,7 @@ Proposed release work, awaiting the owner's three calls (store fees, iOS first, 
 
 Owner rule 2026-10-31: every word the player reads in the prologue is hand-written by the owner; agents leave structure with empty text (record lands with loka-kgd.194.23).
 
-Merged 2026-10-31: #529 quest offer targets (loka-vx2v).
+Merged 2026-10-31: #529 quest offer targets (loka-vx2v), #533 lean workflow (loka-mpu9; owner approved the diff).
 
 ## Retro 2026-10-30b (awaiting owner approval)
 
