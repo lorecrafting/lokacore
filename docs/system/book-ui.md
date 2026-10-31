@@ -206,7 +206,9 @@ rule never refreshes an already-sent invocation or weakens authority freshness/a
 (Owner, 2026-10-30, Beads `loka-uzt6`.) An action the GameView lists unavailable (Take too heavy,
 a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a refused pick row, teach card or spell word) is the same
 [Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. It is
-exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint.
+exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint; once
+pressed its accessible name is its shown text, the label then the reason sentence (label in name), and the
+hint is dropped, so the reason is read once.
 A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
 the label as one sentence (`reasonSentence`, [reasons.ts](../../mobile/app/book/reasons.ts):
 `It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, an Attack on a
