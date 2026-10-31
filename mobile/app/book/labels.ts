@@ -95,6 +95,8 @@ export const LABEL = {
   patrolProgress: (credit: number, required: number, status: string) =>
     `${credit} of ${required} checkpoints. ${status}.`,
   patrolAt: (leader: string, room: string) => `${leader} is at ${room}.`,
+  // A person's condition on their Look page (book-ui.md, NPC page): the hp band phrase.
+  looksToBe: (name: string, band: string) => `${name} looks to be ${band}.`,
   patrolWalk: (direction: string) => `Walk ${direction} to join him.`,
   patrolRejoin: (leader: string) => `Return to ${leader} and choose Rejoin.`,
   patrolRestart: (leader: string) => `Return to ${leader} and choose Restart now.`,

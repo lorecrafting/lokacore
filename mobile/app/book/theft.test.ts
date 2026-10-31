@@ -186,3 +186,30 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
   // The sentence, then its inline link's own Text; the coin is shop stock, b2 another's.
   assert.deepEqual(texts(nodes(carried)), ['M', 'M carries box.', 'box', 'Close']);
 });
+
+// Breaks: the Look page drops the condition sentence, words a band key as the raw key, draws a
+// sentence for a person with no band, or puts it after the carried sentence (book-ui.md, NPC page).
+// Phrases: toolbox_showcase text.json for ready/hurt/dying; an unauthored key reads its words.
+test("a person's Look page names their condition from the band, none without one", () => {
+  const words: Record<string, string> = {
+    'band.ready': 'ready',
+    'band.hurt': 'hurt',
+    'band.dying': 'dying',
+  };
+  const look = (band?: string) => {
+    const m = { id: 'm', kind: 'npc', name: 'Bess', actions: [], ...(band && { band }) };
+    const box = { id: 'box', kind: 'item', name: 'box', actions: [], container_id: 'm' };
+    const view = { entities: [m, box], inventory: [] };
+    const text = (k: string) => words[k] ?? k;
+    return texts(nodes(InsidePage({ screen: { view, text }, id: 'm', open() {} } as any)));
+  };
+  assert.deepEqual(look('ready').slice(0, 3), [
+    'Bess',
+    'Bess looks to be ready.',
+    'Bess carries box.',
+  ]);
+  assert.equal(look('hurt')[1], 'Bess looks to be hurt.');
+  assert.equal(look('dying')[1], 'Bess looks to be dying.');
+  assert.equal(look('covered_in_blood')[1], 'Bess looks to be covered in blood.');
+  assert.deepEqual(look().slice(0, 2), ['Bess', 'Bess carries box.']);
+});

@@ -64,9 +64,11 @@ export const Carrying: StoryObj = {
     ).toBeTruthy();
   },
 };
-// A person's Look page (book-ui.md, NPC page): description, then what they carry as one sentence
-// of inline links. The Reeve carries the letter here; Nell's bread is her shop stock, not carried.
-// Breaks: the carried sentence lost, its item not a link, or shop stock listed as carried.
+// A person's Look page (book-ui.md, NPC page): description, their condition from the hp band, then
+// what they carry as one sentence of inline links. The Reeve is hurt and carries the letter here;
+// Nell has no band and her bread is her shop stock, not carried.
+// Breaks: the condition or carried sentence lost or out of order, its item not a link, a condition
+// drawn without a band, or shop stock listed as carried.
 const letter = NpcChoiceView.view.entities[3]!;
 const nell = NpcChoiceView.view.entities[0]!;
 const lookView = (id: string, entities: unknown[] = NpcChoiceView.view.entities) => ({
@@ -84,13 +86,19 @@ export const Look: StoryObj = {
       NpcChoiceView.view.entities
         .filter((e) => e !== letter)
         .map((e) =>
-          e === reeve ? { ...e, contents: [{ ...letter, container_id: reeve.id }] } : e,
+          e === reeve
+            ? { ...e, band: 'hurt', contents: [{ ...letter, container_id: reeve.id }] }
+            : e,
         ),
     ),
   ),
   name: 'Look',
   play: async ({ canvas }) => {
-    await canvas.findByText(/^The Reeve carries a/);
+    const carries = await canvas.findByText(/^The Reeve carries a/);
+    await expect(
+      canvas.getByText('The Reeve looks to be hurt.').compareDocumentPosition(carries) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     await expect(canvas.getByRole('button', { name: 'sealed letter, open' })).toBeVisible();
   },
 };
@@ -99,7 +107,7 @@ export const LookNothing: StoryObj = {
   name: 'Look, carrying nothing',
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: LABEL.close });
-    await expect(canvas.queryByText(/carries/)).toBeNull();
+    await expect(canvas.queryByText(/carries|looks to be/)).toBeNull();
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };

@@ -1,6 +1,6 @@
 // The thing and Contents views use the existing book controls (the NPC page: Npc.tsx).
 import { View } from 'react-native';
-import { cap, plain, things, type group, type Page as Route } from './model.ts';
+import { bandPhrase, cap, plain, things, type group, type Page as Route } from './model.ts';
 import { held, opens, within } from './item-pages.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
@@ -144,11 +144,13 @@ export function ThingPage(p: {
  * - Use: the inside route, from the item page's Look inside or an accepted Open, or the NPC page's
  *   Look.
  * - Rules: the container's name, then Inside and one Entity line per item, each opening its item
- *   page. A person's: their name, the description as prose, then what they carry as one sentence,
- *   "<Name> carries a flask and a knife.", each name an inline link to its item page; nothing
- *   carried, no sentence. No actions; Close returns to the item or NPC page and sends nothing.
- * - States: several items; empty (one Note); a person carrying things; a person carrying nothing
- *   (the person's states: NpcPage.stories.tsx Look).
+ *   page. A person's: their name, the description as prose, their condition as one prose sentence
+ *   from the projected hp band, "<Name> looks to be <band phrase>." (no band, no sentence), then
+ *   what they carry as one sentence, "<Name> carries a flask and a knife.", each name an inline
+ *   link to its item page; nothing carried, no sentence. No actions; Close returns to the item or
+ *   NPC page and sends nothing.
+ * - States: several items; empty (one Note); a person with a band, carrying things; a person with
+ *   no band, carrying nothing (the person's states: NpcPage.stories.tsx Look).
  * - Story: ItemPage.stories.tsx
  */
 export function InsidePage(p: {
@@ -174,6 +176,11 @@ export function InsidePage(p: {
       ) : (
         <>
           {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
+          {'band' in thing && thing.band && (
+            <Text style={prose(c, t)}>
+              {LABEL.looksToBe(cap(text(thing.name)), bandPhrase({ band: thing.band }, text))}
+            </Text>
+          )}
           {carried.length > 0 &&
             carries({ group: carried, carrier: cap(text(thing.name)), text, open })}
         </>

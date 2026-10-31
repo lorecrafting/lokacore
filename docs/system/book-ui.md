@@ -421,8 +421,12 @@ shows title, description, then Look and Leave. **Look.** Outside a conversation 
 ends the person's page, after the cards and before Leave, and opens their Look page, an anchored
 detail of the person's page as the [Inside](#item-details-and-takedrop) page is of its container
 (owner, 2026-10-30, loka-aqnc). It draws the person's name as title, their description as prose, then
-what they visibly bear in the fixed order condition, worn, carried (condition and worn wait on
-loka-ysbt and loka-oc5i and draw nothing until then; no placeholder). Carried is one sentence,
+what they visibly bear in the fixed order condition, worn, carried (worn waits on loka-oc5i and
+draws nothing until then; no placeholder). Condition is one prose sentence from the person's
+EntityView `band` (loka-ysbt), worded by the hp band phrase the status line uses: **<Name> looks to
+be hurt.** A person with no band (no hp of their own) draws no sentence. The frame needs `band.<key>`
+text that is a bare state phrase ("hurt", "covered in blood"), as the status and combat lines also
+do; a verb phrase ("is hurt", "has a few bruises") reads wrong in all three. Carried is one sentence,
 **<Name> carries a flask and a knife.**, joined as the [room's who-is-here
 sentence](#room-page-anatomy) is (articles, serial comma and "and", plurals collapsed), each item an
 inline link opening its item page; GameView has no pronoun, so it names the person. With nothing
