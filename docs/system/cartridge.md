@@ -1120,7 +1120,7 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Quest offer target
 
-A quest's optional `offer.target` names the fixture or NPC the offer draws on: `{kind: "detail", room, detail}` or `{kind: "npc", npc}`, with `room` and `npc` short refs (`protocol/quest.schema.json`). A reference that does not resolve is `UNRESOLVED_REFERENCE` at `quests/<key>.offer.target`. An offer without a target loads and lists on World until the compiler refuses it (loka-vx2v content half), since the Room page draws no loose action ([book-ui.md](book-ui.md#room-page-anatomy)). [Admission](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) reads the target; a dialogue choice's `accept` does not.
+A quest's optional `offer.target` names the fixture or NPC the offer draws on: `{kind: "detail", room, detail}` or `{kind: "npc", npc}`, with `room` and `npc` short refs (`protocol/quest.schema.json`). A reference that does not resolve is `UNRESOLVED_REFERENCE` at `quests/<key>.offer.target` (`.detail` beneath it for a missing fixture). An offer without a target loads and lists on World until the compiler refuses it (loka-vx2v content half), since the Room page draws no loose action ([book-ui.md](book-ui.md#room-page-anatomy)). [Admission](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) reads the target; a dialogue choice's `accept` does not.
 
 ## Quest deadlines
 

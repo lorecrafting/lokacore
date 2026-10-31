@@ -68,10 +68,10 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const body = bodyOf(world, actor);
   const take = takeAdmission(world, actor, body, steps);
   const here = (a: Offered, d = detailAt(world, a)) =>
-    [undefined, 'spell'].includes(a.scripted?.target.kind) ||
-    (d !== undefined &&
-      world.details[d].room === world.state.containers[body!] &&
-      light.visible(world, actor, d, steps));
+    d === undefined
+      ? [undefined, 'spell'].includes(a.scripted?.target.kind)
+      : world.details[d].room === world.state.containers[body!] &&
+        light.visible(world, actor, d, steps);
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !hidden(world, actor, a))
@@ -331,6 +331,7 @@ function lightOffered(world: World, actor: CharacterId, a: Offered, item: Entity
 }
 
 function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
+  if (a.quest && a.speaker) return []; // the offer names its own target (loka-vx2v)
   if ((a.command === 'expedition' || a.command === 'cast') && id) return [id as EntityId];
   return id && light.VERBS.includes(a.command)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]

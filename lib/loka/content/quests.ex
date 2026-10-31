@@ -8,7 +8,7 @@ defmodule Loka.Content.Quests do
   with every other (`conditions/1`, `Loka.Content.Resolve`).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
-  import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6]
+  import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
 
   @doc "Each schema-valid quest's offer policy root and current_state objective's, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
@@ -44,15 +44,39 @@ defmodule Loka.Content.Quests do
   end
 
   defp quest({rel, q}, ctx) do
-    duplicate =
-      if q["key"] in ctx.taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
-
     owned(at(rel, []), "quest_activated", ctx.events) ++
-      duplicate ++
+      duplicate(rel, q, ctx) ++
       texts(rel, q, ctx.text) ++
       item(rel, q["objective"], ctx.m, ctx.defs) ++
+      offer_target(rel, get_in(q, ["offer", "target"]), ctx) ++
       deadline(rel, q["deadline"], ctx) ++
       attempts(rel, q, ctx)
+  end
+
+  defp duplicate(rel, q, ctx) do
+    if q["key"] in ctx.taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
+  end
+
+  defp offer_target(_, nil, _), do: []
+
+  defp offer_target(rel, %{"kind" => "npc"} = t, ctx),
+    do: reference(rel, ["offer", "target"], "npc", t, ctx.m, ctx.defs)
+
+  # The room resolves (reference/6), then the detail is one of its details (as a scripted action's target).
+  defp offer_target(rel, t, ctx) do
+    case resolve(t["room"], "room", ctx.m, ctx.defs) do
+      {_, _, room} ->
+        if is_map_key(Map.get(room, "details", %{}), t["detail"]),
+          do: [],
+          else: [
+            diag("UNRESOLVED_REFERENCE", at(rel, ["offer", "target", "detail"]), %{
+              "target" => t["detail"]
+            })
+          ]
+
+      _ ->
+        reference(rel, ["offer", "target"], {"room", "room"}, t, ctx.m, ctx.defs)
+    end
   end
 
   defp attempts(rel, q, ctx),
