@@ -73,7 +73,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
   assert.equal(sourceOf(dir, 'room.b', 'line three'), undefined);
   const log = join(dir, 'opened');
-  process.env.LOKA_EDITOR = `printf %s > ${log}`;
+  writeFileSync(join(dir, 'ed'), `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}\n`, {
+    mode: 0o755,
+  });
+  process.env.LOKA_EDITOR = `${join(dir, 'ed')} --goto`; // split on spaces, no shell
   const port = 20000 + Math.floor(Math.random() * 20000);
   const server = serve(port, dir, join(dir, 'none.json'));
   t.after(() => server.close());
@@ -85,6 +88,13 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   for (let i = 0; i < 50 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
   assert.equal(readFileSync(log, 'utf8'), `${join(dir, 'text.json')}:2`);
   assert.equal((await post('/open', { key: 'room.b', words: 'line three' })).status, 404);
+  // Break: no Origin check, and any page the author visits can run LOKA_EDITOR (status 200)
+  const foreign = await fetch(`http://127.0.0.1:${port}/open`, {
+    method: 'POST',
+    headers: { origin: 'http://evil.example' },
+    body: JSON.stringify({ key: 'room.a' }),
+  });
+  assert.equal(foreign.status, 403);
   // the explainer takes one run: a start over's earlier rows are not sent to it
   const run = (id: string) => `{"data":{},"event":"trace.run","ids":{"run_id":"${id}"}}`;
   const step = (id: string) => `{"data":{},"event":"trace.command","ids":{"run_id":"${id}"}}`;

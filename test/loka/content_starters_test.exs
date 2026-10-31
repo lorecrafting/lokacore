@@ -49,5 +49,32 @@ defmodule Loka.ContentStartersTest do
 
     assert {:error, _} = Starters.write(dir, "cartridge", dir)
     assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 2
+    assert {:error, "no cartridge.json in " <> _} = Starters.write(tmp, "rooms", "r")
+    assert {:ok, _} = Starters.write(dir, "text", "a.b")
   end
+
+  # Breaks: a second service on the same npc replacing its first (list merge as replace); the
+  # layout starter flattening a hand-placed room back to x = its index.
+  test "a starter keeps what the author placed before it", %{tmp_dir: tmp} do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    for k <- ~w(npcs resources services), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
+    {:ok, _} = Starters.write(dir, "services", "other")
+    assert read(dir, "npcs/my_npcs.json")["services"] == ["my_services", "other"]
+    File.write!(Path.join(dir, "layout.json"), ~s([{"room":"start","x":5,"y":2,"z":0}]))
+    {:ok, _} = Starters.write(dir, "rooms", "yard")
+    {:ok, _} = Starters.write(dir, "layout", "x")
+    rows = read(dir, "layout.json")
+
+    assert Enum.find(rows, &(&1["room"] == "start")) == %{
+             "room" => "start",
+             "x" => 5,
+             "y" => 2,
+             "z" => 0
+           }
+
+    assert Enum.find(rows, &(&1["room"] == "yard"))["x"] == 6
+  end
+
+  defp read(dir, rel), do: dir |> Path.join(rel) |> File.read!() |> JSON.decode!()
 end

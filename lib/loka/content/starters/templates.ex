@@ -225,12 +225,15 @@ defmodule Loka.Content.Starters.Templates do
     }
   end
 
-  # Every room at its own x; an existing layout keeps its coordinates.
+  # An existing row keeps its coordinates (a removed room's row goes); a new room gets the next x.
   defp layout(_, c) do
-    rows =
-      for {room, x} <- Enum.with_index(c["room_list"]),
-          do: %{"room" => room, "x" => x, "y" => 0, "z" => 0}
+    kept = Enum.filter(c["layout"], &(&1["room"] in c["room_list"]))
+    next = Enum.max(Enum.map(kept, & &1["x"]), fn -> -1 end) + 1
 
-    %{"layout.json" => rows}
+    rows =
+      for {room, i} <- Enum.with_index(c["room_list"] -- Enum.map(kept, & &1["room"])),
+          do: %{"room" => room, "x" => next + i, "y" => 0, "z" => 0}
+
+    %{"layout.json" => kept ++ rows}
   end
 end

@@ -18,7 +18,8 @@ defmodule Loka.Content.Starters do
   end
 
   def write(dir, kind, name) do
-    with :ok <- valid_name(name),
+    with :ok <- valid_name(name, kind),
+         :ok <- in_cartridge(dir),
          {:ok, {caps, needs, make}} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
          {:ok, context} <- context(dir, needs) do
       files =
@@ -36,11 +37,20 @@ defmodule Loka.Content.Starters do
   @doc "The kinds `write/3` knows, sorted (the guide's coverage table lists each)."
   def kinds, do: ["cartridge" | Map.keys(Templates.kinds())] |> Enum.sort()
 
-  defp valid_name(name) do
-    if name =~ ~r/^[a-z][a-z0-9_]{0,63}$/,
+  # A text key may be dotted (`service.unaffordable`); every other name is a file or map key.
+  defp valid_name(name, kind \\ nil) do
+    pattern = if kind == "text", do: ~r/^[a-z][a-z0-9_.]{0,63}$/, else: ~r/^[a-z][a-z0-9_]{0,63}$/
+
+    if name =~ pattern,
       do: :ok,
       else:
         {:error, "a name is lowercase letters, digits and _, 64 at most (got #{inspect(name)})"}
+  end
+
+  defp in_cartridge(dir) do
+    if File.exists?(Path.join(dir, "cartridge.json")),
+      do: :ok,
+      else: {:error, "no cartridge.json in #{dir}: bin/loka new cartridge <dir> first"}
   end
 
   defp or_unknown(:error, kind),
@@ -51,7 +61,9 @@ defmodule Loka.Content.Starters do
   # The first key of each kind the template references (dirs only: an area bundle's npcs are not
   # scanned), plus every room, bundled ones too, for layout's completeness check.
   defp context(dir, needs) do
-    Enum.reduce_while(needs, {:ok, %{"room_list" => rooms(dir)}}, fn kind, {:ok, acc} ->
+    start = %{"room_list" => rooms(dir), "layout" => layout_rows(dir)}
+
+    Enum.reduce_while(needs, {:ok, start}, fn kind, {:ok, acc} ->
       case first(dir, kind) do
         nil -> {:halt, {:error, "no #{kind} yet: bin/loka new #{kind} <name> first"}}
         key -> {:cont, {:ok, Map.put(acc, kind, key)}}
@@ -67,6 +79,13 @@ defmodule Loka.Content.Starters do
 
     plain = for r <- Path.wildcard(Path.join(dir, "rooms/*.json")), do: Path.basename(r, ".json")
     Enum.sort(bundled ++ plain)
+  end
+
+  defp layout_rows(dir) do
+    case read(Path.join(dir, "layout.json")) do
+      rows when is_list(rows) -> rows
+      _ -> []
+    end
   end
 
   @single ~w(facts resources attributes)
@@ -105,9 +124,14 @@ defmodule Loka.Content.Starters do
     end
   end
 
-  # Maps merge by key; a list or scalar in the starter replaces (layout lists every room afresh).
+  # Maps merge by key; a list of names unions (an npc's services); a list of rows (layout) and a
+  # scalar in the starter replace.
   defp merge(old, new) when is_map(old) and is_map(new),
     do: Map.merge(old, new, fn _, a, b -> merge(a, b) end)
+
+  defp merge(old, new) when is_list(old) and is_list(new) do
+    if Enum.all?(new, &is_binary/1), do: Enum.uniq(old ++ new), else: new
+  end
 
   defp merge(_, new), do: new
 

@@ -45,11 +45,18 @@ export const resetPlace = () => {
 };
 export function restorePlace(game: Opened | undefined) {
   if (!game || place.hash === chapter.sha256) return;
-  const { done, failed } = replay(place.steps, game, (ms) => {
-    g.loka_dev_skew = skew() + ms;
-    let rounds = 0;
-    while (rounds++ < 1000 && game.pulse('drain').kind === 'catching_up');
-  });
+  let outcome: ReturnType<typeof replay>;
+  try {
+    outcome = replay(place.steps, game, (ms) => {
+      g.loka_dev_skew = skew() + ms;
+      let rounds = 0;
+      while (rounds++ < 1000 && game.pulse('drain').kind === 'catching_up');
+    });
+  } catch (e) {
+    // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
+    outcome = { done: 0, failed: `malformed step (${(e as Error).message})` };
+  }
+  const { done, failed } = outcome;
   if (failed) {
     placeNote = `Place: ${failed}; stopped after ${done} of ${place.steps.length} steps. Mend the edit, or Start over to record afresh.`;
     console.warn(placeNote);
@@ -153,7 +160,7 @@ function Checkpoints(tools: Tools) {
         <Button
           title="Save checkpoint"
           onPress={save}
-          disabled={!/^[a-z0-9][a-z0-9_-]*$/.test(name)}
+          disabled={!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(name)} // live.ts NAME
         />
       </View>
       {names.map((n) => (

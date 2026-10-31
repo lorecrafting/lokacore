@@ -49,7 +49,7 @@ why the action was missing or refused.
 
 ## Every kind of content
 
-`mise exec -- bin/loka new <kind> <name> [cartridge dir]` (from the repository root) writes a
+`mise exec -- bin/loka new <kind> <name> [cartridge dir]` (from any directory; the cartridge dir defaults to the current one) writes a
 compiling file of that kind with every line a `~` placeholder, merged into the files it touches,
 plus the capabilities it needs in `cartridge.json`; it prints what it wrote. A kind that refers
 to another takes the first one you have and refuses with the command to run first. The shapes

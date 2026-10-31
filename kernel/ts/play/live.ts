@@ -75,6 +75,7 @@ const files = (dir: string, under = ''): string[] =>
   readdirSync(join(dir, under), { withFileTypes: true })
     .flatMap((f) => (f.isDirectory() ? files(dir, join(under, f.name)) : join(under, f.name)))
     .filter((rel) => !rel.startsWith('checkpoints/'))
+    .sort() // readdir order differs by platform
     .sort((a, b) => Number(b === 'text.json') - Number(a === 'text.json'));
 
 /** `rel:line` of the first line defining `key` (`"key":`), else of the first holding `words` as a
@@ -122,14 +123,19 @@ function explain(artifact: string, rows: string[], on: Asked) {
 }
 
 type Sent = Asked & { key?: string; words?: string; trace?: string[] };
-/** `POST /open {key, words}` opens the line's source in `LOKA_EDITOR` (default `code --goto`) and
- * answers `rel:line`; `POST /why {trace, action?, dialogue?}` answers the explainer's report. */
+/** `POST /open {key, words}` opens the line's source in `LOKA_EDITOR` (default `code --goto`; a
+ * command and its flags split on spaces, no shell) and answers `rel:line`; `POST /why {trace,
+ * action?, dialogue?}` answers the explainer's report. Only the author's own page may post: a
+ * cross-site page's simple POST would carry its Origin and run the editor. */
 async function post(
   request: IncomingMessage,
   response: ServerResponse,
   source: string,
   artifact: string,
 ) {
+  const origin = request.headers.origin;
+  if (origin && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
+    return json(response, 403, `not from the author page: ${origin}`);
   let sent: Sent;
   try {
     sent = JSON.parse(await body(request));
@@ -139,12 +145,10 @@ async function post(
   if (request.url === '/open') {
     const at = sourceOf(source, String(sent.key), sent.words);
     if (!at) return json(response, 404, `no source line for ${sent.key ?? sent.words}`);
-    const editor = process.env.LOKA_EDITOR ?? 'code --goto';
-    spawn(`${editor} ${join(source, at)}`, {
-      shell: true,
-      stdio: 'ignore',
-      detached: true,
-    }).unref();
+    const [editor, ...flags] = (process.env.LOKA_EDITOR ?? 'code --goto').split(' ');
+    spawn(editor, [...flags, join(source, at)], { stdio: 'ignore', detached: true })
+      .on('error', () => {}) // a missing editor is not the page's problem; the line is answered
+      .unref();
     return json(response, 200, at);
   }
   try {
@@ -173,7 +177,12 @@ export function serve(port: number, source: string, artifact: string) {
     send(response);
     clients.add(response);
     request.on('close', () => clients.delete(response));
-  }).listen(port, '127.0.0.1');
+  })
+    .on('error', (e: NodeJS.ErrnoException) => {
+      console.error(`author stream: port ${port} ${e.code}; set LOKA_AUTHOR_PORT to a free port`);
+      process.exit(1);
+    })
+    .listen(port, '127.0.0.1');
   return {
     push(message: Partial<Message>) {
       last = { ...last, ...message };
