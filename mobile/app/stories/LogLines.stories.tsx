@@ -31,7 +31,7 @@ export const RefusedWithTag: Story = {
 // A pressed card the kernel rejects (loka-x6t.17): the same refused line as a barred drag.
 export const RejectedPress: Story = {
   args: {
-    lines: [{ kind: 'refused', reason: 'not here', text: "You can't do that: not here." }],
+    lines: [{ kind: 'refused', reason: 'not here', text: "You can't do that—not here." }],
   },
 };
 

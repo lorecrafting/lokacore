@@ -4,7 +4,14 @@ import { useEffect } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
-import { conversation, initialPages, pagesAfter, restoredItemPages, type Page } from './model.ts';
+import {
+  conversation,
+  initialPages,
+  pagesAfter,
+  restoredItemPages,
+  things,
+  type Page,
+} from './model.ts';
 import { restoredNoticePages } from './notices.tsx';
 import type { presenter } from './presenter.ts';
 
@@ -24,11 +31,33 @@ export type BookState = {
 export const wordTurn = (next: Page[], key: string, was: Screen['view'], now: Screen['view']) =>
   WORDS.includes(key) && !was.choice && now.choice ? [...next, conversation(now)] : next;
 
+// An accepted Open turns from the container's item page to its Inside page (book-ui.md, Item details).
+export const openTurn = (
+  next: Page[],
+  target: string | undefined,
+  was: Screen['view'],
+  now: Screen['view'],
+) => {
+  const top = next.at(-1);
+  const state = (v: Screen['view']) => things(v).find((e) => e.id === target)?.state;
+  return top?.kind === 'thing' &&
+    top.id === target &&
+    state(was) !== 'open' &&
+    state(now) === 'open'
+    ? [...next, { kind: 'inside' as const, id: target }]
+    : next;
+};
+
 export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
-  if (screen.returnWorld && !screen.view.combat) return [];
+  if (screen.returnWorld && !screen.view.combat) {
+    // A Drop from a Contents section keeps that section, as its Back does (loka-8lpm).
+    const at =
+      screen.returnWorld === 'section' ? next.findLastIndex((p) => p.kind === 'contents') : -1;
+    return at >= 0 ? next.slice(0, at + 2) : [];
+  }
   if (!screen.returnDetail) return next;
   const index = next.findIndex((p) => p.kind === 'thing' && p.id === screen.returnDetail);
-  if (index >= 0) return next.slice(0, index + 1);
+  if (index >= 0) return next.slice(0, index + (next[index + 1]?.kind === 'inside' ? 2 : 1)); // its Inside page stays
   const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
   return pagesAfter(corpse, screen.view, screen.view);
 }
@@ -75,6 +104,8 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   if (terminal) next = resultPages(next, after);
   if (terminal && update.kind === 'completion')
     next = wordTurn(next, update.intent.action_key, before.view, after.view);
+  if (terminal && update.kind === 'completion')
+    next = openTurn(next, update.intent.target_ids[0], before.view, after.view);
   current.current = { stack: next, view: after.view };
   visit(pr, next);
   setStack(next);

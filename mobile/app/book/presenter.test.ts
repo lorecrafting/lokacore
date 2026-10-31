@@ -86,7 +86,7 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
       assert.equal(p.screen().returnWorld, false);
       assert.equal(p.screen().view, view);
       assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
-      const refused = { kind: 'refused', reason: 'not here', text: "You can't do that: not here." };
+      const refused = { kind: 'refused', reason: 'not here', text: "You can't do that—not here." };
       // A detail-page refusal is in place and in the room log (book-ui.md Line placement), read once.
       assert.deepEqual(p.screen().log, pending ? [] : [refused]);
       assert.equal(p.screen().pending, pending);
@@ -182,7 +182,7 @@ test('confirmed room change clears old history before adding new authored conseq
   const unsupported = {
     kind: 'refused',
     reason: 'not in this book',
-    text: "You can't do that: not in this book.",
+    text: "You can't do that—not in this book.",
   };
   assert.deepEqual(p.screen().log, [unsupported]);
   p.press(north);
@@ -295,7 +295,7 @@ test('a Leave without a close press keeps the history through the next answer', 
   assert.ok(p.screen().detail('bram').includes('Would you fetch it?'));
 });
 
-// Breaks (R6P rerun N-1): an authority rejection worded "You can't do that: too exhausted." because
+// Breaks (R6P rerun N-1): an authority rejection worded "You can't do that—too exhausted." because
 // it skips the sentence a refused drag uses for the same code.
 test('a move rejected for want of MV says the body is too exhausted', () => {
   const rejected = { kind: 'rejected', error: { code: 'insufficient_resource' } } as DecisionResult;
@@ -306,7 +306,7 @@ test('a move rejected for want of MV says the body is too exhausted', () => {
   ]);
 });
 
-// Breaks (Q13 option A): an authority rejection while sitting reads "You can't do that: not now."
+// Breaks (Q13 option A): an authority rejection while sitting reads "You can't do that—not now."
 // because the answer drops the GameError's cause.
 test('a move rejected while sitting says the player is not standing', () => {
   const rejected = {
@@ -320,7 +320,7 @@ test('a move rejected while sitting says the player is not standing', () => {
   ]);
 });
 
-// Breaks (loka-x6t.38): a remove refused by a curse reads "You can't do that: it will not come off."
+// Breaks (loka-x6t.38): a remove refused by a curse reads "You can't do that—it will not come off."
 // because the sentence table lacks the cursed cause.
 test('a remove refused by a curse says it will not come off', () => {
   const rejected = {

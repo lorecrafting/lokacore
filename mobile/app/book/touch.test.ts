@@ -174,7 +174,7 @@ test('the log has story words, never a kernel code, across both endings', () => 
   assert.deepEqual(a.screen().log.at(-1), {
     kind: 'refused',
     reason: 'locked',
-    text: "You can't do that: locked.",
+    text: "You can't do that—locked.",
   });
   a.tap('Talk to Bram the ferryman', 'Go north', 'Close', 'Go south');
   a.tap('Talk to Bram the ferryman', 'Carry it along the bank');
@@ -221,7 +221,7 @@ test('closed answers and a stale answer give their reason in words, not their co
   a.smoke.press({ label: 'Carry', action_key: 'choose', target_ids: [], input });
   const last = a.screen().log.at(-1) as { kind: string; text: string };
   assert.equal(last.kind, 'refused');
-  assert.match(last.text, /^You can't do that: /);
+  assert.match(last.text, /^You can't do that—/);
   assert.ok(!last.text.includes(spaced('invalid_state')));
 });
 

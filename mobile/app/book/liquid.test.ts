@@ -9,6 +9,7 @@ import {
   water,
 } from '../../authority/local-story/__tests__/liquid-bundle.test.ts';
 import { presenter } from './presenter.ts';
+import { liquidWords } from './pick.ts';
 import { buttonsOf, actionContext, group, pagesAfter, intentOf, things } from './model.ts';
 const pin = liquidBundle();
 function invoke(game: Game, action_key: string, target_ids: string[] = [], input: object = {}) {
@@ -68,7 +69,7 @@ test('Book preserves exact water pairs and invalidates changed quantities in dis
       .screen()
       .buttons.find((b) => b.action_key === 'pour' && b.target_ids[0] === original)!;
     ui.press(shown, original);
-    assert.match(ui.screen().detail(original).join(' '), /Water · 1 quarter-litres/);
+    assert.match(ui.screen().detail(original).join(' '), /You pour\./);
     assert.ok(!ui.screen().detail(spare).join(' ').includes('You pour'));
     assert.deepEqual(pagesAfter(beforePages, before, game.view().view), beforePages);
     const after = game.view().view;
@@ -94,10 +95,10 @@ test('Book restores liquid narration on the exact saved source detail after SQLi
     invoke(game, 'fill', [well, original]);
     assert.equal(game.lastNarration()!.detail_id, well);
     game = openGame(p.db, pin, p.host);
-    assert.match(presenter(game).screen().detail(well).join(' '), /Water · 4 quarter-litres/);
+    assert.match(presenter(game).screen().detail(well).join(' '), /You fill the skin\./);
     invoke(game, 'drink', [original]);
     game = openGame(p.db, pin, p.host);
-    assert.match(presenter(game).screen().detail(original).join(' '), /Water · 1 quarter-litres/);
+    assert.match(presenter(game).screen().detail(original).join(' '), /You drink\./);
     assert.equal(game.view().view.inventory.find((e) => e.id === original)!.liquid!.quantity, 3);
   } finally {
     p.sql.close();
@@ -190,9 +191,8 @@ test('loaded liquid aliases reach exact Book presses and matching target/input/p
         assert.equal(ui.press(button, owner), '');
         assert.equal(game.pending(), true);
         p.fault.reads = false;
-        const line = ui.press(button, owner),
-          quantity = type === 'pour' ? 2 : 1;
-        assert.ok(line.includes(`Water · ${quantity} quarter-litres`));
+        const line = ui.press(button, owner);
+        assert.match(line, /^You (fill the skin|drink|pour)\.$/);
         assert.equal(ui.screen().detail(owner).length, 1);
         const receipt = p.sql
           .prepare('SELECT command,response FROM receipt ORDER BY revision DESC LIMIT 1')
@@ -200,7 +200,7 @@ test('loaded liquid aliases reach exact Book presses and matching target/input/p
         const command = JSON.parse(receipt.command as string),
           response = JSON.parse(receipt.response as string);
         assert.equal(command.payload.type, type);
-        assert.equal(response.events[0].payload.quantity, quantity);
+        assert.equal(response.events[0].payload.quantity, type === 'pour' ? 2 : 1);
         assert.deepEqual(
           type === 'fill'
             ? [command.payload.source_id, command.payload.vessel_id]
@@ -245,4 +245,37 @@ test('aliased liquid freshness refuses a stale pair after another committed drin
   } finally {
     p.sql.close();
   }
+});
+
+// Breaks: a band edge flips, so a skin one swallow short reads full, a last swallow reads empty, or a count shows.
+test('a vessel amount reads in words; exact empty and exact full are unambiguous', () => {
+  const say = (quantity: number, capacity: number) =>
+    liquidWords({ label: 'Water', quantity, capacity }, (k) => k);
+  assert.deepEqual(
+    [
+      say(0, 4),
+      say(1, 4),
+      say(2, 4),
+      say(3, 4),
+      say(4, 4),
+      say(0, 1),
+      say(1, 1),
+      say(1, 2),
+      say(1, 3),
+      say(2, 3),
+    ],
+    [
+      'Empty.',
+      'Nearly empty, a little water left.',
+      'Half full of water.',
+      'Nearly full of water.',
+      'Full of water.',
+      'Empty.',
+      'Full of water.',
+      'Half full of water.',
+      // book-ui.md Line placement: "a third or less" and "two thirds or more", edges included
+      'Nearly empty, a little water left.',
+      'Nearly full of water.',
+    ],
+  );
 });

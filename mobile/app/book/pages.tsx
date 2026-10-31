@@ -230,3 +230,12 @@ export function SectionTitle({ children }: { children: ReactNode }) {
     </Text>
   );
 }
+
+// A Contents section's return: to Contents when opened from it, else to World (book-ui.md, Contents).
+export type Home = { world: () => void; contents?: () => void };
+export const home = (p: Home) =>
+  p.contents ? (
+    <Control label={LABEL.backToContents} onPress={p.contents} />
+  ) : (
+    <Control label={LABEL.backToWorld} onPress={p.world} />
+  );

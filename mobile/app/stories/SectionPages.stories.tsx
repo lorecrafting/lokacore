@@ -84,7 +84,15 @@ export const CharacterAimedSpell: StoryObj = {
   },
 };
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
-export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };
+// Opened from Contents: no status line, and the foot goes Back to Contents (loka-8lpm).
+export const Settings: StoryObj = {
+  ...pageStory(SettingsView),
+  name: 'Settings',
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByLabelText('Back to Contents')).toBeVisible();
+    await expect(canvas.queryByLabelText(/opens Contents$/)).toBeNull();
+  },
+};
 // Toolbox row 46: the codex sampler's lore (kernel/ts/test/codex.test.ts) on the Journal page, its
 // words given here because Chapter 1 authors no deduction. Away from the study the card is refused.
 const lore = {

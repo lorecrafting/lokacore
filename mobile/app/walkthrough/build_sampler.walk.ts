@@ -30,6 +30,8 @@ walk('1-raze', 'Build: buy the plot, raise a hut, drop a timber in it, raze it',
   await tap(new RegExp(`^${LABEL.inventory}`));
   await tap(/timber/);
   await tap(/^Drop/);
+  await tap(LABEL.backToContents); // a Drop returns to Inventory (loka-8lpm)
+  await tap(LABEL.backToWorld);
   await settle();
   await moves(screen, 'south');
   await tap(/^The carpenter, open$/i);
