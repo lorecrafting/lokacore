@@ -134,8 +134,8 @@ function placeAgrees(
 }
 
 // The codes the view can show on an entry: an exit's passage, position (position@1) and fare; a
-// scripted action's policy and admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
-// action with a policy on an engine command joins when a cartridge authors one.
+// scripted action's policy and admission; Attack's cannot_be_hurt (loka-xyyd). ponytail: an engine verb's policy is
+// always true, so it shows none; a cartridge action with a policy on an engine command joins when a cartridge authors one.
 const SHOWN: Readonly<Record<string, readonly string[]>> = {
   move: [
     'unsupported_capability',
@@ -148,6 +148,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
   put: ['not_present', 'not_owned', 'invalid_state', 'exit_closed', 'exit_locked'],
   take: ['not_present', 'too_heavy', 'over_load'], // reach and voluntary carrying admission
+  attack: ['invalid_target'], // an NPC that cannot be hurt (loka-xyyd)
 };
 
 const DOOR_VERBS = [...Object.keys(MOVES), 'knock'];

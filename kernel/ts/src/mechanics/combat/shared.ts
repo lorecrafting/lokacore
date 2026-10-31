@@ -38,6 +38,8 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
     ally(world, actor, target)
   )
     return 'invalid_target' as const;
+  // No hp of its own: nothing to lose, so nothing to fight (loka-xyyd); the cause is generic (loka-w9id).
+  if (!npc.hp) return { code: 'invalid_target', cause: 'cannot_be_hurt' } as const;
   const origin = world.state.created?.[target]?.origin;
   if (
     origin?.kind === 'spawned' &&

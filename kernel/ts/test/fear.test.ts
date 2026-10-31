@@ -17,6 +17,10 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { ctx } from './harness.ts';
+import type { Command } from '../src/contracts.gen.ts';
+import { resolved } from '../src/commands/actions.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
+import { check } from '../src/runtime/invariants.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fear-sampler-'));
 let artifact: Uint8Array;
@@ -219,19 +223,66 @@ test('co_present with no room frightens no one', () => {
   assert.deepEqual(r && r.kind === 'accepted' ? r.delta.ops : r, []);
 });
 
-// loka-zvwh. Breaks: the combat view reads an hp-less foe's band from the regen hp pool (NaN level,
-// a TypeError in bandOf), or the guard also drops a foe's band that has hp of its own.
-test('an hp-less foe under the regen hp pool has no combat band; a goblin with hp has one', () => {
+// loka-xyyd (was zvwh's band test). Breaks: Attack admits an NPC with no hp of its own (the round's
+// hp level is NaN), the view offers that Attack as available or drops the cause, execution refuses
+// it with a different reason, or the hp check also refuses a goblin that has hp.
+test('an hp-less NPC is offered Attack unavailable, cannot_be_hurt, and refused with it; a goblin is attackable', () => {
   const c = structuredClone(content) as any;
   c.npcs['fear_sampler@0.0.1:npc/guard'].attack = { chance: 100, damage_min: 1, damage_max: 1 };
   const { w, a } = den(c);
-  const combat = (target: string) => {
-    const view = gameView(play(w, { type: 'attack', target_id: target }));
-    assert.deepEqual(validate('GameView', view), []);
-    return view.combat!;
-  };
-  assert.equal('band' in combat(npc(w, 'guard')), false);
-  assert.equal(combat(a).band, 'ready'); // 6 of 6 hp: world.bands' top row
+  const view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  const offer = (target: string) =>
+    view.entities.find((e) => e.id === target)!.actions.find((x) => x.action_key === 'attack')!;
+  const guard = offer(npc(w, 'guard'));
+  const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
+  assert.deepEqual([guard.available, 'reason' in guard && guard.reason], [false, reason]);
+  assert.equal(offer(a).available, true);
+  // The view's own offer, invoked as the Book does: identify, resolve, step (PM.md step 2).
+  const found = identify('scope', w.character, {
+    invocation_id: id(),
+    actor_id: w.character,
+    action_key: guard.action_key,
+    target_ids: [npc(w, 'guard')], // an entity's own action targets that entity
+    input: {},
+  });
+  assert.ok(found.kind === 'identified', JSON.stringify(found));
+  const command = resolve(w, found) as Command;
+  assert.equal(command.payload.type, 'attack');
+  const refused = step(w, command, n, guard.action_key);
+  assert.deepEqual(refused.decision, { kind: 'rejected', error: reason });
+  assert.equal(refused.world, w);
+  const resolves = Object.fromEntries(
+    Object.values(resolved(w, w.character)).map((x) => [x.key, x.command]),
+  );
+  const observation = { view, command, decision: refused.decision, resolves };
+  assert.ok(check('gameview_agrees_with_admission', observation));
+  // The control: a view that offered this Attack as available disagrees with the refusal.
+  const lied = structuredClone(view) as any;
+  const attack = (e: any) => e.actions.find((x: any) => x.action_key === 'attack');
+  attack(lied.entities.find((e: any) => e.id === npc(w, 'guard'))).available = true;
+  assert.equal(check('gameview_agrees_with_admission', { ...observation, view: lied }), false);
+  assert.equal(gameView(play(w, { type: 'attack', target_id: a })).combat!.band, 'ready');
+});
+
+// loka-xyyd. Breaks: a hostile NPC with no hp of its own engages on entry, opening a fight whose
+// rounds target a body with no hp.
+test('a hostile hp-less NPC never engages; the goblins are calm', () => {
+  const c = structuredClone(content) as any;
+  Object.assign(c.npcs['fear_sampler@0.0.1:npc/guard'], {
+    attack: { chance: 100, damage_min: 1, damage_max: 1 },
+    disposition: { hostile: { op: 'all', items: [] }, engage: 'npc.guard.short' },
+  });
+  assert.deepEqual(den(c).w.state.encounters ?? {}, {});
+  c.npcs['fear_sampler@0.0.1:npc/guard'].hp = c.npcs['fear_sampler@0.0.1:npc/goblin'].hp;
+  const fought = den(c).w;
+  assert.equal(Object.keys(fought.state.encounters ?? {}).length, 1); // the control: with hp it does
+  // loka-zvwh: a save from before 1.126 holds that fight against a foe with no hp; it shows no band.
+  const guard = npc(fought, 'guard');
+  const { hp: _, ...bare } = fought.entities[guard] as any;
+  const old = { ...fought, entities: { ...fought.entities, [guard]: bare } };
+  assert.equal(gameView(fought).combat!.band, 'ready');
+  assert.equal('band' in gameView(old).combat!, false);
 });
 
 // loka-zvwh. Breaks: the body's own hp entry, unreadable without its row under the regen pool,
