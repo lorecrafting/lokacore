@@ -69,17 +69,21 @@ test('world 2: at 07:00 the tide is high: the gate refuses, the room says why, n
   assert.equal(offersOpen(w, 'east'), false);
 });
 
-// Breaks: the map stubs a hidden face, stubs a visited destination, or a stub names the room
-// beyond it. A side walk to the cave that never visits the stair, so its `up` face is a stub.
+// Breaks: the map stubs a hidden face, stubs a visited destination, links an unvisited one, or
+// a stub names the room beyond it. A side walk to the cave that never visits the stair, so its `up` face is a stub.
 test('map: a visited room stubs its unvisited exits by direction only, never a hidden face', () => {
   let x = play(wait(w, 12 * HOUR).world, { type: 'open', direction: 'east' }).world;
   x = wait(go(x, 'east').world, 20 * HOUR).world;
-  const stubs = (v: World, k: string) =>
-    gameView(v)
-      .map!.unexplored.filter((s) => s.from === v.roomIds[ref('room', k)])
+  const from = (v: World, kind: 'links' | 'unexplored', k: string) =>
+    (gameView(v).map![kind] as { from: string; direction: string }[])
+      .filter((s) => s.from === v.roomIds[ref('room', k)])
       .map((s) => s.direction)
       .sort();
-  assert.deepEqual([stubs(x, 'sea_cave'), stubs(x, 'shore_steps')], [[], ['north', 'south']]);
+  const stubs = (v: World, k: string) => from(v, 'unexplored', k);
+  assert.deepEqual(
+    [stubs(x, 'sea_cave'), stubs(x, 'shore_steps'), from(x, 'links', 'shore_steps')],
+    [[], ['north', 'south'], ['east', 'west']],
+  );
   x = perform(x, 'search_cleft').world;
   assert.deepEqual(stubs(x, 'sea_cave'), ['up']);
   const view = gameView(x);
