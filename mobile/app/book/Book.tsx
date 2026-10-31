@@ -28,19 +28,15 @@ import {
   useType,
   type Palette,
 } from './palette.ts';
-import {
-  readingFactor,
-  readingType,
-  type Reading,
-  type ReadingStep,
-  type ReadingStore,
-} from './reading.ts';
+import type { Effects, Reading } from './reading.ts';
+import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
 import { LABEL } from './labels.ts';
+import { HapticPulse } from './HapticPulse.tsx';
 import { PageTurn } from './PageTurn.tsx';
 import {
   firstPages,
@@ -53,12 +49,11 @@ import {
 } from './updates.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
-export type Shell = {
+export type Shell = SettingStores & {
   confirm: (go: () => void) => void;
   learned: Hint;
   recovered?: (healthy: boolean) => void;
   subscribed?: (on: boolean) => void; // whether the Book sees every update (the away recap waits)
-  reading?: ReadingStore & { fontScale: () => number }; // and the system font scale
 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
@@ -149,16 +144,9 @@ export default function Book(p: BookProps) {
       shell={p.shell}
       talkingOn={talkingOn}
       talkOn={talkOn}
-      reading={useReading(p.shell)}
+      {...useSettings(p.shell)}
     />
   );
-}
-
-// The Reading size the player chose on Settings, scaled by the system font scale.
-function useReading(shell: Shell): Reading {
-  const [step, setStep] = useState(() => shell.reading?.get() ?? 'standard');
-  const choose = (s: ReadingStep) => (setStep(s), shell.reading?.set(s));
-  return { step, choose, type: readingType(readingFactor(step, shell.reading?.fontScale() ?? 1)) };
 }
 
 type ViewProps = {
@@ -174,6 +162,7 @@ type ViewProps = {
   talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
   talkOn?: (page?: Page) => void;
   reading?: Reading; // none: the Storybook's Reading global (the TypeContext above)
+  effects?: Effects;
 };
 
 // A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
@@ -218,6 +207,7 @@ export function BookView(p: ViewProps) {
             </PageTurn>
             <Bottom {...ctx} page={page} />
             <Heard said={p.screen.said} />
+            <HapticPulse />
           </View>
           {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>

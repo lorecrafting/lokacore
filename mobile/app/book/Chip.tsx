@@ -5,7 +5,7 @@ import { Text } from './Text.tsx';
 import { LABEL } from './labels.ts';
 import { Note } from './lines.tsx';
 import { usePalette, useType } from './palette.ts';
-import { steps, type Reading } from './reading.ts';
+import { effects, steps, type Effects, type Reading } from './reading.ts';
 import { opacity, radius, size, space } from './tokens.ts';
 
 /**
@@ -98,4 +98,29 @@ export const ReadingSize = (p: Reading) => (
       ))}
     </Row>
   </View>
+);
+
+/**
+ * The Sound, Music, Haptics and Flashes settings: an On and an Off radio Chip under each name.
+ * - Use: Settings, after the Reading size, before Start over.
+ * - Story: Chip.stories.tsx
+ */
+export const EffectSettings = (p: Effects) => (
+  <>
+    {effects.map((e) => (
+      <View key={e} accessibilityRole="radiogroup" accessibilityLabel={LABEL[e]}>
+        <Row title={LABEL[e]}>
+          {[true, false].map((on) => (
+            <Chip
+              key={LABEL[on ? 'on' : 'off']}
+              word={LABEL[on ? 'on' : 'off']}
+              label={LABEL[on ? 'on' : 'off']}
+              chosen={p.on[e] === on}
+              onPress={() => p.choose(e, on)}
+            />
+          ))}
+        </Row>
+      </View>
+    ))}
+  </>
 );

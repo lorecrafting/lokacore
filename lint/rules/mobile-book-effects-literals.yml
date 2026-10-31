@@ -1,0 +1,31 @@
+id: mobile-book-effects-literals
+language: tsx
+severity: error
+message: 'Timing and easing come from tokens.ts (docs/system/book-ui.md, Effects, sound and haptics), and only book/sound and book/haptic touch the audio or vibration APIs: use motion.*, play(name) or haptic(kind).'
+files: [mobile/app/book/**, mobile/app/App*.tsx, mobile/app/SaveError.tsx]
+# The two modules own the device calls; tokens.ts and easing.ts own the values. Stories and tests are
+# not the player's. Two old Easing.linear uses (NightSky, StatusIcon) carry an ast-grep-ignore.
+ignores:
+  - mobile/app/book/tokens.ts
+  - mobile/app/book/easing.ts
+  - mobile/app/book/sound*.ts
+  - mobile/app/book/haptic*.ts
+  - mobile/app/book/*.test.ts
+rule:
+  any:
+    - pattern: navigator.vibrate($$$)
+    - pattern: Vibration.vibrate($$$)
+    - pattern: new Audio($$$)
+    - pattern: new AudioContext($$$)
+    - pattern: $A.play($$$)
+    - pattern: Easing.$E
+    - kind: string_fragment
+      regex: 'cubic-bezier'
+    - kind: pair
+      all:
+        - has: { field: key, regex: '^(duration|delay)$' }
+        - has: { field: value, kind: number }
+    - pattern: setTimeout($F, $N)
+      has: { field: arguments, has: { kind: number } }
+    - pattern: setInterval($F, $N)
+      has: { field: arguments, has: { kind: number } }

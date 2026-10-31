@@ -1,0 +1,18 @@
+id: mobile-book-effects-literals
+valid:
+  - 'const a = { duration: motion.fade.duration };'
+  - 'setTimeout(done, motion.quick.duration);'
+  - 'play(name);'
+  - 'Easing[name];'
+invalid:
+  - 'const a = { duration: 300 };'
+  - 'const a = { delay: 50 };'
+  - 'setTimeout(done, 300);'
+  - 'setInterval(tick, 300);'
+  - 'const e = Easing.linear;'
+  - 'const e = "cubic-bezier(0, 0, 1, 1)";'
+  - 'navigator.vibrate(10);'
+  - 'Vibration.vibrate(10);'
+  - 'new Audio(url);'
+  - 'new AudioContext();'
+  - 'el.play();'

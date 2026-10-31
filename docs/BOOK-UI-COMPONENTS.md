@@ -160,12 +160,14 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Chip` | `book/Chip.tsx` | Chip |
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
+| `EffectSettings` | `book/Chip.tsx` | Chip |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
+| `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |

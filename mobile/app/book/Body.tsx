@@ -15,7 +15,7 @@ import { Page as PageShell, RunningHead } from './pages.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { space } from './tokens.ts';
 import { chapterLabel } from './words.ts';
-import type { Reading } from './reading.ts';
+import type { Effects, Reading } from './reading.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -43,6 +43,7 @@ type BodyProps = {
   back: () => void;
   stack: Page[];
   reading?: Reading;
+  effects?: Effects;
 };
 // The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
@@ -133,7 +134,9 @@ function sectionPage(p: BodyProps, page: Page) {
     );
   if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
   if (page.kind === 'settings')
-    return <SettingsPage startOver={p.startOver} {...home} reading={p.reading} />;
+    return (
+      <SettingsPage startOver={p.startOver} {...home} reading={p.reading} effects={p.effects} />
+    );
   if (page.kind === 'journal') return <JournalPage {...p.screen} {...home} press={p.press} />;
   return (
     <CarryingPage

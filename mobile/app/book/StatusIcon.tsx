@@ -164,6 +164,7 @@ function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
     const at = performance.now();
     const ms = drainMs(last.current.deg, deg, at - last.current.at, reduced);
     last.current = { deg, at };
+    // ast-grep-ignore: mobile-book-effects-literals -- predates the check; a clock hand's constant speed has no token
     shown.value = ms ? withTiming(deg, { duration: ms, easing: Easing.linear }) : deg;
   }, [deg, reduced, shown]);
   const [track, arc] = p.locked ? [c.line, c.dim] : [c.dim, c.fg];

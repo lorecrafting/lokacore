@@ -7,8 +7,8 @@ import { bandPhrase, cap, conditionLine, plain, isPool, toneOf, type Thing } fro
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
-import { ReadingSize } from './Chip.tsx';
-import type { Reading } from './reading.ts';
+import { EffectSettings, ReadingSize } from './Chip.tsx';
+import type { Effects, Reading } from './reading.ts';
 import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from './skills.tsx';
 import { size, space } from './tokens.ts';
 import { ActionCard, ContinueButton } from './actions.tsx';
@@ -180,10 +180,13 @@ export function MapPage(p: { view: GameView; text: Say } & Home) {
  * - Rules: `startOver` asks first: it destroys the save (10 §31; the shell's confirm).
  * - Story: SectionPages.stories.tsx
  */
-export function SettingsPage(p: { startOver: () => void; reading?: Reading } & Home) {
+export function SettingsPage(
+  p: { startOver: () => void; reading?: Reading; effects?: Effects } & Home,
+) {
   return (
     <Page title={LABEL.settings} foot={home(p)}>
       {p.reading && <ReadingSize {...p.reading} />}
+      {p.effects && <EffectSettings {...p.effects} />}
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
   );

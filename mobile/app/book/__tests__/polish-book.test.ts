@@ -19,6 +19,17 @@ registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
     if (specifier === './fade.ts') return fadeStub;
+    // Metro picks the platform file; here each device module records what the Book tells it.
+    if (specifier === './sound')
+      return {
+        url: 'data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m])',
+        shortCircuit: true,
+      };
+    if (specifier === './haptic')
+      return {
+        url: "data:text/javascript,export const hapticsOn=(o)=>globalThis.bookDevice?.push(['haptics',o]);export const onPulse=()=>()=>{}",
+        shortCircuit: true,
+      };
     if (specifier === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
@@ -140,6 +151,7 @@ export function book(
   newId: () => string = randomUUID,
   subscribed?: (on: boolean) => void,
   reading?: Shell['reading'],
+  chips?: Shell['effects'],
 ) {
   const sql = existing?.sql ?? new DatabaseSync(':memory:');
   const clock = existing?.clock ?? { wall: 10000, mono: 0 };
@@ -213,6 +225,7 @@ export function book(
           learned: { seen: () => true, see: () => {} },
           subscribed,
           reading,
+          effects: chips,
         },
       }),
     );

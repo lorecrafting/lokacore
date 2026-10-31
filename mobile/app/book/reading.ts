@@ -27,6 +27,29 @@ export function readingSize(store: Store, key: string) {
   };
 }
 
+// The Sound, Music, Haptics and Flashes settings, kept on the device like the Reading size, each on
+// unless the store says off (book-ui.md, Effects, sound and haptics).
+export const effects = ['sound', 'music', 'haptics', 'flashes'] as const;
+export type Effect = (typeof effects)[number];
+export type EffectStores = Record<Effect, ReturnType<typeof onOff>>;
+export type Effects = { on: Record<Effect, boolean>; choose: (e: Effect, on: boolean) => void };
+export function onOff(store: Store, key: string) {
+  return {
+    get: () => {
+      try {
+        return store.getItemSync(key) !== 'off';
+      } catch {
+        return true;
+      }
+    },
+    set: (on: boolean) => {
+      try {
+        store.setItemSync(key, on ? 'on' : 'off');
+      } catch {} // ponytail: the next launch reads on
+    },
+  };
+}
+
 // The Book's Reading size: the step chosen on Settings and the type it gives.
 export type Reading = { step: ReadingStep; choose: (step: ReadingStep) => void; type: Type };
 export const readingFactor = (step: ReadingStep, fontScale: number) =>
@@ -43,3 +66,5 @@ export const readingType = (f: number): Type =>
   ) as Type;
 // A Tap's bleed, below only: a reading line grown to a touch-sized target (BOOK-UI-COMPONENTS.md).
 export const tapBleed = (lineHeight: number) => Math.max(0, size.touch - lineHeight);
+export const effectStores = (store: Store) =>
+  Object.fromEntries(effects.map((e) => [e, onOff(store, `effects.${e}`)])) as EffectStores;

@@ -87,6 +87,42 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
   'space.hair': 'read only by dev chrome (the picker overlay, the System dashboard)',
   'size.speechBar': 'the Log line row: waits until the log projects a speaker',
   'type.speaker': 'the Log line row: waits until the log projects a speaker',
+  ...Object.fromEntries(
+    [
+      'pickup',
+      'coin',
+      'blow',
+      'level',
+      'skillNew',
+      'questDone',
+      'questFailed',
+      'skillUp',
+      'questGained',
+      'chapter',
+    ].map((k) => [
+      `sound.${k}`,
+      'reached as sound[name] in play(name); its first caller comes with the cue bus',
+    ]),
+  ),
+  ...Object.fromEntries(
+    ['light', 'medium', 'heavy', 'selection', 'warning', 'error'].map((k) => [
+      `haptic.${k}`,
+      'reached as tokens.haptic[kind] in haptic(kind); its first caller comes with the cue bus',
+    ]),
+  ),
+  'mix.spread': 'pitch variation waits for the real samples',
+  ...Object.fromEntries(
+    [
+      'opacity.press',
+      'opacity.wash',
+      'motion.press',
+      'motion.dry',
+      'motion.pop',
+      'motion.flash',
+      'motion.settle',
+      'motion.card',
+    ].map((k) => [k, 'an effect not yet built; its slice reads it']),
+  ),
 };
 test('every token has a consumer outside tokens.ts', async () => {
   const tokens: Record<string, object> = await import('./book/tokens.ts');
@@ -97,7 +133,18 @@ test('every token has a consumer outside tokens.ts', async () => {
   // `t.` counts as a type read only where `t` is the Reading-size type (useType() or a Type parameter).
   const typed = files.filter((f) => /useType\(\)|\bt: Type\b/.test(f)).join('\n');
   const code = files.join('\n');
-  const groups = ['type', 'space', 'size', 'radius', 'opacity', 'motion', 'sound', 'nightSky'];
+  const groups = [
+    'type',
+    'space',
+    'size',
+    'radius',
+    'opacity',
+    'motion',
+    'sound',
+    'mix',
+    'haptic',
+    'nightSky',
+  ];
   const dead = groups.flatMap((g) =>
     Object.keys(tokens[g])
       .map((k) => `${g}.${k}`)

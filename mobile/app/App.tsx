@@ -18,7 +18,7 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import { readingSize } from './book/reading.ts';
+import { effectStores, readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
 import { SaveError } from './SaveError';
@@ -105,6 +105,7 @@ const shell: Shell = {
   },
   learned: hint(Storage, 'hint.learned'),
   reading: { ...readingSize(Storage, 'reading.size'), fontScale: () => PixelRatio.getFontScale() },
+  effects: effectStores(Storage),
 };
 
 type Clock = {

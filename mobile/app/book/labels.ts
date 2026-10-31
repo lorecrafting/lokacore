@@ -51,6 +51,12 @@ export const LABEL = {
   // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).
   inventory: 'Inventory',
   // The Reading size setting (docs/system/book-ui.md#world-and-status-entry, loka-x6t.42).
+  sound: 'Sound',
+  music: 'Music',
+  haptics: 'Haptics',
+  flashes: 'Flashes',
+  on: 'On',
+  off: 'Off',
   readingSize: 'Reading size',
   readingStandard: 'Standard',
   readingLarge: 'Large',
