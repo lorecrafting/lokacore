@@ -42,3 +42,22 @@ Composition record: not applicable; no new mechanic, `speakerOf` is shared insid
 - Traces: lantern-traces `bram_offer.prompt` 22, `proof.accept` 20, `bram.prompt` 4, carry 1, leave 1; adverse-cases `bram_offer.prompt` 40, accept 39, `bram.prompt` 38, leave 15; every one carries `speaker: bram`, movement and item lines none. Source `cartridges/lantern_proof/dialogues/{bram,bram_offer}.json` (npc `bram`, role `bram:npc`). IMPORT.md SHAs `9f9ff623…`, `627b1e88…` match `shasum -a 256`.
 - `/code-review medium` reported in the PR body.
 - CI (`gh run list --commit 858ac3978668454ba246637078fc65be861de85d`): graph-diff, ci, book-e2e success.
+
+## Fix re-check at `c7e92d38934dde8a2ddb7f72ec84452e4ed424d3`
+
+Scope: `858ac3978..c7e92d389` minus the main merges (#513, #515): `cc890cde6`, `9ab37b9ff`, `6a28df720`, `5f74fe52c`, `855b25880`, `b3a3df2f9`, `c7e92d389`.
+
+1. Blocker closed. `world.ts:108` and the showcase are at kernel_api `1.124` (PM renumber in epic `loka-ewtx`: ysbt 1.123, 548k 1.124, oc5i 1.125), and every dialogue cartridge has `at_least` `1.124` (23 with `dialogues/`, 24 `cartridge.json` in all). For `toolbox_showcase_hash`, `cartridge_sampler_hash` and `containers_cartridge_sampler_hash`, the sha256 equals sha256(canonical), and all three differ from main `993a4947b`. The frozen cellar canonical differs from main only by `"at_least":"1.7"` -> `"1.124"`. The new `mobile/authority/local-story/release_pin.test.ts` opens a save on an old release and expects `pinned_release_missing` with `newGame` (Start over).
+   - Repro rerun: the old release is main `993a4947b`'s real showcase canonical. A save opened there is refused at the head with `pinned_release_missing` and `newGame` (2 pass). The pin refusal happens before any receipt replay, so the riddle `save_corrupt` path is no longer reached.
+   - Red control: fixture `at_least` set to `1.122` -> `release_pin.test.ts` 1 fail.
+2. Should-fix closed. `book-ui.md` Line placement (`9ab37b9ff`) now states the PM wording (a bound speaker's bare quotation reads `<Speaker> says[ to you], "..."`; the Book never adds a speaker the binding does not name) and replaces #513's "never parses quotes" sentence. `words.ts:197-199` matches it. `speech.test.ts` covers both the addressed form and the bystander form.
+   - Mutant: always `says to you` -> `speech.test.ts` 1 fail.
+3. Question answered. The PR body lists a 390 px screenshot retaken at `5f74fe52c` showing `The Reeve says to you, "Well, stranger?"`. It is held locally and not attached; the PM decides whether that is enough.
+4. Nit closed. `lib/loka/content/dialogues.ex:252` reserves `["actor", "speaker"]`, and `content_ferry_test.exs` has a `.roles.speaker` DUPLICATE_DEFINITION case.
+   - Mutant: `["actor"]` only -> 16/17 pass, 1 fail.
+
+Test hosts (`c7e92d389`): `calendar.test.ts` and `schedule.test.ts` now read `INSTALLED.kernel_api`. Note: `cartridge_cross_kernel_test.exs:193` hard-codes `"1.124"`, because there is no Elixir source of the kernel version. The next bump (oc5i 1.125) fails this test loudly; it does not pass silently.
+
+CI (`gh run list --commit c7e92d38934dde8a2ddb7f72ec84452e4ed424d3`): graph-diff, ci and book-e2e all succeeded.
+
+Verdict at `c7e92d389`: **APPROVE WITH NOTES** (the screenshot is local only; the Elixir host pin is a literal).
