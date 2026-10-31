@@ -28,7 +28,7 @@ import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 const scratch = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-saves-'));
 const file = join(scratch, 'artifact.json');
-let artifact;
+let artifact: any;
 try {
   execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', file], {
     cwd: fileURLToPath(new URL('../../../', import.meta.url)),
@@ -119,7 +119,7 @@ type Save = ReturnType<typeof begin>;
 
 /** Real catch-up: wall time passes (50 world units a second), then ClockDriver drains to `until`. */
 function drive({ s }: Save, until: number) {
-  const ms = (until - checkpoint(s.p.sql).target) * 20;
+  const ms = (until - Number(checkpoint(s.p.sql).target)) * 20;
   s.p.clock.wall += ms;
   s.p.clock.mono += ms;
   const run = s.story.runId();
@@ -151,10 +151,10 @@ const elapsedReceipts = ({ s }: Save) =>
 const events = (save: Save, type: string) =>
   elapsedReceipts(save).flatMap((r) => r.events.filter((e: any) => e.payload.type === type));
 const pool = ({ s }: Save, key: string) =>
-  gameView(s.story.world()).resources.find((r: any) => r.resource.key === key)!.current;
+  gameView(s.story.world()).resources!.find((r: any) => r.resource.key === key)!.current;
 const nextTicks = ({ s }: Save) =>
   Object.fromEntries(
-    gameView(s.story.world()).conditions.map((c: any) => [c.label, c.next_tick_at]),
+    gameView(s.story.world()).conditions!.map((c: any) => [c.label, c.next_tick_at]),
   );
 const jobRows = ({ s }: Save) => {
   const rows = Object.values(s.story.world().state.jobs ?? {}) as { job: { kind: string } }[];
