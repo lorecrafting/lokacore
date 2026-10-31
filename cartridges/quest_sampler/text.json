@@ -9,7 +9,7 @@
   "quest.find_key.active": "Find the lost key.",
   "quest.find_key.found": "You have the key. Leave word by the hook before the keeper gives up.",
   "quest.find_key.done": "The keeper knows the key is safe with you.",
-  "quest.find_key.failed": "Too late: the keeper changed the lock.",
+  "quest.find_key.failed": "You are too late; the keeper changed the lock.",
   "quest.find_key.abandoned": "You gave up on the key.",
   "quest.find_key.hint_look": "Look at the floor of the hall.",
   "quest.find_key.hint_take": "Take the key from the dust.",

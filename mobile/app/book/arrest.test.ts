@@ -34,7 +34,7 @@ for (const failed of [false, true])
     assert.ok(arm >= 0, JSON.stringify(shown)); // pass-1 UO: one log line per narration record
     assert.equal(
       shown[arm + 1],
-      'The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.',
+      'The sergeant reads out that you are wanted in the square. Pay the fine or sit.',
     );
     assert.ok(!shown.includes('You open the barred cell door.'), JSON.stringify(shown));
     const reopened = book(trial, { sql: b.sql, clock: b.clock } as never).text(); // a cold open
