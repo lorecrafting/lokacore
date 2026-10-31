@@ -1,4 +1,3 @@
-// size: allow 320, every Book word for a kernel code stays in this one file (AGENTS.md: one place)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -94,7 +93,7 @@ export const message = (m: { key: string; bindings?: Record<string, unknown> }, 
     : text(m.key);
 // A refusal's own sentence, not "The way north is …" or "You can't do that—…": keyed by the
 // GameError's cause (RefusalCause), then by its code.
-const SENTENCE: Record<string, string> = {
+export const SENTENCE: Record<string, string> = {
   insufficient_resource: 'You are too exhausted.',
   not_standing: 'You are not standing.',
   cursed: 'It will not come off.',
@@ -142,22 +141,11 @@ export const NOTED: Record<string, string> = {
   cooldown: REASON.cooldown!, // a held tool resting between uses (pass-2 R2)
 };
 // A buy-page row's reason: the shop's stock is gone, or the player's purse is short.
-const BUY: Record<string, string> = {
+export const BUY: Record<string, string> = {
   not_owned: 'sold out',
   insufficient_resource: "can't afford",
 };
 export const buyReason = (code: string) => BUY[code] ?? reason(code);
-// An unavailable card's reason as one sentence (book-ui.md, Unavailable actions): the code's own
-// sentence (SENTENCE, the log's too), a Book word's, a cartridge's line with its stop, else the log's frame.
-const SAID: Record<string, string> = {
-  ...Object.fromEntries(Object.entries(SENTENCE).map(([k, v]) => [reason(k, k), v])),
-  [NOTED.permission_denied!]: "It's not yours.",
-  [BUY.not_owned!]: "It's sold out.",
-  [BUY.insufficient_resource!]: "You can't afford it.",
-};
-const said = (r: string) =>
-  (/^[A-Z]/.test(r) ? r : `You can't do that—${r}`).replace(/[.!?]?$/, (m) => m || '.');
-export const reasonSentence = (r: string) => SAID[r] ?? said(r);
 // A sell-page row's reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
 export const sellReason = (
   s: { reason?: string; message?: { key: string } },

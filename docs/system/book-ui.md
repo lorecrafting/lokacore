@@ -208,9 +208,9 @@ a shop row not afforded, a blocked exit, a refused pick row, teach card or spell
 [Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. It is
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint.
 A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
-the label as one sentence (`reasonSentence`, [words.ts](../../mobile/app/book/words.ts):
-`It's too heavy to carry.`, `You can't afford it.`, otherwise the
-[novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
+the label as one sentence (`reasonSentence`, [reasons.ts](../../mobile/app/book/reasons.ts):
+`It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, with no reason
+`You can't do that.`, otherwise the [novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
 the latest GameView under [live action freshness](#live-action-freshness): a new reason clears the gray,
 and an action that turns available becomes its ordinary card. A walked blocked exit (joystick) shows
 and announces the same sentence. Web: `aria-disabled` is set on the node, never the prop, which
@@ -836,7 +836,7 @@ GameView `levelling` carries `{level, experience, next, unspent}` from [experien
 
 ## Lore details
 
-The Journal page says "Nothing written yet." only when it has no quests, no known topics and no [Chronicle](#chronicle-details) day; after its quests, it shows **Lore** (a section title) when GameView `topics` is non-empty: each known topic's authored label, one per line, in projected order, then for each GameView `deduction` its topics' labels joined by " + " and its card. The card is the deduction's offered action when the current place offers it; when the place lists it unavailable, the [unavailable card](#unavailable-actions) with the action's own reason; otherwise the unavailable card with the reason "Not here". Pressing the card performs the scripted action as any place action; the topic it grants then joins the list and the deduction disappears. Badges are topics and are listed with them. Nothing shows when no topic is known. ([Lore codex](mechanics.md#lore-codex-and-deduction-toolbox-row-46); wording proposed, designer to approve: Beads `loka-x6t.14`.)
+The Journal page says "Nothing written yet." only when it has no quests, no known topics and no [Chronicle](#chronicle-details) day; after its quests, it shows **Lore** (a section title) when GameView `topics` is non-empty: each known topic's authored label, one per line, in projected order, then for each GameView `deduction` its topics' labels joined by " + " and its card. The card is the deduction's offered action when the current place offers it; when the place lists it unavailable, the [unavailable card](#unavailable-actions) with the action's own reason; otherwise the unavailable card with the reason "You can't do that here." Pressing the card performs the scripted action as any place action; the topic it grants then joins the list and the deduction disappears. Badges are topics and are listed with them. Nothing shows when no topic is known. ([Lore codex](mechanics.md#lore-codex-and-deduction-toolbox-row-46); wording proposed, designer to approve: Beads `loka-x6t.14`.)
 
 ## Chronicle details
 

@@ -141,12 +141,14 @@ export const JournalLore: StoryObj = {
 };
 export const JournalLoreAway: StoryObj = {
   ...loreStory(JournalView.view.actions, 'Journal lore, deduction elsewhere'),
-  play: async ({ canvas }) => {
+  play: async ({ canvas, userEvent }) => {
     const card = await canvas.findByRole('button', { name: 'Think it through' });
     await expect(card).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(card);
+    await waitFor(() => expect(card).toHaveTextContent("Think it through You can't do that here."));
   },
 };
-// No quests yet, and the deduction listed here but refused with its own reason (a cost), not "Not here".
+// No quests yet, and the deduction listed here but refused with its own reason (a cost), not "You can't do that here."
 export const JournalLoreRefused: StoryObj = {
   ...loreStory(
     [{ ...deduce, available: false, reason: { code: 'insufficient_resource' } }],
@@ -157,7 +159,7 @@ export const JournalLoreRefused: StoryObj = {
     const card = await canvas.findByRole('button', { name: 'Think it through' });
     await userEvent.click(card);
     await waitFor(() => expect(card).toHaveTextContent(/^Think it through\s+\S/));
-    await expect(card).not.toHaveTextContent(/Not here/);
+    await expect(card).not.toHaveTextContent(/do that here/);
     if (canvas.queryByText('Nothing written yet.')) throw new Error('empty line above Lore');
   },
 };

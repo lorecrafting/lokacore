@@ -68,7 +68,7 @@ export function JournalPage(p: JournalProps) {
 
 /** The Journal's lore (toolbox row 46; wording pending designer, loka-x6t.14): the known topics, then
  * each deduction's topics and its card: refused with the view's reason when listed here but unavailable,
- * "Not here" when this place does not list it. */
+ * "You can't do that here." when this place does not list it. */
 function LoreDetails(p: {
   view: GameView;
   text: (key: string) => string;

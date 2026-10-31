@@ -5,7 +5,7 @@ import { Text } from './Text.tsx';
 import { Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { onKey, unseen } from './lines.tsx';
-import { reasonSentence } from './words.ts';
+import { reasonSentence } from './reasons.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { picks, type Pick } from './pick.ts';
 import { focusTitle, titleContext } from './title.ts';
@@ -18,7 +18,7 @@ import { radius, size, space, type } from './tokens.ts';
  *   Raise cards, a Pick list's option and rows; never an accent text link.
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form
  *   (book-ui.md, Unavailable actions): the same card reading its plain label, never `label: reason`;
- *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, words.ts), read
+ *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, reasons.ts), read
  *   once. It is exposed as disabled yet stays focusable and pressable, its sentence its hint. With
  *   `onPress` it sends nothing: a Pick list's option (with `expanded`) or a card that opens a child
  *   page (the NPC page's Trade). A row may show its own label, accessible name and quiet note in
@@ -74,7 +74,7 @@ const card = (c: ReturnType<typeof usePalette>, grayed = false) => ({
 function Unavailable(p: { label: string; reason?: string }) {
   const c = usePalette();
   const t = useType();
-  const sentence = p.reason ? reasonSentence(p.reason) : '';
+  const sentence = reasonSentence(p.reason);
   const [pressed, setPressed] = useState<string>();
   const shown = `${p.label}\n${sentence}`;
   const grayed = pressed === shown;
