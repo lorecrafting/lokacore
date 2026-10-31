@@ -44,7 +44,10 @@ test('a foe without hp of its own has no band under a non-regen pool', () => {
   const r = rat(w);
   const view = combat({
     ...w,
-    entities: { ...w.entities, [r]: { ...w.entities[r]!, hp: undefined } },
+    entities: {
+      ...w.entities,
+      [r]: { ...w.entities[r]!, hp: undefined } as World['entities'][string],
+    },
   });
   assert.equal('band' in view, false);
 });
