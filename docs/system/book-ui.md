@@ -63,6 +63,13 @@ notice entry: every action, available or refused, draws on its target's fixture,
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
 main room page").
+PM ruling 2026-10-30, pending owner confirmation: a room's place action offered with no target
+and on no fixture page (such as "Agree to find the den") draws on World as an
+[Action card](../../mobile/app/book/actions.tsx) after the people and items; one a fixture also
+offers stays on that fixture's page. This departs from "World draws
+no verb line [or] unavailable card" above and from
+[interaction-patterns §2](../design/interaction-patterns.md#every-action-sits-on-a-fixture-person-or-item-page);
+the Map no longer draws them.
 World draws no door card: Open and Unlock work from the
 [joystick](#minimap-map-and-presentation-controls) (the Map has no door or movement actions, owner 2026-10-30), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
@@ -243,9 +250,10 @@ as one sentence ([unavailable actions](#unavailable-actions)) and logs the refus
 one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Release (or an arrow key)
 toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
 logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
-and walks nowhere. Close and Lock are not drawn ([Verbs the Book does not draw](#verbs-the-book-does-not-draw));
-An authored Knock is an action on the door fixture's page; the engine's exit Knock has no control
-yet (no cartridge declares one), so it and any other offered door verb fail the stranded-verb check. The reader actions name the reason too ("Go west, locked").
+and walks nowhere. Close and Lock are not drawn ([Verbs the Book does not draw](#verbs-the-book-does-not-draw)).
+An authored Knock is an action on the door fixture's page. The engine's exit Knock has no control
+yet (no cartridge declares one), so an offered one fails the stranded-verb check. The footer's
+screen-reader exit actions name a shut exit's reason too ("Go west, locked").
 Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; the footer and its keys are
@@ -901,8 +909,8 @@ The GameView may offer these; the Book draws no control for them, on any page:
   [joystick](#minimap-map-and-presentation-controls).
 - Where (PM 2026-10-30): the Map rings the current room and a tapped dot names its room.
 
-Any other offered door verb with no control fails the Book harness's stranded-verb check, which lists
-the door half of this section (`UNDRAWN_DOOR_VERBS`).
+Any other World-level action (a door verb or a room's place action) with no control fails the Book
+harness's stranded-verb check, which lists this section (`UNDRAWN_VERBS`).
 
 ## Word bar
 

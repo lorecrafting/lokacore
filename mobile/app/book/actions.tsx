@@ -26,8 +26,8 @@ type CardProps = (
 ) & { ref?: Ref<View> };
 /**
  * An offered action as a card.
- * - Use: a detail page's offered action or dialogue choice, the
- *   Raise cards, a Pick list's option and rows; never an accent text link.
+ * - Use: a detail page's offered action or dialogue choice, a room's place action on World
+ *   (after its people and items), the Raise cards, a Pick list's option and rows; never an accent text link.
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form
  *   (book-ui.md, Unavailable actions): the same card reading its plain label, never `label: reason`;
  *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, reasons.ts), read

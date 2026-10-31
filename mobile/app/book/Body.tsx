@@ -4,12 +4,12 @@ import { DreamPage } from './DreamPage.tsx';
 import { JournalPage } from './journal.tsx';
 // Page dispatch for the current Book view and local detail stack, and the room page it renders.
 import { group, LINK, npcPage, type Page } from './model.ts';
-import { presenter, type Button } from './presenter.ts';
+import { cardKey, presenter, type Button } from './presenter.ts';
 import { ContentsPage, InsidePage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
 import { ShelfPage } from './Shelf.tsx';
 import { NoticePage, proseLinks } from './notices.tsx';
-import { VerbLine } from './actions.tsx';
+import { ActionCard, Cards, VerbLine } from './actions.tsx';
 import { Here, LogLines, nameLink } from './lines.tsx';
 import { Page as PageShell, RunningHead } from './pages.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
@@ -164,8 +164,9 @@ function WorldPage(p: BodyProps) {
 
 /**
  * The place (book-ui.md Room page anatomy): fixed title, prose with fixture links, people and
- * items, then the log; sense cues, an exit's warning and the away recap are log entries. The page
- * scrolls to its end while the log has lines.
+ * items, the room's place actions as Action cards (`group().world`, PM 2026-10-30), then the log;
+ * sense cues, an exit's warning and the away recap are log entries. The page scrolls to its end
+ * while the log has lines.
  * - Use: the World page.
  * - Rules: the title is centred and is the Look tap, named `<title>, look`; a new paragraph at every blank line
  *   of the authored text; a touch link in `links` is a name link in the prose, any other its words;
@@ -196,6 +197,11 @@ export function RoomPage(p: {
         {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
         <Here view={p.view} text={p.text} open={p.open} />
       </View>
+      <Cards>
+        {p.g.world.map((b) => (
+          <ActionCard key={cardKey(b)} b={b} press={p.press} />
+        ))}
+      </Cards>
       {p.log.length > 0 && <LogLines lines={p.log} />}
     </PageShell>
   );

@@ -181,12 +181,15 @@ const panes = [attack(refused), attack({ available: true }, 'ready')];
 export const AttackHidden: StoryObj = {
   ...panes[0],
   args: { words: { 'action.attack': 'Attack' } },
-  render: (args, ctx) =>
-    panes.map((s, i) => (
-      <View key={i} testID={`pane${i}`}>
-        {s.render!(args, ctx)}
-      </View>
-    )),
+  render: (args, ctx) => (
+    <>
+      {panes.map((s, i) => (
+        <View key={i} testID={`pane${i}`}>
+          {s.render!(args, ctx)}
+        </View>
+      ))}
+    </>
+  ),
   name: 'No Attack on an NPC that cannot be hurt',
   play: async ({ canvas }) => {
     await within(canvas.getByTestId('pane1')).findByRole('button', { name: /^Attack/ });
@@ -195,8 +198,7 @@ export const AttackHidden: StoryObj = {
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
 type Canvas = Parameters<NonNullable<StoryObj['play']>>[0]['canvas'];
-// Breaks: a shop row drawn as a card, or its noun not in the room link style (book-ui.md, NPC shop
-// and services).
+// Breaks: a shop row drawn as a card, or its noun not link-styled (book-ui.md, NPC shop, services).
 const shopLine = async (canvas: Canvas, name: string, noun: string) => {
   const line = await canvas.findByRole('button', { name });
   await expect(getComputedStyle(line).borderTopWidth).toBe('0px');
@@ -210,9 +212,8 @@ export const Shelf: StoryObj = {
   name: 'Shop, buy page',
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: LABEL.sell });
-    await userEvent.click(
-      await shopLine(canvas, 'A cob of bread, 4p. Buy for 4 pennies.', 'cob of bread'),
-    );
+    const cob = 'A cob of bread, 4p. Buy for 4 pennies.';
+    await userEvent.click(await shopLine(canvas, cob, 'cob of bread'));
     await canvas.findByText(/It's sold out\./, { selector: '[role=button] *' });
   },
 };
@@ -234,9 +235,8 @@ export const Services: StoryObj = {
     await shopLine(canvas, 'Order a knife, 3p. 3 pennies.', 'Order a knife');
   },
 };
-// The smith with a knife on order, shaped from the Services view (the route needs two lumps of ore):
-// the knife still at the forge, so cancel is offered and claim refused not ready; the commission
-// hides and they sit under Your order.
+// The smith with a knife on order, from Services (the route needs two lumps of ore): knife is at
+// the forge, so cancel is offered, claim refused not ready, both under Your order; no commission.
 const smith = NpcServicesView.view.entities.find((e) => 'services' in e && e.services)!;
 const offered = smith.services!.filter((s) => s.benefit.op !== 'entitlement');
 const open = offered.map((s) =>

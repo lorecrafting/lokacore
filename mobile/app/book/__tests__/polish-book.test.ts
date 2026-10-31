@@ -10,6 +10,7 @@ import { openGame } from '../../../authority/local-story/session.ts';
 import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { control, pressable } from './control.test.ts';
 import { fadeStub } from './fade-stub.ts';
+import type { Button } from '../presenter.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -57,22 +58,23 @@ const { default: Book } = await import('../Book.tsx');
 const { doorPick, pressDoor } = await import('../Footer.tsx');
 const { commandOf } = await import('../buttons.ts');
 
-// Every offered door verb has a control on World: the release presses a shut door's pick, and any
-// other verb is drawn (a pressable reading its label) unless the Book leaves it undrawn on purpose
-// (book-ui.md, Verbs the Book does not draw). Runs on every draw of every test.
-const UNDRAWN_DOOR_VERBS = ['close', 'lock'];
+// Every World-level action has a control: on World, each door verb and each of World's place actions
+// (`group().world`, the offered actions no target or fixture page draws) is drawn (a pressable reading its label), the release
+// presses a shut door's pick, and the rest are undrawn on purpose (book-ui.md, Verbs the Book does
+// not draw). Runs on every draw of every test.
+const UNDRAWN_VERBS = ['say', 'shout', 'where', 'close', 'lock'];
+let room: { g: { world: Button[] } } | undefined; // the drawn RoomPage's props: World is showing
 function stranded(rendered: any[]) {
   const f = rendered.find((n) => n.type?.name === 'Footer')?.props;
-  if (!f) return;
   const drawn = rendered.filter(pressable).map((n) => n.props.accessibilityLabel);
-  for (const e of f.exits)
+  const has = (b: Button) => UNDRAWN_VERBS.includes(commandOf(b)) || drawn.includes(b.label);
+  for (const e of f?.exits ?? [])
     for (const b of f.door(e.direction))
       assert.ok(
-        UNDRAWN_DOOR_VERBS.includes(commandOf(b)) ||
-          (!e.available && b === doorPick(f.door(e.direction))) ||
-          drawn.includes(b.label),
+        has(b) || (!e.available && b === doorPick(f.door(e.direction))),
         `door verb ${b.label} has no control`,
       );
+  for (const b of room?.g.world ?? []) assert.ok(has(b), `place action ${b.label} has no control`);
 }
 type Shell = Parameters<typeof Book>[0]['shell'];
 export const bundle = (name = 'containers_cartridge_sampler_hash') =>
@@ -99,6 +101,7 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Heard') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     owner = element.type;
+    if (element.type.name === 'RoomPage') room = element.props;
     return nodes(element.type(element.props));
   }
   // A context element (the Book's palette) provides its value to the components below it.
@@ -190,6 +193,7 @@ export function book(
     owner = Book;
     (globalThis as any)[Symbol.for('loka-book-test-state')] = useState;
     (globalThis as any)[Symbol.for('loka-book-test-effect')] = useEffect;
+    room = undefined;
     const rendered = nodes(
       Book({
         game,

@@ -130,6 +130,8 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Why: the World page is reading; acting is always a page deeper, so the reader knows where to look.
 - Do: "ash heap" link in the description → Ash heap page → Gather. Don't: a Gather ash card under
   the room text.
+- Exception (PM ruling 2026-10-30, pending owner confirmation): a room's targetless place actions
+  draw on World as Action cards ([book-ui.md](../system/book-ui.md#world-and-status-entry)).
 - Source: owner, quoted: "unless its on a description room fixture/furniture, or npc/pc and item"
   (loka-x6t.120 notes); [Room page anatomy](../system/book-ui.md#room-page-anatomy).
 - Enforcement: `refused_verbs.test.ts:66`; plain fixtures need a kernel projection (loka-x6t.120).

@@ -232,6 +232,18 @@ test('room is focused, the Map offers no Go, and every detail returns to the wor
   h.sql.close();
 });
 
+// Breaks: a room's place action (no target, so no detail page draws it) has no control once the
+// Map stops drawing it (PM 2026-10-30; the stranded check in polish-book.test.ts fails every draw).
+test('a place action is an Action card on World and its press is sent', () => {
+  const h = book(bundle('penalty_sampler_hash'));
+  const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+  assert.equal(h.stack.length, 0);
+  h.tap('Agree to find the den');
+  assert.equal(receipts(), 1);
+  assert.equal(h.labels().includes('Agree to find the den'), false);
+  h.sql.close();
+});
+
 // Breaks: a recovery read after commit escapes the press, hiding the result and retaining retry
 // context, or its reason sits inside the Start over button where its label hides it.
 test('a postcommit narration read fault preserves the saved result and clears retry context', () => {
@@ -458,7 +470,7 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
         },
         text: (key: string) => key,
         log: [],
-        g: { place: [] },
+        g: { place: [], world: [] },
         press: () => {},
         open: () => {},
       } as any),

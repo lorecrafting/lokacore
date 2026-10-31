@@ -1,6 +1,6 @@
 // C row Pages, Sections (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect, fn, userEvent, waitFor } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, type Mock } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
@@ -110,7 +110,7 @@ export const CharacterSpells: StoryObj = {
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 // Each entry opens its own section, even pressed at the foot of its shown line (loka-462d).
 // Breaks: the next entry's hit area covers this one's line, or an entry opens another section.
-export const ContentsEntries: StoryObj = {
+export const ContentsEntries: StoryObj<{ open: Mock; world: Mock }> = {
   name: 'Contents, each entry its own',
   args: { open: fn(), world: fn() },
   render: (args) => <ContentsPage {...(args as Parameters<typeof ContentsPage>[0])} />,

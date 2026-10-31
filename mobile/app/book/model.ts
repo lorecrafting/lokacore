@@ -113,6 +113,10 @@ export function group(all: Button[]) {
   const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the say field's sends are apart
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
   const aimed = (b: Button) => b.target_ids.length > 0;
+  const place = buttons.filter(
+    (b) => !b.detail_id && (!aimed(b) || b.place) && !dir(b) && !notVerb(b.action_key),
+  );
+  const paged = buttons.filter((b) => b.detail_id).map((b) => b.action_key); // a fixture's offers
   return {
     look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
     exits: buttons.flatMap((b) =>
@@ -127,9 +131,8 @@ export function group(all: Button[]) {
       (b) => !b.detail_id && ['stand', 'sit', 'rest', 'sleep'].includes(commandOf(b)),
     ),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
-    place: buttons.filter(
-      (b) => !b.detail_id && (!aimed(b) || b.place) && !dir(b) && !notVerb(b.action_key),
-    ),
+    place,
+    world: place.filter((b) => !aimed(b) && !paged.includes(b.action_key)), // PM 2026-10-30
     word: all.filter((b) => WORDS.includes(b.action_key)),
     on: (id: string) =>
       buttons
