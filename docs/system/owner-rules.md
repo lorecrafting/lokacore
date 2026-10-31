@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Shipped player-facing content and store material are human-made; AI writes code and internal documents; agent-written story text is reference or placeholder only; placeholder audio is human-made and tracked until replaced ([record](../decisions/owner-decision-human-made-content-2026-10-31.md)). The owner writes shipped story and lore prose.
+
 - The prologue teaches every basic (Tending, Making, Guarding, Words) through quests of gifts or labour, no coin; houses and guilds open at the landing; Skills stay on Character, one collapsed line per profession, until the landing ([record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)).
 - Proof order for the real game's chapter (PM ruling loka-40d4, 2026-10-28; the rule was set for Chapter 1): E1 coverage complete (harness deleted 2026-10-28, loka-ivjq.16; rebuilt with that chapter), E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
@@ -51,7 +53,7 @@ and not repeated here.
   World time starts at first entry (D11 selection); before it there is no world clock to pause
   ([2026-10-08](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md)).
 - Two lanes: the mechanics toolbox ([record](../decisions/owner-decision-one-lane-mechanics-2026-10-12.md)) and the Storybook polish lane, reactivated by the owner on 2026-10-22 ("set things up so that its easy for me to do my ui polish there").
-- Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
+- Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)). Note 2026-10-31: runtime LLM text is AI content players consume, so none ships without a new owner decision ([record](../decisions/owner-decision-human-made-content-2026-10-31.md)).
 - In Homestead the skill path replaces NPC cooking and building; a paid NPC reaches only a beginner tier, better results need the player's own crafting, and Star Wars Galaxies style skill trees are approved ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Homestead professions: a failed craft loses its inputs; a skill box costs a trainer coin fee (after the prologue: [prologue record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)), XP is never spent, the novice box is free; several hidden elite professions are possible ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Product order: no Chapter 1 yet; finish all showcases, then UI polish, then worldbuilding, then the official Chapters 1-3; new content uses generic names ([record](../decisions/owner-decision-product-order-2026-10-15.md)).
