@@ -3,7 +3,7 @@
 - PR [#512](https://github.com/lorecrafting/lokacore/pull/512) `feat/tc2e-liquid-vessel` at `a951e70109c354af53a453cc90ef06aa35bc89e7`, diff `origin/main...a951e7010`.
 - Governing: "BRIEF loka-tc2e" (`br show loka-tc2e`), PM rulings 2026-10-30 in `br show loka-ewtx` ((3) pour names the receiver), [B7 well and waterskin](../system/mechanics.md#b7-well-and-waterskin-selected-contract), `protocol/text.schema.json` Text, AGENTS.md "Writing tests".
 - Reviewer: independent; authored none of the work.
-- Verdict: **APPROVE** at `f30b3825f3b4e3d2dfcd24a432f575fdaec48adc` after the fix re-check below (first pass at `a951e7010`: CHANGES REQUIRED, one blocker).
+- Verdict: **APPROVE** at `f30b3825f3b4e3d2dfcd24a432f575fdaec48adc` after the fix re-check below (first pass at `a951e7010`: changes required, one blocker).
 
 ## Must be true (written before reading the diff)
 
@@ -35,3 +35,4 @@ Results: 1-3 and 5-7 hold; 4 does not (finding 1).
 - Diff `a951e7010..f30b3825f`: this record and the index (carried unchanged), plus `kernel/ts/test/liquid.test.ts:161-162`, which asserts `{code: 'invalid_state'}` for `cases[1]` (the `owned(4, 4)` full-receiver pour). Nothing else changed.
 - Finding 1 closed: the same `shared.ts:155` `not_present` mutant now fails "liquid refusal participants and custody ..." (pass 11, fail 1); unmutated, pass 12.
 - CI seen: graph-diff success; `ci` in progress, `book-e2e` queued.
+- Re-check verdict: **APPROVE**.
