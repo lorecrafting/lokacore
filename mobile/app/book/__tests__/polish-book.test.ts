@@ -120,6 +120,8 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Footer') return [element];
     // The live region repeats page lines for a screen reader: page text leaves it out (live_region.test.ts reads it).
     if (element.type.name === 'Heard') return [element];
+    // The dev pulse draws nothing until fired, and its hooks would take a slot the page's state holds.
+    if (element.type.name === 'HapticPulse') return [];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     owner = element.type;
     if (element.type.name === 'RoomPage') room = element.props;
