@@ -47,8 +47,8 @@ test('the smith offers one Ask about card per known topic; no topic, no card', (
   );
 });
 
-// Breaks: an ask press is refused (wrong target or input shape), its answer leaves the page or
-// opens a conversation, or a granted topic's card waits for a page change. Every card the view
+// Breaks: an ask press is refused (wrong target or input shape), its answer leaves the page,
+// loses its speaker (loka-548k) or opens a conversation, or a granted topic's card waits for a page change. Every card the view
 // offers on the smith is pressed, so this is the view-to-invocation check.
 test('each Ask about card is admitted: the answer joins the page, a grant adds its card', () => {
   const b = smith();
@@ -65,7 +65,7 @@ test('each Ask about card is admitted: the answer joins the page, a grant adds i
   assert.deepEqual(
     lines.filter((l) => !l.startsWith('Talk')),
     [
-      '"The miller ships more than flour. Ask about the smugglers."',
+      'The smith says to you, "The miller ships more than flour. Ask about the smugglers."',
       'The smith shrugs.',
       'The smith shrugs.',
     ],

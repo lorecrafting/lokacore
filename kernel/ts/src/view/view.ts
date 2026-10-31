@@ -243,7 +243,7 @@ const viewOf = (
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
   // Only an NPC with its own hp has a condition (living's test; loka-ysbt ruling a): no hp, no band.
-  ...(e.kind === 'npc' && e.hp && { band: bandOf(world, id as EntityId, 'hp').band }),
+  ...(e.kind === 'npc' && e.hp && { band: bandOf(world, id as EntityId, 'hp')!.band }),
   ...liquidView(world, id),
   ...(e.kind === 'npc' && freeLessons(world, id, actor, steps)),
   // Book hostile refusal: the page needs hostility, which refusal codes cannot tell apart.

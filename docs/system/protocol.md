@@ -398,7 +398,8 @@ minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 The `combat` opponent, and each `active_opponents` member, carries the `band` key of its `hp`
 pool by the same rule and table (`bandOf`, `kernel/ts/src/view/resources.ts`), only while the
 player sees it (light `visible`) and it lives (a member a spell or status kills stays on the roster
-until the round-end prune); the name is present either way and no hp number is sent
+until the round-end prune) and it has hp of its own (no hp, no band, as in `entities`; loka-zvwh);
+the name is present either way and no hp number is sent
 (loka-y6yg.49). Composition record: reads the encounter row, the opponent's hp level and spec,
 the band table, `visible` and `living`; writes, events, jobs and save rows: none; no version bump (an
 optional view field, as ConditionView `duration`).

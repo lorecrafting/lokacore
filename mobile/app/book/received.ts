@@ -1,7 +1,7 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { cast, comings, lineText, replyLine, spoken, used } from './words.ts';
+import { cast, comings, lineText, lineWords, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
 import {
   arrived,
@@ -170,7 +170,13 @@ function conversationLines(
     was.choice?.continuation_id !== now.choice.continuation_id &&
     !accepted?.narration?.some((line) => line.key === now.choice!.prompt.key)
   )
-    detailLines(s, now.choice.speaker_id ?? 'conversation').push(text(now.choice.prompt.key));
+    detailLines(s, now.choice.speaker_id ?? 'conversation').push(
+      lineWords(
+        { key: now.choice.prompt.key, participants: { speaker: now.choice.speaker_id } },
+        text,
+        now,
+      ),
+    );
 }
 
 // Where the reply's lines go: a corpse pickup, the receipt's or button's detail, or a Read target.

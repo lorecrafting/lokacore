@@ -1,5 +1,5 @@
 {
-  "fixture_version": 4,
+  "fixture_version": 5,
   "evidence_class": "specification-known-answers",
   "note": "Adverse known answers. Tiny and Lantern steps use the cases.json/lantern-traces.json shapes; see conformance/README.md.",
   "uniform": [
@@ -3781,7 +3781,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -3873,7 +3874,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -3881,7 +3883,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -3969,7 +3972,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -3977,14 +3981,16 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -4076,7 +4082,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4084,14 +4091,16 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4100,7 +4109,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -4154,7 +4164,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4162,7 +4173,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4218,7 +4230,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4268,7 +4281,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4276,7 +4290,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4332,7 +4347,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4378,7 +4394,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4386,7 +4403,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4442,7 +4460,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4502,7 +4521,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4510,7 +4530,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4566,7 +4587,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4616,7 +4638,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4624,7 +4647,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4680,7 +4704,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4726,7 +4751,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4734,7 +4760,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4790,7 +4817,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4851,7 +4879,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4859,7 +4888,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4915,7 +4945,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4924,7 +4955,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -4970,7 +5002,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -4978,7 +5011,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5034,7 +5068,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5043,7 +5078,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5098,7 +5134,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5106,7 +5143,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5162,7 +5200,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5171,7 +5210,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5236,7 +5276,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5244,7 +5285,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5300,7 +5342,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5309,7 +5352,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -5356,7 +5400,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5364,7 +5409,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5420,7 +5466,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5429,7 +5476,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -5476,7 +5524,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5484,7 +5533,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5540,7 +5590,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5549,7 +5600,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -5610,7 +5662,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5618,7 +5671,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5674,7 +5728,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -5717,7 +5772,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5725,7 +5781,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5781,7 +5838,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5790,7 +5848,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -5851,7 +5910,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5859,7 +5919,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5915,7 +5976,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -5950,7 +6012,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -5958,7 +6021,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6014,7 +6078,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6056,7 +6121,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6064,7 +6130,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6120,7 +6187,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6151,7 +6219,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6159,7 +6228,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6215,7 +6285,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6250,7 +6321,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6258,7 +6330,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6314,7 +6387,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6357,7 +6431,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6365,7 +6440,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6421,7 +6497,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6430,7 +6507,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6491,7 +6569,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6499,7 +6578,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6555,7 +6635,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6590,7 +6671,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6598,7 +6680,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6654,7 +6737,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6696,7 +6780,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6704,7 +6789,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6760,7 +6846,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6791,7 +6878,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6799,7 +6887,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6855,7 +6944,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6881,7 +6971,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6889,7 +6980,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6945,7 +7037,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -6954,7 +7047,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -6993,7 +7087,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7001,7 +7096,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7057,7 +7153,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7066,7 +7163,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7113,7 +7211,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7121,7 +7220,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7177,7 +7277,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7186,7 +7287,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7247,7 +7349,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7255,7 +7358,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7311,7 +7415,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7337,7 +7442,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7345,7 +7451,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7401,7 +7508,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7410,7 +7518,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7449,7 +7558,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7457,7 +7567,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7513,7 +7624,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7522,7 +7634,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7569,7 +7682,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7577,7 +7691,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7633,7 +7748,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7642,7 +7758,8 @@
                 "bindings": {
                   "actor": "hero",
                   "bram": "bram",
-                  "lantern": "lantern"
+                  "lantern": "lantern",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7696,7 +7813,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7704,7 +7822,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7760,7 +7879,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7799,7 +7919,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7807,7 +7928,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7863,7 +7985,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -7902,7 +8025,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7910,7 +8034,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -7966,7 +8091,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -8021,7 +8147,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -8029,7 +8156,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -8085,7 +8213,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],
@@ -8127,7 +8256,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram_offer.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               },
               {
@@ -8135,7 +8265,8 @@
                 "text_key": "proof.accept",
                 "bindings": {
                   "actor": "hero",
-                  "bram": "bram"
+                  "bram": "bram",
+                  "speaker": "bram"
                 }
               },
               {
@@ -8191,7 +8322,8 @@
                 "id": "null:outcome",
                 "text_key": "dialogue.bram.prompt",
                 "bindings": {
-                  "actor": "hero"
+                  "actor": "hero",
+                  "speaker": "bram"
                 }
               }
             ],

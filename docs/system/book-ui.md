@@ -312,8 +312,9 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   capital and its closing stop sits inside the quotes; a line ending in `?` or `!` takes no added
   comma or period. Never the colon form (`Nell: ...`) and never a bare quotation with no speaker.
   An authored line that already attributes itself (`"Gate's shut," says the guard.`) is kept as
-  written; the Book never parses quotes to add a speaker. Authored dialogue that is a bare
-  quotation is a content fix (Beads `loka-548k`), not a Book rewrite.
+  written. A dialogue line whose narration binds a `speaker` and whose authored text is a bare
+  quotation reads `<Speaker> says, "..."`, or `<Speaker> says to you, "..."` when the player is
+  addressed; the Book never adds a speaker the binding does not name.
 - A vessel's liquid amount reads in words, never a count or unit label (owner, 2026-10-30, Beads
   `loka-ikat`), from quantity against capacity: `Empty.`; a third or less `Nearly empty, a little
   water left.`; between `Half full of water.`; two thirds or more `Nearly full of water.`; exact

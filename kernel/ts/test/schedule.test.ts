@@ -16,7 +16,7 @@ import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { decode, encode } from '../src/foundation/canonical.ts';
 import { accepted, allocator } from '../src/runtime/decision.ts';
-import { admit, adopt, newWorld, step } from '../src/runtime/world.ts';
+import { admit, adopt, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 
@@ -50,7 +50,7 @@ const load = (f: (c: any) => void) => {
   const text = encode(c);
   const h = createHash('sha256').update(text).digest('hex');
   return loadCartridge(new TextEncoder().encode(`{"cartridge":${text},"content_hash":"${h}"}`), {
-    kernel_api: '1.0',
+    kernel_api: INSTALLED.kernel_api,
     capabilities: Object.fromEntries(Object.keys(c.lock.capabilities).map((k) => [k, [1]])),
     content_schema: 1,
     rule_ir: 1,

@@ -2170,7 +2170,7 @@
         },
         "band": {
           "$ref": "action.schema.json#/$defs/Key",
-          "description": "The opponent's hp condition band key (its pool's band table); absent while the opponent is unseen or dead."
+          "description": "The opponent's hp condition band key (its pool's band table); absent while the opponent is unseen or dead, or the NPC has no hp of its own."
         },
         "active_opponents": {
           "type": "array",
@@ -2191,7 +2191,7 @@
               },
               "band": {
                 "$ref": "action.schema.json#/$defs/Key",
-                "description": "This member's hp condition band key; absent while it is unseen or dead."
+                "description": "This member's hp condition band key; absent while it is unseen or dead, or the NPC has no hp of its own."
               }
             },
             "required": [
