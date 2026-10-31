@@ -246,10 +246,10 @@ test('an hp-less NPC is offered Attack unavailable, cannot_be_hurt, and refused 
     target_ids: [npc(w, 'guard')], // an entity's own action targets that entity
     input: {},
   });
-  assert.equal(found.kind, 'identified', JSON.stringify(found));
-  const command = resolve(w, found as never) as Command;
+  assert.ok(found.kind === 'identified', JSON.stringify(found));
+  const command = resolve(w, found) as Command;
   assert.equal(command.payload.type, 'attack');
-  const refused = step(w, command, n, guard.action_key as never);
+  const refused = step(w, command, n, guard.action_key);
   assert.deepEqual(refused.decision, { kind: 'rejected', error: reason });
   assert.equal(refused.world, w);
   const resolves = Object.fromEntries(
