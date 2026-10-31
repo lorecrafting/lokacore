@@ -12,7 +12,7 @@ import type { Pulse } from './elapsed.ts';
 // owner-decision-presenter-split-2026-10-02.md). It adds no mechanics.
 import type { Key } from '../../../kernel/ts/src/contracts.gen.ts';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
-export { KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the app names its build with it
+export { INSTALLED, KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the app names its build and dev save with them
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import type { Failed, Game, GameSession, Intent, Reply } from '../../packages/game-view/session.ts';
 import { openStory, type Host } from './authority.ts';

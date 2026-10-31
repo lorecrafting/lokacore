@@ -127,6 +127,7 @@ const PIN = encode({
   cartridge_id: 'check_sampler',
   cartridge_version: '0.0.1',
   content_hash: kat.sha256,
+  kernel_api: INSTALLED.kernel_api, // the kernel's, not the authority's: a bump must not edit this
   capability_lock: JSON.parse(kat.canonical).lock,
   rule_ir: 1,
   world_context_id: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f',

@@ -7,11 +7,12 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { loadCartridge, type Installed } from '../src/content/cartridge.ts';
+import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_rooms_hash.json');
 const installed: Installed = {
-  kernel_api: '1.0',
+  kernel_api: INSTALLED.kernel_api,
   capabilities: {
     movement: [1],
     description_variant: [1],

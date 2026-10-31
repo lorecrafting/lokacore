@@ -34,3 +34,7 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
   intent; the caller later appended a target, so the retry no longer matched the private
   reservation and every later command returned `conflict`
   ([M1-B1 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-04-m1-b1-driver-review.md)).
+- Pin a save to everything its replay depends on, not only to the content. The pin held the
+  content hash alone, so a kernel contract bump (1.124 dialogue receipts gained `speaker`) left
+  unbumped cartridges' old saves reopening as `save_corrupt`; #514 bumped `at_least` on every
+  dialogue cartridge by hand. The pin now carries `kernel_api`, compared by equality (loka-daha).
