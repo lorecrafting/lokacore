@@ -28,12 +28,19 @@ defmodule Loka.Core.ComposeStatus do
   defp shape?(prior, next, _) when not is_map_key(next, "job_id"),
     do: Map.keys(next) |> Enum.sort() == ~w(active generation) and prior["job_id"] == nil
 
-  # An active row keeps its generation; a refresh or successor never shortens the end (and a
-  # permanent row, with no end, never turns timed).
   defp shape?(prior, next, now) do
+    is_integer(next["next_tick_at"]) and next["next_tick_at"] >= now and
+      is_binary(next["job_id"]) and ends?(prior, next, now)
+  end
+
+  # A ticking permanent row (loka-rn3b) is new or succeeds a ticking permanent one.
+  defp ends?(prior, next, _) when not is_map_key(next, "ends_at"),
+    do:
+      prior["active"] != true or (not is_map_key(prior, "ends_at") and is_binary(prior["job_id"]))
+
+  # A refresh or successor never shortens the end (and a permanent row never turns timed).
+  defp ends?(prior, next, now) do
     is_integer(next["ends_at"]) and next["ends_at"] > now and
-      is_integer(next["next_tick_at"]) and next["next_tick_at"] >= now and
-      is_binary(next["job_id"]) and
       (prior["active"] != true or
          (is_integer(prior["ends_at"]) and next["ends_at"] >= prior["ends_at"]))
   end
@@ -44,12 +51,12 @@ defmodule Loka.Core.ComposeStatus do
   defp generation?(prior, next),
     do: next["generation"] == (prior["generation"] || 0) + if(next["active"], do: 1, else: 0)
 
-  @doc "A delta's last write may not leave a timed status or bleed active past its end or a tick (skipped)."
+  @doc "A delta's last write may not leave a status or bleed active past its end or a tick (skipped)."
   def expired(overlay, horizon) do
     Enum.find_value(overlay, fn {_, {_, target, value}} ->
       if target["kind"] in ~w(status bleed) and value["active"] == true and
-           is_integer(value["ends_at"]) and
-           (value["ends_at"] <= horizon or value["next_tick_at"] < horizon),
+           ((is_integer(value["ends_at"]) and value["ends_at"] <= horizon) or
+              (is_integer(value["next_tick_at"]) and value["next_tick_at"] < horizon)),
          do: target
     end)
   end

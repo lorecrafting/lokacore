@@ -1,12 +1,11 @@
 {
-  "duration": 86400,
+  "duration": "permanent",
   "tick_every": 3600,
   "resource": "hunger",
   "per_tick": -1,
   "name": "condition.hungry",
   "narration": {
     "applied": "narration.hungry.applied",
-    "tick": "narration.hungry.tick",
-    "expired": "narration.hungry.expired"
+    "tick": "narration.hungry.tick"
   }
 }

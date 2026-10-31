@@ -7521,7 +7521,7 @@
               "type": "string"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler SCHEMA_VIOLATION)."
+          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
         },
         "extends": { "$ref": "#/$defs/Key" },
         "fear": {
@@ -7573,7 +7573,10 @@
           "additionalProperties": false,
           "properties": {
             "applied": { "$ref": "#/$defs/partial.TextKey" },
-            "expired": { "$ref": "#/$defs/partial.TextKey" },
+            "expired": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
+            },
             "observed": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent."
@@ -7587,7 +7590,7 @@
           "type": "object"
         },
         "per_tick": {
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION).",
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION).",
           "maximum": 2147483647,
           "minimum": -2147483647,
           "type": "integer"
@@ -9731,7 +9734,7 @@
               "type": "string"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler SCHEMA_VIOLATION)."
+          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
         },
         "fear": {
           "const": true,
@@ -9782,7 +9785,10 @@
           "additionalProperties": false,
           "properties": {
             "applied": { "$ref": "#/$defs/TextKey" },
-            "expired": { "$ref": "#/$defs/TextKey" },
+            "expired": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
+            },
             "observed": {
               "$ref": "#/$defs/TextKey",
               "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent."
@@ -9795,13 +9801,12 @@
           },
           "required": [
             "applied",
-            "tick",
-            "expired"
+            "tick"
           ],
           "type": "object"
         },
         "per_tick": {
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION).",
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION).",
           "maximum": 2147483647,
           "minimum": -2147483647,
           "type": "integer"
