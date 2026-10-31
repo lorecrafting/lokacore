@@ -68,8 +68,8 @@ export function dialogueDetail(
   const detail = row.roles.find((r) => r.role === speaker)?.entity_id;
   const participants = Object.fromEntries([
     ['actor', bodyOf(s.world, p.actor_id)],
-    ['speaker', detail],
     ...row.roles.map((r) => [r.role, r.entity_id]),
+    ...(detail ? [['speaker', detail]] : []),
   ]);
   const riddle = source.riddle?.choice_id === p.choice_id ? source.riddle : undefined;
   if (

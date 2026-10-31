@@ -179,6 +179,16 @@ The table below describes the files as imported. Later amendments are in git his
   now `e008bd4be56e63c2277a2e593217fcce3c5dbfbfe2437f8896f71a9066fc424d`, pinned by the portable
   ABI tests): the `lantern` cases the same way (`item.dropped` for a drop); the `uniform`,
   `tiny` and `composition` suites are unchanged.
+- 2026-10-30, loka-548k under the
+  [forward-development ruling](../decisions/owner-decision-forward-development-2026-10-05.md)
+  (dialogue lines bind their speaker, [mechanics dialogue@1](../system/mechanics.md)). Rewritten by
+  hand: [conformance/lantern-traces.json](conformance/lantern-traces.json) (`fixture_version` 4,
+  SHA-256 now `9f9ff623ec5881c53a254e5260ca721980bb4f6019d79afc73bc9b1aa7801bb9`) and
+  [conformance/adverse-cases.json](conformance/adverse-cases.json) (`fixture_version` 5, SHA-256
+  now `627b1e8803d5d2049b4fc30d6ad6ad0a6917393f361b009071bddc430733e201`, pinned by the portable
+  ABI tests): the bindings of every `dialogue.bram_offer.prompt`, `dialogue.bram.prompt`,
+  `proof.accept`, `proof.carry` and `proof.leave` line gain `speaker: bram` (both Lantern
+  dialogues declare npc `bram`, bound as role `bram`); no other field changes.
 
 ## Link rewrites (the only byte changes at import)
 

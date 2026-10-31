@@ -132,7 +132,13 @@ export function restoredLogs(game: Game, text: Say): Logs {
   logLines(s, combat, s.combatLog);
   // A talk receipt already holds its prompt (received.ts conversationLines guards the same way).
   if (speaker && !last?.lines.some((l) => l.key === view.choice!.prompt.key))
-    detailLines(s, speaker).push(text(view.choice!.prompt.key));
+    detailLines(s, speaker).push(
+      lineWords(
+        { key: view.choice!.prompt.key, participants: { speaker: view.choice!.speaker_id } },
+        text,
+        view,
+      ),
+    );
   s.log.push(...cueLines(s, view, text));
   return s;
 }
