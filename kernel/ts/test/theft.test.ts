@@ -242,7 +242,11 @@ test('9. without theft the merchant shows its slotted badge as worn, nothing els
   );
   // Take refuses an item in an NPC's custody without theft as not_present (PM ruling B).
   assert.deepEqual(
-    merchant.worn![0].actions.map((a) => [a.action_key, a.available, a.reason?.code]),
+    merchant.worn![0].actions.map((a) => [
+      a.action_key,
+      a.available,
+      !a.available && a.reason.code,
+    ]),
     [['take', false, 'not_present']],
   );
   assert.deepEqual(validate('GameView', v), []);
