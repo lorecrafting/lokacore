@@ -428,8 +428,8 @@ while a conversation is open ends that one first, as Leave would: the same decis
 loka-x6t.5, paraphrased: an open conversation must not block the world;
 `mechanics/dialogue/selection.ts:152`). Accepted
 `choice_opened`: one `choice.open` of a new continuation (ordinal 0 of this command), the
-dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
-`choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
+dialogue's roles bound to EntityIds in role-name order, the choice ids in key order,
+`choice_opened`, and the prompt line with the actor and the talk target as `speaker`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
 actor's or not offering the choice `invalid_state`; the pinned dialogue policy is
 re-evaluated for that actor at Choose and pending-option projection, refusing
 `invalid_state` when no longer true; a bound NPC not in the room `not_present`;
@@ -442,8 +442,10 @@ code. Accepted, outcome the choice id, in one decision: the
 `hand_over` (an `entity.transfer` of the bound item to the bound NPC and `item_acquired`),
 the choice's `steps` (the ops its [column](cartridge.md#steps-and-checks) runs), the quest's transitions and `quest_resolved` (or the accepted
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
-at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
-and every bound role as participants, and the `story_point_reached` of a story point outcome
+at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor,
+every bound role and `speaker` (the row's binding of the dialogue's npc role, never re-resolved) as
+participants (a riddle's wrong line and a check's failure line bind the same; the Book words a line
+that is wholly one quotation as the speaker's, loka-548k), and the `story_point_reached` of a story point outcome
 whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:225`). The conversation then
 (unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
 to the person's topics; the conversation stays open until Leave the conversation): the same

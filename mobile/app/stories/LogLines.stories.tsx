@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { LogLines } from '../book/lines.tsx';
+import { lineWords } from '../book/words.ts';
 
 const meta = {
   title: 'Book/LogLines',
@@ -45,4 +46,21 @@ export const Empty: Story = { args: { lines: [] } };
 export const NpcEmotes: Story = {
   name: 'NPC emotes',
   args: { lines: ['A goblin cowers in fear.', 'Nell bows to you.', 'Nell bows to the goblin.'] },
+};
+
+// loka-548k: an NPC's dialogue line, worded through lineWords from its speaker binding, so drift
+// in the wording breaks this story (book-ui.md Line placement: dialogue is novel prose).
+const NELL = { entities: [{ id: 'nell', kind: 'npc', name: 'npc.nell', actions: [] }] } as never;
+const SAY: Record<string, string> = { 'npc.nell': 'Nell', prompt: '"Well, stranger?"' };
+const speech = lineWords(
+  { key: 'prompt', participants: { actor: 'body', speaker: 'nell' } },
+  (k) => SAY[k] ?? k,
+  NELL,
+);
+export const NpcSpeech: Story = {
+  name: 'NPC speech',
+  args: { lines: [speech] },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('Nell says to you, "Well, stranger?"')).toBeVisible();
+  },
 };

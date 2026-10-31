@@ -173,7 +173,8 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // third person when its actor is a person the view, or the view before the step (one who left),
 // names. A skipped combat turn (loka-x6t.30)
 // names its status from the engine line combat.skipped; it has no actor when the player skipped. An NPC's
-// emote (G9) words from the view's emote table (line_words.ts emoteSentence).
+// emote (G9) words from the view's emote table (line_words.ts emoteSentence). A line bound to a named
+// speaker and worded as one quotation reads `Nell says to you, "..."` (book-ui.md Line placement).
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -182,15 +183,20 @@ export const lineWords = (
 ) => {
   const wield =
     t.key in WIELD && things(view).find((x) => x.id === t.participants?.item)?.slot === 'wield';
-  const id = t.participants?.actor;
-  const actor =
+  const named = (id: unknown) =>
     id === undefined ? undefined : nameOf(view, id, text) || (was && nameOf(was, id, text));
+  const id = t.participants?.actor;
+  const actor = named(id);
   const word = (v: unknown) => text(String(v));
   const told =
     (actor && emoteSentence(t, view.emotes, word, actor)) ||
     lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
   if (told) return told;
-  if (t.key !== 'combat.skipped') return text(t.key);
+  if (t.key !== 'combat.skipped') {
+    const said = text(t.key);
+    const speaker = named(t.participants?.speaker);
+    return speaker && /^"[^"]*"$/.test(said) ? `${cap(speaker)} says to you, ${said}` : said;
+  }
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
   return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);
 };

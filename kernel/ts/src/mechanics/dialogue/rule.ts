@@ -70,7 +70,8 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
   const d = spokenBy(world, p.actor_id, p.target_id, steps, p.dialogue);
   if (!d || talking(world, p.actor_id, p.target_id)) return rejected('invalid_state');
   const [op, opened] = opening(world, command, mint, d, steps);
-  const line = { key: d.prompt, participants: { actor: bodyOf(world, p.actor_id)! } };
+  const actor = bodyOf(world, p.actor_id)!;
+  const line = { key: d.prompt, participants: { actor, speaker: p.target_id } };
   return accepted(world, 'choice_opened', [...leave(world, p.actor_id), op], [opened], [line]);
 }
 
@@ -91,6 +92,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
       : rejected(code);
   const participants = row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
     actor: bodyOf(world, actor_id)!,
+    speaker: speakerOf(d, row)!,
   });
   const riddle = d.riddle?.choice_id === choice_id ? d.riddle : undefined;
   const answer = command.payload.answer;
