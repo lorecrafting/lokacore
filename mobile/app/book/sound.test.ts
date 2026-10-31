@@ -101,12 +101,14 @@ test('a sound plays at its tier', async () => {
 });
 
 // Breaks: Sound off still plays, stops the theme cut, or leaves a playing sound running; Music off
-// silences the rest; turning back on stays silent.
+// silences the rest; turning back on stays silent; a setting already on stops what plays.
 test('Sound and Music mute their own sounds only', async () => {
   const b = await browser();
   b.gesture();
   b.play('coin');
   b.play('chapter');
+  b.setMuted('sound', false); // already on: nothing stops
+  assert.equal(b.els[0]!.paused, false);
   b.setMuted('sound', true);
   assert.deepEqual([b.els[0]!.paused, b.els[1]!.paused], [true, false]);
   b.play('coin');
@@ -170,6 +172,7 @@ test('a beat ducks ambience; the last one to end releases it', async () => {
   assert.ok(Math.abs(b.ramps[0]![0] - 0.501) < 0.001);
   assert.ok(Math.abs(b.ramps[0]![1] - 10.3) < 1e-9);
   b.els[2]!.onended!();
+  b.els[2]!.onended!(); // a voice stopping twice must not release another's duck
   assert.equal(b.ramps.length, 1);
   b.els[3]!.onended!();
   assert.deepEqual(b.ramps[1], [1, 11.2]);
