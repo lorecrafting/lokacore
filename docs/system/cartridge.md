@@ -19,7 +19,7 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 
-`requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). No field carries its own floor; a cartridge released later states the API it was compiled against here.
+`requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). `at_least` rises only when the content uses a newer kernel feature; a contract bump alone changes `INSTALLED.kernel_api` and never a cartridge (the save pin carries the kernel_api, [save.md](save.md#opening-a-story); loka-daha). No field carries its own floor; a cartridge released later states the API it was compiled against here.
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Resolve.expand/2`, `lib/loka/content/resolve.ex:37`). A `.json`
@@ -37,7 +37,7 @@ chapter: the [artifact](../../protocol/fixtures/toolbox_showcase_hash.json) comp
 `cartridges/toolbox_showcase`, under the
 [retirement decision](../decisions/owner-decision-retire-first-chapter-2026-10-21.md). The
 first release will bundle the real game's chapter. The app's save has one fixed name,
-`loka-showcase.db` (the web build keeps a storage slot per save file); after a content change the
+`loka-showcase.db` (the web build keeps a storage slot per save file); after a content change or a kernel_api bump the
 app shows the pinned-release refusal with [explicit Start over](save.md#opening-a-story), with no
 save compatibility in pre-production.
 Earlier saves, the retired chapter's save included, stay on the device untouched and

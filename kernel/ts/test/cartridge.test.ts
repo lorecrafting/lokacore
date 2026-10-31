@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { DEFINITION_MAPS, loadCartridge, type Installed } from '../src/content/cartridge.ts';
+import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
@@ -12,7 +13,7 @@ const corpus = read('protocol/fixtures/cartridge_loader.json');
 const hello =
   'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topic check schedule resource';
 const installed: Installed = {
-  kernel_api: '1.0',
+  kernel_api: INSTALLED.kernel_api,
   capabilities: Object.fromEntries(hello.split(' ').map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,

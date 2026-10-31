@@ -6,7 +6,7 @@ import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { Json } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type { ErrorCode, HostKind } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
-import { newWorld } from '../../../kernel/ts/src/runtime/world.ts';
+import { INSTALLED, newWorld } from '../../../kernel/ts/src/runtime/world.ts';
 import { corrupt, identityOf, load, reconcile, replace } from './store.ts';
 import type { Db, Meta } from './store.ts';
 import { chronicle, narration } from './narration.ts';
@@ -94,7 +94,8 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
       ? releases.find((r) => r.content_hash === saved.pin!.content_hash)
       : releases[0]; // no save row: a new save, or half a save that load reports corrupt
     const installed = releases.map((r) => r.content_hash);
-    if (!release)
+    // Any other kernel_api, or none (a pin from before loka-daha), replays under another contract.
+    if (!release || (saved && saved.pin!.kernel_api !== INSTALLED.kernel_api))
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
     const base = saved ? pinned(release, saved.pin!) : drawn(release, host);
     const loaded = base && load(db, base, () => first(release.content_hash, base, host));
@@ -174,6 +175,7 @@ function first(content_hash: string, fresh: World, host: Host): Meta {
     cartridge_id: id,
     cartridge_version: version,
     content_hash,
+    kernel_api: INSTALLED.kernel_api,
     capability_lock: fresh.cartridge.lock,
     rule_ir: requires.rule_ir,
     world_context_id: fresh.context,

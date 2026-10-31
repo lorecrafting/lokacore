@@ -11,13 +11,18 @@ rows plus a receipt in one transaction, then adopts the result, then replies (AD
 (each a content hash and a fresh world) and the host: its `kernel_version`, a random UUID per
 call (`newId`), an optional account binding read once when a run starts, an optional clock
 for latency, and an optional random source shaped like `getRandomValues` (`:57`). It opens the
-save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
+save on the release its pin names, under the kernel_api the pin names (`INSTALLED.kernel_api`,
+`kernel/ts/src/runtime/world.ts`, written into every new pin; loka-daha), or saves a fresh world of the newest release at revision 0 as
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
 (below), else the release's own fresh world.
 
-Pre-production, a rule change in the same release can make an older save's receipt history
-re-decide differently: such a save opens `save_corrupt` with Start over, not a pin refusal
-([dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md)).
+A kernel contract change bumps `kernel_api`, so a save made under any other kernel_api (older,
+newer, or a pin without one, from before loka-daha) is refused at the pin with Start over, on every
+cartridge, whether or not the cartridge's `at_least` changed; equality, not a range, as
+[pre-production](../decisions/owner-decision-forward-development-2026-10-05.md) keeps no save
+compatibility. `save_corrupt` is only a damaged save. The
+[dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md) (item 2: pre-change
+saves open as save corrupt) describes the behavior before loka-daha.
 
 Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
 receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped. An optional `started_at` (toolbox row W23) must be a LogicalTime not after the saved clock, else `save_corrupt`; a row without it (an older save) loads and shows no hint.
@@ -29,7 +34,7 @@ Refusals, nothing written:
 | `unsupported_save_format` | the `save` row's format is `loka-save-vN` with N above 2 (a newer app's; checked first) | no: the player updates the app |
 | `save_corrupt` | the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports and the trace survive |
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:178`) | yes, but `newGame` throws: the host deletes the file (below) |
-| `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
+| `pinned_release_missing` | the pin names a release the app does not carry, or a kernel_api other than the installed one | yes, on the newest release |
 
 The session controller adds `save_corrupt` causes with the new game in place after a story
 opens: a world whose first screen cannot be built
@@ -51,10 +56,10 @@ SQLite read failures such as locks and I/O errors retain their storage-error han
 valid-JSON response of the wrong shape still opens; its replay is a `conflict`
 ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
-`recovery.test.ts`, `start_over.test.ts`.
+`recovery.test.ts`, `start_over.test.ts`, `release_pin.test.ts` (the kernel_api pin).
 
 During [pre-production development](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md), old release/save
-compatibility is not required. A save opens only when its exact release pin is available;
+compatibility is not required. A save opens only when its exact release pin (content hash and kernel_api) is available;
 a mismatch is explicitly refused, never silently migrated, retargeted or deleted.
 
 The [active chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
@@ -161,7 +166,7 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:228`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:231`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay

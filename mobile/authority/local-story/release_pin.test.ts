@@ -1,9 +1,9 @@
-// A save made before a kernel_api bump is refused at its pin with Start over (loka-548k review;
-// loka-oc5i): each bump changes what a save replays into (1.124 dialogue receipts gained `speaker`,
-// 1.125 GameView gained `worn`), so a showcase save from the previous kernel_api must not reopen.
+// The save pin names the kernel_api it was made under (loka-daha; save.md, Opening a story): a save
+// from any other kernel_api is refused at its pin with Start over, on a cartridge whose content and
+// at_least did not change. 1.124 changed dialogue receipts without touching unbumped cartridges.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -26,7 +26,8 @@ const release = (canonical: string) => {
   ] as unknown as RngState);
   return { content_hash: sha, fresh };
 };
-const open = (path: string, releases: [Release], n = { i: 0 }) => {
+const releases: [Release] = [release(showcase.canonical)];
+const open = (path: string, kernel_version = 'k', n = { i: 0 }) => {
   const sql = new DatabaseSync(path);
   type P = (string | number | null)[];
   const db = {
@@ -37,20 +38,45 @@ const open = (path: string, releases: [Release], n = { i: 0 }) => {
     isInTransactionSync: () => sql.isTransaction,
   };
   const newId = () => `aaaaaaaa-0000-4000-8000-${String(++n.i).padStart(12, '0')}`;
-  return { sql, opened: openStory(db as never, releases, { kernel_version: 'k', newId }) };
+  return { sql, opened: openStory(db as never, releases, { kernel_version, newId }) };
+};
+const pinOf = (sql: DatabaseSync) =>
+  JSON.parse((sql.prepare('SELECT pin FROM save').get() as { pin: string }).pin);
+/** A save made by this build, its pin then rewritten in SQLite to `edit`. */
+const saved = (edit: string) => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-pin-')), 'save.db');
+  const a = open(path);
+  assert.equal(a.opened.kind, 'open');
+  a.sql.exec(`UPDATE save SET pin = ${edit}`);
+  a.sql.close();
+  return path;
 };
 
-// Breaks: kernel_api (and the showcase's at_least) left at 1.124, so main's save keeps its pin.
-test('a showcase save from kernel_api 1.124 is refused at its pin and offers Start over', () => {
-  const installed = release(showcase.canonical);
-  // The same showcase as main shipped it before loka-oc5i: only its at_least differs.
-  const old = release(showcase.canonical.replace(/"at_least":"[0-9.]+"/, '"at_least":"1.124"'));
-  const path = join(mkdtempSync(join(tmpdir(), 'loka-pin-')), 'save.db');
-  const a = open(path, [old]);
-  assert.equal(a.opened.kind, 'open');
-  a.sql.close();
-  const b = open(path, [installed]);
-  assert.equal(b.opened.kind, 'pinned_release_missing');
-  assert.equal(typeof (b.opened as { newGame?: unknown }).newGame, 'function');
+for (const [name, edit, pinned] of [
+  ['an older kernel_api (1.0)', "json_set(pin, '$.kernel_api', '1.0')", '1.0'],
+  ["a newer app's kernel_api (9.0)", "json_set(pin, '$.kernel_api', '9.0')", '9.0'],
+  ['no kernel_api (a pin from before loka-daha)', "json_remove(pin, '$.kernel_api')", undefined],
+] as const)
+  // Breaks: openStory comparing the content hash only, a range, or a missing key as a match.
+  test(`a save pinned to ${name} is refused at its pin on the same release; Start over pins the installed kernel_api`, () => {
+    const path = saved(edit);
+    const bytes = readFileSync(path);
+    const b = open(path);
+    assert.equal(b.opened.kind, 'pinned_release_missing');
+    const refused = b.opened as { pinned: Record<string, unknown>; newGame: () => unknown };
+    assert.equal(refused.pinned.kernel_api, pinned);
+    assert.equal(refused.pinned.content_hash, showcase.sha256);
+    assert.deepEqual(readFileSync(path), bytes, 'a refusal writes nothing');
+    assert.deepEqual(refused.newGame(), { kind: 'replaced' });
+    assert.equal(pinOf(b.sql).kernel_api, INSTALLED.kernel_api);
+    b.sql.close();
+  });
+
+// Breaks: the pin naming the host's build (kernel_version) instead of the kernel contract.
+test('a save reopens under another build of the same kernel_api', () => {
+  const path = saved('pin');
+  const b = open(path, 'k2');
+  assert.equal(b.opened.kind, 'open');
+  assert.equal(pinOf(b.sql).kernel_api, INSTALLED.kernel_api);
   b.sql.close();
 });
