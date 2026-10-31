@@ -100,6 +100,7 @@ export const SENTENCE: Record<string, string> = {
   cursed: 'It will not come off.',
   too_heavy: "It's too heavy to carry.",
   over_load: "That's more than you can carry.",
+  cannot_be_hurt: "That can't be hurt.",
 };
 export type Refusal = { code: string; cause?: string };
 // A shut door's refusal ("The door to the south is locked.", owner 2026-10-23); none when open.

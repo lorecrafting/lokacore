@@ -209,7 +209,9 @@ a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a 
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint.
 A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
 the label as one sentence (`reasonSentence`, [reasons.ts](../../mobile/app/book/reasons.ts):
-`It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, with no reason
+`It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, an Attack on a
+person who cannot be hurt `You can't hurt the shopkeeper.` (the person's name with its article on
+their page; `That can't be hurt.` where no target is known), with no reason
 `You can't do that.`, otherwise the [novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
 the latest GameView under [live action freshness](#live-action-freshness): a new reason clears the gray,
 and an action that turns available becomes its ordinary card. A walked blocked exit (joystick) shows

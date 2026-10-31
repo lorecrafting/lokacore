@@ -169,6 +169,28 @@ export const WornItem: StoryObj = {
     await expect(canvas.queryByText(/holding it|not here/i)).toBeNull();
   },
 };
+// An Attack on a person with no hp (loka-xyyd) is the unavailable card naming them (book-ui.md,
+// Unavailable actions). Breaks: no card, or "You can't do that—cannot be hurt."
+const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
+const attack = { available: false, action_key: 'attack', label: 'action.attack', reason };
+export const AttackRefused: StoryObj = {
+  ...pageStory({
+    ...NpcChoiceView,
+    view: {
+      ...NpcChoiceView.view,
+      choice: undefined,
+      entities: NpcChoiceView.view.entities.map((e) =>
+        e === reeve ? { ...e, actions: [attack] } : e,
+      ),
+    },
+  }),
+  args: { words: { 'action.attack': 'Attack' } },
+  name: 'Attack refused',
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Attack' }));
+    await expect(await canvas.findByText(/You can't hurt the Reeve\./)).toBeVisible();
+  },
+};
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
 type Canvas = Parameters<NonNullable<StoryObj['play']>>[0]['canvas'];
 // Breaks: a shop row drawn as a card, or its noun not in the room link style (book-ui.md, NPC shop
