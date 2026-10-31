@@ -75,7 +75,7 @@ test('map: a visited room stubs its unvisited exits by direction only, never a h
   let x = play(wait(w, 12 * HOUR).world, { type: 'open', direction: 'east' }).world;
   x = wait(go(x, 'east').world, 20 * HOUR).world;
   const from = (v: World, kind: 'links' | 'unexplored', k: string) =>
-    (gameView(v).map![kind] as { from: string; direction: string }[])
+    (gameView(v).map![kind] as readonly { from: string; direction: string }[])
       .filter((s) => s.from === v.roomIds[ref('room', k)])
       .map((s) => s.direction)
       .sort();
@@ -86,9 +86,7 @@ test('map: a visited room stubs its unvisited exits by direction only, never a h
   );
   x = perform(x, 'search_cleft').world;
   assert.deepEqual(stubs(x, 'sea_cave'), ['up']);
-  const view = gameView(x);
-  assert.ok(view.map!.unexplored.every((s) => Object.keys(s).sort().join() === 'direction,from'));
-  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(validate('GameView', gameView(x)), []); // a stub with any other key fails
 });
 
 // Breaks: the climb face is missing, its damage differs, or the rope is not checked.

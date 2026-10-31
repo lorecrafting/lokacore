@@ -1980,8 +1980,9 @@ visited connection outside the actor's current room is only a known static link,
 promise of current traversal. Only exits from the actor's current room show live
 availability from ordinary Move admission, including the D9 Study ingress rule. No
 remote admission simulation or automatic travel is selected.
-Each visited room also lists its unexplored stubs: every exit `sight` shows that actor
-whose destination the actor has not visited, as `{from, direction}` with no destination
+Each visited room also lists its unexplored stubs: every exit toward a placed room that
+`sight`'s `hidden` rule leaves visible to that actor and whose destination the actor has not
+visited, as `{from, direction}` with no destination
 id, title or coordinates, so the map draws a line to an open dot and leaks no hidden face
 (loka-6bmd). Composition record: consumer the GameView map; reads the visited relation,
 room exits and `hidden`; writes, events, jobs and save rows: none new; reused the

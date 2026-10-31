@@ -55,17 +55,17 @@ export function knowledgeView(
       visited.has(id) ? [{ id, title: world.rooms[id].name, x: p.x, y: p.y, z: p.z }] : [],
     )
     .sort((a, b) => cmp(a.id, b.id));
-  // The exits `sight` shows (movement/rule.ts): a hidden face is neither a link nor a stub.
+  // Exits toward a placed room, minus those `sight` hides (movement/rule.ts): each is a link or a stub.
   const seen = rooms.flatMap(({ id }) =>
     COMPASS.flatMap((direction) => {
       const exit = exitOf(world.rooms[id], direction);
       const to = exit && world.roomIds[refString(exit.to)];
-      return to && !hidden(world, world.rooms[id], direction, actor)
+      return to && at.has(to) && !hidden(world, world.rooms[id], direction, actor)
         ? [{ from: id, to, direction }]
         : [];
     }),
   );
-  const links = seen.filter(({ to }) => visited.has(to) && at.has(to));
+  const links = seen.filter(({ to }) => visited.has(to));
   const unexplored = seen
     .filter(({ to }) => !visited.has(to))
     .map(({ from, direction }) => ({ from, direction }));

@@ -1291,8 +1291,8 @@ visibility before returning `here` for an exact present NPC; hidden co-location 
 back to the actor's saved `last_seen` or `unknown`, for raw IDs, aliases and touch alike.
 Ambiguity retains sorted exact IDs; no unseen candidate enters the list. Remote known
 Map links carry no live Move availability; only current-room exits do. Map `unexplored`
-lists, per visited room, each exit the actor can see (the current-room exit sight
-query) whose destination the actor has not visited, as `{from, direction}`: that pair is
+lists, per visited room, each exit toward a placed room that `sight`'s `hidden` rule leaves
+visible to the actor and whose destination the actor has not visited, as `{from, direction}`: that pair is
 the stub's stable id, and the stub carries no destination id, title or coordinates. Knock's ActionSet
 key resolves to its door command with the exact local
 direction. View availability and invocation share that admission; narration belongs

@@ -55,7 +55,8 @@ test('Where uses saved observation in darkness and remembers names only for Wher
   });
 });
 
-// Break: drawing discloses unvisited coordinates or links, or uses another actor's visits.
+// Break: drawing discloses unvisited coordinates or links, uses another actor's visits, or stubs
+// an exit toward a room the map cannot place.
 test('Map joins actor-owned visited rooms and only links with two visited endpoints', () => {
   const north = room('well_lane');
   const ref = (name: string) =>
@@ -98,6 +99,9 @@ test('Map joins actor-owned visited rooms and only links with two visited endpoi
     [{ from: landing, to: north, direction: 'north' }],
   );
   assert.ok(map.links.every((l) => !('available' in l)));
+  // The shaft is placed and only another actor's visit: a stub. The lane's east and north lead to
+  // rooms with no map position: neither link nor stub.
+  assert.deepEqual(map.unexplored, [{ from: north, direction: 'down' }]);
 });
 
 // Break: Knock checks a remembered speaker instead of actual presence, or opens the barrier.
