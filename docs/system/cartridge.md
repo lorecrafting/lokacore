@@ -860,8 +860,11 @@ build. The author tools below exist only in that bundle and change no protocol, 
   artifact and names the fault. The release compile (`mix loka.compile`) and every CI check are
   unchanged by the fast path; the overlay never becomes an artifact.
 - **Checkpoints.** A recorded path saved under a name is a plain file in the source tree,
-  `checkpoints/<name>.json` (the same steps as keep my place, versioned with the cartridge). The
-  column lists them; jumping to one starts the game over and replays it.
+  `checkpoints/<name>.json` (`{"steps": [...]}`, the same steps as keep my place, versioned with
+  the cartridge; a name is `[a-z0-9_-]+`, never a path). The watcher reads and writes them
+  (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
+  watcher's rebuild skip the directory. The column lists them; jumping to one starts the game over
+  and replays it.
 - **Author column** (`?dev=1`, web only): the last compile's diagnostics in plain words
   (`severity: file:line message`); current facts, quests and flags from the view; why an action
   is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book

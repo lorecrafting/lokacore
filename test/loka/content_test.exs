@@ -113,12 +113,14 @@ defmodule Loka.ContentTest do
                [d("DUPLICATE_KEY", "actions/talk.policy.items[0].op")]
     end
 
+    # Break: a checkpoint file (author preview) reads as a stray .json.
     test "UNKNOWN_FIELD: stray .json files (dot directories too), an authored key, an unregistered field",
          %{tmp_dir: tmp} do
       assert errors(tmp, %{
                "polices/x.json" => @present,
                "policies/x.json" => @present,
                ".hidden/x.json" => @present,
+               "checkpoints/start.json" => %{"steps" => []},
                "notes.txt" => {:raw, "ignored"},
                "actions/talk.json" => Map.put(@talk, "key", "talk"),
                "cartridge.json" => Map.merge(@manifest, %{"unregistered" => true, "key" => "c"})

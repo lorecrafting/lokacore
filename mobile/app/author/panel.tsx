@@ -1,5 +1,5 @@
 // Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): the dev clock
-// control and keep my place (docs/system/cartridge.md#author-preview). Both drive the kernel's own
+// control, keep my place and checkpoints (docs/system/cartridge.md#author-preview). Both drive the kernel's own
 // paths: the clock skews the host clocks, the place replays saved inputs through `invoke`.
 import { useEffect, useState, type ReactNode } from 'react';
 import { Button, Platform, Text, TextInput, View } from 'react-native';
@@ -97,15 +97,64 @@ function DevClock() {
   );
 }
 
+// Named checkpoints: the recorded path saved as `checkpoints/<name>.json` in the source tree
+// (bin/loka dev --watch writes it); jumping starts the game over and replays the file's steps.
+type Tools = {
+  redraw: (next: object) => void;
+  session: { game: () => Opened | undefined };
+  startOver: () => unknown;
+};
+const CHECKPOINTS = '/__author/checkpoints';
+async function jumpTo(name: string, { session, startOver }: Tools) {
+  const { steps } = (await (await fetch(`${CHECKPOINTS}/${name}`)).json()) as Place;
+  const before = session.game();
+  startOver();
+  const game = session.game();
+  if (!game || game === before) return; // a refused start over keeps this game and its place
+  place.hash = ''; // not this artifact's path yet: restorePlace replays it
+  place.steps = steps;
+  restorePlace(game);
+}
+function Checkpoints(tools: Tools) {
+  const [names, setNames] = useState<string[]>([]);
+  const [name, setName] = useState('');
+  const list = () =>
+    fetch(CHECKPOINTS)
+      .then((r) => r.json())
+      .then(setNames, () => setNames([]));
+  useEffect(() => void list(), []);
+  const save = () =>
+    fetch(`${CHECKPOINTS}/${name}`, {
+      method: 'PUT',
+      body: JSON.stringify({ steps: place.steps }),
+    }).then((r) => (r.ok ? list() : alert(`Not saved: ${r.status}`)));
+  return (
+    <View style={{ position: 'absolute', top: 40, right: 4, gap: 4, backgroundColor: 'white' }}>
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        <TextInput
+          aria-label="Checkpoint name"
+          placeholder="name"
+          value={name}
+          onChangeText={setName}
+          style={{ width: 96, borderWidth: 1 }}
+        />
+        <Button
+          title="Save checkpoint"
+          onPress={save}
+          disabled={!/^[a-z0-9][a-z0-9_-]*$/.test(name)}
+        />
+      </View>
+      {names.map((n) => (
+        <Button key={n} title={`Jump to ${n}`} onPress={() => jumpTo(n, tools)} />
+      ))}
+    </View>
+  );
+}
+
 /** The Book with the author's tools over it (App mounts it only in the author preview). `redraw`
  * is App's state setter, stable, so the stream opens once per page. */
-export function DevPanel({
-  children,
-  redraw,
-}: {
-  children: ReactNode;
-  redraw: (next: object) => void;
-}) {
+export function DevPanel({ children, ...tools }: Tools & { children: ReactNode }) {
+  const { redraw } = tools;
   const [said, setSaid] = useState<string[]>([]); // the last compile's diagnostics
   useEffect(() => listen((lines) => (setSaid(lines), redraw({}))), [redraw]);
   const note = [placeNote, ...said].filter(Boolean).join('\n');
@@ -113,6 +162,7 @@ export function DevPanel({
     <>
       {children}
       <DevClock />
+      <Checkpoints {...tools} />
       {note ? (
         <Text style={{ position: 'absolute', bottom: 4, left: 4, backgroundColor: 'white' }}>
           {note}

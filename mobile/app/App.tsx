@@ -260,5 +260,6 @@ export default function App() {
       />
     );
   const book = <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
-  return devClock ? <DevPanel redraw={redraw}>{book}</DevPanel> : book; // the pinned tree is the Book alone
+  const tools = { redraw, session: activeSession, startOver };
+  return devClock ? <DevPanel {...tools}>{book}</DevPanel> : book; // the pinned tree is the Book alone
 }

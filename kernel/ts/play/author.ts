@@ -33,7 +33,8 @@ if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
   process.exit(2);
 }
 const source = resolve(dir);
-const live = flag === '--watch' ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008)) : undefined;
+const live =
+  flag === '--watch' ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008), source) : undefined;
 // the canonical the page runs (the written artifact), the base of every overlay
 let written: Canonical | undefined = existsSync(out)
   ? JSON.parse(JSON.parse(readFileSync(out, 'utf8')).canonical)
@@ -132,7 +133,8 @@ function build(): boolean {
 const ok = build();
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 let timer: ReturnType<typeof setTimeout> | undefined;
-watch(source, { recursive: true }, () => {
+watch(source, { recursive: true }, (_, file) => {
+  if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
   clearTimeout(timer);
   // one build for an editor's burst of writes; a thrown build must not end the watch
   timer = setTimeout(() => {

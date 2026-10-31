@@ -67,6 +67,8 @@ defmodule Loka.Content.Source do
       |> Path.join("**/*.json")
       |> Path.wildcard(match_dot: true)
       |> Enum.filter(&File.regular?/1)
+      # checkpoints/ holds the author preview's recorded paths, not content
+      |> Enum.reject(&String.starts_with?(Path.relative_to(&1, dir), "checkpoints/"))
       |> Enum.map(&entry(Path.relative_to(&1, dir), dir))
       |> Enum.unzip()
 
