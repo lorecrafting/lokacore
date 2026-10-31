@@ -406,7 +406,7 @@ optional view field, as ConditionView `duration`).
 Each visible living NPC with hp (its own `hp`, the test of `living`) carries in `entities` the `band` key of its `hp` pool by the
 same rule and table, for the Book's Look page; an NPC without hp, an item and the body carry none, and no hp number,
 maximum or tone is sent (loka-ysbt). Reads: the NPC's `hp` level and spec, the band table, `visible`; writes
-none; kernel_api 1.123, so the showcase that the Book's Look page reads pins it.
+none; kernel_api 1.123.
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/view/action_lists.ts:33`). Invariant `gameview_agrees_with_admission` holds this for exits and
 scripted actions (including standalone and board-child Notice actions), and for the door and container verbs and `wear`/`remove`, matched by the Command each
