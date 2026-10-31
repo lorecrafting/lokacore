@@ -46,3 +46,11 @@ Other checks: `/code-review medium` result reported in the PR. Docs match the br
 
 1. **Blocker (reviewer.md step 3, swapped-order mutant green), `mobile/authority/local-story/release_pin.test.ts:66` and `:70` (the cases at `:56-59`).** Mutant: move the kernel_api refusal from `authority.ts:98` to after `if (!loaded) ...` (`:102`). release_pin 4/4 and saves 15/15 stay green, because every case is a current save with only its pin edited, so `load` succeeds. That order is the bug this slice fixes: an older save the current kernel cannot load reports `save_corrupt`, and `load`'s `execSync(SCHEMA)` writes derived tables before the refusal. Fix (verified, either works): in the no-kernel_api case set edit to `"json_remove(pin, '$.kernel_api'); DELETE FROM head"` (head: green; mutant: red at `:66`, actual `save_corrupt`, expected `pinned_release_missing`; this one tests the reply kind), or `...; DROP TABLE trace` (mutant: red at `:70`, 'a refusal writes nothing').
 2. **Nit, PR body `numeric_profile` grep:** also matches the 7 live `.sql` (as finding 1 above).
+
+### Second opinion: fix re-check at `a66f939778d844c06a3eea7a7c349f6923a68f7b`
+
+- Verdict: **APPROVE**. Finding 1 is resolved and the nit is waived (it is in the PR body only).
+- `release_pin.test.ts:59-63`: the no-kernel_api case now runs `json_remove(pin, '$.kernel_api'); DELETE FROM head`. At the head, release_pin passes 4/4. Under the order mutant (the kernel_api refusal moved after `if (!loaded)` at `authority.ts:102`), 3 pass and 1 fails, in the test at `:66` (assertion `:70`): actual `save_corrupt`, expected `pinned_release_missing`.
+- `SaveError.tsx:13`: "This save was made with a different version of the game." `pinned_release_missing` is raised only at `authority.ts:98`. Both causes there are true to the text: the pinned content release is not installed, or the kernel_api differs. No test or doc quotes the old text.
+- Both records are carried on the head (`d914004bd`, `0f0dbc740`, `511aafc1e`). Their record content equals `review-519-b` at `bca464d61`.
+- CI on the head when checked: ci and book-e2e in progress, no result yet.

@@ -15,7 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: liquid line binds its vessel, PR #512 (loka-tc2e, kernel_api 1.122)](2026-10-30-tc2e-liquid-vessel-review.md): **APPROVE**
 - [Review: a seen NPC shows its worn items, PR #517 (loka-oc5i, kernel_api 1.125)](2026-10-30-oc5i-npc-worn-review.md): **APPROVE WITH NOTES**
 - [Review: NPC emotes, PR #509 (loka-kgd.193 slice A)](2026-10-30-kgd193-npc-emotes-review.md): **APPROVE**
-- [Review: the save pin names the kernel_api, PR #519 (loka-daha)](2026-10-30-daha-pin-kernel-api-review.md): **CHANGES REQUIRED**
+- [Review: the save pin names the kernel_api, PR #519 (loka-daha)](2026-10-30-daha-pin-kernel-api-review.md): **APPROVE**
 - [Review: C4 naming batch final head, PR #501 (loka-ivjq.29)](2026-10-30-c4-final-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice B, layout.json and name_variants (loka-ivjq.29)](2026-10-30-c4-b-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice A, capability keys (loka-ivjq.29)](2026-10-30-c4-a-review.md): **APPROVE**
