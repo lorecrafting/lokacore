@@ -194,8 +194,10 @@ slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
-handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the
-decisions index is not part of it).
+handoff, naming any agent still running, and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the
+decisions index is not part of it). Before spawning for a handed-off branch, check its worktree's last commit
+(`git -C <worktree> log -1 --format=%cr`), the branch's remote and PR (`gh pr list --head <branch>`) and `ListAgents` for a live
+agent on it (a second developer spawned beside a live one in the same worktree, loka-mlok).
 
 This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or
