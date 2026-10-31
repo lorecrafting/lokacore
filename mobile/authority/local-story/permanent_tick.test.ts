@@ -303,7 +303,9 @@ test('a tick due exactly at another job runs', (t) => {
 
 // Breaks: clause 5 removed; a fold would swallow a listener's firings.
 test('a status_ticked listener keeps every tick', (t) => {
-  const listened = fixture((c) => {
+  const listened = fixture((c, status) => {
+    // thirsty's hourly tick would stop the fold anyway while its pool moves.
+    status('thirsty').tick_every = 10 * MONTH;
     c.facts[ID('fact', 'ticks')] = {
       key: 'ticks',
       version: 1,
@@ -325,16 +327,43 @@ test('a status_ticked listener keeps every tick', (t) => {
   );
 });
 
-// Breaks: clause 4 removed; a fold skips the -100 that keeps taking back what mv regenerates.
+// Breaks: clause 1 allows timed rows. Both pools start empty; hungry is permanent, thirsty keeps its
+// day, so every hour stops until it expires at 86400; then hungry folds.
+test('a timed status never folds and still ends with its day', (t) => {
+  const save = begin(
+    t,
+    fixture((c, status) => {
+      c.statuses[ID('status', 'thirsty')] = structuredClone(
+        artifact.cartridge.statuses[ID('status', 'thirsty')],
+      );
+      c.resources[ID('resource', 'hunger')].start = 0;
+      c.resources[ID('resource', 'thirst')].start = 0;
+    }),
+  );
+  drive(save, 90000);
+  const hours = Array.from({ length: 24 }, (_, k) => (k + 1) * HOUR);
+  assert.deepEqual(
+    elapsedReceipts(save).map((r) => r.until),
+    [...hours, 90000],
+  );
+  assert.deepEqual(nextTicks(save), { 'condition.hungry': 93600 });
+});
+
+// Breaks: clause 4 removed. mv regenerates 18 an hour; a tick every half hour finds it at 0, then not:
+// a fold at 3600 would skip the -100s and leave 36 at the target; job by job the tick at 10800 leaves 0.
 test('a tick on a regenerating pool never folds', (t) => {
   const drained = () =>
     fixture((c, status) => {
-      Object.assign(status('hungry'), { resource: REF('resource', 'mv'), per_tick: -100 });
+      Object.assign(status('hungry'), {
+        resource: REF('resource', 'mv'),
+        per_tick: -100,
+        tick_every: 1800,
+      });
     });
   const driven = begin(t, drained());
   const walked = begin(t, drained());
   drive(driven, 10801);
-  stepwise(walked, HOUR, 10801);
+  stepwise(walked, 1800, 10801);
   assert.equal(pool(driven, 'mv'), 0);
   assert.equal(pool(walked, 'mv'), 0);
 });
