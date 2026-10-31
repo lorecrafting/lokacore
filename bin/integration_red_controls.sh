@@ -125,6 +125,22 @@ amk; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; 
   && git checkout -q main && git merge -q --no-ff pr2 -m merge2 && git push -q origin main)
 am cherry-picked 0
 ! git rev-parse -q --verify review-7 > /dev/null && grep -qx 'close loka-a --reason Merged #7' "$R.br" || bad 'after_merge cherry-picked: review-7 left or issue not closed'
+# Break: a records-only review-7 not in main (no fix round, loka-o0pw) is refused or deleted unpicked,
+# a README clash with a record main gained meanwhile stops the pick, or the pick is left unpushed
+# when nothing else is staged (export already on main, issue already closed).
+rec() { # <repo> <name>: commit docs/reviews/<name>-review.md and the regenerated index
+  (cd "$1" && echo "# $2" > "docs/reviews/$2-review.md" && sh bin/review_index.sh && git add docs/reviews && git commit -qm "$2")
+}
+amk; git checkout -q review-7; rec . 2026-01-01-own; git checkout -q main
+(cd "$M" && rec . 2026-01-02-m2 && git push -q origin main)
+am record-picked 0; git fetch -q origin
+git show origin/main:docs/reviews/2026-01-01-own-review.md > /dev/null && git show origin/main:docs/reviews/README.md | grep -q 2026-01-02-m2 \
+  && git show origin/main:docs/reviews/README.md | grep -q 2026-01-01-own && ! git rev-parse -q --verify review-7 > /dev/null \
+  || { bad 'after_merge record-picked: record or index entry not on origin/main, or review-7 left'; sed 's/^/  /' "$R.out"; }
+amk; git checkout -q review-7; rec . 2026-01-01-own; git checkout -q main
+(cd "$M" && echo '{"id":"local-write"}' >> .beads/issues.jsonl && git commit -qam export && git push -q origin main)
+export ISSUE_STATUS=closed; am record-only 0; unset ISSUE_STATUS; git fetch -q origin
+git show origin/main:docs/reviews/2026-01-01-own-review.md > /dev/null || bad 'after_merge record-only: the picked record was not pushed'
 # Break: a merge on review-7 whose resolution main lacks is invisible to git cherry and deleted.
 amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; git merge -q --no-ff origin/main -m mrg
 echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main

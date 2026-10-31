@@ -65,7 +65,7 @@ Step 4 (verify and review) is the PM's.
    resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the decisions list) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). When a
-   record exists, the PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
+   record exists, the PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: `bin/after_merge.sh` cherry-picks `review-<N>` onto `main` after the merge, never a push into the PR, which cancels its CI, loka-o0pw); the developer never
    force-pushes, fixes or disputes each finding with a reason, and reruns the focused checks once.
    A published branch pushes (hosted CI reruns on the new head); a local draft
    keeps the fixed commits and review record until publication.
@@ -191,7 +191,7 @@ Claude Code specifics:
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `bin/orphans.sh` (also in `bin/session_status.sh`) never kills: check one, then stop it by PID.
 - For a contract slice's record (save, protocol or kernel contracts), the reviewer commits only its record in a detached worktree
-  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
+  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push carries it, or with no fix round `bin/after_merge.sh` after the merge, with no standalone record push. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
