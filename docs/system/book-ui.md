@@ -425,17 +425,18 @@ shows title, description, then Look and Leave. **Look.** Outside a conversation 
 ends the person's page, after the cards and before Leave, and opens their Look page, an anchored
 detail of the person's page as the [Inside](#item-details-and-takedrop) page is of its container
 (owner, 2026-10-30, loka-aqnc). It draws the person's name as title, their description as prose, then
-what they visibly bear in the fixed order condition, worn, carried (worn waits on loka-oc5i and
-draws nothing until then; no placeholder). Condition is one prose sentence from the person's
+what they visibly bear in the fixed order condition, worn, carried. Condition is one prose sentence from the person's
 EntityView `band` (loka-ysbt), worded by the hp band phrase the status line uses: **<Name> looks to
 be hurt.** A person with no band (no hp of their own) draws no sentence. The frame needs `band.<key>`
 text that is a bare state phrase ("hurt", "covered in blood"), as the status and combat lines also
-do; a verb phrase ("is hurt", "has a few bruises") reads wrong in all three. Carried is one sentence,
-**<Name> carries a flask and a knife.**, joined as the [room's who-is-here
-sentence](#room-page-anatomy) is (articles, serial comma and "and", plurals collapsed), each item an
-inline link opening its item page; GameView has no pronoun, so it names the person. With nothing
-carried it draws no sentence and no Note. Carried means the person's directly held items offered
-under `world.theft`, less their shop stock. The page draws no actions; its foot is a local **Close**
+do; a verb phrase ("is hurt", "has a few bruises") reads wrong in all three. Worn is one sentence,
+**<Name> wears a scorched apron and a badge.**, from EntityView `worn` (loka-oc5i), shown with or
+without theft. Carried is one sentence, **<Name> carries a flask and a knife.** Both are joined as
+the [room's who-is-here sentence](#room-page-anatomy) is (articles, serial comma and "and", plurals
+collapsed), each item an inline link opening its item page; GameView has no pronoun, so each names
+the person (loka-dgko). With nothing worn or carried that sentence is not drawn, and no Note stands in.
+Carried means the person's directly held items offered under `world.theft`, less their shop stock
+and less their worn items (by id), so no item is named twice. The page draws no actions; its foot is a local **Close**
 that returns to the person's page and sends nothing, and it goes with the person, carrying or not. A person's page draws no Give an item… card: a gift is
 given from the item's own Give to… (owner pick mvlymuams73l). **Trade** shows while the
 person's shop has a row; it opens the child buy page **<Name> can sell you…**, as a notice opens
@@ -550,7 +551,7 @@ Retry retains original action/target context and appends each confirmed Take/Dro
 When Take removes an item from a corpse's Contents, the confirmed result returns to
 that corpse's Inside page (its item page once the corpse is empty), where the take line is quiet ([line placement](#line-placement)), and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, are the carried sentence of their [Look page](#npc-dialogue-and-action-details) (not Inside, never a list on the person's page), each link opening the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps its **Inside** page and Take.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, are the carried sentence of their [Look page](#npc-dialogue-and-action-details) (not Inside, never a list on the person's page), each link opening the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps its **Inside** page and Take. A worn item's page, opened from the worn sentence, draws neither its refused take (`not_present`) nor that Note until stealing exists; the theft lane is the item's listing in the person's `contents` (the Book has no theft flag), and there a worn item keeps Lift and the Note (loka-oc5i).
 
 A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Look inside: Open is one of its own cards (first group), an accepted Open logs **Opened.** in the item page's history and turns to the Inside page (owner, 2026-10-30, loka-mo0p), so Close shows the line on the item page, now with Look inside; a refused or pending Open stays on the item page; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
 

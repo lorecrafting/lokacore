@@ -176,16 +176,18 @@ export function Here(p: {
 // One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
 // words (loka-6qi): the bare name, its article written when it differs from the previous link's or
 // the name ends in the previous link's last word (a name without one breaks the run), and
-// same-name entities with a plural as one. With a carrier: "<Carrier> carries <links>." (the NPC's
-// Look page, InsidePage), its first link not capitalised.
+// same-name entities with a plural as one. With a carrier: "<Carrier> carries <links>." or, with
+// verb wears, "<Carrier> wears <links>." (the NPC's Look page, InsidePage), first link lowercase.
 const noun = (n?: string) => n?.split(' ').pop(); // 'cowering goblin' and 'goblin' end alike
 type Group = {
   group: GameView['entities'];
   text: (key: string) => string;
   open: (id: string) => void;
   carrier?: string;
+  verb?: 'carries' | 'wears';
 };
-export const carries = (p: Group & { carrier: string }) => <Present {...p} />;
+// An empty group draws no sentence (a seen NPC always has worn, often []).
+export const carries = (p: Group & { carrier: string }) => p.group.length > 0 && <Present {...p} />;
 function Present(p: Group) {
   const [c, t] = [usePalette(), useType()];
   type Link = { id: string; name: string; article?: string; many?: true };
@@ -200,7 +202,7 @@ function Present(p: Group) {
   });
   return (
     <Text style={prose(c, t)}>
-      {p.carrier && `${p.carrier} carries `}
+      {p.carrier && `${p.carrier} ${p.verb ?? 'carries'} `}
       {links.map((l, i) => {
         const prev = links[i - 1];
         const article =

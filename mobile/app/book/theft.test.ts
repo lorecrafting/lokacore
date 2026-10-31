@@ -46,6 +46,8 @@ registerHooks({
 });
 const { InsidePage, Item, ThingPage } = await import('./Menu.tsx');
 const { NpcDetail, NpcPage } = await import('./Npc.tsx');
+const buttons = await import('./buttons.ts');
+const { heldBy } = await import('./words.ts');
 
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
@@ -212,4 +214,58 @@ test("a person's Look page names their condition from the band, none without one
   assert.equal(look('dying')[1], 'Bess looks to be dying.');
   assert.equal(look('covered_in_blood')[1], 'Bess looks to be covered in blood.');
   assert.deepEqual(look().slice(0, 2), ['Bess', 'Bess carries box.']);
+});
+
+// Breaks (loka-oc5i): the Look page drops the worn sentence or draws it out of order (condition,
+// worn, carried), the carried sentence repeats a worn item the theft lane also lists, a worn-only
+// person gains a carries sentence, an empty worn draws a bare "wears", or a worn item's page outside the theft lane shows the
+// unavailable Take (as Lift, "not here") or the holding Note; inside the theft lane it keeps Lift.
+test("a person's Look page names what they wear; a worn item's page has no Take without theft", () => {
+  const { buttonsOf } = buttons;
+  const take = (available: boolean) => ({
+    action_key: 'take',
+    label: 'action.take',
+    target_ids: ['apron'],
+    available,
+    ...(!available && { reason: { code: 'not_present' } }),
+  });
+  const apron = { id: 'apron', kind: 'item', name: 'apron', slot: 'body', container_id: 'm' };
+  const knife = { id: 'knife', kind: 'item', name: 'knife', actions: [], container_id: 'm' };
+  const view = (theft: boolean) => {
+    const worn = { ...apron, actions: [take(theft)] };
+    const m = {
+      id: 'm',
+      kind: 'npc',
+      name: 'Bess',
+      band: 'hurt',
+      actions: [],
+      worn: [worn],
+      ...(theft && { contents: [worn, knife] }),
+    };
+    return { entities: [m], inventory: [], exits: [], actions: [], place: { id: 'p' } } as any;
+  };
+  const text = (k: string) => (k === 'band.hurt' ? 'hurt' : k);
+  const look = (v: any) =>
+    texts(nodes(InsidePage({ screen: { view: v, text }, id: 'm', open() {} } as any)));
+  assert.deepEqual(
+    look(view(true)).filter((s) => s.startsWith('Bess')),
+    ['Bess', 'Bess looks to be hurt.', 'Bess wears apron.', 'Bess carries knife.'],
+  );
+  assert.deepEqual(
+    look(view(false)).filter((s) => s.startsWith('Bess')),
+    ['Bess', 'Bess looks to be hurt.', 'Bess wears apron.'],
+  );
+  const bare = view(false);
+  bare.entities[0].worn = []; // a seen NPC always has worn; empty draws no "Bess wears ."
+  assert.deepEqual(
+    look(bare).filter((s) => s.startsWith('Bess')),
+    ['Bess', 'Bess looks to be hurt.'],
+  );
+  const page = (v: any) => {
+    const screen = { view: v, text, label: text, detail: () => [], pending: false };
+    const g = group(buttonsOf(v, text, text));
+    return texts(nodes(Item({ id: 'apron', screen, g, press() {}, open() {}, world() {} } as any)));
+  };
+  assert.deepEqual(page(view(false)), ['Apron', 'Leave']);
+  assert.deepEqual(page(view(true)).slice(-3), [heldBy('Bess'), 'Lift', 'Leave']);
 });

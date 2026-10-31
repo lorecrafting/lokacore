@@ -65,12 +65,21 @@ export const Carrying: StoryObj = {
   },
 };
 // A person's Look page (book-ui.md, NPC page): description, their condition from the hp band, then
-// what they carry as one sentence of inline links. The Reeve is hurt and carries the letter here;
-// Nell has no band and her bread is her shop stock, not carried.
-// Breaks: the condition or carried sentence lost or out of order, its item not a link, a condition
-// drawn without a band, or shop stock listed as carried.
+// what they wear and what else they carry, each one sentence of inline links. The Reeve is hurt,
+// wears a cloak and carries the letter here; Nell has no band and her bread is her shop stock.
+// Breaks: the condition, worn or carried sentence lost or out of order, its item not a link, a
+// condition drawn without a band, shop stock listed as carried, or a worn item repeated as carried.
 const letter = NpcChoiceView.view.entities[3]!;
 const nell = NpcChoiceView.view.entities[0]!;
+const cloak = {
+  id: 'cloak',
+  kind: 'item',
+  name: 'item.cloak.short',
+  words: { article: 'a', bare: 'item.cloak.bare', plural: 'item.cloak.plural' },
+  slot: 'body',
+  container_id: reeve.id,
+  actions: [],
+};
 const lookView = (id: string, entities: unknown[] = NpcChoiceView.view.entities) => ({
   ...NpcChoiceView,
   view: { ...NpcChoiceView.view, entities },
@@ -79,27 +88,35 @@ const lookView = (id: string, entities: unknown[] = NpcChoiceView.view.entities)
     { kind: 'inside', id },
   ],
 });
+// The Reeve as the view projects them: worn always, contents (worn included) only under theft.
+const reeveWith = (dress: object) =>
+  NpcChoiceView.view.entities
+    .filter((e) => e !== letter)
+    .map((e) => (e === reeve ? { ...e, band: 'hurt', worn: [cloak], ...dress } : e));
+const after = (a: Element, b: Element) =>
+  expect(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 export const Look: StoryObj = {
   ...pageStory(
-    lookView(
-      reeve.id,
-      NpcChoiceView.view.entities
-        .filter((e) => e !== letter)
-        .map((e) =>
-          e === reeve
-            ? { ...e, band: 'hurt', contents: [{ ...letter, container_id: reeve.id }] }
-            : e,
-        ),
-    ),
+    lookView(reeve.id, reeveWith({ contents: [cloak, { ...letter, container_id: reeve.id }] })),
   ),
   name: 'Look',
   play: async ({ canvas }) => {
-    const carries = await canvas.findByText(/^The Reeve carries a/);
-    await expect(
-      canvas.getByText('The Reeve looks to be hurt.').compareDocumentPosition(carries) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    const wears = await canvas.findByText(/^The Reeve wears a/);
+    const carries = canvas.getByText(/^The Reeve carries a/);
+    await after(canvas.getByText('The Reeve looks to be hurt.'), wears);
+    await after(wears, carries);
+    await expect(carries).not.toHaveTextContent('cloak');
+    await expect(canvas.getByRole('button', { name: 'wool cloak, open' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'sealed letter, open' })).toBeVisible();
+  },
+};
+// Breaks: a person who only wears things gains a carries sentence (no theft: no contents).
+export const LookWorn: StoryObj = {
+  ...pageStory(lookView(reeve.id, reeveWith({}))),
+  name: 'Look, wearing only',
+  play: async ({ canvas }) => {
+    await canvas.findByText(/^The Reeve wears a/);
+    await expect(canvas.queryByText(/carries/)).toBeNull();
   },
 };
 export const LookNothing: StoryObj = {
