@@ -149,8 +149,8 @@ function foldedTicks(
   let horizon = target;
   for (const [id, { due_time }] of queue) {
     const other = visit.state.jobs?.[id];
-    if (id === job_id || due_time < visit.state.clock || due_time > horizon) continue;
-    if (other?.status !== 'pending') continue; // already ran in this drain
+    if (id === job_id || due_time < visit.state.clock || due_time > horizon || !other) continue;
+    if (due_time === visit.state.clock && other.status !== 'pending') continue; // ran just now
     if (other.job.kind !== CLOCK_JOB && !folds(visit, id as JobId, other)) horizon = due_time - 1;
   }
   return Math.max(1, Math.floor((horizon - tick) / spec.tick_every) + 1);
