@@ -21,7 +21,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: C4 naming batch final head, PR #501 (loka-ivjq.29)](2026-10-30-c4-final-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice B, layout.json and name_variants (loka-ivjq.29)](2026-10-30-c4-b-review.md): **APPROVE WITH NOTES**
 - [Review: C4 slice A, capability keys (loka-ivjq.29)](2026-10-30-c4-a-review.md): **APPROVE**
-- [Review: Map unexplored exit stubs, PR #524 (loka-6bmd, kernel_api 1.127)](2026-10-30-6bmd-map-stubs-review.md): **CHANGES REQUIRED**
+- [Review: Map unexplored exit stubs, PR #524 (loka-6bmd, kernel_api 1.127)](2026-10-30-6bmd-map-stubs-review.md): **APPROVE**
 - [Review: dialogue lines bind their speaker, PR #514 (loka-548k, kernel_api 1.122)](2026-10-30-548k-dialogue-speaker-review.md): **APPROVE WITH NOTES**
 - [Review: PR #496, Realm live operations sketch (docs only)](2026-10-29-pr496-review.md): **APPROVE WITH NOTES**
 - [Review: C3 slice Z, docs sweep (loka-ivjq.4)](2026-10-29-c3-z-review.md): **APPROVE WITH NOTES**

@@ -32,3 +32,11 @@ Results: 1 (behaviour holds; tests do not hold it, finding 1), 2-7 hold. Open PR
 
 CI on `521d9ed4f`: graph-diff success; ci and book-e2e in_progress (one `gh run list --commit`).
 `/code-review medium` reported in the PR body.
+
+## Fix check: `521d9ed4f..dd354e99f` (one commit)
+
+- Verdict: **APPROVE**. Question 3 settled by the PM: no change.
+- Finding 1 resolved: `d10_presentation.test.ts:107-108` asserts every `links[].from` and `unexplored[].from` is in `map.rooms`. Scan-every-room mutant (`knowledge.ts:59`) now red in `d10_presentation` (that assertion); `showcase_world` stays green, `hidden_passage` was not the killer.
+- Finding 2 resolved: `shownExit` (`lookups.ts:55`) used by `sight` (`movement/rule.ts:52`) and the map (`knowledge.ts:61`). Mutant drop `!hidden` from `shownExit`: red in `showcase_world` and `hidden_passage` (`d10_presentation` green; its fixture has no hidden exit). Mutant `sight` bypasses `shownExit` (`has` only): red in the same two.
+- `sight` unchanged: `!!shownExit(...)` equals the old `has(room.exits, d) && !hidden(...)`, since a present `Connection` is a truthy object. `barriers`, `cancel_alternatives`, `character_choice`, `character_contracts` (each call `sight`) green at the head.
+- CI on `dd354e99f`: ci success, book-e2e success (one `gh run list --commit`).
