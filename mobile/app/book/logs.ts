@@ -24,7 +24,11 @@ export const narrationLines = (
 ) => [
   [
     ...rendered(last, view, text, false, was),
-    last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '',
+    // A restored cue is past: a narrated event says so before it (loka-lsqi, no colon label).
+    ...(last?.cue && past
+      ? [{ text: 'You remember what you heard earlier.', event: true as const }]
+      : []),
+    last?.cue ? text(last.cue.key) : '',
   ].filter(Boolean),
   rendered(last, view, text, true, was),
 ];

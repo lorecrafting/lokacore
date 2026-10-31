@@ -126,12 +126,9 @@ test('journal cues belong only to changed NPC histories', () => {
     const button = { label: 'Open', action_key: 'open', target_ids: ['target'], input: {} };
     p.press(button, 'target');
     p.press(button, 'target');
-    assert.deepEqual(
-      p.screen().detail('target'),
-      kind === 'npc'
-        ? ['Time passes.', { text: 'Journal updated', event: true }, 'Time passes.']
-        : ['Time passes.', 'Time passes.'],
-    );
+    const note = { text: 'You make a note in your journal.', event: true };
+    const t = 'Time passes.';
+    assert.deepEqual(p.screen().detail('target'), kind === 'npc' ? [t, note, t] : [t, t]);
   }
 });
 

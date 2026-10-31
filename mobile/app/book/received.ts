@@ -85,8 +85,8 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   if (!repeated && routed) s.combatLog.push(...routed[1]);
   if (!repeated && routed) s.log.push(...routed[2]);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
-  conversationLines(s, was, now, accepted, attempt.detail, text);
-  return repeated ? '' : said.map(lineText).join(' ');
+  const taught = conversationLines(s, was, now, accepted, attempt.detail, text);
+  return repeated ? '' : [...said, ...taught].map(lineText).join(' ');
 }
 
 // The narration routed to its logs; a cast in a fight sends its lines to the combat log.
@@ -164,7 +164,7 @@ function conversationLines(
   text: Say,
 ) {
   if (accepted && detail && journalChanged(was, now, detail))
-    detailLines(s, detail).push({ text: 'Journal updated', event: true });
+    detailLines(s, detail).push({ text: 'You make a note in your journal.', event: true });
   if (
     now.choice &&
     was.choice?.continuation_id !== now.choice.continuation_id &&
@@ -177,7 +177,21 @@ function conversationLines(
         now,
       ),
     );
+  const taught = accepted ? skillEvents(was, now, text) : [];
+  if (taught.length) logLines(s, taught, detail ? detailLines(s, detail) : undefined);
+  return taught; // the reply's own sentence carries them too
 }
+
+// A skill the reply taught or raised narrates itself (book-ui.md Line placement, loka-lsqi).
+const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
+  (was.skills ? (now.skills ?? []) : []).flatMap((n): DetailLine[] => {
+    const w = was.skills!.find((k) => k.skill.key === n.skill.key && k.skill.kind === n.skill.kind);
+    const name = text(n.label);
+    if (n.acquired && !w?.acquired) return [{ text: `You have learned ${name}.`, event: true }];
+    if (w?.acquired && (n.level ?? 0) > (w.level ?? 0))
+      return [{ text: `Your ${name} improves.`, event: true }];
+    return [];
+  });
 
 // Where the reply's lines go: a corpse pickup, the receipt's or button's detail, or a Read target.
 function detailRoute(

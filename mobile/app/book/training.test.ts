@@ -142,10 +142,10 @@ test('Character groups profession boxes under their title, acquired then not lea
   ]);
   const npc = { name: 'aldous', lessons: view.skills.map((s: any) => s.skill) };
   assert.deepEqual(words(npcSkills(usePalette(), useType(), { view, npc, text } as any)), [
-    'swords: learned.',
-    'whittling: learned.',
-    'carving: locked. carving req',
-    'joinery: learned, unqualified. joinery req',
+    'You know swords.',
+    'You know whittling.',
+    'You cannot learn carving yet. carving req',
+    'You know joinery but cannot use it yet. joinery req',
     'Aldous teaches turning. turning req',
     'Aldous teaches weaving. weaving req',
   ]);

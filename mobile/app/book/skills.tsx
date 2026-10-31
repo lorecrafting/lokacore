@@ -204,9 +204,11 @@ export const npcSkills = (
       const locked = s.locked && !s.acquired; // learned reads first, as on the Character page
       return (
         <Text key={s.skill.key} style={note(c, t)}>
-          {s.acquired || locked
-            ? `${p.text(s.label)}: ${locked ? 'locked' : s.qualified ? 'learned' : 'learned, unqualified'}`
-            : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
+          {locked
+            ? `You cannot learn ${p.text(s.label)} yet`
+            : s.acquired
+              ? `You know ${p.text(s.label)}${s.qualified ? '' : ' but cannot use it yet'}`
+              : `${cap(p.text(p.npc!.name))} teaches ${p.text(s.label)}`}
           {/* a qualified skill asks nothing more (pass-1 H3); a locked one always names its need */}
           {s.qualified && !locked ? '.' : `. ${p.text(s.requirement)}`}
         </Text>

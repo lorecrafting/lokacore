@@ -107,7 +107,8 @@ function narrate(
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
   // A room change's fight lines stay on the Combat page; the room log opens at the arrival.
-  if (!last.read) world(s, away, narrationLines(arrived(last), now, text, false, was).flat()); // Read text: its page only
+  if (!last.read)
+    world(s, away, narrationLines(arrived(last), now, text, false, was).flat().map(lineText)); // Read text: its page only
   // A quiet receipt settled in the background is the room log's only, as when restored.
   if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }
@@ -300,7 +301,7 @@ export function presenter(game: Game) {
     leaveCombat: () => (s.ended = undefined),
     visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
-      if (why !== undefined) s.log.push(`(start over: ${why})`);
+      if (why !== undefined) s.log.push({ text: `You could not start over. ${why}`, event: true });
     },
   };
 }

@@ -1,0 +1,10 @@
+id: mobile-book-log-prose
+valid:
+  - "const f = `You have learned ${name}.`;"
+  - "const f = `${h}:${m}`;"
+  - "const f = 'You can\\'t do that—locked.';"
+  - "s.fault = c ? `Time stopped: ${code}` : undefined;"
+invalid: # one per alternative of the rule, in its order
+  - "const f = `Earlier: ${cue}`;"
+  - "const f = `(start over: ${why})`;"
+  - "const f = `${label}: ${state}`;"

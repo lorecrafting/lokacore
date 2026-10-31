@@ -308,7 +308,7 @@ test('delayed Take returns once with its original item name after a conflicting 
 });
 
 // Breaks: delayed quest completion loses original NPC history or repeats the neutral journal event.
-test('delayed actual quest completion adds one authored result and Journal updated in original history', () => {
+test('delayed actual quest completion adds one authored result and the journal event in original history', () => {
   const h = book(bundle('containers_sampler_v010_hash')),
     completed: GameSubscription[] = [];
   h.game.subscribe((u) => {
@@ -334,7 +334,7 @@ test('delayed actual quest completion adds one authored result and Journal updat
     );
     assert.deepEqual(
       history.filter((s: unknown) => typeof s !== 'string'),
-      [{ text: 'Journal updated', event: true }],
+      [{ text: 'You make a note in your journal.', event: true }],
     );
     assert.equal(h.p.update(completed[0]), false);
     assert.equal(history.filter((s: unknown) => typeof s !== 'string').length, 1);

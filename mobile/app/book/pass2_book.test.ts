@@ -23,7 +23,9 @@ test('a learned teach line drops its requirement', (t) => {
   b.tap('Talk to the carpenter');
   b.tap('Learn whittling');
   const shown = b.text();
-  assert.ok(shown.includes('Whittling: learned.'), JSON.stringify(shown));
+  assert.ok(shown.includes('You know Whittling.'), JSON.stringify(shown));
+  // Breaks: the lesson leaves no narrated event in the teacher's history (loka-lsqi).
+  assert.ok(shown.includes('You have learned Whittling.'), JSON.stringify(shown));
   assert.ok(shown.includes('The carpenter teaches Woodcutting.'), JSON.stringify(shown));
   // the same page with every skill unqualified, then woodcutting locked (controlled views): the
   // requirement comes back (book-ui.md, Skill tree details; loka-x6t.24)
@@ -41,12 +43,12 @@ test('a learned teach line drops its requirement', (t) => {
   const free = 'The carpenter teaches it free.';
   const unqualified = skills(() => ({ qualified: false }));
   assert.ok(
-    unqualified.includes(`Whittling: learned, unqualified. ${free}`),
+    unqualified.includes(`You know Whittling but cannot use it yet. ${free}`),
     JSON.stringify(unqualified),
   );
   assert.ok(unqualified.includes(`The carpenter teaches Woodcutting. ${free}`));
   const locked = skills((s) => ({ locked: !s.acquired }));
-  assert.ok(locked.includes(`Woodcutting: locked. ${free}`), JSON.stringify(locked));
+  assert.ok(locked.includes(`You cannot learn Woodcutting yet. ${free}`), JSON.stringify(locked));
 });
 
 // Breaks: reopening the save seeds the NPC page with the last visit's narration, so a fresh

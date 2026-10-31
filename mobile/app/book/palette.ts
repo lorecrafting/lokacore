@@ -12,6 +12,8 @@ export const TypeContext = createContext<Type>(type);
 export const useType = () => useContext(TypeContext);
 export const prose = (c: Palette, t: Type) => ({ ...t.body, color: c.fg });
 export const note = (c: Palette, t: Type) => ({ ...t.body, color: c.dim });
+// A narrated event: the Book's own second-person log line (LogLines's doc comment, loka-lsqi).
+export const narrated = (c: Palette, t: Type) => ({ ...t.log, color: c.fg, ...type.italic });
 
 // The confirmed GameView solar phase's palette (docs/system/book-ui.md#world-and-status-entry):
 // the Book reads the cartridge's phase name and computes no hours. Confirmed: the Book passes

@@ -294,6 +294,6 @@ export const expeditionLine = (
 ) =>
   e.status === 'active' && e.next_title
     ? e.direction
-      ? `Next: ${e.direction} to ${text(e.next_title)}.`
-      : `Next checkpoint: ${text(e.next_title)}.`
+      ? `Next you go ${e.direction} to ${text(e.next_title)}.`
+      : `Your next checkpoint is ${text(e.next_title)}.`
     : '';

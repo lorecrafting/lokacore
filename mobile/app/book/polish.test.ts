@@ -11,6 +11,8 @@ import { LABEL } from './labels.ts';
 import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
+const NOTE = 'You make a note in your journal.';
+
 // Breaks: confirmed ear Take returns to World, leaves the stale ear child open, or restores
 // its pickup on the World log instead of the exact corpse after reopening; or the nested ear
 // shows Back to container beside Leave, two returns to the same page (loka-x6t.94).
@@ -240,10 +242,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   assert.doesNotThrow(() => h.tap("Offer to fetch Bram's lantern"));
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.journal[0].state, 'active');
-  assert.deepEqual(h.p.screen().detail(speaker).slice(-2), [
-    result,
-    { text: 'Journal updated', event: true },
-  ]);
+  assert.deepEqual(h.p.screen().detail(speaker).slice(-2), [result, { text: NOTE, event: true }]);
   const fault = 'Saved result; narration recovery unavailable: no such table: missing_narration';
   assert.ok(h.text().includes(fault));
   // A screen reader hears the reason too, not only the Start over button's label.
@@ -316,7 +315,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   assert.deepEqual(h.p.screen().detail(speaker), [
     prompt,
     "You say you'll fetch it. Bram nods toward the path north.",
-    { text: 'Journal updated', event: true },
+    { text: NOTE, event: true },
   ]);
   const flow = nodes(h.draw().find((n) => n.type === 'ScrollView'));
   assert.deepEqual(h.text().slice(0, 3), [
@@ -324,7 +323,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
     'Old Bram',
     'A ferryman with rope-scarred hands and a coat that has never been dry.',
   ]);
-  const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === 'Journal updated');
+  const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === NOTE);
   assert.equal(flow[cue].props.style.fontStyle, 'italic');
   // The reply ended the kernel conversation; the page stays in it: no Talk, only its Leave.
   assert.equal(
@@ -336,7 +335,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.tap('Leave the conversation'); // the later fresh visit offers Talk again
   h.tap('Leave');
   h.map();
-  assert.equal(h.text().includes('Journal updated'), false);
+  assert.equal(h.text().includes(NOTE), false);
   h.tap('Go north');
   h.tap('A brass lantern');
   const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');
@@ -347,9 +346,9 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.map();
   h.tap('Go south');
   h.tap('Old Bram');
-  assert.equal(h.text().includes('Journal updated'), false); // a fresh visit hides past talk
+  assert.equal(h.text().includes(NOTE), false); // a fresh visit hides past talk
   h.tap('Talk to Old Bram');
-  assert.equal(h.text().includes('Journal updated'), false); // nor does a new conversation (loka-x6t.19)
+  assert.equal(h.text().includes(NOTE), false); // nor does a new conversation (loka-x6t.19)
   h.tap('Keep the lantern');
   assert.equal(h.game.view().view.scene!.index, 1);
   assert.deepEqual(h.labels(), ['Continue']);
@@ -415,7 +414,7 @@ test('an NPC choice retried from the world keeps its result in the original deta
   ]);
   assert.deepEqual(h.p.screen().detail(bram).slice(-2), [
     "You say you'll fetch it. Bram nods toward the path north.",
-    { text: 'Journal updated', event: true },
+    { text: NOTE, event: true },
   ]);
   h.sql.close();
 });
