@@ -171,6 +171,28 @@ defmodule Loka.ContentLintTest do
     assert Lint.findings(talk.(%{"label" => "s", "steps" => []})) == []
   end
 
+  # Breaks: a colon label ("Cooking: Learned", "High tide: ...") passes as prose, or a prose colon
+  # after a longer lead-in or mid-sentence is refused (loka-pxa0).
+  test "no text opens a sentence with a one-to-three-word colon label" do
+    t = fn s -> Lint.findings(%{"text.json" => %{"k" => s}}) end
+    bad = ["text.json: k opens a sentence with a colon label"]
+
+    for s <- [
+          "Cooking: learned.",
+          "The door shuts. Too late: the keeper changed the lock.",
+          "North, the market: candles.",
+          "A [painted board](board): rides north."
+        ],
+        do: assert({s, t.(s)} == {s, bad})
+
+    for s <- [
+          "The tide is in: water covers the cave.",
+          "Your hand is quicker than the bones: you catch all five.",
+          "Nell says to you, \"Ale's a penny.\""
+        ],
+        do: assert({s, t.(s)} == {s, []})
+  end
+
   # Samplers break lint rules on purpose, but not label wording (loka-p2ey, loka-z2j2).
   test "every cartridge's choice, action and status labels follow the label rules" do
     for dir <- Path.wildcard("cartridges/*"), File.exists?(Path.join(dir, "cartridge.json")) do

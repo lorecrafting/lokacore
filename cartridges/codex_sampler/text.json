@@ -22,7 +22,7 @@
   "topic.mill": "The mill",
   "topic.missing_cart": "The missing cart",
   "topic.smugglers": "The smugglers",
-  "topic.wanderer": "Wanderer: you have visited all five rooms",
+  "topic.wanderer": "You have wandered all five rooms",
   "actions.deduce_smugglers": "Think it through",
   "narration.deduce_smugglers": "Night grinding and a cart that never arrived: someone is smuggling through the mill.",
   "actions.follow_tracks": "Follow the cart tracks",

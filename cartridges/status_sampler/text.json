@@ -7,7 +7,7 @@
   "room.shrine.description": "A small shrine under the open sky. The air feels light here.",
   "item.antidote.short": "a glass vial",
   "item.antidote.room": "A [glass vial] of green liquid rests on the floor.",
-  "item.antidote.description": "A stoppered vial. The label reads: antidote.",
+  "item.antidote.description": "A stoppered vial. The label reads \"antidote.\"",
   "item.player_corpse.short": "your corpse",
   "item.player_corpse.room": "A [player corpse] lies here.",
   "item.player_corpse.description": "Your own body, cold.",

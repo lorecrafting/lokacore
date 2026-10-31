@@ -1,7 +1,7 @@
 defmodule Loka.Content.Lint do
   @moduledoc """
   Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources, plus the label rules: no final period on a
-  choice or action label, lowercase status labels;
+  choice or action label, lowercase status labels, no sentence that opens with a colon label;
   docs/CHECKS.md). Each finding is one line naming the file and key. The loader never runs
   these: a sampler may break them on purpose.
   """
@@ -246,7 +246,18 @@ defmodule Loka.Content.Lint do
       is_binary(s),
       msg = label_problem(kind, key, s),
       do: "#{rel}: label #{key} #{msg}"
-    ) ++ exits(files, text)
+    ) ++ exits(files, text) ++ colon_labels(text)
+  end
+
+  # A sentence that opens with a one-to-three-word label and a colon ("High tide: ...", "Nell: ...")
+  # reads as a form, not prose (book-ui.md Line placement, loka-pxa0); a longer lead-in or a
+  # mid-sentence colon is prose. Link markup reads as its label.
+  @colon_label ~r/(?:^|[.!?]["”’]?\s)(?:[\w'’-]+,?\s){0,2}[\w'’-]+:\s/u
+  defp colon_labels(text) do
+    for {key, s} <- Enum.sort(text),
+        is_binary(s),
+        String.replace(s, ~r/\[([^\]]*)\]\([^)]*\)/, "\\1") =~ @colon_label,
+        do: "text.json: #{key} opens a sentence with a colon label"
   end
 
   # The page's own Leave control ends a talk, so a do-nothing Leave or Close choice is refused
