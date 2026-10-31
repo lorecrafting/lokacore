@@ -231,4 +231,15 @@ defmodule Loka.ContentErrandTest do
     compiled = JSON.decode!(bytes)["cartridge"]["quests"]["errand_sampler@0.0.1:quest/lantern"]
     assert compiled["offer"]["target"] == %{"kind" => "npc", "npc" => ref("npc", "bram")}
   end
+
+  # Breaks: a targetless offer compiling, so it ships with no control in the Book (loka-vx2v).
+  test "an offer without a target is refused", %{dir: dir} do
+    rel = "quests/lantern.json"
+
+    assert compile(dir, %{rel => update_in(src(rel), ["offer"], &Map.delete(&1, "target"))}) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "quests/lantern.offer.target", %{"error" => "invalid_value"})
+              ]}
+  end
 end

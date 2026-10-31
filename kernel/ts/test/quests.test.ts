@@ -58,6 +58,7 @@ const world = (f: (c: any) => void = () => {}): World => {
   return newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], [1, 2, 3, 4]);
 };
 const quest = (c: any) => c.quests[`${E}:quest/lantern`];
+const bare = (c: any) => delete quest(c).offer.target; // a place action; the loader accepts it
 const strict = () => world((c) => (c.quests[`${E}:quest/lantern`].objective = STRICT));
 const cmd = (w: World, payload: object, id = CMD): Command =>
   ({
@@ -139,7 +140,7 @@ test('a second accept and an accept of an undeclared quest are refused', () => {
 // Breaks: the offer not resolving to accept_quest of its quest (the frozen accept request carries
 // no input), or still offered once the actor has an instance.
 test('the offer is a place action that resolves to accept_quest and is withdrawn after', () => {
-  const w = world();
+  const w = world(bare);
   const offer = { action_key: 'lantern', label: 'quest.lantern.accept', target: { kind: 'none' } };
   assert.deepEqual(plain(gameView(w).actions.find((a) => a.action_key === 'lantern')), {
     available: true,
@@ -172,7 +173,10 @@ test('the offer is a place action that resolves to accept_quest and is withdrawn
 // Breaks: the offer's policy ignored by admission or by the GameView.
 test('an offer whose policy fails is listed unavailable and accept is invalid_state', () => {
   const never = { op: 'not', item: { op: 'all', items: [] } };
-  const w = world((c) => (c.quests[`${E}:quest/lantern`].offer.policy = never));
+  const w = world((c) => {
+    bare(c);
+    quest(c).offer.policy = never;
+  });
   const listed = gameView(w).actions.find((a) => a.action_key === 'lantern');
   assert.deepEqual(plain(listed && 'reason' in listed && listed.reason), { code: 'invalid_state' });
   refused(w, ACCEPT, 'invalid_state');
@@ -275,7 +279,7 @@ test('resolution re-checks current possession and resolves an open instance once
 // activation), or one completed by its event not resolvable; delivery to an instance no longer
 // active (a re-take after objectives_complete or resolved then faults precondition_failed).
 test('a strict objective resolves only once its event completed it', () => {
-  const early = after(strict(), move('north'), take, ACCEPT);
+  const early = after(strict(), move('north'), take, move('south'), ACCEPT);
   assert.equal(resolved(early), 'quest_requirement');
   const complete = after(early, drop, take, drop, take);
   assert.deepEqual(state(complete), ['objectives_complete']);
@@ -359,6 +363,7 @@ test('the loader checks the installed quest capability', () => {
     without,
   );
   const contributed = world((c) => {
+    bare(c);
     c.rooms[`${E}:room/ferry_landing`].actions = [{ op: 'replace', actions: ['lantern'] }];
   });
   assert.deepEqual(
@@ -374,12 +379,11 @@ test('two strict quests on one item complete in quest order, also after a restor
     quest(c).objective = STRICT;
     c.quests[`${E}:quest/shed`] = { ...quest(c), key: 'shed' };
   });
-  const accepted = after(w, ACCEPT, move('north'));
-  const both = step(
-    accepted,
-    cmd(accepted, { ...ACCEPT, quest: ref('quest', 'shed') }, CMD2),
-    0,
-  ).world;
+  const accepted = after(w, ACCEPT);
+  const both = after(
+    step(accepted, cmd(accepted, { ...ACCEPT, quest: ref('quest', 'shed') }, CMD2), 0).world,
+    move('north'),
+  );
   const restored = {
     ...both,
     state: decode(encode(both.state as never)) as unknown as World['state'],

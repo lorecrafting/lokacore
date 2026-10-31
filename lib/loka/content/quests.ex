@@ -48,7 +48,7 @@ defmodule Loka.Content.Quests do
       duplicate(rel, q, ctx) ++
       texts(rel, q, ctx.text) ++
       item(rel, q["objective"], ctx.m, ctx.defs) ++
-      offer_target(rel, get_in(q, ["offer", "target"]), ctx) ++
+      offer_target(rel, q["offer"], ctx) ++
       deadline(rel, q["deadline"], ctx) ++
       attempts(rel, q, ctx)
   end
@@ -59,11 +59,22 @@ defmodule Loka.Content.Quests do
 
   defp offer_target(_, nil, _), do: []
 
-  defp offer_target(rel, %{"kind" => "npc"} = t, ctx),
+  # An offer without a target draws on no page (book-ui.md#room-page-anatomy).
+  defp offer_target(rel, offer, ctx) do
+    case offer["target"] do
+      nil ->
+        [diag("SCHEMA_VIOLATION", at(rel, ["offer", "target"]), %{"error" => "invalid_value"})]
+
+      t ->
+        target(rel, t, ctx)
+    end
+  end
+
+  defp target(rel, %{"kind" => "npc"} = t, ctx),
     do: reference(rel, ["offer", "target"], "npc", t, ctx.m, ctx.defs)
 
   # The room resolves (reference/6), then the detail is one of its details (as a scripted action's target).
-  defp offer_target(rel, t, ctx) do
+  defp target(rel, t, ctx) do
     case resolve(t["room"], "room", ctx.m, ctx.defs) do
       {_, _, room} ->
         if is_map_key(Map.get(room, "details", %{}), t["detail"]),
