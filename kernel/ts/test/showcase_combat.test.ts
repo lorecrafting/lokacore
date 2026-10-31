@@ -423,19 +423,28 @@ test('tilt yard: the sandbox pack is two goblins fought together; their hits do 
 });
 
 // Breaks (plan 5's world.theft impact): an NPC's held item not listed with Take, the lift not a
-// theft, or a stolen sword returned to Aldous still refusing the lesson.
+// theft, or a stolen sword returned to Aldous still refusing the lesson. loka-oc5i: the wielded
+// sword (slot wield) not also in `worn`, or still worn once lifted (worn read from authored
+// location, not custody).
 test('combat impact: Aldous holds the sword; lifted, given back, the lesson still runs', () => {
   let s = go(fresh(SOCIAL), 'west').world;
   const sword = id(s, 'item', 'training_sword');
   const aldous = npc(s, 'aldous');
-  const held = gameView(s).entities.find((e) => e.id === aldous)!.contents!;
+  const seen = (w: World) => gameView(w).entities.find((e) => e.id === aldous)!;
+  const held = seen(s).contents!;
   assert.deepEqual(
     held.map((h) => [h.id, h.actions.map((a) => a.action_key)]),
     [[sword, ['take']]],
   );
+  assert.deepEqual(
+    seen(s).worn!.map((h) => [h.id, h.slot, h.container_id]),
+    [[sword, 'wield', aldous]],
+  );
+  assert.deepEqual(validate('GameView', gameView(s)), []);
   const lifted = play(s, { type: 'take', item_id: sword });
   assert.deepEqual(lifted.lines, ['theft.unseen']);
   s = lifted.world;
+  assert.equal('worn' in seen(s), false);
   const asked = talk(s, 'aldous').world;
   const [continuation_id] = pending(asked, asked.character)!;
   assert.equal(

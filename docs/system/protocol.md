@@ -372,8 +372,12 @@ item: every item inside it in reach (containment@1 custody: no closed or locked 
 at any depth, flattened in DefinitionRefString order, each with its `container_id` (its direct
 container), its `state` if it has a barrier, and as actions only `take` and its container verbs
 (a `ContentView`, also with its explicit full-description TextKey; a recursive view is not
-allowed in the schemas). An NPC's possessions and a
-worn item's contents are never shown (c1-locks); `equipment`, one entry per slot
+allowed in the schemas). A visible NPC carries `worn`, its direct holdings whose definition
+declares a `slot` (ContentViews, `take` refused `not_present` without theft), shown to anyone who sees it;
+its other possessions show as `contents` only under `world.theft` (row 33); a worn item's contents are never
+shown (c1-locks; loka-oc5i, the owner's NPC Look request in loka-ewtx: "list all the character items worn",
+the pack only with a skill). Reads: `containers`, item `slot`, `visible`; writes none; kernel_api 1.125;
+`equipment`, one entry per slot
 holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
 accepts (only those resolving to `remove`), absent when the world has no holder
 ([equipment@1](mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets)); `journal` (each quest the player

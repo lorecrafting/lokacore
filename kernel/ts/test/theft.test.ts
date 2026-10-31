@@ -222,3 +222,31 @@ test('8. the market guard (own hp) shows its hp band; the hp-less shopkeeper sho
     ['perfect_health', 'slightly_scratched', 'many_nasty_wounds', 'almost_dead'],
   );
 });
+
+// loka-oc5i: without world.theft a seen NPC shows only what it wears (its direct holdings that
+// declare a slot), its take unavailable. Breaks: worn gated on theft, the slot filter dropped or
+// inverted (the purse listed), the depth-2 slotted coin listed (direct dropped), or contents
+// shown without theft.
+test('9. without theft the merchant shows its slotted badge as worn, nothing else, take refused', () => {
+  const w = fresh((c) => {
+    delete c.world.theft;
+    c.items[`${S}:item/badge`].slot = 'neck';
+    c.items[`${S}:item/badge`].location.npc.key = 'merchant';
+    c.items[`${S}:item/coin`].slot = 'finger';
+  });
+  const v = gameView(w);
+  const merchant = v.entities.find((e) => e.id === npc(w, 'merchant'))!;
+  assert.deepEqual(
+    [merchant.worn?.map((c) => [c.id, c.slot, c.container_id]), merchant.contents],
+    [[[item(w, 'badge'), 'neck', npc(w, 'merchant')]], undefined],
+  );
+  // Take refuses an item in an NPC's custody without theft as not_present (PM ruling B).
+  assert.deepEqual(
+    merchant.worn![0].actions.map((a) => [a.action_key, a.available, a.reason?.code]),
+    [['take', false, 'not_present']],
+  );
+  assert.deepEqual(validate('GameView', v), []);
+  // An empty worn list is absent, never []: the schema refuses it (minItems 1).
+  const bare = v.entities.map((e) => (e === merchant ? { ...e, worn: [] } : e));
+  assert.notDeepEqual(validate('GameView', { ...v, entities: bare }), []);
+});

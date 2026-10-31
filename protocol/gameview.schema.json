@@ -510,6 +510,14 @@
             "$ref": "#/$defs/ContentView"
           }
         },
+        "worn": {
+          "description": "A visible NPC's worn items (loka-oc5i): its direct holdings whose definition declares a slot, shown to anyone who sees it; absent when none.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ContentView"
+          }
+        },
         "skill_requirement": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },

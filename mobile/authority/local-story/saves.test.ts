@@ -1,4 +1,4 @@
-// size: allow 560, every save-open outcome shares this file's one-process harness
+// size: allow 570, every save-open outcome shares this file's one-process harness
 // The save's identity and pin, a new game, and a corrupt save (10 §§31-32 as amended; 07 §9;
 // OFF-07) on Node with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one
 // connection per simulated process, as local_story.test.ts. Expected values are literals from the
@@ -550,4 +550,17 @@ test('a new game after a settled one replaces the save again', () => {
   assert.deepEqual(p.story.invoke(pick(2)), { kind: 'pending' });
   assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
   assert.deepEqual(p.all(IDENTITY), [identity(5)]);
+});
+
+// Breaks (loka-oc5i): kernel_api or the showcase's at_least left at 1.123, so main's save reopens.
+test('a showcase save from kernel_api 1.123 is refused at its pin and offers Start over', () => {
+  const { canonical } = read('protocol/fixtures/toolbox_showcase_hash.json');
+  const sha256 = (c: string) => createHash('sha256').update(c).digest('hex');
+  const at = (c: string) => release({ canonical: c, sha256: sha256(c) }, SEED);
+  const path = save();
+  const old = at(canonical.replace(/"at_least":"[0-9.]+"/, '"at_least":"1.123"'));
+  processOn(path, { newId: ids(), releases: [old] }).sql.close();
+  const { opened } = processOn(path, { releases: [at(canonical)] });
+  const offer = typeof (opened as { newGame?: unknown }).newGame;
+  assert.deepEqual([opened.kind, offer], ['pinned_release_missing', 'function']);
 });
