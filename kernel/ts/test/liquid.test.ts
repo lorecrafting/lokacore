@@ -158,6 +158,8 @@ test('liquid refusal participants and custody leave every row unchanged while op
     assert.notEqual(result.decision.kind, 'accepted');
     assert.equal(result.world, w);
   }
+  const full = (run(...cases[1]).decision as any).error; // a pour that moves nothing (row 4)
+  assert.deepEqual(full, { code: 'invalid_state' });
   const nested = {
     ...start,
     state: {
