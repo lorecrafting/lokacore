@@ -22,7 +22,7 @@ const SHARED = new Set([
   'vite',
 ]);
 
-// Breaks: a panel package (radix-ui, tailwind, vite, shadcn's helpers) is installed into mobile/app,
+// Breaks: a panel package (radix-ui, tailwind, shadcn's helpers; vite is already Storybook's) is installed into mobile/app,
 // or an app module or metro.config.js reaches into tools/author-panel.
 test('nothing of the author panel enters mobile/app', () => {
   const app = new Set(deps(APP));

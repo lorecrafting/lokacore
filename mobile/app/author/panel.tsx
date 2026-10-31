@@ -23,10 +23,13 @@ export const skew = () => g.loka_dev_skew ?? 0;
 // The inputs the session saved, under the artifact hash, in localStorage; replayed once per page
 // load after a reload into a different artifact.
 const PLACE = 'loka-place';
-const place: Place = (devClock && JSON.parse(localStorage.getItem(PLACE) ?? 'null')) || {
-  hash: chapter.sha256,
-  steps: [],
-};
+function saved(): Place | undefined {
+  try {
+    const p = JSON.parse(localStorage.getItem(PLACE) ?? 'null') as Place | null;
+    if (p && typeof p.hash === 'string' && Array.isArray(p.steps)) return p;
+  } catch {} // a stale or hand-edited value is forgotten, not fatal to the Book
+}
+const place: Place = (devClock && saved()) || { hash: chapter.sha256, steps: [] };
 let placeNote = '';
 const savePlace = () => localStorage.setItem(PLACE, JSON.stringify(place));
 const keep = (step: Step) => {
@@ -74,9 +77,10 @@ export function played(game: Opened | undefined) {
         return words;
       },
       invoke: (intent) => {
+        const ids = game.entityIds(); // before the action eats, gives away or kills its target
         const reply = game.invoke(intent);
         if (reply.kind === 'saved' && reply.decision.kind === 'accepted')
-          keep({ intent: asRefs(intent, game.entityIds()) });
+          keep({ intent: asRefs(intent, ids) });
         return reply;
       },
     });
@@ -119,6 +123,7 @@ type Asked =
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
   | { op: 'trace' };
+const OPS = new Set(['hello', 'advance', 'jump', 'trace']); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
@@ -144,7 +149,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     if (!devClock || !game) return;
     const state = () => tell({ state: stateOf(game) });
     const onMessage = (e: MessageEvent<Asked>) => {
-      if (!LOCAL.test(e.origin) || !e.source || !e.data?.op) return;
+      if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
       if (e.data.op === 'advance') advance(e.data.minutes);

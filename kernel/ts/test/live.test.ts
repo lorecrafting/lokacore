@@ -58,6 +58,10 @@ test('checkpoints: a name is a file under checkpoints/, the body a steps array',
   assert.equal(read.status, 200);
   assert.deepEqual(await read.json(), { steps });
   assert.equal((await at('/checkpoints/other')).status, 404);
+  // Break: a hand-edited checkpoint that is not JSON throws in the handler and kills the watcher.
+  writeFileSync(join(dir, 'checkpoints/cellar-1.json'), '{"steps": [1,]}');
+  assert.equal((await at('/checkpoints/cellar-1')).status, 500);
+  assert.equal((await at('/checkpoints')).status, 200);
   assert.equal((await at('/checkpoints/cellar-1', { method: 'DELETE' })).status, 405);
   const ac = new AbortController(); // the stream stays open; the status is the check
   assert.equal((await at('/events', { signal: ac.signal })).status, 200);

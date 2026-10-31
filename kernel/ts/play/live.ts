@@ -162,17 +162,25 @@ export function serve(port: number, source: string, artifact: string) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [] };
   const send = (client: ServerResponse) => client.write(`data: ${JSON.stringify(last)}\n\n`);
-  const server = createServer((request, response) => {
-    if (request.url?.startsWith('/checkpoints')) return void checkpoints(request, response, source);
-    if (request.url === '/todo') return void json(response, 200, todo(source));
+  const route = (request: IncomingMessage, response: ServerResponse) => {
+    if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
+    if (request.url === '/todo') return json(response, 200, todo(source));
     if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
-      return void post(request, response, source, artifact);
+      return post(request, response, source, artifact);
     if (request.url !== '/events') return response.writeHead(404).end();
     response.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
     send(response);
     clients.add(response);
     request.on('close', () => clients.delete(response));
-  })
+  };
+  // A half-saved or hand-edited file is the author's to fix, not the watcher's to die of.
+  const server = createServer((request, response) =>
+    Promise.resolve()
+      .then(() => route(request, response))
+      .catch((e: unknown) => {
+        if (!response.headersSent) response.writeHead(500).end(String(e));
+      }),
+  )
     .on('error', (e: NodeJS.ErrnoException) => {
       console.error(`author stream: port ${port} ${e.code}; set LOKA_AUTHOR_PORT to a free port`);
       process.exit(1);
